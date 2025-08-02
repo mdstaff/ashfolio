@@ -1,0 +1,289 @@
+defmodule Ashfolio.Portfolio.Calculator do
+  @moduledoc """
+  Simple portfolio calculations for Ashfolio Phase 1.
+
+  Provides basic portfolio value calculations, return percentages, and individual
+  position gains/losses using simple formulas suitable for Phase 1 scope.
+
+  Key calculations:
+  - Total portfolio value (sum of holdings)
+  - Simple return percentage: (current_value - cost_basis) / cost_basis * 100
+  - Individual position gains/losses
+  - Cost basis calculation from transaction history
+  """
+
+  alias Ashfolio.Portfolio.{Transaction, Symbol, Account}
+  require Logger
+
+  @doc """
+  Calculate the total portfolio value for a user.
+
+  Returns the sum of all current holdings values across all accounts.
+
+  ## Examples
+
+      iex> Calculator.calculate_portfolio_value(user_id)
+      {:ok, %Decimal{}}
+
+      iex> Calculator.calculate_portfolio_value("invalid-id")
+      {:error, :user_not_found}
+  """
+  def calculate_portfolio_value(user_id) when is_binary(user_id) do
+    Logger.debug("Calculating portfolio value for user: #{user_id}")
+
+    case get_all_holdings(user_id) do
+      {:ok, holdings} ->
+        total_value =
+          holdings
+          |> Enum.map(&calculate_holding_value/1)
+          |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
+
+        Logger.debug("Total portfolio value calculated: #{total_value}")
+        {:ok, total_value}
+
+      {:error, reason} ->
+        Logger.warning("Failed to calculate portfolio value: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  @doc """
+  Calculate simple return percentage using the formula:
+  (current_value - cost_basis) / cost_basis * 100
+
+  ## Examples
+
+      iex> Calculator.calculate_simple_return(Decimal.new(1500), Decimal.new(1000))
+      {:ok, Decimal.new(50.0)}
+
+      iex> Calculator.calculate_simple_return(Decimal.new(800), Decimal.new(1000))
+      {:ok, Decimal.new(-20.0)}
+  """
+  def calculate_simple_return(current_value, cost_basis) do
+    cond do
+      Decimal.equal?(cost_basis, 0) ->
+        {:ok, Decimal.new(0)}
+
+      true ->
+        # (current_value - cost_basis) / cost_basis * 100
+        difference = Decimal.sub(current_value, cost_basis)
+        percentage =
+          difference
+          |> Decimal.div(cost_basis)
+          |> Decimal.mult(100)
+
+        {:ok, percentage}
+    end
+  end
+
+  @doc """
+  Calculate individual position gains/losses for all holdings.
+
+  Returns a list of position data with current values, cost basis, and returns.
+
+  ## Examples
+
+      iex> Calculator.calculate_position_returns(user_id)
+      {:ok, [%{symbol: "AAPL", current_value: %Decimal{}, cost_basis: %Decimal{}, return_pct: %Decimal{}}]}
+  """
+  def calculate_position_returns(user_id) when is_binary(user_id) do
+    Logger.debug("Calculating position returns for user: #{user_id}")
+
+    case get_all_holdings(user_id) do
+      {:ok, holdings} ->
+        positions =
+          holdings
+          |> Enum.map(&calculate_position_data/1)
+          |> Enum.filter(fn position -> position.quantity != Decimal.new(0) end)
+
+        {:ok, positions}
+
+      {:error, reason} ->
+        Logger.warning("Failed to calculate position returns: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  @doc """
+  Get total return tracking data for the portfolio.
+
+  Returns portfolio summary with total value, cost basis, and return percentage.
+  """
+  def calculate_total_return(user_id) when is_binary(user_id) do
+    Logger.debug("Calculating total return for user: #{user_id}")
+
+    with {:ok, portfolio_value} <- calculate_portfolio_value(user_id),
+         {:ok, total_cost_basis} <- calculate_total_cost_basis(user_id),
+         {:ok, return_percentage} <- calculate_simple_return(portfolio_value, total_cost_basis) do
+
+      summary = %{
+        total_value: portfolio_value,
+        cost_basis: total_cost_basis,
+        return_percentage: return_percentage,
+        dollar_return: Decimal.sub(portfolio_value, total_cost_basis)
+      }
+
+      Logger.debug("Total return calculated: #{inspect(summary)}")
+      {:ok, summary}
+    else
+      {:error, reason} ->
+        Logger.warning("Failed to calculate total return: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  # Private functions
+
+  defp get_all_holdings(user_id) do
+    try do
+      # Get all accounts for the user (excluding excluded accounts)
+      case Account.accounts_for_user(user_id) do
+        {:ok, accounts} ->
+          active_accounts = Enum.filter(accounts, fn account ->
+            not account.is_excluded
+          end)
+
+          if Enum.empty?(active_accounts) do
+            Logger.debug("No active accounts found for user: #{user_id}")
+            {:ok, []}
+          else
+            # Get all transactions for these accounts
+            account_ids = Enum.map(active_accounts, & &1.id)
+
+            holdings =
+              account_ids
+              |> Enum.flat_map(&get_holdings_for_account/1)
+              |> group_holdings_by_symbol()
+
+            {:ok, holdings}
+          end
+
+        {:error, reason} ->
+          Logger.warning("Failed to get accounts for user #{user_id}: #{inspect(reason)}")
+          {:error, reason}
+      end
+    rescue
+      error ->
+        Logger.error("Error getting holdings: #{inspect(error)}")
+        {:error, :calculation_error}
+    end
+  end
+
+  defp get_holdings_for_account(account_id) do
+    # Get all buy/sell transactions for this account
+    case Transaction.by_account(account_id) do
+      {:ok, transactions} ->
+        Enum.filter(transactions, fn transaction ->
+          transaction.type in [:buy, :sell]
+        end)
+
+      {:error, _reason} ->
+        []
+    end
+  end
+
+  defp group_holdings_by_symbol(transactions) do
+    transactions
+    |> Enum.group_by(& &1.symbol_id)
+    |> Enum.map(fn {symbol_id, symbol_transactions} ->
+      # Calculate net quantity and weighted average cost
+      {net_quantity, total_cost} = calculate_position_summary(symbol_transactions)
+
+      # Get symbol data
+      symbol = case Symbol.get_by_id(symbol_id) do
+        {:ok, symbol} -> symbol
+        _ -> nil
+      end
+
+      %{
+        symbol_id: symbol_id,
+        symbol: symbol,
+        quantity: net_quantity,
+        cost_basis: total_cost,
+        transactions: symbol_transactions
+      }
+    end)
+    |> Enum.filter(fn holding -> holding.symbol != nil end)
+  end
+
+  defp calculate_position_summary(transactions) do
+    Enum.reduce(transactions, {Decimal.new(0), Decimal.new(0)}, fn transaction, {net_qty, total_cost} ->
+      case transaction.type do
+        :buy ->
+          new_qty = Decimal.add(net_qty, transaction.quantity)
+          new_cost = Decimal.add(total_cost, transaction.total_amount)
+          {new_qty, new_cost}
+
+        :sell ->
+          # For sells, quantity is negative, so we add it (which subtracts)
+          new_qty = Decimal.add(net_qty, transaction.quantity)
+          # For cost basis, we need to reduce it proportionally
+          # This is simplified - in reality we'd use FIFO/LIFO
+          sell_ratio = Decimal.div(Decimal.abs(transaction.quantity), net_qty)
+          cost_reduction = Decimal.mult(total_cost, sell_ratio)
+          new_cost = Decimal.sub(total_cost, cost_reduction)
+          {new_qty, new_cost}
+      end
+    end)
+  end
+
+  defp calculate_holding_value(holding) do
+    current_price = get_current_price(holding.symbol)
+
+    if current_price do
+      Decimal.mult(holding.quantity, current_price)
+    else
+      Decimal.new(0)
+    end
+  end
+
+  defp calculate_position_data(holding) do
+    current_price = get_current_price(holding.symbol)
+    current_value = if current_price do
+      Decimal.mult(holding.quantity, current_price)
+    else
+      Decimal.new(0)
+    end
+
+    {:ok, return_pct} = calculate_simple_return(current_value, holding.cost_basis)
+
+    %{
+      symbol_id: holding.symbol_id,
+      symbol: holding.symbol.symbol,
+      name: holding.symbol.name,
+      quantity: holding.quantity,
+      current_price: current_price,
+      current_value: current_value,
+      cost_basis: holding.cost_basis,
+      return_percentage: return_pct,
+      dollar_return: Decimal.sub(current_value, holding.cost_basis)
+    }
+  end
+
+  defp get_current_price(symbol) do
+    case symbol.current_price do
+      nil ->
+        # Try to get from cache as fallback
+        case Ashfolio.Cache.get_price(symbol.symbol) do
+          {:ok, cached_data} -> cached_data.price
+          _ -> nil
+        end
+      price -> price
+    end
+  end
+
+  defp calculate_total_cost_basis(user_id) do
+    case get_all_holdings(user_id) do
+      {:ok, holdings} ->
+        total_cost =
+          holdings
+          |> Enum.map(& &1.cost_basis)
+          |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
+
+        {:ok, total_cost}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+end
