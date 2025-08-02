@@ -59,6 +59,9 @@ defmodule Ashfolio.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
 
+      # Credo
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+
       # Ash Framework dependencies
       {:ash, "~> 3.0"},
       {:ash_sqlite, "~> 0.2"},
