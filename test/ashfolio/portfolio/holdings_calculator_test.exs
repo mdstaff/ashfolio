@@ -272,8 +272,8 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
 
       {:ok, symbol} = Symbol.create(%{
-        symbol: "AAPL",
-        name: "Apple Inc.",
+        symbol: "NOPRICE",
+        name: "No Price Corp.",
         asset_class: :stock,
         data_source: :yahoo_finance
         # No current_price set
@@ -291,7 +291,7 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
 
       {:ok, pnl} = HoldingsCalculator.calculate_holding_pnl(user.id, symbol.id)
 
-      assert pnl.symbol == "AAPL"
+      assert pnl.symbol == "NOPRICE"
       assert pnl.current_price == nil
       assert Decimal.equal?(pnl.current_value, Decimal.new("0"))  # No price = $0 value
       assert Decimal.equal?(pnl.cost_basis, Decimal.new("1000.00"))

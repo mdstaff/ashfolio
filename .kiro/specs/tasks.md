@@ -167,26 +167,30 @@ This implementation plan focuses on delivering core portfolio management functio
   - _Requirements: 16.1_
   - **Completed: Previously completed, verified in Task 12.1**
 
-## Phase 5: Simple Portfolio Calculations (85% confidence)
+## Phase 5: Simple Portfolio Calculations (85% confidence) ✅ COMPLETED
 
 > **🚨 HANDOFF NOTE FOR NEXT AGENT**
 >
-> **CRITICAL**: Before starting Phase 5, please review and verify the completion status of Phases 1-4:
+> **CRITICAL**: Phase 5 is now COMPLETE. Before starting Phase 6, please review the completion status:
 >
 > - **Phase 1**: ✅ Project Foundation (Tasks 0-4) - All completed
 > - **Phase 2**: ✅ Data Model Setup (Tasks 5-10) - All completed
 > - **Phase 3**: ✅ Database Management (Tasks covered in Phase 2)
 > - **Phase 4**: ✅ Market Data Integration (Tasks 11-13) - All completed
+> - **Phase 5**: ✅ Portfolio Calculations (Tasks 14-15) - All completed
 >
-> **Current Status**: 146/146 tests passing (100% pass rate)
+> **Current Status**: 169/169 tests passing (100% pass rate)
 >
 > **Key Achievements**:
 >
-> - ✅ Ash Framework resources (User, Account, Symbol, Transaction)
-> - ✅ Yahoo Finance API integration with comprehensive error handling
-> - ✅ PriceManager GenServer with dual storage (ETS cache + database)
-> - ✅ Comprehensive test suite with GenServer testing patterns
-> - ✅ Database migrations and seeding system
+> - ✅ Complete portfolio calculation engine with dual calculator architecture
+> - ✅ Financial precision using Decimal types for all monetary calculations
+> - ✅ FIFO cost basis calculation from transaction history
+> - ✅ Individual position gains/losses with percentage returns
+> - ✅ Multi-account support with exclusion filtering
+> - ✅ Real-time price integration with ETS cache fallback
+> - ✅ Comprehensive error handling and logging
+> - ✅ 23 new test cases added (Calculator: 11, HoldingsCalculator: 12)
 >
 > **🔧 IMPORTANT - USE JUST COMMANDS**:
 >
@@ -197,31 +201,39 @@ This implementation plan focuses on delivering core portfolio management functio
 > - **Database**: `just reset`, `just reseed`, `just backup`, `just db-status`
 > - **Help**: `just` (shows all available commands)
 >
-> **Before proceeding**:
+> **Before proceeding to Phase 6**:
 >
-> 1. Run `just test` to verify all tests still pass
-> 2. Review CHANGELOG.md for latest technical decisions
-> 3. Check `.kiro/specs/design.md` for architectural patterns
+> 1. Run `just test` to verify all 169 tests still pass
+> 2. Review CHANGELOG.md for Phase 5 technical achievements
+> 3. Check new calculator modules: `lib/ashfolio/portfolio/calculator.ex` and `lib/ashfolio/portfolio/holdings_calculator.ex`
 > 4. Verify the application starts with `just dev`
 >
-> **Ready for Phase 5**: Portfolio calculations and basic LiveView interface
+> **Ready for Phase 6**: Basic LiveView Setup to display portfolio calculations in web interface
 
 - [x] 14. Implement basic portfolio calculator
 
-  - Create simple portfolio value calculation (sum of holdings)
-  - Add basic return calculation: (current_value - cost_basis) / cost_basis \* 100
-  - Implement individual position gain/loss calculations
-  - Add simple total return tracking
-  - Write unit tests for calculation functions
+  - ✅ Created `Ashfolio.Portfolio.Calculator` module with comprehensive portfolio calculations
+  - ✅ Implemented `calculate_portfolio_value/1` for total portfolio value (sum of holdings)
+  - ✅ Added `calculate_simple_return/2` using formula: (current_value - cost_basis) / cost_basis \* 100
+  - ✅ Built `calculate_position_returns/1` for individual position gains/losses analysis
+  - ✅ Created `calculate_total_return/1` for portfolio summary with total return tracking
+  - ✅ Added comprehensive test suite with 11 test cases covering all scenarios
+  - ✅ Integrated with Account, Symbol, and Cache modules for data access
+  - ✅ Implemented proper error handling with logging and graceful degradation
   - _Requirements: 5.1, 5.2_
+  - **Completed: 2025-08-02**
 
-- [ ] 15. Create holdings value calculator
-  - Implement function to calculate current holding values
-  - Add cost basis calculation from transaction history
-  - Create simple profit/loss calculation per holding
-  - Add portfolio total value aggregation
-  - Write tests with sample transaction data
+- [x] 15. Create holdings value calculator
+  - ✅ Created `Ashfolio.Portfolio.HoldingsCalculator` as specialized holdings analysis module
+  - ✅ Implemented `calculate_holding_values/1` for current holding values across all positions
+  - ✅ Added `calculate_cost_basis/2` with FIFO cost basis calculation from transaction history
+  - ✅ Built `calculate_holding_pnl/2` for individual holding profit/loss calculations
+  - ✅ Created `aggregate_portfolio_value/1` for portfolio total value aggregation
+  - ✅ Added `get_holdings_summary/1` for comprehensive holdings summary with P&L data
+  - ✅ Implemented comprehensive test suite with 12 test cases
+  - ✅ Fixed test data pollution issues to ensure reliable test execution
   - _Requirements: 5.3_
+  - **Completed: 2025-08-02**
 
 ## Phase 6: Basic LiveView Setup (80% confidence)
 

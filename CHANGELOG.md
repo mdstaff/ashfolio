@@ -8,19 +8,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 > **🎯 NEXT AGENT HANDOFF SUMMARY**
-> 
-> **Current Status**: Phase 4 Complete - Ready for Phase 5 (Portfolio Calculations)
-> - **Test Suite**: 146/146 tests passing (100% pass rate) 
-> - **Core Features**: User/Account/Symbol/Transaction resources, Yahoo Finance integration, PriceManager GenServer
-> - **Key Achievement**: Resolved all GenServer testing challenges and architectural patterns documented
-> - **Next Phase**: Implement portfolio calculations and basic LiveView interface
-> 
-> **Critical Files Updated**: 
-> - Design document with GenServer testing patterns
-> - Requirements with comprehensive testing specification  
-> - Tasks with detailed completion status and learnings
-> 
-> **Verification Steps**: Run `mix test`, `mix phx.server`, review `.kiro/specs/` documentation
+>
+> **Current Status**: Phase 5 Complete - Ready for Phase 6 (Basic LiveView Setup)
+>
+> - **Test Suite**: 169/169 tests passing (100% pass rate)
+> - **Core Features**: Complete portfolio calculation engine with dual calculator architecture
+> - **Key Achievement**: Comprehensive portfolio calculations with financial precision and error handling
+> - **Next Phase**: Implement basic LiveView interface to display portfolio calculations
+>
+> **Critical Files Updated**:
+>
+> - Portfolio Calculator and HoldingsCalculator modules with comprehensive test coverage
+> - Tasks documentation updated with Phase 5 completion status
+> - CHANGELOG updated with Phase 5 achievements
+>
+> **Verification Steps**: Run `just test`, `just dev`, review portfolio calculation modules
+
+### Phase 5: Simple Portfolio Calculations
+
+#### [0.15.0] - 2025-08-02
+
+##### Added
+
+- **Portfolio Calculator Module** (Task 14)
+
+  - Created `Ashfolio.Portfolio.Calculator` with comprehensive portfolio calculation functions
+  - Implemented `calculate_portfolio_value/1` for total portfolio value calculation (sum of holdings)
+  - Added `calculate_simple_return/2` using formula: (current_value - cost_basis) / cost_basis \* 100
+  - Built `calculate_position_returns/1` for individual position gains/losses analysis
+  - Created `calculate_total_return/1` for portfolio summary with total return tracking
+  - Added comprehensive test suite with 11 test cases covering all calculation scenarios
+  - Integrated with existing Account, Symbol, and Cache modules for data access
+  - Implemented proper error handling with logging and graceful degradation
+
+- **Holdings Value Calculator Module** (Task 15)
+  - Created `Ashfolio.Portfolio.HoldingsCalculator` as specialized holdings analysis module
+  - Implemented `calculate_holding_values/1` for current holding values across all positions
+  - Added `calculate_cost_basis/2` with FIFO cost basis calculation from transaction history
+  - Built `calculate_holding_pnl/2` for individual holding profit/loss calculations
+  - Created `aggregate_portfolio_value/1` for portfolio total value aggregation
+  - Added `get_holdings_summary/1` for comprehensive holdings summary with P&L data
+  - Implemented comprehensive test suite with 12 test cases
+  - Fixed test data pollution issues to ensure reliable test execution
+
+##### Technical Details
+
+- **Dual Calculator Architecture**: Main Calculator for general portfolio calculations, HoldingsCalculator for detailed holdings analysis
+- **Financial Precision**: All calculations use Decimal types for accurate financial mathematics
+- **Cost Basis Method**: Simplified FIFO (First In, First Out) method for buy/sell transaction processing
+- **Multi-Account Support**: Calculations work across multiple accounts with proper exclusion handling
+- **Price Integration**: Uses both database-stored prices and ETS cache fallback for current market data
+- **Error Resilience**: Comprehensive error handling for missing prices, invalid data, and calculation errors
+- **Test Coverage**: 23 new test cases added, bringing total test suite to 169 tests (100% pass rate)
+
+##### Key Calculations Implemented
+
+- Portfolio value calculation as sum of all current holdings
+- Simple return percentage using standard financial formula
+- Individual position gains/losses with dollar amounts and percentages
+- Cost basis tracking from complete transaction history
+- Account-level filtering with exclusion support
+- Real-time price integration with fallback mechanisms
 
 ### Phase 4: Simple Market Data
 

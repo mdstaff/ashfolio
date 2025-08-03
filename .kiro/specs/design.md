@@ -283,37 +283,219 @@ defmodule Ashfolio.MarketData.PriceManager do
 end
 ```
 
-### Simple Performance Calculation
+### Portfolio Calculation Engine
 
-#### Basic Portfolio Calculator
+#### Dual Calculator Architecture
+
+The portfolio calculation system uses a dual calculator architecture for different use cases:
+
+- **`Ashfolio.Portfolio.Calculator`**: Main portfolio calculations for general use
+- **`Ashfolio.Portfolio.HoldingsCalculator`**: Specialized holdings analysis with detailed cost basis tracking
+
+#### Main Portfolio Calculator
 
 ```elixir
 defmodule Ashfolio.Portfolio.Calculator do
-  # Simple portfolio calculations
-  # - Total portfolio value (sum of holdings)
-  # - Simple return percentage
-  # - Individual position gains/losses
+  @moduledoc """
+  Simple portfolio calculations for Ashfolio Phase 1.
+
+  Provides basic portfolio value calculations, return percentages, and individual
+  position gains/losses using simple formulas suitable for Phase 1 scope.
+  """
 
   def calculate_portfolio_value(user_id) do
-    user_id
-    |> get_all_holdings()
-    |> Enum.map(&calculate_holding_value/1)
-    |> Enum.sum()
-  end
-
-  def calculate_simple_return(current_value, cost_basis) do
-    case cost_basis do
-      0 -> 0
-      _ -> (current_value - cost_basis) / cost_basis * 100
+    # Calculate total portfolio value as sum of all holdings
+    case get_all_holdings(user_id) do
+      {:ok, holdings} ->
+        total_value =
+          holdings
+          |> Enum.map(&calculate_holding_value/1)
+          |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
+        {:ok, total_value}
+      {:error, reason} -> {:error, reason}
     end
   end
 
-  defp calculate_holding_value(holding) do
-    current_price = get_cached_price(holding.symbol)
-    Decimal.mult(holding.quantity, current_price || 0)
+  def calculate_simple_return(current_value, cost_basis) do
+    # Simple return formula: (current_value - cost_basis) / cost_basis * 100
+    cond do
+      Decimal.equal?(cost_basis, 0) -> {:ok, Decimal.new(0)}
+      true ->
+        difference = Decimal.sub(current_value, cost_basis)
+        percentage =
+          difference
+          |> Decimal.div(cost_basis)
+          |> Decimal.mult(100)
+        {:ok, percentage}
+    end
+  end
+
+  def calculate_position_returns(user_id) do
+    # Calculate individual position gains/losses for all holdings
+    case get_all_holdings(user_id) do
+      {:ok, holdings} ->
+        positions =
+          holdings
+          |> Enum.map(&calculate_position_data/1)
+          |> Enum.filter(fn position -> position.quantity != Decimal.new(0) end)
+        {:ok, positions}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  def calculate_total_return(user_id) do
+    # Get total return tracking data for the portfolio
+    with {:ok, portfolio_value} <- calculate_portfolio_value(user_id),
+         {:ok, total_cost_basis} <- calculate_total_cost_basis(user_id),
+         {:ok, return_percentage} <- calculate_simple_return(portfolio_value, total_cost_basis) do
+
+      summary = %{
+        total_value: portfolio_value,
+        cost_basis: total_cost_basis,
+        return_percentage: return_percentage,
+        dollar_return: Decimal.sub(portfolio_value, total_cost_basis)
+      }
+      {:ok, summary}
+    end
   end
 end
 ```
+
+#### Holdings Value Calculator
+
+```elixir
+defmodule Ashfolio.Portfolio.HoldingsCalculator do
+  @moduledoc """
+  Holdings value calculator for Ashfolio Phase 1.
+
+  Provides focused calculations for individual holdings values, cost basis,
+  and profit/loss calculations with FIFO cost basis method.
+  """
+
+  def calculate_holding_values(user_id) do
+    # Calculate current holding values for all positions
+    with {:ok, holdings_data} <- get_holdings_data(user_id) do
+      holdings_with_values =
+        holdings_data
+        |> Enum.map(&calculate_individual_holding_value/1)
+        |> Enum.filter(fn holding -> not Decimal.equal?(holding.quantity, 0) end)
+      {:ok, holdings_with_values}
+    end
+  end
+
+  def calculate_cost_basis(user_id, symbol_id) do
+    # Calculate cost basis from transaction history using FIFO method
+    case get_symbol_transactions(user_id, symbol_id) do
+      {:ok, transactions} ->
+        cost_basis_data = calculate_cost_basis_from_transactions(transactions)
+        {:ok, cost_basis_data}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  def calculate_holding_pnl(user_id, symbol_id) do
+    # Calculate profit/loss for individual holdings
+    with {:ok, cost_basis_data} <- calculate_cost_basis(user_id, symbol_id),
+         {:ok, symbol} <- Symbol.get_by_id(symbol_id) do
+
+      current_price = get_current_price(symbol)
+      current_value = if current_price do
+        Decimal.mult(cost_basis_data.quantity, current_price)
+      else
+        Decimal.new(0)
+      end
+
+      unrealized_pnl = Decimal.sub(current_value, cost_basis_data.total_cost)
+      unrealized_pnl_pct = calculate_percentage_return(unrealized_pnl, cost_basis_data.total_cost)
+
+      pnl_data = %{
+        symbol: symbol.symbol,
+        quantity: cost_basis_data.quantity,
+        current_price: current_price,
+        current_value: current_value,
+        cost_basis: cost_basis_data.total_cost,
+        average_cost: cost_basis_data.average_cost,
+        unrealized_pnl: unrealized_pnl,
+        unrealized_pnl_pct: unrealized_pnl_pct
+      }
+      {:ok, pnl_data}
+    end
+  end
+
+  def get_holdings_summary(user_id) do
+    # Get comprehensive holdings summary with all calculations
+    with {:ok, holdings} <- calculate_holding_values(user_id),
+         {:ok, total_value} <- aggregate_portfolio_value(user_id) do
+
+      total_cost_basis =
+        holdings
+        |> Enum.map(& &1.cost_basis)
+        |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
+
+      total_pnl = Decimal.sub(total_value, total_cost_basis)
+      total_pnl_pct = calculate_percentage_return(total_pnl, total_cost_basis)
+
+      summary = %{
+        holdings: holdings,
+        total_value: total_value,
+        total_cost_basis: total_cost_basis,
+        total_pnl: total_pnl,
+        total_pnl_pct: total_pnl_pct,
+        holdings_count: length(holdings)
+      }
+      {:ok, summary}
+    end
+  end
+
+  # FIFO cost basis calculation from transactions
+  defp calculate_cost_basis_from_transactions(transactions) do
+    {total_quantity, total_cost, _} =
+      Enum.reduce(transactions, {Decimal.new(0), Decimal.new(0), []}, fn transaction, {qty, cost, lots} ->
+        case transaction.type do
+          :buy ->
+            new_qty = Decimal.add(qty, transaction.quantity)
+            new_cost = Decimal.add(cost, transaction.total_amount)
+            new_lot = %{quantity: transaction.quantity, cost: transaction.total_amount, date: transaction.date}
+            {new_qty, new_cost, [new_lot | lots]}
+
+          :sell ->
+            # Reduce cost proportionally for simplified FIFO
+            sell_qty = Decimal.abs(transaction.quantity)
+            if Decimal.equal?(qty, 0) do
+              {qty, cost, lots}
+            else
+              sell_ratio = Decimal.div(sell_qty, qty)
+              cost_reduction = Decimal.mult(cost, sell_ratio)
+              new_qty = Decimal.sub(qty, sell_qty)
+              new_cost = Decimal.sub(cost, cost_reduction)
+              {new_qty, new_cost, lots}
+            end
+        end
+      end)
+
+    average_cost = if Decimal.equal?(total_quantity, 0) do
+      Decimal.new(0)
+    else
+      Decimal.div(total_cost, total_quantity)
+    end
+
+    %{
+      quantity: total_quantity,
+      total_cost: total_cost,
+      average_cost: average_cost
+    }
+  end
+end
+```
+
+#### Key Features
+
+- **Financial Precision**: All calculations use Decimal types for accurate financial mathematics
+- **FIFO Cost Basis**: Simplified First In, First Out method for cost basis calculations
+- **Multi-Account Support**: Calculations work across multiple accounts with exclusion filtering
+- **Error Handling**: Comprehensive error handling with logging and graceful degradation
+- **Price Integration**: Uses both database prices and ETS cache fallback
+- **Real-time Updates**: Calculations reflect current market prices when available
 
 ### LiveView Components
 
@@ -502,25 +684,28 @@ end
 
 ### API Resilience Strategy
 
-1. **Circuit Breaker Pattern**: 
+1. **Circuit Breaker Pattern**:
+
    - 5 consecutive failures = open circuit
    - 30-second recovery timeout before attempting half_open
    - 2 consecutive successes = close circuit
    - Per-data-source circuit breaker state management
 
-2. **Graceful Degradation**: 
+2. **Graceful Degradation**:
+
    - Fall back to cached prices when APIs fail
    - Allow manual price entry when all sources unavailable
    - Prioritize data sources: Yahoo Finance → CoinGecko → Manual
    - Display staleness indicators for cached data
 
-3. **Retry Logic**: 
+3. **Retry Logic**:
+
    - Exponential backoff: 1s, 2s, 4s, 8s intervals
    - Maximum 3 retry attempts per request
    - Different strategies for different error types (network vs rate limit)
    - Structured logging for all retry attempts
 
-4. **Cache Fallback**: 
+4. **Cache Fallback**:
    - Use last known prices with staleness indicators
    - ETS cache with configurable TTL (default: 1 hour)
    - Background refresh jobs continue attempting updates
@@ -531,7 +716,7 @@ end
 ```elixir
 defmodule Ashfolio.Validation do
   # Enhanced validation with recovery suggestions
-  
+
   def validate_transaction(attrs) do
     attrs
     |> validate_required_fields()
@@ -633,6 +818,7 @@ end
 #### Solution Patterns
 
 **1. Accept Shared State in Tests**
+
 ```elixir
 defmodule PriceManagerTest do
   use Ashfolio.DataCase, async: false  # Must be synchronous
@@ -646,7 +832,7 @@ defmodule PriceManagerTest do
   test "handles state persistence gracefully" do
     # Test should work regardless of previous state
     last_refresh = PriceManager.last_refresh()
-    
+
     case last_refresh do
       nil -> assert true  # Fresh start
       %{timestamp: _, results: _} -> assert true  # Previous state exists
@@ -656,11 +842,12 @@ end
 ```
 
 **2. Focus on Functionality Over Timing**
+
 ```elixir
 # AVOID: Timing-dependent concurrent tests
 test "rejects concurrent requests" do
   expect(Mock, :api_call, fn -> Process.sleep(100); {:ok, data} end)
-  
+
   task = Task.async(fn -> GenServer.call(MyServer, :action) end)
   Process.sleep(10)  # Fragile timing!
   assert {:error, :busy} = GenServer.call(MyServer, :action)
@@ -675,6 +862,7 @@ end
 ```
 
 **3. Mox Configuration for Shared Processes**
+
 ```elixir
 # test_helper.exs
 Mox.defmock(YahooFinanceMock, for: YahooFinanceBehaviour)
@@ -688,12 +876,13 @@ test "handles multiple calls" do
   expect(YahooFinanceMock, :fetch_prices, 2, fn symbols ->
     {:ok, %{"AAPL" => Decimal.new("150.00")}}
   end)
-  
+
   # Test may be called multiple times due to shared GenServer
 end
 ```
 
 **4. Test Architecture Considerations**
+
 ```elixir
 # For better testability, consider dependency injection:
 defmodule PriceManager do
