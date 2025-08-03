@@ -249,7 +249,7 @@ This implementation plan focuses on delivering core portfolio management functio
   - _Requirements: 12.1, 15.1_
   - **Completed: 2025-08-02**
 
-- [ ] 17. Configure simple routing
+- [x] 17. Configure simple routing
   - Set up Phoenix router for basic pages (dashboard, accounts, transactions)
   - Remove authentication requirements (single-user app)
   - Add simple route helpers
