@@ -17,7 +17,9 @@ defmodule AshfolioWeb.Router do
   scope "/", AshfolioWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", DashboardLive, :index
+    live "/accounts", AccountLive.Index, :index
+    live "/transactions", TransactionLive.Index, :index
   end
 
   # Other scopes may use custom stacks.

@@ -149,6 +149,105 @@ defmodule AshfolioWeb.Live.ErrorHelpers do
     """
   end
 
+  @doc """
+  Component for displaying success messages in a banner format.
+
+  ## Attributes
+  - message: Success message to display
+  - title: Optional title for the success message
+  - class: Additional CSS classes
+
+  ## Examples
+      <.success_banner message="Account created successfully!" />
+  """
+  attr :message, :string, required: true
+  attr :title, :string, default: nil
+  attr :class, :string, default: ""
+
+  def success_banner(assigns) do
+    ~H"""
+    <div class={["rounded-md bg-green-50 p-4 border border-green-200", @class]}>
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <.icon name="hero-check-circle" class="h-5 w-5 text-green-400" />
+        </div>
+        <div class="ml-3">
+          <h3 :if={@title} class="text-sm font-medium text-green-800">
+            {@title}
+          </h3>
+          <p class="text-sm text-green-700">{@message}</p>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
+  Component for displaying warning messages.
+
+  ## Attributes
+  - message: Warning message to display
+  - title: Optional title for the warning message
+  - class: Additional CSS classes
+
+  ## Examples
+      <.warning_banner message="Price data may be outdated" />
+  """
+  attr :message, :string, required: true
+  attr :title, :string, default: nil
+  attr :class, :string, default: ""
+
+  def warning_banner(assigns) do
+    ~H"""
+    <div class={["rounded-md bg-yellow-50 p-4 border border-yellow-200", @class]}>
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <.icon name="hero-exclamation-triangle" class="h-5 w-5 text-yellow-400" />
+        </div>
+        <div class="ml-3">
+          <h3 :if={@title} class="text-sm font-medium text-yellow-800">
+            {@title}
+          </h3>
+          <p class="text-sm text-yellow-700">{@message}</p>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
+  Component for displaying info messages.
+
+  ## Attributes
+  - message: Info message to display
+  - title: Optional title for the info message
+  - class: Additional CSS classes
+
+  ## Examples
+      <.info_banner message="Market data refreshed 5 minutes ago" />
+  """
+  attr :message, :string, required: true
+  attr :title, :string, default: nil
+  attr :class, :string, default: ""
+
+  def info_banner(assigns) do
+    ~H"""
+    <div class={["rounded-md bg-blue-50 p-4 border border-blue-200", @class]}>
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <.icon name="hero-information-circle" class="h-5 w-5 text-blue-400" />
+        </div>
+        <div class="ml-3">
+          <h3 :if={@title} class="text-sm font-medium text-blue-800">
+            {@title}
+          </h3>
+          <p class="text-sm text-blue-700">{@message}</p>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
   # Private helper functions
 
   defp format_validation_errors(errors) when is_map(errors) do

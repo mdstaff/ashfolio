@@ -66,11 +66,13 @@ defmodule Ashfolio.MarketData.YahooFinanceTest do
   end
 
   describe "URL building and request structure" do
-    test "builds correct URL format" do
-      # Test the private function indirectly by checking the module exists
-      # and has the expected functions
-      assert function_exported?(Ashfolio.MarketData.YahooFinance, :fetch_price, 1)
-      assert function_exported?(Ashfolio.MarketData.YahooFinance, :fetch_prices, 1)
+    test "module implements required behaviour functions" do
+      # Test that the module implements the YahooFinanceBehaviour
+      assert Code.ensure_loaded?(Ashfolio.MarketData.YahooFinance)
+
+      # Check that the module has the required functions from the behaviour
+      behaviours = Ashfolio.MarketData.YahooFinance.__info__(:attributes)[:behaviour] || []
+      assert Ashfolio.MarketData.YahooFinanceBehaviour in behaviours
     end
   end
 

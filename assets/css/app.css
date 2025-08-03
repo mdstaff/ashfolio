@@ -2,4 +2,154 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-/* This file is for your main application CSS */
+/* Ashfolio Application Styles */
+
+/* Base styles */
+@layer base {
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+}
+
+/* Component styles */
+@layer components {
+  /* Portfolio value styling */
+  .portfolio-value {
+    @apply text-3xl font-bold text-gray-900;
+  }
+  
+  .portfolio-change-positive {
+    @apply text-green-600 font-medium;
+  }
+  
+  .portfolio-change-negative {
+    @apply text-red-600 font-medium;
+  }
+  
+  .portfolio-change-neutral {
+    @apply text-gray-600 font-medium;
+  }
+
+  /* Table styling for holdings */
+  .holdings-table {
+    @apply min-w-full divide-y divide-gray-200;
+  }
+  
+  .holdings-table th {
+    @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50;
+  }
+  
+  .holdings-table td {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+  }
+  
+  .holdings-table tbody tr:hover {
+    @apply bg-gray-50;
+  }
+
+  /* Currency formatting */
+  .currency {
+    @apply font-mono;
+  }
+  
+  .currency-positive {
+    @apply text-green-600;
+  }
+  
+  .currency-negative {
+    @apply text-red-600;
+  }
+
+  /* Loading states */
+  .loading-overlay {
+    @apply absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center;
+  }
+  
+  .loading-text {
+    @apply text-gray-600 text-sm ml-2;
+  }
+
+  /* Form styling */
+  .form-section {
+    @apply bg-white shadow rounded-lg p-6 mb-6;
+  }
+  
+  .form-section h3 {
+    @apply text-lg font-medium text-gray-900 mb-4;
+  }
+
+  /* Button variants */
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-4 rounded-md transition-colors duration-200;
+  }
+  
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200;
+  }
+  
+  .btn-success {
+    @apply bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200;
+  }
+
+  /* Status indicators */
+  .status-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .status-badge-success {
+    @apply bg-green-100 text-green-800;
+  }
+  
+  .status-badge-warning {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+  
+  .status-badge-error {
+    @apply bg-red-100 text-red-800;
+  }
+  
+  .status-badge-info {
+    @apply bg-blue-100 text-blue-800;
+  }
+
+  /* Card hover effects */
+  .card-hover {
+    @apply transition-shadow duration-200 hover:shadow-lg;
+  }
+
+  /* Navigation active states */
+  .nav-active {
+    @apply text-blue-700 bg-blue-50 border-b-2 border-blue-700;
+  }
+  
+  .nav-inactive {
+    @apply text-gray-600 hover:text-gray-900 hover:bg-gray-50;
+  }
+}
+
+/* Utility classes */
+@layer utilities {
+  /* Text utilities for financial data */
+  .text-currency {
+    font-variant-numeric: tabular-nums;
+  }
+  
+  /* Animation utilities */
+  .fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Focus utilities */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  }
+}

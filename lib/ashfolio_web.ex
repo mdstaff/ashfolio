@@ -56,6 +56,11 @@ defmodule AshfolioWeb do
         layout: {AshfolioWeb.Layouts, :app}
 
       unquote(html_helpers())
+
+      # Helper for setting current page in navigation
+      defp assign_current_page(socket, page) do
+        assign(socket, :current_page, page)
+      end
     end
   end
 

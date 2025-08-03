@@ -673,4 +673,161 @@ defmodule AshfolioWeb.CoreComponents do
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
   end
+
+  @doc """
+  Renders a navigation link with active state styling.
+
+  ## Examples
+
+      <.nav_link navigate={~p"/dashboard"} current={@current_page == :dashboard}>
+        Dashboard
+      </.nav_link>
+  """
+  attr :navigate, :any, required: true
+  attr :current, :boolean, default: false
+  attr :class, :string, default: nil
+  slot :inner_block, required: true
+
+  def nav_link(assigns) do
+    ~H"""
+    <.link
+      navigate={@navigate}
+      class={[
+        "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200",
+        @current && "text-blue-700 bg-blue-50 border-b-2 border-blue-700",
+        !@current && "text-gray-600 hover:text-gray-900 hover:bg-gray-50",
+        @class
+      ]}
+    >
+      {render_slot(@inner_block)}
+    </.link>
+    """
+  end
+
+  @doc """
+  Renders a mobile navigation link with active state styling.
+
+  ## Examples
+
+      <.mobile_nav_link navigate={~p"/dashboard"} current={@current_page == :dashboard}>
+        Dashboard
+      </.mobile_nav_link>
+  """
+  attr :navigate, :any, required: true
+  attr :current, :boolean, default: false
+  attr :class, :string, default: nil
+  slot :inner_block, required: true
+
+  def mobile_nav_link(assigns) do
+    ~H"""
+    <.link
+      navigate={@navigate}
+      class={[
+        "flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors duration-200",
+        @current && "text-blue-700 bg-blue-50 border-l-4 border-blue-700",
+        !@current && "text-gray-600 hover:text-gray-900 hover:bg-gray-50",
+        @class
+      ]}
+    >
+      {render_slot(@inner_block)}
+    </.link>
+    """
+  end
+
+  @doc """
+  Renders a loading spinner component.
+
+  ## Examples
+
+      <.loading_spinner />
+      <.loading_spinner class="w-8 h-8" />
+  """
+  attr :class, :string, default: "w-5 h-5"
+
+  def loading_spinner(assigns) do
+    ~H"""
+    <div class={["animate-spin rounded-full border-2 border-gray-300 border-t-blue-600", @class]}>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a card container with optional header and actions.
+
+  ## Examples
+
+      <.card>
+        <p>Card content</p>
+      </.card>
+
+      <.card>
+        <:header>
+          <h2>Card Title</h2>
+        </:header>
+        <:actions>
+          <.button>Action</.button>
+        </:actions>
+        <p>Card content</p>
+      </.card>
+  """
+  attr :class, :string, default: nil
+  slot :header
+  slot :actions
+  slot :inner_block, required: true
+
+  def card(assigns) do
+    ~H"""
+    <div class={["bg-white shadow rounded-lg", @class]}>
+      <div :if={@header != [] || @actions != []} class="px-6 py-4 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <div :if={@header != []} class="flex-1">
+            {render_slot(@header)}
+          </div>
+          <div :if={@actions != []} class="flex-shrink-0">
+            {render_slot(@actions)}
+          </div>
+        </div>
+      </div>
+      <div class="px-6 py-4">
+        {render_slot(@inner_block)}
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a stat card for displaying key metrics.
+
+  ## Examples
+
+      <.stat_card title="Total Value" value="$12,345.67" change="+5.2%" positive={true} />
+  """
+  attr :title, :string, required: true
+  attr :value, :string, required: true
+  attr :change, :string, default: nil
+  attr :positive, :boolean, default: nil
+  attr :class, :string, default: nil
+
+  def stat_card(assigns) do
+    ~H"""
+    <div class={["bg-white rounded-lg shadow p-6", @class]}>
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-600">{@title}</p>
+          <p class="text-2xl font-semibold text-gray-900">{@value}</p>
+        </div>
+        <div :if={@change} class="text-right">
+          <p class={[
+            "text-sm font-medium",
+            @positive == true && "text-green-600",
+            @positive == false && "text-red-600",
+            @positive == nil && "text-gray-600"
+          ]}>
+            {@change}
+          </p>
+        </div>
+      </div>
+    </div>
+    """
+  end
 end
