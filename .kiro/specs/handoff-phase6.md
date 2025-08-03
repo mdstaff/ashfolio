@@ -2,12 +2,12 @@
 
 ## 🎯 Current Project Status
 
-**Ashfolio Phase 7 Ready - Portfolio Dashboard Implementation Complete**
+**Ashfolio Phase 7 Ready - Holdings Table Implementation Complete**
 
-- **Test Suite**: 169/169 tests passing (100% pass rate)
-- **Tasks Completed**: 18/29 (62% complete)
-- **Current Phase**: Phase 7 - Portfolio Dashboard (Task 18 ✅ Complete)
-- **Next Task**: Task 19 - Add portfolio value display
+- **Test Suite**: 192/192 tests passing (100% pass rate)
+- **Tasks Completed**: 20/29 (69% complete)
+- **Current Phase**: Phase 7 - Portfolio Dashboard (Task 20 ✅ Complete)
+- **Next Task**: Task 21 - Add manual price refresh
 
 ## ✅ Phase 5 Achievements
 
@@ -94,6 +94,22 @@
 
 ### Recently Completed
 
+#### Task 20: Create holdings table ✅
+
+- ✅ Implemented holdings table using Phoenix table component from core_components.ex
+- ✅ Display current holdings with symbol, name, quantity, current price, current value, cost basis, and P&L
+- ✅ Added proper column formatting with right-aligned numeric values
+- ✅ Applied color coding for gains (green) and losses (red) in P&L column using FormatHelpers.value_color_class/1
+- ✅ Integrated with HoldingsCalculator.get_holdings_summary/1 for data source
+- ✅ Formatted currency values using FormatHelpers.format_currency/1 ($X,XXX.XX format)
+- ✅ Formatted percentage values using FormatHelpers.format_percentage/1 (XX.XX% format)
+- ✅ Replaced empty state in dashboard card with populated holdings table
+- ✅ Added proper table styling with responsive design and hover effects
+- ✅ Implemented quantity formatting with format_quantity/1 helper function
+- ✅ Used proper CSS classes for text alignment and color coding
+- **Requirements**: 13.3, 15.1
+- **Completed**: 2025-08-03
+
 #### Task 18: Create basic dashboard LiveView ✅
 
 - ✅ Enhanced existing DashboardLive module mount/3 function with portfolio calculations
@@ -134,15 +150,17 @@
 
 ### Next Tasks (Ready to Start)
 
-#### Task 19: Add portfolio value display
+#### Task 21: Add manual price refresh
 
-- Update stat_card components with real portfolio values from Calculator.calculate_total_return/1
-- Implement currency formatting helper function for Decimal values ($1,234.56 format)
-- Show total return percentage with proper decimal precision (2 decimal places)
-- Add conditional color coding to stat cards (green for positive returns, red for negative)
-- Display daily change calculation (if available) or show as "N/A" for Phase 1
-- Update "Holdings" stat card with actual holdings count from HoldingsCalculator
-- **Requirements**: 13.1, 13.2
+- Wire existing "Refresh Prices" button to PriceManager.refresh_prices/1 function
+- Implement handle_event("refresh_prices", \*, socket) in DashboardLive
+- Add loading state management with assign(:loading, true/false)
+- Show loading spinner on button and disable during refresh operation
+- Update portfolio calculations and holdings table after successful price refresh
+- Display success/error flash messages using existing ErrorHelpers
+- Update "last updated" timestamp display from ETS cache
+- **Requirements**: 6.1, 6.2
+- **Technical**: Use existing PriceManager GenServer, integrate with flash system, update LiveView assigns
 
 ### Available Data for UI
 

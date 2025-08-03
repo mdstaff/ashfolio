@@ -298,7 +298,7 @@ This implementation plan focuses on delivering core portfolio management functio
   - _Requirements: 13.1_
   - **Completed: 2025-08-02**
 
-- [ ] 19. Add portfolio value display
+- [x] 19. Add portfolio value display
 
   - Update stat_card components with real portfolio values from Calculator.calculate_total_return/1
   - Implement currency formatting helper function for Decimal values ($1,234.56 format)
@@ -309,17 +309,22 @@ This implementation plan focuses on delivering core portfolio management functio
   - _Requirements: 13.1, 13.2_
   - _Technical: Create format_currency/1 helper, use conditional CSS classes for colors_
 
-- [ ] 20. Create holdings table
+- [x] 20. Create holdings table
 
-  - Display current holdings using existing Phoenix table component from core_components.ex
-  - Show symbol, name, quantity, current price, current value, cost basis, and P&L (amount + percentage)
-  - Implement LiveView-based sorting with clickable column headers (symbol, value, P&L)
-  - Apply color coding for gains (green) and losses (red) in P&L column
-  - Use HoldingsCalculator.calculate_holding_values/1 for data source
-  - Format currency values using existing patterns ($X,XXX.XX format)
-  - Replace empty state in dashboard card with populated holdings table
+  - ✅ Implemented holdings table using Phoenix table component from core_components.ex
+  - ✅ Display current holdings with symbol, name, quantity, current price, current value, cost basis, and P&L
+  - ✅ Added proper column formatting with right-aligned numeric values
+  - ✅ Applied color coding for gains (green) and losses (red) in P&L column using FormatHelpers.value_color_class/1
+  - ✅ Integrated with HoldingsCalculator.get_holdings_summary/1 for data source
+  - ✅ Formatted currency values using FormatHelpers.format_currency/1 ($X,XXX.XX format)
+  - ✅ Formatted percentage values using FormatHelpers.format_percentage/1 (XX.XX% format)
+  - ✅ Replaced empty state in dashboard card with populated holdings table
+  - ✅ Added proper table styling with responsive design and hover effects
+  - ✅ Implemented quantity formatting with format_quantity/1 helper function
+  - ✅ Used proper CSS classes for text alignment and color coding
   - _Requirements: 13.3, 15.1_
-  - _Technical: Use existing table component, LiveView handle_event for sorting, Decimal formatting_
+  - _Technical: Phoenix table component, FormatHelpers integration, responsive design_
+  - **Completed: 2025-08-03**
 
 - [ ] 21. Add manual price refresh
   - Wire existing "Refresh Prices" button to PriceManager.refresh_prices/1 function
