@@ -502,14 +502,246 @@ end
 #### Portfolio Dashboard
 
 ```elixir
-defmodule AshfolioWeb.PortfolioLive.Dashboard do
+defmodule AshfolioWeb.DashboardLive do
   use AshfolioWeb, :live_view
 
-  # Real-time portfolio overview
-  # - Current portfolio value
-  # - Performance metrics
-  # - Asset allocation charts
-  # - Recent transactions
+  @impl true
+  def mount(_params, _session, socket) do
+    # Load portfolio data using Calculator modules
+    user_id = get_default_user_id()
+
+    with {:ok, total_return} <- Portfolio.Calculator.calculate_total_return(user_id),
+         {:ok, holdings} <- Portfolio.HoldingsCalculator.calculate_holding_values(user_id) do
+
+      socket =
+        socket
+        |> assign_current_page(:dashboard)
+        |> assign(:page_title, "Dashboard")
+        |> assign(:loading, false)
+        |> assign(:portfolio_value, format_currency(total_return.total_value))
+        |> assign(:total_return, format_currency(total_return.dollar_return))
+        |> assign(:total_return_percent, format_percentage(total_return.return_percentage))
+        |> assign(:holdings, holdings)
+        |> assign(:holdings_count, length(holdings))
+        |> assign(:sort_by, :symbol)
+        |> assign(:sort_order, :asc)
+        |> assign(:last_updated, get_last_price_update())
+
+      {:ok, socket}
+    else
+      {:error, reason} ->
+        Logger.error("Failed to load dashboard data: #{inspect(reason)}")
+        {:ok, assign_error_state(socket)}
+    end
+  end
+
+  @impl true
+  def handle_event("refresh_prices", _params, socket) do
+    socket = assign(socket, :loading, true)
+
+    # Get symbols from current holdings
+    symbols = Enum.map(socket.assigns.holdings, & &1.symbol)
+
+    case PriceManager.refresh_prices(symbols) do
+      {:ok, _results} ->
+        # Reload portfolio data with updated prices
+        socket = reload_portfolio_data(socket)
+        socket =
+          socket
+          |> assign(:loading, false)
+          |> put_flash(:info, "Prices updated successfully")
+        {:noreply, socket}
+
+      {:error, reason} ->
+        socket =
+          socket
+          |> assign(:loading, false)
+          |> put_flash(:error, "Failed to update prices: #{reason}")
+        {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_event("sort", %{"column" => column}, socket) do
+    {sort_by, sort_order} = toggle_sort(socket.assigns.sort_by, socket.assigns.sort_order, column)
+    holdings = sort_holdings(socket.assigns.holdings, sort_by, sort_order)
+
+    socket =
+      socket
+      |> assign(:sort_by, sort_by)
+      |> assign(:sort_order, sort_order)
+      |> assign(:holdings, holdings)
+
+    {:noreply, socket}
+  end
+
+  # Holdings table with sorting
+  defp render_holdings_table(assigns) do
+    ~H"""
+    <.table id="holdings-table" rows={@holdings} row_click={&JS.navigate(~p"/holdings/#{&1.symbol_id}")}>
+      <:col :let={holding} label="Symbol">
+        <div class="font-semibold text-gray-900">{holding.symbol}</div>
+        <div class="text-sm text-gray-500">{holding.name}</div>
+      </:col>
+      <:col :let={holding} label="Quantity" class="text-right">
+        {format_quantity(holding.quantity)}
+      </:col>
+      <:col :let={holding} label="Current Price" class="text-right">
+        {format_currency(holding.current_price)}
+      </:col>
+      <:col :let={holding} label="Current Value" class="text-right">
+        {format_currency(holding.current_value)}
+      </:col>
+      <:col :let={holding} label="Cost Basis" class="text-right">
+        {format_currency(holding.cost_basis)}
+      </:col>
+      <:col :let={holding} label="P&L" class="text-right">
+        <div class={pnl_color_class(holding.unrealized_pnl)}>
+          <div>{format_currency(holding.unrealized_pnl)}</div>
+          <div class="text-sm">({format_percentage(holding.unrealized_pnl_pct)})</div>
+        </div>
+      </:col>
+    </.table>
+    """
+  end
+
+  # Helper functions for formatting and sorting
+  defp format_currency(decimal_value) do
+    # Format Decimal as $X,XXX.XX
+    decimal_value
+    |> Decimal.round(2)
+    |> Decimal.to_string()
+    |> String.to_float()
+    |> :erlang.float_to_binary(decimals: 2)
+    |> then(&"$#{&1}")
+  end
+
+  defp format_percentage(decimal_value) do
+    # Format Decimal as XX.XX%
+    decimal_value
+    |> Decimal.round(2)
+    |> Decimal.to_string()
+    |> then(&"#{&1}%")
+  end
+
+  defp pnl_color_class(pnl) do
+    cond do
+      Decimal.positive?(pnl) -> "text-green-600"
+      Decimal.negative?(pnl) -> "text-red-600"
+      true -> "text-gray-600"
+    end
+  end
+
+  defp sort_holdings(holdings, sort_by, sort_order) do
+    holdings
+    |> Enum.sort_by(&Map.get(&1, sort_by), sort_order)
+  end
+
+  defp toggle_sort(current_sort, current_order, new_column) do
+    new_column_atom = String.to_existing_atom(new_column)
+
+    if current_sort == new_column_atom do
+      {new_column_atom, toggle_order(current_order)}
+    else
+      {new_column_atom, :asc}
+    end
+  end
+
+  defp toggle_order(:asc), do: :desc
+  defp toggle_order(:desc), do: :asc
+end
+```
+
+#### Holdings Table Implementation
+
+Based on research findings, the holdings table will use the following technical approach:
+
+**Data Source Integration:**
+
+```elixir
+# In DashboardLive mount/3
+{:ok, holdings} = HoldingsCalculator.calculate_holding_values(user_id)
+
+# Holdings data structure:
+%{
+  symbol_id: "uuid",
+  symbol: "AAPL",
+  name: "Apple Inc.",
+  quantity: %Decimal{},
+  current_price: %Decimal{},
+  current_value: %Decimal{},
+  cost_basis: %Decimal{},
+  average_cost: %Decimal{},
+  unrealized_pnl: %Decimal{},
+  unrealized_pnl_pct: %Decimal{}
+}
+```
+
+**Table Component Usage:**
+
+```elixir
+# Use existing Phoenix table component from core_components.ex
+<.table id="holdings-table" rows={@holdings}>
+  <:col :let={holding} label="Symbol">
+    <div class="font-semibold">{holding.symbol}</div>
+    <div class="text-sm text-gray-500">{holding.name}</div>
+  </:col>
+  <:col :let={holding} label="Quantity" class="text-right">
+    {format_quantity(holding.quantity)}
+  </:col>
+  <:col :let={holding} label="Current Price" class="text-right">
+    {format_currency(holding.current_price)}
+  </:col>
+  <:col :let={holding} label="Current Value" class="text-right">
+    {format_currency(holding.current_value)}
+  </:col>
+  <:col :let={holding} label="P&L" class="text-right">
+    <div class={pnl_color_class(holding.unrealized_pnl)}>
+      <div>{format_currency(holding.unrealized_pnl)}</div>
+      <div class="text-sm">({format_percentage(holding.unrealized_pnl_pct)})</div>
+    </div>
+  </:col>
+</.table>
+```
+
+**Sorting Implementation:**
+
+```elixir
+# LiveView state management
+assign(:sort_by, :symbol)
+assign(:sort_order, :asc)
+
+# Handle sort events
+def handle_event("sort", %{"column" => column}, socket) do
+  {sort_by, sort_order} = toggle_sort(socket.assigns.sort_by, socket.assigns.sort_order, column)
+  holdings = sort_holdings(socket.assigns.holdings, sort_by, sort_order)
+
+  socket =
+    socket
+    |> assign(:sort_by, sort_by)
+    |> assign(:sort_order, sort_order)
+    |> assign(:holdings, holdings)
+
+  {:noreply, socket}
+end
+```
+
+**Formatting Helpers:**
+
+```elixir
+defp format_currency(decimal_value) do
+  decimal_value
+  |> Decimal.round(2)
+  |> Decimal.to_string()
+  |> then(&"$#{&1}")
+end
+
+defp pnl_color_class(pnl) do
+  cond do
+    Decimal.positive?(pnl) -> "text-green-600"
+    Decimal.negative?(pnl) -> "text-red-600"
+    true -> "text-gray-600"
+  end
 end
 ```
 
