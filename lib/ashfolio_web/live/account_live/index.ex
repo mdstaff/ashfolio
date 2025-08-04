@@ -95,12 +95,12 @@ defmodule AshfolioWeb.AccountLive.Index do
     ~H"""
     <div class="space-y-6">
       <!-- Header with New Account Button -->
-      <div class="flex justify-between items-center">
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 class="text-2xl font-bold text-gray-900">Investment Accounts</h1>
           <p class="text-gray-600">Manage your investment accounts and balances</p>
         </div>
-        <.button phx-click="new_account" class="bg-blue-600 hover:bg-blue-700">
+        <.button phx-click="new_account" class="btn-primary inline-flex items-center">
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
@@ -108,77 +108,149 @@ defmodule AshfolioWeb.AccountLive.Index do
         </.button>
       </div>
 
-      <!-- Accounts Table -->
+      <!-- Accounts Table or Empty State -->
       <%= if Enum.empty?(@accounts) do %>
-        <div class="text-center py-12">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No accounts</h3>
-          <p class="mt-1 text-sm text-gray-500">Get started by creating your first investment account.</p>
-          <div class="mt-6">
-            <.button phx-click="new_account" class="bg-blue-600 hover:bg-blue-700">
+        <!-- Enhanced Empty State -->
+        <div class="bg-white shadow rounded-lg">
+          <div class="text-center py-16 px-6">
+            <div class="mx-auto h-16 w-16 text-gray-400 mb-4">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-full h-full">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No accounts</h3>
+            <p class="text-gray-500 mb-6 max-w-sm mx-auto">
+              Get started by creating your first investment account to track your portfolio and transactions.
+            </p>
+            <.button phx-click="new_account" class="btn-primary inline-flex items-center">
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
-              New Account
+              Create Your First Account
             </.button>
           </div>
         </div>
       <% else %>
+        <!-- Enhanced Accounts Table with Responsive Design -->
         <div class="bg-white shadow rounded-lg overflow-hidden">
-          <.table id="accounts-table" rows={@accounts}>
-            <:col :let={account} label="Account">
-              <div class="flex items-center">
-                <div>
-                  <div class="font-medium text-gray-900">{account.name}</div>
-                  <div class="text-sm text-gray-500">{account.platform || "No platform"}</div>
+          <div class="overflow-x-auto">
+            <.table id="accounts-table" rows={@accounts} class="min-w-full">
+              <:col :let={account} label="Account" class="min-w-0 w-full sm:w-auto">
+                <div class="flex items-center space-x-3">
+                  <!-- Account Icon -->
+                  <div class="flex-shrink-0">
+                    <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                      <svg class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  <!-- Account Details -->
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center space-x-2">
+                      <p class="font-medium text-gray-900 truncate">{account.name}</p>
+                      <%= if account.is_excluded do %>
+                        <span class="status-badge status-badge-warning flex-shrink-0">
+                          <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
+                          </svg>
+                          Excluded
+                        </span>
+                      <% else %>
+                        <span class="status-badge status-badge-success flex-shrink-0">
+                          <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                          </svg>
+                          Active
+                        </span>
+                      <% end %>
+                    </div>
+                    <p class="text-sm text-gray-500 truncate">
+                      {account.platform || "No platform specified"}
+                    </p>
+                  </div>
                 </div>
-                <%= if account.is_excluded do %>
-                  <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                    Excluded
+              </:col>
+
+              <:col :let={account} label="Balance" class="text-right">
+                <div class="text-right">
+                  <span class={"font-mono font-semibold text-lg #{if account.is_excluded, do: "text-gray-500", else: "text-gray-900"}"}>
+                    {FormatHelpers.format_currency(account.balance)}
                   </span>
-                <% end %>
-              </div>
-            </:col>
+                  <%= if account.is_excluded do %>
+                    <p class="text-xs text-gray-400 mt-1">Excluded from calculations</p>
+                  <% end %>
+                </div>
+              </:col>
 
-            <:col :let={account} label="Balance">
-              <div class="text-right">
-                <span class="font-medium text-gray-900">
-                  {FormatHelpers.format_currency(account.balance)}
+              <:col :let={account} label="Actions" class="text-right">
+                <div class="flex justify-end space-x-1 sm:space-x-2">
+                  <!-- Edit Button -->
+                  <.button
+                    class="btn-secondary text-xs sm:text-sm px-2 sm:px-3 py-1 inline-flex items-center"
+                    phx-click="edit_account"
+                    phx-value-id={account.id}
+                    title="Edit account"
+                  >
+                    <svg class="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <span class="hidden sm:inline">Edit</span>
+                  </.button>
+
+                  <!-- Toggle Exclusion Button -->
+                  <.button
+                    class={if account.is_excluded, do: "btn-success text-xs sm:text-sm px-2 sm:px-3 py-1 inline-flex items-center", else: "bg-yellow-100 hover:bg-yellow-200 text-yellow-800 text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-md transition-colors duration-200 inline-flex items-center"}
+                    phx-click="toggle_exclusion"
+                    phx-value-id={account.id}
+                    title={if account.is_excluded, do: "Include in calculations", else: "Exclude from calculations"}
+                  >
+                    <%= if account.is_excluded do %>
+                      <svg class="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span class="hidden sm:inline">Include</span>
+                    <% else %>
+                      <svg class="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
+                      </svg>
+                      <span class="hidden sm:inline">Exclude</span>
+                    <% end %>
+                  </.button>
+
+                  <!-- Delete Button -->
+                  <.button
+                    class="btn-danger text-xs sm:text-sm px-2 sm:px-3 py-1 inline-flex items-center"
+                    phx-click="delete_account"
+                    phx-value-id={account.id}
+                    data-confirm="Are you sure you want to delete this account? This action cannot be undone."
+                    title="Delete account"
+                  >
+                    <svg class="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <span class="hidden sm:inline">Delete</span>
+                  </.button>
+                </div>
+              </:col>
+            </.table>
+          </div>
+
+          <!-- Table Footer with Summary -->
+          <div class="bg-gray-50 px-6 py-3 border-t border-gray-200">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+              <p class="text-sm text-gray-600">
+                {length(@accounts)} account{if length(@accounts) == 1, do: "", else: "s"} total
+              </p>
+              <p class="text-sm font-medium text-gray-900">
+                Total Balance:
+                <span class="font-mono">
+                  {FormatHelpers.format_currency(calculate_total_balance(@accounts))}
                 </span>
-              </div>
-            </:col>
-
-            <:col :let={account} label="Actions">
-              <div class="flex justify-end space-x-2">
-                <.button
-                  class="text-sm px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700"
-                  phx-click="edit_account"
-                  phx-value-id={account.id}
-                >
-                  Edit
-                </.button>
-
-                <.button
-                  class="text-sm px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700"
-                  phx-click="toggle_exclusion"
-                  phx-value-id={account.id}
-                >
-                  <%= if account.is_excluded, do: "Include", else: "Exclude" %>
-                </.button>
-
-                <.button
-                  class="text-sm px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700"
-                  phx-click="delete_account"
-                  phx-value-id={account.id}
-                  data-confirm="Are you sure you want to delete this account?"
-                >
-                  Delete
-                </.button>
-              </div>
-            </:col>
-          </.table>
+              </p>
+            </div>
+          </div>
         </div>
       <% end %>
     </div>
@@ -230,5 +302,13 @@ defmodule AshfolioWeb.AccountLive.Index do
     |> assign(:show_form, true)
     |> assign(:form_action, :edit)
     |> assign(:selected_account, account)
+  end
+
+  defp calculate_total_balance(accounts) do
+    accounts
+    |> Enum.filter(fn account -> !account.is_excluded end)
+    |> Enum.reduce(Decimal.new(0), fn account, acc ->
+      Decimal.add(acc, account.balance || Decimal.new(0))
+    end)
   end
 end

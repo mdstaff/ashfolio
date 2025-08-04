@@ -151,7 +151,7 @@ ashfolio/
 - **Log Management**: Enabled log capture (`capture_log: true`) to prevent test logs from cluttering console output
 - **Selective Testing**: Added `:seeding` tag exclusion to skip slow seeding tests by default while maintaining ability to run them with `--include seeding`
 - **Developer Experience**: Optimized configuration for development workflow with faster test feedback cycles
-- **Stability Maintained**: All 192 tests continue to pass with improved execution speed and cleaner output
+- **Stability Maintained**: All 201 tests continue to pass with improved execution speed and cleaner output
 - **Configuration Balance**: Maintained comprehensive test coverage while improving performance for daily development use
 
 ### Task 18: Dashboard LiveView Implementation (2025-08-02)

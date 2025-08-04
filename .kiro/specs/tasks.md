@@ -357,7 +357,7 @@ This implementation plan focuses on delivering core portfolio management functio
   - ✅ Created verbose variants (`test-verbose`, `test-file-verbose`, etc.) for detailed debugging
   - ✅ Reduced test noise by setting `capture_log: true` and `trace: false` in test helper
   - ✅ Fixed duplicate layout navigation issue that was causing LiveView test warnings
-  - ✅ All 202 tests now passing (197 main + 5 seeding) with clean, focused output
+  - ✅ All 201 tests now passing (196 main + 5 seeding) with clean, focused output
   - _Requirements: Developer Experience, Test Organization_
   - _Technical: ExUnit configuration, justfile commands, LiveView test setup_
   - **Completed: 2025-08-03**

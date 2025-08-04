@@ -11,7 +11,7 @@ A simplified Phase 1 portfolio management application built with Phoenix LiveVie
 - **Market Data**: Yahoo Finance integration for price fetching, with a GenServer-based `PriceManager` for coordination and ETS caching.
 - **Portfolio Calculation Engine**: A dual-calculator architecture (`Calculator` and `HoldingsCalculator`) provides a rich set of functions for portfolio analysis, including FIFO cost basis and P&L.
 - **LiveView Dashboard**: A functional and responsive portfolio dashboard that displays real-time data, including portfolio value, returns, and a sortable holdings table.
-- **Robust Testing**: **100% passing test suite** (192/192 tests) with optimized configuration and `just` command runner for easy execution.
+- **Robust Testing**: **100% passing test suite** (201/201 tests) with optimized configuration and `just` command runner for easy execution.
 
 **🔄 Next Steps:**
 
