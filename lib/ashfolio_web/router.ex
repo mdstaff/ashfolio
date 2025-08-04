@@ -1,7 +1,7 @@
 defmodule AshfolioWeb.Router do
   use AshfolioWeb, :router
 
-  pipeline :browser do
+    pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash

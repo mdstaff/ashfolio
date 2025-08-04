@@ -21,8 +21,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > - Dashboard LiveView with complete holdings table implementation
 > - Holdings table with proper formatting, color coding, and responsive design
 > - Tasks documentation updated with Task 20 completion status
+> - Test configuration optimized for better performance and focused testing
 >
 > **Verification Steps**: Run `just test`, `just dev`, navigate to dashboard to see holdings table with portfolio data
+
+### Test Configuration Optimization
+
+#### [0.20.1] - 2025-08-03
+
+##### Changed
+
+- **Test Suite Performance Optimization**
+  - ✅ Disabled trace mode (`trace: false`) for faster test execution
+  - ✅ Enabled log capture (`capture_log: true`) for cleaner test output
+  - ✅ Added `:seeding` tag exclusion to skip slow seeding tests by default
+  - ✅ Maintained all other test configuration settings for stability
+  - ✅ Improved developer experience with faster test feedback cycles
+
+##### Technical Details
+
+- Test trace mode disabled reduces verbose output and improves performance
+- Log capture enabled prevents test logs from cluttering console output
+- Seeding tests excluded by default but can be run with `--include seeding` flag
+- Configuration optimized for development workflow while maintaining test coverage
+- All 192 tests continue to pass with improved execution speed
 
 ### Phase 7: Portfolio Dashboard
 

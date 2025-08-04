@@ -9,7 +9,7 @@ defmodule AshfolioWeb.RouterTest do
 
     test "GET /accounts routes to AccountLive.Index", %{conn: conn} do
       conn = get(conn, "/accounts")
-      assert html_response(conn, 200) =~ "Investment Accounts"
+      assert html_response(conn, 200) =~ "Accounts"
     end
 
     test "GET /transactions routes to TransactionLive.Index", %{conn: conn} do

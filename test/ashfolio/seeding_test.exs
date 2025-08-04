@@ -1,7 +1,28 @@
 defmodule Ashfolio.SeedingTest do
   use Ashfolio.DataCase
 
+  @moduletag :seeding
+
   alias Ashfolio.Portfolio.{User, Account, Symbol, Transaction}
+
+  # Import Mox for setting up mocks
+  import Mox
+
+  # Set up mocks before each test
+  setup do
+    # Stub any required Yahoo Finance calls
+    stub(YahooFinanceMock, :fetch_prices, fn _symbols ->
+      # Return empty price map for seeding tests
+      {:ok, %{}}
+    end)
+
+    stub(YahooFinanceMock, :fetch_price, fn _symbol ->
+      # Return empty price data for individual fetches
+      {:ok, %{}}
+    end)
+
+    :ok
+  end
 
   describe "database seeding" do
     test "creates default user with proper attributes" do

@@ -53,7 +53,7 @@ defmodule AshfolioWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {AshfolioWeb.Layouts, :app}
+        layout: {AshfolioWeb.Layouts, :root}
 
       unquote(html_helpers())
 

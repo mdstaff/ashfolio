@@ -10,5 +10,7 @@ defmodule AshfolioWeb.Layouts do
   """
   use AshfolioWeb, :html
 
+  import AshfolioWeb.Components.TopBar
+
   embed_templates "layouts/*"
 end

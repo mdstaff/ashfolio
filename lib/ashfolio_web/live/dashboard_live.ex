@@ -2,6 +2,7 @@ defmodule AshfolioWeb.DashboardLive do
   use AshfolioWeb, :live_view
 
   alias Ashfolio.Portfolio.{Calculator, HoldingsCalculator, User}
+  alias Ashfolio.MarketData.PriceManager
   alias AshfolioWeb.Live.{ErrorHelpers, FormatHelpers}
   require Logger
 
@@ -15,6 +16,51 @@ defmodule AshfolioWeb.DashboardLive do
       |> load_portfolio_data()
 
     {:ok, socket}
+  end
+
+  @impl true
+  def handle_event("refresh_prices", _params, socket) do
+    Logger.info("Manual price refresh requested")
+
+    # Set loading state
+    socket = assign(socket, :loading, true)
+
+    # Perform price refresh
+    case PriceManager.refresh_prices() do
+      {:ok, results} ->
+        Logger.info("Price refresh successful: #{results.success_count} symbols updated")
+
+        # Reload portfolio data with updated prices
+        socket =
+          socket
+          |> assign(:loading, false)
+          |> load_portfolio_data()
+          |> ErrorHelpers.put_success_flash(
+            "Prices refreshed successfully! Updated #{results.success_count} symbols in #{results.duration_ms}ms."
+          )
+
+        {:noreply, socket}
+
+      {:error, :refresh_in_progress} ->
+        Logger.info("Price refresh already in progress")
+
+        socket =
+          socket
+          |> assign(:loading, false)
+          |> ErrorHelpers.put_error_flash("Price refresh is already in progress. Please wait.")
+
+        {:noreply, socket}
+
+      {:error, reason} ->
+        Logger.error("Price refresh failed: #{inspect(reason)}")
+
+        socket =
+          socket
+          |> assign(:loading, false)
+          |> ErrorHelpers.put_error_flash("Failed to refresh prices. Please try again.")
+
+        {:noreply, socket}
+    end
   end
 
   @impl true
@@ -45,7 +91,7 @@ defmodule AshfolioWeb.DashboardLive do
           </p>
         </div>
         <div class="flex space-x-3">
-          <.button type="button" class="btn-secondary" disabled={@loading}>
+          <.button type="button" class="btn-secondary" disabled={@loading} phx-click="refresh_prices">
             <.icon name="hero-arrow-path" class={if @loading, do: "w-4 h-4 mr-2 animate-spin", else: "w-4 h-4 mr-2"} />
             {if @loading, do: "Refreshing...", else: "Refresh Prices"}
           </.button>

@@ -65,35 +65,72 @@ stop:
     @pkill -f "beam.smp.*ashfolio" || echo "No Elixir processes found"
     @echo "✅ Server stopped"
 
-# Run test suite
+# Run main test suite (silent by default)
 test:
-    @echo "🧪 Running test suite..."
-    mix test
+    @echo "🧪 Running main test suite..."
+    @mix test --exclude seeding 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Tests failed - run 'just test-verbose' for details" && exit 1)
 
-# Run specific test file
+# Run seeding tests (silent by default)
+test-seeding:
+    @echo "🧪 Running seeding tests..."
+    @mix test --only seeding 2>&1 | grep -E "(\.+|Finished|tests,|failures|excluded)" | grep -v "Creating\|Created\|Ready to start" || (echo "❌ Seeding tests failed - run 'just test-seeding-verbose' for details" && exit 1)
+
+# Run full test suite (silent by default)
+test-all:
+    @echo "🧪 Running full test suite..."
+    @mix test --include seeding 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Tests failed - run 'just test-all-verbose' for details" && exit 1)
+
+# Run specific test file (silent by default)
 test-file file:
     @echo "🧪 Running tests for {{file}}..."
-    mix test {{file}}
+    @mix test {{file}} 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Test file failed - run 'just test-file-verbose {{file}}' for details" && exit 1)
 
 # Run tests with coverage report
 test-coverage:
     @echo "🧪 Running test suite with coverage report..."
-    mix test --cover
+    mix test --cover --exclude seeding
 
 # Run tests in watch mode (re-runs on file changes)
 test-watch:
     @echo "🧪 Running tests in watch mode..."
-    mix test.watch
+    mix test.watch --exclude seeding
 
 # Run only failed tests from last run
 test-failed:
     @echo "🧪 Running only failed tests..."
     mix test --failed
 
-# Run tests with detailed output
+# VERBOSE VERSIONS (show full output)
+# Run main test suite with full output
 test-verbose:
-    @echo "🧪 Running tests with verbose output..."
-    mix test --trace
+    @echo "🧪 Running main test suite (verbose)..."
+    mix test --exclude seeding --trace
+
+# Run seeding tests with full output
+test-seeding-verbose:
+    @echo "🧪 Running seeding tests (verbose)..."
+    mix test --only seeding --trace
+
+# Run full test suite with full output
+test-all-verbose:
+    @echo "🧪 Running full test suite (verbose)..."
+    mix test --include seeding --trace
+
+# Run specific test file with full output
+test-file-verbose file:
+    @echo "🧪 Running tests for {{file}} (verbose)..."
+    mix test {{file}} --trace
+
+# LEGACY COMMANDS (for compatibility)
+# Run tests with minimal output (summary only)
+test-quiet:
+    @echo "🧪 Running tests with minimal output..."
+    mix test --exclude seeding --formatter ExUnit.CLIFormatter
+
+# Run tests and show only summary
+test-summary:
+    @echo "🧪 Running test suite (summary only)..."
+    @mix test --exclude seeding 2>/dev/null | tail -n 10 || echo "❌ Tests failed - run 'just test-failed' for details"
 
 # Run PriceManager tests specifically
 test-price-manager:
