@@ -19,6 +19,8 @@ defmodule AshfolioWeb.Router do
 
     live "/", DashboardLive, :index
     live "/accounts", AccountLive.Index, :index
+    live "/accounts/new", AccountLive.Index, :new
+    live "/accounts/:id/edit", AccountLive.Index, :edit
     live "/transactions", TransactionLive.Index, :index
   end
 
