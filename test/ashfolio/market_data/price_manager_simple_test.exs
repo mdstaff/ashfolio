@@ -16,9 +16,15 @@ defmodule Ashfolio.MarketData.PriceManagerSimpleTest do
 
     test "last_refresh returns timestamp or nil" do
       # Since PriceManager is a singleton GenServer that persists across tests,
-      # last_refresh may return a timestamp if other tests have run refresh operations
+      # last_refresh may return a refresh info map if other tests have run refresh operations
       result = PriceManager.last_refresh()
-      assert result == nil or match?(%DateTime{}, result)
+
+      case result do
+        nil -> assert true  # Expected for fresh start
+        %{timestamp: timestamp, results: results} ->
+          assert %DateTime{} = timestamp
+          assert is_map(results)
+      end
     end
   end
 end

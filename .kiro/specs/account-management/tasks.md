@@ -23,7 +23,7 @@ The implementation is organized into 4 phases:
   - _Requirements: 1.1, 7.1_
   - **Completed: 2025-08-03**
 
-- [ ] 2. Implement basic account listing functionality
+- [x] 2. Implement basic account listing functionality
 
   - Enhance `AccountLive.Index.mount/3` to load accounts using `Account.accounts_for_user!/1`
   - Add assigns for accounts list, page title, and current page navigation

@@ -2,25 +2,29 @@
 
 ## Overview
 
-This document outlines the testing strategy for Phase 9 of the Ashfolio project, focusing on comprehensive testing and final integration. Current test coverage shows 169/169 tests passing, with the need to expand coverage for new features and integration scenarios.
+This document outlines the testing strategy for Phase 9 of the Ashfolio project, focusing on comprehensive testing and final integration. Current test coverage shows 201/201 tests passing, with the need to expand coverage for new features and integration scenarios.
 
 ## 1. Test Coverage Requirements
 
 ### 1.1 Resource Testing (Task #28)
 
 #### Ash Resources
+
 - **User Resource**
+
   - Single user support validation
   - Default currency handling
   - Basic CRUD operations
 
 - **Account Resource**
+
   - Relationship validation (user, transactions)
   - Balance tracking
   - Platform association
   - CRUD operations with validations
 
 - **Symbol Resource**
+
   - Price update actions
   - Transaction relationships
   - Cache integration
@@ -33,6 +37,7 @@ This document outlines the testing strategy for Phase 9 of the Ashfolio project,
   - Relationship integrity
 
 #### Portfolio Calculations
+
 - Cost basis calculations (FIFO)
 - Return calculations
   - Simple returns
@@ -44,6 +49,7 @@ This document outlines the testing strategy for Phase 9 of the Ashfolio project,
   - P&L calculations
 
 #### LiveView Testing
+
 - Dashboard display
 - Account management interface
 - Transaction forms
@@ -51,6 +57,7 @@ This document outlines the testing strategy for Phase 9 of the Ashfolio project,
 - Error state handling
 
 #### Integration Points
+
 - Yahoo Finance API
 - ETS cache operations
 - Price refresh workflow
@@ -59,12 +66,15 @@ This document outlines the testing strategy for Phase 9 of the Ashfolio project,
 ### 1.2 Integration Testing (Task #29)
 
 #### Core Workflows
+
 1. Account Management Flow
+
    ```
    Create Account → Validate Fields → View in List → Edit → Delete
    ```
 
 2. Transaction Flow
+
    ```
    Select Account → Enter Transaction → Validate → View in Portfolio → Edit/Delete
    ```
@@ -75,13 +85,16 @@ This document outlines the testing strategy for Phase 9 of the Ashfolio project,
    ```
 
 #### Critical Integration Points
+
 - Price refresh functionality
+
   - Manual refresh
   - Cache updates
   - UI updates
   - Error handling
 
 - Transaction impact
+
   - Portfolio recalculation
   - Holdings updates
   - Cost basis updates
@@ -143,21 +156,32 @@ test/
 
 ### 2.3 Test Commands
 
-Using the project's Just task runner:
+**Always use the project's justfile commands for testing:**
 
 ```bash
-# Full Test Suite
-just test
+# Primary Commands (Use These)
+just test                                    # Main test suite (excludes seeding)
+just test-file <path>                       # Specific test file (preferred for focused testing)
+just test-seeding                           # Seeding tests only
+just test-coverage                          # Coverage report
+just test-watch                             # Watch mode for development
+just test-failed                            # Re-run failed tests only
 
-# Specific Test File
-just test-file test/integration/workflow_test.exs
+# Full Test Suite (When Needed)
+just test-all                               # All tests including seeding
 
-# Watch Mode
-just test-watch
-
-# Coverage Report
-just test-coverage
+# Debugging Only (Avoid for Regular Use)
+just test-file-verbose <path>               # Verbose output for specific file
+just test-verbose                           # Verbose main suite (avoid)
+just test-all-verbose                       # Verbose all tests (avoid)
 ```
+
+**Testing Best Practices:**
+
+- Use `just test-file <path>` for individual test files during development
+- Avoid verbose commands unless debugging specific failures
+- Run `just test` for quick validation of main test suite
+- Use `just test-seeding` separately when seeding functionality is modified
 
 ## 3. Implementation Guidelines
 
@@ -196,13 +220,13 @@ defmodule Ashfolio.IntegrationCase do
   setup do
     # Setup test database
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Ashfolio.Repo)
-    
+
     # Clear ETS cache
     :ets.delete_all_objects(:price_cache)
-    
+
     # Setup mock for Yahoo Finance API
     Mox.stub_with(Ashfolio.YahooFinance.Mock, Ashfolio.YahooFinance.Behaviour)
-    
+
     :ok
   end
 end
@@ -233,7 +257,7 @@ end
 
 ## 5. Completion Criteria
 
-✅ All existing 169 tests passing
+✅ All existing 201 tests passing
 ✅ New integration tests added and passing
 ✅ All core workflows tested
 ✅ Error handling scenarios covered

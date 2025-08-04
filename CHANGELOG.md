@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 >
 > **Current Status**: Phase 8 In Progress - Account Management LiveView Implementation
 >
-> - **Test Suite**: 202/202 tests passing (100% pass rate)
+> - **Test Suite**: 201/201 tests passing (100% pass rate)
 > - **Core Features**: Complete portfolio calculation engine + responsive web layout + functional dashboard + holdings table + account management UI
 > - **Key Achievement**: Comprehensive account management interface with full CRUD operations
 > - **Next Phase**: Continue with Phase 8 account management implementation (Task 23 - Account CRUD operations)
@@ -22,10 +22,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > - Account listing, creation, editing, deletion, and exclusion toggle
 > - Professional UI with empty states, form modals, and responsive design
 > - Integration with existing Account Ash resource and FormatHelpers
+> - Fixed PriceManager test to handle new return format for last_refresh
 >
 > **Verification Steps**: Run `just test`, `just dev`, navigate to `/accounts` to see account management interface
 
 ### Phase 8: Account Management
+
+#### [0.22.1] - 2025-08-03
+
+##### Fixed
+
+- **PriceManager Test Update** (Test Maintenance)
+  - ✅ Updated PriceManagerSimpleTest to handle new return format for `last_refresh/0`
+  - ✅ Fixed test to properly handle both nil and map return values from last_refresh
+  - ✅ Added proper pattern matching for refresh info map with timestamp and results
+  - ✅ Maintained test suite stability with 201/201 tests passing (100% pass rate)
+
+##### Technical Details
+
+- PriceManager.last_refresh/0 now returns `%{timestamp: DateTime.t(), results: map()}` instead of just DateTime
+- Test updated to handle both nil (fresh start) and map (after refresh operations) return values
+- Proper validation of timestamp as DateTime struct and results as map
+- Test accounts for singleton GenServer state persistence across test runs
 
 #### [0.22.0] - 2025-08-03
 

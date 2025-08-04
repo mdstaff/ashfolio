@@ -10,9 +10,10 @@ This steering rule provides specific guidance for executing tasks from the Ashfo
 
 1. **Verify Test Suite Stability**
 
-   - **FIRST:** Run `just test` to ensure all tests pass (should be 118/118 passing)
+   - **FIRST:** Run `just test` to ensure all tests pass (currently 201/201 passing)
    - If tests fail, fix test issues before proceeding with new features
-   - Use `just test-failed` and `just test-verbose` for debugging failing tests
+   - Use `just test-failed` for debugging failing tests
+   - Use `just test-file-verbose <file>` only when debugging specific test failures
 
 2. **Read Context Documents**
 
@@ -21,19 +22,19 @@ This steering rule provides specific guidance for executing tasks from the Ashfo
    - Check `.kiro/specs/design.md` for technical architecture
    - Review the specific task details in `.kiro/specs/tasks.md`
 
-2. **Update Steering Documents**
+3. **Update Steering Documents**
 
    - Update `.kiro/steering/project-context.md` with current task being started
    - Move the task from "Next Priority Tasks" to "Currently Working On"
    - Update completion percentage if starting a new phase
 
-3. **Update Task Status**
+4. **Update Task Status**
 
    - Mark task as "in_progress" before starting work
    - Mark as "completed" only when fully finished
    - Handle sub-tasks individually if they exist
 
-4. **Verify Dependencies**
+5. **Verify Dependencies**
    - Ensure prerequisite tasks are completed
    - Check that required files/modules exist
    - Verify database migrations are up to date
@@ -49,13 +50,21 @@ This steering rule provides specific guidance for executing tasks from the Ashfo
 
 ### Testing Requirements
 
-- **Maintain 100% test pass rate** - all 118 tests must pass before and after changes
+- **Maintain 100% test pass rate** - all 201 tests must pass before and after changes
 - Unit tests for all new Ash resources and actions
 - Integration tests for complex workflows
 - Mock external APIs consistently
 - Verify error handling scenarios
-- Use `just test-watch` during development for continuous testing
-- Run `just test-coverage` to ensure adequate test coverage for new code
+
+### Testing Commands (Use Justfile Only)
+
+- **Development testing**: `just test-watch` - Continuous testing during development
+- **Focused testing**: `just test-file <path>` - Test specific files (preferred for targeted testing)
+- **Main test suite**: `just test` - Run core tests (excludes seeding for speed)
+- **Coverage analysis**: `just test-coverage` - Ensure adequate test coverage for new code
+- **Seeding tests**: `just test-seeding` - Run seeding tests separately when needed
+- **Failed tests**: `just test-failed` - Re-run only previously failed tests
+- **Debugging**: `just test-file-verbose <file>` - Use only when debugging specific failures
 
 ### Documentation
 
@@ -69,7 +78,8 @@ This steering rule provides specific guidance for executing tasks from the Ashfo
 
 1. **Verification Checklist**
 
-   - **All tests pass** (`just test` shows 118/118 passing)
+   - **All tests pass** (`just test` shows 201/201 passing)
+   - **Seeding tests pass** (`just test-seeding` if seeding functionality was modified)
    - Application starts without errors (`mix phx.server`)
    - New functionality works as expected
    - No regressions in existing features
