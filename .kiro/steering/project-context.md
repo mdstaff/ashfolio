@@ -43,7 +43,7 @@ _No task currently in progress_
 
 ### Next Priority Tasks
 
-🔄 **Phase 8:** Account Management Implementation (Task 23 - Add account CRUD operations)
+🔄 **Phase 8:** Account Management Implementation (Task 6 - Account exclusion toggle functionality)
 
 ### Phase 7 Research Summary (2025-08-02)
 
@@ -59,6 +59,8 @@ _No task currently in progress_
 **Technical Confidence**: Phase 7 confidence increased from 80% to 85% due to completed research
 
 ### Recently Completed
+
+✅ **Task 5:** Account detail view layout and transaction summary (Completed - 2025-08-03)
 
 ✅ **PriceManager Test Fix:** Updated test to handle new last_refresh return format (Completed - 2025-08-03)
 

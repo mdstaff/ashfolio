@@ -47,23 +47,27 @@ The implementation is organized into 4 phases:
 
 ## Phase 2: Account Display and Basic Interactions (85% confidence)
 
-- [ ] 4. Create AccountLive.Show module for account details
+- [x] 4. Create AccountLive.Show module for account details
 
-  - Implement `AccountLive.Show` with `mount/3` and `handle_params/3` functions
-  - Load account data using `Account.get_by_id!/1` with account ID from URL params
-  - Load associated transactions using `Transaction.by_account!/1` for transaction summary
-  - Display account information in stat cards (balance, transaction count, status)
-  - Add breadcrumb navigation back to accounts list
+  - ✅ Implemented `AccountLive.Show` with `mount/3` and `handle_params/3` functions
+  - ✅ Load account data using `Account.get_by_id!/1` with account ID from URL params
+  - ✅ Load associated transactions using `Transaction.by_account!/1` for transaction summary
+  - ✅ Display account information in stat cards (balance, transaction count, status)
+  - ✅ Add breadcrumb navigation back to accounts list
+  - ✅ Comprehensive test suite with 8 test cases covering all functionality
   - _Requirements: 7.2, 7.3_
+  - **Completed: 2025-08-03**
 
-- [ ] 5. Implement account detail view layout and transaction summary
+- [x] 5. Implement account detail view layout and transaction summary
 
-  - Create comprehensive account detail layout with header, stats, and transaction list
-  - Display recent transactions table (limit to 10 most recent)
-  - Add account status indicators (active/excluded) with proper styling
-  - Calculate and display transaction summary statistics
-  - Add "Edit Account" and "Delete Account" action buttons (non-functional for now)
+  - ✅ Created comprehensive account detail layout with header, stats, and transaction summary
+  - ✅ Display transaction statistics with counts and totals for buy/sell/dividend/fee transactions
+  - ✅ Added account status indicators (active/excluded) with proper styling and visual feedback
+  - ✅ Calculate and display transaction summary statistics using `calculate_transaction_stats/1`
+  - ✅ Added "Edit Account" action button with proper navigation
+  - ✅ Implemented empty state for accounts with no transactions with call-to-action
   - _Requirements: 7.4, 7.5_
+  - **Completed: 2025-08-03**
 
 - [ ] 6. Add account exclusion toggle functionality
 

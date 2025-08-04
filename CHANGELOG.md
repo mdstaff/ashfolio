@@ -49,6 +49,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ##### Added
 
+- **Task 5: Account Detail View Layout and Transaction Summary** (Account Management Phase 2)
+  - ✅ Created comprehensive account detail layout with header, stats, and transaction summary
+  - ✅ Display transaction statistics with counts and totals for buy/sell/dividend/fee transactions
+  - ✅ Added account status indicators (active/excluded) with proper styling and visual feedback
+  - ✅ Calculate and display transaction summary statistics using `calculate_transaction_stats/1`
+  - ✅ Added "Edit Account" action button with proper navigation
+  - ✅ Implemented empty state for accounts with no transactions with call-to-action
+  - ✅ Enhanced test suite with HTML entity encoding fix for apostrophes
+  - ✅ Professional UI design with responsive layout and proper accessibility
+  - ✅ Integration with existing FormatHelpers for consistent currency formatting
+
+##### Technical Implementation
+
+- **AccountLive.Show Module**: Complete implementation with mount/3, handle_params/3, and render/1
+- **Transaction Statistics**: Private function `calculate_transaction_stats/1` for aggregating transaction data
+- **UI Components**: Breadcrumb navigation, stat cards, transaction summary grid, and empty states
+- **Error Handling**: Graceful handling of account not found with redirect to accounts list
+- **Test Coverage**: 8 comprehensive test cases covering all functionality and edge cases
+- **HTML Encoding**: Proper handling of HTML entities in test assertions for apostrophes
+
 - **Account Management LiveView** (Task 22)
   - ✅ Created comprehensive AccountLive.Index module with full account management functionality
   - ✅ Implemented account listing with professional table display showing name, platform, balance, and exclusion status
