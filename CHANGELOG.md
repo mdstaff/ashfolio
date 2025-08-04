@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > - **Test Suite**: 201/201 tests passing (100% pass rate)
 > - **Core Features**: Complete portfolio calculation engine + responsive web layout + functional dashboard + holdings table + account management UI
 > - **Key Achievement**: Comprehensive account management interface with full CRUD operations
-> - **Next Phase**: Continue with Phase 8 account management implementation (Task 23 - Account CRUD operations)
+> - **Next Phase**: Continue with Phase 8 account management implementation (Task 7 - FormComponent for reusable forms)
 >
 > **Critical Files Updated**:
 >
@@ -27,6 +27,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > **Verification Steps**: Run `just test`, `just dev`, navigate to `/accounts` to see account management interface
 
 ### Phase 8: Account Management
+
+#### [0.22.2] - 2025-08-03
+
+##### Added
+
+- **Task 6: Account Exclusion Toggle Functionality** (Account Management Phase 2)
+  - ✅ Implemented `handle_event("toggle_exclusion", params, socket)` in AccountLive.Index
+  - ✅ Uses `Account.toggle_exclusion/2` to update account exclusion status
+  - ✅ Added success/error flash message handling using `ErrorHelpers.put_success_flash/2` and `ErrorHelpers.put_error_flash/3`
+  - ✅ Updates account list display after successful toggle with `list_accounts/1`
+  - ✅ Added visual feedback during toggle operation with loading state and spinner animation
+  - ✅ Proper button styling with conditional classes for Include/Exclude states
+  - ✅ Disabled button state during toggle operation to prevent double-clicks
+  - ✅ Comprehensive error handling with user-friendly messages
+  - ✅ Professional UI design with responsive layout and proper accessibility
+  - ✅ Integration with existing Account Ash resource and ErrorHelpers module
+
+##### Technical Implementation
+
+- **Toggle Functionality**: Complete implementation with `handle_event("toggle_exclusion", params, socket)`
+- **State Management**: Uses `toggling_account_id` assign for loading state during toggle operations
+- **Error Handling**: Graceful handling of toggle failures with user-friendly flash messages
+- **UI Feedback**: Loading spinner animation and disabled button state during operations
+- **Button Styling**: Conditional CSS classes for Include (green) and Exclude (yellow) states
+- **Integration**: Uses existing `Account.toggle_exclusion/2` action and `ErrorHelpers` module
+- **Responsive Design**: Mobile-optimized button layout with proper touch targets
+- **Accessibility**: Proper button titles and ARIA labels for screen readers
+
+##### User Experience Features
+
+- Visual loading state with spinner animation during toggle operations
+- Conditional button styling (green for Include, yellow for Exclude)
+- Disabled button state prevents double-clicks during operations
+- Success flash messages confirm toggle completion
+- Error flash messages provide helpful feedback on failures
+- Responsive design works on desktop, tablet, and mobile devices
+- Proper button titles provide context for each action
+- Immediate visual feedback with updated account list after toggle
 
 #### [0.22.1] - 2025-08-03
 

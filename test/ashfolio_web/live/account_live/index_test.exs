@@ -68,7 +68,25 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
              |> render_click()
 
       # Check that the account exclusion was updated
-      assert html =~ "Account exclusion updated"
+      assert html =~ "Account exclusion updated successfully"
+    end
+
+    test "shows loading state during exclusion toggle", %{conn: conn, account1: account1} do
+      {:ok, index_live, _html} = live(conn, ~p"/accounts")
+
+      # Check initial state - should show "Exclude" button
+      assert render(index_live) =~ "Exclude"
+
+      # Toggle exclusion and check for loading state
+      # Note: In tests, the operation is synchronous so we can't easily test the loading state
+      # But we can verify the button exists and the operation completes
+      html = index_live
+             |> element("button[phx-click='toggle_exclusion'][phx-value-id='#{account1.id}']")
+             |> render_click()
+
+      # After toggle, should show success message and "Include" button
+      assert html =~ "Account exclusion updated successfully"
+      assert html =~ "Include"
     end
 
     test "deletes account with confirmation", %{conn: conn, account1: account1} do

@@ -2,7 +2,7 @@ defmodule AshfolioWeb.AccountLive.Index do
   use AshfolioWeb, :live_view
 
   alias Ashfolio.Portfolio.{Account, User}
-  alias AshfolioWeb.Live.FormatHelpers
+  alias AshfolioWeb.Live.{FormatHelpers, ErrorHelpers}
   alias AshfolioWeb.AccountLive.FormComponent
 
   @impl true
@@ -18,7 +18,8 @@ defmodule AshfolioWeb.AccountLive.Index do
      |> assign(:accounts, list_accounts(user_id))
      |> assign(:show_form, false)
      |> assign(:form_action, :new)
-     |> assign(:selected_account, nil)}
+     |> assign(:selected_account, nil)
+     |> assign(:toggling_account_id, nil)}
   end
 
   @impl true
@@ -52,11 +53,13 @@ defmodule AshfolioWeb.AccountLive.Index do
       :ok ->
         {:noreply,
          socket
-         |> put_flash(:info, "Account deleted successfully")
+         |> ErrorHelpers.put_success_flash("Account deleted successfully")
          |> assign(:accounts, list_accounts(socket.assigns.user_id))}
 
       {:error, reason} ->
-        {:noreply, put_flash(socket, :error, "Failed to delete account: #{inspect(reason)}")}
+        {:noreply,
+         socket
+         |> ErrorHelpers.put_error_flash(reason, "Failed to delete account")}
     end
   end
 
@@ -64,15 +67,22 @@ defmodule AshfolioWeb.AccountLive.Index do
   def handle_event("toggle_exclusion", %{"id" => id}, socket) do
     account = Enum.find(socket.assigns.accounts, &(&1.id == id))
 
+    # Set loading state for visual feedback
+    socket = assign(socket, :toggling_account_id, id)
+
     case Account.toggle_exclusion(account, %{is_excluded: !account.is_excluded}) do
       {:ok, _updated_account} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Account exclusion updated")
-         |> assign(:accounts, list_accounts(socket.assigns.user_id))}
+         |> ErrorHelpers.put_success_flash("Account exclusion updated successfully")
+         |> assign(:accounts, list_accounts(socket.assigns.user_id))
+         |> assign(:toggling_account_id, nil)}
 
       {:error, reason} ->
-        {:noreply, put_flash(socket, :error, "Failed to update account: #{inspect(reason)}")}
+        {:noreply,
+         socket
+         |> ErrorHelpers.put_error_flash(reason, "Failed to update account exclusion")
+         |> assign(:toggling_account_id, nil)}
     end
   end
 
@@ -80,7 +90,7 @@ defmodule AshfolioWeb.AccountLive.Index do
   def handle_info({FormComponent, {:saved, _account}}, socket) do
     {:noreply,
      socket
-     |> put_flash(:info, "Account saved successfully")
+     |> ErrorHelpers.put_success_flash("Account saved successfully")
      |> assign(:show_form, false)
      |> assign(:accounts, list_accounts(socket.assigns.user_id))}
   end
@@ -217,18 +227,28 @@ defmodule AshfolioWeb.AccountLive.Index do
                     class={if account.is_excluded, do: "btn-success text-xs sm:text-sm px-2 sm:px-3 py-1 inline-flex items-center", else: "bg-yellow-100 hover:bg-yellow-200 text-yellow-800 text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-md transition-colors duration-200 inline-flex items-center"}
                     phx-click="toggle_exclusion"
                     phx-value-id={account.id}
+                    disabled={@toggling_account_id == account.id}
                     title={if account.is_excluded, do: "Include in calculations", else: "Exclude from calculations"}
                   >
-                    <%= if account.is_excluded do %>
-                      <svg class="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    <%= if @toggling_account_id == account.id do %>
+                      <!-- Loading spinner -->
+                      <svg class="animate-spin w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      <span class="hidden sm:inline">Include</span>
+                      <span class="hidden sm:inline">Updating...</span>
                     <% else %>
-                      <svg class="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
-                      </svg>
-                      <span class="hidden sm:inline">Exclude</span>
+                      <%= if account.is_excluded do %>
+                        <svg class="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="hidden sm:inline">Include</span>
+                      <% else %>
+                        <svg class="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
+                        </svg>
+                        <span class="hidden sm:inline">Exclude</span>
+                      <% end %>
                     <% end %>
                   </.button>
 
