@@ -110,6 +110,15 @@ defmodule AshfolioWeb.AccountLive.Index do
   end
 
   @impl true
+  def handle_info({FormComponent, {:saved, _account, message}}, socket) do
+    {:noreply,
+     socket
+     |> ErrorHelpers.put_success_flash(message)
+     |> assign(:show_form, false)
+     |> assign(:accounts, list_accounts(socket.assigns.user_id))}
+  end
+
+  @impl true
   def handle_info({FormComponent, :cancel}, socket) do
     {:noreply, assign(socket, :show_form, false)}
   end
@@ -202,9 +211,16 @@ defmodule AshfolioWeb.AccountLive.Index do
                   <span class={"font-mono font-semibold text-lg #{if account.is_excluded, do: "text-gray-500", else: "text-gray-900"}"}>
                     {FormatHelpers.format_currency(account.balance)}
                   </span>
-                  <%= if account.is_excluded do %>
-                    <p class="text-xs text-gray-400 mt-1">Excluded from calculations</p>
-                  <% end %>
+                  <div class="text-xs text-gray-500 mt-1">
+                    <%= if account.is_excluded do %>
+                      <p>Excluded from calculations</p>
+                    <% end %>
+                    <%= if account.balance_updated_at do %>
+                      <p>Updated {FormatHelpers.format_relative_time(account.balance_updated_at)}</p>
+                    <% else %>
+                      <p>Balance not yet updated</p>
+                    <% end %>
+                  </div>
                 </div>
               </:col>
 

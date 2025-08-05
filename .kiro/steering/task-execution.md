@@ -58,6 +58,7 @@ This steering rule provides specific guidance for executing tasks from the Ashfo
 
 ### Testing Commands (Use Justfile Only)
 
+- Review the justfile #[[file:justfile]]
 - **Development testing**: `just test-watch` - Continuous testing during development
 - **Focused testing**: `just test-file <path>` - Test specific files (preferred for targeted testing)
 - **Main test suite**: `just test` - Run core tests (excludes seeding for speed)

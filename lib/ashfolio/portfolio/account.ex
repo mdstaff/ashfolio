@@ -45,6 +45,10 @@ defmodule Ashfolio.Portfolio.Account do
       description "Current account balance"
     end
 
+    attribute :balance_updated_at, :utc_datetime do
+      description "Timestamp when balance was last updated"
+    end
+
     timestamps()
   end
 
@@ -69,6 +73,8 @@ defmodule Ashfolio.Portfolio.Account do
     # Validate balance is not negative
     validate compare(:balance, greater_than_or_equal_to: 0),
       message: "Account balance cannot be negative"
+
+
   end
 
   actions do
@@ -78,12 +84,30 @@ defmodule Ashfolio.Portfolio.Account do
       description "Create a new account"
       accept [:name, :platform, :currency, :is_excluded, :balance, :user_id]
       primary? true
+
+      change fn changeset, _context ->
+        # Set balance_updated_at when creating with a balance
+        if Ash.Changeset.get_attribute(changeset, :balance) do
+          Ash.Changeset.change_attribute(changeset, :balance_updated_at, DateTime.utc_now())
+        else
+          changeset
+        end
+      end
     end
 
     update :update do
       description "Update account attributes"
       accept [:name, :platform, :currency, :is_excluded, :balance]
       primary? true
+
+      change fn changeset, _context ->
+        # Set balance_updated_at when balance is being updated
+        if Ash.Changeset.changing_attribute?(changeset, :balance) do
+          Ash.Changeset.change_attribute(changeset, :balance_updated_at, DateTime.utc_now())
+        else
+          changeset
+        end
+      end
     end
 
     read :active do
@@ -105,6 +129,11 @@ defmodule Ashfolio.Portfolio.Account do
     update :update_balance do
       description "Update account balance"
       accept [:balance]
+
+      change fn changeset, _context ->
+        # Always set balance_updated_at when updating balance
+        Ash.Changeset.change_attribute(changeset, :balance_updated_at, DateTime.utc_now())
+      end
     end
   end
 

@@ -124,7 +124,7 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
       html = render(index_live)
 
       # Should show success message and new account
-      assert html =~ "Account saved successfully"
+      assert html =~ "Account created successfully with balance of $5,000.00"
       assert html =~ "New Test Account"
       assert html =~ "$5,000.00"
     end
@@ -210,7 +210,7 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
       html = render(index_live)
 
       # Should show success message and updated account data
-      assert html =~ "Account saved successfully"
+      assert html =~ "Account updated successfully"
       assert html =~ "Updated Account Name"
       assert html =~ "Updated Platform"
       assert html =~ "$3,000.00"

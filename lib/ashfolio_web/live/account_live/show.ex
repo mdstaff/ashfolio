@@ -141,9 +141,16 @@ defmodule AshfolioWeb.AccountLive.Show do
               <p class={"text-2xl font-bold #{if @account.is_excluded, do: "text-gray-500", else: "text-gray-900"}"}>
                 {FormatHelpers.format_currency(@account.balance)}
               </p>
-              <%= if @account.is_excluded do %>
-                <p class="text-xs text-gray-400 mt-1">Excluded from calculations</p>
-              <% end %>
+              <div class="text-xs text-gray-500 mt-1">
+                <%= if @account.is_excluded do %>
+                  <p>Excluded from calculations</p>
+                <% end %>
+                <%= if @account.balance_updated_at do %>
+                  <p>Balance updated {FormatHelpers.format_relative_time(@account.balance_updated_at)}</p>
+                <% else %>
+                  <p class="text-yellow-600">Balance not yet updated - Phase 1 manual entry required</p>
+                <% end %>
+              </div>
             </div>
           </div>
         </div>

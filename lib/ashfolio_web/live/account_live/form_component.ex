@@ -2,6 +2,7 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
   use AshfolioWeb, :live_component
 
   alias Ashfolio.Portfolio.Account
+  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def render(assigns) do
@@ -34,7 +35,27 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
         >
           <.input field={@form[:name]} type="text" label="Account Name" required />
           <.input field={@form[:platform]} type="text" label="Platform" placeholder="e.g., Schwab, Fidelity" />
-          <.input field={@form[:balance]} type="number" label="Current Balance" step="0.01" />
+
+          <div class="space-y-2">
+            <.input
+              field={@form[:balance]}
+              type="number"
+              label="Current Balance"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+            />
+            <p class="text-sm text-gray-600">
+              <span class="font-medium">Phase 1 Manual Entry:</span>
+              Enter your current account balance manually. Future versions will calculate this automatically from transactions.
+            </p>
+            <%= if @action == :edit and @account.balance_updated_at do %>
+              <p class="text-xs text-gray-500">
+                Balance last updated: <%= FormatHelpers.format_relative_time(@account.balance_updated_at) %>
+              </p>
+            <% end %>
+          </div>
+
           <.input field={@form[:is_excluded]} type="checkbox" label="Exclude from portfolio calculations" />
 
           <:actions>
@@ -65,6 +86,8 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
 
   @impl true
   def handle_event("validate", %{"form" => form_params}, socket) do
+    # Validate balance format and precision
+    form_params = validate_balance_input(form_params)
     form = AshPhoenix.Form.validate(socket.assigns.form, form_params)
     {:noreply, assign(socket, form: form)}
   end
@@ -85,7 +108,12 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
 
     case AshPhoenix.Form.submit(socket.assigns.form, params: form_params) do
       {:ok, account} ->
-        notify_parent({:saved, account})
+        success_message = if Map.get(form_params, "balance") && form_params["balance"] != "" do
+          "Account created successfully with balance of #{FormatHelpers.format_currency(account.balance)}"
+        else
+          "Account created successfully"
+        end
+        notify_parent({:saved, account, success_message})
         {:noreply, socket}
 
       {:error, form} ->
@@ -94,13 +122,41 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
   end
 
   defp save_account(socket, :edit, form_params) do
+    old_balance = socket.assigns.account.balance
+
     case AshPhoenix.Form.submit(socket.assigns.form, params: form_params) do
       {:ok, account} ->
-        notify_parent({:saved, account})
+        success_message = if Map.get(form_params, "balance") &&
+                             form_params["balance"] != "" &&
+                             !Decimal.equal?(old_balance, account.balance) do
+          "Account updated successfully. Balance changed to #{FormatHelpers.format_currency(account.balance)}"
+        else
+          "Account updated successfully"
+        end
+        notify_parent({:saved, account, success_message})
         {:noreply, socket}
 
       {:error, form} ->
         {:noreply, assign(socket, form: form)}
+    end
+  end
+
+
+
+  defp validate_balance_input(form_params) do
+    case Map.get(form_params, "balance") do
+      nil -> form_params
+      "" -> form_params
+      balance_string ->
+        # Ensure balance has proper decimal formatting
+        case Float.parse(balance_string) do
+          {balance_float, ""} ->
+            # Format to 2 decimal places
+            formatted_balance = :erlang.float_to_binary(balance_float, decimals: 2)
+            Map.put(form_params, "balance", formatted_balance)
+          _ ->
+            form_params
+        end
     end
   end
 
