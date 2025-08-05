@@ -8,6 +8,8 @@ defmodule AshfolioWeb.DashboardLive do
 
   @impl true
   def mount(_params, _session, socket) do
+    if connected?(socket), do: Ashfolio.PubSub.subscribe("accounts")
+
     socket =
       socket
       |> assign_current_page(:dashboard)
@@ -75,6 +77,21 @@ defmodule AshfolioWeb.DashboardLive do
       |> assign(:holdings, holdings)
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:account_saved, _account}, socket) do
+    {:noreply, load_portfolio_data(socket)}
+  end
+
+  @impl true
+  def handle_info({:account_deleted, _account_id}, socket) do
+    {:noreply, load_portfolio_data(socket)}
+  end
+
+  @impl true
+  def handle_info({:account_updated, _account}, socket) do
+    {:noreply, load_portfolio_data(socket)}
   end
 
   @impl true

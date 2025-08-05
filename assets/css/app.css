@@ -153,3 +153,25 @@
     @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
   }
 }
+
+/* Responsive utilities */
+@layer utilities {
+  .account-actions {
+    @apply flex items-center justify-end space-x-2;
+  }
+
+  @screen sm {
+    .account-actions {
+      @apply flex-row;
+    }
+  }
+
+  @screen max-sm {
+    .account-actions {
+      @apply flex-col items-stretch space-y-2 space-x-0;
+    }
+    .account-actions .btn {
+      @apply w-full;
+    }
+  }
+}

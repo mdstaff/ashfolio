@@ -74,6 +74,16 @@ defmodule Ashfolio.Portfolio.Account do
     validate compare(:balance, greater_than_or_equal_to: 0),
       message: "Account balance cannot be negative"
 
+    # Validate name length
+    validate length(:name, min: 2, max: 100)
+
+    # Validate platform length
+    validate length(:platform, max: 50)
+
+    # Validate name format
+    validate match(:name, ~r/^[a-zA-Z0-9\s\-_]+$/),
+      message: "Account name can only contain letters, numbers, spaces, hyphens, and underscores"
+
 
   end
 
@@ -149,5 +159,11 @@ defmodule Ashfolio.Portfolio.Account do
     define :toggle_exclusion, action: :toggle_exclusion
     define :update_balance, action: :update_balance
     define :destroy, action: :destroy
+
+    def get_by_name_for_user(user_id, name) do
+      Ashfolio.Portfolio.Account
+      |> Ash.Query.filter(user_id: user_id, name: name)
+      |> Ashfolio.Portfolio.first()
+    end
   end
 end

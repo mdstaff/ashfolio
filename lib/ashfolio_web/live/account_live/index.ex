@@ -49,20 +49,26 @@ defmodule AshfolioWeb.AccountLive.Index do
 
   @impl true
   def handle_event("delete_account", %{"id" => id}, socket) do
+    # Set loading state for visual feedback
+    socket = assign(socket, :deleting_account_id, id)
+
     # Check if account has any transactions before allowing deletion
     case Transaction.by_account!(id) do
       [] ->
         # Safe to delete - no transactions
         case Account.destroy(id) do
           :ok ->
+            Ashfolio.PubSub.broadcast!("accounts", {:account_deleted, id})
             {:noreply,
              socket
              |> ErrorHelpers.put_success_flash("Account deleted successfully")
-             |> assign(:accounts, list_accounts(socket.assigns.user_id))}
+             |> assign(:accounts, list_accounts(socket.assigns.user_id))
+             |> assign(:deleting_account_id, nil)}
 
           {:error, reason} ->
             {:noreply,
              socket
+             |> assign(:deleting_account_id, nil)
              |> ErrorHelpers.put_error_flash(reason, "Failed to delete account")}
         end
 
@@ -70,6 +76,7 @@ defmodule AshfolioWeb.AccountLive.Index do
         # Has transactions - prevent deletion
         {:noreply,
          socket
+         |> assign(:deleting_account_id, nil)
          |> ErrorHelpers.put_error_flash(
            "Cannot delete account with transactions. Consider excluding it instead.",
            "Account has associated transactions"
@@ -79,24 +86,32 @@ defmodule AshfolioWeb.AccountLive.Index do
 
   @impl true
   def handle_event("toggle_exclusion", %{"id" => id}, socket) do
-    account = Enum.find(socket.assigns.accounts, &(&1.id == id))
+    # Optimistically update the UI
+    accounts = socket.assigns.accounts
+    account_index = Enum.find_index(accounts, &(&1.id == id))
+    account = Enum.at(accounts, account_index)
+    updated_account = %{account | is_excluded: !account.is_excluded}
+    updated_accounts = List.replace_at(accounts, account_index, updated_account)
 
-    # Set loading state for visual feedback
-    socket = assign(socket, :toggling_account_id, id)
+    socket = 
+      socket
+      |> assign(:accounts, updated_accounts)
+      |> assign(:toggling_account_id, id)
 
     case Account.toggle_exclusion(account, %{is_excluded: !account.is_excluded}) do
       {:ok, _updated_account} ->
+        Ashfolio.PubSub.broadcast!("accounts", {:account_updated, updated_account})
         {:noreply,
          socket
-         |> ErrorHelpers.put_success_flash("Account exclusion updated successfully")
-         |> assign(:accounts, list_accounts(socket.assigns.user_id))
          |> assign(:toggling_account_id, nil)}
 
       {:error, reason} ->
+        # Revert the optimistic update on failure
         {:noreply,
          socket
-         |> ErrorHelpers.put_error_flash(reason, "Failed to update account exclusion")
-         |> assign(:toggling_account_id, nil)}
+         |> assign(:accounts, accounts)
+         |> assign(:toggling_account_id, nil)
+         |> ErrorHelpers.put_error_flash(reason, "Failed to update account exclusion")}
     end
   end
 
@@ -110,7 +125,8 @@ defmodule AshfolioWeb.AccountLive.Index do
   end
 
   @impl true
-  def handle_info({FormComponent, {:saved, _account, message}}, socket) do
+  def handle_info({FormComponent, {:saved, account, message}}, socket) do
+    Ashfolio.PubSub.broadcast!("accounts", {:account_saved, account})
     {:noreply,
      socket
      |> ErrorHelpers.put_success_flash(message)
@@ -225,12 +241,13 @@ defmodule AshfolioWeb.AccountLive.Index do
               </:col>
 
               <:col :let={account} label="Actions" class="text-right">
-                <div class="flex justify-end space-x-1 sm:space-x-2">
+                <div class="account-actions">
                   <!-- View Button -->
                   <.link
                     navigate={~p"/accounts/#{account.id}"}
                     class="btn-secondary text-xs sm:text-sm px-2 sm:px-3 py-1 inline-flex items-center"
                     title="View account details"
+                    aria-label={"View account details for #{account.name}"}
                   >
                     <svg class="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -245,6 +262,7 @@ defmodule AshfolioWeb.AccountLive.Index do
                     phx-click="edit_account"
                     phx-value-id={account.id}
                     title="Edit account"
+                    aria-label={"Edit account #{account.name}"}
                   >
                     <svg class="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -259,6 +277,7 @@ defmodule AshfolioWeb.AccountLive.Index do
                     phx-value-id={account.id}
                     disabled={@toggling_account_id == account.id}
                     title={if account.is_excluded, do: "Include in calculations", else: "Exclude from calculations"}
+                    aria-label={"Toggle exclusion for #{account.name}"}
                   >
                     <%= if @toggling_account_id == account.id do %>
                       <!-- Loading spinner -->
@@ -289,7 +308,22 @@ defmodule AshfolioWeb.AccountLive.Index do
                     phx-value-id={account.id}
                     data-confirm="Are you sure you want to delete this account? This action cannot be undone."
                     title="Delete account"
+                    aria-label={"Delete account #{account.name}"}
+                    disabled={@deleting_account_id == account.id}
                   >
+                    <%= if @deleting_account_id == account.id do %>
+                      <svg class="animate-spin w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span class="hidden sm:inline">Deleting...</span>
+                    <% else %>
+                      <svg class="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      <span class="hidden sm:inline">Delete</span>
+                    <% end %>
+                  </.button>
                     <svg class="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>

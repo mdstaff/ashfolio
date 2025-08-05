@@ -50,4 +50,9 @@ defmodule AshfolioWeb.Endpoint do
   plug Plug.Head
   plug Plug.Session, @session_options
   plug AshfolioWeb.Router
+
+  @doc """
+  Phoenix PubSub server configuration.
+  """
+  def pubsub_server, do: Ashfolio.PubSub
 end
