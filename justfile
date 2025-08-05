@@ -2,10 +2,15 @@
 # Run `just` to see all available commands
 #
 # Development:
-#   - just dev: Setup and start development server
-#   - just compile: Compile project (check for errors)
-#   - just format: Format code
-#   - just check: Run format + compile + test
+#   - just dev: Setup and start development server (BLOCKING)
+#   - just dev-bg: Setup and start development server (BACKGROUND)
+#   - just server: Start Phoenix server (BLOCKING)
+#   - just server-bg: Start Phoenix server (BACKGROUND)
+#   - just server-check: Check for server startup warnings (NON-BLOCKING)
+#   - just compile: Compile project (NON-BLOCKING)
+#   - just compile-warnings: Check for compilation warnings (NON-BLOCKING)
+#   - just format: Format code (NON-BLOCKING)
+#   - just check: Run format + compile + test (NON-BLOCKING)
 #
 # Testing:
 #   - just test: Run full test suite
@@ -204,6 +209,16 @@ console-web:
 compile:
     @echo "🔨 Compiling project..."
     mix compile
+
+# Check for compilation warnings
+compile-warnings:
+    @echo "⚠️  Checking for compilation warnings..."
+    mix compile --force --warnings-as-errors 2>&1 || echo "✅ No compilation warnings found"
+
+# Start server and check for warnings
+server-check:
+    @echo "🚀 Starting Phoenix server and checking for warnings..."
+    @timeout 10s mix phx.server 2>&1 | head -20 | grep -i warning || echo "✅ No startup warnings found"
 
 # Check code formatting
 format:

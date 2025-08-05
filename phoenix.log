@@ -1,26 +1,449 @@
 [info] Initialized ETS price cache: ashfolio_price_cache
+[info] PriceManager started
 [info] Running AshfolioWeb.Endpoint with Bandit 1.7.0 at 127.0.0.1:4000 (http)
 [info] Access AshfolioWeb.Endpoint at http://localhost:4000
 [watch] build finished, watching for changes...
+[info] CONNECTED TO Phoenix.LiveView.Socket in 16µs
+  Transport: :longpoll
+  Serializer: Phoenix.Socket.V2.JSONSerializer
+  Parameters: %{"_csrf_token" => "JF41f3gwFAdGF1E2LHQ5ajotegs-PwshH1j5OJcJqP2wDGoXYUBlkMJg", "_live_referer" => "undefined", "_mount_attempts" => "0", "_mounts" => "0", "_track_static" => %{"0" => "http://127.0.0.1:4000/assets/app.css", "1" => "http://127.0.0.1:4000/assets/app.js", "2" => "http://127.0.0.1:4000/assets/app.css", "3" => "http://127.0.0.1:4000/assets/app.js"}, "vsn" => "2.0.0"}
 
 Rebuilding...
 
-Done in 186ms.
-[info] GET /
-[debug] Processing with AshfolioWeb.PageController.home/2
+Done in 198ms.
+[debug] MOUNT AshfolioWeb.DashboardLive
   Parameters: %{}
-  Pipelines: [:browser]
-[info] Sent 200 in 59ms
-[info] GET /
-[debug] Processing with AshfolioWeb.PageController.home/2
+  Session: %{"_csrf_token" => "lo_J7zwM7GcAh3V2cx8gUrAF"}
+[debug] Loading portfolio data for dashboard
+[debug] QUERY OK source="users" db=0.6ms decode=0.8ms idle=1408.9ms
+SELECT u0."id", u0."name", u0."currency", u0."locale", u0."updated_at", u0."inserted_at" FROM "users" AS u0 LIMIT ? [1]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] Calculating total return for user: c010022e-4715-43b2-86b0-94bb21861d16
+[debug] Calculating portfolio value for user: c010022e-4715-43b2-86b0-94bb21861d16
+[debug] QUERY OK source="accounts" db=0.0ms idle=1455.6ms
+SELECT a0."id", a0."name", a0."balance", a0."currency", a0."updated_at", a0."inserted_at", a0."user_id", a0."is_excluded", a0."platform" FROM "accounts" AS a0 WHERE (CAST(a0."user_id" AS TEXT) = CAST(? AS TEXT)) ["c010022e-4715-43b2-86b0-94bb21861d16"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.1ms idle=1467.6ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["35ab268b-22d5-4f50-974f-4378b268d707"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=1471.5ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["8baff5f1-851f-4f43-8995-c710010595a9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=1471.9ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["5cfbd662-5f72-4dc6-8a47-7b1f9f5385e9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=1480.5ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["20a894f5-9cea-473c-8234-08cec3499859"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=1482.6ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["24ce9369-b222-4029-a781-b91c6123ff48"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=1482.8ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["4fa426d5-aefa-44e4-af15-610f59f88cd4"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=1483.0ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["83286fc9-e831-48c9-aae5-3da631a39673"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=1483.3ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["b996055a-839c-47ba-90b9-47be97596856"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=73.9ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["eb9a91c5-eb6e-4fcb-a6a5-5f954a1ecbdd"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] Total portfolio value calculated: 64500.0
+[debug] QUERY OK source="accounts" db=0.0ms idle=29.0ms
+SELECT a0."id", a0."name", a0."balance", a0."currency", a0."updated_at", a0."inserted_at", a0."user_id", a0."is_excluded", a0."platform" FROM "accounts" AS a0 WHERE (CAST(a0."user_id" AS TEXT) = CAST(? AS TEXT)) ["c010022e-4715-43b2-86b0-94bb21861d16"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=17.2ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["35ab268b-22d5-4f50-974f-4378b268d707"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=13.6ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["8baff5f1-851f-4f43-8995-c710010595a9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=13.6ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["5cfbd662-5f72-4dc6-8a47-7b1f9f5385e9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=5.1ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["20a894f5-9cea-473c-8234-08cec3499859"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.2ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["24ce9369-b222-4029-a781-b91c6123ff48"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.2ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["4fa426d5-aefa-44e4-af15-610f59f88cd4"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.1ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["83286fc9-e831-48c9-aae5-3da631a39673"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.0ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["b996055a-839c-47ba-90b9-47be97596856"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.0ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["eb9a91c5-eb6e-4fcb-a6a5-5f954a1ecbdd"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] Total return calculated: %{cost_basis: Decimal.new("61750"), total_value: Decimal.new("64500.0"), dollar_return: Decimal.new("2750.0"), return_percentage: Decimal.new("4.453441295546558704453441296")}
+[debug] Getting holdings summary for user: c010022e-4715-43b2-86b0-94bb21861d16
+[debug] Calculating holding values for user: c010022e-4715-43b2-86b0-94bb21861d16
+[debug] QUERY OK source="accounts" db=0.0ms idle=4.5ms
+SELECT a0."id", a0."name", a0."balance", a0."currency", a0."updated_at", a0."inserted_at", a0."user_id", a0."is_excluded", a0."platform" FROM "accounts" AS a0 WHERE (CAST(a0."user_id" AS TEXT) = CAST(? AS TEXT)) ["c010022e-4715-43b2-86b0-94bb21861d16"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=4.5ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["35ab268b-22d5-4f50-974f-4378b268d707"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=4.4ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["8baff5f1-851f-4f43-8995-c710010595a9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=4.4ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["5cfbd662-5f72-4dc6-8a47-7b1f9f5385e9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=4.4ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["20a894f5-9cea-473c-8234-08cec3499859"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=4.4ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["24ce9369-b222-4029-a781-b91c6123ff48"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=4.4ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["4fa426d5-aefa-44e4-af15-610f59f88cd4"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=4.4ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["83286fc9-e831-48c9-aae5-3da631a39673"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=4.4ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["b996055a-839c-47ba-90b9-47be97596856"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=4.4ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["eb9a91c5-eb6e-4fcb-a6a5-5f954a1ecbdd"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] Calculated 6 holdings with values
+[debug] Aggregating portfolio value for user: c010022e-4715-43b2-86b0-94bb21861d16
+[debug] Calculating holding values for user: c010022e-4715-43b2-86b0-94bb21861d16
+[debug] QUERY OK source="accounts" db=0.0ms idle=1.9ms
+SELECT a0."id", a0."name", a0."balance", a0."currency", a0."updated_at", a0."inserted_at", a0."user_id", a0."is_excluded", a0."platform" FROM "accounts" AS a0 WHERE (CAST(a0."user_id" AS TEXT) = CAST(? AS TEXT)) ["c010022e-4715-43b2-86b0-94bb21861d16"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=1.8ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["35ab268b-22d5-4f50-974f-4378b268d707"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=1.9ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["8baff5f1-851f-4f43-8995-c710010595a9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=1.8ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["5cfbd662-5f72-4dc6-8a47-7b1f9f5385e9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=1.8ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["20a894f5-9cea-473c-8234-08cec3499859"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=1.8ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["24ce9369-b222-4029-a781-b91c6123ff48"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=1.7ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["4fa426d5-aefa-44e4-af15-610f59f88cd4"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=1.7ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["83286fc9-e831-48c9-aae5-3da631a39673"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=1.7ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["b996055a-839c-47ba-90b9-47be97596856"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=1.7ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["eb9a91c5-eb6e-4fcb-a6a5-5f954a1ecbdd"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] Calculated 6 holdings with values
+[debug] Portfolio total value: 64500.0
+[debug] Holdings summary calculated: 6 holdings, total value: 64500.0
+[debug] Replied in 163ms
+[info] CONNECTED TO Phoenix.LiveView.Socket in 22µs
+  Transport: :longpoll
+  Serializer: Phoenix.Socket.V2.JSONSerializer
+  Parameters: %{"_csrf_token" => "JF41f3gwFAdGF1E2LHQ5ajotegs-PwshH1j5OJcJqP2wDGoXYUBlkMJg", "_live_referer" => "undefined", "_mount_attempts" => "0", "_mounts" => "0", "_track_static" => %{"0" => "http://127.0.0.1:4000/assets/app.css", "1" => "http://127.0.0.1:4000/assets/app.js", "2" => "http://127.0.0.1:4000/assets/app.css", "3" => "http://127.0.0.1:4000/assets/app.js"}, "vsn" => "2.0.0"}
+[debug] MOUNT AshfolioWeb.DashboardLive
   Parameters: %{}
-  Pipelines: [:browser]
-[info] Sent 200 in 395µs
-[info] GET /
-[debug] Processing with AshfolioWeb.PageController.home/2
+  Session: %{"_csrf_token" => "lo_J7zwM7GcAh3V2cx8gUrAF"}
+[debug] Loading portfolio data for dashboard
+[debug] QUERY OK source="users" db=0.1ms idle=675.1ms
+SELECT u0."id", u0."name", u0."currency", u0."locale", u0."updated_at", u0."inserted_at" FROM "users" AS u0 LIMIT ? [1]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] Calculating total return for user: c010022e-4715-43b2-86b0-94bb21861d16
+[debug] Calculating portfolio value for user: c010022e-4715-43b2-86b0-94bb21861d16
+[debug] QUERY OK source="accounts" db=0.0ms idle=675.7ms
+SELECT a0."id", a0."name", a0."balance", a0."currency", a0."updated_at", a0."inserted_at", a0."user_id", a0."is_excluded", a0."platform" FROM "accounts" AS a0 WHERE (CAST(a0."user_id" AS TEXT) = CAST(? AS TEXT)) ["c010022e-4715-43b2-86b0-94bb21861d16"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.1ms idle=676.0ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["35ab268b-22d5-4f50-974f-4378b268d707"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=676.5ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["8baff5f1-851f-4f43-8995-c710010595a9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=676.8ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["5cfbd662-5f72-4dc6-8a47-7b1f9f5385e9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=677.1ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["20a894f5-9cea-473c-8234-08cec3499859"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=677.6ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["24ce9369-b222-4029-a781-b91c6123ff48"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=678.0ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["4fa426d5-aefa-44e4-af15-610f59f88cd4"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=678.3ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["83286fc9-e831-48c9-aae5-3da631a39673"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=678.6ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["b996055a-839c-47ba-90b9-47be97596856"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.7ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["eb9a91c5-eb6e-4fcb-a6a5-5f954a1ecbdd"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] Total portfolio value calculated: 64500.0
+[debug] QUERY OK source="accounts" db=0.0ms idle=3.4ms
+SELECT a0."id", a0."name", a0."balance", a0."currency", a0."updated_at", a0."inserted_at", a0."user_id", a0."is_excluded", a0."platform" FROM "accounts" AS a0 WHERE (CAST(a0."user_id" AS TEXT) = CAST(? AS TEXT)) ["c010022e-4715-43b2-86b0-94bb21861d16"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=3.4ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["35ab268b-22d5-4f50-974f-4378b268d707"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=3.3ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["8baff5f1-851f-4f43-8995-c710010595a9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=3.3ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["5cfbd662-5f72-4dc6-8a47-7b1f9f5385e9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.3ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["20a894f5-9cea-473c-8234-08cec3499859"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.0ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["24ce9369-b222-4029-a781-b91c6123ff48"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=2.9ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["4fa426d5-aefa-44e4-af15-610f59f88cd4"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.0ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["83286fc9-e831-48c9-aae5-3da631a39673"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=2.9ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["b996055a-839c-47ba-90b9-47be97596856"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=2.9ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["eb9a91c5-eb6e-4fcb-a6a5-5f954a1ecbdd"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] Total return calculated: %{cost_basis: Decimal.new("61750"), total_value: Decimal.new("64500.0"), dollar_return: Decimal.new("2750.0"), return_percentage: Decimal.new("4.453441295546558704453441296")}
+[debug] Getting holdings summary for user: c010022e-4715-43b2-86b0-94bb21861d16
+[debug] Calculating holding values for user: c010022e-4715-43b2-86b0-94bb21861d16
+[debug] QUERY OK source="accounts" db=0.0ms idle=3.1ms
+SELECT a0."id", a0."name", a0."balance", a0."currency", a0."updated_at", a0."inserted_at", a0."user_id", a0."is_excluded", a0."platform" FROM "accounts" AS a0 WHERE (CAST(a0."user_id" AS TEXT) = CAST(? AS TEXT)) ["c010022e-4715-43b2-86b0-94bb21861d16"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=3.0ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["35ab268b-22d5-4f50-974f-4378b268d707"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=3.0ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["8baff5f1-851f-4f43-8995-c710010595a9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=3.0ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["5cfbd662-5f72-4dc6-8a47-7b1f9f5385e9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=2.9ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["20a894f5-9cea-473c-8234-08cec3499859"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.0ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["24ce9369-b222-4029-a781-b91c6123ff48"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.0ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["4fa426d5-aefa-44e4-af15-610f59f88cd4"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=2.9ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["83286fc9-e831-48c9-aae5-3da631a39673"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.0ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["b996055a-839c-47ba-90b9-47be97596856"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=2.9ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["eb9a91c5-eb6e-4fcb-a6a5-5f954a1ecbdd"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] Calculated 6 holdings with values
+[debug] Aggregating portfolio value for user: c010022e-4715-43b2-86b0-94bb21861d16
+[debug] Calculating holding values for user: c010022e-4715-43b2-86b0-94bb21861d16
+[debug] QUERY OK source="accounts" db=0.0ms idle=2.8ms
+SELECT a0."id", a0."name", a0."balance", a0."currency", a0."updated_at", a0."inserted_at", a0."user_id", a0."is_excluded", a0."platform" FROM "accounts" AS a0 WHERE (CAST(a0."user_id" AS TEXT) = CAST(? AS TEXT)) ["c010022e-4715-43b2-86b0-94bb21861d16"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=2.8ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["35ab268b-22d5-4f50-974f-4378b268d707"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=2.8ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["8baff5f1-851f-4f43-8995-c710010595a9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=2.8ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["5cfbd662-5f72-4dc6-8a47-7b1f9f5385e9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=2.8ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["20a894f5-9cea-473c-8234-08cec3499859"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=2.7ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["24ce9369-b222-4029-a781-b91c6123ff48"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=2.6ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["4fa426d5-aefa-44e4-af15-610f59f88cd4"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=2.5ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["83286fc9-e831-48c9-aae5-3da631a39673"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=2.5ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["b996055a-839c-47ba-90b9-47be97596856"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=2.4ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["eb9a91c5-eb6e-4fcb-a6a5-5f954a1ecbdd"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] Calculated 6 holdings with values
+[debug] Portfolio total value: 64500.0
+[debug] Holdings summary calculated: 6 holdings, total value: 64500.0
+[debug] Replied in 13ms
+[info] CONNECTED TO Phoenix.LiveView.Socket in 164µs
+  Transport: :longpoll
+  Serializer: Phoenix.Socket.V2.JSONSerializer
+  Parameters: %{"_csrf_token" => "JF41f3gwFAdGF1E2LHQ5ajotegs-PwshH1j5OJcJqP2wDGoXYUBlkMJg", "_live_referer" => "undefined", "_mount_attempts" => "0", "_mounts" => "0", "_track_static" => %{"0" => "http://127.0.0.1:4000/assets/app.css", "1" => "http://127.0.0.1:4000/assets/app.js", "2" => "http://127.0.0.1:4000/assets/app.css", "3" => "http://127.0.0.1:4000/assets/app.js"}, "token" => "SFMyNTY.g2gDaAR3AnYxbQAAABY2NDdjY3BsOFFxNkxCbjNyRCtEZytRWHcNbm9ub2RlQG5vaG9zdAAAAqkAAAAAAAAAAG0AAAAscGh4OmxwOmtheC85NXg5OGhRWWR0Nzk1U2QwUVE9PTE3NTQzNjU0NjMyNzluBgD6ilR4mAFiABJ1AA.4epYKttgFyCRz9o3fmTWCBKnOrA59g_2dKqfGUEk5tM", "vsn" => "2.0.0"}
+[info] CONNECTED TO Phoenix.LiveView.Socket in 52µs
+  Transport: :longpoll
+  Serializer: Phoenix.Socket.V2.JSONSerializer
+  Parameters: %{"_csrf_token" => "JF41f3gwFAdGF1E2LHQ5ajotegs-PwshH1j5OJcJqP2wDGoXYUBlkMJg", "_live_referer" => "undefined", "_mount_attempts" => "0", "_mounts" => "1", "_track_static" => %{"0" => "http://127.0.0.1:4000/assets/app.css", "1" => "http://127.0.0.1:4000/assets/app.js", "2" => "http://127.0.0.1:4000/assets/app.css", "3" => "http://127.0.0.1:4000/assets/app.js"}, "vsn" => "2.0.0"}
+[debug] MOUNT AshfolioWeb.DashboardLive
   Parameters: %{}
-  Pipelines: [:browser]
-[info] Sent 200 in 383µs
+  Session: %{"_csrf_token" => "lo_J7zwM7GcAh3V2cx8gUrAF"}
+[debug] Loading portfolio data for dashboard
+[debug] QUERY OK source="users" db=0.6ms idle=5.5ms
+SELECT u0."id", u0."name", u0."currency", u0."locale", u0."updated_at", u0."inserted_at" FROM "users" AS u0 LIMIT ? [1]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] Calculating total return for user: c010022e-4715-43b2-86b0-94bb21861d16
+[debug] Calculating portfolio value for user: c010022e-4715-43b2-86b0-94bb21861d16
+[debug] QUERY OK source="accounts" db=0.2ms idle=8.0ms
+SELECT a0."id", a0."name", a0."balance", a0."currency", a0."updated_at", a0."inserted_at", a0."user_id", a0."is_excluded", a0."platform" FROM "accounts" AS a0 WHERE (CAST(a0."user_id" AS TEXT) = CAST(? AS TEXT)) ["c010022e-4715-43b2-86b0-94bb21861d16"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.1ms idle=9.0ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["35ab268b-22d5-4f50-974f-4378b268d707"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.1ms idle=9.7ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["8baff5f1-851f-4f43-8995-c710010595a9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.1ms idle=10.3ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["5cfbd662-5f72-4dc6-8a47-7b1f9f5385e9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.1ms idle=11.2ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["20a894f5-9cea-473c-8234-08cec3499859"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.1ms idle=11.7ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["24ce9369-b222-4029-a781-b91c6123ff48"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.1ms idle=12.2ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["4fa426d5-aefa-44e4-af15-610f59f88cd4"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.1ms idle=12.8ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["83286fc9-e831-48c9-aae5-3da631a39673"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.1ms idle=13.2ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["b996055a-839c-47ba-90b9-47be97596856"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.1ms idle=7.4ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["eb9a91c5-eb6e-4fcb-a6a5-5f954a1ecbdd"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] Total portfolio value calculated: 64500.0
+[debug] QUERY OK source="accounts" db=0.1ms idle=6.5ms
+SELECT a0."id", a0."name", a0."balance", a0."currency", a0."updated_at", a0."inserted_at", a0."user_id", a0."is_excluded", a0."platform" FROM "accounts" AS a0 WHERE (CAST(a0."user_id" AS TEXT) = CAST(? AS TEXT)) ["c010022e-4715-43b2-86b0-94bb21861d16"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.1ms idle=6.2ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["35ab268b-22d5-4f50-974f-4378b268d707"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=6.0ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["8baff5f1-851f-4f43-8995-c710010595a9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.1ms idle=5.7ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["5cfbd662-5f72-4dc6-8a47-7b1f9f5385e9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=5.3ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["20a894f5-9cea-473c-8234-08cec3499859"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=5.1ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["24ce9369-b222-4029-a781-b91c6123ff48"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=4.9ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["4fa426d5-aefa-44e4-af15-610f59f88cd4"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=4.8ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["83286fc9-e831-48c9-aae5-3da631a39673"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=4.6ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["b996055a-839c-47ba-90b9-47be97596856"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=4.5ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["eb9a91c5-eb6e-4fcb-a6a5-5f954a1ecbdd"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] Total return calculated: %{cost_basis: Decimal.new("61750"), total_value: Decimal.new("64500.0"), dollar_return: Decimal.new("2750.0"), return_percentage: Decimal.new("4.453441295546558704453441296")}
+[debug] Getting holdings summary for user: c010022e-4715-43b2-86b0-94bb21861d16
+[debug] Calculating holding values for user: c010022e-4715-43b2-86b0-94bb21861d16
+[debug] QUERY OK source="accounts" db=0.0ms idle=4.0ms
+SELECT a0."id", a0."name", a0."balance", a0."currency", a0."updated_at", a0."inserted_at", a0."user_id", a0."is_excluded", a0."platform" FROM "accounts" AS a0 WHERE (CAST(a0."user_id" AS TEXT) = CAST(? AS TEXT)) ["c010022e-4715-43b2-86b0-94bb21861d16"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.1ms idle=3.7ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["35ab268b-22d5-4f50-974f-4378b268d707"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=3.9ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["8baff5f1-851f-4f43-8995-c710010595a9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.1ms idle=3.9ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["5cfbd662-5f72-4dc6-8a47-7b1f9f5385e9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.9ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["20a894f5-9cea-473c-8234-08cec3499859"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.8ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["24ce9369-b222-4029-a781-b91c6123ff48"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.8ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["4fa426d5-aefa-44e4-af15-610f59f88cd4"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.8ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["83286fc9-e831-48c9-aae5-3da631a39673"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.8ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["b996055a-839c-47ba-90b9-47be97596856"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.7ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["eb9a91c5-eb6e-4fcb-a6a5-5f954a1ecbdd"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] Calculated 6 holdings with values
+[debug] Aggregating portfolio value for user: c010022e-4715-43b2-86b0-94bb21861d16
+[debug] Calculating holding values for user: c010022e-4715-43b2-86b0-94bb21861d16
+[debug] QUERY OK source="accounts" db=0.0ms idle=3.7ms
+SELECT a0."id", a0."name", a0."balance", a0."currency", a0."updated_at", a0."inserted_at", a0."user_id", a0."is_excluded", a0."platform" FROM "accounts" AS a0 WHERE (CAST(a0."user_id" AS TEXT) = CAST(? AS TEXT)) ["c010022e-4715-43b2-86b0-94bb21861d16"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=3.6ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["35ab268b-22d5-4f50-974f-4378b268d707"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=3.4ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["8baff5f1-851f-4f43-8995-c710010595a9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="transactions" db=0.0ms idle=3.2ms
+SELECT t0."id", t0."type", t0."date", t0."price", t0."updated_at", t0."quantity", t0."inserted_at", t0."symbol_id", t0."total_amount", t0."account_id", t0."fee", t0."notes" FROM "transactions" AS t0 WHERE (CAST(t0."account_id" AS TEXT) = CAST(? AS TEXT)) ["5cfbd662-5f72-4dc6-8a47-7b1f9f5385e9"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.2ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["20a894f5-9cea-473c-8234-08cec3499859"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.2ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["24ce9369-b222-4029-a781-b91c6123ff48"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.1ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["4fa426d5-aefa-44e4-af15-610f59f88cd4"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.1ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["83286fc9-e831-48c9-aae5-3da631a39673"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.1ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["b996055a-839c-47ba-90b9-47be97596856"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] QUERY OK source="symbols" db=0.0ms idle=3.1ms
+SELECT s0."id", s0."name", s0."symbol", s0."currency", s0."updated_at", s0."current_price", s0."price_updated_at", s0."inserted_at", s0."asset_class", s0."countries", s0."data_source", s0."isin", s0."sectors" FROM "symbols" AS s0 WHERE (CAST(s0."id" AS TEXT) = CAST(? AS TEXT)) ["eb9a91c5-eb6e-4fcb-a6a5-5f954a1ecbdd"]
+[90m↳ AshSqlite.DataLayer.run_query/2, at: lib/data_layer.ex:604[0m
+[debug] Calculated 6 holdings with values
+[debug] Portfolio total value: 64500.0
+[debug] Holdings summary calculated: 6 holdings, total value: 64500.0
+[debug] Replied in 23ms
 [notice] SIGTERM received - shutting down
 
+[info] DRAINING 1 of 1 total connection(s) for socket Phoenix.LiveView.Socket every 2000ms - round 1 of 1
 [info] DRAINING 1 of 1 total connection(s) for socket Phoenix.LiveReloader.Socket every 2000ms - round 1 of 1
