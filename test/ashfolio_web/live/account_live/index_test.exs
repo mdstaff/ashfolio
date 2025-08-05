@@ -130,6 +130,140 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
     end
   end
 
+  describe "account editing" do
+    test "opens edit form with pre-populated data", %{conn: conn, account1: account1} do
+      {:ok, index_live, _html} = live(conn, ~p"/accounts")
+
+      # Click edit button
+      html = index_live
+             |> element("button[phx-click='edit_account'][phx-value-id='#{account1.id}']")
+             |> render_click()
+
+      # Should show edit form with pre-populated data
+      assert html =~ "Edit Account"
+      assert html =~ "Update Account"
+
+      # Check that form fields are pre-populated with account data
+      assert html =~ ~s(value="#{account1.name}")
+      assert html =~ ~s(value="#{account1.platform}")
+      assert html =~ ~s(value="#{account1.balance}")
+    end
+
+    test "can cancel edit form", %{conn: conn, account1: account1} do
+      {:ok, index_live, _html} = live(conn, ~p"/accounts")
+
+      # Open edit form
+      index_live
+      |> element("button[phx-click='edit_account'][phx-value-id='#{account1.id}']")
+      |> render_click()
+
+      # Cancel form
+      index_live
+      |> element("button[phx-click='cancel']")
+      |> render_click()
+
+      # Get the updated HTML after the cancel action
+      html = render(index_live)
+
+      # Form should be closed
+      refute html =~ "Edit Account"
+      refute html =~ "Update Account"
+      refute html =~ "Account Name"
+    end
+
+    test "validates edit form fields", %{conn: conn, account1: account1} do
+      {:ok, index_live, _html} = live(conn, ~p"/accounts")
+
+      # Open edit form
+      index_live
+      |> element("button[phx-click='edit_account'][phx-value-id='#{account1.id}']")
+      |> render_click()
+
+      # Try to submit form with empty name
+      html = index_live
+             |> form("#account-form", form: %{name: ""})
+             |> render_submit()
+
+      # Should show validation errors
+      assert html =~ "can't be blank" or html =~ "is required"
+    end
+
+    test "updates account with valid data", %{conn: conn, account1: account1} do
+      {:ok, index_live, _html} = live(conn, ~p"/accounts")
+
+      # Open edit form
+      index_live
+      |> element("button[phx-click='edit_account'][phx-value-id='#{account1.id}']")
+      |> render_click()
+
+      # Submit updated form data
+      index_live
+      |> form("#account-form", form: %{
+        name: "Updated Account Name",
+        platform: "Updated Platform",
+        balance: "3000.00",
+        is_excluded: "true"
+      })
+      |> render_submit()
+
+      # Get the updated HTML after the form submission
+      html = render(index_live)
+
+      # Should show success message and updated account data
+      assert html =~ "Account saved successfully"
+      assert html =~ "Updated Account Name"
+      assert html =~ "Updated Platform"
+      assert html =~ "$3,000.00"
+      assert html =~ "Excluded"
+    end
+
+    test "handles edit form validation errors", %{conn: conn, account1: account1} do
+      {:ok, index_live, _html} = live(conn, ~p"/accounts")
+
+      # Open edit form
+      index_live
+      |> element("button[phx-click='edit_account'][phx-value-id='#{account1.id}']")
+      |> render_click()
+
+      # Submit form with invalid balance (negative)
+      html = index_live
+             |> form("#account-form", form: %{
+               name: "Valid Name",
+               balance: "-100.00"
+             })
+             |> render_submit()
+
+      # Should show validation error for negative balance
+      assert html =~ "cannot be negative" or html =~ "must be greater than or equal to"
+    end
+
+    test "preserves other accounts when editing one account", %{conn: conn, account1: account1, account2: account2} do
+      {:ok, index_live, _html} = live(conn, ~p"/accounts")
+
+      # Open edit form for account1
+      index_live
+      |> element("button[phx-click='edit_account'][phx-value-id='#{account1.id}']")
+      |> render_click()
+
+      # Update account1
+      index_live
+      |> form("#account-form", form: %{
+        name: "Updated Account 1",
+        platform: "Updated Platform"
+      })
+      |> render_submit()
+
+      # Get the updated HTML
+      html = render(index_live)
+
+      # Should show updated account1 and unchanged account2
+      assert html =~ "Updated Account 1"
+      assert html =~ "Updated Platform"
+      assert html =~ account2.name  # account2 should remain unchanged
+      assert html =~ account2.platform  # account2 platform should remain unchanged
+    end
+  end
+
   describe "account management" do
     test "toggles account exclusion", %{conn: conn, account1: account1} do
       {:ok, index_live, _html} = live(conn, ~p"/accounts")

@@ -11,21 +11,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 >
 > **Current Status**: Phase 8 In Progress - Account Management LiveView Implementation
 >
-> - **Test Suite**: 214/214 tests passing (100% pass rate) - All tests now passing
-> - **Core Features**: Complete portfolio calculation engine + responsive web layout + functional dashboard + holdings table + account management UI + FormComponent + account creation
-> - **Key Achievement**: Complete account creation functionality with FormComponent and comprehensive test coverage
-> - **Next Phase**: Continue with Phase 8 account management implementation (Task 9 - Implement account editing functionality)
+> - **Test Suite**: All account management tests passing (100% pass rate)
+> - **Core Features**: Complete portfolio calculation engine + responsive web layout + functional dashboard + holdings table + complete account management UI (create, read, edit, exclusion toggle)
+> - **Key Achievement**: Complete account CRUD operations with FormComponent and comprehensive test coverage
+> - **Next Phase**: Continue with Phase 8 account management implementation (Task 10 - Implement account deletion functionality)
 >
 > **Critical Files Updated**:
 >
-> - AccountLive.FormComponent with complete modal-based form implementation
-> - Account creation functionality with proper form handling and validation
-> - Test suite updated with correct form parameter naming convention
-> - All form-related tests now passing with comprehensive coverage
+> - AccountLive.Index with complete account editing functionality
+> - FormComponent handles both creation and editing with proper validation
+> - Test suite expanded with comprehensive account editing test coverage
+> - All account management tests now passing
 >
-> **Verification Steps**: Run `just test`, `just dev`, navigate to `/accounts` and click "New Account" to create accounts
+> **Verification Steps**: Run `just test`, `just dev`, navigate to `/accounts` and test creating, editing, and toggling account exclusion
 
 ### Phase 8: Account Management
+
+#### [0.23.3] - 2025-08-04
+
+##### Task 9 Complete: Account Editing Functionality
+
+- **✅ Account Editing**: Complete implementation using existing FormComponent infrastructure
+- **✅ Form Pre-population**: Edit form properly loads existing account data
+- **✅ Update Logic**: Account.update/2 integration with proper validation and error handling
+- **✅ Test Coverage**: Comprehensive test suite with 7 test cases covering all editing scenarios
+- **✅ UI Integration**: Seamless editing experience with success/error feedback
+- **Next Task**: Task 10 - Implement account deletion functionality with transaction safety checks
+
+##### Technical Achievements
+
+- **Reusable FormComponent**: Single component handles both creation and editing modes
+- **Data Pre-population**: Form fields automatically populated with existing account data
+- **Validation Consistency**: Same validation rules apply for both create and edit operations
+- **Error Handling**: Comprehensive error display for validation failures and update errors
+- **Test Coverage**: Complete test suite covering form display, validation, updates, and edge cases
 
 #### [0.23.2] - 2025-08-04
 
