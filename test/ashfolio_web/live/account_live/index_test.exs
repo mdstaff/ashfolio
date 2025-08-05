@@ -1,7 +1,7 @@
 defmodule AshfolioWeb.AccountLive.IndexTest do
   use AshfolioWeb.LiveViewCase
 
-  alias Ashfolio.Portfolio.{Account, User}
+  alias Ashfolio.Portfolio.{Account, User, Transaction, Symbol}
 
   setup do
     # Create default user
@@ -305,6 +305,179 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
 
       # Check that the account was deleted
       assert html =~ "Account deleted successfully"
+    end
+  end
+
+  describe "account deletion" do
+    test "deletes account with no transactions", %{conn: conn, account1: account1} do
+      {:ok, index_live, _html} = live(conn, ~p"/accounts")
+
+      # Verify account exists initially
+      assert render(index_live) =~ account1.name
+
+      # Delete account (account1 has no transactions by default)
+      html = index_live
+             |> element("button[phx-click='delete_account'][phx-value-id='#{account1.id}']")
+             |> render_click()
+
+      # Should show success message
+      assert html =~ "Account deleted successfully"
+
+      # Account should no longer appear in the list
+      refute html =~ account1.name
+    end
+
+    test "prevents deletion of account with transactions", %{conn: conn, account1: account1, user: user} do
+      # First create a symbol for the transaction
+      {:ok, symbol} = Symbol.create(%{
+        symbol: "AAPL",
+        name: "Apple Inc.",
+        asset_class: :stock,
+        data_source: :yahoo_finance,
+        current_price: Decimal.new("150.00")
+      })
+
+      # Create a transaction for account1
+      {:ok, _transaction} = Transaction.create(%{
+        type: :buy,
+        quantity: Decimal.new("10"),
+        price: Decimal.new("150.00"),
+        total_amount: Decimal.new("1500.00"),
+        fee: Decimal.new("0.00"),
+        date: Date.utc_today(),
+        account_id: account1.id,
+        symbol_id: symbol.id
+      })
+
+      {:ok, index_live, _html} = live(conn, ~p"/accounts")
+
+      # Verify account exists initially
+      assert render(index_live) =~ account1.name
+
+      # Try to delete account with transactions
+      html = index_live
+             |> element("button[phx-click='delete_account'][phx-value-id='#{account1.id}']")
+             |> render_click()
+
+      # Should show error message preventing deletion
+      assert html =~ "Cannot delete account with transactions"
+      assert html =~ "Consider excluding it instead"
+
+      # Account should still appear in the list
+      assert html =~ account1.name
+    end
+
+    test "shows helpful error message when deletion prevented", %{conn: conn, account1: account1, user: user} do
+      # Create a symbol and transaction for account1
+      {:ok, symbol} = Symbol.create(%{
+        symbol: "TSLA",
+        name: "Tesla Inc.",
+        asset_class: :stock,
+        data_source: :yahoo_finance,
+        current_price: Decimal.new("200.00")
+      })
+
+      {:ok, _transaction} = Transaction.create(%{
+        type: :sell,
+        quantity: Decimal.new("-5"),
+        price: Decimal.new("200.00"),
+        total_amount: Decimal.new("-1000.00"),
+        fee: Decimal.new("5.00"),
+        date: Date.utc_today(),
+        account_id: account1.id,
+        symbol_id: symbol.id
+      })
+
+      {:ok, index_live, _html} = live(conn, ~p"/accounts")
+
+      # Try to delete account with transactions
+      html = index_live
+             |> element("button[phx-click='delete_account'][phx-value-id='#{account1.id}']")
+             |> render_click()
+
+      # Should show specific error message with helpful suggestion
+      assert html =~ "Cannot delete account with transactions"
+      assert html =~ "Consider excluding it instead"
+    end
+
+    test "suggests account exclusion as alternative", %{conn: conn, account1: account1, user: user} do
+      # Create a symbol and transaction for account1
+      {:ok, symbol} = Symbol.create(%{
+        symbol: "NVDA",
+        name: "NVIDIA Corporation",
+        asset_class: :stock,
+        data_source: :yahoo_finance,
+        current_price: Decimal.new("300.00")
+      })
+
+      {:ok, _transaction} = Transaction.create(%{
+        type: :dividend,
+        quantity: Decimal.new("2"),
+        price: Decimal.new("1.50"),
+        total_amount: Decimal.new("3.00"),
+        fee: Decimal.new("0.00"),
+        date: Date.utc_today(),
+        account_id: account1.id,
+        symbol_id: symbol.id
+      })
+
+      {:ok, index_live, _html} = live(conn, ~p"/accounts")
+
+      # Try to delete account with transactions
+      html = index_live
+             |> element("button[phx-click='delete_account'][phx-value-id='#{account1.id}']")
+             |> render_click()
+
+      # Should suggest exclusion as alternative
+      assert html =~ "Consider excluding it instead"
+
+      # Verify that the exclusion toggle button is still available
+      assert html =~ "Exclude"
+    end
+
+    test "allows deletion after all transactions are removed", %{conn: conn, account1: account1, user: user} do
+      # Create a symbol and transaction for account1
+      {:ok, symbol} = Symbol.create(%{
+        symbol: "MSFT",
+        name: "Microsoft Corporation",
+        asset_class: :stock,
+        data_source: :yahoo_finance,
+        current_price: Decimal.new("250.00")
+      })
+
+      {:ok, transaction} = Transaction.create(%{
+        type: :buy,
+        quantity: Decimal.new("8"),
+        price: Decimal.new("250.00"),
+        total_amount: Decimal.new("2000.00"),
+        fee: Decimal.new("10.00"),
+        date: Date.utc_today(),
+        account_id: account1.id,
+        symbol_id: symbol.id
+      })
+
+      {:ok, index_live, _html} = live(conn, ~p"/accounts")
+
+      # First attempt should fail
+      html = index_live
+             |> element("button[phx-click='delete_account'][phx-value-id='#{account1.id}']")
+             |> render_click()
+
+      assert html =~ "Cannot delete account with transactions"
+
+      # Remove the transaction
+      Transaction.destroy(transaction)
+
+      # Refresh the page to get updated state
+      {:ok, index_live, _html} = live(conn, ~p"/accounts")
+
+      # Now deletion should succeed
+      html = index_live
+             |> element("button[phx-click='delete_account'][phx-value-id='#{account1.id}']")
+             |> render_click()
+
+      assert html =~ "Account deleted successfully"
+      refute html =~ account1.name
     end
   end
 end

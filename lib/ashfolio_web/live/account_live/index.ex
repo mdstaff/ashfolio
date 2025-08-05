@@ -1,7 +1,7 @@
 defmodule AshfolioWeb.AccountLive.Index do
   use AshfolioWeb, :live_view
 
-  alias Ashfolio.Portfolio.{Account, User}
+  alias Ashfolio.Portfolio.{Account, User, Transaction}
   alias AshfolioWeb.Live.{FormatHelpers, ErrorHelpers}
   alias AshfolioWeb.AccountLive.FormComponent
 
@@ -49,17 +49,31 @@ defmodule AshfolioWeb.AccountLive.Index do
 
   @impl true
   def handle_event("delete_account", %{"id" => id}, socket) do
-    case Account.destroy(id) do
-      :ok ->
-        {:noreply,
-         socket
-         |> ErrorHelpers.put_success_flash("Account deleted successfully")
-         |> assign(:accounts, list_accounts(socket.assigns.user_id))}
+    # Check if account has any transactions before allowing deletion
+    case Transaction.by_account!(id) do
+      [] ->
+        # Safe to delete - no transactions
+        case Account.destroy(id) do
+          :ok ->
+            {:noreply,
+             socket
+             |> ErrorHelpers.put_success_flash("Account deleted successfully")
+             |> assign(:accounts, list_accounts(socket.assigns.user_id))}
 
-      {:error, reason} ->
+          {:error, reason} ->
+            {:noreply,
+             socket
+             |> ErrorHelpers.put_error_flash(reason, "Failed to delete account")}
+        end
+
+      _transactions ->
+        # Has transactions - prevent deletion
         {:noreply,
          socket
-         |> ErrorHelpers.put_error_flash(reason, "Failed to delete account")}
+         |> ErrorHelpers.put_error_flash(
+           "Cannot delete account with transactions. Consider excluding it instead.",
+           "Account has associated transactions"
+         )}
     end
   end
 
