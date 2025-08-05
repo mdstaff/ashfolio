@@ -56,6 +56,71 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
       assert index_live |> element("button", "New Account") |> render_click() =~
                "New Account"
     end
+
+    test "displays form fields when creating new account", %{conn: conn} do
+      {:ok, index_live, _html} = live(conn, ~p"/accounts")
+
+      html = index_live |> element("button", "New Account") |> render_click()
+
+      # Check that form fields are present
+      assert html =~ "Account Name"
+      assert html =~ "Platform"
+      assert html =~ "Current Balance"
+      assert html =~ "Exclude from portfolio calculations"
+      assert html =~ "Create Account"
+    end
+
+    test "can cancel form", %{conn: conn} do
+      {:ok, index_live, _html} = live(conn, ~p"/accounts")
+
+      # Open form
+      index_live |> element("button", "New Account") |> render_click()
+
+      # Cancel form
+      html = index_live
+             |> element("button[phx-click='cancel']")
+             |> render_click()
+
+      # Form should be closed
+      refute html =~ "New Account"
+      refute html =~ "Account Name"
+    end
+
+    test "validates form fields", %{conn: conn} do
+      {:ok, index_live, _html} = live(conn, ~p"/accounts")
+
+      # Open form
+      index_live |> element("button", "New Account") |> render_click()
+
+      # Try to submit empty form
+      html = index_live
+             |> form("#account-form", account: %{name: ""})
+             |> render_submit()
+
+      # Should show validation errors
+      assert html =~ "can't be blank" or html =~ "is required"
+    end
+
+    test "creates account with valid data", %{conn: conn} do
+      {:ok, index_live, _html} = live(conn, ~p"/accounts")
+
+      # Open form
+      index_live |> element("button", "New Account") |> render_click()
+
+      # Submit valid form
+      html = index_live
+             |> form("#account-form", account: %{
+               name: "New Test Account",
+               platform: "Test Platform",
+               balance: "5000.00"
+             })
+             |> render_submit()
+
+      # Should show success message and new account
+      assert html =~ "Account saved successfully"
+      assert html =~ "New Test Account"
+      assert html =~ "$5,000.00"
+    end
   end
 
   describe "account management" do
