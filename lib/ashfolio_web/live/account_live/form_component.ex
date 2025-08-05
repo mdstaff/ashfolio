@@ -64,14 +64,14 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
   end
 
   @impl true
-  def handle_event("validate", %{"account" => account_params}, socket) do
-    form = AshPhoenix.Form.validate(socket.assigns.form, account_params)
+  def handle_event("validate", %{"form" => form_params}, socket) do
+    form = AshPhoenix.Form.validate(socket.assigns.form, form_params)
     {:noreply, assign(socket, form: form)}
   end
 
   @impl true
-  def handle_event("save", %{"account" => account_params}, socket) do
-    save_account(socket, socket.assigns.action, account_params)
+  def handle_event("save", %{"form" => form_params}, socket) do
+    save_account(socket, socket.assigns.action, form_params)
   end
 
   @impl true
@@ -80,10 +80,10 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
     {:noreply, socket}
   end
 
-  defp save_account(socket, :new, account_params) do
-    account_params = Map.put(account_params, "user_id", socket.assigns.user_id)
+  defp save_account(socket, :new, form_params) do
+    form_params = Map.put(form_params, "user_id", socket.assigns.user_id)
 
-    case AshPhoenix.Form.submit(socket.assigns.form, params: account_params) do
+    case AshPhoenix.Form.submit(socket.assigns.form, params: form_params) do
       {:ok, account} ->
         notify_parent({:saved, account})
         {:noreply, socket}
@@ -93,8 +93,8 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
     end
   end
 
-  defp save_account(socket, :edit, account_params) do
-    case AshPhoenix.Form.submit(socket.assigns.form, params: account_params) do
+  defp save_account(socket, :edit, form_params) do
+    case AshPhoenix.Form.submit(socket.assigns.form, params: form_params) do
       {:ok, account} ->
         notify_parent({:saved, account})
         {:noreply, socket}

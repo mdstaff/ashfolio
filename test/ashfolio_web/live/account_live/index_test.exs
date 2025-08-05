@@ -77,13 +77,17 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
       index_live |> element("button", "New Account") |> render_click()
 
       # Cancel form
-      html = index_live
-             |> element("button[phx-click='cancel']")
-             |> render_click()
+      index_live
+      |> element("button[phx-click='cancel']")
+      |> render_click()
 
-      # Form should be closed
-      refute html =~ "New Account"
+      # Get the updated HTML after the cancel action
+      html = render(index_live)
+
+      # Form should be closed - check for form-specific elements
       refute html =~ "Account Name"
+      refute html =~ "Current Balance"
+      refute html =~ "Create Account"
     end
 
     test "validates form fields", %{conn: conn} do
@@ -94,7 +98,7 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
 
       # Try to submit empty form
       html = index_live
-             |> form("#account-form", account: %{name: ""})
+             |> form("#account-form", form: %{name: ""})
              |> render_submit()
 
       # Should show validation errors
@@ -108,13 +112,16 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
       index_live |> element("button", "New Account") |> render_click()
 
       # Submit valid form
-      html = index_live
-             |> form("#account-form", account: %{
-               name: "New Test Account",
-               platform: "Test Platform",
-               balance: "5000.00"
-             })
-             |> render_submit()
+      index_live
+      |> form("#account-form", form: %{
+        name: "New Test Account",
+        platform: "Test Platform",
+        balance: "5000.00"
+      })
+      |> render_submit()
+
+      # Get the updated HTML after the form submission
+      html = render(index_live)
 
       # Should show success message and new account
       assert html =~ "Account saved successfully"
