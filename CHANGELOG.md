@@ -5,47 +5,67 @@ All notable changes to the Ashfolio project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.25.0] - 2025-08-05
 
-> **🎯 NEXT AGENT HANDOFF SUMMARY**
->
-> **Current Status**: Phase 8 Complete - Account Management LiveView Implementation + Code Cleanup
->
-> - **Test Suite**: All account management tests passing (225/225 tests, 100% pass rate)
-> - **Core Features**: Complete portfolio calculation engine + responsive web layout + functional dashboard + holdings table + complete account management UI (create, read, edit, delete, exclusion toggle, balance management)
-> - **Key Achievement**: Complete account management system with balance management and simplified codebase after removing unused validation infrastructure
-> - **Next Phase**: Phase 4 - Polish and Integration (Tasks 12-16)
->
-> **Recent Code Cleanup**:
->
-> - Removed unused balance precision validation from Account resource
-> - Cleaned up unnecessary error handling code from FormComponent
-> - Deleted unused validation module (`lib/ashfolio/portfolio/account/validations.ex`)
-> - Updated test expectations to match actual success message formats
-> - Maintained all existing functionality while reducing code complexity
->
-> **Verification Steps**: Run `just test` (all 225 tests passing), `just dev`, navigate to `/accounts` and test complete account management including balance entry with validation
+### Phase 9 Transaction Management Complete ✅
 
-### Phase 8: Account Management Complete ✅
+This release introduces comprehensive transaction management functionality, allowing users to create, list, edit, and delete investment transactions.
 
-#### [0.23.6] - 2025-08-05
+#### Added
 
-##### Code Cleanup: Balance Precision Validation Removal
+- **Transaction Entry Form (Task 24)**
+  - ✅ Implemented `TransactionLive.FormComponent` for creating and editing transactions.
+  - ✅ Supports core transaction types: `BUY`, `SELL`, `DIVIDEND`, `FEE`, `INTEREST`, and `LIABILITY`.
+  - ✅ Dynamic dropdowns for selecting `Account` and `Symbol`.
+  - ✅ Real-time validation and calculation of `total_amount`.
 
-- **✅ Validation Cleanup**: Removed unused balance precision validation from Account resource
-- **✅ Error Handling Cleanup**: Removed unnecessary balance error handling code from FormComponent
-- **✅ File Cleanup**: Deleted unused `lib/ashfolio/portfolio/account/validations.ex` module
-- **✅ Test Fixes**: Updated test expectations to match actual success message formats
-- **✅ All Tests Passing**: 225/225 tests passing (100% pass rate) after cleanup
-- **Technical Achievement**: Simplified codebase by removing unused validation infrastructure
+- **Transaction Listing (Task 25)**
+  - ✅ Displayed all transactions in a sortable table within `TransactionLive.Index`.
+  - ✅ Includes columns for Date, Type, Symbol, Quantity, Price, Fee, Total Amount, and Account.
+  - ✅ Implemented proper formatting for dates, quantities, and currency values.
+  - ✅ Handles empty state with a clear call-to-action.
 
-##### Technical Details
+- **Transaction CRUD Operations (Task 26)**
+  - ✅ Added "Edit" and "Delete" buttons to each transaction row in the list.
+  - ✅ Implemented `handle_event` functions for `edit_transaction` and `delete_transaction` in `TransactionLive.Index`.
+  - ✅ Provides success and error flash messages for all CRUD operations.
 
-- Removed `validate_balance_precision` validation that was no longer referenced in Account resource
-- Cleaned up `handle_balance_errors` and `get_field_errors` functions from FormComponent
-- Updated test assertions to match actual flash messages ("Account created successfully" vs "Account saved successfully")
-- Maintained all existing functionality while reducing code complexity
-- Preserved existing balance validation (non-negative) through Ash resource validations
+#### Changed
+
+- **Transaction Resource Update**
+  - ✅ Updated `Ashfolio.Portfolio.Transaction` resource to include `INTEREST` and `LIABILITY` transaction types.
+  - ✅ Modified `validate_quantity_for_type` function to correctly handle quantity validations for the new transaction types.
+
+## [0.24.0] - 2025-08-05
+
+### Phase 8 Polish & Integration Complete ✅
+
+This release marks the completion of the entire Account Management feature, including comprehensive validation, responsive design, accessibility enhancements, and seamless portfolio integration.
+
+#### Added
+
+- **Portfolio Integration (PubSub)**
+  - ✅ Created a new `Ashfolio.PubSub` module for decoupled event-driven communication.
+  - ✅ The `AccountLive` module now broadcasts events (`:account_saved`, `:account_deleted`, `:account_updated`) when account data changes.
+  - ✅ The `DashboardLive` module subscribes to these events and automatically reloads portfolio data, ensuring the dashboard stays in sync with account modifications.
+
+- **Comprehensive Testing**
+  - ✅ Added a new integration test (`account_management_integration_test.exs`) covering the full end-to-end account management workflow (create → edit → delete).
+  - ✅ Created a new test file for the `FormComponent` (`form_component_test.exs`) to verify its validation, submission, and error handling logic.
+
+- **UI Polish & Performance**
+  - ✅ Implemented optimistic UI updates for the "toggle exclusion" feature, making the interface feel more responsive.
+  - ✅ Added loading state indicators to the delete and toggle exclusion buttons to provide clear visual feedback during operations.
+
+#### Changed
+
+- **Enhanced Form Validation**
+  - ✅ Added server-side validations for name length/format and a `get_by_name_for_user/2` function for uniqueness checks in the `Account` resource.
+  - ✅ The `FormComponent` now includes a `check_name_uniqueness` function for real-time, client-side validation.
+
+- **Responsive & Accessible Design**
+  - ✅ Added responsive CSS classes (`.account-actions`) to handle button layout on smaller screens.
+  - ✅ Added descriptive `aria-label` attributes to all action buttons in the account list and detail pages for improved accessibility.
 
 #### [0.23.5] - 2025-08-05
 

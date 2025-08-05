@@ -439,15 +439,15 @@ This implementation plan focuses on delivering core portfolio management functio
 
 ## Phase 9: Transaction Management (80% confidence)
 
-- [ ] 24. Create transaction entry form
+- [x] 24. Create transaction entry form
 
   - Create TransactionLive module with simple form
-  - Add form fields for all transaction types (BUY, SELL, DIVIDEND, FEE)
+  - Add form fields for all core transaction types (BUY, SELL, DIVIDEND, FEE, INTEREST)
   - Implement basic form validation
   - Add symbol selection (dropdown or text input)
   - _Requirements: 3.1, 3.2, 7.1_
 
-- [ ] 25. Add transaction listing
+- [x] 25. Add transaction listing
 
   - Create simple transaction table showing all transactions
   - Add basic filtering by account or transaction type
@@ -455,7 +455,7 @@ This implementation plan focuses on delivering core portfolio management functio
   - Show transaction details in table format
   - _Requirements: 7.2_
 
-- [ ] 26. Implement transaction CRUD
+- [x] 26. Implement transaction CRUD
   - Add transaction creation with validation
   - Implement transaction editing functionality
   - Add transaction deletion with confirmation
@@ -521,3 +521,31 @@ These features can be added in subsequent phases once the core application is wo
 - Cost basis calculations (FIFO, LIFO, SpecID)
 - Tax implications and reporting
 - Corporate actions handling
+
+## Phase 11: Documentation and Onboarding (90% confidence)
+
+- [ ] 30. Create CONTRIBUTING.md guide
+
+  - Consolidate development workflow, pull request process, and code style conventions
+  - Reference justfile for commands and link to ashfolio-coding-standards.md
+  - _Requirements: 19.5_
+
+- [ ] 31. Enhance README.md for quick onboarding
+
+  - Add "Project Status" badge or section
+  - Add "Key Architectural Decisions" section summarizing critical learnings
+  - Feature `just dev` command more prominently
+  - _Requirements: 19.1_
+
+- [ ] 32. Create TROUBLESHOOTING.md document
+
+  - Include sections for common test failures and solutions
+  - Add guidance for debugging LiveView and GenServer processes
+  - Document common database connection issues
+  - _Requirements: 19.6_
+
+- [ ] 33. Add inline documentation to justfile
+  - Add comments to justfile to make it self-documenting
+  - Explain the purpose of each command group
+  - _Requirements: 19.1_
+

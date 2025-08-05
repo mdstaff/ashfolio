@@ -21,7 +21,7 @@ defmodule Ashfolio.Portfolio.Transaction do
     uuid_primary_key :id
 
     attribute :type, :atom do
-      constraints one_of: [:buy, :sell, :dividend, :fee]
+      constraints one_of: [:buy, :sell, :dividend, :fee, :interest, :liability]
       allow_nil? false
       description "Transaction type"
     end
@@ -205,6 +205,12 @@ defmodule Ashfolio.Portfolio.Transaction do
 
       type == :dividend and (is_nil(quantity) or Decimal.compare(quantity, 0) != :gt) ->
         Ash.Changeset.add_error(changeset, field: :quantity, message: "Quantity must be positive for dividend transactions")
+
+      type == :interest and (is_nil(quantity) or Decimal.compare(quantity, 0) != :gt) ->
+        Ash.Changeset.add_error(changeset, field: :quantity, message: "Quantity must be positive for interest transactions")
+
+      type == :liability and (is_nil(quantity) or Decimal.compare(quantity, 0) != :lt) ->
+        Ash.Changeset.add_error(changeset, field: :quantity, message: "Quantity must be negative for liability transactions")
 
       type == :fee and not is_nil(quantity) and Decimal.compare(quantity, 0) == :lt ->
         Ash.Changeset.add_error(changeset, field: :quantity, message: "Quantity cannot be negative for fee transactions")
