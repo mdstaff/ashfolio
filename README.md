@@ -1,102 +1,118 @@
 # Ashfolio
 
-A simplified Phase 1 portfolio management application built with Phoenix LiveView and the Ash Framework. This is a single-user local application designed for personal portfolio tracking with manual price updates.
+A simplified Phase 1 portfolio management application built with Phoenix LiveView and the Ash Framework. Designed for single-user local deployment, Ashfolio helps you track your investments with manual price updates.
 
-## Current Status (Phase 7: Portfolio Dashboard - 69% Complete)
+## 🚀 Quick Start
 
-**✅ What's Working Now:**
-
-- **Complete Data Model**: All core Ash resources (User, Account, Symbol, Transaction) are implemented with validations and relationships.
-- **Database Management**: SQLite database with migrations, performance indexes, and comprehensive seeding.
-- **Market Data**: Yahoo Finance integration for price fetching, with a GenServer-based `PriceManager` for coordination and ETS caching.
-- **Portfolio Calculation Engine**: A dual-calculator architecture (`Calculator` and `HoldingsCalculator`) provides a rich set of functions for portfolio analysis, including FIFO cost basis and P&L.
-- **LiveView Dashboard**: A functional and responsive portfolio dashboard that displays real-time data, including portfolio value, returns, and a sortable holdings table.
-- **Robust Testing**: **98.6% passing test suite** (211/214 tests) with optimized configuration and `just` command runner for easy execution.
-
-**🔄 Next Steps:**
-
-- Manual price refresh functionality from the UI.
-- Account and transaction management interfaces.
-- Basic charting and visualizations.
-
-## Quick Start
+Get Ashfolio up and running in minutes!
 
 ### Prerequisites
 
-- Elixir 1.14+ and Erlang/OTP 25+
-- macOS (optimized for Apple Silicon)
-- `just` command runner (`brew install just`)
+*   Elixir 1.14+ and Erlang/OTP 25+
+*   macOS (optimized for Apple Silicon)
+*   `just` command runner (`brew install just`)
 
-### Installation
+### Installation & Run
 
-1.  **Install Elixir** (if not already installed):
-
+1.  **Clone the repository**:
     ```bash
-    brew install elixir
+    git clone https://github.com/mdstaff/ashfolio.git
+    cd ashfolio
     ```
-
 2.  **Setup and start the project**:
-
     ```bash
-    # The `just dev` command will install dependencies, set up the database, and start the server.
+    # This command will install dependencies, set up the database, and start the Phoenix server.
     just dev
     ```
-
 3.  **Access the application**:
-    - Open [`http://localhost:4000`](http://localhost:4000) in your browser.
-    - The database comes pre-seeded with sample data.
+    *   Open [`http://localhost:4000`](http://localhost:4000) in your browser.
+    *   The database comes pre-seeded with sample data, so you'll see a populated portfolio immediately!
 
-## Tech Stack
+---
 
-- **Backend**: Elixir, Phoenix 1.7+, Ash Framework 3.0+
-- **Database**: SQLite with `ecto_sqlite3` and `ash_sqlite`
-- **Frontend**: Phoenix LiveView
-- **Caching**: In-memory caching with ETS
-- **HTTP Client**: `HTTPoison` for external API communication
-- **Testing**: ExUnit, Mox, and Meck for comprehensive testing
-- **Code Quality**: Credo for static analysis
-- **Task Runner**: `just` for streamlined development commands
+## ✨ Key Features
 
-## Architecture
+*   **Comprehensive Data Model**: Manages Users, Accounts, Symbols, and Transactions with robust validations.
+*   **Portfolio Calculation Engine**: Advanced dual-calculator architecture for accurate portfolio analysis, including FIFO cost basis and P&L.
+*   **Intuitive Dashboard**: A responsive LiveView dashboard displaying real-time portfolio value, returns, and a sortable holdings table.
+*   **Transaction Management**: Full CRUD operations for investment transactions (BUY, SELL, DIVIDEND, FEE, INTEREST, LIABILITY).
+*   **Account Management**: Create, edit, delete, and exclude investment accounts from calculations.
+*   **Manual Price Updates**: User-initiated price refreshes via Yahoo Finance integration.
+*   **Robust Testing**: A high-coverage test suite ensures stability and reliability.
 
-The application follows a standard Phoenix architecture, with the addition of the Ash Framework for the business logic layer.
+---
 
-- **`lib/ashfolio`**: Contains the core business logic, including Ash resources, portfolio calculators, and market data services.
-- **`lib/ashfolio_web`**: Contains the Phoenix web interface, including LiveView components, routing, and templates.
-- **`data/`**: The SQLite database file is stored here.
-- **`.kiro/`**: Contains project specifications, design documents, and steering instructions for AI-driven development.
+## 🏗️ Architecture Overview
 
-The system is designed to be modular and extensible, with a clear separation of concerns between the data, logic, and presentation layers.
+Ashfolio follows a standard Phoenix architecture, enhanced by the Ash Framework for its business logic layer.
 
-## Development
+```mermaid
+graph TD
+    subgraph "Ashfolio Application"
+        LV[Phoenix LiveView] --> BL[Business Logic Layer]
+        BL --> DL[Data Layer]
+        BL --> MS[Market Data Services]
+        MS --> ETS[ETS Cache]
+        MS --> EXT[External APIs (Yahoo Finance)]
+    end
 
-### Running Tests
+    subgraph "Business Logic Layer"
+        AR[Ash Resources]
+        PC[Portfolio Calculators]
+    end
 
-**Current Status: ✅ All 192 tests passing (optimized configuration)**
+    subgraph "Data Layer"
+        DB[(SQLite Database)]
+    end
 
-```bash
-# Run all tests using the just command runner
-just test
-
-# Run tests with seeding tests included (slower)
-just test --include seeding
-
-# Other test commands
-just test-file <path>      # Run specific test file
-just test-coverage         # Run with coverage report
-just test-watch           # Run in watch mode
+    LV -- "User Interaction" --> LV
+    LV -- "Data Requests" --> AR
+    AR -- "Data Storage" --> DB
+    PC -- "Calculations" --> AR
+    PC -- "Price Data" --> ETS
+    ETS -- "Caching" --> DB
+    EXT -- "Price Fetching" --> MS
 ```
 
-### Development Commands
+For a more detailed breakdown of the system architecture, including Ash Resource relationships and LiveView component flows, please refer to the [Architecture Documentation](docs/ARCHITECTURE.md).
 
-The project uses `just` to simplify common development tasks.
+---
 
-```bash
-just              # Show all available commands
-just dev          # Setup and start server
-just test         # Run the full test suite
-just test-file <path>  # Run a specific test file
-just test-coverage     # Run tests with a coverage report
-just reset        # Reset the database with fresh sample data
-just console      # Start an interactive Elixir console
-```
+## 🛠️ Development
+
+### Tech Stack
+
+*   **Backend**: Elixir, Phoenix 1.7+, Ash Framework 3.0+
+*   **Database**: SQLite with `ecto_sqlite3` and `ash_sqlite`
+*   **Frontend**: Phoenix LiveView
+*   **Caching**: In-memory caching with ETS
+*   **HTTP Client**: `HTTPoison` for external API communication
+*   **Testing**: ExUnit, Mox, and Meck for comprehensive testing
+*   **Code Quality**: Credo for static analysis
+*   **Task Runner**: `just` for streamlined development commands
+
+### Development Workflow
+
+Ashfolio uses the `just` command runner to simplify common development tasks.
+
+*   **`just dev`**: Sets up the environment, installs dependencies, and starts the Phoenix server.
+*   **`just test`**: Runs the main test suite (excluding slower seeding tests).
+*   **`just test-file <path>`**: Runs tests for a specific file.
+*   **`just reset`**: Resets the database with fresh sample data.
+*   **`just`**: Lists all available `just` commands with descriptions.
+
+For a complete guide to setting up your development environment, including manual installation steps and troubleshooting, see [DEVELOPMENT_SETUP.md](docs/DEVELOPMENT_SETUP.md).
+
+### Contributing
+
+We welcome contributions to Ashfolio! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get started, coding standards, and the pull request process.
+
+---
+
+## ❓ Getting Help
+
+If you encounter any issues or have questions:
+
+*   Check the [DEVELOPMENT_SETUP.md](docs/DEVELOPMENT_SETUP.md) for common troubleshooting steps.
+*   Review the [Elixir Installation Guide](https://elixir-lang.org/install.html) and [Phoenix Installation Guide](https://hexdocs.pm/phoenix/installation.html).
+*   Feel free to open an issue on the GitHub repository.

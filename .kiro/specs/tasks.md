@@ -465,27 +465,66 @@ This implementation plan focuses on delivering core portfolio management functio
 ## Phase 10: Basic Testing and Polish (85% confidence)
 
 - [ ] 27. Add basic responsive styling
+  - [ ] 27.1 Implement Comprehensive Responsive Layouts
+    - Ensure all main application views (Dashboard, Accounts, Transactions) adapt gracefully across desktop, tablet, and basic mobile screen sizes, leveraging existing Tailwind CSS patterns.
+    - _Requirements: 15.1, 15.2_
+  - [ ] 27.2 Enhance Accessibility (WCAG AA)
+    - Verify and implement WCAG AA color contrast compliance for all text and UI elements.
+    - Add proper ARIA labels and semantic markup for screen readers across all views.
+    - Ensure full keyboard navigation support for all interactive elements (buttons, links, form fields).
+    - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
+  - [ ] 27.3 Standardize Loading States & Error Messages
+    - Ensure consistent visual feedback for loading states (spinners, disabled controls) and clear, consistent display of error messages across all forms and actions.
+    - _Requirements: 8.3, 8.5, 12.3_
+  - [ ] 27.4 Apply Consistent Color Coding
+    - Ensure consistent green/red color coding for gains/losses is applied across all relevant displays (e.g., dashboard, holdings table, transaction details).
+    - _Requirements: 12.4, 15.2_
 
-  - Create simple CSS for clean, professional appearance
-  - Add responsive design for desktop and tablet
-  - Implement basic color coding (green/red for gains/losses)
-  - Add simple loading states and error messages
-  - _Requirements: 15.1, 15.2_
-
-- [ ] 28. Create basic test suite
-
-  - Write unit tests for Ash resources (User, Account, Symbol, Transaction)
-  - Add tests for portfolio calculation functions
-  - Create basic LiveView tests for main pages
-  - Add tests for Yahoo Finance integration
-  - _Requirements: 11.1_
+- [ ] 28. Create comprehensive test suite
+  - [ ] 28.1 Complete Ash Resource Test Coverage
+    - Ensure 100% test coverage for all Ash resource actions, validations, and relationships for `User`, `Account`, `Symbol`, and `Transaction` resources.
+    - _Requirements: 19.1_
+  - [ ] 28.2 Complete Portfolio Calculation Test Coverage
+    - Ensure 100% test coverage for cost basis, return calculations (simple returns, position-level P&L, portfolio-level aggregation), and holdings calculations.
+    - _Requirements: 19.1_
+  - [ ] 28.3 Complete LiveView Test Coverage
+    - Achieve at least 90% test coverage for Dashboard display, Account management interface, Transaction forms, and Price refresh functionality.
+    - _Requirements: 19.1_
+  - [ ] 28.4 Add Missing Integration Point Tests
+    - Implement tests for Yahoo Finance API integration, ETS cache operations, Price refresh workflow, and Database operations where gaps exist.
+    - _Requirements: 19.1_
+  - [ ] 28.5 Verify Test Quality Gates
+    - Ensure all tests pass, maintain proper isolation between tests, and adhere to performance benchmarks where applicable.
+    - _Requirements: 19.5_
 
 - [ ] 29. Final integration and testing
-  - Test complete workflow: create account → add transactions → view portfolio
-  - Verify price refresh functionality works end-to-end
-  - Test error handling for API failures
-  - Ensure all basic features work together
-  - _Requirements: All core requirements_
+  - [ ] 29.1 Execute Core Workflow Integration Tests
+    - **Account Management Flow:** Test end-to-end: Create Account → Validate Fields → View in List → Edit → Delete.
+    - **Transaction Flow:** Test end-to-end: Select Account → Enter Transaction → Validate → View in Portfolio → Edit/Delete.
+    - **Portfolio View Flow:** Test end-to-end: View Dashboard → Refresh Prices → View Updates → Check Calculations.
+    - _Requirements: All core requirements_
+  - [ ] 29.2 Test Critical Integration Points
+    - Verify price refresh functionality, including manual refresh, cache updates, UI updates, and error handling.
+    - Confirm transaction impact on portfolio recalculation, holdings updates, and cost basis updates.
+    - Test comprehensive error handling scenarios (API failures, validation errors, network timeouts, cache misses).
+    - _Requirements: All core requirements_
+  - [ ] 29.3 Verify Performance Benchmarks
+    - Conduct basic performance checks to ensure page load times are under 500ms, price refresh under 2s, and portfolio calculations under 100ms.
+    - _Requirements: 11.1_
+
+- [ ] 29.5 Implement PubSub for Transaction Events
+  - Implement explicit PubSub broadcasting for transaction events (e.g., `:transaction_saved`, `:transaction_deleted`) from `TransactionLive.Index` when transactions are created, updated, or deleted.
+  - Subscribe `DashboardLive` to these events to trigger portfolio data recalculation, ensuring the dashboard is always in sync.
+  - _Requirements: 10.2, 12.2_
+
+- [ ] 29.6 Enhance Loading States for Transaction CRUD
+  - Implement `phx-disable-with` and loading state assigns for "Edit" and "Delete" buttons in the `TransactionLive.Index` table to provide clear visual feedback during asynchronous operations, mirroring the existing implementation in `AccountLive.Index`.
+  - _Requirements: 12.3_
+
+- [ ] 29.7 Review and Refine User-Facing Error Messages
+  - Conduct a comprehensive review of all user-facing error messages (flash messages, form validation errors) across the Dashboard, Account, and Transaction management interfaces.
+  - Refine messages for clarity, conciseness, and actionable guidance to improve the overall user experience.
+  - _Requirements: 18.1, 12.4_
 
 ## Future Enhancement Phases
 
