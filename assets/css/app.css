@@ -19,11 +19,11 @@
   }
   
   .portfolio-change-positive {
-    @apply text-green-600 font-medium;
+    @apply text-green-700 font-medium;
   }
   
   .portfolio-change-negative {
-    @apply text-red-600 font-medium;
+    @apply text-red-700 font-medium;
   }
   
   .portfolio-change-neutral {
@@ -53,11 +53,11 @@
   }
   
   .currency-positive {
-    @apply text-green-600;
+    @apply text-green-700 font-medium;
   }
   
   .currency-negative {
-    @apply text-red-600;
+    @apply text-red-700 font-medium;
   }
 
   /* Loading states */
@@ -151,6 +151,31 @@
   /* Focus utilities */
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  }
+  
+  /* High contrast utilities for accessibility */
+  .text-success {
+    @apply text-green-800;
+  }
+  
+  .text-error {
+    @apply text-red-800;
+  }
+  
+  .text-warning {
+    @apply text-yellow-800;
+  }
+  
+  .bg-success-subtle {
+    @apply bg-green-50 border-green-200;
+  }
+  
+  .bg-error-subtle {
+    @apply bg-red-50 border-red-200;
+  }
+  
+  .bg-warning-subtle {
+    @apply bg-yellow-50 border-yellow-200;
   }
 }
 

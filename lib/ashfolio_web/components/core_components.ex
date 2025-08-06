@@ -698,6 +698,7 @@ defmodule AshfolioWeb.CoreComponents do
       navigate={@navigate}
       class={[
         "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200",
+        "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
         @current && "text-blue-700 bg-blue-50 border-b-2 border-blue-700",
         !@current && "text-gray-600 hover:text-gray-900 hover:bg-gray-50",
         @class
@@ -728,6 +729,7 @@ defmodule AshfolioWeb.CoreComponents do
       navigate={@navigate}
       class={[
         "flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors duration-200",
+        "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
         @current && "text-blue-700 bg-blue-50 border-l-4 border-blue-700",
         !@current && "text-gray-600 hover:text-gray-900 hover:bg-gray-50",
         @class

@@ -21,7 +21,7 @@ defmodule AshfolioWeb.Components.TopBar do
           </div>
 
           <!-- Navigation -->
-          <nav class="hidden md:flex space-x-8">
+          <nav class="hidden md:flex space-x-8" role="navigation" aria-label="Main navigation">
             <.nav_link navigate={~p"/"} current={@current_page == :dashboard}>
               <.icon name="hero-chart-bar" class="w-4 h-4 mr-2" />
               Dashboard
@@ -40,8 +40,11 @@ defmodule AshfolioWeb.Components.TopBar do
           <div class="md:hidden">
             <button
               type="button"
-              class="text-gray-500 hover:text-gray-600 focus:outline-none focus:text-gray-600"
+              class="text-gray-500 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md p-2"
               phx-click={JS.toggle(to: "#mobile-menu")}
+              aria-expanded="false"
+              aria-controls="mobile-menu"
+              aria-label="Toggle mobile menu"
             >
               <.icon name="hero-bars-3" class="w-6 h-6" />
             </button>
@@ -49,7 +52,7 @@ defmodule AshfolioWeb.Components.TopBar do
         </div>
 
         <!-- Mobile Navigation -->
-        <div id="mobile-menu" class="md:hidden hidden pb-4">
+        <div id="mobile-menu" class="md:hidden hidden pb-4" role="navigation" aria-label="Mobile navigation">
           <div class="space-y-1">
             <.mobile_nav_link navigate={~p"/"} current={@current_page == :dashboard}>
               <.icon name="hero-chart-bar" class="w-4 h-4 mr-3" />

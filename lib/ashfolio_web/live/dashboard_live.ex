@@ -99,7 +99,7 @@ defmodule AshfolioWeb.DashboardLive do
     ~H"""
     <div class="space-y-6">
       <!-- Page Header -->
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 class="text-2xl font-bold text-gray-900">Portfolio Dashboard</h1>
           <p class="text-gray-600">Overview of your investment portfolio</p>
@@ -107,12 +107,16 @@ defmodule AshfolioWeb.DashboardLive do
             Last updated: {FormatHelpers.format_relative_time(@last_price_update)}
           </p>
         </div>
-        <div class="flex space-x-3">
-          <.button type="button" class="btn-secondary" disabled={@loading} phx-click="refresh_prices">
-            <.icon name="hero-arrow-path" class={if @loading, do: "w-4 h-4 mr-2 animate-spin", else: "w-4 h-4 mr-2"} />
+        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <.button type="button" class="btn-secondary w-full sm:w-auto" disabled={@loading} phx-click="refresh_prices">
+            <%= if @loading do %>
+              <.loading_spinner class="w-4 h-4 mr-2" />
+            <% else %>
+              <.icon name="hero-arrow-path" class="w-4 h-4 mr-2" />
+            <% end %>
             {if @loading, do: "Refreshing...", else: "Refresh Prices"}
           </.button>
-          <.button type="button" class="btn-primary">
+          <.button type="button" class="btn-primary w-full sm:w-auto">
             <.icon name="hero-plus" class="w-4 h-4 mr-2" />
             Add Transaction
           </.button>
@@ -167,32 +171,32 @@ defmodule AshfolioWeb.DashboardLive do
             </.button>
           </div>
         <% else %>
-          <div class="overflow-y-auto px-4 sm:overflow-visible sm:px-0">
-            <table class="w-[40rem] mt-11 sm:w-full">
+          <div class="overflow-x-auto">
+            <table class="min-w-full mt-4" role="table" aria-label="Portfolio holdings">
               <thead class="text-sm text-left leading-6 text-zinc-500">
                 <tr>
                   <th class="p-0 pb-4 pr-6 font-normal">
-                    <button phx-click="sort" phx-value-column="symbol" class="hover:text-zinc-700">
+                    <button phx-click="sort" phx-value-column="symbol" class="hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded" aria-label="Sort by symbol">
                       Symbol {sort_indicator(@sort_by, @sort_order, :symbol)}
                     </button>
                   </th>
                   <th class="p-0 pb-4 pr-6 font-normal text-right">Quantity</th>
                   <th class="p-0 pb-4 pr-6 font-normal text-right">Current Price</th>
                   <th class="p-0 pb-4 pr-6 font-normal text-right">
-                    <button phx-click="sort" phx-value-column="current_value" class="hover:text-zinc-700">
+                    <button phx-click="sort" phx-value-column="current_value" class="hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded" aria-label="Sort by current value">
                       Current Value {sort_indicator(@sort_by, @sort_order, :current_value)}
                     </button>
                   </th>
                   <th class="p-0 pb-4 pr-6 font-normal text-right">Cost Basis</th>
                   <th class="p-0 pb-4 pr-6 font-normal text-right">
-                    <button phx-click="sort" phx-value-column="unrealized_pnl" class="hover:text-zinc-700">
+                    <button phx-click="sort" phx-value-column="unrealized_pnl" class="hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded" aria-label="Sort by profit and loss">
                       P&L {sort_indicator(@sort_by, @sort_order, :unrealized_pnl)}
                     </button>
                   </th>
                 </tr>
               </thead>
               <tbody class="relative divide-y divide-zinc-100 border-t border-zinc-200 text-sm leading-6 text-zinc-700">
-                <tr :for={holding <- @holdings} class="group hover:bg-zinc-50">
+                <tr :for={holding <- @holdings} class="group hover:bg-zinc-50" role="row">
                   <td class="relative p-0">
                     <div class="block py-4 pr-6">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 sm:rounded-l-xl" />

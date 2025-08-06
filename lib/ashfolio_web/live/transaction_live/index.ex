@@ -79,12 +79,12 @@ defmodule AshfolioWeb.TransactionLive.Index do
     ~H"""
     <div class="space-y-6">
       <!-- Header with New Transaction Button -->
-      <div class="flex justify-between items-center">
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 class="text-2xl font-bold text-gray-900"><%= @page_title %></h1>
           <p class="text-gray-600"><%= @page_subtitle %></p>
         </div>
-        <.button phx-click="new_transaction">
+        <.button phx-click="new_transaction" class="w-full sm:w-auto">
           <.icon name="hero-plus" class="w-4 h-4 mr-2" />
           New Transaction
         </.button>
@@ -106,8 +106,8 @@ defmodule AshfolioWeb.TransactionLive.Index do
             </.button>
           </div>
         <% else %>
-          <div class="overflow-y-auto px-4 sm:overflow-visible sm:px-0">
-            <table class="w-[60rem] mt-11 sm:w-full">
+          <div class="overflow-x-auto">
+            <table class="min-w-full mt-4" role="table" aria-label="Investment transactions">
               <thead class="text-sm text-left leading-6 text-zinc-500">
                 <tr>
                   <th class="p-0 pb-4 pr-6 font-normal">Date</th>
@@ -122,7 +122,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
                 </tr>
               </thead>
               <tbody class="relative divide-y divide-zinc-100 border-t border-zinc-200 text-sm leading-6 text-zinc-700">
-                <tr :for={transaction <- @transactions} class="group hover:bg-zinc-50">
+                <tr :for={transaction <- @transactions} class="group hover:bg-zinc-50" role="row">
                   <td class="relative p-0">
                     <div class="block py-4 pr-6">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 sm:rounded-l-xl" />
@@ -176,25 +176,27 @@ defmodule AshfolioWeb.TransactionLive.Index do
                   <td class="relative p-0">
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 sm:rounded-r-xl" />
-                      <div class="flex justify-end space-x-2">
+                      <div class="flex flex-col sm:flex-row justify-end gap-2">
                         <.button
-                          class="text-sm px-2 py-1"
+                          class="text-sm px-3 py-2 w-full sm:w-auto"
                           phx-click="edit_transaction"
                           phx-value-id={transaction.id}
                           title="Edit transaction"
                           aria-label={"Edit transaction for #{transaction.symbol.symbol}"}
                         >
-                          Edit
+                          <.icon name="hero-pencil" class="w-4 h-4 sm:mr-1" />
+                          <span class="hidden sm:inline">Edit</span>
                         </.button>
                         <.button
-                          class="text-sm px-2 py-1 text-red-600 hover:text-red-700"
+                          class="text-sm px-3 py-2 w-full sm:w-auto text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-md"
                           phx-click="delete_transaction"
                           phx-value-id={transaction.id}
                           data-confirm="Are you sure you want to delete this transaction? This action cannot be undone."
                           title="Delete transaction"
                           aria-label={"Delete transaction for #{transaction.symbol.symbol}"}
                         >
-                          Delete
+                          <.icon name="hero-trash" class="w-4 h-4 sm:mr-1" />
+                          <span class="hidden sm:inline">Delete</span>
                         </.button>
                       </div>
                     </div>
