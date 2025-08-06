@@ -16,6 +16,8 @@ defmodule AshfolioWeb.TransactionLive.Index do
       |> assign(:show_form, false)
       |> assign(:form_action, :new)
       |> assign(:selected_transaction, nil)
+      |> assign(:editing_transaction_id, nil)
+      |> assign(:deleting_transaction_id, nil)
 
     {:ok, socket}
   end
@@ -37,37 +39,52 @@ defmodule AshfolioWeb.TransactionLive.Index do
      socket
      |> assign(:show_form, true)
      |> assign(:form_action, :edit)
-     |> assign(:selected_transaction, transaction)}
+     |> assign(:selected_transaction, transaction)
+     |> assign(:editing_transaction_id, id)}
   end
 
   @impl true
   def handle_event("delete_transaction", %{"id" => id}, socket) do
+    socket = assign(socket, :deleting_transaction_id, id)
+
     case Ashfolio.Portfolio.Transaction.destroy(id) do
       :ok ->
+        # Broadcast transaction deleted event
+        Ashfolio.PubSub.broadcast!("transactions", {:transaction_deleted, id})
+
         {:noreply,
          socket
          |> ErrorHelpers.put_success_flash("Transaction deleted successfully")
-         |> assign(:transactions, list_transactions())}
+         |> assign(:transactions, list_transactions())
+         |> assign(:deleting_transaction_id, nil)}
 
       {:error, reason} ->
         {:noreply,
          socket
-         |> ErrorHelpers.put_error_flash(reason, "Failed to delete transaction")}
+         |> ErrorHelpers.put_error_flash(reason, "Failed to delete transaction")
+         |> assign(:deleting_transaction_id, nil)}
     end
   end
 
   @impl true
-  def handle_info({FormComponent, {:saved, _transaction, message}}, socket) do
+  def handle_info({FormComponent, {:saved, transaction, message}}, socket) do
+    # Broadcast transaction saved event
+    Ashfolio.PubSub.broadcast!("transactions", {:transaction_saved, transaction})
+
     {:noreply,
      socket
      |> ErrorHelpers.put_success_flash(message)
      |> assign(:show_form, false)
-     |> assign(:transactions, list_transactions())}
+     |> assign(:transactions, list_transactions())
+     |> assign(:editing_transaction_id, nil)}
   end
 
   @impl true
   def handle_info({FormComponent, :cancel}, socket) do
-    {:noreply, assign(socket, :show_form, false)}
+    {:noreply,
+     socket
+     |> assign(:show_form, false)
+     |> assign(:editing_transaction_id, nil)}
   end
 
   defp list_transactions() do
@@ -88,7 +105,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
           <.icon name="hero-plus" class="w-4 h-4 mr-2" /> New Transaction
         </.button>
       </div>
-      
+
     <!-- Transaction List (Placeholder) -->
       <.card>
         <:header>
@@ -185,22 +202,36 @@ defmodule AshfolioWeb.TransactionLive.Index do
                           class="text-sm px-3 py-2 w-full sm:w-auto"
                           phx-click="edit_transaction"
                           phx-value-id={transaction.id}
+                          phx-disable-with="Opening..."
                           title="Edit transaction"
                           aria-label={"Edit transaction for #{transaction.symbol.symbol}"}
+                          disabled={@editing_transaction_id == transaction.id}
                         >
-                          <.icon name="hero-pencil" class="w-4 h-4 sm:mr-1" />
-                          <span class="hidden sm:inline">Edit</span>
+                          <%= if @editing_transaction_id == transaction.id do %>
+                            <.icon name="hero-arrow-path" class="w-4 h-4 sm:mr-1 animate-spin" />
+                            <span class="hidden sm:inline">Opening...</span>
+                          <% else %>
+                            <.icon name="hero-pencil" class="w-4 h-4 sm:mr-1" />
+                            <span class="hidden sm:inline">Edit</span>
+                          <% end %>
                         </.button>
                         <.button
                           class="text-sm px-3 py-2 w-full sm:w-auto text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-md"
                           phx-click="delete_transaction"
                           phx-value-id={transaction.id}
+                          phx-disable-with="Deleting..."
                           data-confirm="Are you sure you want to delete this transaction? This action cannot be undone."
                           title="Delete transaction"
                           aria-label={"Delete transaction for #{transaction.symbol.symbol}"}
+                          disabled={@deleting_transaction_id == transaction.id}
                         >
-                          <.icon name="hero-trash" class="w-4 h-4 sm:mr-1" />
-                          <span class="hidden sm:inline">Delete</span>
+                          <%= if @deleting_transaction_id == transaction.id do %>
+                            <.icon name="hero-arrow-path" class="w-4 h-4 sm:mr-1 animate-spin" />
+                            <span class="hidden sm:inline">Deleting...</span>
+                          <% else %>
+                            <.icon name="hero-trash" class="w-4 h-4 sm:mr-1" />
+                            <span class="hidden sm:inline">Delete</span>
+                          <% end %>
                         </.button>
                       </div>
                     </div>
@@ -211,7 +242,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
           </div>
         <% end %>
       </.card>
-      
+
     <!-- Form Modal -->
       <%= if @show_form do %>
         <.live_component

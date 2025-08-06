@@ -8,7 +8,10 @@ defmodule AshfolioWeb.DashboardLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    if connected?(socket), do: Ashfolio.PubSub.subscribe("accounts")
+    if connected?(socket) do
+      Ashfolio.PubSub.subscribe("accounts")
+      Ashfolio.PubSub.subscribe("transactions")
+    end
 
     socket =
       socket
@@ -95,6 +98,16 @@ defmodule AshfolioWeb.DashboardLive do
   end
 
   @impl true
+  def handle_info({:transaction_deleted, _transaction_id}, socket) do
+    {:noreply, load_portfolio_data(socket)}
+  end
+
+  @impl true
+  def handle_info({:transaction_saved, _transaction}, socket) do
+    {:noreply, load_portfolio_data(socket)}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="space-y-6">
@@ -126,7 +139,7 @@ defmodule AshfolioWeb.DashboardLive do
           </.button>
         </div>
       </div>
-      
+
     <!-- Portfolio Summary Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <.stat_card
@@ -144,7 +157,7 @@ defmodule AshfolioWeb.DashboardLive do
         />
         <.stat_card title="Holdings" value={@holdings_count} change={"#{@holdings_count} positions"} />
       </div>
-      
+
     <!-- Holdings Table -->
       <.card>
         <:header>
@@ -268,7 +281,7 @@ defmodule AshfolioWeb.DashboardLive do
           </div>
         <% end %>
       </.card>
-      
+
     <!-- Recent Activity -->
       <.card>
         <:header>

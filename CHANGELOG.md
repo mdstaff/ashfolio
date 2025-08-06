@@ -5,6 +5,55 @@ All notable changes to the Ashfolio project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.2] - 2025-08-06
+
+### Dashboard PubSub Integration ✅
+
+This release completes the PubSub integration by adding transaction event handlers to the dashboard, enabling real-time portfolio updates when transactions are modified.
+
+#### Added
+
+- **Dashboard Transaction Event Handling**
+  - ✅ Added `handle_info({:transaction_saved, _transaction}, socket)` to DashboardLive
+  - ✅ Added `handle_info({:transaction_deleted, _transaction_id}, socket)` to DashboardLive
+  - ✅ Dashboard now subscribes to "transactions" PubSub topic on mount
+  - ✅ Portfolio data automatically refreshes when transactions are created, updated, or deleted
+
+#### Technical Improvements
+
+- **Real-time Updates**: Dashboard portfolio calculations update immediately when transactions change
+- **Event-Driven Architecture**: Complete decoupling between transaction management and dashboard display
+- **User Experience**: No manual refresh needed - portfolio values update automatically
+- **SOLID Compliance**: Implements Dependency Inversion Principle with dashboard depending on PubSub abstraction
+
+#### Integration Tests
+
+- **Updated Integration Tests**
+  - ✅ Enhanced transaction PubSub tests to verify event broadcasting
+  - ✅ Added tests for dashboard event handling and portfolio data refresh
+  - ✅ Improved test coverage for real-time update scenarios
+
+## [0.26.1] - 2025-08-06
+
+### Phase 10 SOLID Principles Implementation ✅
+
+This release implements key SOLID principle recommendations, specifically enhancing the Open/Closed Principle and Dependency Inversion Principle through improved PubSub integration.
+
+#### Added
+
+- **Transaction PubSub Integration**
+  - ✅ Added `Ashfolio.PubSub.broadcast!("transactions", {:transaction_deleted, id})` to TransactionLive.Index
+  - ✅ Implemented consistent PubSub pattern for transaction deletion events
+  - ✅ Enhanced decoupling between TransactionLive and DashboardLive modules
+  - ✅ Follows SOLID recommendations from senior engineer review
+
+#### Technical Improvements
+
+- **Open/Closed Principle**: TransactionLive.Index now broadcasts events without requiring modification for new subscribers
+- **Dependency Inversion**: DashboardLive can subscribe to transaction events without direct coupling to TransactionLive internals
+- **Consistent Architecture**: Matches existing PubSub pattern used in AccountLive.Index for account events
+- **Event-Driven Design**: Enables future extensions for transaction-related notifications and updates
+
 ## [0.26.0] - 2025-08-06
 
 ### Phase 10 Critical Code Quality Fixes ✅
@@ -14,23 +63,27 @@ This release addresses critical compilation issues discovered during Phase 10 st
 #### Fixed
 
 - **Task 26.5.1: PubSub Implementation Issues**
+
   - ✅ Fixed `Ashfolio.PubSub` module structure with proper function exports
   - ✅ Added missing `broadcast!/2` function for raising PubSub operations
   - ✅ Resolved all `Ashfolio.PubSub.broadcast!/2` undefined function calls in AccountLive.Index
 
 - **Task 26.5.2: Module Aliases and References**
+
   - ✅ Added proper `ErrorHelpers` and `FormatHelpers` aliases to TransactionLive.Index
   - ✅ Removed unused `ErrorHelpers` alias from TransactionLive.FormComponent
   - ✅ Fixed all undefined module reference warnings
 
 - **Task 26.5.3: Ash Framework Function Calls**
+
   - ✅ Fixed `Ash.Query.filter/2` with proper `require Ash.Query` statement
   - ✅ Updated `Ashfolio.Portfolio.first/1` calls to `Ash.read_first/1`
   - ✅ Fixed `Symbol.list_symbols!/0` to correct `Symbol.list!/0` function call
   - ✅ Replaced deprecated `Transaction.changeset_for_create/*` with `AshPhoenix.Form` functions
   - ✅ Added `require_atomic? false` to Account resource update actions
 
-- **Task 26.5.4: Component Attribute Issues**  
+- **Task 26.5.4: Component Attribute Issues**
+
   - ✅ Removed undefined `size` and `variant` attributes from CoreComponents.button/1 calls
   - ✅ Fixed button component dynamic class array issues (converted to string interpolation)
   - ✅ Added missing `format_date/1` and `format_quantity/1` functions to FormatHelpers module
@@ -61,12 +114,14 @@ This release introduces comprehensive transaction management functionality, allo
 #### Added
 
 - **Transaction Entry Form (Task 24)**
+
   - ✅ Implemented `TransactionLive.FormComponent` for creating and editing transactions.
   - ✅ Supports core transaction types: `BUY`, `SELL`, `DIVIDEND`, `FEE`, `INTEREST`, and `LIABILITY`.
   - ✅ Dynamic dropdowns for selecting `Account` and `Symbol`.
   - ✅ Real-time validation and calculation of `total_amount`.
 
 - **Transaction Listing (Task 25)**
+
   - ✅ Displayed all transactions in a sortable table within `TransactionLive.Index`.
   - ✅ Includes columns for Date, Type, Symbol, Quantity, Price, Fee, Total Amount, and Account.
   - ✅ Implemented proper formatting for dates, quantities, and currency values.
@@ -92,11 +147,13 @@ This release marks the completion of the entire Account Management feature, incl
 #### Added
 
 - **Portfolio Integration (PubSub)**
+
   - ✅ Created a new `Ashfolio.PubSub` module for decoupled event-driven communication.
   - ✅ The `AccountLive` module now broadcasts events (`:account_saved`, `:account_deleted`, `:account_updated`) when account data changes.
   - ✅ The `DashboardLive` module subscribes to these events and automatically reloads portfolio data, ensuring the dashboard stays in sync with account modifications.
 
 - **Comprehensive Testing**
+
   - ✅ Added a new integration test (`account_management_integration_test.exs`) covering the full end-to-end account management workflow (create → edit → delete).
   - ✅ Created a new test file for the `FormComponent` (`form_component_test.exs`) to verify its validation, submission, and error handling logic.
 
@@ -107,6 +164,7 @@ This release marks the completion of the entire Account Management feature, incl
 #### Changed
 
 - **Enhanced Form Validation**
+
   - ✅ Added server-side validations for name length/format and a `get_by_name_for_user/2` function for uniqueness checks in the `Account` resource.
   - ✅ The `FormComponent` now includes a `check_name_uniqueness` function for real-time, client-side validation.
 
