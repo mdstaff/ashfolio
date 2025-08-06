@@ -8,28 +8,28 @@ defmodule Ashfolio.ErrorHandlerTest do
       error = {:error, :network_timeout}
 
       assert {:error, "Network connection issue. Please try again."} =
-        ErrorHandler.handle_error(error)
+               ErrorHandler.handle_error(error)
     end
 
     test "handles rate limit errors" do
       error = {:error, :rate_limited}
 
       assert {:error, "Market data temporarily unavailable. Using cached prices."} =
-        ErrorHandler.handle_error(error)
+               ErrorHandler.handle_error(error)
     end
 
     test "handles not found errors" do
       error = {:error, :not_found}
 
       assert {:error, "The requested information was not found."} =
-        ErrorHandler.handle_error(error)
+               ErrorHandler.handle_error(error)
     end
 
     test "handles stale data errors" do
       error = {:error, :stale}
 
       assert {:error, "Data may be outdated. Please refresh to get current information."} =
-        ErrorHandler.handle_error(error)
+               ErrorHandler.handle_error(error)
     end
 
     test "handles validation errors with changeset" do
@@ -47,7 +47,7 @@ defmodule Ashfolio.ErrorHandlerTest do
       error = {:error, :some_unknown_error}
 
       assert {:error, "An unexpected error occurred. Please try again."} =
-        ErrorHandler.handle_error(error)
+               ErrorHandler.handle_error(error)
     end
 
     test "includes context in logging" do
@@ -56,9 +56,10 @@ defmodule Ashfolio.ErrorHandlerTest do
       error = {:error, :test_error}
       context = %{user_id: "123", action: "test_action"}
 
-      log = capture_log(fn ->
-        ErrorHandler.handle_error(error, context)
-      end)
+      log =
+        capture_log(fn ->
+          ErrorHandler.handle_error(error, context)
+        end)
 
       assert log =~ "Error occurred"
       assert log =~ "test_error"
@@ -101,9 +102,10 @@ defmodule Ashfolio.ErrorHandlerTest do
       import ExUnit.CaptureLog
 
       # Test network error (warning level)
-      log = capture_log(fn ->
-        ErrorHandler.log_error({:error, :network_timeout})
-      end)
+      log =
+        capture_log(fn ->
+          ErrorHandler.log_error({:error, :network_timeout})
+        end)
 
       assert log =~ "[warning]"
       assert log =~ "Error occurred"
@@ -116,9 +118,10 @@ defmodule Ashfolio.ErrorHandlerTest do
       changeset = %Ecto.Changeset{valid?: false, errors: []}
 
       # Just test that logging doesn't crash - the exact log format is less important
-      log = capture_log(fn ->
-        ErrorHandler.log_error(changeset, %{})
-      end)
+      log =
+        capture_log(fn ->
+          ErrorHandler.log_error(changeset, %{})
+        end)
 
       # The log might be empty due to log level filtering, but the function should not crash
       assert is_binary(log)
@@ -127,9 +130,10 @@ defmodule Ashfolio.ErrorHandlerTest do
     test "logs system errors with error level" do
       import ExUnit.CaptureLog
 
-      log = capture_log(fn ->
-        ErrorHandler.log_error({:error, :unknown_system_error})
-      end)
+      log =
+        capture_log(fn ->
+          ErrorHandler.log_error({:error, :unknown_system_error})
+        end)
 
       assert log =~ "[error]"
       assert log =~ "Error occurred"

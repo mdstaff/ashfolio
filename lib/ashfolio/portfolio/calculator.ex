@@ -67,6 +67,7 @@ defmodule Ashfolio.Portfolio.Calculator do
       true ->
         # (current_value - cost_basis) / cost_basis * 100
         difference = Decimal.sub(current_value, cost_basis)
+
         percentage =
           difference
           |> Decimal.div(cost_basis)
@@ -115,7 +116,6 @@ defmodule Ashfolio.Portfolio.Calculator do
     with {:ok, portfolio_value} <- calculate_portfolio_value(user_id),
          {:ok, total_cost_basis} <- calculate_total_cost_basis(user_id),
          {:ok, return_percentage} <- calculate_simple_return(portfolio_value, total_cost_basis) do
-
       summary = %{
         total_value: portfolio_value,
         cost_basis: total_cost_basis,
@@ -139,9 +139,10 @@ defmodule Ashfolio.Portfolio.Calculator do
       # Get all accounts for the user (excluding excluded accounts)
       case Account.accounts_for_user(user_id) do
         {:ok, accounts} ->
-          active_accounts = Enum.filter(accounts, fn account ->
-            not account.is_excluded
-          end)
+          active_accounts =
+            Enum.filter(accounts, fn account ->
+              not account.is_excluded
+            end)
 
           if Enum.empty?(active_accounts) do
             Logger.debug("No active accounts found for user: #{user_id}")
@@ -190,10 +191,11 @@ defmodule Ashfolio.Portfolio.Calculator do
       {net_quantity, total_cost} = calculate_position_summary(symbol_transactions)
 
       # Get symbol data
-      symbol = case Symbol.get_by_id(symbol_id) do
-        {:ok, symbol} -> symbol
-        _ -> nil
-      end
+      symbol =
+        case Symbol.get_by_id(symbol_id) do
+          {:ok, symbol} -> symbol
+          _ -> nil
+        end
 
       %{
         symbol_id: symbol_id,
@@ -207,7 +209,8 @@ defmodule Ashfolio.Portfolio.Calculator do
   end
 
   defp calculate_position_summary(transactions) do
-    Enum.reduce(transactions, {Decimal.new(0), Decimal.new(0)}, fn transaction, {net_qty, total_cost} ->
+    Enum.reduce(transactions, {Decimal.new(0), Decimal.new(0)}, fn transaction,
+                                                                   {net_qty, total_cost} ->
       case transaction.type do
         :buy ->
           new_qty = Decimal.add(net_qty, transaction.quantity)
@@ -239,11 +242,13 @@ defmodule Ashfolio.Portfolio.Calculator do
 
   defp calculate_position_data(holding) do
     current_price = get_current_price(holding.symbol)
-    current_value = if current_price do
-      Decimal.mult(holding.quantity, current_price)
-    else
-      Decimal.new(0)
-    end
+
+    current_value =
+      if current_price do
+        Decimal.mult(holding.quantity, current_price)
+      else
+        Decimal.new(0)
+      end
 
     {:ok, return_pct} = calculate_simple_return(current_value, holding.cost_basis)
 
@@ -268,7 +273,9 @@ defmodule Ashfolio.Portfolio.Calculator do
           {:ok, cached_data} -> cached_data.price
           _ -> nil
         end
-      price -> price
+
+      price ->
+        price
     end
   end
 

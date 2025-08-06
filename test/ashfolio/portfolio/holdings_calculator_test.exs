@@ -10,42 +10,46 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       {:ok, user} = User.create(%{name: "Test User"})
       {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
 
-      {:ok, symbol1} = Symbol.create(%{
-        symbol: "AAPL",
-        name: "Apple Inc.",
-        asset_class: :stock,
-        data_source: :yahoo_finance,
-        current_price: Decimal.new("150.00")
-      })
+      {:ok, symbol1} =
+        Symbol.create(%{
+          symbol: "AAPL",
+          name: "Apple Inc.",
+          asset_class: :stock,
+          data_source: :yahoo_finance,
+          current_price: Decimal.new("150.00")
+        })
 
-      {:ok, symbol2} = Symbol.create(%{
-        symbol: "MSFT",
-        name: "Microsoft",
-        asset_class: :stock,
-        data_source: :yahoo_finance,
-        current_price: Decimal.new("300.00")
-      })
+      {:ok, symbol2} =
+        Symbol.create(%{
+          symbol: "MSFT",
+          name: "Microsoft",
+          asset_class: :stock,
+          data_source: :yahoo_finance,
+          current_price: Decimal.new("300.00")
+        })
 
       # Create transactions
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("10"),
-        price: Decimal.new("100.00"),
-        total_amount: Decimal.new("1000.00"),
-        date: ~D[2024-01-01],
-        account_id: account.id,
-        symbol_id: symbol1.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("10"),
+          price: Decimal.new("100.00"),
+          total_amount: Decimal.new("1000.00"),
+          date: ~D[2024-01-01],
+          account_id: account.id,
+          symbol_id: symbol1.id
+        })
 
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("5"),
-        price: Decimal.new("200.00"),
-        total_amount: Decimal.new("1000.00"),
-        date: ~D[2024-01-02],
-        account_id: account.id,
-        symbol_id: symbol2.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("5"),
+          price: Decimal.new("200.00"),
+          total_amount: Decimal.new("1000.00"),
+          date: ~D[2024-01-02],
+          account_id: account.id,
+          symbol_id: symbol2.id
+        })
 
       # Calculate holding values
       {:ok, holdings} = HoldingsCalculator.calculate_holding_values(user.id)
@@ -56,53 +60,62 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       aapl_holding = Enum.find(holdings, fn h -> h.symbol == "AAPL" end)
       assert aapl_holding != nil
       assert Decimal.equal?(aapl_holding.quantity, Decimal.new("10"))
-      assert Decimal.equal?(aapl_holding.current_value, Decimal.new("1500.00"))  # 10 * $150
+      # 10 * $150
+      assert Decimal.equal?(aapl_holding.current_value, Decimal.new("1500.00"))
       assert Decimal.equal?(aapl_holding.cost_basis, Decimal.new("1000.00"))
-      assert Decimal.equal?(aapl_holding.unrealized_pnl, Decimal.new("500.00"))  # $1500 - $1000
-      assert Decimal.equal?(aapl_holding.unrealized_pnl_pct, Decimal.new("50.0"))  # 50% gain
+      # $1500 - $1000
+      assert Decimal.equal?(aapl_holding.unrealized_pnl, Decimal.new("500.00"))
+      # 50% gain
+      assert Decimal.equal?(aapl_holding.unrealized_pnl_pct, Decimal.new("50.0"))
 
       # Find MSFT holding
       msft_holding = Enum.find(holdings, fn h -> h.symbol == "MSFT" end)
       assert msft_holding != nil
       assert Decimal.equal?(msft_holding.quantity, Decimal.new("5"))
-      assert Decimal.equal?(msft_holding.current_value, Decimal.new("1500.00"))  # 5 * $300
+      # 5 * $300
+      assert Decimal.equal?(msft_holding.current_value, Decimal.new("1500.00"))
       assert Decimal.equal?(msft_holding.cost_basis, Decimal.new("1000.00"))
-      assert Decimal.equal?(msft_holding.unrealized_pnl, Decimal.new("500.00"))  # $1500 - $1000
-      assert Decimal.equal?(msft_holding.unrealized_pnl_pct, Decimal.new("50.0"))  # 50% gain
+      # $1500 - $1000
+      assert Decimal.equal?(msft_holding.unrealized_pnl, Decimal.new("500.00"))
+      # 50% gain
+      assert Decimal.equal?(msft_holding.unrealized_pnl_pct, Decimal.new("50.0"))
     end
 
     test "filters out positions with zero quantity" do
       {:ok, user} = User.create(%{name: "Test User"})
       {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
 
-      {:ok, symbol} = Symbol.create(%{
-        symbol: "AAPL",
-        name: "Apple Inc.",
-        asset_class: :stock,
-        data_source: :yahoo_finance,
-        current_price: Decimal.new("150.00")
-      })
+      {:ok, symbol} =
+        Symbol.create(%{
+          symbol: "AAPL",
+          name: "Apple Inc.",
+          asset_class: :stock,
+          data_source: :yahoo_finance,
+          current_price: Decimal.new("150.00")
+        })
 
       # Buy and then sell all shares
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("10"),
-        price: Decimal.new("100.00"),
-        total_amount: Decimal.new("1000.00"),
-        date: ~D[2024-01-01],
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("10"),
+          price: Decimal.new("100.00"),
+          total_amount: Decimal.new("1000.00"),
+          date: ~D[2024-01-01],
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
-      {:ok, _} = Transaction.create(%{
-        type: :sell,
-        quantity: Decimal.new("-10"),
-        price: Decimal.new("150.00"),
-        total_amount: Decimal.new("1500.00"),
-        date: ~D[2024-01-02],
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :sell,
+          quantity: Decimal.new("-10"),
+          price: Decimal.new("150.00"),
+          total_amount: Decimal.new("1500.00"),
+          date: ~D[2024-01-02],
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       {:ok, holdings} = HoldingsCalculator.calculate_holding_values(user.id)
 
@@ -124,22 +137,24 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       {:ok, user} = User.create(%{name: "Test User"})
       {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
 
-      {:ok, symbol} = Symbol.create(%{
-        symbol: "AAPL",
-        name: "Apple Inc.",
-        asset_class: :stock,
-        data_source: :yahoo_finance
-      })
+      {:ok, symbol} =
+        Symbol.create(%{
+          symbol: "AAPL",
+          name: "Apple Inc.",
+          asset_class: :stock,
+          data_source: :yahoo_finance
+        })
 
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("10"),
-        price: Decimal.new("100.00"),
-        total_amount: Decimal.new("1000.00"),
-        date: ~D[2024-01-01],
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("10"),
+          price: Decimal.new("100.00"),
+          total_amount: Decimal.new("1000.00"),
+          date: ~D[2024-01-01],
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       {:ok, cost_basis} = HoldingsCalculator.calculate_cost_basis(user.id, symbol.id)
 
@@ -152,39 +167,43 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       {:ok, user} = User.create(%{name: "Test User"})
       {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
 
-      {:ok, symbol} = Symbol.create(%{
-        symbol: "AAPL",
-        name: "Apple Inc.",
-        asset_class: :stock,
-        data_source: :yahoo_finance
-      })
+      {:ok, symbol} =
+        Symbol.create(%{
+          symbol: "AAPL",
+          name: "Apple Inc.",
+          asset_class: :stock,
+          data_source: :yahoo_finance
+        })
 
       # First buy
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("10"),
-        price: Decimal.new("100.00"),
-        total_amount: Decimal.new("1000.00"),
-        date: ~D[2024-01-01],
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("10"),
+          price: Decimal.new("100.00"),
+          total_amount: Decimal.new("1000.00"),
+          date: ~D[2024-01-01],
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       # Second buy at different price
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("5"),
-        price: Decimal.new("120.00"),
-        total_amount: Decimal.new("600.00"),
-        date: ~D[2024-01-02],
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("5"),
+          price: Decimal.new("120.00"),
+          total_amount: Decimal.new("600.00"),
+          date: ~D[2024-01-02],
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       {:ok, cost_basis} = HoldingsCalculator.calculate_cost_basis(user.id, symbol.id)
 
       assert Decimal.equal?(cost_basis.quantity, Decimal.new("15"))
-      assert Decimal.equal?(cost_basis.total_cost, Decimal.new("1600.00"))  # $1000 + $600
+      # $1000 + $600
+      assert Decimal.equal?(cost_basis.total_cost, Decimal.new("1600.00"))
       # Average cost: $1600 / 15 shares = $106.67 (rounded)
       expected_avg = Decimal.div(Decimal.new("1600.00"), Decimal.new("15"))
       assert Decimal.equal?(cost_basis.average_cost, expected_avg)
@@ -194,38 +213,42 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       {:ok, user} = User.create(%{name: "Test User"})
       {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
 
-      {:ok, symbol} = Symbol.create(%{
-        symbol: "AAPL",
-        name: "Apple Inc.",
-        asset_class: :stock,
-        data_source: :yahoo_finance
-      })
+      {:ok, symbol} =
+        Symbol.create(%{
+          symbol: "AAPL",
+          name: "Apple Inc.",
+          asset_class: :stock,
+          data_source: :yahoo_finance
+        })
 
       # Buy 20 shares
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("20"),
-        price: Decimal.new("100.00"),
-        total_amount: Decimal.new("2000.00"),
-        date: ~D[2024-01-01],
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("20"),
+          price: Decimal.new("100.00"),
+          total_amount: Decimal.new("2000.00"),
+          date: ~D[2024-01-01],
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       # Sell 5 shares
-      {:ok, _} = Transaction.create(%{
-        type: :sell,
-        quantity: Decimal.new("-5"),
-        price: Decimal.new("120.00"),
-        total_amount: Decimal.new("600.00"),
-        date: ~D[2024-01-02],
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :sell,
+          quantity: Decimal.new("-5"),
+          price: Decimal.new("120.00"),
+          total_amount: Decimal.new("600.00"),
+          date: ~D[2024-01-02],
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       {:ok, cost_basis} = HoldingsCalculator.calculate_cost_basis(user.id, symbol.id)
 
-      assert Decimal.equal?(cost_basis.quantity, Decimal.new("15"))  # 20 - 5
+      # 20 - 5
+      assert Decimal.equal?(cost_basis.quantity, Decimal.new("15"))
       # Cost basis should be reduced proportionally: $2000 - ($2000 * 5/20) = $2000 - $500 = $1500
       assert Decimal.equal?(cost_basis.total_cost, Decimal.new("1500.00"))
       # Average cost: $1500 / 15 = $100
@@ -238,64 +261,72 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       {:ok, user} = User.create(%{name: "Test User"})
       {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
 
-      {:ok, symbol} = Symbol.create(%{
-        symbol: "AAPL",
-        name: "Apple Inc.",
-        asset_class: :stock,
-        data_source: :yahoo_finance,
-        current_price: Decimal.new("150.00")
-      })
+      {:ok, symbol} =
+        Symbol.create(%{
+          symbol: "AAPL",
+          name: "Apple Inc.",
+          asset_class: :stock,
+          data_source: :yahoo_finance,
+          current_price: Decimal.new("150.00")
+        })
 
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("10"),
-        price: Decimal.new("100.00"),
-        total_amount: Decimal.new("1000.00"),
-        date: ~D[2024-01-01],
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("10"),
+          price: Decimal.new("100.00"),
+          total_amount: Decimal.new("1000.00"),
+          date: ~D[2024-01-01],
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       {:ok, pnl} = HoldingsCalculator.calculate_holding_pnl(user.id, symbol.id)
 
       assert pnl.symbol == "AAPL"
       assert Decimal.equal?(pnl.quantity, Decimal.new("10"))
       assert Decimal.equal?(pnl.current_price, Decimal.new("150.00"))
-      assert Decimal.equal?(pnl.current_value, Decimal.new("1500.00"))  # 10 * $150
+      # 10 * $150
+      assert Decimal.equal?(pnl.current_value, Decimal.new("1500.00"))
       assert Decimal.equal?(pnl.cost_basis, Decimal.new("1000.00"))
       assert Decimal.equal?(pnl.average_cost, Decimal.new("100.00"))
-      assert Decimal.equal?(pnl.unrealized_pnl, Decimal.new("500.00"))  # $1500 - $1000
+      # $1500 - $1000
+      assert Decimal.equal?(pnl.unrealized_pnl, Decimal.new("500.00"))
     end
 
     test "handles holdings with no current price" do
       {:ok, user} = User.create(%{name: "Test User"})
       {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
 
-      {:ok, symbol} = Symbol.create(%{
-        symbol: "NOPRICE",
-        name: "No Price Corp.",
-        asset_class: :stock,
-        data_source: :yahoo_finance
-        # No current_price set
-      })
+      {:ok, symbol} =
+        Symbol.create(%{
+          symbol: "NOPRICE",
+          name: "No Price Corp.",
+          asset_class: :stock,
+          data_source: :yahoo_finance
+          # No current_price set
+        })
 
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("10"),
-        price: Decimal.new("100.00"),
-        total_amount: Decimal.new("1000.00"),
-        date: ~D[2024-01-01],
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("10"),
+          price: Decimal.new("100.00"),
+          total_amount: Decimal.new("1000.00"),
+          date: ~D[2024-01-01],
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       {:ok, pnl} = HoldingsCalculator.calculate_holding_pnl(user.id, symbol.id)
 
       assert pnl.symbol == "NOPRICE"
       assert pnl.current_price == nil
-      assert Decimal.equal?(pnl.current_value, Decimal.new("0"))  # No price = $0 value
+      # No price = $0 value
+      assert Decimal.equal?(pnl.current_value, Decimal.new("0"))
       assert Decimal.equal?(pnl.cost_basis, Decimal.new("1000.00"))
-      assert Decimal.equal?(pnl.unrealized_pnl, Decimal.new("-1000.00"))  # $0 - $1000
+      # $0 - $1000
+      assert Decimal.equal?(pnl.unrealized_pnl, Decimal.new("-1000.00"))
     end
   end
 
@@ -304,42 +335,46 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       {:ok, user} = User.create(%{name: "Test User"})
       {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
 
-      {:ok, symbol1} = Symbol.create(%{
-        symbol: "AAPL",
-        name: "Apple Inc.",
-        asset_class: :stock,
-        data_source: :yahoo_finance,
-        current_price: Decimal.new("150.00")
-      })
+      {:ok, symbol1} =
+        Symbol.create(%{
+          symbol: "AAPL",
+          name: "Apple Inc.",
+          asset_class: :stock,
+          data_source: :yahoo_finance,
+          current_price: Decimal.new("150.00")
+        })
 
-      {:ok, symbol2} = Symbol.create(%{
-        symbol: "MSFT",
-        name: "Microsoft",
-        asset_class: :stock,
-        data_source: :yahoo_finance,
-        current_price: Decimal.new("300.00")
-      })
+      {:ok, symbol2} =
+        Symbol.create(%{
+          symbol: "MSFT",
+          name: "Microsoft",
+          asset_class: :stock,
+          data_source: :yahoo_finance,
+          current_price: Decimal.new("300.00")
+        })
 
       # Create transactions
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("10"),
-        price: Decimal.new("100.00"),
-        total_amount: Decimal.new("1000.00"),
-        date: ~D[2024-01-01],
-        account_id: account.id,
-        symbol_id: symbol1.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("10"),
+          price: Decimal.new("100.00"),
+          total_amount: Decimal.new("1000.00"),
+          date: ~D[2024-01-01],
+          account_id: account.id,
+          symbol_id: symbol1.id
+        })
 
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("5"),
-        price: Decimal.new("200.00"),
-        total_amount: Decimal.new("1000.00"),
-        date: ~D[2024-01-02],
-        account_id: account.id,
-        symbol_id: symbol2.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("5"),
+          price: Decimal.new("200.00"),
+          total_amount: Decimal.new("1000.00"),
+          date: ~D[2024-01-02],
+          account_id: account.id,
+          symbol_id: symbol2.id
+        })
 
       {:ok, total_value} = HoldingsCalculator.aggregate_portfolio_value(user.id)
 
@@ -362,31 +397,36 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       {:ok, user} = User.create(%{name: "Test User"})
       {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
 
-      {:ok, symbol} = Symbol.create(%{
-        symbol: "AAPL",
-        name: "Apple Inc.",
-        asset_class: :stock,
-        data_source: :yahoo_finance,
-        current_price: Decimal.new("150.00")
-      })
+      {:ok, symbol} =
+        Symbol.create(%{
+          symbol: "AAPL",
+          name: "Apple Inc.",
+          asset_class: :stock,
+          data_source: :yahoo_finance,
+          current_price: Decimal.new("150.00")
+        })
 
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("10"),
-        price: Decimal.new("100.00"),
-        total_amount: Decimal.new("1000.00"),
-        date: ~D[2024-01-01],
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("10"),
+          price: Decimal.new("100.00"),
+          total_amount: Decimal.new("1000.00"),
+          date: ~D[2024-01-01],
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       {:ok, summary} = HoldingsCalculator.get_holdings_summary(user.id)
 
       assert summary.holdings_count == 1
-      assert Decimal.equal?(summary.total_value, Decimal.new("1500.00"))  # 10 * $150
+      # 10 * $150
+      assert Decimal.equal?(summary.total_value, Decimal.new("1500.00"))
       assert Decimal.equal?(summary.total_cost_basis, Decimal.new("1000.00"))
-      assert Decimal.equal?(summary.total_pnl, Decimal.new("500.00"))  # $1500 - $1000
-      assert Decimal.equal?(summary.total_pnl_pct, Decimal.new("50.0"))  # 50% gain
+      # $1500 - $1000
+      assert Decimal.equal?(summary.total_pnl, Decimal.new("500.00"))
+      # 50% gain
+      assert Decimal.equal?(summary.total_pnl_pct, Decimal.new("50.0"))
 
       # Check individual holding in summary
       holding = List.first(summary.holdings)

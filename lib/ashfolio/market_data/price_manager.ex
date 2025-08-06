@@ -37,7 +37,11 @@ defmodule Ashfolio.MarketData.PriceManager do
 
   import Ash.Query, only: [filter: 2, select: 2]
 
-  @yahoo_finance_module Application.compile_env(:ashfolio, :yahoo_finance_module, Ashfolio.MarketData.YahooFinance)
+  @yahoo_finance_module Application.compile_env(
+                          :ashfolio,
+                          :yahoo_finance_module,
+                          Ashfolio.MarketData.YahooFinance
+                        )
 
   # Client API
 
@@ -152,13 +156,17 @@ defmodule Ashfolio.MarketData.PriceManager do
   end
 
   def handle_call(:last_refresh, _from, state) do
-    last_refresh_info = case state.last_refresh_at do
-      nil -> nil
-      timestamp -> %{
-        timestamp: timestamp,
-        results: state.last_refresh_results || %{}
-      }
-    end
+    last_refresh_info =
+      case state.last_refresh_at do
+        nil ->
+          nil
+
+        timestamp ->
+          %{
+            timestamp: timestamp,
+            results: state.last_refresh_results || %{}
+          }
+      end
 
     {:reply, last_refresh_info, state}
   end
@@ -178,10 +186,7 @@ defmodule Ashfolio.MarketData.PriceManager do
   defp do_refresh(symbols, state) do
     start_time = System.monotonic_time(:millisecond)
 
-    new_state = %{state |
-      refreshing?: true,
-      last_refresh_at: DateTime.utc_now()
-    }
+    new_state = %{state | refreshing?: true, last_refresh_at: DateTime.utc_now()}
 
     # Perform the actual refresh
     results = refresh_symbol_prices(symbols)
@@ -190,13 +195,16 @@ defmodule Ashfolio.MarketData.PriceManager do
     duration_ms = end_time - start_time
 
     # Update state with results
-    final_state = %{new_state |
-      refreshing?: false,
-      last_refresh_results: Map.put(results, :duration_ms, duration_ms),
-      refresh_count: state.refresh_count + 1
+    final_state = %{
+      new_state
+      | refreshing?: false,
+        last_refresh_results: Map.put(results, :duration_ms, duration_ms),
+        refresh_count: state.refresh_count + 1
     }
 
-    Logger.info("Price refresh completed: #{results.success_count} success, #{results.failure_count} failures, #{duration_ms}ms")
+    Logger.info(
+      "Price refresh completed: #{results.success_count} success, #{results.failure_count} failures, #{duration_ms}ms"
+    )
 
     {:reply, {:ok, Map.put(results, :duration_ms, duration_ms)}, final_state}
   end
@@ -219,42 +227,47 @@ defmodule Ashfolio.MarketData.PriceManager do
   end
 
   defp fetch_individually(symbols) do
-    results = Enum.map(symbols, fn symbol ->
-      case @yahoo_finance_module.fetch_price(symbol) do
-        {:ok, price} ->
-          {symbol, {:ok, price}}
-        {:error, reason} ->
-          {symbol, {:error, reason}}
-      end
-    end)
+    results =
+      Enum.map(symbols, fn symbol ->
+        case @yahoo_finance_module.fetch_price(symbol) do
+          {:ok, price} ->
+            {symbol, {:ok, price}}
+
+          {:error, reason} ->
+            {symbol, {:error, reason}}
+        end
+      end)
 
     process_individual_results(results)
   end
 
   defp process_successful_prices(price_map, requested_symbols) do
-    successes = Enum.map(price_map, fn {symbol, price} ->
-      case store_price(symbol, price) do
-        :ok -> {symbol, {:ok, price}}
-        {:error, reason} -> {symbol, {:error, reason}}
-      end
-    end)
+    successes =
+      Enum.map(price_map, fn {symbol, price} ->
+        case store_price(symbol, price) do
+          :ok -> {symbol, {:ok, price}}
+          {:error, reason} -> {symbol, {:error, reason}}
+        end
+      end)
 
     # Find symbols that weren't returned in the batch
     returned_symbols = Map.keys(price_map)
     missing_symbols = requested_symbols -- returned_symbols
 
-    failures = Enum.map(missing_symbols, fn symbol ->
-      {symbol, {:error, :not_found}}
-    end)
+    failures =
+      Enum.map(missing_symbols, fn symbol ->
+        {symbol, {:error, :not_found}}
+      end)
 
     all_results = successes ++ failures
     process_individual_results(all_results)
   end
 
   defp process_individual_results(results) do
-    {successes, failures} = Enum.split_with(results, fn {_symbol, result} ->
-      match?({:ok, _}, result)
-    end)
+    {successes, failures} =
+      Enum.split_with(results, fn {_symbol, result} ->
+        match?({:ok, _}, result)
+      end)
 
     # Log failures for debugging
     Enum.each(failures, fn {symbol, {:error, reason}} ->
@@ -290,10 +303,14 @@ defmodule Ashfolio.MarketData.PriceManager do
   defp update_database(symbol_string, price, updated_at) do
     case Symbol.find_by_symbol(symbol_string) do
       {:ok, [symbol | _]} ->
-        case Ash.update(symbol, %{
-          current_price: price,
-          price_updated_at: updated_at
-        }, action: :update_price) do
+        case Ash.update(
+               symbol,
+               %{
+                 current_price: price,
+                 price_updated_at: updated_at
+               },
+               action: :update_price
+             ) do
           {:ok, updated_symbol} -> {:ok, updated_symbol}
           {:error, reason} -> {:error, reason}
         end
@@ -311,7 +328,8 @@ defmodule Ashfolio.MarketData.PriceManager do
   defp get_active_symbols do
     try do
       # Query symbols that have transactions (active holdings)
-      symbols = Symbol
+      symbols =
+        Symbol
         |> filter(exists(transactions, true))
         |> select([:symbol, :id])
         |> Ash.read!()

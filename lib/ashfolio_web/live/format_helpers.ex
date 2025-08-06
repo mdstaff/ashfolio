@@ -35,18 +35,20 @@ defmodule AshfolioWeb.Live.FormatHelpers do
     float_value = Decimal.to_float(value)
 
     # Handle negative values
-    {sign, abs_value} = if float_value < 0 do
-      {"-", abs(float_value)}
-    else
-      {"", float_value}
-    end
+    {sign, abs_value} =
+      if float_value < 0 do
+        {"-", abs(float_value)}
+      else
+        {"", float_value}
+      end
 
     # Format with commas and appropriate decimal places
-    formatted = if show_cents do
-      :erlang.float_to_binary(abs_value, decimals: 2)
-    else
-      :erlang.float_to_binary(abs_value, decimals: 0)
-    end
+    formatted =
+      if show_cents do
+        :erlang.float_to_binary(abs_value, decimals: 2)
+      else
+        :erlang.float_to_binary(abs_value, decimals: 0)
+      end
 
     # Add commas for thousands
     formatted_with_commas = add_commas(formatted)
@@ -183,11 +185,17 @@ defmodule AshfolioWeb.Live.FormatHelpers do
       iex> value_color_class(Decimal.new("-5.5"))
       "text-red-600"
   """
-  def value_color_class(value, positive_class \\ "text-green-600", negative_class \\ "text-red-600", neutral_class \\ "text-gray-600")
+  def value_color_class(
+        value,
+        positive_class \\ "text-green-600",
+        negative_class \\ "text-red-600",
+        neutral_class \\ "text-gray-600"
+      )
 
   def value_color_class(nil, _positive_class, _negative_class, neutral_class), do: neutral_class
 
-  def value_color_class(value, positive_class, negative_class, neutral_class) when is_struct(value, Decimal) do
+  def value_color_class(value, positive_class, negative_class, neutral_class)
+      when is_struct(value, Decimal) do
     cond do
       Decimal.positive?(value) -> positive_class
       Decimal.negative?(value) -> negative_class
@@ -195,7 +203,8 @@ defmodule AshfolioWeb.Live.FormatHelpers do
     end
   end
 
-  def value_color_class(value, positive_class, negative_class, neutral_class) when is_number(value) do
+  def value_color_class(value, positive_class, negative_class, neutral_class)
+      when is_number(value) do
     cond do
       value > 0 -> positive_class
       value < 0 -> negative_class
@@ -203,7 +212,8 @@ defmodule AshfolioWeb.Live.FormatHelpers do
     end
   end
 
-  def value_color_class(_value, _positive_class, _negative_class, neutral_class), do: neutral_class
+  def value_color_class(_value, _positive_class, _negative_class, neutral_class),
+    do: neutral_class
 
   # Private helper functions
 
@@ -230,35 +240,35 @@ defmodule AshfolioWeb.Live.FormatHelpers do
 
   @doc """
   Formats a Date as a readable string.
-  
+
   ## Examples
       iex> format_date(~D[2023-12-25])
       "Dec 25, 2023"
   """
   def format_date(nil), do: "N/A"
-  
+
   def format_date(%Date{} = date) do
     Calendar.strftime(date, "%b %d, %Y")
   end
-  
+
   def format_date(_date), do: "Invalid Date"
 
   @doc """
   Formats a quantity as a decimal number.
-  
+
   ## Examples
       iex> format_quantity(Decimal.new("123.456"))
       "123.456"
   """
   def format_quantity(nil), do: "0"
-  
+
   def format_quantity(value) when is_struct(value, Decimal) do
     Decimal.to_string(value)
   end
-  
+
   def format_quantity(value) when is_number(value) do
     :erlang.float_to_binary(value * 1.0, decimals: 3)
   end
-  
+
   def format_quantity(_value), do: "0"
 end

@@ -93,6 +93,7 @@ defmodule Ashfolio.MarketData.YahooFinance do
 
   defp make_request(symbol) do
     url = build_url(symbol)
+
     headers = [
       {"User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"},
       {"Accept", "application/json"}
@@ -131,7 +132,6 @@ defmodule Ashfolio.MarketData.YahooFinance do
   defp extract_current_price(result, symbol) do
     with %{"meta" => meta} <- result,
          %{"regularMarketPrice" => price} when is_number(price) <- meta do
-
       decimal_price = Decimal.from_float(price)
       Logger.debug("Successfully fetched price for #{symbol}: #{decimal_price}")
       {:ok, decimal_price}

@@ -11,7 +11,7 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
       <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-medium text-gray-900">
-            <%= if @action == :new, do: "New Account", else: "Edit Account" %>
+            {if @action == :new, do: "New Account", else: "Edit Account"}
           </h3>
           <button
             type="button"
@@ -22,22 +22,24 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
           >
             <span class="sr-only">Close</span>
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
-
-        <!-- Form-level error display -->
+        
+    <!-- Form-level error display -->
         <div :if={@form_errors != []} class="mb-4">
           <ErrorHelpers.error_list errors={@form_errors} title="Please correct the following errors:" />
         </div>
-
-        <!-- Network error display -->
+        
+    <!-- Network error display -->
         <div :if={@network_error} class="mb-4">
-          <ErrorHelpers.warning_banner
-            message={@network_error}
-            title="Connection Issue"
-          />
+          <ErrorHelpers.warning_banner message={@network_error} title="Connection Issue" />
           <div class="mt-2 flex gap-2">
             <button
               type="button"
@@ -81,8 +83,8 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
               {@validation_messages[:name]}
             </div>
           </div>
-
-          <!-- Platform Field with Enhanced Validation -->
+          
+    <!-- Platform Field with Enhanced Validation -->
           <div class="space-y-1">
             <.input
               field={@form[:platform]}
@@ -96,8 +98,8 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
               {@validation_messages[:platform]}
             </div>
           </div>
-
-          <!-- Balance Field with Enhanced Validation -->
+          
+    <!-- Balance Field with Enhanced Validation -->
           <div class="space-y-2">
             <div class="space-y-1">
               <.input
@@ -123,13 +125,15 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
               </p>
               <%= if @action == :edit and @account.balance_updated_at do %>
                 <p class="text-xs text-blue-600 mt-1">
-                  Balance last updated: <%= FormatHelpers.format_relative_time(@account.balance_updated_at) %>
+                  Balance last updated: {FormatHelpers.format_relative_time(
+                    @account.balance_updated_at
+                  )}
                 </p>
               <% end %>
             </div>
           </div>
-
-          <!-- Exclusion Checkbox with Enhanced Validation -->
+          
+    <!-- Exclusion Checkbox with Enhanced Validation -->
           <div class="space-y-1">
             <.input
               field={@form[:is_excluded]}
@@ -150,34 +154,48 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
             <div class="w-full">
               <.button
                 type="submit"
-                disabled={@saving or not @form.valid?}
-                class={"w-full relative #{(@saving or not @form.valid?) && "opacity-50 cursor-not-allowed"}"}
+                disabled={@saving}
+                class={"w-full relative #{@saving && "opacity-50 cursor-not-allowed"}"}
               >
                 <%= if @saving do %>
                   <div class="flex items-center justify-center">
-                    <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      class="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      >
+                      </circle>
+                      <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      >
+                      </path>
                     </svg>
                     Saving...
                   </div>
                 <% else %>
-                  <%= if @action == :new, do: "Create Account", else: "Update Account" %>
+                  {if @action == :new, do: "Create Account", else: "Update Account"}
                 <% end %>
               </.button>
-
-              <!-- Form validation status -->
-              <div :if={not @form.valid? and @form.submitted?} class="mt-2 text-center">
-                <p class="text-xs text-red-600">
-                  <.icon name="hero-exclamation-triangle-mini" class="h-3 w-3 inline mr-1" />
-                  Please fix the errors above before submitting
-                </p>
-              </div>
-
-              <!-- Save shortcut hint -->
-              <div :if={@form.valid? and not @saving} class="mt-2 text-center">
+              
+    <!-- Save shortcut hint -->
+              <div :if={not @saving} class="mt-2 text-center">
                 <p class="text-xs text-gray-500">
-                  Press <kbd class="px-1 py-0.5 text-xs font-mono bg-gray-100 border border-gray-300 rounded">Enter</kbd> to save
+                  Press
+                  <kbd class="px-1 py-0.5 text-xs font-mono bg-gray-100 border border-gray-300 rounded">
+                    Enter
+                  </kbd>
+                  to save
                 </p>
               </div>
             </div>
@@ -190,12 +208,14 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
 
   @impl true
   def update(%{account: _account} = assigns, socket) do
-    form = case assigns.action do
-      :new ->
-        AshPhoenix.Form.for_create(Account, :create)
-      :edit ->
-        AshPhoenix.Form.for_update(assigns.account, :update)
-    end
+    form =
+      case assigns.action do
+        :new ->
+          AshPhoenix.Form.for_create(Account, :create)
+
+        :edit ->
+          AshPhoenix.Form.for_update(assigns.account, :update)
+      end
 
     {:ok,
      socket
@@ -232,16 +252,19 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
   @impl true
   def handle_event("save", %{"form" => form_params}, socket) do
     # Set saving state and clear errors
-    socket = socket
-    |> assign(:saving, true)
-    |> assign(:network_error, nil)
-    |> assign(:form_errors, [])
+    socket =
+      socket
+      |> assign(:saving, true)
+      |> assign(:network_error, nil)
+      |> assign(:form_errors, [])
 
-    current_account_id = if socket.assigns.action == :edit, do: socket.assigns.account.id, else: nil
+    current_account_id =
+      if socket.assigns.action == :edit, do: socket.assigns.account.id, else: nil
 
     case check_name_uniqueness(form_params, socket.assigns.user_id, current_account_id) do
       {:ok, _} ->
         save_account(socket, socket.assigns.action, form_params)
+
       {:error, error_message} ->
         {:noreply,
          socket
@@ -261,10 +284,11 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
     # Retry the last save attempt
     form_params = socket.assigns.last_form_params
 
-    socket = socket
-    |> assign(:saving, true)
-    |> assign(:network_error, nil)
-    |> assign(:form_errors, [])
+    socket =
+      socket
+      |> assign(:saving, true)
+      |> assign(:network_error, nil)
+      |> assign(:form_errors, [])
 
     save_account(socket, socket.assigns.action, form_params)
   end
@@ -279,11 +303,13 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
 
     case AshPhoenix.Form.submit(socket.assigns.form, params: form_params) do
       {:ok, account} ->
-        success_message = if Map.get(form_params, "balance") && form_params["balance"] != "" do
-          "Account created successfully with balance of #{FormatHelpers.format_currency(account.balance)}"
-        else
-          "Account created successfully"
-        end
+        success_message =
+          if Map.get(form_params, "balance") && form_params["balance"] != "" do
+            "Account created successfully with balance of #{FormatHelpers.format_currency(account.balance)}"
+          else
+            "Account created successfully"
+          end
+
         notify_parent({:saved, account, success_message})
         {:noreply, assign(socket, :saving, false)}
 
@@ -308,13 +334,15 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
 
     case AshPhoenix.Form.submit(socket.assigns.form, params: form_params) do
       {:ok, account} ->
-        success_message = if Map.get(form_params, "balance") &&
-                             form_params["balance"] != "" &&
-                             !Decimal.equal?(old_balance, account.balance) do
-          "Account updated successfully. Balance changed to #{FormatHelpers.format_currency(account.balance)}"
-        else
-          "Account updated successfully"
-        end
+        success_message =
+          if Map.get(form_params, "balance") &&
+               form_params["balance"] != "" &&
+               !Decimal.equal?(old_balance, account.balance) do
+            "Account updated successfully. Balance changed to #{FormatHelpers.format_currency(account.balance)}"
+          else
+            "Account updated successfully"
+          end
+
         notify_parent({:saved, account, success_message})
         {:noreply, assign(socket, :saving, false)}
 
@@ -334,12 +362,14 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
       handle_save_exception(socket, error)
   end
 
-
-
   defp validate_balance_input(form_params) do
     case Map.get(form_params, "balance") do
-      nil -> form_params
-      "" -> form_params
+      nil ->
+        form_params
+
+      "" ->
+        form_params
+
       balance_string ->
         # Ensure balance has proper decimal formatting
         case Float.parse(balance_string) do
@@ -347,6 +377,7 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
             # Format to 2 decimal places
             formatted_balance = :erlang.float_to_binary(balance_float, decimals: 2)
             Map.put(form_params, "balance", formatted_balance)
+
           _ ->
             form_params
         end
@@ -357,70 +388,120 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
     messages = %{}
 
     # Name field validation messages
-    messages = case Map.get(form_params, "name") do
-      nil -> messages
-      "" -> messages
-      name when byte_size(name) < 2 ->
-        Map.put(messages, :name, "Account name should be at least 2 characters long")
-      name when byte_size(name) > 100 ->
-        Map.put(messages, :name, "Account name should be less than 100 characters")
-      name ->
-        if String.match?(name, ~r/^[a-zA-Z0-9\s\-_]+$/) do
-          Map.put(messages, :name, "Good! Account name looks valid")
-        else
-          Map.put(messages, :name, "Use only letters, numbers, spaces, hyphens, and underscores")
-        end
-    end
+    messages =
+      case Map.get(form_params, "name") do
+        nil ->
+          messages
+
+        "" ->
+          messages
+
+        name when byte_size(name) < 2 ->
+          Map.put(messages, :name, "Account name should be at least 2 characters long")
+
+        name when byte_size(name) > 100 ->
+          Map.put(messages, :name, "Account name should be less than 100 characters")
+
+        name ->
+          if String.match?(name, ~r/^[a-zA-Z0-9\s\-_]+$/) do
+            Map.put(messages, :name, "Good! Account name looks valid")
+          else
+            Map.put(
+              messages,
+              :name,
+              "Use only letters, numbers, spaces, hyphens, and underscores"
+            )
+          end
+      end
 
     # Platform field validation messages
-    messages = case Map.get(form_params, "platform") do
-      nil -> messages
-      "" -> messages
-      platform when byte_size(platform) > 50 ->
-        Map.put(messages, :platform, "Platform name should be less than 50 characters")
-      platform ->
-        common_platforms = ["Schwab", "Fidelity", "Vanguard", "TD Ameritrade", "E*TRADE", "Robinhood", "Interactive Brokers"]
-        if Enum.any?(common_platforms, &String.contains?(String.downcase(platform), String.downcase(&1))) do
-          Map.put(messages, :platform, "Great! We recognize this platform")
-        else
-          Map.put(messages, :platform, "Platform name looks good")
-        end
-    end
+    messages =
+      case Map.get(form_params, "platform") do
+        nil ->
+          messages
+
+        "" ->
+          messages
+
+        platform when byte_size(platform) > 50 ->
+          Map.put(messages, :platform, "Platform name should be less than 50 characters")
+
+        platform ->
+          common_platforms = [
+            "Schwab",
+            "Fidelity",
+            "Vanguard",
+            "TD Ameritrade",
+            "E*TRADE",
+            "Robinhood",
+            "Interactive Brokers"
+          ]
+
+          if Enum.any?(
+               common_platforms,
+               &String.contains?(String.downcase(platform), String.downcase(&1))
+             ) do
+            Map.put(messages, :platform, "Great! We recognize this platform")
+          else
+            Map.put(messages, :platform, "Platform name looks good")
+          end
+      end
 
     # Balance field validation messages
-    messages = case Map.get(form_params, "balance") do
-      nil -> messages
-      "" -> messages
-      balance_string ->
-        case Float.parse(balance_string) do
-          {balance, ""} when balance < 0 ->
-            Map.put(messages, :balance, "Balance cannot be negative")
-          {balance, ""} when balance > 10_000_000 ->
-            Map.put(messages, :balance, "That's a lot! Please verify this amount is correct")
-          {balance, ""} when balance > 0 ->
-            formatted = FormatHelpers.format_currency(Decimal.new(balance))
-            Map.put(messages, :balance, "Balance will be set to #{formatted}")
-          {+0.0, ""} ->
-            Map.put(messages, :balance, "Account will be created with zero balance")
-          _ ->
-            Map.put(messages, :balance, "Please enter a valid number (e.g., 1000.50)")
-        end
-    end
+    messages =
+      case Map.get(form_params, "balance") do
+        nil ->
+          messages
+
+        "" ->
+          messages
+
+        balance_string ->
+          case Float.parse(balance_string) do
+            {balance, ""} when balance < 0 ->
+              Map.put(messages, :balance, "Balance cannot be negative")
+
+            {balance, ""} when balance > 10_000_000 ->
+              Map.put(messages, :balance, "That's a lot! Please verify this amount is correct")
+
+            {balance, ""} when balance > 0 ->
+              formatted = FormatHelpers.format_currency(Decimal.new(balance))
+              Map.put(messages, :balance, "Balance will be set to #{formatted}")
+
+            {+0.0, ""} ->
+              Map.put(messages, :balance, "Account will be created with zero balance")
+
+            _ ->
+              Map.put(messages, :balance, "Please enter a valid number (e.g., 1000.50)")
+          end
+      end
 
     # Exclusion field validation messages
-    messages = case Map.get(form_params, "is_excluded") do
-      "true" ->
-        Map.put(messages, :is_excluded, "This account will be excluded from portfolio calculations")
-      _ ->
-        Map.put(messages, :is_excluded, "This account will be included in portfolio calculations")
-    end
+    messages =
+      case Map.get(form_params, "is_excluded") do
+        "true" ->
+          Map.put(
+            messages,
+            :is_excluded,
+            "This account will be excluded from portfolio calculations"
+          )
+
+        _ ->
+          Map.put(
+            messages,
+            :is_excluded,
+            "This account will be included in portfolio calculations"
+          )
+      end
 
     messages
   end
 
   defp extract_form_errors(form) do
     case form.errors do
-      [] -> []
+      [] ->
+        []
+
       errors ->
         errors
         |> Enum.map(fn {field, {message, _opts}} ->
@@ -436,13 +517,19 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
     error_messages = extract_form_errors(form)
 
     network_indicators = [
-      "timeout", "connection", "network", "unreachable",
-      "dns", "socket", "refused", "unavailable"
+      "timeout",
+      "connection",
+      "network",
+      "unreachable",
+      "dns",
+      "socket",
+      "refused",
+      "unavailable"
     ]
 
     if Enum.any?(error_messages, fn msg ->
-      Enum.any?(network_indicators, &String.contains?(String.downcase(msg), &1))
-    end) do
+         Enum.any?(network_indicators, &String.contains?(String.downcase(msg), &1))
+       end) do
       "Unable to save due to a connection issue. Please check your internet connection and try again."
     else
       nil
@@ -450,17 +537,19 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
   end
 
   defp handle_save_exception(socket, error) do
-    error_message = case error do
-      %{message: msg} when is_binary(msg) -> msg
-      _ -> "An unexpected error occurred while saving the account"
-    end
+    error_message =
+      case error do
+        %{message: msg} when is_binary(msg) -> msg
+        _ -> "An unexpected error occurred while saving the account"
+      end
 
-    network_error = if String.contains?(String.downcase(error_message), "timeout") or
-                       String.contains?(String.downcase(error_message), "connection") do
-      "Connection timeout occurred. Please try again."
-    else
-      "System error occurred. Please try again or contact support if the problem persists."
-    end
+    network_error =
+      if String.contains?(String.downcase(error_message), "timeout") or
+           String.contains?(String.downcase(error_message), "connection") do
+        "Connection timeout occurred. Please try again."
+      else
+        "System error occurred. Please try again or contact support if the problem persists."
+      end
 
     {:noreply,
      socket
@@ -482,16 +571,24 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
 
   defp check_name_uniqueness(form_params, user_id, current_account_id) do
     name = Map.get(form_params, "name")
-    return_value = {:ok, form_params}
 
     if name do
-      existing_account = Account.get_by_name_for_user(user_id, name)
+      case Account.get_by_name_for_user(user_id, name) do
+        {:ok, existing_account} when not is_nil(existing_account) ->
+          if existing_account.id != current_account_id do
+            {:error, "Account name '#{name}' is already taken. Please choose another."}
+          else
+            {:ok, form_params}
+          end
 
-      if existing_account && existing_account.id != current_account_id do
-        _return_value = {:error, "Account name '#{name}' is already taken. Please choose another."}
+        {:ok, nil} ->
+          {:ok, form_params}
+
+        {:error, _reason} ->
+          {:ok, form_params}
       end
+    else
+      {:ok, form_params}
     end
-
-    return_value
   end
 end

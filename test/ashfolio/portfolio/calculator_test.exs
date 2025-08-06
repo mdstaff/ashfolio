@@ -10,42 +10,46 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
       {:ok, user} = User.create(%{name: "Test User"})
       {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
 
-      {:ok, symbol1} = Symbol.create(%{
-        symbol: "AAPL",
-        name: "Apple Inc.",
-        asset_class: :stock,
-        data_source: :yahoo_finance,
-        current_price: Decimal.new("150.00")
-      })
+      {:ok, symbol1} =
+        Symbol.create(%{
+          symbol: "AAPL",
+          name: "Apple Inc.",
+          asset_class: :stock,
+          data_source: :yahoo_finance,
+          current_price: Decimal.new("150.00")
+        })
 
-      {:ok, symbol2} = Symbol.create(%{
-        symbol: "MSFT",
-        name: "Microsoft",
-        asset_class: :stock,
-        data_source: :yahoo_finance,
-        current_price: Decimal.new("300.00")
-      })
+      {:ok, symbol2} =
+        Symbol.create(%{
+          symbol: "MSFT",
+          name: "Microsoft",
+          asset_class: :stock,
+          data_source: :yahoo_finance,
+          current_price: Decimal.new("300.00")
+        })
 
       # Create transactions
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("10"),
-        price: Decimal.new("100.00"),
-        total_amount: Decimal.new("1000.00"),
-        date: ~D[2024-01-01],
-        account_id: account.id,
-        symbol_id: symbol1.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("10"),
+          price: Decimal.new("100.00"),
+          total_amount: Decimal.new("1000.00"),
+          date: ~D[2024-01-01],
+          account_id: account.id,
+          symbol_id: symbol1.id
+        })
 
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("5"),
-        price: Decimal.new("200.00"),
-        total_amount: Decimal.new("1000.00"),
-        date: ~D[2024-01-02],
-        account_id: account.id,
-        symbol_id: symbol2.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("5"),
+          price: Decimal.new("200.00"),
+          total_amount: Decimal.new("1000.00"),
+          date: ~D[2024-01-02],
+          account_id: account.id,
+          symbol_id: symbol2.id
+        })
 
       # Calculate portfolio value
       {:ok, portfolio_value} = Calculator.calculate_portfolio_value(user.id)
@@ -66,37 +70,42 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     test "excludes excluded accounts from calculation" do
       {:ok, user} = User.create(%{name: "Test User"})
       {:ok, active_account} = Account.create(%{name: "Active Account", user_id: user.id})
-      {:ok, excluded_account} = Account.create(%{name: "Excluded Account", user_id: user.id, is_excluded: true})
 
-      {:ok, symbol} = Symbol.create(%{
-        symbol: "AAPL",
-        name: "Apple Inc.",
-        asset_class: :stock,
-        data_source: :yahoo_finance,
-        current_price: Decimal.new("150.00")
-      })
+      {:ok, excluded_account} =
+        Account.create(%{name: "Excluded Account", user_id: user.id, is_excluded: true})
+
+      {:ok, symbol} =
+        Symbol.create(%{
+          symbol: "AAPL",
+          name: "Apple Inc.",
+          asset_class: :stock,
+          data_source: :yahoo_finance,
+          current_price: Decimal.new("150.00")
+        })
 
       # Transaction in active account
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("10"),
-        price: Decimal.new("100.00"),
-        total_amount: Decimal.new("1000.00"),
-        date: ~D[2024-01-01],
-        account_id: active_account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("10"),
+          price: Decimal.new("100.00"),
+          total_amount: Decimal.new("1000.00"),
+          date: ~D[2024-01-01],
+          account_id: active_account.id,
+          symbol_id: symbol.id
+        })
 
       # Transaction in excluded account
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("20"),
-        price: Decimal.new("100.00"),
-        total_amount: Decimal.new("2000.00"),
-        date: ~D[2024-01-01],
-        account_id: excluded_account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("20"),
+          price: Decimal.new("100.00"),
+          total_amount: Decimal.new("2000.00"),
+          date: ~D[2024-01-01],
+          account_id: excluded_account.id,
+          symbol_id: symbol.id
+        })
 
       {:ok, portfolio_value} = Calculator.calculate_portfolio_value(user.id)
 
@@ -156,42 +165,46 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
       {:ok, user} = User.create(%{name: "Test User"})
       {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
 
-      {:ok, symbol1} = Symbol.create(%{
-        symbol: "AAPL",
-        name: "Apple Inc.",
-        asset_class: :stock,
-        data_source: :yahoo_finance,
-        current_price: Decimal.new("150.00")
-      })
+      {:ok, symbol1} =
+        Symbol.create(%{
+          symbol: "AAPL",
+          name: "Apple Inc.",
+          asset_class: :stock,
+          data_source: :yahoo_finance,
+          current_price: Decimal.new("150.00")
+        })
 
-      {:ok, symbol2} = Symbol.create(%{
-        symbol: "MSFT",
-        name: "Microsoft",
-        asset_class: :stock,
-        data_source: :yahoo_finance,
-        current_price: Decimal.new("200.00")
-      })
+      {:ok, symbol2} =
+        Symbol.create(%{
+          symbol: "MSFT",
+          name: "Microsoft",
+          asset_class: :stock,
+          data_source: :yahoo_finance,
+          current_price: Decimal.new("200.00")
+        })
 
       # Create transactions
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("10"),
-        price: Decimal.new("100.00"),
-        total_amount: Decimal.new("1000.00"),
-        date: ~D[2024-01-01],
-        account_id: account.id,
-        symbol_id: symbol1.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("10"),
+          price: Decimal.new("100.00"),
+          total_amount: Decimal.new("1000.00"),
+          date: ~D[2024-01-01],
+          account_id: account.id,
+          symbol_id: symbol1.id
+        })
 
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("5"),
-        price: Decimal.new("250.00"),
-        total_amount: Decimal.new("1250.00"),
-        date: ~D[2024-01-02],
-        account_id: account.id,
-        symbol_id: symbol2.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("5"),
+          price: Decimal.new("250.00"),
+          total_amount: Decimal.new("1250.00"),
+          date: ~D[2024-01-02],
+          account_id: account.id,
+          symbol_id: symbol2.id
+        })
 
       {:ok, positions} = Calculator.calculate_position_returns(user.id)
 
@@ -201,51 +214,58 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
       aapl_position = Enum.find(positions, fn p -> p.symbol == "AAPL" end)
       assert aapl_position != nil
       assert Decimal.equal?(aapl_position.quantity, Decimal.new("10"))
-      assert Decimal.equal?(aapl_position.current_value, Decimal.new("1500.00"))  # 10 * $150
+      # 10 * $150
+      assert Decimal.equal?(aapl_position.current_value, Decimal.new("1500.00"))
       assert Decimal.equal?(aapl_position.cost_basis, Decimal.new("1000.00"))
-      assert Decimal.equal?(aapl_position.return_percentage, Decimal.new("50.0"))  # 50% gain
+      # 50% gain
+      assert Decimal.equal?(aapl_position.return_percentage, Decimal.new("50.0"))
 
       # Find MSFT position
       msft_position = Enum.find(positions, fn p -> p.symbol == "MSFT" end)
       assert msft_position != nil
       assert Decimal.equal?(msft_position.quantity, Decimal.new("5"))
-      assert Decimal.equal?(msft_position.current_value, Decimal.new("1000.00"))  # 5 * $200
+      # 5 * $200
+      assert Decimal.equal?(msft_position.current_value, Decimal.new("1000.00"))
       assert Decimal.equal?(msft_position.cost_basis, Decimal.new("1250.00"))
-      assert Decimal.equal?(msft_position.return_percentage, Decimal.new("-20.0"))  # 20% loss
+      # 20% loss
+      assert Decimal.equal?(msft_position.return_percentage, Decimal.new("-20.0"))
     end
 
     test "filters out positions with zero quantity" do
       {:ok, user} = User.create(%{name: "Test User"})
       {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
 
-      {:ok, symbol} = Symbol.create(%{
-        symbol: "AAPL",
-        name: "Apple Inc.",
-        asset_class: :stock,
-        data_source: :yahoo_finance,
-        current_price: Decimal.new("150.00")
-      })
+      {:ok, symbol} =
+        Symbol.create(%{
+          symbol: "AAPL",
+          name: "Apple Inc.",
+          asset_class: :stock,
+          data_source: :yahoo_finance,
+          current_price: Decimal.new("150.00")
+        })
 
       # Buy and then sell all shares
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("10"),
-        price: Decimal.new("100.00"),
-        total_amount: Decimal.new("1000.00"),
-        date: ~D[2024-01-01],
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("10"),
+          price: Decimal.new("100.00"),
+          total_amount: Decimal.new("1000.00"),
+          date: ~D[2024-01-01],
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
-      {:ok, _} = Transaction.create(%{
-        type: :sell,
-        quantity: Decimal.new("-10"),
-        price: Decimal.new("150.00"),
-        total_amount: Decimal.new("1500.00"),
-        date: ~D[2024-01-02],
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :sell,
+          quantity: Decimal.new("-10"),
+          price: Decimal.new("150.00"),
+          total_amount: Decimal.new("1500.00"),
+          date: ~D[2024-01-02],
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       {:ok, positions} = Calculator.calculate_position_returns(user.id)
 
@@ -260,30 +280,35 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
       {:ok, user} = User.create(%{name: "Test User"})
       {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
 
-      {:ok, symbol} = Symbol.create(%{
-        symbol: "AAPL",
-        name: "Apple Inc.",
-        asset_class: :stock,
-        data_source: :yahoo_finance,
-        current_price: Decimal.new("150.00")
-      })
+      {:ok, symbol} =
+        Symbol.create(%{
+          symbol: "AAPL",
+          name: "Apple Inc.",
+          asset_class: :stock,
+          data_source: :yahoo_finance,
+          current_price: Decimal.new("150.00")
+        })
 
-      {:ok, _} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("10"),
-        price: Decimal.new("100.00"),
-        total_amount: Decimal.new("1000.00"),
-        date: ~D[2024-01-01],
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("10"),
+          price: Decimal.new("100.00"),
+          total_amount: Decimal.new("1000.00"),
+          date: ~D[2024-01-01],
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       {:ok, summary} = Calculator.calculate_total_return(user.id)
 
-      assert Decimal.equal?(summary.total_value, Decimal.new("1500.00"))  # 10 * $150
+      # 10 * $150
+      assert Decimal.equal?(summary.total_value, Decimal.new("1500.00"))
       assert Decimal.equal?(summary.cost_basis, Decimal.new("1000.00"))
-      assert Decimal.equal?(summary.return_percentage, Decimal.new("50.0"))  # 50% gain
-      assert Decimal.equal?(summary.dollar_return, Decimal.new("500.00"))  # $500 gain
+      # 50% gain
+      assert Decimal.equal?(summary.return_percentage, Decimal.new("50.0"))
+      # $500 gain
+      assert Decimal.equal?(summary.dollar_return, Decimal.new("500.00"))
     end
 
     test "handles portfolio with no holdings" do

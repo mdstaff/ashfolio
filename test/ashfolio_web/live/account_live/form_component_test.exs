@@ -13,7 +13,9 @@ defmodule AshfolioWeb.AccountLive.FormComponentTest do
       assert has_element?(view, "#account-form")
 
       view
-      |> form("#account-form", account: %{name: "Valid Account", platform: "Valid Platform", balance: "1234.56"})
+      |> form("#account-form",
+        account: %{name: "Valid Account", platform: "Valid Platform", balance: "1234.56"}
+      )
       |> render_submit()
 
       refute has_element?(view, "#account-form")

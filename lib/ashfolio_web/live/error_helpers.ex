@@ -80,8 +80,9 @@ defmodule AshfolioWeb.Live.ErrorHelpers do
   - Updated socket with validation error flash message
   """
   def handle_form_errors(socket, %Ecto.Changeset{valid?: false} = changeset) do
-    error_message = Ashfolio.ErrorHandler.format_changeset_errors(changeset)
-    |> format_validation_errors()
+    error_message =
+      Ashfolio.ErrorHandler.format_changeset_errors(changeset)
+      |> format_validation_errors()
 
     put_error_flash(socket, error_message, gettext("Validation Error"))
   end

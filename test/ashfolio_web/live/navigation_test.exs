@@ -56,15 +56,27 @@ defmodule AshfolioWeb.NavigationTest do
       assert html =~ "Portfolio Dashboard"
 
       # Navigate to accounts (use desktop navigation)
-      {:ok, view, html} = view |> element("nav.hidden a[href='/accounts']") |> render_click() |> follow_redirect(conn)
+      {:ok, view, html} =
+        view
+        |> element("nav.hidden a[href='/accounts']")
+        |> render_click()
+        |> follow_redirect(conn)
+
       assert html =~ "Investment Accounts"
 
       # Navigate to transactions
-      {:ok, view, html} = view |> element("nav.hidden a[href='/transactions']") |> render_click() |> follow_redirect(conn)
+      {:ok, view, html} =
+        view
+        |> element("nav.hidden a[href='/transactions']")
+        |> render_click()
+        |> follow_redirect(conn)
+
       assert html =~ "Transactions"
 
       # Navigate back to dashboard
-      {:ok, _view, html} = view |> element("nav.hidden a[href='/']") |> render_click() |> follow_redirect(conn)
+      {:ok, _view, html} =
+        view |> element("nav.hidden a[href='/']") |> render_click() |> follow_redirect(conn)
+
       assert html =~ "Portfolio Dashboard"
     end
 

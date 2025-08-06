@@ -32,11 +32,13 @@ defmodule Ashfolio.CacheTest do
 
       # Manually insert stale cache entry (2 hours old)
       old_cached_at = DateTime.add(DateTime.utc_now(), -7200, :second)
+
       cache_entry = %{
         price: price,
         updated_at: DateTime.utc_now(),
         cached_at: old_cached_at
       }
+
       :ets.insert(:ashfolio_price_cache, {symbol, cache_entry})
 
       # Should be stale with 1 hour max age
@@ -52,8 +54,12 @@ defmodule Ashfolio.CacheTest do
       all_prices = Cache.get_all_prices()
 
       assert length(all_prices) == 2
-      assert {"AAPL", %{price: _, updated_at: _}} = Enum.find(all_prices, fn {symbol, _} -> symbol == "AAPL" end)
-      assert {"MSFT", %{price: _, updated_at: _}} = Enum.find(all_prices, fn {symbol, _} -> symbol == "MSFT" end)
+
+      assert {"AAPL", %{price: _, updated_at: _}} =
+               Enum.find(all_prices, fn {symbol, _} -> symbol == "AAPL" end)
+
+      assert {"MSFT", %{price: _, updated_at: _}} =
+               Enum.find(all_prices, fn {symbol, _} -> symbol == "MSFT" end)
     end
   end
 
@@ -87,11 +93,13 @@ defmodule Ashfolio.CacheTest do
 
       # Manually insert stale entry (2 hours old)
       old_cached_at = DateTime.add(DateTime.utc_now(), -7200, :second)
+
       stale_cache_entry = %{
         price: Decimal.new("300.50"),
         updated_at: DateTime.utc_now(),
         cached_at: old_cached_at
       }
+
       :ets.insert(:ashfolio_price_cache, {"MSFT", stale_cache_entry})
 
       # Cleanup with 1 hour threshold

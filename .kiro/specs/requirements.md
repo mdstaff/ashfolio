@@ -8,6 +8,7 @@ This document outlines the requirements for creating Ashfolio Phase 1, a simplif
 **Future Phases**: Real-time updates, advanced analytics, data import/export, macOS optimizations
 
 The application architecture:
+
 - **Backend**: Phoenix (Elixir) with Ash Framework
 - **Frontend**: Phoenix LiveView (simplified UI)
 - **Database**: SQLite with basic indexing
@@ -46,7 +47,7 @@ The application architecture:
 
 #### Acceptance Criteria
 
-1. WHEN a user creates a transaction THEN the system SHALL support multiple order types (BUY, SELL, DIVIDEND, FEE, INTEREST, LIABILITY)
+1. WHEN a user creates a transaction THEN the system SHALL support multiple order types (BUY, SELL, DIVIDEND, FEE, INTEREST)
 2. WHEN a user enters a transaction THEN the system SHALL require symbol, quantity, unit price, date, and currency
 3. WHEN a user creates a transaction THEN the system SHALL allow optional comments and fee tracking
 4. WHEN a user manages transactions THEN the system SHALL support draft transactions for incomplete entries
@@ -62,7 +63,7 @@ The application architecture:
 1. WHEN the system processes symbols THEN it SHALL support multiple data sources (Yahoo Finance, CoinGecko, Manual entry)
 2. WHEN market data is needed THEN it SHALL fetch and cache current and historical prices using ETS for real-time data
 3. WHEN a symbol is created THEN it SHALL store metadata including asset class, currency, ISIN, sectors, and countries
-4. WHEN market data is stale THEN it SHALL automatically refresh current prices every 1-5 minutes for active holdings and every 15-30 minutes for background data during market hours using Oban background jobs
+4. WHEN market data is stale THEN it SHALL display last updated timestamp and provide manual refresh option for user-initiated price updates
 5. WHEN a user searches symbols THEN it SHALL provide symbol lookup functionality across data sources
 6. WHEN external APIs are unavailable THEN the system SHALL gracefully degrade and allow manual price entry
 7. WHEN API failures occur THEN the system SHALL implement circuit breaker patterns with configurable failure thresholds (5 failures = open circuit)
@@ -75,7 +76,7 @@ The application architecture:
 #### Acceptance Criteria
 
 1. WHEN a user views portfolio THEN the system SHALL calculate total portfolio value as sum of all holdings
-2. WHEN performance is calculated THEN the system SHALL use simple return formula: (current_value - cost_basis) / cost_basis * 100
+2. WHEN performance is calculated THEN the system SHALL use simple return formula: (current_value - cost_basis) / cost_basis \* 100
 3. WHEN a user views dashboard THEN the system SHALL display total return percentage and dollar amount
 4. WHEN displaying holdings THEN the system SHALL show individual position gains/losses
 5. WHEN portfolio data changes THEN the system SHALL recalculate values on page refresh

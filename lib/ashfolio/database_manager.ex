@@ -271,22 +271,88 @@ defmodule Ashfolio.DatabaseManager do
 
     sample_transactions = [
       # Schwab account transactions
-      %{account_id: schwab.id, symbol_id: aapl.id, type: :buy, quantity: Decimal.new("100"), price: Decimal.new("145.00"), total_amount: Decimal.new("14500.00"), date: ~D[2024-01-15]},
-      %{account_id: schwab.id, symbol_id: msft.id, type: :buy, quantity: Decimal.new("50"), price: Decimal.new("290.00"), total_amount: Decimal.new("14500.00"), date: ~D[2024-02-01]},
-      %{account_id: schwab.id, symbol_id: aapl.id, type: :dividend, quantity: Decimal.new("100"), price: Decimal.new("0.25"), total_amount: Decimal.new("25.00"), date: ~D[2024-03-15]},
+      %{
+        account_id: schwab.id,
+        symbol_id: aapl.id,
+        type: :buy,
+        quantity: Decimal.new("100"),
+        price: Decimal.new("145.00"),
+        total_amount: Decimal.new("14500.00"),
+        date: ~D[2024-01-15]
+      },
+      %{
+        account_id: schwab.id,
+        symbol_id: msft.id,
+        type: :buy,
+        quantity: Decimal.new("50"),
+        price: Decimal.new("290.00"),
+        total_amount: Decimal.new("14500.00"),
+        date: ~D[2024-02-01]
+      },
+      %{
+        account_id: schwab.id,
+        symbol_id: aapl.id,
+        type: :dividend,
+        quantity: Decimal.new("100"),
+        price: Decimal.new("0.25"),
+        total_amount: Decimal.new("25.00"),
+        date: ~D[2024-03-15]
+      },
 
       # Fidelity account transactions
-      %{account_id: fidelity.id, symbol_id: spy.id, type: :buy, quantity: Decimal.new("50"), price: Decimal.new("380.00"), total_amount: Decimal.new("19000.00"), date: ~D[2024-01-20]},
-      %{account_id: fidelity.id, symbol_id: vti.id, type: :buy, quantity: Decimal.new("25"), price: Decimal.new("190.00"), total_amount: Decimal.new("4750.00"), date: ~D[2024-02-15]},
+      %{
+        account_id: fidelity.id,
+        symbol_id: spy.id,
+        type: :buy,
+        quantity: Decimal.new("50"),
+        price: Decimal.new("380.00"),
+        total_amount: Decimal.new("19000.00"),
+        date: ~D[2024-01-20]
+      },
+      %{
+        account_id: fidelity.id,
+        symbol_id: vti.id,
+        type: :buy,
+        quantity: Decimal.new("25"),
+        price: Decimal.new("190.00"),
+        total_amount: Decimal.new("4750.00"),
+        date: ~D[2024-02-15]
+      },
 
       # Crypto account transactions
-      %{account_id: crypto.id, symbol_id: btc.id, type: :buy, quantity: Decimal.new("0.1"), price: Decimal.new("45000.00"), total_amount: Decimal.new("4500.00"), fee: Decimal.new("25.00"), date: ~D[2024-03-01]},
+      %{
+        account_id: crypto.id,
+        symbol_id: btc.id,
+        type: :buy,
+        quantity: Decimal.new("0.1"),
+        price: Decimal.new("45000.00"),
+        total_amount: Decimal.new("4500.00"),
+        fee: Decimal.new("25.00"),
+        date: ~D[2024-03-01]
+      },
 
       # Additional Schwab transactions
-      %{account_id: schwab.id, symbol_id: tsla.id, type: :buy, quantity: Decimal.new("25"), price: Decimal.new("180.00"), total_amount: Decimal.new("4500.00"), date: ~D[2024-02-20]},
+      %{
+        account_id: schwab.id,
+        symbol_id: tsla.id,
+        type: :buy,
+        quantity: Decimal.new("25"),
+        price: Decimal.new("180.00"),
+        total_amount: Decimal.new("4500.00"),
+        date: ~D[2024-02-20]
+      },
 
       # Some fees
-      %{account_id: schwab.id, symbol_id: aapl.id, type: :fee, quantity: Decimal.new("0"), price: Decimal.new("0"), total_amount: Decimal.new("12.95"), fee: Decimal.new("12.95"), date: ~D[2024-01-15]}
+      %{
+        account_id: schwab.id,
+        symbol_id: aapl.id,
+        type: :fee,
+        quantity: Decimal.new("0"),
+        price: Decimal.new("0"),
+        total_amount: Decimal.new("12.95"),
+        fee: Decimal.new("12.95"),
+        date: ~D[2024-01-15]
+      }
     ]
 
     Enum.each(sample_transactions, fn transaction_attrs ->

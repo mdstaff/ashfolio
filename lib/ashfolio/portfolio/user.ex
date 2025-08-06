@@ -11,26 +11,26 @@ defmodule Ashfolio.Portfolio.User do
     data_layer: AshSqlite.DataLayer
 
   sqlite do
-    table "users"
-    repo Ashfolio.Repo
+    table("users")
+    repo(Ashfolio.Repo)
   end
 
   attributes do
-    uuid_primary_key :id
+    uuid_primary_key(:id)
 
     attribute :name, :string do
-      default "Local User"
-      allow_nil? false
+      default("Local User")
+      allow_nil?(false)
     end
 
     attribute :currency, :string do
-      default "USD"
-      allow_nil? false
+      default("USD")
+      allow_nil?(false)
     end
 
     attribute :locale, :string do
-      default "en-US"
-      allow_nil? false
+      default("en-US")
+      allow_nil?(false)
     end
 
     timestamps()
@@ -44,44 +44,44 @@ defmodule Ashfolio.Portfolio.User do
   end
 
   validations do
-    validate present(:name), message: "Name is required"
-    validate present(:currency), message: "Currency is required"
-    validate present(:locale), message: "Locale is required"
+    validate(present(:name), message: "Name is required")
+    validate(present(:currency), message: "Currency is required")
+    validate(present(:locale), message: "Locale is required")
 
     # Phase 1: USD-only validation
-    validate match(:currency, ~r/^USD$/), message: "Only USD currency is supported in Phase 1"
+    validate(match(:currency, ~r/^USD$/), message: "Only USD currency is supported in Phase 1")
   end
 
   actions do
-    defaults [:read, :update]
+    defaults([:read, :update])
 
     # Create action for seeding the default user
     create :create do
-      description "Create the default user (used only for seeding)"
-      accept [:name, :currency, :locale]
-      primary? true
+      description("Create the default user (used only for seeding)")
+      accept([:name, :currency, :locale])
+      primary?(true)
     end
 
     read :default_user do
-      description "Returns the single local user"
+      description("Returns the single local user")
 
-      prepare fn query, _context ->
+      prepare(fn query, _context ->
         # Always return the first (and only) user
         Ash.Query.limit(query, 1)
-      end
+      end)
     end
 
     update :update_preferences do
-      description "Update user preferences like name and locale"
-      accept [:name, :locale]
+      description("Update user preferences like name and locale")
+      accept([:name, :locale])
     end
   end
 
   code_interface do
-    domain Ashfolio.Portfolio
+    domain(Ashfolio.Portfolio)
 
-    define :create, action: :create
-    define :get_default_user, action: :default_user
-    define :update_preferences, action: :update_preferences
+    define(:create, action: :create)
+    define(:get_default_user, action: :default_user)
+    define(:update_preferences, action: :update_preferences)
   end
 end

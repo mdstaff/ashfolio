@@ -132,9 +132,7 @@ defmodule Ashfolio.Validation do
       |> validate_supported_currency(:currency)
   """
   def validate_supported_currency(changeset, field, _opts \\ []) do
-    validate_inclusion(changeset, field, ["USD"],
-      message: "only USD is supported in Phase 1"
-    )
+    validate_inclusion(changeset, field, ["USD"], message: "only USD is supported in Phase 1")
   end
 
   @doc """

@@ -20,7 +20,10 @@ defmodule Ashfolio.MarketData.PriceManagerSimpleTest do
       result = PriceManager.last_refresh()
 
       case result do
-        nil -> assert true  # Expected for fresh start
+        # Expected for fresh start
+        nil ->
+          assert true
+
         %{timestamp: timestamp, results: results} ->
           assert %DateTime{} = timestamp
           assert is_map(results)

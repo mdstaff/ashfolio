@@ -36,9 +36,11 @@ config :phoenix_live_view,
 
 # PriceManager test configuration
 config :ashfolio, Ashfolio.MarketData.PriceManager,
-  refresh_timeout: 5_000,   # Fast tests
+  # Fast tests
+  refresh_timeout: 5_000,
   batch_size: 5,
-  max_retries: 1            # Don't retry in tests
+  # Don't retry in tests
+  max_retries: 1
 
 # Use mock for Yahoo Finance in tests
 config :ashfolio, :yahoo_finance_module, YahooFinanceMock

@@ -10,7 +10,8 @@ defmodule Ashfolio.Cache do
   require Logger
 
   @cache_table :ashfolio_price_cache
-  @default_ttl_seconds 3600  # 1 hour default TTL
+  # 1 hour default TTL
+  @default_ttl_seconds 3600
 
   @doc """
   Initializes the ETS cache table.
@@ -23,10 +24,13 @@ defmodule Ashfolio.Cache do
           :set,
           :public,
           :named_table,
-          {:write_concurrency, true},  # Leverage M1 Pro's multiple cores
+          # Leverage M1 Pro's multiple cores
+          {:write_concurrency, true},
           {:read_concurrency, true},
-          {:decentralized_counters, true}  # Better performance on Apple Silicon
+          # Better performance on Apple Silicon
+          {:decentralized_counters, true}
         ])
+
         Logger.info("Initialized ETS price cache: #{@cache_table}")
         :ok
 
@@ -145,6 +149,7 @@ defmodule Ashfolio.Cache do
     Enum.each(stale_keys, &:ets.delete(@cache_table, &1))
 
     count = length(stale_keys)
+
     if count > 0 do
       Logger.info("Cleaned up #{count} stale cache entries")
     end

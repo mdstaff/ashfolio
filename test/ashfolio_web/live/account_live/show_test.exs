@@ -10,66 +10,72 @@ defmodule AshfolioWeb.AccountLive.ShowTest do
     {:ok, user} = User.create(%{name: "Test User", currency: "USD", locale: "en-US"})
 
     # Create test account
-    {:ok, account} = Account.create(%{
-      name: "Test Account",
-      platform: "Test Platform",
-      balance: Decimal.new("10000.00"),
-      user_id: user.id
-    })
+    {:ok, account} =
+      Account.create(%{
+        name: "Test Account",
+        platform: "Test Platform",
+        balance: Decimal.new("10000.00"),
+        user_id: user.id
+      })
 
     # Create test symbol
-    {:ok, symbol} = Symbol.create(%{
-      symbol: "AAPL",
-      name: "Apple Inc.",
-      asset_class: :stock,
-      data_source: :yahoo_finance,
-      current_price: Decimal.new("150.00")
-    })
+    {:ok, symbol} =
+      Symbol.create(%{
+        symbol: "AAPL",
+        name: "Apple Inc.",
+        asset_class: :stock,
+        data_source: :yahoo_finance,
+        current_price: Decimal.new("150.00")
+      })
 
     # Create test transactions
-    {:ok, buy_transaction} = Transaction.create(%{
-      type: :buy,
-      quantity: Decimal.new("10"),
-      price: Decimal.new("150.00"),
-      total_amount: Decimal.new("1500.00"),
-      fee: Decimal.new("1.00"),
-      date: Date.utc_today(),
-      account_id: account.id,
-      symbol_id: symbol.id
-    })
+    {:ok, buy_transaction} =
+      Transaction.create(%{
+        type: :buy,
+        quantity: Decimal.new("10"),
+        price: Decimal.new("150.00"),
+        total_amount: Decimal.new("1500.00"),
+        fee: Decimal.new("1.00"),
+        date: Date.utc_today(),
+        account_id: account.id,
+        symbol_id: symbol.id
+      })
 
-    {:ok, sell_transaction} = Transaction.create(%{
-      type: :sell,
-      quantity: Decimal.new("-5"),
-      price: Decimal.new("160.00"),
-      total_amount: Decimal.new("-800.00"),
-      fee: Decimal.new("1.00"),
-      date: Date.utc_today(),
-      account_id: account.id,
-      symbol_id: symbol.id
-    })
+    {:ok, sell_transaction} =
+      Transaction.create(%{
+        type: :sell,
+        quantity: Decimal.new("-5"),
+        price: Decimal.new("160.00"),
+        total_amount: Decimal.new("-800.00"),
+        fee: Decimal.new("1.00"),
+        date: Date.utc_today(),
+        account_id: account.id,
+        symbol_id: symbol.id
+      })
 
-    {:ok, dividend_transaction} = Transaction.create(%{
-      type: :dividend,
-      quantity: Decimal.new("10"),
-      price: Decimal.new("2.50"),
-      total_amount: Decimal.new("25.00"),
-      fee: Decimal.new("0.00"),
-      date: Date.utc_today(),
-      account_id: account.id,
-      symbol_id: symbol.id
-    })
+    {:ok, dividend_transaction} =
+      Transaction.create(%{
+        type: :dividend,
+        quantity: Decimal.new("10"),
+        price: Decimal.new("2.50"),
+        total_amount: Decimal.new("25.00"),
+        fee: Decimal.new("0.00"),
+        date: Date.utc_today(),
+        account_id: account.id,
+        symbol_id: symbol.id
+      })
 
-    {:ok, fee_transaction} = Transaction.create(%{
-      type: :fee,
-      quantity: Decimal.new("0"),
-      price: Decimal.new("0.00"),
-      total_amount: Decimal.new("5.00"),
-      fee: Decimal.new("0.00"),
-      date: Date.utc_today(),
-      account_id: account.id,
-      symbol_id: symbol.id
-    })
+    {:ok, fee_transaction} =
+      Transaction.create(%{
+        type: :fee,
+        quantity: Decimal.new("0"),
+        price: Decimal.new("0.00"),
+        total_amount: Decimal.new("5.00"),
+        fee: Decimal.new("0.00"),
+        date: Date.utc_today(),
+        account_id: account.id,
+        symbol_id: symbol.id
+      })
 
     %{
       user: user,
@@ -110,10 +116,14 @@ defmodule AshfolioWeb.AccountLive.ShowTest do
       assert html =~ "Fees"
 
       # Should show transaction totals
-      assert html =~ "$1,500.00"  # Buy total
-      assert html =~ "$800.00"    # Sell total
-      assert html =~ "$25.00"     # Dividend total
-      assert html =~ "$5.00"      # Fee total
+      # Buy total
+      assert html =~ "$1,500.00"
+      # Sell total
+      assert html =~ "$800.00"
+      # Dividend total
+      assert html =~ "$25.00"
+      # Fee total
+      assert html =~ "$5.00"
     end
 
     test "displays excluded account status", %{conn: conn, account: account} do
@@ -147,12 +157,13 @@ defmodule AshfolioWeb.AccountLive.ShowTest do
   describe "account with no transactions" do
     test "displays empty state when account has no transactions", %{conn: conn, user: user} do
       # Create account with no transactions
-      {:ok, empty_account} = Account.create(%{
-        name: "Empty Account",
-        platform: "Test Platform",
-        balance: Decimal.new("5000.00"),
-        user_id: user.id
-      })
+      {:ok, empty_account} =
+        Account.create(%{
+          name: "Empty Account",
+          platform: "Test Platform",
+          balance: Decimal.new("5000.00"),
+          user_id: user.id
+        })
 
       {:ok, _show_live, html} = live(conn, ~p"/accounts/#{empty_account.id}")
 

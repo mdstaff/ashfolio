@@ -108,7 +108,12 @@ defmodule AshfolioWeb.DashboardLive do
           </p>
         </div>
         <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <.button type="button" class="btn-secondary w-full sm:w-auto" disabled={@loading} phx-click="refresh_prices">
+          <.button
+            type="button"
+            class="btn-secondary w-full sm:w-auto"
+            disabled={@loading}
+            phx-click="refresh_prices"
+          >
             <%= if @loading do %>
               <.loading_spinner class="w-4 h-4 mr-2" />
             <% else %>
@@ -117,13 +122,12 @@ defmodule AshfolioWeb.DashboardLive do
             {if @loading, do: "Refreshing...", else: "Refresh Prices"}
           </.button>
           <.button type="button" class="btn-primary w-full sm:w-auto">
-            <.icon name="hero-plus" class="w-4 h-4 mr-2" />
-            Add Transaction
+            <.icon name="hero-plus" class="w-4 h-4 mr-2" /> Add Transaction
           </.button>
         </div>
       </div>
-
-      <!-- Portfolio Summary Cards -->
+      
+    <!-- Portfolio Summary Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <.stat_card
           title="Total Value"
@@ -131,26 +135,17 @@ defmodule AshfolioWeb.DashboardLive do
           change={@total_return_percent}
           positive={FormatHelpers.is_positive?(@total_return_amount)}
         />
-        <.stat_card
-          title="Daily Change"
-          value="N/A"
-          change="Phase 2"
-          positive={true}
-        />
+        <.stat_card title="Daily Change" value="N/A" change="Phase 2" positive={true} />
         <.stat_card
           title="Total Return"
           value={@total_return_amount}
           change={@total_return_percent}
           positive={FormatHelpers.is_positive?(@total_return_amount)}
         />
-        <.stat_card
-          title="Holdings"
-          value={@holdings_count}
-          change={"#{@holdings_count} positions"}
-        />
+        <.stat_card title="Holdings" value={@holdings_count} change={"#{@holdings_count} positions"} />
       </div>
-
-      <!-- Holdings Table -->
+      
+    <!-- Holdings Table -->
       <.card>
         <:header>
           <h2 class="text-lg font-medium text-gray-900">Current Holdings</h2>
@@ -165,7 +160,9 @@ defmodule AshfolioWeb.DashboardLive do
           <div class="text-center py-12">
             <.icon name="hero-chart-bar" class="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 class="text-lg font-medium text-gray-900 mb-2">No holdings yet</h3>
-            <p class="text-gray-600 mb-4">Start by adding your first transaction to see your portfolio here.</p>
+            <p class="text-gray-600 mb-4">
+              Start by adding your first transaction to see your portfolio here.
+            </p>
             <.button type="button" class="btn-primary">
               Add First Transaction
             </.button>
@@ -176,20 +173,35 @@ defmodule AshfolioWeb.DashboardLive do
               <thead class="text-sm text-left leading-6 text-zinc-500">
                 <tr>
                   <th class="p-0 pb-4 pr-6 font-normal">
-                    <button phx-click="sort" phx-value-column="symbol" class="hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded" aria-label="Sort by symbol">
+                    <button
+                      phx-click="sort"
+                      phx-value-column="symbol"
+                      class="hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded"
+                      aria-label="Sort by symbol"
+                    >
                       Symbol {sort_indicator(@sort_by, @sort_order, :symbol)}
                     </button>
                   </th>
                   <th class="p-0 pb-4 pr-6 font-normal text-right">Quantity</th>
                   <th class="p-0 pb-4 pr-6 font-normal text-right">Current Price</th>
                   <th class="p-0 pb-4 pr-6 font-normal text-right">
-                    <button phx-click="sort" phx-value-column="current_value" class="hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded" aria-label="Sort by current value">
+                    <button
+                      phx-click="sort"
+                      phx-value-column="current_value"
+                      class="hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded"
+                      aria-label="Sort by current value"
+                    >
                       Current Value {sort_indicator(@sort_by, @sort_order, :current_value)}
                     </button>
                   </th>
                   <th class="p-0 pb-4 pr-6 font-normal text-right">Cost Basis</th>
                   <th class="p-0 pb-4 pr-6 font-normal text-right">
-                    <button phx-click="sort" phx-value-column="unrealized_pnl" class="hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded" aria-label="Sort by profit and loss">
+                    <button
+                      phx-click="sort"
+                      phx-value-column="unrealized_pnl"
+                      class="hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded"
+                      aria-label="Sort by profit and loss"
+                    >
                       P&L {sort_indicator(@sort_by, @sort_order, :unrealized_pnl)}
                     </button>
                   </th>
@@ -215,27 +227,38 @@ defmodule AshfolioWeb.DashboardLive do
                   <td class="relative p-0">
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
-                      <span class="relative">{FormatHelpers.format_currency(holding.current_price)}</span>
+                      <span class="relative">
+                        {FormatHelpers.format_currency(holding.current_price)}
+                      </span>
                     </div>
                   </td>
                   <td class="relative p-0">
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
-                      <span class="relative">{FormatHelpers.format_currency(holding.current_value)}</span>
+                      <span class="relative">
+                        {FormatHelpers.format_currency(holding.current_value)}
+                      </span>
                     </div>
                   </td>
                   <td class="relative p-0">
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
-                      <span class="relative">{FormatHelpers.format_currency(holding.cost_basis)}</span>
+                      <span class="relative">
+                        {FormatHelpers.format_currency(holding.cost_basis)}
+                      </span>
                     </div>
                   </td>
                   <td class="relative p-0">
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 sm:rounded-r-xl" />
-                      <span class={["relative", FormatHelpers.value_color_class(holding.unrealized_pnl)]}>
+                      <span class={[
+                        "relative",
+                        FormatHelpers.value_color_class(holding.unrealized_pnl)
+                      ]}>
                         <div>{FormatHelpers.format_currency(holding.unrealized_pnl)}</div>
-                        <div class="text-sm">({FormatHelpers.format_percentage(holding.unrealized_pnl_pct)})</div>
+                        <div class="text-sm">
+                          ({FormatHelpers.format_percentage(holding.unrealized_pnl_pct)})
+                        </div>
                       </span>
                     </div>
                   </td>
@@ -245,8 +268,8 @@ defmodule AshfolioWeb.DashboardLive do
           </div>
         <% end %>
       </.card>
-
-      <!-- Recent Activity -->
+      
+    <!-- Recent Activity -->
       <.card>
         <:header>
           <h2 class="text-lg font-medium text-gray-900">Recent Activity</h2>
@@ -277,6 +300,7 @@ defmodule AshfolioWeb.DashboardLive do
 
       {:error, reason} ->
         Logger.warning("Failed to get default user: #{inspect(reason)}")
+
         socket
         |> assign_default_values()
         |> ErrorHelpers.put_error_flash("Unable to load user data")
@@ -286,11 +310,16 @@ defmodule AshfolioWeb.DashboardLive do
   defp load_user_portfolio_data(socket, user_id) do
     with {:ok, total_return_data} <- Calculator.calculate_total_return(user_id),
          {:ok, holdings_summary} <- HoldingsCalculator.get_holdings_summary(user_id) do
-
       socket
       |> assign(:portfolio_value, FormatHelpers.format_currency(total_return_data.total_value))
-      |> assign(:total_return_amount, FormatHelpers.format_currency(total_return_data.dollar_return))
-      |> assign(:total_return_percent, FormatHelpers.format_percentage(total_return_data.return_percentage))
+      |> assign(
+        :total_return_amount,
+        FormatHelpers.format_currency(total_return_data.dollar_return)
+      )
+      |> assign(
+        :total_return_percent,
+        FormatHelpers.format_percentage(total_return_data.return_percentage)
+      )
       |> assign(:cost_basis, FormatHelpers.format_currency(total_return_data.cost_basis))
       |> assign(:holdings_count, to_string(holdings_summary.holdings_count))
       |> assign(:holdings, holdings_summary.holdings)
@@ -298,10 +327,10 @@ defmodule AshfolioWeb.DashboardLive do
       |> assign(:sort_order, :asc)
       |> assign(:last_price_update, get_last_price_update())
       |> assign(:error, nil)
-
     else
       {:error, reason} ->
         Logger.warning("Failed to load portfolio data: #{inspect(reason)}")
+
         socket
         |> assign_default_values()
         |> ErrorHelpers.put_error_flash("Unable to load portfolio data")

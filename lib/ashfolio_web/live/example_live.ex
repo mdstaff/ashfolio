@@ -16,12 +16,13 @@ defmodule AshfolioWeb.ExampleLive do
 
   def handle_event("simulate_error", %{"type" => error_type}, socket) do
     # Simulate different types of errors for demonstration
-    error = case error_type do
-      "network" -> {:error, :network_timeout}
-      "validation" -> %Ecto.Changeset{valid?: false, errors: [name: {"can't be blank", []}]}
-      "system" -> {:error, :unknown_system_error}
-      _ -> {:error, :generic_error}
-    end
+    error =
+      case error_type do
+        "network" -> {:error, :network_timeout}
+        "validation" -> %Ecto.Changeset{valid?: false, errors: [name: {"can't be blank", []}]}
+        "system" -> {:error, :unknown_system_error}
+        _ -> {:error, :generic_error}
+      end
 
     socket = ErrorHelpers.put_error_flash(socket, error)
     {:noreply, socket}

@@ -81,16 +81,15 @@ defmodule AshfolioWeb.TransactionLive.Index do
       <!-- Header with New Transaction Button -->
       <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900"><%= @page_title %></h1>
-          <p class="text-gray-600"><%= @page_subtitle %></p>
+          <h1 class="text-2xl font-bold text-gray-900">{@page_title}</h1>
+          <p class="text-gray-600">{@page_subtitle}</p>
         </div>
         <.button phx-click="new_transaction" class="w-full sm:w-auto">
-          <.icon name="hero-plus" class="w-4 h-4 mr-2" />
-          New Transaction
+          <.icon name="hero-plus" class="w-4 h-4 mr-2" /> New Transaction
         </.button>
       </div>
-
-      <!-- Transaction List (Placeholder) -->
+      
+    <!-- Transaction List (Placeholder) -->
       <.card>
         <:header>
           <h2 class="text-lg font-medium text-gray-900">All Transactions</h2>
@@ -101,8 +100,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
             <h3 class="text-lg font-medium text-gray-900 mb-2">No transactions yet</h3>
             <p class="text-gray-600 mb-4">Start by adding your first transaction.</p>
             <.button phx-click="new_transaction">
-              <.icon name="hero-plus" class="w-4 h-4 mr-2" />
-              Add First Transaction
+              <.icon name="hero-plus" class="w-4 h-4 mr-2" /> Add First Transaction
             </.button>
           </div>
         <% else %>
@@ -134,7 +132,9 @@ defmodule AshfolioWeb.TransactionLive.Index do
                   <td class="relative p-0">
                     <div class="block py-4 pr-6">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
-                      <span class="relative">{String.capitalize(Atom.to_string(transaction.type))}</span>
+                      <span class="relative">
+                        {String.capitalize(Atom.to_string(transaction.type))}
+                      </span>
                     </div>
                   </td>
                   <td class="relative p-0">
@@ -146,7 +146,9 @@ defmodule AshfolioWeb.TransactionLive.Index do
                   <td class="relative p-0">
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
-                      <span class="relative">{FormatHelpers.format_quantity(transaction.quantity)}</span>
+                      <span class="relative">
+                        {FormatHelpers.format_quantity(transaction.quantity)}
+                      </span>
                     </div>
                   </td>
                   <td class="relative p-0">
@@ -164,7 +166,9 @@ defmodule AshfolioWeb.TransactionLive.Index do
                   <td class="relative p-0">
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
-                      <span class="relative">{FormatHelpers.format_currency(transaction.total_amount)}</span>
+                      <span class="relative">
+                        {FormatHelpers.format_currency(transaction.total_amount)}
+                      </span>
                     </div>
                   </td>
                   <td class="relative p-0">
@@ -207,8 +211,8 @@ defmodule AshfolioWeb.TransactionLive.Index do
           </div>
         <% end %>
       </.card>
-
-      <!-- Form Modal -->
+      
+    <!-- Form Modal -->
       <%= if @show_form do %>
         <.live_component
           module={FormComponent}

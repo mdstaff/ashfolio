@@ -1,5 +1,6 @@
 defmodule Ashfolio.MarketData.PriceManagerTest do
-  use Ashfolio.DataCase, async: false  # GenServer tests need async: false
+  # GenServer tests need async: false
+  use Ashfolio.DataCase, async: false
 
   alias Ashfolio.MarketData.PriceManager
   alias Ashfolio.Portfolio.{User, Account, Symbol, Transaction}
@@ -23,40 +24,44 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
     {:ok, account} = Account.create(%{user_id: user.id, name: "Test Account"})
 
     # Create test symbols
-    {:ok, aapl} = Symbol.create(%{
-      symbol: "AAPL",
-      name: "Apple Inc.",
-      asset_class: :stock,
-      data_source: :yahoo_finance
-    })
+    {:ok, aapl} =
+      Symbol.create(%{
+        symbol: "AAPL",
+        name: "Apple Inc.",
+        asset_class: :stock,
+        data_source: :yahoo_finance
+      })
 
-    {:ok, msft} = Symbol.create(%{
-      symbol: "MSFT",
-      name: "Microsoft Corporation",
-      asset_class: :stock,
-      data_source: :yahoo_finance
-    })
+    {:ok, msft} =
+      Symbol.create(%{
+        symbol: "MSFT",
+        name: "Microsoft Corporation",
+        asset_class: :stock,
+        data_source: :yahoo_finance
+      })
 
     # Create transactions to make symbols "active"
-    {:ok, _transaction1} = Transaction.create(%{
-      account_id: account.id,
-      symbol_id: aapl.id,
-      type: :buy,
-      quantity: Decimal.new("10"),
-      price: Decimal.new("150.00"),
-      total_amount: Decimal.new("1500.00"),
-      date: ~D[2024-01-15]
-    })
+    {:ok, _transaction1} =
+      Transaction.create(%{
+        account_id: account.id,
+        symbol_id: aapl.id,
+        type: :buy,
+        quantity: Decimal.new("10"),
+        price: Decimal.new("150.00"),
+        total_amount: Decimal.new("1500.00"),
+        date: ~D[2024-01-15]
+      })
 
-    {:ok, _transaction2} = Transaction.create(%{
-      account_id: account.id,
-      symbol_id: msft.id,
-      type: :buy,
-      quantity: Decimal.new("5"),
-      price: Decimal.new("300.00"),
-      total_amount: Decimal.new("1500.00"),
-      date: ~D[2024-01-16]
-    })
+    {:ok, _transaction2} =
+      Transaction.create(%{
+        account_id: account.id,
+        symbol_id: msft.id,
+        type: :buy,
+        quantity: Decimal.new("5"),
+        price: Decimal.new("300.00"),
+        total_amount: Decimal.new("1500.00"),
+        date: ~D[2024-01-16]
+      })
 
     %{
       user: user,
@@ -73,10 +78,12 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
       expect(YahooFinanceMock, :fetch_prices, fn symbols ->
         # Verify we get the expected symbols (order may vary)
         assert Enum.sort(symbols) == ["AAPL", "MSFT"]
-        {:ok, %{
-          "AAPL" => Decimal.new("155.50"),
-          "MSFT" => Decimal.new("310.25")
-        }}
+
+        {:ok,
+         %{
+           "AAPL" => Decimal.new("155.50"),
+           "MSFT" => Decimal.new("310.25")
+         }}
       end)
 
       assert {:ok, results} = PriceManager.refresh_prices()
@@ -119,10 +126,12 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
       # Mock batch fetch with partial success
       expect(YahooFinanceMock, :fetch_prices, fn symbols ->
         assert Enum.sort(symbols) == ["AAPL", "MSFT"]
-        {:ok, %{
-          "AAPL" => Decimal.new("155.50")
-          # MSFT missing (not found)
-        }}
+
+        {:ok,
+         %{
+           "AAPL" => Decimal.new("155.50")
+           # MSFT missing (not found)
+         }}
       end)
 
       assert {:ok, results} = PriceManager.refresh_prices()
@@ -177,10 +186,12 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
 
       expect(YahooFinanceMock, :fetch_prices, fn received_symbols ->
         assert received_symbols == symbols
-        {:ok, %{
-          "AAPL" => Decimal.new("155.50"),
-          "MSFT" => Decimal.new("310.25")
-        }}
+
+        {:ok,
+         %{
+           "AAPL" => Decimal.new("155.50"),
+           "MSFT" => Decimal.new("310.25")
+         }}
       end)
 
       assert {:ok, results} = PriceManager.refresh_symbols(symbols)
@@ -194,7 +205,8 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
 
       expect(YahooFinanceMock, :fetch_prices, fn received_symbols ->
         assert received_symbols == symbols
-        {:ok, %{}}  # No symbols found
+        # No symbols found
+        {:ok, %{}}
       end)
 
       assert {:ok, results} = PriceManager.refresh_symbols(symbols)
@@ -262,7 +274,10 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
 
       # The result should either be nil (no previous refresh) or a valid refresh result
       case last_refresh do
-        nil -> assert true  # Expected for fresh start
+        # Expected for fresh start
+        nil ->
+          assert true
+
         %{timestamp: timestamp, results: results} ->
           # If there was a previous refresh, verify the structure is correct
           assert %DateTime{} = timestamp

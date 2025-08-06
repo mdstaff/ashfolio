@@ -1,4 +1,3 @@
-
 defmodule AshfolioWeb.TransactionLive.FormComponent do
   use AshfolioWeb, :live_component
 
@@ -11,7 +10,7 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
       <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-medium text-gray-900">
-            <%= if @action == :new, do: "New Transaction", else: "Edit Transaction" %>
+            {if @action == :new, do: "New Transaction", else: "Edit Transaction"}
           </h3>
           <button
             type="button"
@@ -21,7 +20,12 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
           >
             <span class="sr-only">Close</span>
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -37,16 +41,14 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
             field={@form[:type]}
             type="select"
             label="Type"
-            options={
-              [
-                {"Buy", :buy},
-                {"Sell", :sell},
-                {"Dividend", :dividend},
-                {"Fee", :fee},
-                {"Interest", :interest},
-                {"Liability", :liability}
-              ]
-            }
+            options={[
+              {"Buy", :buy},
+              {"Sell", :sell},
+              {"Dividend", :dividend},
+              {"Fee", :fee},
+              {"Interest", :interest},
+              {"Liability", :liability}
+            ]}
             prompt="Select type"
             required
           />
@@ -77,7 +79,7 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
 
           <:actions>
             <.button phx-disable-with="Saving..." class="w-full">
-              <%= if @action == :new, do: "Create Transaction", else: "Update Transaction" %>
+              {if @action == :new, do: "Create Transaction", else: "Update Transaction"}
             </.button>
           </:actions>
         </.simple_form>
@@ -126,7 +128,9 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
     fee = Decimal.new(transaction_params["fee"] || "0")
 
     total_amount = Decimal.add(Decimal.mult(quantity, price), fee)
-    transaction_params = Map.put(transaction_params, "total_amount", Decimal.to_string(total_amount))
+
+    transaction_params =
+      Map.put(transaction_params, "total_amount", Decimal.to_string(total_amount))
 
     user_id = Ashfolio.Portfolio.User.get_default_user!() |> List.first() |> Map.get(:id)
     transaction_params = Map.put(transaction_params, "user_id", user_id)
@@ -148,7 +152,9 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
     fee = Decimal.new(transaction_params["fee"] || "0")
 
     total_amount = Decimal.add(Decimal.mult(quantity, price), fee)
-    transaction_params = Map.put(transaction_params, "total_amount", Decimal.to_string(total_amount))
+
+    transaction_params =
+      Map.put(transaction_params, "total_amount", Decimal.to_string(total_amount))
 
     case Transaction.update(socket.assigns.transaction, transaction_params) do
       {:ok, transaction} ->

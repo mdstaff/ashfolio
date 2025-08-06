@@ -7,31 +7,33 @@
 alias Ashfolio.Portfolio.{User, Account, Symbol}
 
 # Create the default user if it doesn't exist
-user = case Ash.read(User, action: :default_user) do
-  {:ok, []} ->
-    # No user exists, create the default user
-    case Ash.create(User, %{
-      name: "Local User",
-      currency: "USD",
-      locale: "en-US"
-    }) do
-      {:ok, user} ->
-        IO.puts("✅ Created default user: #{user.name}")
-        user
-      {:error, error} ->
-        IO.puts("❌ Error creating default user: #{inspect(error)}")
-        exit(1)
-    end
+user =
+  case Ash.read(User, action: :default_user) do
+    {:ok, []} ->
+      # No user exists, create the default user
+      case Ash.create(User, %{
+             name: "Local User",
+             currency: "USD",
+             locale: "en-US"
+           }) do
+        {:ok, user} ->
+          IO.puts("✅ Created default user: #{user.name}")
+          user
 
-  {:ok, [user]} ->
-    # User already exists
-    IO.puts("ℹ️  Default user already exists: #{user.name}")
-    user
+        {:error, error} ->
+          IO.puts("❌ Error creating default user: #{inspect(error)}")
+          exit(1)
+      end
 
-  {:error, error} ->
-    IO.puts("❌ Error checking for default user: #{inspect(error)}")
-    exit(1)
-end
+    {:ok, [user]} ->
+      # User already exists
+      IO.puts("ℹ️  Default user already exists: #{user.name}")
+      user
+
+    {:error, error} ->
+      IO.puts("❌ Error checking for default user: #{inspect(error)}")
+      exit(1)
+  end
 
 # Create sample accounts if they don't exist
 sample_accounts = [
@@ -61,12 +63,16 @@ sample_accounts = [
 if Enum.empty?(existing_accounts) do
   # Create sample accounts
   IO.puts("🏦 Creating sample accounts...")
+
   Enum.each(sample_accounts, fn account_attrs ->
     account_attrs_with_user = Map.put(account_attrs, :user_id, user.id)
 
     case Account.create(account_attrs_with_user) do
       {:ok, account} ->
-        IO.puts("  ✅ Created account: #{account.name} (#{account.platform}) - $#{account.balance}")
+        IO.puts(
+          "  ✅ Created account: #{account.name} (#{account.platform}) - $#{account.balance}"
+        )
+
       {:error, error} ->
         IO.puts("  ❌ Error creating account #{account_attrs.name}: #{inspect(error)}")
     end
@@ -165,10 +171,14 @@ sample_symbols = [
 if Enum.empty?(existing_symbols) do
   # Create sample symbols
   IO.puts("📈 Creating sample symbols...")
+
   Enum.each(sample_symbols, fn symbol_attrs ->
     case Symbol.create(symbol_attrs) do
       {:ok, symbol} ->
-        IO.puts("  ✅ Created symbol: #{symbol.symbol} (#{symbol.name}) - $#{symbol.current_price}")
+        IO.puts(
+          "  ✅ Created symbol: #{symbol.symbol} (#{symbol.name}) - $#{symbol.current_price}"
+        )
+
       {:error, error} ->
         IO.puts("  ❌ Error creating symbol #{symbol_attrs.symbol}: #{inspect(error)}")
     end
@@ -313,12 +323,16 @@ if Enum.empty?(existing_transactions) do
 
   # Create sample transactions
   IO.puts("💰 Creating sample transactions...")
+
   Enum.each(sample_transactions, fn transaction_attrs ->
     # Only create transaction if all required IDs are present
     if transaction_attrs.account_id && transaction_attrs.symbol_id do
       case Transaction.create(transaction_attrs) do
         {:ok, transaction} ->
-          IO.puts("  ✅ Created #{transaction.type} transaction: #{transaction.quantity} shares - #{transaction_attrs[:notes] || ""}")
+          IO.puts(
+            "  ✅ Created #{transaction.type} transaction: #{transaction.quantity} shares - #{transaction_attrs[:notes] || ""}"
+          )
+
         {:error, error} ->
           IO.puts("  ❌ Error creating transaction: #{inspect(error)}")
       end
@@ -327,7 +341,9 @@ if Enum.empty?(existing_transactions) do
     end
   end)
 else
-  IO.puts("ℹ️  Sample transactions already exist (#{length(existing_transactions)} transactions found)")
+  IO.puts(
+    "ℹ️  Sample transactions already exist (#{length(existing_transactions)} transactions found)"
+  )
 end
 
 IO.puts("\n✅ Database seeding completed!")

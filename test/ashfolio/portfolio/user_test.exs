@@ -8,11 +8,12 @@ defmodule Ashfolio.Portfolio.UserTest do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Ashfolio.Repo)
 
     # Create a test user for each test
-    {:ok, user} = Ash.create(User, %{
-      name: "Local User",
-      currency: "USD",
-      locale: "en-US"
-    })
+    {:ok, user} =
+      Ash.create(User, %{
+        name: "Local User",
+        currency: "USD",
+        locale: "en-US"
+      })
 
     %{user: user}
   end
@@ -28,14 +29,20 @@ defmodule Ashfolio.Portfolio.UserTest do
 
     test "can update user preferences", %{user: user} do
       # Update preferences
-      {:ok, updated_user} = Ash.update(user, %{
-        name: "John Doe",
-        locale: "en-CA"
-      }, action: :update_preferences)
+      {:ok, updated_user} =
+        Ash.update(
+          user,
+          %{
+            name: "John Doe",
+            locale: "en-CA"
+          },
+          action: :update_preferences
+        )
 
       assert updated_user.name == "John Doe"
       assert updated_user.locale == "en-CA"
-      assert updated_user.currency == "USD"  # Should remain unchanged
+      # Should remain unchanged
+      assert updated_user.currency == "USD"
     end
 
     test "validates required fields", %{user: user} do
@@ -48,11 +55,12 @@ defmodule Ashfolio.Portfolio.UserTest do
 
     test "validates USD-only currency" do
       # Try to create a user with non-USD currency (this should fail validation)
-      {:error, changeset} = Ash.create(User, %{
-        name: "Test User",
-        currency: "EUR",
-        locale: "en-US"
-      })
+      {:error, changeset} =
+        Ash.create(User, %{
+          name: "Test User",
+          currency: "EUR",
+          locale: "en-US"
+        })
 
       assert changeset.errors != []
       # Check that there's a currency validation error
@@ -61,11 +69,12 @@ defmodule Ashfolio.Portfolio.UserTest do
 
     test "default_user action works correctly" do
       # Create a user first
-      {:ok, _user} = Ash.create(User, %{
-        name: "Test User",
-        currency: "USD",
-        locale: "en-US"
-      })
+      {:ok, _user} =
+        Ash.create(User, %{
+          name: "Test User",
+          currency: "USD",
+          locale: "en-US"
+        })
 
       # Test the default_user action returns the first user
       {:ok, [user]} = Ash.read(User, action: :default_user)

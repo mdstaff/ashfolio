@@ -6,24 +6,27 @@ defmodule Ashfolio.Portfolio.TransactionTest do
   describe "Transaction resource" do
     setup do
       # Create test user
-      {:ok, user} = Ash.create(User, %{
-        name: "Test User"
-      })
+      {:ok, user} =
+        Ash.create(User, %{
+          name: "Test User"
+        })
 
       # Create test account
-      {:ok, account} = Account.create(%{
-        name: "Test Brokerage",
-        platform: "Test Platform",
-        user_id: user.id
-      })
+      {:ok, account} =
+        Account.create(%{
+          name: "Test Brokerage",
+          platform: "Test Platform",
+          user_id: user.id
+        })
 
       # Create test symbol
-      {:ok, symbol} = Symbol.create(%{
-        symbol: "AAPL",
-        name: "Apple Inc.",
-        asset_class: :stock,
-        data_source: :yahoo_finance
-      })
+      {:ok, symbol} =
+        Symbol.create(%{
+          symbol: "AAPL",
+          name: "Apple Inc.",
+          asset_class: :stock,
+          data_source: :yahoo_finance
+        })
 
       %{user: user, account: account, symbol: symbol}
     end
@@ -115,110 +118,116 @@ defmodule Ashfolio.Portfolio.TransactionTest do
       {:error, changeset} = Transaction.create(%{})
 
       assert Enum.any?(changeset.errors, fn error ->
-        error.field == :type
-      end)
+               error.field == :type
+             end)
 
       assert Enum.any?(changeset.errors, fn error ->
-        error.field == :quantity
-      end)
+               error.field == :quantity
+             end)
 
       assert Enum.any?(changeset.errors, fn error ->
-        error.field == :price
-      end)
+               error.field == :price
+             end)
 
       assert Enum.any?(changeset.errors, fn error ->
-        error.field == :total_amount
-      end)
+               error.field == :total_amount
+             end)
 
       assert Enum.any?(changeset.errors, fn error ->
-        error.field == :date
-      end)
+               error.field == :date
+             end)
     end
 
     test "validates positive price" do
-      {:error, changeset} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("100"),
-        price: Decimal.new("-10"),
-        total_amount: Decimal.new("1000"),
-        date: Date.utc_today()
-      })
+      {:error, changeset} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("100"),
+          price: Decimal.new("-10"),
+          total_amount: Decimal.new("1000"),
+          date: Date.utc_today()
+        })
 
       assert Enum.any?(changeset.errors, fn error ->
-        error.field == :price and String.contains?(error.message, "negative")
-      end)
+               error.field == :price and String.contains?(error.message, "negative")
+             end)
     end
 
     test "validates non-negative fee" do
-      {:error, changeset} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("100"),
-        price: Decimal.new("10"),
-        total_amount: Decimal.new("1000"),
-        fee: Decimal.new("-5"),
-        date: Date.utc_today()
-      })
+      {:error, changeset} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("100"),
+          price: Decimal.new("10"),
+          total_amount: Decimal.new("1000"),
+          fee: Decimal.new("-5"),
+          date: Date.utc_today()
+        })
 
       assert Enum.any?(changeset.errors, fn error ->
-        error.field == :fee and String.contains?(error.message, "negative")
-      end)
+               error.field == :fee and String.contains?(error.message, "negative")
+             end)
     end
 
     test "validates buy transaction quantity is positive" do
-      {:error, changeset} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("-100"),
-        price: Decimal.new("10"),
-        total_amount: Decimal.new("1000"),
-        date: Date.utc_today()
-      })
+      {:error, changeset} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("-100"),
+          price: Decimal.new("10"),
+          total_amount: Decimal.new("1000"),
+          date: Date.utc_today()
+        })
 
       assert Enum.any?(changeset.errors, fn error ->
-        error.field == :quantity and String.contains?(error.message, "positive for buy")
-      end)
+               error.field == :quantity and String.contains?(error.message, "positive for buy")
+             end)
     end
 
     test "validates sell transaction quantity is negative" do
-      {:error, changeset} = Transaction.create(%{
-        type: :sell,
-        quantity: Decimal.new("100"),
-        price: Decimal.new("10"),
-        total_amount: Decimal.new("1000"),
-        date: Date.utc_today()
-      })
+      {:error, changeset} =
+        Transaction.create(%{
+          type: :sell,
+          quantity: Decimal.new("100"),
+          price: Decimal.new("10"),
+          total_amount: Decimal.new("1000"),
+          date: Date.utc_today()
+        })
 
       assert Enum.any?(changeset.errors, fn error ->
-        error.field == :quantity and String.contains?(error.message, "negative for sell")
-      end)
+               error.field == :quantity and String.contains?(error.message, "negative for sell")
+             end)
     end
 
     test "validates future date" do
       future_date = Date.utc_today() |> Date.add(1)
 
-      {:error, changeset} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("100"),
-        price: Decimal.new("10"),
-        total_amount: Decimal.new("1000"),
-        date: future_date
-      })
+      {:error, changeset} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("100"),
+          price: Decimal.new("10"),
+          total_amount: Decimal.new("1000"),
+          date: future_date
+        })
 
       assert Enum.any?(changeset.errors, fn error ->
-        error.field == :date and String.contains?(error.message, "future")
-      end)
+               error.field == :date and String.contains?(error.message, "future")
+             end)
     end
 
     test "queries transactions by account", %{account: account, symbol: symbol} do
       # Create transactions
-      {:ok, _transaction1} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("100"),
-        price: Decimal.new("10"),
-        total_amount: Decimal.new("1000"),
-        date: Date.utc_today(),
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _transaction1} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("100"),
+          price: Decimal.new("10"),
+          total_amount: Decimal.new("1000"),
+          date: Date.utc_today(),
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       {:ok, transactions} = Transaction.by_account(account.id)
       assert length(transactions) == 1
@@ -226,15 +235,16 @@ defmodule Ashfolio.Portfolio.TransactionTest do
 
     test "queries transactions by symbol", %{account: account, symbol: symbol} do
       # Create transactions
-      {:ok, _transaction1} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("100"),
-        price: Decimal.new("10"),
-        total_amount: Decimal.new("1000"),
-        date: Date.utc_today(),
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _transaction1} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("100"),
+          price: Decimal.new("10"),
+          total_amount: Decimal.new("1000"),
+          date: Date.utc_today(),
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       {:ok, transactions} = Transaction.by_symbol(symbol.id)
       assert length(transactions) == 1
@@ -242,26 +252,28 @@ defmodule Ashfolio.Portfolio.TransactionTest do
 
     test "queries transactions by type", %{account: account, symbol: symbol} do
       # Create buy transaction
-      {:ok, _transaction1} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("100"),
-        price: Decimal.new("10"),
-        total_amount: Decimal.new("1000"),
-        date: Date.utc_today(),
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _transaction1} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("100"),
+          price: Decimal.new("10"),
+          total_amount: Decimal.new("1000"),
+          date: Date.utc_today(),
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       # Create sell transaction
-      {:ok, _transaction2} = Transaction.create(%{
-        type: :sell,
-        quantity: Decimal.new("-50"),
-        price: Decimal.new("12"),
-        total_amount: Decimal.new("600"),
-        date: Date.utc_today(),
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _transaction2} =
+        Transaction.create(%{
+          type: :sell,
+          quantity: Decimal.new("-50"),
+          price: Decimal.new("12"),
+          total_amount: Decimal.new("600"),
+          date: Date.utc_today(),
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       {:ok, buy_transactions} = Transaction.by_type(:buy)
       {:ok, sell_transactions} = Transaction.by_type(:sell)
@@ -276,15 +288,16 @@ defmodule Ashfolio.Portfolio.TransactionTest do
       tomorrow = Date.add(today, 1)
 
       # Create transaction for today
-      {:ok, _transaction} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("100"),
-        price: Decimal.new("10"),
-        total_amount: Decimal.new("1000"),
-        date: today,
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _transaction} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("100"),
+          price: Decimal.new("10"),
+          total_amount: Decimal.new("1000"),
+          date: today,
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       # Query for yesterday to tomorrow (should include today's transaction)
       {:ok, transactions} = Transaction.by_date_range(yesterday, tomorrow)
@@ -299,15 +312,16 @@ defmodule Ashfolio.Portfolio.TransactionTest do
 
     test "queries recent transactions", %{account: account, symbol: symbol} do
       # Create transaction for today (should be included)
-      {:ok, _transaction} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("100"),
-        price: Decimal.new("10"),
-        total_amount: Decimal.new("1000"),
-        date: Date.utc_today(),
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _transaction} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("100"),
+          price: Decimal.new("10"),
+          total_amount: Decimal.new("1000"),
+          date: Date.utc_today(),
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       {:ok, recent_transactions} = Transaction.recent_transactions()
       assert length(recent_transactions) == 1
@@ -315,59 +329,65 @@ defmodule Ashfolio.Portfolio.TransactionTest do
 
     test "queries holdings data", %{account: account, symbol: symbol} do
       # Create buy transaction
-      {:ok, _transaction1} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("100"),
-        price: Decimal.new("10"),
-        total_amount: Decimal.new("1000"),
-        date: Date.utc_today(),
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _transaction1} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("100"),
+          price: Decimal.new("10"),
+          total_amount: Decimal.new("1000"),
+          date: Date.utc_today(),
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       # Create sell transaction
-      {:ok, _transaction2} = Transaction.create(%{
-        type: :sell,
-        quantity: Decimal.new("-25"),
-        price: Decimal.new("12"),
-        total_amount: Decimal.new("300"),
-        date: Date.utc_today(),
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, _transaction2} =
+        Transaction.create(%{
+          type: :sell,
+          quantity: Decimal.new("-25"),
+          price: Decimal.new("12"),
+          total_amount: Decimal.new("300"),
+          date: Date.utc_today(),
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       {:ok, holdings} = Transaction.holdings_data()
-      assert length(holdings) == 2  # Both buy and sell transactions
+      # Both buy and sell transactions
+      assert length(holdings) == 2
     end
 
     test "updates transaction successfully", %{account: account, symbol: symbol} do
-      {:ok, transaction} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("100"),
-        price: Decimal.new("10"),
-        total_amount: Decimal.new("1000"),
-        date: Date.utc_today(),
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, transaction} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("100"),
+          price: Decimal.new("10"),
+          total_amount: Decimal.new("1000"),
+          date: Date.utc_today(),
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
-      {:ok, updated_transaction} = Transaction.update(transaction, %{
-        notes: "Updated notes"
-      })
+      {:ok, updated_transaction} =
+        Transaction.update(transaction, %{
+          notes: "Updated notes"
+        })
 
       assert updated_transaction.notes == "Updated notes"
     end
 
     test "destroys transaction successfully", %{account: account, symbol: symbol} do
-      {:ok, transaction} = Transaction.create(%{
-        type: :buy,
-        quantity: Decimal.new("100"),
-        price: Decimal.new("10"),
-        total_amount: Decimal.new("1000"),
-        date: Date.utc_today(),
-        account_id: account.id,
-        symbol_id: symbol.id
-      })
+      {:ok, transaction} =
+        Transaction.create(%{
+          type: :buy,
+          quantity: Decimal.new("100"),
+          price: Decimal.new("10"),
+          total_amount: Decimal.new("1000"),
+          date: Date.utc_today(),
+          account_id: account.id,
+          symbol_id: symbol.id
+        })
 
       :ok = Transaction.destroy(transaction)
 

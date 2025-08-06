@@ -8,20 +8,22 @@ defmodule Ashfolio.MarketData.YahooFinanceTest do
   describe "fetch_price/1" do
     test "returns error for invalid symbol format" do
       # Test with empty string
-      _log = capture_log(fn ->
-        result = YahooFinance.fetch_price("")
-        assert match?({:error, _}, result)
-      end)
+      _log =
+        capture_log(fn ->
+          result = YahooFinance.fetch_price("")
+          assert match?({:error, _}, result)
+        end)
     end
 
     test "handles network timeout gracefully" do
       # This test will actually make a network call but with a very short timeout
       # We expect it to fail gracefully
-      _log = capture_log(fn ->
-        # Test with a symbol that should timeout or fail
-        result = YahooFinance.fetch_price("NONEXISTENT_SYMBOL_12345")
-        assert match?({:error, _}, result)
-      end)
+      _log =
+        capture_log(fn ->
+          # Test with a symbol that should timeout or fail
+          result = YahooFinance.fetch_price("NONEXISTENT_SYMBOL_12345")
+          assert match?({:error, _}, result)
+        end)
     end
 
     @tag :integration
@@ -32,6 +34,7 @@ defmodule Ashfolio.MarketData.YahooFinanceTest do
         {:ok, price} ->
           assert %Decimal{} = price
           assert Decimal.positive?(price)
+
         {:error, reason} ->
           # Network might be unavailable, log and skip
           IO.puts("Integration test skipped due to network error: #{reason}")
@@ -78,11 +81,12 @@ defmodule Ashfolio.MarketData.YahooFinanceTest do
 
   describe "error handling" do
     test "logs appropriate messages for different error types" do
-      log = capture_log(fn ->
-        # Test with clearly invalid symbol
-        result = YahooFinance.fetch_price("INVALID_SYMBOL_THAT_SHOULD_NOT_EXIST_12345")
-        assert match?({:error, _}, result)
-      end)
+      log =
+        capture_log(fn ->
+          # Test with clearly invalid symbol
+          result = YahooFinance.fetch_price("INVALID_SYMBOL_THAT_SHOULD_NOT_EXIST_12345")
+          assert match?({:error, _}, result)
+        end)
 
       # Should contain some log message (debug or warning)
       assert String.length(log) > 0

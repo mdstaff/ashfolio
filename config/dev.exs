@@ -84,5 +84,7 @@ config :swoosh, :api_client, false
 
 # PriceManager development configuration
 config :ashfolio, Ashfolio.MarketData.PriceManager,
-  refresh_timeout: 10_000,  # Shorter timeout for development
-  batch_size: 10            # Smaller batches for testing
+  # Shorter timeout for development
+  refresh_timeout: 10_000,
+  # Smaller batches for testing
+  batch_size: 10

@@ -10,11 +10,11 @@ defmodule Ashfolio.MarketData.YahooFinanceBehaviour do
   Fetches the current price for a single symbol.
   """
   @callback fetch_price(symbol :: String.t()) ::
-    {:ok, Decimal.t()} | {:error, atom()}
+              {:ok, Decimal.t()} | {:error, atom()}
 
   @doc """
   Fetches current prices for multiple symbols in a single request.
   """
   @callback fetch_prices(symbols :: [String.t()]) ::
-    {:ok, %{String.t() => Decimal.t()}} | {:error, atom()}
+              {:ok, %{String.t() => Decimal.t()}} | {:error, atom()}
 end

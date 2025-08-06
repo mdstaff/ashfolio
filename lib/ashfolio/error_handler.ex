@@ -82,7 +82,10 @@ defmodule Ashfolio.ErrorHandler do
   defp log_error(error, error_type, context) do
     severity = get_log_severity(error_type)
 
-    Logger.log(severity, "Error occurred: #{inspect(error)} (type: #{error_type}, context: #{inspect(context)})")
+    Logger.log(
+      severity,
+      "Error occurred: #{inspect(error)} (type: #{error_type}, context: #{inspect(context)})"
+    )
   end
 
   # Get appropriate log severity for error type

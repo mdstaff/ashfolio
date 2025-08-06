@@ -19,24 +19,21 @@ defmodule AshfolioWeb.Components.TopBar do
               <h1 class="text-xl font-semibold text-gray-900">Ashfolio</h1>
             </.link>
           </div>
-
-          <!-- Navigation -->
+          
+    <!-- Navigation -->
           <nav class="hidden md:flex space-x-8" role="navigation" aria-label="Main navigation">
             <.nav_link navigate={~p"/"} current={@current_page == :dashboard}>
-              <.icon name="hero-chart-bar" class="w-4 h-4 mr-2" />
-              Dashboard
+              <.icon name="hero-chart-bar" class="w-4 h-4 mr-2" /> Dashboard
             </.nav_link>
             <.nav_link navigate={~p"/accounts"} current={@current_page == :accounts}>
-              <.icon name="hero-building-library" class="w-4 h-4 mr-2" />
-              Accounts
+              <.icon name="hero-building-library" class="w-4 h-4 mr-2" /> Accounts
             </.nav_link>
             <.nav_link navigate={~p"/transactions"} current={@current_page == :transactions}>
-              <.icon name="hero-arrow-right-left" class="w-4 h-4 mr-2" />
-              Transactions
+              <.icon name="hero-arrow-right-left" class="w-4 h-4 mr-2" /> Transactions
             </.nav_link>
           </nav>
-
-          <!-- Mobile menu button -->
+          
+    <!-- Mobile menu button -->
           <div class="md:hidden">
             <button
               type="button"
@@ -50,28 +47,30 @@ defmodule AshfolioWeb.Components.TopBar do
             </button>
           </div>
         </div>
-
-        <!-- Mobile Navigation -->
-        <div id="mobile-menu" class="md:hidden hidden pb-4" role="navigation" aria-label="Mobile navigation">
+        
+    <!-- Mobile Navigation -->
+        <div
+          id="mobile-menu"
+          class="md:hidden hidden pb-4"
+          role="navigation"
+          aria-label="Mobile navigation"
+        >
           <div class="space-y-1">
             <.mobile_nav_link navigate={~p"/"} current={@current_page == :dashboard}>
-              <.icon name="hero-chart-bar" class="w-4 h-4 mr-3" />
-              Dashboard
+              <.icon name="hero-chart-bar" class="w-4 h-4 mr-3" /> Dashboard
             </.mobile_nav_link>
             <.mobile_nav_link navigate={~p"/accounts"} current={@current_page == :accounts}>
-              <.icon name="hero-building-library" class="w-4 h-4 mr-3" />
-              Accounts
+              <.icon name="hero-building-library" class="w-4 h-4 mr-3" /> Accounts
             </.mobile_nav_link>
             <.mobile_nav_link navigate={~p"/transactions"} current={@current_page == :transactions}>
-              <.icon name="hero-arrow-right-left" class="w-4 h-4 mr-3" />
-              Transactions
+              <.icon name="hero-arrow-right-left" class="w-4 h-4 mr-3" /> Transactions
             </.mobile_nav_link>
           </div>
         </div>
       </div>
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 border-t border-gray-200">
-        <h2 class="text-2xl font-bold text-gray-900"><%= @page_title %></h2>
-        <p class="text-sm text-gray-500"><%= @page_subtitle %></p>
+        <h2 class="text-2xl font-bold text-gray-900">{@page_title}</h2>
+        <p class="text-sm text-gray-500">{@page_subtitle}</p>
       </div>
     </header>
     """

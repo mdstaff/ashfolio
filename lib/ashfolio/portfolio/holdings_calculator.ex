@@ -80,28 +80,31 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
       iex> HoldingsCalculator.calculate_holding_pnl(user_id, symbol_id)
       {:ok, %{unrealized_pnl: %Decimal{}, unrealized_pnl_pct: %Decimal{}, current_value: %Decimal{}}}
   """
-  def calculate_holding_pnl(user_id, symbol_id) when is_binary(user_id) and is_binary(symbol_id) do
+  def calculate_holding_pnl(user_id, symbol_id)
+      when is_binary(user_id) and is_binary(symbol_id) do
     Logger.debug("Calculating P&L for user: #{user_id}, symbol: #{symbol_id}")
 
     with {:ok, cost_basis_data} <- calculate_cost_basis(user_id, symbol_id),
          {:ok, symbol} <- Symbol.get_by_id(symbol_id) do
-
       current_price = get_current_price(symbol)
-      current_value = if current_price do
-        Decimal.mult(cost_basis_data.quantity, current_price)
-      else
-        Decimal.new(0)
-      end
+
+      current_value =
+        if current_price do
+          Decimal.mult(cost_basis_data.quantity, current_price)
+        else
+          Decimal.new(0)
+        end
 
       unrealized_pnl = Decimal.sub(current_value, cost_basis_data.total_cost)
 
-      unrealized_pnl_pct = if Decimal.equal?(cost_basis_data.total_cost, 0) do
-        Decimal.new(0)
-      else
-        cost_basis_data.total_cost
-        |> Decimal.div_int(unrealized_pnl)
-        |> Decimal.mult(100)
-      end
+      unrealized_pnl_pct =
+        if Decimal.equal?(cost_basis_data.total_cost, 0) do
+          Decimal.new(0)
+        else
+          cost_basis_data.total_cost
+          |> Decimal.div_int(unrealized_pnl)
+          |> Decimal.mult(100)
+        end
 
       pnl_data = %{
         symbol: symbol.symbol,
@@ -162,7 +165,6 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
 
     with {:ok, holdings} <- calculate_holding_values(user_id),
          {:ok, total_value} <- aggregate_portfolio_value(user_id) do
-
       total_cost_basis =
         holdings
         |> Enum.map(& &1.cost_basis)
@@ -170,13 +172,14 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
 
       total_pnl = Decimal.sub(total_value, total_cost_basis)
 
-      total_pnl_pct = if Decimal.equal?(total_cost_basis, 0) do
-        Decimal.new(0)
-      else
-        total_pnl
-        |> Decimal.div(total_cost_basis)
-        |> Decimal.mult(100)
-      end
+      total_pnl_pct =
+        if Decimal.equal?(total_cost_basis, 0) do
+          Decimal.new(0)
+        else
+          total_pnl
+          |> Decimal.div(total_cost_basis)
+          |> Decimal.mult(100)
+        end
 
       summary = %{
         holdings: holdings,
@@ -187,7 +190,10 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
         holdings_count: length(holdings)
       }
 
-      Logger.debug("Holdings summary calculated: #{summary.holdings_count} holdings, total value: #{total_value}")
+      Logger.debug(
+        "Holdings summary calculated: #{summary.holdings_count} holdings, total value: #{total_value}"
+      )
+
       {:ok, summary}
     else
       {:error, reason} ->
@@ -202,9 +208,10 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
     try do
       case Account.accounts_for_user(user_id) do
         {:ok, accounts} ->
-          active_accounts = Enum.filter(accounts, fn account ->
-            not account.is_excluded
-          end)
+          active_accounts =
+            Enum.filter(accounts, fn account ->
+              not account.is_excluded
+            end)
 
           if Enum.empty?(active_accounts) do
             {:ok, []}
@@ -257,28 +264,30 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
           nil
       end
     end)
-    |> Enum.filter(& &1 != nil)
+    |> Enum.filter(&(&1 != nil))
   end
 
   defp calculate_individual_holding_value(holding_data) do
     cost_basis_data = calculate_cost_basis_from_transactions(holding_data.transactions)
     current_price = get_current_price(holding_data.symbol)
 
-    current_value = if current_price do
-      Decimal.mult(cost_basis_data.quantity, current_price)
-    else
-      Decimal.new(0)
-    end
+    current_value =
+      if current_price do
+        Decimal.mult(cost_basis_data.quantity, current_price)
+      else
+        Decimal.new(0)
+      end
 
     unrealized_pnl = Decimal.sub(current_value, cost_basis_data.total_cost)
 
-    unrealized_pnl_pct = if Decimal.equal?(cost_basis_data.total_cost, 0) do
-      Decimal.new(0)
-    else
-      unrealized_pnl
-      |> Decimal.div(cost_basis_data.total_cost)
-      |> Decimal.mult(100)
-    end
+    unrealized_pnl_pct =
+      if Decimal.equal?(cost_basis_data.total_cost, 0) do
+        Decimal.new(0)
+      else
+        unrealized_pnl
+        |> Decimal.div(cost_basis_data.total_cost)
+        |> Decimal.mult(100)
+      end
 
     %{
       symbol_id: holding_data.symbol_id,
@@ -297,12 +306,19 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
   defp calculate_cost_basis_from_transactions(transactions) do
     # Simple FIFO cost basis calculation
     {total_quantity, total_cost, _} =
-      Enum.reduce(transactions, {Decimal.new(0), Decimal.new(0), []}, fn transaction, {qty, cost, lots} ->
+      Enum.reduce(transactions, {Decimal.new(0), Decimal.new(0), []}, fn transaction,
+                                                                         {qty, cost, lots} ->
         case transaction.type do
           :buy ->
             new_qty = Decimal.add(qty, transaction.quantity)
             new_cost = Decimal.add(cost, transaction.total_amount)
-            new_lot = %{quantity: transaction.quantity, cost: transaction.total_amount, date: transaction.date}
+
+            new_lot = %{
+              quantity: transaction.quantity,
+              cost: transaction.total_amount,
+              date: transaction.date
+            }
+
             {new_qty, new_cost, [new_lot | lots]}
 
           :sell ->
@@ -321,11 +337,12 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
         end
       end)
 
-    average_cost = if Decimal.equal?(total_quantity, 0) do
-      Decimal.new(0)
-    else
-      Decimal.div(total_cost, total_quantity)
-    end
+    average_cost =
+      if Decimal.equal?(total_quantity, 0) do
+        Decimal.new(0)
+      else
+        Decimal.div(total_cost, total_quantity)
+      end
 
     %{
       quantity: total_quantity,
@@ -337,9 +354,10 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
   defp get_symbol_transactions(user_id, symbol_id) do
     case Account.accounts_for_user(user_id) do
       {:ok, accounts} ->
-        active_accounts = Enum.filter(accounts, fn account ->
-          not account.is_excluded
-        end)
+        active_accounts =
+          Enum.filter(accounts, fn account ->
+            not account.is_excluded
+          end)
 
         transactions =
           active_accounts
@@ -370,7 +388,9 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
           {:ok, cached_data} -> cached_data.price
           _ -> nil
         end
-      price -> price
+
+      price ->
+        price
     end
   end
 end

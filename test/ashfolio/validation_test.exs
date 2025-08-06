@@ -27,23 +27,26 @@ defmodule Ashfolio.ValidationTest do
 
   describe "validate_positive_decimal/2" do
     test "accepts positive decimal values" do
-      changeset = test_changeset(%{price: Decimal.new("10.50")})
-      |> Validation.validate_positive_decimal(:price)
+      changeset =
+        test_changeset(%{price: Decimal.new("10.50")})
+        |> Validation.validate_positive_decimal(:price)
 
       assert changeset.valid?
     end
 
     test "rejects zero values" do
-      changeset = test_changeset(%{price: Decimal.new("0")})
-      |> Validation.validate_positive_decimal(:price)
+      changeset =
+        test_changeset(%{price: Decimal.new("0")})
+        |> Validation.validate_positive_decimal(:price)
 
       refute changeset.valid?
       assert changeset.errors[:price] != []
     end
 
     test "rejects negative values" do
-      changeset = test_changeset(%{price: Decimal.new("-5.00")})
-      |> Validation.validate_positive_decimal(:price)
+      changeset =
+        test_changeset(%{price: Decimal.new("-5.00")})
+        |> Validation.validate_positive_decimal(:price)
 
       refute changeset.valid?
       assert changeset.errors[:price] != []
@@ -52,22 +55,25 @@ defmodule Ashfolio.ValidationTest do
 
   describe "validate_non_negative_decimal/2" do
     test "accepts positive decimal values" do
-      changeset = test_changeset(%{fee: Decimal.new("1.50")})
-      |> Validation.validate_non_negative_decimal(:fee)
+      changeset =
+        test_changeset(%{fee: Decimal.new("1.50")})
+        |> Validation.validate_non_negative_decimal(:fee)
 
       assert changeset.valid?
     end
 
     test "accepts zero values" do
-      changeset = test_changeset(%{fee: Decimal.new("0")})
-      |> Validation.validate_non_negative_decimal(:fee)
+      changeset =
+        test_changeset(%{fee: Decimal.new("0")})
+        |> Validation.validate_non_negative_decimal(:fee)
 
       assert changeset.valid?
     end
 
     test "rejects negative values" do
-      changeset = test_changeset(%{fee: Decimal.new("-1.00")})
-      |> Validation.validate_non_negative_decimal(:fee)
+      changeset =
+        test_changeset(%{fee: Decimal.new("-1.00")})
+        |> Validation.validate_non_negative_decimal(:fee)
 
       refute changeset.valid?
       assert changeset.errors[:fee] != []
@@ -76,24 +82,29 @@ defmodule Ashfolio.ValidationTest do
 
   describe "validate_not_future_date/2" do
     test "accepts today's date" do
-      changeset = test_changeset(%{date: Date.utc_today()})
-      |> Validation.validate_not_future_date(:date)
+      changeset =
+        test_changeset(%{date: Date.utc_today()})
+        |> Validation.validate_not_future_date(:date)
 
       assert changeset.valid?
     end
 
     test "accepts past dates" do
       past_date = Date.add(Date.utc_today(), -30)
-      changeset = test_changeset(%{date: past_date})
-      |> Validation.validate_not_future_date(:date)
+
+      changeset =
+        test_changeset(%{date: past_date})
+        |> Validation.validate_not_future_date(:date)
 
       assert changeset.valid?
     end
 
     test "rejects future dates" do
       future_date = Date.add(Date.utc_today(), 1)
-      changeset = test_changeset(%{date: future_date})
-      |> Validation.validate_not_future_date(:date)
+
+      changeset =
+        test_changeset(%{date: future_date})
+        |> Validation.validate_not_future_date(:date)
 
       refute changeset.valid?
       assert changeset.errors[:date] != []
@@ -105,16 +116,18 @@ defmodule Ashfolio.ValidationTest do
       valid_symbols = ["AAPL", "MSFT", "GOOGL", "SPY", "QQQ"]
 
       for symbol <- valid_symbols do
-        changeset = test_changeset(%{symbol: symbol})
-        |> Validation.validate_symbol_format(:symbol)
+        changeset =
+          test_changeset(%{symbol: symbol})
+          |> Validation.validate_symbol_format(:symbol)
 
         assert changeset.valid?, "Expected #{symbol} to be valid"
       end
     end
 
     test "rejects symbols that are too long" do
-      changeset = test_changeset(%{symbol: "VERYLONGSYMBOL"})
-      |> Validation.validate_symbol_format(:symbol)
+      changeset =
+        test_changeset(%{symbol: "VERYLONGSYMBOL"})
+        |> Validation.validate_symbol_format(:symbol)
 
       refute changeset.valid?
       assert changeset.errors[:symbol] != []
@@ -123,15 +136,17 @@ defmodule Ashfolio.ValidationTest do
 
   describe "validate_supported_currency/2" do
     test "accepts USD currency" do
-      changeset = test_changeset(%{currency: "USD"})
-      |> Validation.validate_supported_currency(:currency)
+      changeset =
+        test_changeset(%{currency: "USD"})
+        |> Validation.validate_supported_currency(:currency)
 
       assert changeset.valid?
     end
 
     test "rejects non-USD currencies" do
-      changeset = test_changeset(%{currency: "EUR"})
-      |> Validation.validate_supported_currency(:currency)
+      changeset =
+        test_changeset(%{currency: "EUR"})
+        |> Validation.validate_supported_currency(:currency)
 
       refute changeset.valid?
       assert changeset.errors[:currency] != []
@@ -149,8 +164,9 @@ defmodule Ashfolio.ValidationTest do
         currency: "USD"
       }
 
-      changeset = test_changeset(attrs)
-      |> Validation.validate_transaction_data()
+      changeset =
+        test_changeset(attrs)
+        |> Validation.validate_transaction_data()
 
       assert changeset.valid?
     end
@@ -163,8 +179,9 @@ defmodule Ashfolio.ValidationTest do
         currency: "USD"
       }
 
-      changeset = test_changeset(attrs)
-      |> Validation.validate_account_data()
+      changeset =
+        test_changeset(attrs)
+        |> Validation.validate_account_data()
 
       assert changeset.valid?
     end
