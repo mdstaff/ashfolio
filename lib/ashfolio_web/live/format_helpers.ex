@@ -227,4 +227,38 @@ defmodule AshfolioWeb.Live.FormatHelpers do
     |> Enum.join(",")
     |> String.reverse()
   end
+
+  @doc """
+  Formats a Date as a readable string.
+  
+  ## Examples
+      iex> format_date(~D[2023-12-25])
+      "Dec 25, 2023"
+  """
+  def format_date(nil), do: "N/A"
+  
+  def format_date(%Date{} = date) do
+    Calendar.strftime(date, "%b %d, %Y")
+  end
+  
+  def format_date(_date), do: "Invalid Date"
+
+  @doc """
+  Formats a quantity as a decimal number.
+  
+  ## Examples
+      iex> format_quantity(Decimal.new("123.456"))
+      "123.456"
+  """
+  def format_quantity(nil), do: "0"
+  
+  def format_quantity(value) when is_struct(value, Decimal) do
+    Decimal.to_string(value)
+  end
+  
+  def format_quantity(value) when is_number(value) do
+    :erlang.float_to_binary(value * 1.0, decimals: 3)
+  end
+  
+  def format_quantity(_value), do: "0"
 end

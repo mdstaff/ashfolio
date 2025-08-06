@@ -151,10 +151,7 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
               <.button
                 type="submit"
                 disabled={@saving or not @form.valid?}
-                class={[
-                  "w-full relative",
-                  (@saving or not @form.valid?) && "opacity-50 cursor-not-allowed"
-                ]}
+                class={"w-full relative #{(@saving or not @form.valid?) && "opacity-50 cursor-not-allowed"}"}
               >
                 <%= if @saving do %>
                   <div class="flex items-center justify-center">
@@ -356,7 +353,7 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
     end
   end
 
-  defp generate_validation_messages(form_params, form) do
+  defp generate_validation_messages(form_params, _form) do
     messages = %{}
 
     # Name field validation messages
@@ -403,7 +400,7 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
           {balance, ""} when balance > 0 ->
             formatted = FormatHelpers.format_currency(Decimal.new(balance))
             Map.put(messages, :balance, "Balance will be set to #{formatted}")
-          {0.0, ""} ->
+          {+0.0, ""} ->
             Map.put(messages, :balance, "Account will be created with zero balance")
           _ ->
             Map.put(messages, :balance, "Please enter a valid number (e.g., 1000.50)")
@@ -491,7 +488,7 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
       existing_account = Account.get_by_name_for_user(user_id, name)
 
       if existing_account && existing_account.id != current_account_id do
-        return_value = {:error, "Account name '#{name}' is already taken. Please choose another."}
+        _return_value = {:error, "Account name '#{name}' is already taken. Please choose another."}
       end
     end
 

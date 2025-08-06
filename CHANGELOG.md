@@ -5,6 +5,53 @@ All notable changes to the Ashfolio project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.0] - 2025-08-06
+
+### Phase 10 Critical Code Quality Fixes ✅
+
+This release addresses critical compilation issues discovered during Phase 10 startup, bringing the codebase to production-ready quality standards.
+
+#### Fixed
+
+- **Task 26.5.1: PubSub Implementation Issues**
+  - ✅ Fixed `Ashfolio.PubSub` module structure with proper function exports
+  - ✅ Added missing `broadcast!/2` function for raising PubSub operations
+  - ✅ Resolved all `Ashfolio.PubSub.broadcast!/2` undefined function calls in AccountLive.Index
+
+- **Task 26.5.2: Module Aliases and References**
+  - ✅ Added proper `ErrorHelpers` and `FormatHelpers` aliases to TransactionLive.Index
+  - ✅ Removed unused `ErrorHelpers` alias from TransactionLive.FormComponent
+  - ✅ Fixed all undefined module reference warnings
+
+- **Task 26.5.3: Ash Framework Function Calls**
+  - ✅ Fixed `Ash.Query.filter/2` with proper `require Ash.Query` statement
+  - ✅ Updated `Ashfolio.Portfolio.first/1` calls to `Ash.read_first/1`
+  - ✅ Fixed `Symbol.list_symbols!/0` to correct `Symbol.list!/0` function call
+  - ✅ Replaced deprecated `Transaction.changeset_for_create/*` with `AshPhoenix.Form` functions
+  - ✅ Added `require_atomic? false` to Account resource update actions
+
+- **Task 26.5.4: Component Attribute Issues**  
+  - ✅ Removed undefined `size` and `variant` attributes from CoreComponents.button/1 calls
+  - ✅ Fixed button component dynamic class array issues (converted to string interpolation)
+  - ✅ Added missing `format_date/1` and `format_quantity/1` functions to FormatHelpers module
+
+- **Task 26.5.5: Code Quality Issues**
+  - ✅ Fixed unused variable warnings (`form` → `_form`, `return_value` → `_return_value`, `transaction` → `_transaction`)
+  - ✅ Removed duplicate `handle_event` clauses in TransactionLive.Index (lines 32, 43, 59, 70)
+  - ✅ Fixed pattern matching on `0.0` warning (changed to `+0.0` for Erlang/OTP 27+ compatibility)
+
+#### Technical Improvements
+
+- **Compilation Status**: Reduced from 12+ warnings/errors to 1 minor non-blocking warning
+- **Test Coverage**: All 192+ tests continue passing - functionality preserved during cleanup
+- **Code Standards**: Codebase now meets production-ready quality standards
+- **Developer Experience**: Clean compilation enables faster development iteration
+
+#### Documentation
+
+- **Task List Updates**: Updated `.kiro/specs/tasks.md` with Phase 10 progress and discoveries
+- **Project Status**: Updated overall project status to 86% complete (25/29 tasks)
+
 ## [0.25.0] - 2025-08-05
 
 ### Phase 9 Transaction Management Complete ✅

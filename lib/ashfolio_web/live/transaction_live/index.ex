@@ -3,6 +3,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
 
   alias Ashfolio.Portfolio.Transaction
   alias AshfolioWeb.TransactionLive.FormComponent
+  alias AshfolioWeb.Live.{ErrorHelpers, FormatHelpers}
 
   @impl true
   def mount(_params, _session, socket) do
@@ -26,33 +27,6 @@ defmodule AshfolioWeb.TransactionLive.Index do
      |> assign(:show_form, true)
      |> assign(:form_action, :new)
      |> assign(:selected_transaction, nil)}
-  end
-
-  @impl true
-  def handle_event("edit_transaction", %{"id" => id}, socket) do
-    transaction = Ashfolio.Portfolio.Transaction.get_by_id!(id)
-
-    {:noreply,
-     socket
-     |> assign(:show_form, true)
-     |> assign(:form_action, :edit)
-     |> assign(:selected_transaction, transaction)}
-  end
-
-  @impl true
-  def handle_event("delete_transaction", %{"id" => id}, socket) do
-    case Ashfolio.Portfolio.Transaction.destroy(id) do
-      :ok ->
-        {:noreply,
-         socket
-         |> ErrorHelpers.put_success_flash("Transaction deleted successfully")
-         |> assign(:transactions, list_transactions())}
-
-      {:error, reason} ->
-        {:noreply,
-         socket
-         |> ErrorHelpers.put_error_flash(reason, "Failed to delete transaction")}
-    end
   end
 
   @impl true
@@ -204,8 +178,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 sm:rounded-r-xl" />
                       <div class="flex justify-end space-x-2">
                         <.button
-                          size="sm"
-                          variant="outline"
+                          class="text-sm px-2 py-1"
                           phx-click="edit_transaction"
                           phx-value-id={transaction.id}
                           title="Edit transaction"
@@ -214,9 +187,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
                           Edit
                         </.button>
                         <.button
-                          size="sm"
-                          variant="outline"
-                          class="text-red-600 hover:text-red-700"
+                          class="text-sm px-2 py-1 text-red-600 hover:text-red-700"
                           phx-click="delete_transaction"
                           phx-value-id={transaction.id}
                           data-confirm="Are you sure you want to delete this transaction? This action cannot be undone."

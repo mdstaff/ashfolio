@@ -3,7 +3,6 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
   use AshfolioWeb, :live_component
 
   alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
-  alias AshfolioWeb.Live.ErrorHelpers
 
   @impl true
   def render(assigns) do
@@ -88,10 +87,10 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
   end
 
   @impl true
-  def update(%{transaction: transaction} = assigns, socket) do
+  def update(%{transaction: _transaction} = assigns, socket) do
     user_id = Ashfolio.Portfolio.User.get_default_user!() |> List.first() |> Map.get(:id)
     accounts = Account.accounts_for_user!(user_id)
-    symbols = Symbol.list_symbols!()
+    symbols = Symbol.list!()
 
     {:ok,
      socket
@@ -99,14 +98,14 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
      |> assign(:accounts, accounts)
      |> assign(:symbols, symbols)
      |> assign_new(:form, fn ->
-       to_form(Transaction.changeset_for_create(transaction))
+       to_form(AshPhoenix.Form.for_create(Transaction, :create, as: "transaction"))
      end)}
   end
 
   @impl true
   def handle_event("validate", %{"transaction" => transaction_params}, socket) do
-    changeset = Transaction.changeset_for_create(socket.assigns.transaction, transaction_params)
-    {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
+    form = AshPhoenix.Form.validate(socket.assigns.form, transaction_params)
+    {:noreply, assign(socket, form: form)}
   end
 
   @impl true

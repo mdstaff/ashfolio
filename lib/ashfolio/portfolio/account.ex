@@ -75,10 +75,10 @@ defmodule Ashfolio.Portfolio.Account do
       message: "Account balance cannot be negative"
 
     # Validate name length
-    validate length(:name, min: 2, max: 100)
+    validate string_length(:name, min: 2, max: 100)
 
     # Validate platform length
-    validate length(:platform, max: 50)
+    validate string_length(:platform, max: 50)
 
     # Validate name format
     validate match(:name, ~r/^[a-zA-Z0-9\s\-_]+$/),
@@ -109,6 +109,7 @@ defmodule Ashfolio.Portfolio.Account do
       description "Update account attributes"
       accept [:name, :platform, :currency, :is_excluded, :balance]
       primary? true
+      require_atomic? false
 
       change fn changeset, _context ->
         # Set balance_updated_at when balance is being updated
@@ -139,6 +140,7 @@ defmodule Ashfolio.Portfolio.Account do
     update :update_balance do
       description "Update account balance"
       accept [:balance]
+      require_atomic? false
 
       change fn changeset, _context ->
         # Always set balance_updated_at when updating balance
@@ -161,9 +163,11 @@ defmodule Ashfolio.Portfolio.Account do
     define :destroy, action: :destroy
 
     def get_by_name_for_user(user_id, name) do
+      require Ash.Query
+      
       Ashfolio.Portfolio.Account
       |> Ash.Query.filter(user_id: user_id, name: name)
-      |> Ashfolio.Portfolio.first()
+      |> Ash.read_first()
     end
   end
 end
