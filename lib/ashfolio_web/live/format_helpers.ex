@@ -56,8 +56,12 @@ defmodule AshfolioWeb.Live.FormatHelpers do
     "#{sign}$#{formatted_with_commas}"
   end
 
-  def format_currency(value, show_cents) when is_number(value) do
+  def format_currency(value, show_cents) when is_integer(value) do
     format_currency(Decimal.new(value), show_cents)
+  end
+
+  def format_currency(value, show_cents) when is_float(value) do
+    format_currency(Decimal.from_float(value), show_cents)
   end
 
   def format_currency(_value, _show_cents), do: "$0.00"
@@ -89,8 +93,12 @@ defmodule AshfolioWeb.Live.FormatHelpers do
     "#{formatted}%"
   end
 
-  def format_percentage(value, decimal_places) when is_number(value) do
+  def format_percentage(value, decimal_places) when is_integer(value) do
     format_percentage(Decimal.new(value), decimal_places)
+  end
+
+  def format_percentage(value, decimal_places) when is_float(value) do
+    format_percentage(Decimal.from_float(value), decimal_places)
   end
 
   def format_percentage(_value, _decimal_places), do: "0.00%"
