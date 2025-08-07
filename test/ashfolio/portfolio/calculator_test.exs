@@ -1,32 +1,33 @@
 defmodule Ashfolio.Portfolio.CalculatorTest do
   use Ashfolio.DataCase, async: false
 
+  @moduletag :calculations
+  @moduletag :unit
+  @moduletag :fast
+
   alias Ashfolio.Portfolio.Calculator
   alias Ashfolio.Portfolio.{User, Account, Symbol, Transaction}
+  alias Ashfolio.SQLiteHelpers
+
+  # Helper function to create user - use global setup
+  defp create_test_user(attrs \\ %{}) do
+    # Use the global user from SQLiteHelpers, ignore custom attrs for consistency
+    {:ok, SQLiteHelpers.get_default_user()}
+  end
 
   describe "calculate_portfolio_value/1" do
     test "calculates total portfolio value correctly" do
       # Create test data
-      {:ok, user} = User.create(%{name: "Test User"})
-      {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
+      {:ok, user} = create_test_user()
+      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
 
-      {:ok, symbol1} =
-        Symbol.create(%{
-          symbol: "AAPL",
-          name: "Apple Inc.",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("150.00")
-        })
+      symbol1 = SQLiteHelpers.get_or_create_symbol("AAPL", %{
+        current_price: Decimal.new("150.00")
+      })
 
-      {:ok, symbol2} =
-        Symbol.create(%{
-          symbol: "MSFT",
-          name: "Microsoft",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("300.00")
-        })
+      symbol2 = SQLiteHelpers.get_or_create_symbol("MSFT", %{
+        current_price: Decimal.new("300.00")
+      })
 
       # Create transactions
       {:ok, _} =
@@ -60,7 +61,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "returns zero for user with no holdings" do
-      {:ok, user} = User.create(%{name: "Empty User"})
+      {:ok, user} = create_test_user(%{name: "Empty User"})
 
       {:ok, portfolio_value} = Calculator.calculate_portfolio_value(user.id)
 
@@ -68,20 +69,14 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "excludes excluded accounts from calculation" do
-      {:ok, user} = User.create(%{name: "Test User"})
-      {:ok, active_account} = Account.create(%{name: "Active Account", user_id: user.id})
+      {:ok, user} = create_test_user()
+      active_account = SQLiteHelpers.get_or_create_account(user, %{name: "Active Account"})
 
-      {:ok, excluded_account} =
-        Account.create(%{name: "Excluded Account", user_id: user.id, is_excluded: true})
+      excluded_account = SQLiteHelpers.get_or_create_account(user, %{name: "Excluded Account", is_excluded: true})
 
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "AAPL",
-          name: "Apple Inc.",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("150.00")
-        })
+      symbol = SQLiteHelpers.get_or_create_symbol("AAPL", %{
+        current_price: Decimal.new("150.00")
+      })
 
       # Transaction in active account
       {:ok, _} =
@@ -162,26 +157,16 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
   describe "calculate_position_returns/1" do
     test "calculates individual position returns" do
       # Create test data
-      {:ok, user} = User.create(%{name: "Test User"})
-      {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
+      {:ok, user} = create_test_user()
+      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
 
-      {:ok, symbol1} =
-        Symbol.create(%{
-          symbol: "AAPL",
-          name: "Apple Inc.",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("150.00")
-        })
+      symbol1 = SQLiteHelpers.get_or_create_symbol("AAPL", %{
+        current_price: Decimal.new("150.00")
+      })
 
-      {:ok, symbol2} =
-        Symbol.create(%{
-          symbol: "MSFT",
-          name: "Microsoft",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("200.00")
-        })
+      symbol2 = SQLiteHelpers.get_or_create_symbol("MSFT", %{
+        current_price: Decimal.new("200.00")
+      })
 
       # Create transactions
       {:ok, _} =
@@ -232,17 +217,12 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "filters out positions with zero quantity" do
-      {:ok, user} = User.create(%{name: "Test User"})
-      {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
+      {:ok, user} = create_test_user()
+      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
 
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "AAPL",
-          name: "Apple Inc.",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("150.00")
-        })
+      symbol = SQLiteHelpers.get_or_create_symbol("AAPL", %{
+        current_price: Decimal.new("150.00")
+      })
 
       # Buy and then sell all shares
       {:ok, _} =
@@ -277,17 +257,12 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
   describe "calculate_total_return/1" do
     test "calculates total portfolio return summary" do
       # Create test data
-      {:ok, user} = User.create(%{name: "Test User"})
-      {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
+      {:ok, user} = create_test_user()
+      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
 
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "AAPL",
-          name: "Apple Inc.",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("150.00")
-        })
+      symbol = SQLiteHelpers.get_or_create_symbol("AAPL", %{
+        current_price: Decimal.new("150.00")
+      })
 
       {:ok, _} =
         Transaction.create(%{
@@ -312,7 +287,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles portfolio with no holdings" do
-      {:ok, user} = User.create(%{name: "Empty User"})
+      {:ok, user} = create_test_user(%{name: "Empty User"})
 
       {:ok, summary} = Calculator.calculate_total_return(user.id)
 
@@ -323,28 +298,18 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles mixed gains and losses across positions" do
-      {:ok, user} = User.create(%{name: "Test User"})
-      {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
+      {:ok, user} = create_test_user()
+      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
 
       # Winning position
-      {:ok, winner} =
-        Symbol.create(%{
-          symbol: "WINNER",
-          name: "Winner Corp",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("200.00")
-        })
+      winner = SQLiteHelpers.get_or_create_symbol("WINNER", %{
+        current_price: Decimal.new("200.00")
+      })
 
       # Losing position
-      {:ok, loser} =
-        Symbol.create(%{
-          symbol: "LOSER",
-          name: "Loser Corp",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("50.00")
-        })
+      loser = SQLiteHelpers.get_or_create_symbol("LOSER", %{
+        current_price: Decimal.new("50.00")
+      })
 
       # Buy winner at $100, now worth $200 (100% gain)
       {:ok, _} =
@@ -383,17 +348,12 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles symbols with no current price" do
-      {:ok, user} = User.create(%{name: "Test User"})
-      {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
+      {:ok, user} = create_test_user()
+      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
 
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "NOPRICE",
-          name: "No Price Corp",
-          asset_class: :stock,
-          data_source: :yahoo_finance
-          # No current_price set
-        })
+      symbol = SQLiteHelpers.get_or_create_symbol("NOPRICE", %{
+        current_price: nil  # Explicitly set to nil for no price
+      })
 
       {:ok, _} =
         Transaction.create(%{
@@ -418,17 +378,12 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles complex transaction history with multiple buys and sells" do
-      {:ok, user} = User.create(%{name: "Test User"})
-      {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
+      {:ok, user} = create_test_user()
+      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
 
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "COMPLEX",
-          name: "Complex Corp",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("120.00")
-        })
+      symbol = SQLiteHelpers.get_or_create_symbol("COMPLEX", %{
+        current_price: Decimal.new("120.00")
+      })
 
       # Buy 20 shares at $100
       {:ok, _} =
@@ -566,17 +521,12 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles dividend transactions in portfolio calculations" do
-      {:ok, user} = User.create(%{name: "Test User"})
-      {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
+      {:ok, user} = create_test_user()
+      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
 
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "DIVSTOCK",
-          name: "Dividend Stock",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("100.00")
-        })
+      symbol = SQLiteHelpers.get_or_create_symbol("DIVSTOCK", %{
+        current_price: Decimal.new("100.00")
+      })
 
       # Buy shares
       {:ok, _} =
@@ -612,17 +562,12 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles fee transactions in portfolio calculations" do
-      {:ok, user} = User.create(%{name: "Test User"})
-      {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
+      {:ok, user} = create_test_user()
+      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
 
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "FEESTOCK",
-          name: "Fee Stock",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("100.00")
-        })
+      symbol = SQLiteHelpers.get_or_create_symbol("FEESTOCK", %{
+        current_price: Decimal.new("100.00")
+      })
 
       # Buy shares
       {:ok, _} =
@@ -671,17 +616,12 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles zero cost basis in calculations" do
-      {:ok, user} = User.create(%{name: "Edge Case User", currency: "USD", locale: "en-US"})
-      {:ok, account} = Account.create(%{name: "Edge Case Account", user_id: user.id})
+      user = SQLiteHelpers.get_default_user()
+      account = SQLiteHelpers.get_or_create_account(user, %{name: "Edge Case Account"})
 
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "ZERO",
-          name: "Zero Cost Stock",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("100.00")
-        })
+      symbol = SQLiteHelpers.get_or_create_symbol("ZERO", %{
+        current_price: Decimal.new("100.00")
+      })
 
       # Free stock with zero cost
       {:ok, _} =
@@ -705,17 +645,12 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles extremely small decimal quantities" do
-      {:ok, user} = User.create(%{name: "Micro User", currency: "USD", locale: "en-US"})
-      {:ok, account} = Account.create(%{name: "Micro Account", user_id: user.id})
+      user = SQLiteHelpers.get_default_user()
+      account = SQLiteHelpers.get_or_create_account(user, %{name: "Micro Account"})
 
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "MICRO",
-          name: "Micro Holdings",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("1000.00")
-        })
+      symbol = SQLiteHelpers.get_or_create_symbol("MICRO", %{
+        current_price: Decimal.new("1000.00")
+      })
 
       # Buy tiny fractional share
       {:ok, _} =
@@ -736,17 +671,12 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles extremely large positions" do
-      {:ok, user} = User.create(%{name: "Whale User", currency: "USD", locale: "en-US"})
-      {:ok, account} = Account.create(%{name: "Whale Account", user_id: user.id})
+      user = SQLiteHelpers.get_default_user()
+      account = SQLiteHelpers.get_or_create_account(user, %{name: "Whale Account"})
 
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "WHALE",
-          name: "Whale Holdings",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("1000.00")
-        })
+      symbol = SQLiteHelpers.get_or_create_symbol("WHALE", %{
+        current_price: Decimal.new("1000.00")
+      })
 
       # Large position
       {:ok, _} =
@@ -767,17 +697,12 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles accounts with only non-buy/sell transactions" do
-      {:ok, user} = User.create(%{name: "Dividend User", currency: "USD", locale: "en-US"})
-      {:ok, account} = Account.create(%{name: "Dividend Account", user_id: user.id})
+      user = SQLiteHelpers.get_default_user()
+      account = SQLiteHelpers.get_or_create_account(user, %{name: "Dividend Account"})
 
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "DIVONLY",
-          name: "Dividend Only",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("50.00")
-        })
+      symbol = SQLiteHelpers.get_or_create_symbol("DIVONLY", %{
+        current_price: Decimal.new("50.00")
+      })
 
       # Only dividend transaction (should be ignored for position calculations)
       {:ok, _} =
@@ -798,17 +723,12 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles negative holdings from overselling" do
-      {:ok, user} = User.create(%{name: "Short User", currency: "USD", locale: "en-US"})
-      {:ok, account} = Account.create(%{name: "Short Account", user_id: user.id})
+      user = SQLiteHelpers.get_default_user()
+      account = SQLiteHelpers.get_or_create_account(user, %{name: "Short Account"})
 
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "SHORT",
-          name: "Short Position",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("100.00")
-        })
+      symbol = SQLiteHelpers.get_or_create_symbol("SHORT", %{
+        current_price: Decimal.new("100.00")
+      })
 
       # Buy 100 shares
       {:ok, _} =
@@ -843,17 +763,12 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles multiple partial sells across lots" do
-      {:ok, user} = User.create(%{name: "Complex User", currency: "USD", locale: "en-US"})
-      {:ok, account} = Account.create(%{name: "Complex Account", user_id: user.id})
+      user = SQLiteHelpers.get_default_user()
+      account = SQLiteHelpers.get_or_create_account(user, %{name: "Complex Account"})
 
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "COMPLEX",
-          name: "Complex Trading",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("120.00")
-        })
+      symbol = SQLiteHelpers.get_or_create_symbol("COMPLEX2", %{
+        current_price: Decimal.new("120.00")
+      })
 
       # Multiple buys and sells
       {:ok, _} =
@@ -901,7 +816,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
         })
 
       {:ok, position_returns} = Calculator.calculate_position_returns(user.id)
-      complex_position = Enum.find(position_returns, fn p -> p.symbol == "COMPLEX" end)
+      complex_position = Enum.find(position_returns, fn p -> p.symbol == "COMPLEX2" end)
       assert complex_position != nil
       assert Decimal.equal?(complex_position.quantity, Decimal.new("50"))
       
@@ -910,25 +825,20 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "calculates total returns correctly with mixed scenarios" do
-      {:ok, user} = User.create(%{name: "Mixed User", currency: "USD", locale: "en-US"})
-      {:ok, account} = Account.create(%{name: "Mixed Account", user_id: user.id})
+      user = SQLiteHelpers.get_default_user()
+      account = SQLiteHelpers.get_or_create_account(user, %{name: "Mixed Account"})
 
       # Create multiple symbols with different scenarios
       symbols_data = [
-        %{symbol: "WINNER", price: "150.00", buy_price: "100.00", qty: "100"},
-        %{symbol: "LOSER", price: "80.00", buy_price: "120.00", qty: "50"},
-        %{symbol: "FLAT", price: "100.00", buy_price: "100.00", qty: "75"}
+        %{symbol: "WINNER2", price: "150.00", buy_price: "100.00", qty: "100"},
+        %{symbol: "LOSER2", price: "80.00", buy_price: "120.00", qty: "50"},
+        %{symbol: "FLAT2", price: "100.00", buy_price: "100.00", qty: "75"}
       ]
 
       for symbol_data <- symbols_data do
-        {:ok, symbol} =
-          Symbol.create(%{
-            symbol: symbol_data.symbol,
-            name: "#{symbol_data.symbol} Corp",
-            asset_class: :stock,
-            data_source: :yahoo_finance,
-            current_price: Decimal.new(symbol_data.price)
-          })
+        symbol = SQLiteHelpers.get_or_create_symbol(symbol_data.symbol, %{
+          current_price: Decimal.new(symbol_data.price)
+        })
 
         {:ok, _} =
           Transaction.create(%{
