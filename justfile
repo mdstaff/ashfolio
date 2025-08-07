@@ -16,6 +16,8 @@
 #   - just test: Run full test suite
 #   - just test-file <file>: Run specific test file
 #   - just test-coverage: Run tests with coverage report
+#   - just test-coverage-clean: Run coverage analysis with minimal logs
+#   - just test-coverage-summary: Show coverage summary table only
 #   - just test-watch: Run tests in watch mode
 #   - just test-failed: Run only failed tests
 #   - just test-verbose: Run tests with detailed output
@@ -94,6 +96,16 @@ test-file file:
 test-coverage:
     @echo "🧪 Running test suite with coverage report..."
     mix test --cover --exclude seeding
+
+# Run tests with clean coverage report (test summary + coverage table)
+test-coverage-clean:
+    @echo "🧪 Running coverage analysis (clean output)..."
+    @mix test --cover --exclude seeding 2>/dev/null | grep -E "(Finished|tests,|failures|excluded|Percentage|---|\..*%|Total)" || echo "❌ Coverage analysis failed - run 'just test-coverage' for details"
+
+# Show coverage summary table only
+test-coverage-summary:
+    @echo "📊 Test Coverage Summary:"
+    @mix test --cover --exclude seeding 2>/dev/null | sed -n '/Percentage | Module/,/Total/p' || echo "❌ Coverage analysis failed - run 'just test-coverage' for details"
 
 # Run tests in watch mode (re-runs on file changes)
 test-watch:

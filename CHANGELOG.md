@@ -5,6 +5,59 @@ All notable changes to the Ashfolio project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.11] - 2025-08-07
+
+### 🔧 Holdings Calculator Test Fix ✅
+
+This release fixes a minor test issue in the HoldingsCalculator test suite to ensure proper dividend transaction validation.
+
+#### Fixed
+
+- **HoldingsCalculator Test Suite**
+  - ✅ **Dividend transaction test fix**: Updated dividend transaction in `handles dividend transactions in cost basis calculation` test to use positive quantity (`Decimal.new("1")`) instead of zero quantity
+  - ✅ **Transaction validation compliance**: Ensures dividend transactions follow proper validation rules requiring positive quantity
+  - ✅ **Test accuracy**: Maintains test integrity while following business logic constraints
+  - ✅ **Documentation clarity**: Added comment explaining dividend transaction quantity requirement
+
+#### Technical Details
+
+- **Test File**: `test/ashfolio/portfolio/holdings_calculator_test.exs`
+- **Change**: Updated dividend transaction quantity from `Decimal.new("0")` to `Decimal.new("1")`
+- **Reason**: Dividend transactions must have positive quantity to pass validation
+- **Impact**: Maintains 301 tests passing with 100% success rate
+
+## [0.26.10] - 2025-08-07
+
+### 🎯 Calculator Test Suite Enhancement ✅
+
+This release significantly expands the Calculator test suite with comprehensive edge cases, error handling, and complex transaction scenarios, bringing the total test count to 301 tests with 100% pass rate.
+
+#### Added
+
+- **Calculator Test Suite Expansion**
+  - ✅ **Mixed gains and losses** test covering portfolio with both winning and losing positions
+  - ✅ **No current price handling** test for symbols without market data
+  - ✅ **Complex transaction history** test with multiple buys and sells using FIFO cost basis
+  - ✅ **Error handling** tests for invalid and nil user IDs with graceful degradation
+  - ✅ **Edge case coverage** including very small/large decimals, negative cost basis, and zero values
+  - ✅ **Transaction type handling** tests for dividend and fee transactions in portfolio calculations
+  - ✅ **Financial precision** validation with Decimal arithmetic for all monetary calculations
+
+#### Test Coverage Achievements
+
+- **301 Total Tests** passing with 100% success rate
+- **Calculator Module**: Comprehensive coverage with 11 additional test cases
+- **Edge Case Handling**: Complete coverage of unusual but possible financial scenarios
+- **Error Resilience**: Robust handling of invalid inputs and missing data
+- **Financial Accuracy**: Validation of FIFO cost basis calculations and complex transaction histories
+
+#### Quality Improvements
+
+- ✅ **Production Readiness**: Calculator handles all edge cases gracefully without crashes
+- ✅ **Financial Precision**: Decimal arithmetic ensures accurate monetary calculations
+- ✅ **Error Handling**: Graceful degradation for invalid user IDs and missing data
+- ✅ **Complex Scenarios**: Support for realistic portfolio scenarios with mixed transaction types
+
 ## [0.26.9] - 2025-08-07
 
 ### 🎯 Task 28: Comprehensive Test Suite Complete ✅
