@@ -1,5 +1,21 @@
 # Ashfolio Development Commands
 # Run `just` to see all available commands
+
+# Architectural focus
+#   just test-ash           # Business logic tests
+#   just test-liveview      # UI tests
+#   just test-calculations  # Portfolio math tests
+#   just test-market-data   # Price system tests
+
+#   # Performance-based
+#   just test-fast          # Quick feedback loop
+#   just test-unit          # Isolated tests
+#   just test-slow          # Comprehensive tests
+
+#   # Development workflow
+#   just test-smoke         # Essential tests
+#   just test-regression    # Bug fix validation
+#   just test-error-handling # Fault tolerance
 #
 # Development:
 #   - just dev: Setup and start development server (BLOCKING)
@@ -13,15 +29,36 @@
 #   - just check: Run format + compile + test (NON-BLOCKING)
 #
 # Testing:
-#   - just test: Run full test suite
+#   - just test: Run main test suite (excludes slow/seeding tests)
 #   - just test-file <file>: Run specific test file
+#   - just test-all: Run full test suite including seeding tests
 #   - just test-coverage: Run tests with coverage report
 #   - just test-coverage-clean: Run coverage analysis with minimal logs
 #   - just test-coverage-summary: Show coverage summary table only
 #   - just test-watch: Run tests in watch mode
 #   - just test-failed: Run only failed tests
 #   - just test-verbose: Run tests with detailed output
-#   - just test-price-manager: Run PriceManager tests specifically
+#
+# Modular Testing (by Architecture Layer):
+#   - just test-ash: Run Ash Resource business logic tests
+#   - just test-liveview: Run Phoenix LiveView UI tests
+#   - just test-calculations: Run portfolio calculation tests
+#   - just test-market-data: Run market data system tests
+#   - just test-integration: Run end-to-end workflow tests
+#   - just test-ui: Run user interface tests
+#
+# Modular Testing (by Performance/Dependencies):
+#   - just test-fast: Run fast tests for development feedback
+#   - just test-unit: Run isolated unit tests
+#   - just test-slow: Run slower, comprehensive tests
+#   - just test-external: Run tests requiring external APIs
+#   - just test-mocked: Run tests with mocked dependencies
+#
+# Modular Testing (by Development Workflow):
+#   - just test-smoke: Run essential tests that must always pass
+#   - just test-regression: Run tests for previously fixed bugs
+#   - just test-edge-cases: Run boundary condition tests
+#   - just test-error-handling: Run error condition tests
 #
 # Database Management:
 #   - just reset: Reset database with fresh sample data
@@ -153,6 +190,131 @@ test-summary:
 test-price-manager:
     @echo "🧪 Running PriceManager tests..."
     mix test test/ashfolio/market_data/price_manager_test.exs
+
+# ============================================================================
+# MODULAR TESTING COMMANDS - ARCHITECTURAL LAYER FILTERS
+# ============================================================================
+
+# Run Ash Resource business logic tests
+test-ash:
+    @echo "🧪 Running Ash Resource business logic tests..."
+    @mix test --only ash_resources 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Ash Resource tests failed - run with --include ash_resources for details" && exit 1)
+
+# Run Phoenix LiveView UI tests
+test-liveview:
+    @echo "🧪 Running Phoenix LiveView UI tests..."
+    @mix test --only liveview 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ LiveView tests failed - run with --include liveview for details" && exit 1)
+
+# Run portfolio calculation tests
+test-calculations:
+    @echo "🧪 Running portfolio calculation tests..."
+    @mix test --only calculations 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Calculation tests failed - run with --include calculations for details" && exit 1)
+
+# Run market data system tests
+test-market-data:
+    @echo "🧪 Running market data system tests..."
+    @mix test --only market_data 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Market data tests failed - run with --include market_data for details" && exit 1)
+
+# Run end-to-end workflow tests
+test-integration:
+    @echo "🧪 Running integration workflow tests..."
+    @mix test --only integration 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Integration tests failed - run with --include integration for details" && exit 1)
+
+# Run user interface tests
+test-ui:
+    @echo "🧪 Running user interface tests..."
+    @mix test --only ui 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ UI tests failed - run with --include ui for details" && exit 1)
+
+# ============================================================================
+# MODULAR TESTING COMMANDS - PERFORMANCE/DEPENDENCY FILTERS
+# ============================================================================
+
+# Run fast tests for development feedback
+test-fast:
+    @echo "🧪 Running fast tests for development feedback..."
+    @mix test --only fast 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Fast tests failed - run with --include fast for details" && exit 1)
+
+# Run isolated unit tests
+test-unit:
+    @echo "🧪 Running isolated unit tests..."
+    @mix test --only unit 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Unit tests failed - run with --include unit for details" && exit 1)
+
+# Run slower, comprehensive tests
+test-slow:
+    @echo "🧪 Running slower, comprehensive tests..."
+    @mix test --only slow 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Slow tests failed - run with --include slow for details" && exit 1)
+
+# Run tests requiring external APIs
+test-external:
+    @echo "🧪 Running tests with external API dependencies..."
+    @mix test --only external_deps 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ External dependency tests failed - run with --include external_deps for details" && exit 1)
+
+# Run tests with mocked dependencies
+test-mocked:
+    @echo "🧪 Running tests with mocked dependencies..."
+    @mix test --only mocked 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Mocked tests failed - run with --include mocked for details" && exit 1)
+
+# ============================================================================
+# MODULAR TESTING COMMANDS - DEVELOPMENT WORKFLOW FILTERS
+# ============================================================================
+
+# Run essential tests that must always pass
+test-smoke:
+    @echo "🧪 Running smoke tests (essential functionality)..."
+    @mix test --only smoke 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Smoke tests failed - run with --include smoke for details" && exit 1)
+
+# Run tests for previously fixed bugs
+test-regression:
+    @echo "🧪 Running regression tests..."
+    @mix test --only regression 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Regression tests failed - run with --include regression for details" && exit 1)
+
+# Run boundary condition tests
+test-edge-cases:
+    @echo "🧪 Running edge case tests..."
+    @mix test --only edge_cases 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Edge case tests failed - run with --include edge_cases for details" && exit 1)
+
+# Run error condition tests
+test-error-handling:
+    @echo "🧪 Running error handling tests..."
+    @mix test --only error_handling 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Error handling tests failed - run with --include error_handling for details" && exit 1)
+
+# ============================================================================
+# MODULAR TESTING COMMANDS - VERBOSE VARIANTS
+# ============================================================================
+
+# Run architectural layer tests with verbose output
+test-ash-verbose:
+    @echo "🧪 Running Ash Resource tests (verbose)..."
+    mix test --only ash_resources --trace
+
+test-liveview-verbose:
+    @echo "🧪 Running LiveView tests (verbose)..."
+    mix test --only liveview --trace
+
+test-calculations-verbose:
+    @echo "🧪 Running calculation tests (verbose)..."
+    mix test --only calculations --trace
+
+test-market-data-verbose:
+    @echo "🧪 Running market data tests (verbose)..."
+    mix test --only market_data --trace
+
+test-integration-verbose:
+    @echo "🧪 Running integration tests (verbose)..."
+    mix test --only integration --trace
+
+# Run performance/dependency tests with verbose output
+test-fast-verbose:
+    @echo "🧪 Running fast tests (verbose)..."
+    mix test --only fast --trace
+
+test-unit-verbose:
+    @echo "🧪 Running unit tests (verbose)..."
+    mix test --only unit --trace
+
+test-slow-verbose:
+    @echo "🧪 Running slow tests (verbose)..."
+    mix test --only slow --trace
 
 # Run database migrations
 migrate:

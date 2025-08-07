@@ -9,20 +9,34 @@ This guide provides specific instructions for AI agents working on the Ashfolio 
 ### Essential Commands
 
 ```bash
-# Test specific file
-just test-file test/path/to/test.exs
+# Basic Commands
+just test-file test/path/to/test.exs     # Test specific file
+just test-file-verbose test/path/to/test.exs  # Verbose output for debugging
+just compile                             # Check compilation
+just test-failed                         # Run failed tests only
+just test                               # Full test suite (takes longer)
 
-# Verbose output for debugging
-just test-file-verbose test/path/to/test.exs
+# NEW: Modular Testing Commands (Use These for Focused Development)
+just test-fast                          # Quick development feedback (< 100ms tests)
+just test-smoke                         # Essential tests that must always pass
 
-# Check compilation
-just compile
+# Test by architectural layer
+just test-ash                           # Business logic (User, Account, Symbol, Transaction)
+just test-liveview                      # UI components and interactions
+just test-calculations                  # Portfolio math and FIFO calculations
+just test-market-data                   # Price fetching and Yahoo Finance integration
 
-# Run failed tests only
-just test-failed
+# Test by scope
+just test-unit                          # Isolated unit tests
+just test-integration                   # End-to-end workflows
 
-# Full test suite (takes longer)
-just test
+# Test with specific dependencies
+just test-external                      # Tests requiring external APIs
+just test-mocked                        # Tests using Mox for external services
+
+# All commands support -verbose variants for detailed output
+just test-fast-verbose                  # Fast tests with detailed output
+just test-ash-verbose                   # Business logic tests with detailed output
 ```
 
 ### Critical File Locations
@@ -325,6 +339,30 @@ end
 ## AI Agent Decision Guidelines
 
 ### When to Use Global Data
+
+#### New: Use Modular Testing Commands for Focused Development
+
+```bash
+# ✅ FAST DEVELOPMENT - Use targeted commands for development workflow
+just test-fast           # Quick feedback during development (< 100ms tests)
+just test-smoke          # Essential functionality verification
+
+# ✅ ARCHITECTURAL FOCUS - Match your development area
+just test-ash           # When working on business logic (User, Account, Symbol, Transaction)
+just test-liveview      # When working on UI components and interactions
+just test-calculations  # When working on portfolio math and FIFO calculations
+just test-market-data   # When working on price fetching and Yahoo Finance
+
+# ✅ SCOPE-BASED DEVELOPMENT - Choose appropriate test scope
+just test-unit          # For isolated functionality testing
+just test-integration   # For end-to-end workflow testing
+just test-regression    # For bug fix validation
+just test-error-handling # For fault tolerance testing
+
+# ❌ AVOID during active development - Use for final validation only
+just test               # Full test suite (slow feedback loop)
+just test-all           # Comprehensive suite including seeding tests
+```
 
 **✅ Use Global Data When**:
 - Testing calculations with standard data

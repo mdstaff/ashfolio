@@ -16,7 +16,9 @@ This project uses `just` as the task runner. Key commands:
 - `just server` - Start Phoenix server (assumes setup already done)
 - `just stop` - Stop Phoenix server
 
-### Testing
+### Testing - Modular Testing Strategy
+
+#### Basic Testing Commands
 - `just test` - Run main test suite (excludes slow seeding tests)
 - `just test-all` - Run full test suite including seeding tests
 - `just test-file <path>` - Run specific test file
@@ -24,6 +26,29 @@ This project uses `just` as the task runner. Key commands:
 - `just test-coverage` - Run tests with coverage report
 - `just test-watch` - Run tests in watch mode
 - `just test-failed` - Re-run only failed tests
+
+#### Architectural Layer Testing (NEW)
+- `just test-ash` - Ash Resource business logic tests (User, Account, Symbol, Transaction)
+- `just test-liveview` - Phoenix LiveView UI component and interaction tests
+- `just test-calculations` - Portfolio calculation and FIFO cost basis tests
+- `just test-market-data` - Price fetching, Yahoo Finance, and caching tests
+- `just test-integration` - End-to-end workflow and system integration tests
+- `just test-ui` - User interface, accessibility, and responsive design tests
+
+#### Performance-Based Testing (NEW)
+- `just test-fast` - Quick tests for development feedback loop (< 100ms)
+- `just test-unit` - Isolated unit tests with minimal dependencies
+- `just test-slow` - Slower comprehensive tests requiring more setup
+- `just test-external` - Tests requiring external APIs (Yahoo Finance, etc.)
+- `just test-mocked` - Tests using Mox for external service mocking
+
+#### Development Workflow Testing (NEW)
+- `just test-smoke` - Essential tests that must always pass
+- `just test-regression` - Tests covering previously fixed bugs
+- `just test-edge-cases` - Boundary condition and unusual scenario tests
+- `just test-error-handling` - Error condition and fault tolerance tests
+
+**Note**: All test commands support `-verbose` variants for detailed output (e.g., `just test-fast-verbose`)
 
 ### Database Management
 - `just reset` - Reset database with fresh sample data (full reset)
@@ -83,17 +108,38 @@ This project uses `just` as the task runner. Key commands:
 
 ## Development Practices
 
-### Testing Strategy
-- Comprehensive test coverage with both unit and integration tests
-- Seeding tests are separated (slow) and excluded by default
-- Mock external APIs using Mox
-- Test both calculator modules extensively due to financial calculation complexity
+### Testing Strategy - Modular Architecture-Aligned Approach
 
-#### SQLite Testing Considerations
-- **Concurrency Limitations**: SQLite has limited concurrent access compared to PostgreSQL
-- **Test Sandbox**: The `DataCase.setup_sandbox/1` handles SQLite connection sharing gracefully
-- **Intermittent Test Failures**: If tests fail with `{:badmatch, :already_shared}` errors, this indicates SQLite sandbox conflicts
-- **Resolution**: The test infrastructure automatically handles these conflicts by allowing connection reuse
+#### Comprehensive Modular Testing Framework
+- **Architecture-Aligned Organization**: Tests organized by architectural layers using ExUnit filters
+- **Performance-Optimized Execution**: Separate fast/slow test categories for optimal development workflow
+- **Dependency-Based Categorization**: Clear separation of tests requiring external services, mocks, or GenServers
+- **Development Workflow Integration**: Specialized test suites for smoke tests, regression testing, and error handling
+
+#### ExUnit Filter Categories
+- **Architectural Layers**: `:ash_resources`, `:liveview`, `:market_data`, `:calculations`, `:ui`, `:pubsub`
+- **Performance Groups**: `:fast`, `:slow`, `:unit`, `:integration`  
+- **Dependency Types**: `:external_deps`, `:genserver`, `:ets_cache`, `:mocked`
+- **Workflow Categories**: `:smoke`, `:regression`, `:edge_cases`, `:error_handling`
+
+#### Test Execution Strategy
+- **Development Loop**: `just test-fast` for quick feedback (< 100ms tests)
+- **Layer-Specific**: `just test-ash`, `just test-liveview`, `just test-calculations` for focused development
+- **Integration Testing**: `just test-integration` for end-to-end workflow validation
+- **Comprehensive**: `just test-all` includes all categories including slow seeding tests
+
+#### SQLite Testing Architecture
+- **Concurrency Safety**: All tests use `async: false` for SQLite compatibility
+- **Global Test Data Pattern**: Pre-created default user, accounts, and symbols reduce database contention
+- **Retry Logic**: Built-in retry patterns for handling SQLite "Database busy" errors
+- **Test Sandbox**: Proper database isolation using `DataCase.setup_sandbox/1`
+- **GenServer Integration**: Special handling for PriceManager and other GenServer database access
+
+#### Testing Documentation
+- **Comprehensive Guides**: Complete documentation in `docs/` covering all testing patterns
+- **AI Agent Support**: Specialized guides and templates for AI-assisted development
+- **Migration Strategies**: Step-by-step guides for adopting modular testing patterns
+- **Best Practices**: SQLite-specific patterns and performance optimization techniques
 
 ### Database Management
 - Development uses seeded sample data for immediate productivity

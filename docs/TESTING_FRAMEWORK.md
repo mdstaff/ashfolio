@@ -246,9 +246,9 @@ test "custom account scenarios" do
 end
 ```
 
-## Running Tests
+## Running Tests - Modular Strategy
 
-### Just Commands
+### Basic Just Commands
 
 ```bash
 # Main test suite (excludes seeding tests)
@@ -274,6 +274,84 @@ just test-seeding
 
 # Full suite including seeding
 just test-all
+```
+
+### Architectural Layer Testing (NEW)
+
+```bash
+# Business logic layer
+just test-ash                    # Ash Resources (User, Account, Symbol, Transaction)
+just test-ash-verbose            # With detailed output
+
+# UI layer  
+just test-liveview              # Phoenix LiveView components
+just test-liveview-verbose      # With detailed output
+just test-ui                    # User interface and accessibility
+
+# Calculation engine
+just test-calculations          # Portfolio math and FIFO calculations
+just test-calculations-verbose  # With detailed output
+
+# Market data system
+just test-market-data           # Price fetching and Yahoo Finance
+just test-market-data-verbose   # With detailed output
+
+# Integration workflows
+just test-integration           # End-to-end workflows
+just test-integration-verbose   # With detailed output
+```
+
+### Performance-Based Testing (NEW)
+
+```bash
+# Development workflow optimization
+just test-fast                  # Quick tests for rapid feedback (< 100ms)
+just test-fast-verbose          # With detailed output
+
+# Test scope categories
+just test-unit                  # Isolated unit tests
+just test-unit-verbose          # With detailed output
+just test-slow                  # Slower comprehensive tests
+just test-slow-verbose          # With detailed output
+
+# Dependency-based testing
+just test-external              # Tests requiring external APIs
+just test-external-verbose      # With detailed output
+just test-mocked                # Tests using Mox for external services
+just test-mocked-verbose        # With detailed output
+```
+
+### Development Workflow Testing (NEW)
+
+```bash
+# Essential testing
+just test-smoke                 # Critical tests that must pass
+just test-smoke-verbose         # With detailed output
+
+# Quality assurance
+just test-regression            # Tests for previously fixed bugs
+just test-regression-verbose    # With detailed output
+just test-edge-cases            # Boundary conditions and unusual scenarios
+just test-edge-cases-verbose    # With detailed output
+just test-error-handling        # Error conditions and fault tolerance
+just test-error-handling-verbose # With detailed output
+```
+
+### Advanced Filter Usage
+
+```bash
+# Combine multiple filters
+mix test --only unit --only fast           # Fast unit tests only
+mix test --include slow --include external # Include slower external tests
+mix test --exclude external_deps           # Exclude external dependencies
+
+# Filter by architectural layer
+mix test --only ash_resources              # Only Ash Resource tests
+mix test --only liveview --only ui         # Only UI-related tests
+
+# Development workflow combinations
+mix test --only smoke --only fast          # Essential fast tests
+mix test --only regression --include slow  # All regression tests including slow ones
 ```
 
 ### Test Configuration

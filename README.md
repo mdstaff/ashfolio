@@ -119,13 +119,35 @@ For a more detailed breakdown of the system architecture, including Ash Resource
 
 ### Development Workflow
 
-Ashfolio uses the `just` command runner to simplify common development tasks.
+Ashfolio uses the `just` command runner with a comprehensive modular testing strategy.
 
+#### Essential Development Commands
 - **`just dev`**: Sets up the environment, installs dependencies, and starts the Phoenix server.
 - **`just test`**: Runs the main test suite (excluding slower seeding tests).
 - **`just test-file <path>`**: Runs tests for a specific file.
 - **`just reset`**: Resets the database with fresh sample data.
 - **`just`**: Lists all available `just` commands with descriptions.
+
+#### Modular Testing Strategy (NEW)
+Ashfolio implements architecture-aligned testing with ExUnit filters for optimal development workflow:
+
+**Quick Development Feedback:**
+- **`just test-fast`**: Quick tests for rapid development feedback (< 100ms)
+- **`just test-smoke`**: Essential tests that must always pass
+
+**Architectural Layer Testing:**
+- **`just test-ash`**: Business logic tests (User, Account, Symbol, Transaction)
+- **`just test-liveview`**: Phoenix LiveView UI component tests
+- **`just test-calculations`**: Portfolio calculation and FIFO cost basis tests
+- **`just test-market-data`**: Price fetching and Yahoo Finance integration tests
+
+**Specialized Testing:**
+- **`just test-unit`**: Isolated unit tests with minimal dependencies
+- **`just test-integration`**: End-to-end workflow tests
+- **`just test-regression`**: Tests for previously fixed bugs
+- **`just test-error-handling`**: Error condition and fault tolerance tests
+
+All commands support `-verbose` variants for detailed output (e.g., `just test-fast-verbose`).
 
 For a complete guide to setting up your development environment, including manual installation steps and troubleshooting, see [DEVELOPMENT_SETUP.md](docs/DEVELOPMENT_SETUP.md).
 
@@ -142,9 +164,13 @@ We welcome contributions to Ashfolio! Please see our [CONTRIBUTING.md](CONTRIBUT
 - **[REST API Guide](docs/api/rest-api.md)**: Complete guide to the local REST API endpoints
 - **[API Reference](docs/api/endpoints.md)**: Detailed technical specifications for all endpoints
 
-### Testing Documentation
+### Testing Documentation (UPDATED)
 
-- **[Accessibility Testing](docs/testing/accessibility-checklist.md)**: WCAG AA compliance testing procedures
+- **[Testing Framework](docs/TESTING_FRAMEWORK.md)**: Comprehensive testing guide with SQLite concurrency patterns
+- **[AI Agent Testing Guide](docs/AI_AGENT_TESTING_GUIDE.md)**: Specialized guide for AI-assisted test development  
+- **[SQLite Concurrency Patterns](docs/SQLITE_CONCURRENCY_PATTERNS.md)**: Deep dive into SQLite-specific testing solutions
+- **[Test Consistency Standards](docs/TEST_CONSISTENCY_STANDARDS.md)**: Quality standards and organization guidelines
+- **[Modular Testing Migration Guide](docs/MODULAR_TESTING_MIGRATION_GUIDE.md)**: Step-by-step filter implementation guide
 
 ### Project Specifications
 
