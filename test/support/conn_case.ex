@@ -28,6 +28,7 @@ defmodule AshfolioWeb.ConnCase do
       import Plug.Conn
       import Phoenix.ConnTest
       import AshfolioWeb.ConnCase
+      import Ashfolio.SQLiteHelpers
     end
   end
 

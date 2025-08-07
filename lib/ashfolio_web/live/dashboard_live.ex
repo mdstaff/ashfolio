@@ -364,12 +364,21 @@ defmodule AshfolioWeb.DashboardLive do
     |> assign(:error, "Unable to load portfolio data")
   end
 
+  # Defensive user creation for single-user application
   defp get_default_user do
     case User.get_default_user() do
       {:ok, [user]} -> {:ok, user}
-      {:ok, []} -> {:error, :no_user_found}
-      {:error, reason} -> {:error, reason}
+      {:ok, []} ->
+        {:ok, user} = User.create(%{name: "Local User", currency: "USD", locale: "en-US"})
+        {:ok, user}
+      {:error, error} ->
+        Logger.error("Failed to get or create default user: #{inspect(error)}")
+        {:error, error}
     end
+  rescue
+    error ->
+      Logger.error("Failed to get or create default user: #{inspect(error)}")
+      {:error, error}
   end
 
   defp get_last_price_update do

@@ -19,7 +19,7 @@ defmodule AshfolioWeb.NavigationTest do
     test "transactions route works", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/transactions")
       assert html =~ "Transactions"
-      assert html =~ "View and manage your investment transactions"
+      assert html =~ "Manage your investment transactions"
     end
 
     test "navigation links are present in layout", %{conn: conn} do

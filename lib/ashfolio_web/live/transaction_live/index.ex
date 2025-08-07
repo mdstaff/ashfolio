@@ -88,7 +88,12 @@ defmodule AshfolioWeb.TransactionLive.Index do
   end
 
   defp list_transactions() do
-    Ashfolio.Portfolio.Transaction.list() |> Ash.Query.load([:account, :symbol])
+    case Ashfolio.Portfolio.Transaction.list() do
+      {:ok, transactions} -> 
+        transactions |> Ash.load!([:account, :symbol])
+      {:error, _error} -> 
+        []
+    end
   end
 
   @impl true

@@ -1,7 +1,7 @@
 defmodule AshfolioWeb.TransactionLive.FormComponent do
   use AshfolioWeb, :live_component
 
-  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
+  alias Ashfolio.Portfolio.{Account, Symbol, Transaction, User}
 
   @impl true
   def render(assigns) do
@@ -90,7 +90,8 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
 
   @impl true
   def update(%{transaction: _transaction} = assigns, socket) do
-    user_id = Ashfolio.Portfolio.User.get_default_user!() |> List.first() |> Map.get(:id)
+    # Get default user, creating if needed (defensive for single-user app)
+    user_id = get_or_create_default_user_id()
     accounts = Account.accounts_for_user!(user_id)
     symbols = Symbol.list!()
 
@@ -132,8 +133,7 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
     transaction_params =
       Map.put(transaction_params, "total_amount", Decimal.to_string(total_amount))
 
-    user_id = Ashfolio.Portfolio.User.get_default_user!() |> List.first() |> Map.get(:id)
-    transaction_params = Map.put(transaction_params, "user_id", user_id)
+    # User association is handled through the account relationship
 
     case Transaction.create(transaction_params) do
       {:ok, transaction} ->
@@ -167,4 +167,14 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
   end
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
+
+  # Defensive user creation for single-user application
+  defp get_or_create_default_user_id do
+    case User.get_default_user() do
+      {:ok, [user]} -> user.id
+      {:ok, []} ->
+        {:ok, user} = User.create(%{name: "Local User", currency: "USD", locale: "en-US"})
+        user.id
+    end
+  end
 end

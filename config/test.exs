@@ -9,7 +9,15 @@ config :ashfolio, Ashfolio.Repo,
   adapter: Ecto.Adapters.SQLite3,
   database: "data/ashfolio_test#{System.get_env("MIX_TEST_PARTITION")}.db",
   pool: Ecto.Adapters.SQL.Sandbox,
-  pool_size: System.schedulers_online() * 2
+  pool_size: System.schedulers_online() * 2,
+  # SQLite optimizations for testing
+  pragma: [
+    journal_mode: :wal,
+    synchronous: :normal,
+    temp_store: :memory,
+    mmap_size: 268_435_456,
+    busy_timeout: 30_000
+  ]
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.

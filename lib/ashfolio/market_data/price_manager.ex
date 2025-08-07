@@ -118,6 +118,9 @@ defmodule Ashfolio.MarketData.PriceManager do
       refresh_count: 0
     }
 
+    # Schedule periodic cache cleanup (every 30 minutes)
+    schedule_cache_cleanup()
+
     Logger.info("PriceManager started")
     {:ok, state}
   end
@@ -169,6 +172,21 @@ defmodule Ashfolio.MarketData.PriceManager do
       end
 
     {:reply, last_refresh_info, state}
+  end
+
+  @impl true
+  def handle_info(:cleanup_cache, state) do
+    # Perform cache cleanup
+    cleaned_count = Cache.cleanup_stale_entries()
+
+    if cleaned_count > 0 do
+      Logger.info("Cache cleanup removed #{cleaned_count} stale entries")
+    end
+
+    # Schedule next cleanup
+    schedule_cache_cleanup()
+
+    {:noreply, state}
   end
 
   @impl true
@@ -345,5 +363,10 @@ defmodule Ashfolio.MarketData.PriceManager do
   defp get_timeout do
     Application.get_env(:ashfolio, __MODULE__, [])
     |> Keyword.get(:refresh_timeout, 30_000)
+  end
+
+  # Schedule cache cleanup to run every 60 minutes (3,600,000 ms)
+  defp schedule_cache_cleanup do
+    Process.send_after(self(), :cleanup_cache, 3_600_000)
   end
 end

@@ -11,6 +11,7 @@ defmodule AshfolioWeb.LiveViewCase do
       use AshfolioWeb.ConnCase
       import Phoenix.LiveViewTest
       import AshfolioWeb.LiveViewCase
+      import Ashfolio.SQLiteHelpers
 
       # Use warn for LiveView errors during testing to avoid duplicate ID crashes
       @live_view_opts [connect_params: %{}, on_error: :warn]

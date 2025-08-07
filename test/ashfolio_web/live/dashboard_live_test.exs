@@ -23,8 +23,8 @@ defmodule AshfolioWeb.DashboardLiveTest do
 
   describe "dashboard with seeded data" do
     setup do
-      # Create a user with sample data
-      {:ok, user} = User.create(%{name: "Test User", currency: "USD", locale: "en-US"})
+      # Get or create the default test user (eliminates SQLite concurrency issues)
+      {:ok, user} = get_or_create_default_user()
 
       # Create an account
       {:ok, account} =
@@ -99,8 +99,8 @@ defmodule AshfolioWeb.DashboardLiveTest do
 
   describe "manual price refresh" do
     setup do
-      # Create test data for price refresh testing
-      {:ok, user} = User.create(%{name: "Refresh Test User", currency: "USD", locale: "en-US"})
+      # Get or create the default test user (eliminates SQLite concurrency issues)
+      {:ok, user} = get_or_create_default_user()
 
       {:ok, account} =
         Account.create(%{
@@ -214,8 +214,8 @@ defmodule AshfolioWeb.DashboardLiveTest do
 
   describe "formatting" do
     setup do
-      # Create test data with specific values to test formatting
-      {:ok, user} = User.create(%{name: "Format Test User", currency: "USD", locale: "en-US"})
+      # Get or create the default test user (eliminates SQLite concurrency issues)
+      {:ok, user} = get_or_create_default_user()
 
       {:ok, account} =
         Account.create(%{

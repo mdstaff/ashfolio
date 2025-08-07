@@ -936,6 +936,7 @@ end
    - Maximum 3 retry attempts per request
    - Different strategies for different error types (network vs rate limit)
    - Structured logging for all retry attempts
+   - **SQLite Handling**: Standard Ash error handling patterns for database operations
 
 4. **Cache Fallback**:
    - Use last known prices with staleness indicators

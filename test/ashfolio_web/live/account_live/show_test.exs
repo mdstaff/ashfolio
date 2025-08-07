@@ -6,8 +6,8 @@ defmodule AshfolioWeb.AccountLive.ShowTest do
   alias Ashfolio.Portfolio.{User, Account, Transaction, Symbol}
 
   setup do
-    # Create default user
-    {:ok, user} = User.create(%{name: "Test User", currency: "USD", locale: "en-US"})
+    # Get or create the default test user (eliminates SQLite concurrency issues)
+    {:ok, user} = get_or_create_default_user()
 
     # Create test account
     {:ok, account} =

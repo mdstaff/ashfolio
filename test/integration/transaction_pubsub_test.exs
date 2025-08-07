@@ -93,7 +93,7 @@ defmodule AshfolioWeb.Integration.TransactionPubSubTest do
       assert_receive {:transaction_saved, _transaction}, 1000
 
       # Verify success message is displayed
-      assert render(transaction_live) =~ "Transaction saved successfully"
+      assert render(transaction_live) =~ "Transaction created successfully"
     end
 
     test "transaction deletion broadcasts PubSub event", %{conn: conn} do
@@ -144,7 +144,8 @@ defmodule AshfolioWeb.Integration.TransactionPubSubTest do
   defp create_test_user do
     Ashfolio.Portfolio.User.create(%{
       name: "Test User",
-      currency: "USD"
+      currency: "USD",
+      locale: "en-US"
     })
   end
 
@@ -165,6 +166,7 @@ defmodule AshfolioWeb.Integration.TransactionPubSubTest do
       symbol: "TEST",
       name: "Test Company Inc.",
       asset_class: :stock,
+      data_source: :yahoo_finance,
       current_price: Decimal.new("100.00")
     }
 
@@ -179,12 +181,23 @@ defmodule AshfolioWeb.Integration.TransactionPubSubTest do
       price: Decimal.new("100.00"),
       fee: Decimal.new("9.95"),
       date: Date.utc_today(),
-      user_id: user.id,
       account_id: account.id,
       symbol_id: symbol.id
     }
 
     attrs = Map.merge(default_attrs, attrs)
+    
+    # Calculate total_amount if not provided
+    attrs = if Map.has_key?(attrs, :total_amount) do
+      attrs
+    else
+      quantity = attrs[:quantity] || default_attrs[:quantity]
+      price = attrs[:price] || default_attrs[:price] 
+      fee = attrs[:fee] || default_attrs[:fee]
+      total_amount = Decimal.add(Decimal.mult(quantity, price), fee)
+      Map.put(attrs, :total_amount, total_amount)
+    end
+    
     Ashfolio.Portfolio.Transaction.create(attrs)
   end
 end

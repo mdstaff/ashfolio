@@ -14,7 +14,7 @@ defmodule AshfolioWeb.AccountLive.FormComponentTest do
 
       view
       |> form("#account-form",
-        account: %{name: "Valid Account", platform: "Valid Platform", balance: "1234.56"}
+        form: %{name: "Valid Account", platform: "Valid Platform", balance: "1234.56"}
       )
       |> render_submit()
 
@@ -30,7 +30,7 @@ defmodule AshfolioWeb.AccountLive.FormComponentTest do
       assert has_element?(view, "#account-form")
 
       view
-      |> form("#account-form", account: %{name: "", platform: "", balance: "-100"})
+      |> form("#account-form", form: %{name: "", platform: "", balance: "-100"})
       |> render_submit()
 
       assert has_element?(view, "#account-form")

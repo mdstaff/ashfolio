@@ -187,8 +187,8 @@ defmodule AshfolioWeb.Live.FormatHelpers do
   """
   def value_color_class(
         value,
-        positive_class \\ "text-green-600",
-        negative_class \\ "text-red-600",
+        positive_class \\ "text-green-700",
+        negative_class \\ "text-red-700",
         neutral_class \\ "text-gray-600"
       )
 

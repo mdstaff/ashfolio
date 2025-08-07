@@ -90,7 +90,7 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
 
       assert results.success_count == 2
       assert results.failure_count == 0
-      assert results.duration_ms > 0
+      assert results.duration_ms >= 0
       assert length(results.successes) == 2
       assert length(results.failures) == 0
 

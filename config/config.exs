@@ -20,7 +20,7 @@ config :ashfolio, AshfolioWeb.Endpoint,
     layout: false
   ],
   pubsub_server: Ashfolio.PubSub,
-  live_view: [signing_salt: "yC+J6S1X"]
+  live_view: [signing_salt: System.get_env("LIVE_VIEW_SIGNING_SALT") || "yC+J6S1X"]
 
 # Configures the mailer
 #

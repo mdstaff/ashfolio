@@ -101,8 +101,8 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
         if Decimal.equal?(cost_basis_data.total_cost, 0) do
           Decimal.new(0)
         else
-          cost_basis_data.total_cost
-          |> Decimal.div_int(unrealized_pnl)
+          unrealized_pnl
+          |> Decimal.div(cost_basis_data.total_cost)
           |> Decimal.mult(100)
         end
 

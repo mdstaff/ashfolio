@@ -256,6 +256,30 @@ brew reinstall sqlite
 sqlite3 --version
 ```
 
+#### 6. Test Failures with SQLite Concurrency
+
+If tests fail with database sandbox errors:
+
+**Symptoms:**
+- Tests fail with `{:badmatch, :already_shared}` errors  
+- Multiple tests failing with sandbox-related messages
+- Intermittent test failures in CI/CD
+
+**Cause:** SQLite has limited concurrent access compared to PostgreSQL
+
+**Resolution:**
+- The test infrastructure automatically handles these conflicts
+- Tests should pass on retry
+- For persistent issues, run individual test files: `just test-file path/to/test.exs`
+
+```bash
+# If encountering persistent sandbox issues
+just test-file test/ashfolio_web/live/dashboard_pubsub_test.exs
+
+# Reset test database if needed
+MIX_ENV=test just reset
+```
+
 ### Memory Issues on 16GB Systems
 
 If you encounter memory issues during development:

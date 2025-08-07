@@ -88,33 +88,56 @@ defmodule AshfolioWeb.AccountLive.Index do
 
   @impl true
   def handle_event("toggle_exclusion", %{"id" => id}, socket) do
-    # Optimistically update the UI
-    accounts = socket.assigns.accounts
-    account_index = Enum.find_index(accounts, &(&1.id == id))
-    account = Enum.at(accounts, account_index)
-    updated_account = %{account | is_excluded: !account.is_excluded}
-    updated_accounts = List.replace_at(accounts, account_index, updated_account)
+    # Check if already toggling this account to prevent concurrent operations
+    if socket.assigns.toggling_account_id == id do
+      {:noreply, socket}
+    else
+      # Store original accounts for potential rollback
+      original_accounts = socket.assigns.accounts
+      account_index = Enum.find_index(original_accounts, &(&1.id == id))
 
-    socket =
-      socket
-      |> assign(:accounts, updated_accounts)
-      |> assign(:toggling_account_id, id)
+      case account_index do
+        nil ->
+          {:noreply,
+           socket
+           |> ErrorHelpers.put_error_flash(:not_found, "Account not found")}
 
-    case Account.toggle_exclusion(account, %{is_excluded: !account.is_excluded}) do
-      {:ok, updated_account_from_db} ->
-        Ashfolio.PubSub.broadcast!("accounts", {:account_updated, updated_account_from_db})
+        _ ->
+          account = Enum.at(original_accounts, account_index)
 
-        {:noreply,
-         socket
-         |> assign(:toggling_account_id, nil)}
+          # Optimistically update the UI
+          updated_account = %{account | is_excluded: !account.is_excluded}
+          updated_accounts = List.replace_at(original_accounts, account_index, updated_account)
 
-      {:error, reason} ->
-        # Revert the optimistic update on failure
-        {:noreply,
-         socket
-         |> assign(:accounts, accounts)
-         |> assign(:toggling_account_id, nil)
-         |> ErrorHelpers.put_error_flash(reason, "Failed to update account exclusion")}
+          socket =
+            socket
+            |> assign(:accounts, updated_accounts)
+            |> assign(:toggling_account_id, id)
+
+          case Account.toggle_exclusion(account, %{is_excluded: !account.is_excluded}) do
+            {:ok, updated_account_from_db} ->
+              Ashfolio.PubSub.broadcast!("accounts", {:account_updated, updated_account_from_db})
+
+              # Reload accounts to ensure consistency
+              user_id = socket.assigns.user_id
+              accounts = list_accounts(user_id)
+              socket =
+                socket
+                |> assign(:toggling_account_id, nil)
+                |> assign(:accounts, accounts)
+                |> ErrorHelpers.put_success_flash("Account exclusion updated successfully")
+
+              {:noreply, socket}
+
+            {:error, reason} ->
+              # Revert the optimistic update on failure
+              {:noreply,
+               socket
+               |> assign(:accounts, original_accounts)
+               |> assign(:toggling_account_id, nil)
+               |> ErrorHelpers.put_error_flash(reason, "Failed to update account exclusion")}
+          end
+      end
     end
   end
 
@@ -160,7 +183,7 @@ defmodule AshfolioWeb.AccountLive.Index do
           New Account
         </.button>
       </div>
-      
+
     <!-- Accounts Table or Empty State -->
       <%= if Enum.empty?(@accounts) do %>
         <!-- Enhanced Empty State -->
@@ -218,7 +241,7 @@ defmodule AshfolioWeb.AccountLive.Index do
                       </svg>
                     </div>
                   </div>
-                  
+
     <!-- Account Details -->
                   <div class="min-w-0 flex-1">
                     <div class="flex items-center space-x-2">
@@ -314,7 +337,7 @@ defmodule AshfolioWeb.AccountLive.Index do
                     </svg>
                     <span class="hidden sm:inline">View</span>
                   </.link>
-                  
+
     <!-- Edit Button -->
                   <.button
                     class="btn-secondary text-xs sm:text-sm px-2 sm:px-3 py-1 inline-flex items-center"
@@ -338,7 +361,7 @@ defmodule AshfolioWeb.AccountLive.Index do
                     </svg>
                     <span class="hidden sm:inline">Edit</span>
                   </.button>
-                  
+
     <!-- Toggle Exclusion Button -->
                   <.button
                     class={
@@ -396,7 +419,7 @@ defmodule AshfolioWeb.AccountLive.Index do
                       <% end %>
                     <% end %>
                   </.button>
-                  
+
     <!-- Delete Button -->
                   <.button
                     class="btn-danger text-xs sm:text-sm px-2 sm:px-3 py-1 inline-flex items-center"
@@ -431,7 +454,7 @@ defmodule AshfolioWeb.AccountLive.Index do
               </:col>
             </.table>
           </div>
-          
+
     <!-- Table Footer with Summary -->
           <div class="bg-gray-50 px-6 py-3 border-t border-gray-200">
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
@@ -463,17 +486,50 @@ defmodule AshfolioWeb.AccountLive.Index do
     """
   end
 
+  # Defensive user creation for single-user application
   defp get_default_user_id do
-    case User.get_default_user!() do
-      [user] ->
-        user.id
-
-      [] ->
-        # Create default user if none exists
-        {:ok, user} = User.create(%{name: "Local User", currency: "USD", locale: "en-US"})
-        user.id
+    case User.get_default_user() do
+      {:ok, [user]} -> user.id
+      {:ok, []} ->
+        create_user_with_retry()
     end
   end
+
+  # SQLite retry helper for user creation
+  defp create_user_with_retry(max_attempts \\ 3, delay_ms \\ 100) do
+    do_create_user_with_retry(max_attempts, delay_ms, 1)
+  end
+
+  defp do_create_user_with_retry(max_attempts, delay_ms, attempt) do
+    case User.create(%{name: "Local User", currency: "USD", locale: "en-US"}) do
+      {:ok, user} -> user.id
+      {:error, error} ->
+        if sqlite_busy_error?(error) and attempt < max_attempts do
+          # Exponential backoff with jitter
+          sleep_time = delay_ms * attempt + :rand.uniform(50)
+          Process.sleep(sleep_time)
+          do_create_user_with_retry(max_attempts, delay_ms, attempt + 1)
+        else
+          # If it's still failing, maybe the user was created by another process
+          case User.get_default_user() do
+            {:ok, [user]} -> user.id
+            _ -> raise "Failed to create or retrieve default user: #{inspect(error)}"
+          end
+        end
+    end
+  end
+
+  defp sqlite_busy_error?(%Ash.Error.Unknown{errors: errors}) do
+    Enum.any?(errors, fn
+      %Ash.Error.Unknown.UnknownError{error: error} when is_binary(error) ->
+        String.contains?(error, "Database busy")
+      _ -> false
+    end)
+  end
+
+  defp sqlite_busy_error?(_), do: false
+
+
 
   defp list_accounts(user_id) do
     Account.accounts_for_user!(user_id)

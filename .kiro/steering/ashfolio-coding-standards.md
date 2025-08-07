@@ -43,6 +43,7 @@
 - Graceful degradation for API failures (use cached data)
 - Never crash the application - handle errors gracefully
 - Format changeset errors for user-friendly display
+- **SQLite Handling**: Use standard Ash error handling patterns for database operations
 
 ### Testing Requirements
 

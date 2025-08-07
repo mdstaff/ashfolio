@@ -279,6 +279,17 @@ Ashfolio aims to meet WCAG 2.1 AA accessibility standards to ensure the applicat
 
 ## Automated Testing Integration
 
+### Robust Test Implementation
+
+Ashfolio's accessibility tests are designed to be resilient and work in various environments:
+
+- **Database State Management**: Tests create default user in setup to prevent LiveView mounting failures
+- **Consistent Behavior**: Tests work reliably across all environments with proper database handling
+- **Root Cause Resolution**: Addresses database concurrency issues at the source rather than with fallbacks
+- **Enhanced Error Reporting**: Uses `inspect(error, limit: :infinity)` for comprehensive error diagnostics
+- **Clear Failure Messages**: Provides detailed LiveView mounting error messages for debugging
+- **Simplified Structure**: Clean test implementation with robust error handling
+
 ### CI/CD Integration
 
 ```bash

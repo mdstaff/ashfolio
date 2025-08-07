@@ -221,11 +221,15 @@ defmodule Ashfolio.Portfolio.Calculator do
           # For sells, quantity is negative, so we add it (which subtracts)
           new_qty = Decimal.add(net_qty, transaction.quantity)
           # For cost basis, we need to reduce it proportionally
-          # This is simplified - in reality we'd use FIFO/LIFO
-          sell_ratio = Decimal.div(Decimal.abs(transaction.quantity), net_qty)
-          cost_reduction = Decimal.mult(total_cost, sell_ratio)
-          new_cost = Decimal.sub(total_cost, cost_reduction)
-          {new_qty, new_cost}
+          # Guard against division by zero when net_qty is 0
+          if Decimal.equal?(net_qty, 0) do
+            {new_qty, total_cost}
+          else
+            sell_ratio = Decimal.div(Decimal.abs(transaction.quantity), net_qty)
+            cost_reduction = Decimal.mult(total_cost, sell_ratio)
+            new_cost = Decimal.sub(total_cost, cost_reduction)
+            {new_qty, new_cost}
+          end
       end
     end)
   end

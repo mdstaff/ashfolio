@@ -89,6 +89,12 @@ This project uses `just` as the task runner. Key commands:
 - Mock external APIs using Mox
 - Test both calculator modules extensively due to financial calculation complexity
 
+#### SQLite Testing Considerations
+- **Concurrency Limitations**: SQLite has limited concurrent access compared to PostgreSQL
+- **Test Sandbox**: The `DataCase.setup_sandbox/1` handles SQLite connection sharing gracefully
+- **Intermittent Test Failures**: If tests fail with `{:badmatch, :already_shared}` errors, this indicates SQLite sandbox conflicts
+- **Resolution**: The test infrastructure automatically handles these conflicts by allowing connection reuse
+
 ### Database Management
 - Development uses seeded sample data for immediate productivity
 - Database backups are timestamped and stored in `data/backups/`
