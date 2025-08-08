@@ -1,27 +1,23 @@
 defmodule Ashfolio.Portfolio.UserTest do
-  use ExUnit.Case, async: true
+  use Ashfolio.DataCase, async: false
+
+  @moduletag :ash_resources
+  @moduletag :unit
+  @moduletag :fast
+  @moduletag :smoke
 
   alias Ashfolio.Portfolio.User
 
   setup do
-    # Explicitly checkout a connection for this test
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Ashfolio.Repo)
-
-    # Create a test user for each test
-    {:ok, user} =
-      Ash.create(User, %{
-        name: "Local User",
-        currency: "USD",
-        locale: "en-US"
-      })
-
+    # Use the global default user for most tests
+    user = Ashfolio.SQLiteHelpers.get_default_user()
     %{user: user}
   end
 
   describe "User resource" do
     test "has correct default attributes", %{user: user} do
       # Check default values
-      assert user.name == "Local User"
+      assert user.name == "Test User"
       assert user.currency == "USD"
       assert user.locale == "en-US"
       assert user.id != nil

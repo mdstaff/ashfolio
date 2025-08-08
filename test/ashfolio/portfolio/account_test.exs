@@ -1,20 +1,17 @@
 defmodule Ashfolio.Portfolio.AccountTest do
-  use ExUnit.Case, async: true
+  use Ashfolio.DataCase, async: false
+
+  @moduletag :ash_resources
+  @moduletag :unit
+  @moduletag :fast
+  @moduletag :smoke
 
   alias Ashfolio.Portfolio.{User, Account}
+  alias Ashfolio.SQLiteHelpers
 
   setup do
-    # Explicitly checkout a connection for this test
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Ashfolio.Repo)
-
-    # Create a test user for each test
-    {:ok, user} =
-      Ash.create(User, %{
-        name: "Local User",
-        currency: "USD",
-        locale: "en-US"
-      })
-
+    # Use the global default user - no concurrency issues with async: false
+    user = SQLiteHelpers.get_default_user()
     %{user: user}
   end
 
@@ -87,9 +84,10 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
       :ok = Ash.destroy(account)
 
-      # Verify account is deleted
+      # Verify the specific account is deleted
       {:ok, accounts} = Ash.read(Account)
-      assert Enum.empty?(accounts)
+      account_ids = Enum.map(accounts, & &1.id)
+      refute account.id in account_ids
     end
 
     test "validates required name field", %{user: user} do
@@ -159,9 +157,10 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
       {:ok, active_accounts} = Ash.read(Account, action: :active)
 
-      assert length(active_accounts) == 1
-      assert hd(active_accounts).id == active_account.id
-      assert hd(active_accounts).is_excluded == false
+      # Verify our active account is in the results and all accounts are non-excluded
+      active_account_ids = Enum.map(active_accounts, & &1.id)
+      assert active_account.id in active_account_ids
+      assert Enum.all?(active_accounts, fn account -> account.is_excluded == false end)
     end
 
     test "by_user action returns accounts for specific user", %{user: user} do
@@ -189,9 +188,10 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
       {:ok, user_accounts} = Account.accounts_for_user(user.id)
 
-      assert length(user_accounts) == 1
-      assert hd(user_accounts).id == user_account.id
-      assert hd(user_accounts).user_id == user.id
+      # Verify our account is in the results and all accounts belong to the user
+      user_account_ids = Enum.map(user_accounts, & &1.id)
+      assert user_account.id in user_account_ids
+      assert Enum.all?(user_accounts, fn account -> account.user_id == user.id end)
     end
 
     test "toggle_exclusion action works correctly", %{user: user} do
@@ -237,7 +237,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
     end
 
     test "list function works", %{user: user} do
-      {:ok, _account} =
+      {:ok, account} =
         Ash.create(Account, %{
           name: "Test Account",
           user_id: user.id
@@ -245,8 +245,10 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
       {:ok, accounts} = Account.list()
 
-      assert length(accounts) == 1
-      assert hd(accounts).name == "Test Account"
+      # Verify our account is in the results
+      account_names = Enum.map(accounts, & &1.name)
+      assert "Test Account" in account_names
+      assert length(accounts) >= 1
     end
 
     test "get_by_id function works", %{user: user} do
@@ -279,8 +281,10 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
       {:ok, active_accounts} = Account.active_accounts()
 
-      assert length(active_accounts) == 1
-      assert hd(active_accounts).id == active_account.id
+      # Verify our active account is in the results and all are non-excluded
+      active_account_ids = Enum.map(active_accounts, & &1.id)
+      assert active_account.id in active_account_ids
+      assert Enum.all?(active_accounts, fn account -> account.is_excluded == false end)
     end
 
     test "accounts_for_user function works", %{user: user} do
@@ -292,8 +296,10 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
       {:ok, user_accounts} = Account.accounts_for_user(user.id)
 
-      assert length(user_accounts) == 1
-      assert hd(user_accounts).id == account.id
+      # Verify our account is in the results and all belong to the user
+      user_account_ids = Enum.map(user_accounts, & &1.id)
+      assert account.id in user_account_ids
+      assert Enum.all?(user_accounts, fn acc -> acc.user_id == user.id end)
     end
 
     test "update function works", %{user: user} do
@@ -343,9 +349,10 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
       :ok = Account.destroy(account)
 
-      # Verify account is deleted
+      # Verify the specific account is deleted
       {:ok, accounts} = Account.list()
-      assert Enum.empty?(accounts)
+      account_ids = Enum.map(accounts, & &1.id)
+      refute account.id in account_ids
     end
   end
 

@@ -1,24 +1,27 @@
 defmodule Ashfolio.Portfolio.SymbolTest do
-  use ExUnit.Case, async: true
+  use Ashfolio.DataCase, async: false
 
+  @moduletag :ash_resources
+  @moduletag :unit
+  @moduletag :fast
+  @moduletag :smoke
+
+  import Ashfolio.SQLiteHelpers
   alias Ashfolio.Portfolio.Symbol
-
-  setup do
-    # Explicitly checkout a connection for this test
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Ashfolio.Repo)
-    :ok
-  end
 
   describe "Symbol resource" do
     test "can create symbol with required attributes" do
+      # Use unique symbol to avoid conflicts with global data
+      unique_symbol = "TEST#{System.unique_integer([:positive])}"
+
       {:ok, symbol} =
         Ash.create(Symbol, %{
-          symbol: "AAPL",
+          symbol: unique_symbol,
           asset_class: :stock,
           data_source: :yahoo_finance
         })
 
-      assert symbol.symbol == "AAPL"
+      assert symbol.symbol == unique_symbol
       assert symbol.asset_class == :stock
       assert symbol.data_source == :yahoo_finance
       # Default value
@@ -32,11 +35,12 @@ defmodule Ashfolio.Portfolio.SymbolTest do
 
     test "can create symbol with all attributes" do
       current_time = DateTime.utc_now()
+      unique_symbol = "FULL#{System.unique_integer([:positive])}"
 
       {:ok, symbol} =
         Ash.create(Symbol, %{
-          symbol: "AAPL",
-          name: "Apple Inc.",
+          symbol: unique_symbol,
+          name: "Test Company Inc.",
           asset_class: :stock,
           currency: "USD",
           isin: "US0378331005",
@@ -47,8 +51,8 @@ defmodule Ashfolio.Portfolio.SymbolTest do
           price_updated_at: current_time
         })
 
-      assert symbol.symbol == "AAPL"
-      assert symbol.name == "Apple Inc."
+      assert symbol.symbol == unique_symbol
+      assert symbol.name == "Test Company Inc."
       assert symbol.asset_class == :stock
       assert symbol.currency == "USD"
       assert symbol.isin == "US0378331005"
@@ -72,9 +76,11 @@ defmodule Ashfolio.Portfolio.SymbolTest do
     end
 
     test "requires asset_class attribute" do
+      unique_symbol = "REQ#{System.unique_integer([:positive])}"
+
       {:error, changeset} =
         Ash.create(Symbol, %{
-          symbol: "AAPL",
+          symbol: unique_symbol,
           data_source: :yahoo_finance
         })
 
@@ -83,9 +89,11 @@ defmodule Ashfolio.Portfolio.SymbolTest do
     end
 
     test "requires data_source attribute" do
+      unique_symbol = "DS#{System.unique_integer([:positive])}"
+
       {:error, changeset} =
         Ash.create(Symbol, %{
-          symbol: "AAPL",
+          symbol: unique_symbol,
           asset_class: :stock
         })
 
@@ -94,9 +102,11 @@ defmodule Ashfolio.Portfolio.SymbolTest do
     end
 
     test "validates asset_class is one of allowed values" do
+      unique_symbol = "VAL#{System.unique_integer([:positive])}"
+
       {:error, changeset} =
         Ash.create(Symbol, %{
-          symbol: "AAPL",
+          symbol: unique_symbol,
           asset_class: :invalid_class,
           data_source: :yahoo_finance
         })
@@ -106,9 +116,11 @@ defmodule Ashfolio.Portfolio.SymbolTest do
     end
 
     test "validates data_source is one of allowed values" do
+      unique_symbol = "VDS#{System.unique_integer([:positive])}"
+
       {:error, changeset} =
         Ash.create(Symbol, %{
-          symbol: "AAPL",
+          symbol: unique_symbol,
           asset_class: :stock,
           data_source: :invalid_source
         })
@@ -118,9 +130,11 @@ defmodule Ashfolio.Portfolio.SymbolTest do
     end
 
     test "validates currency is USD only in Phase 1" do
+      unique_symbol = "CUR#{System.unique_integer([:positive])}"
+
       {:error, changeset} =
         Ash.create(Symbol, %{
-          symbol: "AAPL",
+          symbol: unique_symbol,
           asset_class: :stock,
           data_source: :yahoo_finance,
           currency: "EUR"
@@ -156,28 +170,34 @@ defmodule Ashfolio.Portfolio.SymbolTest do
     end
 
     test "allows valid symbol formats" do
-      valid_symbols = ["AAPL", "BTC-USD", "SPY", "VTI", "MSFT", "GOOGL", "AMZN.L"]
+      # Use unique identifiers to avoid conflicts
+      unique_id = System.unique_integer([:positive])
+      valid_formats = ["ABC", "BTC-USD", "SPY", "VTI", "MSFT", "GOOGL", "AMZN.L"]
 
-      for symbol_name <- valid_symbols do
+      for format <- valid_formats do
+        unique_symbol = "#{format}#{unique_id}#{System.unique_integer([:positive])}"
         {:ok, symbol} =
           Ash.create(Symbol, %{
-            symbol: symbol_name,
+            symbol: unique_symbol,
             asset_class: :stock,
             data_source: :yahoo_finance
           })
 
-        assert symbol.symbol == symbol_name
+        assert symbol.symbol == unique_symbol
       end
     end
   end
 
   describe "Symbol actions" do
     setup do
-      # Create test symbols
+      # Use unique symbols to avoid conflicts with global data
+      unique_id = System.unique_integer([:positive])
+
+      # Create test symbols with unique identifiers
       {:ok, aapl} =
         Ash.create(Symbol, %{
-          symbol: "AAPL",
-          name: "Apple Inc.",
+          symbol: "AAPL#{unique_id}",
+          name: "Apple Inc. Test",
           asset_class: :stock,
           data_source: :yahoo_finance,
           current_price: Decimal.new("150.00"),
@@ -186,8 +206,8 @@ defmodule Ashfolio.Portfolio.SymbolTest do
 
       {:ok, btc} =
         Ash.create(Symbol, %{
-          symbol: "BTC-USD",
-          name: "Bitcoin",
+          symbol: "BTC#{unique_id}",
+          name: "Bitcoin Test",
           asset_class: :crypto,
           data_source: :coingecko,
           current_price: Decimal.new("45000.00"),
@@ -197,8 +217,8 @@ defmodule Ashfolio.Portfolio.SymbolTest do
 
       {:ok, spy} =
         Ash.create(Symbol, %{
-          symbol: "SPY",
-          name: "SPDR S&P 500 ETF",
+          symbol: "SPY#{unique_id}",
+          name: "SPDR S&P 500 ETF Test",
           asset_class: :etf,
           data_source: :yahoo_finance
         })
@@ -207,9 +227,9 @@ defmodule Ashfolio.Portfolio.SymbolTest do
     end
 
     test "can find symbol by ticker symbol", %{aapl: aapl} do
-      {:ok, [found_symbol]} = Symbol.find_by_symbol("AAPL")
+      {:ok, [found_symbol]} = Symbol.find_by_symbol(aapl.symbol)
       assert found_symbol.id == aapl.id
-      assert found_symbol.symbol == "AAPL"
+      assert found_symbol.symbol == aapl.symbol
     end
 
     test "can find symbols by asset class", %{aapl: aapl} do
@@ -230,7 +250,7 @@ defmodule Ashfolio.Portfolio.SymbolTest do
       symbol_ids = Enum.map(symbols, & &1.id)
       assert aapl.id in symbol_ids
       assert btc.id in symbol_ids
-      assert length(symbols) == 2
+      assert length(symbols) >= 2
     end
 
     test "can find symbols with stale prices", %{btc: btc} do
@@ -290,22 +310,26 @@ defmodule Ashfolio.Portfolio.SymbolTest do
 
   describe "Symbol code interface" do
     test "create function works" do
+      unique_symbol = "CI#{System.unique_integer([:positive])}"
+
       {:ok, symbol} =
         Symbol.create(%{
-          symbol: "MSFT",
-          name: "Microsoft Corporation",
+          symbol: unique_symbol,
+          name: "Test Corporation",
           asset_class: :stock,
           data_source: :yahoo_finance
         })
 
-      assert symbol.symbol == "MSFT"
-      assert symbol.name == "Microsoft Corporation"
+      assert symbol.symbol == unique_symbol
+      assert symbol.name == "Test Corporation"
     end
 
     test "list function works" do
+      unique_symbol = "LIST#{System.unique_integer([:positive])}"
+
       {:ok, _} =
         Symbol.create(%{
-          symbol: "GOOGL",
+          symbol: unique_symbol,
           asset_class: :stock,
           data_source: :yahoo_finance
         })
@@ -315,21 +339,25 @@ defmodule Ashfolio.Portfolio.SymbolTest do
     end
 
     test "find_by_symbol function works" do
+      unique_symbol = "FIND#{System.unique_integer([:positive])}"
+
       {:ok, created_symbol} =
         Symbol.create(%{
-          symbol: "AMZN",
+          symbol: unique_symbol,
           asset_class: :stock,
           data_source: :yahoo_finance
         })
 
-      {:ok, [found_symbol]} = Symbol.find_by_symbol("AMZN")
+      {:ok, [found_symbol]} = Symbol.find_by_symbol(unique_symbol)
       assert found_symbol.id == created_symbol.id
     end
 
     test "by_asset_class function works" do
+      unique_symbol = "ETF#{System.unique_integer([:positive])}"
+
       {:ok, _} =
         Symbol.create(%{
-          symbol: "VTI",
+          symbol: unique_symbol,
           asset_class: :etf,
           data_source: :yahoo_finance
         })
@@ -340,9 +368,11 @@ defmodule Ashfolio.Portfolio.SymbolTest do
     end
 
     test "with_prices function works" do
+      unique_symbol = "PRICE#{System.unique_integer([:positive])}"
+
       {:ok, _} =
         Symbol.create(%{
-          symbol: "TSLA",
+          symbol: unique_symbol,
           asset_class: :stock,
           data_source: :yahoo_finance,
           current_price: Decimal.new("200.00"),

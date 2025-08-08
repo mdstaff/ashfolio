@@ -1,32 +1,20 @@
 defmodule Ashfolio.Portfolio.TransactionTest do
-  use Ashfolio.DataCase, async: true
+  use Ashfolio.DataCase, async: false
+
+  @moduletag :ash_resources
+  @moduletag :unit
+  @moduletag :fast
+  @moduletag :smoke
 
   alias Ashfolio.Portfolio.{Transaction, User, Account, Symbol}
+  alias Ashfolio.SQLiteHelpers
 
   describe "Transaction resource" do
     setup do
-      # Create test user
-      {:ok, user} =
-        Ash.create(User, %{
-          name: "Test User"
-        })
-
-      # Create test account
-      {:ok, account} =
-        Account.create(%{
-          name: "Test Brokerage",
-          platform: "Test Platform",
-          user_id: user.id
-        })
-
-      # Create test symbol
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "AAPL",
-          name: "Apple Inc.",
-          asset_class: :stock,
-          data_source: :yahoo_finance
-        })
+      # Use hybrid approach: get global defaults or create custom resources with retry logic
+      user = SQLiteHelpers.get_default_user()
+      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Brokerage", platform: "Test Platform"})
+      symbol = SQLiteHelpers.get_common_symbol("AAPL")
 
       %{user: user, account: account, symbol: symbol}
     end
