@@ -1,6 +1,10 @@
 defmodule Ashfolio.MarketData.YahooFinanceTest do
   use ExUnit.Case, async: false
 
+  @moduletag :market_data
+  @moduletag :unit
+  @moduletag :external_deps
+
   alias Ashfolio.MarketData.YahooFinance
 
   import ExUnit.CaptureLog

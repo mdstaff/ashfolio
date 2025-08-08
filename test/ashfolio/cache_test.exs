@@ -1,5 +1,8 @@
 defmodule Ashfolio.CacheTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
+
+  @moduletag :unit
+  @moduletag :fast
 
   alias Ashfolio.Cache
 

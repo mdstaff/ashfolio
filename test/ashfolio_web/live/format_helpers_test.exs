@@ -1,6 +1,10 @@
 defmodule AshfolioWeb.Live.FormatHelpersTest do
   use ExUnit.Case, async: true
 
+  @moduletag :liveview
+  @moduletag :unit
+  @moduletag :fast
+
   alias AshfolioWeb.Live.FormatHelpers
 
   describe "format_currency/2" do

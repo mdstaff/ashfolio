@@ -1,6 +1,10 @@
 defmodule AshfolioWeb.Live.ErrorHelpersTest do
   use ExUnit.Case, async: true
 
+  @moduletag :liveview
+  @moduletag :unit
+  @moduletag :fast
+
   alias AshfolioWeb.Live.ErrorHelpers
 
   # Note: ErrorHelpers functions require a LiveView socket which is difficult to test in isolation.

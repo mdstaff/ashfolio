@@ -6,8 +6,11 @@ defmodule AshfolioWeb.DashboardPubSubTest do
   without requiring full integration test setup.
   """
 
-  use AshfolioWeb.ConnCase
   use AshfolioWeb.LiveViewCase
+
+  @moduletag :liveview
+  @moduletag :unit
+  @moduletag :fast
 
   import Phoenix.LiveViewTest
 

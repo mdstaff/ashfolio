@@ -1,6 +1,10 @@
 defmodule AshfolioWeb.NavigationTest do
   use AshfolioWeb.ConnCase
 
+  @moduletag :liveview
+  @moduletag :unit
+  @moduletag :fast
+
   import Phoenix.LiveViewTest
 
   describe "navigation routing" do

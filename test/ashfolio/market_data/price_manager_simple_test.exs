@@ -1,6 +1,11 @@
 defmodule Ashfolio.MarketData.PriceManagerSimpleTest do
   use ExUnit.Case, async: false
 
+  @moduletag :market_data
+  @moduletag :genserver
+  @moduletag :unit
+  @moduletag :fast
+
   alias Ashfolio.MarketData.PriceManager
 
   # No setup needed - PriceManager is started by the application

@@ -4,6 +4,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
   @moduletag :calculations
   @moduletag :unit
   @moduletag :fast
+  @moduletag :smoke
 
   alias Ashfolio.Portfolio.Calculator
   alias Ashfolio.Portfolio.{User, Account, Symbol, Transaction}

@@ -1,6 +1,10 @@
 defmodule AshfolioWeb.AccountLive.ShowTest do
   use AshfolioWeb.ConnCase
 
+  @moduletag :liveview
+  @moduletag :unit
+  @moduletag :fast
+
   import Phoenix.LiveViewTest
 
   alias Ashfolio.Portfolio.{User, Account, Transaction, Symbol}
@@ -18,15 +22,13 @@ defmodule AshfolioWeb.AccountLive.ShowTest do
         user_id: user.id
       })
 
-    # Create test symbol
-    {:ok, symbol} =
-      Symbol.create(%{
-        symbol: "AAPL",
-        name: "Apple Inc.",
-        asset_class: :stock,
-        data_source: :yahoo_finance,
-        current_price: Decimal.new("150.00")
-      })
+    # Get or create test symbol
+    symbol = get_or_create_symbol("AAPL", %{
+      name: "Apple Inc.",
+      asset_class: :stock,
+      data_source: :yahoo_finance,
+      current_price: Decimal.new("150.00")
+    })
 
     # Create test transactions
     {:ok, buy_transaction} =

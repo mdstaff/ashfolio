@@ -1,6 +1,10 @@
 defmodule AshfolioWeb.AccountLive.IndexTest do
   use AshfolioWeb.LiveViewCase
 
+  @moduletag :liveview
+  @moduletag :unit
+  @moduletag :fast
+
   alias Ashfolio.Portfolio.{Account, User, Transaction, Symbol}
 
   setup do
@@ -356,15 +360,13 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
       account1: account1,
       user: user
     } do
-      # First create a symbol for the transaction
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "AAPL",
-          name: "Apple Inc.",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("150.00")
-        })
+      # Get or create a symbol for the transaction
+      symbol = get_or_create_symbol("AAPL", %{
+        name: "Apple Inc.",
+        asset_class: :stock,
+        data_source: :yahoo_finance,
+        current_price: Decimal.new("150.00")
+      })
 
       # Create a transaction for account1
       {:ok, _transaction} =
@@ -403,15 +405,13 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
       account1: account1,
       user: user
     } do
-      # Create a symbol and transaction for account1
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "TSLA",
-          name: "Tesla Inc.",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("200.00")
-        })
+      # Get or create a symbol and transaction for account1
+      symbol = get_or_create_symbol("TSLA", %{
+        name: "Tesla Inc.",
+        asset_class: :stock,
+        data_source: :yahoo_finance,
+        current_price: Decimal.new("200.00")
+      })
 
       {:ok, _transaction} =
         Transaction.create(%{
@@ -485,15 +485,13 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
       account1: account1,
       user: user
     } do
-      # Create a symbol and transaction for account1
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "MSFT",
-          name: "Microsoft Corporation",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("250.00")
-        })
+      # Get or create a symbol and transaction for account1
+      symbol = get_or_create_symbol("MSFT", %{
+        name: "Microsoft Corporation",
+        asset_class: :stock,
+        data_source: :yahoo_finance,
+        current_price: Decimal.new("250.00")
+      })
 
       {:ok, transaction} =
         Transaction.create(%{

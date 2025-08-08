@@ -1,5 +1,9 @@
 defmodule AshfolioWeb.AccountLive.FormComponentTest do
-  use AshfolioWeb.LiveViewCase, async: true
+  use AshfolioWeb.LiveViewCase, async: false
+
+  @moduletag :liveview
+  @moduletag :unit
+  @moduletag :fast
 
   alias Ashfolio.Portfolio.Account
   alias AshfolioWeb.AccountLive.FormComponent
@@ -12,14 +16,19 @@ defmodule AshfolioWeb.AccountLive.FormComponentTest do
 
       assert has_element?(view, "#account-form")
 
+      unique_name = "Valid Account #{System.unique_integer([:positive])}"
+
       view
       |> form("#account-form",
-        form: %{name: "Valid Account", platform: "Valid Platform", balance: "1234.56"}
+        form: %{name: unique_name, platform: "Valid Platform", balance: "1234.56"}
       )
       |> render_submit()
 
+      # Wait a moment for the form to process
+      Process.sleep(100)
+
       refute has_element?(view, "#account-form")
-      assert render(view) =~ "Valid Account"
+      assert render(view) =~ unique_name
     end
 
     test "submitting an invalid form shows validation errors", %{conn: conn} do

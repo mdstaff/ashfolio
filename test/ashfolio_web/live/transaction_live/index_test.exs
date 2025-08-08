@@ -1,5 +1,9 @@
 defmodule AshfolioWeb.TransactionLive.IndexTest do
   use AshfolioWeb.ConnCase
+
+  @moduletag :liveview
+  @moduletag :unit
+  @moduletag :fast
   import Phoenix.LiveViewTest
   # import Ashfolio.TestFixtures
 
