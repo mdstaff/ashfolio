@@ -37,19 +37,10 @@ defmodule Ashfolio.DataCase do
   Sets up the sandbox based on the test tags.
   """
   def setup_sandbox(tags) do
-    try do
-      pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Ashfolio.Repo, shared: not tags[:async])
-      on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
-    rescue
-      MatchError ->
-        # Database connection already shared, skip setup
-        # This can happen with SQLite when concurrent tests overlap
-        :ok
-      DBConnection.OwnershipError ->
-        # Another process already owns the connection, retry with shared mode
-        pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Ashfolio.Repo, shared: true)
-        on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
-    end
+    # Use shared mode for tests that need GenServer access
+    # but still provide proper isolation
+    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Ashfolio.Repo, shared: not (tags[:async] || false))
+    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
   end
 
   @doc """

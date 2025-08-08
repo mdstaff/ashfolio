@@ -5,6 +5,55 @@ All notable changes to the Ashfolio project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.13] - 2025-08-07
+
+### 🔧 Account Test Robustness Improvement ✅
+
+This release improves the account deletion test to be more robust in multi-account scenarios.
+
+#### Fixed
+
+- **Account Test Suite Enhancement**
+  - ✅ **Improved account deletion test**: Updated test to verify specific account ID is no longer present rather than assuming empty accounts list
+  - ✅ **Multi-account compatibility**: Test now works correctly when other accounts exist in the database
+  - ✅ **Test robustness**: Prevents false failures in scenarios where multiple accounts are present
+  - ✅ **Better assertion logic**: Uses `refute account.id in account_ids` for precise verification
+
+#### Technical Details
+
+- **Test File**: `test/ashfolio/portfolio/account_test.exs`
+- **Change**: Updated deletion verification from `assert Enum.empty?(accounts)` to ID-specific check
+- **Benefit**: Test passes regardless of other accounts in database
+- **Impact**: Improved test reliability in complex database states
+
+## [0.26.12] - 2025-08-07
+
+### ⚠️ Test Suite Stability Issues Identified
+
+This release identifies critical test stability issues that need to be addressed before v1.0 completion.
+
+#### Issues Identified
+
+- **Test Failures**: 93 out of 383 tests failing (76% pass rate)
+- **Root Cause**: Database state pollution and symbol uniqueness constraint violations
+- **Impact**: Test isolation problems causing shared state between tests
+- **SQLiteHelpers Import**: Added `import Ashfolio.SQLiteHelpers` to Symbol test to improve database cleanup
+
+#### Next Steps
+
+- **Priority**: High - Test suite reliability must be restored
+- **Focus Areas**:
+  - Database cleanup in test setup/teardown
+  - Symbol uniqueness constraint handling
+  - Proper test isolation for SQLite
+  - Restore 100% test pass rate
+
+#### Status
+
+- **Current**: 290/383 tests passing (76% pass rate)
+- **Target**: 383/383 tests passing (100% pass rate)
+- **Blocking**: v1.0 release readiness
+
 ## [0.26.11] - 2025-08-07
 
 ### 🔧 Holdings Calculator Test Fix ✅

@@ -16,30 +16,35 @@ This document provides comprehensive guidance for testing the Ashfolio applicati
 ### Core Test Categories
 
 #### 1. Unit Tests (`test/ashfolio/`)
+
 - **Ash Resources**: `user_test.exs`, `account_test.exs`, `symbol_test.exs`, `transaction_test.exs`
 - **Business Logic**: `calculator_test.exs`, `holdings_calculator_test.exs`
 - **Market Data**: `yahoo_finance_test.exs`, `price_manager_test.exs`
 - **Infrastructure**: `cache_test.exs`, `validation_test.exs`, `error_handler_test.exs`
 
 #### 2. LiveView Tests (`test/ashfolio_web/live/`)
+
 - **Dashboard**: `dashboard_live_test.exs`, `dashboard_pubsub_test.exs`
 - **Account Management**: `account_live/index_test.exs`, `account_live/show_test.exs`, `account_live/form_component_test.exs`
 - **Transaction Management**: `transaction_live/index_test.exs`
 - **Helpers**: `format_helpers_test.exs`, `error_helpers_test.exs`
 
 #### 3. Integration Tests (`test/integration/`)
+
 - **Workflow Tests**: `account_management_flow_test.exs`, `transaction_flow_test.exs`
 - **Performance**: `performance_benchmarks_test.exs`
 - **Critical Points**: `critical_integration_points_test.exs`
 - **PubSub Integration**: `transaction_pubsub_test.exs`
 
 #### 4. Web Tests (`test/ashfolio_web/`)
+
 - **Controllers**: `page_controller_test.exs`, `error_html_test.exs`, `error_json_test.exs`
 - **Infrastructure**: `router_test.exs`, `accessibility_test.exs`, `responsive_design_test.exs`
 
 ### Special Test Categories
 
 #### Seeding Tests
+
 - **File**: `test/ashfolio/seeding_test.exs`
 - **Tag**: `@moduletag :seeding`
 - **Exclusion**: Excluded by default in `test_helper.exs` with `exclude_tags: [:seeding]`
@@ -57,6 +62,7 @@ Ashfolio.SQLiteHelpers.setup_global_test_data!()
 ```
 
 This creates:
+
 - **Default User**: Created once, used by all tests
 - **Default Account**: Created once, available globally
 - **Common Symbols**: AAPL, MSFT, GOOGL, TSLA created once
@@ -105,6 +111,7 @@ end
 ```
 
 **Key Features**:
+
 - Uses checkout/checkin pattern for SQLite
 - No `allow/3` calls needed for single-threaded SQLite
 - Global data created before sandbox mode starts
@@ -132,15 +139,15 @@ end
 ```elixir
 defmodule Ashfolio.Portfolio.UserTest do
   use Ashfolio.DataCase, async: false
-  
+
   alias Ashfolio.Portfolio.User
-  
+
   describe "crud operations" do
     test "creates user successfully" do
       # Test implementation
     end
   end
-  
+
   describe "validations" do
     test "validates required fields" do
       # Test implementation
@@ -154,16 +161,16 @@ end
 ```elixir
 defmodule AshfolioWeb.DashboardLiveTest do
   use AshfolioWeb.ConnCase, async: false
-  
+
   import Phoenix.LiveViewTest
   import Ashfolio.SQLiteHelpers
-  
+
   setup do
     user = get_default_user()
     account = get_default_account(user)
     %{user: user, account: account}
   end
-  
+
   describe "dashboard functionality" do
     test "renders dashboard", %{conn: conn} do
       # Test implementation
@@ -177,10 +184,10 @@ end
 ```elixir
 defmodule Ashfolio.Integration.AccountManagementFlowTest do
   use AshfolioWeb.ConnCase, async: false
-  
+
   import Phoenix.LiveViewTest
   import Ashfolio.SQLiteHelpers
-  
+
   describe "account management workflow" do
     test "complete account lifecycle", %{conn: conn} do
       # End-to-end test implementation
@@ -216,7 +223,7 @@ test "portfolio calculation with default data" do
   user = get_default_user()
   account = get_default_account(user)
   symbol = get_common_symbol("AAPL")
-  
+
   # Use existing data - no creation needed
 end
 ```
@@ -226,18 +233,18 @@ end
 ```elixir
 test "custom account scenarios" do
   user = get_default_user()
-  
+
   # Custom account with retry logic
   account = get_or_create_account(user, %{
     name: "Custom Account",
     balance: Decimal.new("25000.00")
   })
-  
+
   # Custom symbol with price
   symbol = get_or_create_symbol("NVDA", %{
     current_price: Decimal.new("800.00")
   })
-  
+
   # Custom transaction
   transaction = create_test_transaction(user, account, symbol, %{
     type: :sell,
@@ -283,7 +290,7 @@ just test-all
 just test-ash                    # Ash Resources (User, Account, Symbol, Transaction)
 just test-ash-verbose            # With detailed output
 
-# UI layer  
+# UI layer
 just test-liveview              # Phoenix LiveView components
 just test-liveview-verbose      # With detailed output
 just test-ui                    # User interface and accessibility
@@ -385,6 +392,26 @@ symbol = get_common_symbol("AAPL")
 {:ok, user} = User.create(%{name: "Test User"})
 ```
 
+#### 1.5. Handle Global Data Conflicts Properly
+
+```elixir
+# ✅ CORRECT - Use unique identifiers for test resources
+unique_symbol = "TEST#{System.unique_integer([:positive])}"
+{:ok, symbol} = Symbol.create(%{symbol: unique_symbol, ...})
+
+# ✅ CORRECT - Assert membership, not exact counts
+{:ok, accounts} = Account.list()
+account_ids = Enum.map(accounts, & &1.id)
+assert test_account.id in account_ids
+
+# ❌ AVOID - Hardcoded symbols that conflict with global data
+{:ok, symbol} = Symbol.create(%{symbol: "AAPL", ...})  # Conflicts with global AAPL
+
+# ❌ AVOID - Expecting database isolation
+assert length(accounts) == 1  # Fails when global accounts exist
+assert Enum.empty?(accounts)  # Fails when global accounts exist
+```
+
 #### 2. Understand SQLite Limitations
 
 - **No Async Tests**: Always use `async: false`
@@ -397,9 +424,9 @@ symbol = get_common_symbol("AAPL")
 # Required module structure
 defmodule MyTest do
   use Ashfolio.DataCase, async: false  # Always async: false
-  
+
   import Ashfolio.SQLiteHelpers  # Access to helper functions
-  
+
   # Use describe blocks for organization
   describe "feature group" do
     test "specific behavior" do
@@ -431,6 +458,9 @@ just compile
 - **Don't create duplicate users** - Use global user
 - **Don't ignore retry logic** - Use `with_retry/1` for custom resources
 - **Don't mock unnecessarily** - Use real data when possible
+- **Don't expect database isolation** - Global data persists across tests
+- **Don't use hardcoded symbols** - AAPL, MSFT, GOOGL, TSLA exist globally
+- **Don't assert exact counts** - Use membership checks instead
 
 ### Creating New Tests
 
@@ -447,10 +477,10 @@ just compile
 # Unit Test Template
 defmodule Ashfolio.MyModuleTest do
   use Ashfolio.DataCase, async: false
-  
+
   alias Ashfolio.MyModule
   import Ashfolio.SQLiteHelpers
-  
+
   describe "function_group" do
     test "specific_behavior" do
       # Test implementation
@@ -461,15 +491,15 @@ end
 # LiveView Test Template
 defmodule AshfolioWeb.MyLiveTest do
   use AshfolioWeb.ConnCase, async: false
-  
+
   import Phoenix.LiveViewTest
   import Ashfolio.SQLiteHelpers
-  
+
   setup do
     user = get_default_user()
     %{user: user}
   end
-  
+
   describe "liveview_feature" do
     test "interaction", %{conn: conn, user: user} do
       # LiveView test implementation
