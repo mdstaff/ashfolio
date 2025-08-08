@@ -1,5 +1,9 @@
 defmodule Ashfolio.PubSubTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
+
+  @moduletag :pubsub
+  @moduletag :unit
+  @moduletag :fast
 
   alias Ashfolio.PubSub
 

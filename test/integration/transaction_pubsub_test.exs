@@ -6,19 +6,20 @@ defmodule AshfolioWeb.Integration.TransactionPubSubTest do
   and that the dashboard updates in response to transaction changes.
   """
 
-  use AshfolioWeb.ConnCase
   use AshfolioWeb.LiveViewCase
 
   import Phoenix.LiveViewTest
+  alias Ashfolio.SQLiteHelpers
 
   @moduletag :integration
+  @moduletag :pubsub
 
   describe "transaction PubSub integration" do
     test "dashboard subscribes to transaction events and updates portfolio data", %{conn: conn} do
-      # Setup: Create test data
-      {:ok, user} = create_test_user()
-      {:ok, account} = create_test_account(user)
-      {:ok, symbol} = create_test_symbol()
+      # Setup: Use global test data
+      user = Ashfolio.SQLiteHelpers.get_default_user()
+      account = Ashfolio.SQLiteHelpers.get_default_account(user)
+      symbol = Ashfolio.SQLiteHelpers.get_common_symbol("AAPL")
 
       # Navigate to dashboard - this should subscribe to transaction events
       {:ok, dashboard_live, _html} = live(conn, ~p"/")
@@ -35,13 +36,13 @@ defmodule AshfolioWeb.Integration.TransactionPubSubTest do
     end
 
     test "dashboard handles transaction_deleted PubSub events", %{conn: conn} do
-      # Setup: Create test data with existing transaction
-      {:ok, user} = create_test_user()
-      {:ok, account} = create_test_account(user)
-      {:ok, symbol} = create_test_symbol()
+      # Setup: Use global test data with existing transaction
+      user = Ashfolio.SQLiteHelpers.get_default_user()
+      account = Ashfolio.SQLiteHelpers.get_default_account(user)
+      symbol = Ashfolio.SQLiteHelpers.get_common_symbol("AAPL")
 
       {:ok, transaction} =
-        create_test_transaction(user, account, symbol, %{
+        create_local_transaction(user, account, symbol, %{
           type: :buy,
           quantity: Decimal.new("100"),
           price: Decimal.new("150.00")
@@ -58,10 +59,10 @@ defmodule AshfolioWeb.Integration.TransactionPubSubTest do
     end
 
     test "transaction creation broadcasts PubSub event", %{conn: conn} do
-      # Setup: Create test data
-      {:ok, user} = create_test_user()
-      {:ok, account} = create_test_account(user)
-      {:ok, symbol} = create_test_symbol()
+      # Setup: Use global test data
+      user = Ashfolio.SQLiteHelpers.get_default_user()
+      account = Ashfolio.SQLiteHelpers.get_default_account(user)
+      symbol = Ashfolio.SQLiteHelpers.get_common_symbol("AAPL")
 
       # Subscribe to transaction events to verify broadcasting
       Ashfolio.PubSub.subscribe("transactions")
@@ -97,13 +98,13 @@ defmodule AshfolioWeb.Integration.TransactionPubSubTest do
     end
 
     test "transaction deletion broadcasts PubSub event", %{conn: conn} do
-      # Setup: Create test data with existing transaction
-      {:ok, user} = create_test_user()
-      {:ok, account} = create_test_account(user)
-      {:ok, symbol} = create_test_symbol()
+      # Setup: Use global test data with existing transaction
+      user = Ashfolio.SQLiteHelpers.get_default_user()
+      account = Ashfolio.SQLiteHelpers.get_default_account(user)
+      symbol = Ashfolio.SQLiteHelpers.get_common_symbol("AAPL")
 
       {:ok, transaction} =
-        create_test_transaction(user, account, symbol, %{
+        create_local_transaction(user, account, symbol, %{
           type: :buy,
           quantity: Decimal.new("100"),
           price: Decimal.new("150.00")
@@ -174,7 +175,7 @@ defmodule AshfolioWeb.Integration.TransactionPubSubTest do
     Ashfolio.Portfolio.Symbol.create(attrs)
   end
 
-  defp create_test_transaction(user, account, symbol, attrs \\ %{}) do
+  defp create_local_transaction(user, account, symbol, attrs \\ %{}) do
     default_attrs = %{
       type: :buy,
       quantity: Decimal.new("10"),
@@ -186,18 +187,18 @@ defmodule AshfolioWeb.Integration.TransactionPubSubTest do
     }
 
     attrs = Map.merge(default_attrs, attrs)
-    
+
     # Calculate total_amount if not provided
     attrs = if Map.has_key?(attrs, :total_amount) do
       attrs
     else
       quantity = attrs[:quantity] || default_attrs[:quantity]
-      price = attrs[:price] || default_attrs[:price] 
+      price = attrs[:price] || default_attrs[:price]
       fee = attrs[:fee] || default_attrs[:fee]
       total_amount = Decimal.add(Decimal.mult(quantity, price), fee)
       Map.put(attrs, :total_amount, total_amount)
     end
-    
+
     Ashfolio.Portfolio.Transaction.create(attrs)
   end
 end

@@ -11,6 +11,7 @@ defmodule AshfolioWeb.DashboardPubSubTest do
   @moduletag :liveview
   @moduletag :unit
   @moduletag :fast
+  @moduletag :pubsub
 
   import Phoenix.LiveViewTest
 

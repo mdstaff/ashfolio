@@ -5,6 +5,41 @@ All notable changes to the Ashfolio project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.14] - 2025-08-07
+
+### 🧪 Integration Test Suite Fixes ✅
+
+This release fixes critical integration test failures by implementing proper global test data patterns.
+
+#### Fixed
+
+- **Performance Benchmarks Test**
+
+  - ✅ **Symbol creation conflicts resolved**: Replaced direct `Symbol.create()` calls with `SQLiteHelpers.get_or_create_symbol()` helper
+  - ✅ **Global data compatibility**: Test now works with existing symbols in global test data
+  - ✅ **All 10 performance tests passing**: Portfolio calculations, page load times, and memory usage tests all working
+  - ✅ **Test File**: `test/integration/performance_benchmarks_test.exs`
+
+- **Transaction PubSub Test**
+  - ✅ **Form validation errors resolved**: Fixed ArgumentError where account IDs didn't match form select options
+  - ✅ **Global test data integration**: Updated all tests to use `SQLiteHelpers.get_default_user()`, `get_default_account()`, and `get_common_symbol()`
+  - ✅ **All 5 PubSub tests passing**: Transaction creation/deletion events and dashboard updates all working
+  - ✅ **Test File**: `test/integration/transaction_pubsub_test.exs`
+
+#### Technical Details
+
+- **Root Cause**: Tests were creating isolated data that conflicted with global test data and LiveView form options
+- **Solution**: Consistent use of SQLiteHelpers for global test data access
+- **Pattern**: Follows established project testing standards for SQLite concurrency safety
+- **Impact**: Integration tests now align with project's global test data strategy
+
+#### Key Learnings
+
+- **Global Test Data Strategy**: Tests should work with existing data, not create isolated test environments
+- **LiveView Form Compatibility**: Form select options must match test data IDs
+- **SQLite Concurrency**: Helper functions prevent database conflicts and uniqueness constraint violations
+- **Test Reliability**: Proper data patterns ensure consistent test execution
+
 ## [0.26.13] - 2025-08-07
 
 ### 🔧 Account Test Robustness Improvement ✅
