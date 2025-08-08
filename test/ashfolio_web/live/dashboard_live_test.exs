@@ -1,6 +1,10 @@
 defmodule AshfolioWeb.DashboardLiveTest do
   # Manual price refresh tests need async: false
   use AshfolioWeb.LiveViewCase, async: false
+
+  @moduletag :liveview
+  @moduletag :integration
+  @moduletag :slow
   import Mox
 
   alias Ashfolio.Portfolio.{User, Account, Symbol, Transaction}
@@ -9,9 +13,9 @@ defmodule AshfolioWeb.DashboardLiveTest do
   setup :set_mox_from_context
 
   describe "dashboard with no data" do
+    @tag :smoke
     test "displays default values when no user exists", %{conn: conn} do
-      view = live_with_error_check(conn, "/")
-      html = render(view)
+      {:ok, _view, html} = live(conn, "/")
 
       # Should display default values
       assert html =~ "Portfolio Dashboard"
