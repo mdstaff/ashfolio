@@ -89,22 +89,22 @@ Is this a simple read operation?
 ```elixir
 defmodule Ashfolio.MyModuleTest do
   use Ashfolio.DataCase, async: false
-  
+
   alias Ashfolio.MyModule
   import Ashfolio.SQLiteHelpers
-  
+
   describe "function_name/1" do
     test "handles valid input" do
       # Use global data when possible
       user = get_default_user()
-      
+
       # Test the function
       result = MyModule.function_name(user)
-      
+
       # Assert expected behavior
       assert {:ok, _} = result
     end
-    
+
     test "handles invalid input" do
       # Test error cases
       result = MyModule.function_name(nil)
@@ -119,32 +119,32 @@ end
 ```elixir
 defmodule AshfolioWeb.MyLiveTest do
   use AshfolioWeb.ConnCase, async: false
-  
+
   import Phoenix.LiveViewTest
   import Ashfolio.SQLiteHelpers
-  
+
   setup do
     # Always provide basic context
     user = get_default_user()
     account = get_default_account(user)
     %{user: user, account: account}
   end
-  
+
   describe "page rendering" do
     test "displays correct content", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/my-page")
-      
+
       assert html =~ "Expected Content"
     end
   end
-  
+
   describe "user interactions" do
     test "handles button click", %{conn: conn, user: user} do
       {:ok, view, _html} = live(conn, "/my-page")
-      
+
       # Simulate user interaction
       result = view |> element("button[data-test='my-button']") |> render_click()
-      
+
       # Assert expected outcome
       assert result =~ "Success Message"
     end
@@ -157,31 +157,31 @@ end
 ```elixir
 defmodule Ashfolio.Integration.MyWorkflowTest do
   use AshfolioWeb.ConnCase, async: false
-  
+
   import Phoenix.LiveViewTest
   import Ashfolio.SQLiteHelpers
-  
+
   describe "complete workflow" do
     test "user can complete full process", %{conn: conn} do
       # Step 1: Setup
       user = get_default_user()
-      
+
       # Step 2: Navigate to starting point
       {:ok, view, _html} = live(conn, "/start-page")
-      
+
       # Step 3: Execute workflow steps
       view
       |> element("button[data-test='step-1']")
       |> render_click()
-      
+
       # Step 4: Verify intermediate state
       assert has_element?(view, "[data-test='step-1-complete']")
-      
+
       # Step 5: Continue workflow
       view
-      |> element("button[data-test='step-2']") 
+      |> element("button[data-test='step-2']")
       |> render_click()
-      
+
       # Step 6: Verify final outcome
       assert has_element?(view, "[data-test='workflow-complete']")
     end
@@ -194,28 +194,28 @@ end
 ```elixir
 defmodule Ashfolio.PriceManagerTest do
   use Ashfolio.DataCase, async: false
-  
+
   import Ashfolio.SQLiteHelpers
-  
+
   alias Ashfolio.MarketData.PriceManager
-  
+
   setup do
     # CRITICAL: Allow GenServer database access
     allow_price_manager_db_access()
-    
+
     # Mock external API calls
     expect(YahooFinanceMock, :fetch_price, fn _symbol ->
       {:ok, %{price: Decimal.new("150.00"), timestamp: DateTime.utc_now()}}
     end)
-    
+
     :ok
   end
-  
+
   describe "price refresh" do
     test "updates symbol prices successfully" do
       # Test can now call GenServer functions
       result = PriceManager.refresh_prices()
-      
+
       assert {:ok, updated_symbols} = result
       assert length(updated_symbols) > 0
     end
@@ -231,9 +231,9 @@ end
 test "portfolio calculation" do
   # ✅ FAST - Uses pre-created data
   user = get_default_user()
-  account = get_default_account(user)  
+  account = get_default_account(user)
   symbol = get_common_symbol("AAPL")  # AAPL, MSFT, GOOGL, TSLA available
-  
+
   # Your test logic here
   result = Calculator.calculate_portfolio_value(user)
   assert %Decimal{} = result
@@ -245,19 +245,19 @@ end
 ```elixir
 test "custom account scenario" do
   user = get_default_user()
-  
+
   # ✅ SAFE - Uses retry logic internally
   custom_account = get_or_create_account(user, %{
     name: "High Balance Account",
     balance: Decimal.new("50000.00"),
     platform: "Custom Platform"
   })
-  
+
   # ✅ SAFE - Updates existing or creates new
   expensive_symbol = get_or_create_symbol("NVDA", %{
     current_price: Decimal.new("800.00")
   })
-  
+
   # Test with custom data
 end
 ```
@@ -269,20 +269,20 @@ test "multiple transaction types" do
   user = get_default_user()
   account = get_default_account(user)
   symbol = get_common_symbol("MSFT")
-  
+
   # ✅ EFFICIENT - Uses helper with retry logic
   buy_tx = create_test_transaction(user, account, symbol, %{
     type: :buy,
     quantity: Decimal.new("10"),
     price: Decimal.new("300.00")
   })
-  
+
   sell_tx = create_test_transaction(user, account, symbol, %{
-    type: :sell, 
+    type: :sell,
     quantity: Decimal.new("5"),
     price: Decimal.new("320.00")
   })
-  
+
   # Test calculations with transaction history
   holdings = HoldingsCalculator.get_holdings_summary(user)
   assert length(holdings) > 0
@@ -297,16 +297,16 @@ end
 test "handles invalid input gracefully" do
   # Test expected error conditions
   result = MyModule.process_data(nil)
-  
+
   assert {:error, :invalid_input} = result
 end
 
 test "validates required fields" do
   user = get_default_user()
-  
+
   # Test validation errors
   result = Account.create(%{user_id: user.id}, actor: user)  # Missing required fields
-  
+
   assert {:error, changeset} = result
   assert %{name: ["is required"]} = errors_on(changeset)
 end
@@ -317,11 +317,11 @@ end
 ```elixir
 test "handles database constraints" do
   user = get_default_user()
-  
+
   # First account with name
   account1 = get_or_create_account(user, %{name: "Unique Name"})
   assert account1.name == "Unique Name"
-  
+
   # Attempt duplicate name (should fail gracefully)
   result = with_retry(fn ->
     Account.create(%{
@@ -330,7 +330,7 @@ test "handles database constraints" do
       balance: Decimal.new("1000.00")
     }, actor: user)
   end)
-  
+
   # Assert appropriate error handling
   assert {:error, _changeset} = result
 end
@@ -365,18 +365,20 @@ just test-all           # Comprehensive suite including seeding tests
 ```
 
 **✅ Use Global Data When**:
+
 - Testing calculations with standard data
 - Need basic user/account/symbol for context
 - Testing read-only operations
 - Performance is important
 
 **Examples**:
+
 ```elixir
 # Portfolio calculations
 user = get_default_user()
 holdings = Calculator.calculate_holdings(user)
 
-# Symbol lookups  
+# Symbol lookups
 symbol = get_common_symbol("AAPL")
 price = symbol.current_price
 ```
@@ -384,12 +386,14 @@ price = symbol.current_price
 ### When to Create Custom Data
 
 **✅ Create Custom Data When**:
+
 - Testing edge cases or specific scenarios
 - Need unusual attribute combinations
 - Testing validation logic
 - Simulating complex portfolios
 
 **Examples**:
+
 ```elixir
 # High-balance account for testing
 account = get_or_create_account(user, %{
@@ -405,12 +409,14 @@ symbol = get_or_create_symbol("TEST", %{
 ### When to Use Integration Tests
 
 **✅ Create Integration Test When**:
+
 - Testing complete user workflows
 - Multiple modules interact
 - UI and backend integration
 - Testing system behavior
 
 **Examples**:
+
 - Account creation → Transaction entry → Portfolio calculation
 - Price refresh → Cache update → Dashboard display
 - User navigation → Form submission → Database update
@@ -439,7 +445,7 @@ just test-file-verbose test/path/to/failing_test.exs
 ** (ArgumentError) expected first argument to be a %Phoenix.LiveView.Socket{}
 → Solution: Check LiveView test setup and imports
 
-# Mox Error  
+# Mox Error
 ** (Mox.UnexpectedCallError) no expectation defined for YahooFinanceMock.fetch_price/1
 → Solution: Add expect() calls in test setup
 ```
@@ -506,7 +512,7 @@ end
 # ❌ SLOW - Creates new data
 test "slow test" do
   {:ok, user} = User.create(%{})     # DB write
-  {:ok, account} = Account.create(%{}) # DB write  
+  {:ok, account} = Account.create(%{}) # DB write
   # Test logic
 end
 ```
@@ -521,7 +527,7 @@ test "calculation logic" do
   assert result == Decimal.new("105.00")
 end
 
-# ✅ INTEGRATION TEST - Slower, comprehensive  
+# ✅ INTEGRATION TEST - Slower, comprehensive
 test "complete portfolio workflow" do
   # Multi-step workflow testing
 end
@@ -537,23 +543,23 @@ defmodule MyTest do
       user = get_default_user()
       %{user: user}
     end
-    
+
     test "scenario 1", %{user: user} do
       # Uses shared setup
     end
-    
-    test "scenario 2", %{user: user} do  
+
+    test "scenario 2", %{user: user} do
       # Uses shared setup
     end
   end
-  
+
   describe "with custom data" do
     setup do
       user = get_default_user()
       custom_account = get_or_create_account(user, %{balance: Decimal.new("50000.00")})
       %{user: user, account: custom_account}
     end
-    
+
     # Tests that need custom data
   end
 end
@@ -564,30 +570,35 @@ end
 Before submitting test code, verify:
 
 ### ✅ Structure Checklist
+
 - [ ] `use Ashfolio.DataCase, async: false` (never async: true)
 - [ ] `import Ashfolio.SQLiteHelpers` included
 - [ ] Tests organized in logical `describe` blocks
 - [ ] Descriptive test names explaining behavior
 
-### ✅ Data Usage Checklist  
+### ✅ Data Usage Checklist
+
 - [ ] Used global data (`get_default_user()`) when possible
 - [ ] Used retry helpers for custom resources
 - [ ] No direct `User.create()` or `Account.create()` calls without retry
 - [ ] Used `create_test_transaction()` for transaction tests
 
 ### ✅ Error Handling Checklist
+
 - [ ] Tests both success and error cases
 - [ ] Uses `assert {:ok, _}` and `assert {:error, _}` patterns
 - [ ] Validates error messages when relevant
 - [ ] Handles expected exceptions gracefully
 
 ### ✅ Performance Checklist
+
 - [ ] Minimized database write operations
 - [ ] Used appropriate test type (unit vs integration)
 - [ ] Avoided unnecessary data creation
 - [ ] Shared setup data when possible
 
 ### ✅ Special Cases Checklist
+
 - [ ] Added `allow_price_manager_db_access()` for GenServer tests
 - [ ] Added Mox expectations for external API calls
 - [ ] Used proper LiveView test imports and setup
@@ -596,6 +607,7 @@ Before submitting test code, verify:
 ## Summary for AI Agents
 
 **Key Success Patterns**:
+
 1. **Always use `async: false`** for SQLite compatibility
 2. **Prefer global data** over custom creation for performance
 3. **Use retry helpers** when custom resources are needed
@@ -604,6 +616,7 @@ Before submitting test code, verify:
 6. **Add proper setup** for GenServer and LiveView tests
 
 **Common Mistakes to Avoid**:
+
 1. Using `async: true` (causes SQLite conflicts)
 2. Creating users/accounts directly without retry logic
 3. Missing GenServer database permissions
@@ -612,3 +625,102 @@ Before submitting test code, verify:
 6. Creating unnecessary custom data
 
 Following these patterns will result in reliable, fast, maintainable tests that work well with Ashfolio's SQLite-based architecture.
+
+## Integration Test Patterns (Recently Added)
+
+### Pattern: LiveView Form Testing with Global Data
+
+When testing LiveView forms, ensure the test data matches what the form expects:
+
+```elixir
+# ❌ PROBLEMATIC - Creates data that form doesn't recognize
+test "form submission" do
+  {:ok, user} = User.create(%{name: "Test User"})
+  {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
+
+  # Form will fail because account.id isn't in form's select options
+  form_data = %{account_id: account.id, ...}
+end
+
+# ✅ CORRECT - Uses global data that form recognizes
+test "form submission" do
+  user = SQLiteHelpers.get_default_user()
+  account = SQLiteHelpers.get_default_account(user)
+
+  # Form will work because account.id matches form's select options
+  form_data = %{account_id: account.id, ...}
+end
+```
+
+### Pattern: Performance Test Data Setup
+
+For performance tests that need realistic data volumes:
+
+```elixir
+# ✅ CORRECT - Uses get_or_create for existing symbols
+test "performance with realistic data" do
+  user = SQLiteHelpers.get_default_user()
+  account = SQLiteHelpers.get_default_account(user)
+
+  # Use existing symbols or create if needed
+  symbols = ["AAPL", "MSFT", "GOOGL", "TSLA", "AMZN"]
+  created_symbols =
+    Enum.map(symbols, fn symbol_name ->
+      SQLiteHelpers.get_or_create_symbol(symbol_name, %{
+        name: "#{symbol_name} Inc.",
+        asset_class: :stock,
+        current_price: Decimal.new("#{100 + :rand.uniform(200)}.00")
+      })
+    end)
+
+  # Create test transactions using existing data
+  # ... rest of test
+end
+```
+
+### Pattern: PubSub Integration Testing
+
+For testing real-time events and LiveView updates:
+
+```elixir
+test "PubSub event broadcasting" do
+  # Use global data for consistency
+  user = SQLiteHelpers.get_default_user()
+  account = SQLiteHelpers.get_default_account(user)
+  symbol = SQLiteHelpers.get_common_symbol("AAPL")
+
+  # Subscribe to events
+  Ashfolio.PubSub.subscribe("transactions")
+
+  # Perform action that should broadcast
+  {:ok, transaction_live, _html} = live(conn, ~p"/transactions")
+
+  # Submit form with data that matches form options
+  transaction_live
+  |> form("#transaction-form", transaction: %{
+    account_id: account.id,  # This ID will be in form's select options
+    symbol_id: symbol.id,
+    # ... other fields
+  })
+  |> render_submit()
+
+  # Verify event was broadcast
+  assert_receive {:transaction_saved, _transaction}, 1000
+end
+```
+
+## Recent Fixes Applied (August 7, 2025)
+
+### Fix: Performance Benchmarks Test
+
+- **Issue**: Symbol creation conflicts with global test data
+- **Solution**: Used `SQLiteHelpers.get_or_create_symbol()` instead of direct `Symbol.create()`
+- **File**: `test/integration/performance_benchmarks_test.exs`
+
+### Fix: Transaction PubSub Test
+
+- **Issue**: Form validation errors due to account ID mismatch
+- **Solution**: Used global test data helpers consistently
+- **File**: `test/integration/transaction_pubsub_test.exs`
+
+These fixes demonstrate the importance of the global test data strategy for integration tests.

@@ -126,9 +126,10 @@ defmodule AshfolioWeb.DashboardLive do
             class="btn-secondary w-full sm:w-auto"
             disabled={@loading}
             phx-click="refresh_prices"
+            data-testid="refresh-prices-button"
           >
             <%= if @loading do %>
-              <.loading_spinner class="w-4 h-4 mr-2" />
+              <.loading_spinner class="w-4 h-4 mr-2" data-testid="loading-spinner" />
             <% else %>
               <.icon name="hero-arrow-path" class="w-4 h-4 mr-2" />
             <% end %>
@@ -141,12 +142,13 @@ defmodule AshfolioWeb.DashboardLive do
       </div>
 
     <!-- Portfolio Summary Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="portfolio-summary">
         <.stat_card
           title="Total Value"
           value={@portfolio_value}
           change={@total_return_percent}
           positive={FormatHelpers.is_positive?(@total_return_amount)}
+          data_testid="total-value"
         />
         <.stat_card title="Daily Change" value="N/A" change="Phase 2" positive={true} />
         <.stat_card
@@ -154,8 +156,9 @@ defmodule AshfolioWeb.DashboardLive do
           value={@total_return_amount}
           change={@total_return_percent}
           positive={FormatHelpers.is_positive?(@total_return_amount)}
+          data_testid="total-return"
         />
-        <.stat_card title="Holdings" value={@holdings_count} change={"#{@holdings_count} positions"} />
+        <.stat_card title="Holdings" value={@holdings_count} change={"#{@holdings_count} positions"} data_testid="holdings-count" />
       </div>
 
     <!-- Holdings Table -->
@@ -182,7 +185,7 @@ defmodule AshfolioWeb.DashboardLive do
           </div>
         <% else %>
           <div class="overflow-x-auto">
-            <table class="min-w-full mt-4" role="table" aria-label="Portfolio holdings">
+            <table class="min-w-full mt-4" role="table" aria-label="Portfolio holdings" data-testid="holdings-table">
               <thead class="text-sm text-left leading-6 text-zinc-500">
                 <tr>
                   <th class="p-0 pb-4 pr-6 font-normal">

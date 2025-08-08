@@ -7,6 +7,7 @@ defmodule AshfolioWeb.ConnCase do
   import other functionality to make it easier
   to build common data structures and query the data layer.
 
+
   Finally, if the test case interacts with the database,
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using

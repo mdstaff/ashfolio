@@ -1,5 +1,5 @@
 defmodule AshfolioWeb.ErrorJSONTest do
-  use AshfolioWeb.ConnCase, async: true
+  use AshfolioWeb.ConnCase, async: false
 
   test "renders 404" do
     assert AshfolioWeb.ErrorJSON.render("404.json", %{}) == %{errors: %{detail: "Not Found"}}

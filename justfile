@@ -1,21 +1,24 @@
 # Ashfolio Development Commands
 # Run `just` to see all available commands
 
-# Architectural focus
-#   just test-ash           # Business logic tests
-#   just test-liveview      # UI tests
-#   just test-calculations  # Portfolio math tests
-#   just test-market-data   # Price system tests
+#   # Architectural focus
+#   just test-ash           # Business logic tests 0 failures
+#   just test-liveview      # UI tests  18 failures
+#   just test-calculations  # Portfolio math tests 0 failures
+#   just test-market-data   # Price system tests 0 failures
+#   just test-mocked        # 0 Failures 2 Skipped
 
 #   # Performance-based
-#   just test-fast          # Quick feedback loop
-#   just test-unit          # Isolated tests
-#   just test-slow          # Comprehensive tests
+#   just test-unit          # Isolated tests 0 failures
+#   just test-fast          # Quick feedback loop 10 failures
+#   just test-slow          # Comprehensive tests 18 failures
 
 #   # Development workflow
-#   just test-smoke         # Essential tests
-#   just test-regression    # Bug fix validation
-#   just test-error-handling # Fault tolerance
+#   just test-smoke         # Essential tests 0 failures
+#   just test-regression    # Bug fix validation 0 tests run
+#   just test-error-handling # Fault tolerance 0 tests run
+#   just test-integration: Run end-to-end workflow tests
+#   just test-ui: Run user interface tests
 #
 # Development:
 #   - just dev: Setup and start development server (BLOCKING)
@@ -66,6 +69,13 @@
 #   - just backup: Create timestamped database backup
 #   - just restore <file>: Restore from backup file
 #   - just db-status: Show table counts and database status
+#
+# Test Database Safeguards (NEW!):
+#   - just test-health-check: Check test database health before running tests
+#   - just test-safe: Run tests with automatic health check
+#   - just test-db-validate: Validate test database state
+#   - just test-db-reset: Safe test database reset procedure
+#   - just test-db-emergency-reset: Emergency recovery for mass failures
 
 # Show all available commands
 default:
@@ -352,6 +362,36 @@ restore backup_file:
 db-status:
     @echo "📊 Database status:"
     @mix run -e "alias Ashfolio.Repo; IO.puts(\"Users: #{Repo.aggregate(Ashfolio.Portfolio.User, :count)}\"); IO.puts(\"Accounts: #{Repo.aggregate(Ashfolio.Portfolio.Account, :count)}\"); IO.puts(\"Symbols: #{Repo.aggregate(Ashfolio.Portfolio.Symbol, :count)}\"); IO.puts(\"Transactions: #{Repo.aggregate(Ashfolio.Portfolio.Transaction, :count)}\");"
+
+# === TEST DATABASE SAFEGUARDS ===
+
+# Check test database health before running tests
+test-health-check:
+    @echo "🛡️  Checking test database health..."
+    @MIX_ENV=test mix run -e "Ashfolio.SQLiteHelpers.test_database_health_check!()"
+
+# Emergency test database recovery (our proven fix for mass test failures)
+test-db-emergency-reset:
+    @echo "🚨 EMERGENCY: Resetting test database..."
+    @echo "⚠️  This will completely reset the test database!"
+    @echo "Press Enter to continue or Ctrl+C to abort..."
+    @read
+    @MIX_ENV=test mix run -e "Ashfolio.SQLiteHelpers.emergency_test_db_reset!()"
+
+# Complete test database reset (safe version for regular use)
+test-db-reset:
+    @echo "🔄 Resetting test database (safe procedure)..."
+    @MIX_ENV=test mix ecto.drop && MIX_ENV=test mix ecto.create && MIX_ENV=test mix ecto.migrate
+    @MIX_ENV=test mix run -e "Ashfolio.SQLiteHelpers.setup_global_test_data!()"
+    @echo "✅ Test database reset complete"
+
+# Validate test database state
+test-db-validate:
+    @echo "🔍 Validating test database state..."
+    @MIX_ENV=test mix run -e "Ashfolio.SQLiteHelpers.validate_global_test_data!()"
+
+# Enhanced test command with health check
+test-safe: test-health-check test
 
 # Clean build artifacts
 clean:

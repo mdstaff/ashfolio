@@ -8,19 +8,22 @@ defmodule AshfolioWeb.LiveViewCase do
 
   using do
     quote do
-      use AshfolioWeb.ConnCase
+      # The default endpoint for testing
+      @endpoint AshfolioWeb.Endpoint
+
+      use AshfolioWeb, :verified_routes
+
+      # Import conveniences for testing with connections
+      import Plug.Conn
+      import Phoenix.ConnTest
       import Phoenix.LiveViewTest
-      import AshfolioWeb.LiveViewCase
+      import AshfolioWeb.ConnCase
       import Ashfolio.SQLiteHelpers
-
-      # Use warn for LiveView errors during testing to avoid duplicate ID crashes
-      @live_view_opts [connect_params: %{}, on_error: :warn]
-
-      # Helper to mount LiveViews with error checking
-      def live_with_error_check(conn, path) do
-        {:ok, view, _html} = live(conn, path, @live_view_opts)
-        view
-      end
     end
+  end
+
+  setup tags do
+    Ashfolio.DataCase.setup_sandbox(tags)
+    {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end

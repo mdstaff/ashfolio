@@ -119,11 +119,61 @@ defmodule Ashfolio.SQLiteHelpers do
     account = create_default_account!(user)
     symbols = create_common_symbols!()
 
+    # Validate the setup was successful
+    validate_global_test_data!()
+
     %{
       user: user,
       account: account,
       symbols: symbols
     }
+  end
+
+  @doc """
+  Validates that the global test data is properly set up.
+  
+  This safeguard helps catch database setup issues early before tests run.
+  """
+  def validate_global_test_data! do
+    # Check default user exists
+    case User.get_default_user() do
+      {:ok, []} -> 
+        raise "❌ SAFEGUARD FAILURE: Default user not found after setup"
+      {:ok, [user]} when user.name in ["Test User", "Local User"] -> 
+        IO.puts("✅ Test user validated: #{user.name}")
+      {:ok, [user]} -> 
+        IO.puts("⚠️  WARNING: Test user has unexpected name: #{user.name}")
+      {:error, error} -> 
+        raise "❌ SAFEGUARD FAILURE: Could not query default user: #{inspect(error)}"
+    end
+
+    # Check default account exists
+    case Ashfolio.Portfolio.Account.get_by_name_for_user(get_default_user().id, "Default Test Account") do
+      {:ok, nil} -> 
+        raise "❌ SAFEGUARD FAILURE: Default account not found after setup"
+      {:ok, account} -> 
+        IO.puts("✅ Test account validated: #{account.name}")
+      {:error, error} -> 
+        raise "❌ SAFEGUARD FAILURE: Could not query default account: #{inspect(error)}"
+    end
+
+    # Check common symbols exist
+    common_tickers = ["AAPL", "MSFT", "GOOGL", "TSLA"]
+    missing_symbols = Enum.filter(common_tickers, fn ticker ->
+      case Ashfolio.Portfolio.Symbol.find_by_symbol(ticker) do
+        {:ok, []} -> true
+        {:ok, [_symbol]} -> false
+        {:error, _} -> true
+      end
+    end)
+
+    if missing_symbols != [] do
+      raise "❌ SAFEGUARD FAILURE: Missing common symbols: #{inspect(missing_symbols)}"
+    else
+      IO.puts("✅ Test symbols validated: #{length(common_tickers)} common symbols found")
+    end
+
+    IO.puts("🛡️  Global test data validation: ALL CHECKS PASSED")
   end
 
   @doc """
@@ -403,6 +453,89 @@ defmodule Ashfolio.SQLiteHelpers do
       # Tests will handle the database access failure gracefully
       _ -> :ok
     end
+  end
+
+  @doc """
+  Quick health check for test database state.
+  
+  This can be run before test suites to catch database issues early.
+  Returns :ok or raises with helpful error messages.
+  """
+  def test_database_health_check! do
+    IO.puts("🔍 Running test database health check...")
+
+    # Check if we can connect to the database
+    try do
+      case Ashfolio.Repo.query("SELECT 1", []) do
+        {:ok, _} -> IO.puts("✅ Database connection: OK")
+        {:error, error} -> raise "❌ Database connection failed: #{inspect(error)}"
+      end
+    rescue
+      error -> raise "❌ Database connection failed: #{inspect(error)}"
+    end
+
+    # Check if we have the expected baseline data by counting records
+    user_count = Ashfolio.Repo.aggregate(Ashfolio.Portfolio.User, :count)
+    account_count = Ashfolio.Repo.aggregate(Ashfolio.Portfolio.Account, :count)
+    symbol_count = Ashfolio.Repo.aggregate(Ashfolio.Portfolio.Symbol, :count)
+
+    IO.puts("📊 Database state:")
+    IO.puts("   Users: #{user_count}")
+    IO.puts("   Accounts: #{account_count}")  
+    IO.puts("   Symbols: #{symbol_count}")
+
+    # Validate expected minimums for healthy test environment
+    cond do
+      user_count == 0 -> 
+        raise "❌ HEALTH CHECK FAILED: No users found. Run: MIX_ENV=test mix run -e \"Ashfolio.SQLiteHelpers.setup_global_test_data!()\""
+      
+      account_count == 0 ->
+        raise "❌ HEALTH CHECK FAILED: No accounts found. Run: MIX_ENV=test mix run -e \"Ashfolio.SQLiteHelpers.setup_global_test_data!()\""
+      
+      symbol_count < 4 ->
+        raise "❌ HEALTH CHECK FAILED: Expected at least 4 symbols, found #{symbol_count}. Run: MIX_ENV=test mix run -e \"Ashfolio.SQLiteHelpers.setup_global_test_data!()\""
+      
+      true -> 
+        IO.puts("🛡️  Test database health check: PASSED")
+        :ok
+    end
+  end
+
+  @doc """
+  Emergency test database recovery procedure.
+  
+  This implements the complete reset procedure we discovered during debugging.
+  """
+  def emergency_test_db_reset! do
+    IO.puts("🚨 EMERGENCY: Performing complete test database reset...")
+    
+    # This is the exact procedure that fixed our 253 test failures
+    IO.puts("Step 1: Dropping test database...")
+    case Ashfolio.Repo.__adapter__.storage_down(Ashfolio.Repo.config) do
+      :ok -> IO.puts("✅ Database dropped")
+      {:error, :already_down} -> IO.puts("✅ Database was already down")
+      {:error, error} -> raise "❌ Failed to drop database: #{inspect(error)}"
+    end
+
+    IO.puts("Step 2: Creating clean test database...")
+    case Ashfolio.Repo.__adapter__.storage_up(Ashfolio.Repo.config) do
+      :ok -> IO.puts("✅ Database created")
+      {:error, :already_up} -> IO.puts("✅ Database already exists")
+      {:error, error} -> raise "❌ Failed to create database: #{inspect(error)}"
+    end
+
+    IO.puts("Step 3: Running migrations...")
+    try do
+      Ecto.Migrator.run(Ashfolio.Repo, :up, all: true)
+      IO.puts("✅ Migrations completed")
+    rescue
+      error -> raise "❌ Migration failed: #{inspect(error)}"
+    end
+
+    IO.puts("Step 4: Setting up global test data...")
+    setup_global_test_data!()
+
+    IO.puts("🎉 RECOVERY COMPLETE! Test database fully reset and validated.")
   end
 
 end

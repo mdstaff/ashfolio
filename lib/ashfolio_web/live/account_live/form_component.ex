@@ -317,6 +317,9 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
         form_errors = extract_form_errors(form)
         network_error = detect_network_error(form)
 
+        # Notify parent of failure, but keep form open
+        notify_parent({:failed, form})
+
         {:noreply,
          socket
          |> assign(:form, form)
@@ -349,6 +352,9 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
       {:error, form} ->
         form_errors = extract_form_errors(form)
         network_error = detect_network_error(form)
+
+        # Notify parent of failure, but keep form open
+        notify_parent({:failed, form})
 
         {:noreply,
          socket
@@ -556,6 +562,8 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
      |> assign(:saving, false)
      |> assign(:network_error, network_error)
      |> assign(:form_errors, [error_message])}
+
+    notify_parent({:failed, :exception, error_message})
   end
 
   defp humanize_field(field) when is_atom(field) do

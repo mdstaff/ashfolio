@@ -813,10 +813,11 @@ defmodule AshfolioWeb.CoreComponents do
   attr :change, :string, default: nil
   attr :positive, :boolean, default: nil
   attr :class, :string, default: nil
+  attr :data_testid, :string, default: nil
 
   def stat_card(assigns) do
     ~H"""
-    <div class={["bg-white rounded-lg shadow p-6", @class]}>
+    <div class={["bg-white rounded-lg shadow p-6", @class]} data-testid={@data_testid}>
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-medium text-gray-600">{@title}</p>

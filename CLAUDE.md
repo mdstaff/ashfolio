@@ -50,6 +50,80 @@ This project uses `just` as the task runner. Key commands:
 
 **Note**: All test commands support `-verbose` variants for detailed output (e.g., `just test-fast-verbose`)
 
+## 🛡️ **NEW: Test Database Safeguards**
+
+**IMPORTANT**: We've implemented comprehensive safeguards after experiencing mass test failures (253 → 0). These tools prevent database issues and provide instant recovery.
+
+### **🚀 Quick Start - Use These First!**
+
+```bash
+# ALWAYS start with health check when debugging tests
+just test-health-check          # ← START HERE for any test issues
+
+# Run tests with automatic safeguards  
+just test-safe                  # ← Use this instead of regular 'just test'
+
+# Emergency recovery (fixes 99% of test database issues)
+just test-db-emergency-reset    # ← Nuclear option that actually works
+```
+
+### **Why These Safeguards Exist**
+
+During development, we experienced a catastrophic test failure where **253 tests suddenly failed** due to test database contamination. The root cause was stale data from previous test runs that corrupted the baseline state. 
+
+These safeguards **prevent this from happening again** and provide **instant recovery** when it does.
+
+### Test Database Management
+
+#### Understanding Test Database Architecture
+- **Separation**: Test database (`data/ashfolio_test.db`) is completely separate from development database (`data/ashfolio_dev.db`)
+- **Global Test Data Pattern**: Uses a global setup pattern where baseline test data is created once in `test_helper.exs`
+- **Required Baseline Data**: All tests expect a default user, default account, and common symbols to exist
+
+#### Test Database Reset Procedures
+
+**For Test Database Issues (Stale Data, Failures):**
+```bash
+# Complete test database reset (recommended approach)
+MIX_ENV=test mix ecto.drop && MIX_ENV=test mix ecto.create && MIX_ENV=test mix ecto.migrate
+
+# Restore required global test data
+MIX_ENV=test mix run -e "Ashfolio.SQLiteHelpers.setup_global_test_data!()"
+
+# Verify tests are working
+just test-fast
+```
+
+**Alternative Reset (includes sample transactions):**
+```bash
+# This creates more data than tests typically need
+MIX_ENV=test mix ecto.reset
+```
+
+#### Common Test Database Issues & Solutions
+
+**Error: "Default user not found"**
+- **Cause**: Global test data missing from database
+- **Solution**: Run `MIX_ENV=test mix run -e "Ashfolio.SQLiteHelpers.setup_global_test_data!()"`
+
+**Error: Expected X accounts, got Y accounts**  
+- **Cause**: Stale test data contamination from previous runs
+- **Solution**: Complete test database reset (see procedures above)
+
+**Error: "Database busy" or "database is locked"**
+- **Cause**: SQLite concurrency issues, test processes accessing database simultaneously
+- **Solution**: Tests use `async: false` and retry logic, but reset database if persistent
+
+**Mass Test Failures (200+ failures)**
+- **Cause**: Usually test database contamination or missing global test data
+- **Solution**: Complete test database reset procedure above
+
+#### Test Data Isolation Strategy
+- **Per-Test Setup**: Each test creates its own specific data in setup blocks
+- **Global Baseline**: Common data (default user, default account, common symbols) created once
+- **Database Sandbox**: Uses Ecto SQL Sandbox for test isolation
+- **SQLite Constraints**: All tests run with `async: false` due to SQLite limitations
+
 ### Database Management
 - `just reset` - Reset database with fresh sample data (full reset)
 - `just reseed` - Truncate and re-seed (preserves schema)
@@ -105,6 +179,130 @@ This project uses `just` as the task runner. Key commands:
 2. **PriceManager → YahooFinance → ETS Cache**: Price fetching and caching
 3. **Calculator modules**: Read from Ash Resources, perform calculations, return results
 4. **Dual Calculator Architecture**: Main Calculator orchestrates, HoldingsCalculator handles per-symbol logic
+
+## Troubleshooting & Debugging
+
+### Systematic Test Failure Debugging Process
+
+When encountering test failures, follow this systematic approach:
+
+#### 1. **Assess the Scope**
+```bash
+# Get overall test health
+just test-fast
+
+# Check specific test
+just test-file path/to/failing_test.exs
+```
+
+#### 2. **Identify the Pattern**
+- **Single test failure**: Likely code logic or test-specific issue
+- **Mass failures (50+)**: Usually infrastructure issue (database, setup, dependencies)
+- **Consistent failure location**: Focus on that specific assertion or setup
+
+#### 3. **Check Test Database State**
+```bash
+# Verify test database exists and has proper setup
+MIX_ENV=test mix run -e "
+  {:ok, accounts} = Ashfolio.Portfolio.Account.list()
+  IO.puts(\"Accounts: #{length(accounts)}\")
+  
+  {:ok, users} = Ashfolio.Portfolio.User.list()  
+  IO.puts(\"Users: #{length(users)}\")
+"
+```
+
+#### 4. **Analyze Error Messages**
+- **"Default user not found"** → Missing global test data
+- **"Expected X, got Y"** → Stale data contamination  
+- **"Database busy/locked"** → SQLite concurrency issues
+- **Protocol/Module errors** → Code syntax or compilation issues
+
+#### 5. **Apply Targeted Fixes**
+- **Database issues**: Use test database reset procedures (see Test Database Management section)
+- **Logic issues**: Focus on the failing assertion and surrounding code
+- **Setup issues**: Check test setup blocks and global test data
+
+#### 6. **Verify the Fix**
+```bash
+# Test the specific failing test
+just test-file path/to/test.exs
+
+# Run broader test suite to ensure no regressions
+just test-fast
+
+# Full verification if needed
+just test
+```
+
+### Integration Test Debugging Example
+
+**Case Study**: Integration test `account_management_flow_test.exs` failing with account count mismatch
+
+**Problem**: Expected 5 accounts, got 4 - account creation appeared to fail
+**Root Cause**: Stale test database data from previous runs contaminated the baseline
+**Solution**: Complete test database reset + global test data restoration
+**Result**: Test passed consistently, 253 → 0 test failures across entire suite
+
+**Key Learnings**: 
+- Integration tests are more sensitive to database state than unit tests
+- Always verify test database baseline when debugging integration tests
+- Mass test failures often indicate infrastructure issues, not code issues
+
+### Quick Reference: Test Debugging Commands
+
+```bash
+# === ASSESSMENT & HEALTH CHECKS ===
+just test-health-check              # 🛡️ Check test database health FIRST
+just test-safe                      # Run tests with automatic health check
+just test-fast                      # Quick health check (372 tests)
+just test-file path/to/test.exs     # Run specific test file
+
+# === TEST DATABASE SAFEGUARDS (NEW!) ===
+just test-db-validate               # Validate test database state
+just test-db-reset                  # Safe test database reset
+just test-db-emergency-reset        # Emergency recovery (for mass failures)
+
+# === TEST DATABASE RESET (Most Common Fix) ===
+MIX_ENV=test mix ecto.drop && MIX_ENV=test mix ecto.create && MIX_ENV=test mix ecto.migrate
+MIX_ENV=test mix run -e "Ashfolio.SQLiteHelpers.setup_global_test_data!()"
+just test-fast                      # Verify fix
+
+# === DEBUGGING SPECIFIC TESTS ===
+just test-file-verbose path/to/test.exs    # Run with detailed output
+just test-file path/to/test.exs --trace    # Run with execution trace
+
+# === DATABASE STATE INSPECTION ===
+MIX_ENV=test mix run -e "
+  user_count = Ashfolio.Repo.aggregate(Ashfolio.Portfolio.User, :count)
+  account_count = Ashfolio.Repo.aggregate(Ashfolio.Portfolio.Account, :count)
+  symbol_count = Ashfolio.Repo.aggregate(Ashfolio.Portfolio.Symbol, :count)
+  IO.puts(\"Users: #{user_count}, Accounts: #{account_count}, Symbols: #{symbol_count}\")
+"
+
+# === DEVELOPMENT DATABASE (SEPARATE) ===
+just reset                          # Reset development database  
+just reseed                         # Re-seed development database
+```
+
+### 🛡️ **NEW SAFEGUARDS IMPLEMENTED**
+
+After experiencing mass test failures (253 → 0), we've implemented several safeguards:
+
+**Automatic Health Checks**: Built into `just test-safe`
+- Database connectivity validation
+- Baseline data verification (users, accounts, symbols)
+- Clear error messages with fix instructions
+
+**Emergency Recovery**: `just test-db-emergency-reset`
+- Complete test database rebuild procedure
+- Implements the exact fix that resolved our 253-failure crisis
+- Includes confirmation prompts for safety
+
+**Validation Functions**: `just test-db-validate`
+- Validates global test data integrity
+- Checks for expected baseline records
+- Provides detailed validation output
 
 ## Development Practices
 

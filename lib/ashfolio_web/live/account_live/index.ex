@@ -167,6 +167,14 @@ defmodule AshfolioWeb.AccountLive.Index do
   end
 
   @impl true
+  def handle_info({FormComponent, {:failed, _form}}, socket) do
+    {:noreply,
+     socket
+     |> ErrorHelpers.put_error_flash("Please correct the errors in the form.", "Failed to save account")
+     |> assign(:show_form, true)} # Keep the form open
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="space-y-6">

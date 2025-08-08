@@ -3,30 +3,8 @@ defmodule AshfolioWeb.ResponsiveDesignTest do
   import Phoenix.LiveViewTest
 
   setup do
-    # Ensure clean database state for each test
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Ashfolio.Repo)
-
-    # Create a default user to prevent race conditions in LiveView mounting
-    # This addresses the root cause of the database concurrency issue
-    # Use get_or_create pattern to handle potential race conditions
-    user = case Ashfolio.Portfolio.User.get_default_user!() do
-      [existing_user] -> existing_user
-      [] ->
-        case Ashfolio.Portfolio.User.create(%{
-          name: "Test User",
-          currency: "USD",
-          locale: "en-US"
-        }) do
-          {:ok, user} -> user
-          {:error, _} ->
-            # If creation fails due to race condition, try to get existing user
-            case Ashfolio.Portfolio.User.get_default_user!() do
-              [existing_user] -> existing_user
-              [] -> raise "Failed to create or find default user"
-            end
-        end
-    end
-
+    # Use the global default user - no need for complex race condition handling
+    user = Ashfolio.SQLiteHelpers.get_default_user()
     {:ok, user: user}
   end
 
