@@ -230,17 +230,30 @@ defmodule Ashfolio.MarketData.PriceManager do
   defp refresh_symbol_prices(symbols) when is_list(symbols) do
     Logger.debug("Refreshing prices for symbols: #{inspect(symbols)}")
 
-    # Try batch fetch first (hybrid approach from research)
-    case @yahoo_finance_module.fetch_prices(symbols) do
-      {:ok, price_map} ->
-        # Batch fetch succeeded
-        Logger.debug("Batch fetch successful for #{map_size(price_map)} symbols")
-        process_successful_prices(price_map, symbols)
+    # Check rate limit before making API calls
+    case Ashfolio.MarketData.RateLimiter.check_rate_limit(:batch_fetch, length(symbols)) do
+      :ok ->
+        # Try batch fetch first (hybrid approach from research)
+        case @yahoo_finance_module.fetch_prices(symbols) do
+          {:ok, price_map} ->
+            # Batch fetch succeeded
+            Logger.debug("Batch fetch successful for #{map_size(price_map)} symbols")
+            process_successful_prices(price_map, symbols)
 
-      {:error, reason} ->
-        # Batch fetch failed, try individual fetches
-        Logger.info("Batch fetch failed (#{inspect(reason)}), trying individual fetches")
-        fetch_individually(symbols)
+          {:error, reason} ->
+            # Batch fetch failed, try individual fetches with rate limiting
+            Logger.info("Batch fetch failed (#{inspect(reason)}), trying individual fetches")
+            fetch_individually_with_rate_limit(symbols)
+        end
+
+      {:error, :rate_limited, retry_after_ms} ->
+        Logger.warning("Rate limit exceeded, cannot refresh prices. Retry after #{retry_after_ms}ms")
+        %{
+          success_count: 0,
+          failure_count: length(symbols),
+          successes: [],
+          failures: Enum.map(symbols, &{&1, :rate_limited})
+        }
     end
   end
 
@@ -253,6 +266,27 @@ defmodule Ashfolio.MarketData.PriceManager do
 
           {:error, reason} ->
             {symbol, {:error, reason}}
+        end
+      end)
+
+    process_individual_results(results)
+  end
+
+  defp fetch_individually_with_rate_limit(symbols) do
+    results =
+      Enum.map(symbols, fn symbol ->
+        case Ashfolio.MarketData.RateLimiter.check_rate_limit(:individual_fetch, 1) do
+          :ok ->
+            case @yahoo_finance_module.fetch_price(symbol) do
+              {:ok, price} ->
+                {symbol, {:ok, price}}
+
+              {:error, reason} ->
+                {symbol, {:error, reason}}
+            end
+
+          {:error, :rate_limited, _retry_after_ms} ->
+            {symbol, {:error, :rate_limited}}
         end
       end)
 

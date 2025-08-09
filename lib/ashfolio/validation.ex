@@ -110,11 +110,27 @@ defmodule Ashfolio.Validation do
   """
   def validate_symbol_format(changeset, field, _opts \\ []) do
     validate_change(changeset, field, fn field, value ->
-      # Basic symbol validation: 1-10 uppercase letters/numbers, possibly with dots or dashes
-      if Regex.match?(~r/^[A-Z0-9.-]{1,10}$/, String.upcase(value)) do
-        []
-      else
-        [{field, "must be a valid symbol (1-10 characters, letters and numbers only)"}]
+      # Enhanced symbol validation with stricter security rules
+      cond do
+        String.length(value) > 10 ->
+          [{field, "must be 10 characters or less"}]
+
+        String.length(value) < 1 ->
+          [{field, "must be at least 1 character"}]
+
+        not Regex.match?(~r/^[A-Z0-9.-]{1,10}$/, String.upcase(value)) ->
+          [{field, "must contain only uppercase letters, numbers, dots, and dashes"}]
+
+        # Additional security: prevent suspicious patterns
+        Regex.match?(~r/^\.+$|^-+$/, value) ->
+          [{field, "cannot consist only of dots or dashes"}]
+
+        # Prevent common injection patterns
+        String.contains?(String.downcase(value), ["script", "select", "drop", "insert"]) ->
+          [{field, "contains invalid characters or patterns"}]
+
+        true ->
+          []
       end
     end)
   end

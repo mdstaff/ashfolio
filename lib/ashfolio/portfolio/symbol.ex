@@ -158,6 +158,12 @@ defmodule Ashfolio.Portfolio.Symbol do
       filter(expr(not is_nil(current_price)))
     end
 
+    read :by_ids do
+      description("Batch fetch symbols by list of IDs - eliminates N+1 queries")
+      argument(:ids, {:array, :string}, allow_nil?: false)
+      filter(expr(id in ^arg(:ids)))
+    end
+
     read :stale_prices do
       description("Find symbols with stale price data (older than 1 hour)")
       argument(:stale_threshold, :utc_datetime, allow_nil?: true)
@@ -182,6 +188,7 @@ defmodule Ashfolio.Portfolio.Symbol do
     define(:create, action: :create)
     define(:list, action: :read)
     define(:get_by_id, action: :read, get_by: [:id])
+    define(:get_by_ids, action: :by_ids, args: [:ids])
     define(:find_by_symbol, action: :by_symbol, args: [:symbol])
     define(:by_asset_class, action: :by_asset_class, args: [:asset_class])
     define(:by_data_source, action: :by_data_source, args: [:data_source])

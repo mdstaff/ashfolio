@@ -18,7 +18,7 @@ This document provides comprehensive guidance for testing the Ashfolio applicati
 #### 1. Unit Tests (`test/ashfolio/`)
 
 - **Ash Resources**: `user_test.exs`, `account_test.exs`, `symbol_test.exs`, `transaction_test.exs`
-- **Business Logic**: `calculator_test.exs`, `holdings_calculator_test.exs`
+- **Business Logic**: `calculator_test.exs`, `holdings_calculator_test.exs`, `calculator_edge_cases_test.exs`
 - **Market Data**: `yahoo_finance_test.exs`, `price_manager_test.exs`
 - **Infrastructure**: `cache_test.exs`, `validation_test.exs`, `error_handler_test.exs`
 
@@ -42,6 +42,13 @@ This document provides comprehensive guidance for testing the Ashfolio applicati
 - **Infrastructure**: `router_test.exs`, `accessibility_test.exs`, `responsive_design_test.exs`
 
 ### Special Test Categories
+
+#### Edge Case Tests
+
+- **File**: `test/ashfolio/portfolio/calculator_edge_cases_test.exs`
+- **Purpose**: Comprehensive edge case testing for portfolio calculations
+- **Coverage**: Zero values, extreme precision, complex transaction sequences, error handling
+- **Integration**: Uses SQLiteHelpers patterns for robust database operations
 
 #### Seeding Tests
 

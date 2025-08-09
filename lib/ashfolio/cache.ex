@@ -128,7 +128,7 @@ defmodule Ashfolio.Cache do
   end
 
   @doc """
-  Performs cleanup of stale cache entries.
+  Performs cleanup of stale cache entries with enhanced TTL management.
 
   ## Parameters
   - max_age_seconds: Age threshold for cleanup (defaults to 1 hour)
@@ -155,6 +155,29 @@ defmodule Ashfolio.Cache do
     end
 
     count
+  end
+
+  @doc """
+  Enhanced cleanup with memory pressure awareness.
+
+  Performs more aggressive cleanup when memory usage is high.
+  """
+  def cleanup_with_memory_pressure do
+    stats = stats()
+    memory_mb = stats.memory_bytes / (1024 * 1024)
+
+    # Aggressive cleanup if cache is using more than 50MB
+    max_age = if memory_mb > 50, do: @default_ttl_seconds / 2, else: @default_ttl_seconds
+
+    cleanup_count = cleanup_stale_entries(trunc(max_age))
+
+    Logger.debug("Memory-aware cleanup: #{cleanup_count} entries removed, #{memory_mb}MB cache size")
+
+    %{
+      entries_removed: cleanup_count,
+      memory_mb: memory_mb,
+      aggressive_cleanup: memory_mb > 50
+    }
   end
 
   @doc """

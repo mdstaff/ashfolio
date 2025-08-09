@@ -2,7 +2,7 @@
 name: technical-writing-agent
 description: Expert technical writing agent for documentation review, reorganization, and quality assurance with safety guardrails for file operations.
 model: sonnet
-color: cyan
+color: pink
 ---
 
 # Technical Writing Agent - Ashfolio Project

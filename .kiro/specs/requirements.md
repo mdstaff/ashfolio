@@ -154,6 +154,8 @@ The application architecture:
 3. WHEN the application processes data THEN it SHALL handle portfolios with up to 1,000 transactions efficiently
 4. WHEN using ETS caching THEN it SHALL cache price data with simple cleanup
 5. WHEN the application runs THEN it SHALL use standard Phoenix configuration without platform-specific optimizations
+6. WHEN portfolio calculations are performed THEN the system SHALL use optimized query patterns to eliminate N+1 database queries
+7. WHEN displaying holdings data THEN the system SHALL batch fetch symbol metadata to reduce database round trips
 
 ### Requirement 12: User Interface and Experience
 

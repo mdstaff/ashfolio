@@ -488,6 +488,31 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
 end
 ```
 
+#### Performance Optimization
+
+```elixir
+defmodule Ashfolio.Portfolio.CalculatorOptimized do
+  @moduledoc """
+  Performance-optimized version of portfolio calculations addressing N+1 query issues.
+
+  Key optimizations:
+  - Batch symbol lookups to eliminate N+1 queries
+  - Preloaded symbol data in single query
+  - Reduced database round trips
+  """
+
+  def get_all_holdings_optimized(user_id) do
+    # Batch fetch all symbols in single query - eliminates N+1
+    case Symbol.get_by_ids(symbol_ids) do
+      {:ok, symbols} ->
+        symbol_map = Map.new(symbols, &{&1.id, &1})
+        holdings = group_holdings_with_preloaded_symbols(all_transactions, symbol_map)
+        {:ok, holdings}
+    end
+  end
+end
+```
+
 #### Key Features
 
 - **Financial Precision**: All calculations use Decimal types for accurate financial mathematics
@@ -496,6 +521,7 @@ end
 - **Error Handling**: Comprehensive error handling with logging and graceful degradation
 - **Price Integration**: Uses both database prices and ETS cache fallback
 - **Real-time Updates**: Calculations reflect current market prices when available
+- **Performance Optimization**: CalculatorOptimized module eliminates N+1 queries for better scalability
 
 ### LiveView Components
 

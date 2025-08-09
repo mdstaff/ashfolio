@@ -558,6 +558,7 @@ This implementation plan focuses on delivering core portfolio management functio
     - ✅ **COVERAGE ACHIEVEMENT**: Calculator module: 85.90%, HoldingsCalculator module: 90.32% (exceeded targets!)
     - ✅ **ENHANCED CALCULATOR**: Added 8 comprehensive edge case tests covering error handling, zero cost basis, extreme decimal values, negative holdings, and complex multi-transaction scenarios
     - ✅ **ENHANCED HOLDINGS CALCULATOR**: Added 10 comprehensive edge case tests covering excluded accounts, precision handling, cache integration, overselling scenarios, and mixed transaction filtering
+    - ✅ **CALCULATOR EDGE CASES**: Added comprehensive edge case test suite (`calculator_edge_cases_test.exs`) with 12 additional tests covering zero values, extreme precision, complex transaction sequences, and error resilience
     - ✅ **FIXED TEST FAILURES**: Resolved 2 critical test failures in HoldingsCalculator (cost basis calculation and transaction type filtering)
     - ✅ **PRODUCTION-READY**: Both calculator modules now have robust test coverage with extensive edge cases for reliable financial calculations
     - _Requirements: 19.1_
