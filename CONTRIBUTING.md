@@ -4,11 +4,18 @@ We welcome contributions to Ashfolio! Whether you're fixing a bug, adding a new 
 
 ## Code of Conduct
 
-By participating in this project, you are expected to uphold our [Code of Conduct](CODE_OF_CONDUCT.md). (Note: This file is a placeholder and should be created with actual content).
+We expect all contributors to be respectful and professional. Please follow standard open source community guidelines:
+
+- Be respectful of different viewpoints and experiences
+- Give and accept constructive feedback gracefully
+- Focus on what is best for the project and the community
+- Show empathy towards other community members
+
+Unacceptable behavior includes harassment, trolling, insulting comments, or any conduct that would be considered inappropriate in a professional setting.
 
 ## Getting Started
 
-Before you start contributing, please ensure your development environment is set up correctly. Follow the instructions in [DEVELOPMENT_SETUP.md](docs/DEVELOPMENT_SETUP.md).
+Before you start contributing, please ensure your development environment is set up correctly. Follow the instructions in [Installation Guide](docs/getting-started/installation.md).
 
 Once set up, you can get the application running with:
 
@@ -67,7 +74,7 @@ This completes Phase 9 and allows users to manage their investment records.
 
 ## Coding Standards
 
-Ashfolio adheres to specific coding standards to maintain consistency and quality. Please review the detailed guidelines in [.kiro/steering/ashfolio-coding-standards.md](.kiro/steering/ashfolio-coding-standards.md). Key highlights include:
+Ashfolio adheres to specific coding standards to maintain consistency and quality. Please review the detailed guidelines in [Coding Standards](.kiro/steering/02-coding-standards.md). Key highlights include:
 
 *   **Ash Framework Usage**: All business logic must be implemented as Ash resources. No direct Ecto usage.
 *   **Financial Data Handling**: Always use `Decimal` types for monetary values and keep everything in USD.
@@ -92,7 +99,7 @@ Maintaining a robust test suite is crucial for Ashfolio's stability. We expect a
     just test-coverage
     ```
 *   **Mocking External APIs**: Never make real API calls in tests. Use Mox for mocking external services like Yahoo Finance.
-*   **GenServer Testing**: Be aware of the specific patterns for testing singleton GenServers and shared state, as detailed in [.kiro/steering/phase9-testing-strategy.md](.kiro/steering/phase9-testing-strategy.md) and [.kiro/steering/project-context.md](.kiro/steering/project-context.md).
+*   **GenServer Testing**: Be aware of the specific patterns for testing singleton GenServers and shared state, as detailed in our [testing documentation](docs/testing/) and [project overview](.kiro/steering/00-project-overview.md).
 
 ## Documentation
 
@@ -100,8 +107,8 @@ Keep documentation up-to-date. If your changes affect any of the following, plea
 
 *   `CHANGELOG.md`: Summarize your changes for the next release.
 *   `tasks.md`: Update the status of the task you're working on.
-*   `.kiro/steering/project-context.md`: Add key learnings or significant technical decisions.
-*   `docs/ARCHITECTURE.md`: If your changes impact the overall system design.
+*   `.kiro/steering/00-project-overview.md`: Add key learnings or significant technical decisions.
+*   `docs/development/architecture.md`: If your changes impact the overall system design.
 
 ## Before Submitting a Pull Request - Checklist
 

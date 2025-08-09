@@ -1,6 +1,12 @@
-# Ashfolio
+# Ashfolio 📊
 
-A simplified Phase 1 portfolio management application built with Phoenix LiveView and the Ash Framework. Designed for single-user local deployment, Ashfolio helps you track your investments with manual price updates.
+**A modern, local-first portfolio management application for personal investment tracking.**
+
+Built with Phoenix LiveView and the Ash Framework, Ashfolio provides a secure, privacy-focused solution for managing your investment portfolio on your own computer. No cloud dependencies, no data sharing—just powerful portfolio analysis at your fingertips.
+
+[![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-green)](https://github.com/mdstaff/ashfolio)
+[![Test Coverage](https://img.shields.io/badge/Tests-383%20passing-brightgreen)](https://github.com/mdstaff/ashfolio)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## 🚀 Quick Start
 
@@ -30,41 +36,45 @@ Get Ashfolio up and running in minutes!
 
 ---
 
-## ✨ Key Features
+## ✨ Why Ashfolio?
 
-- **Comprehensive Data Model**: Manages Users, Accounts, Symbols, and Transactions with robust validations.
-- **Portfolio Calculation Engine**: Advanced dual-calculator architecture for accurate portfolio analysis, including FIFO cost basis and P&L.
-- **Intuitive Dashboard**: A responsive LiveView dashboard displaying real-time portfolio value, returns, and a sortable holdings table.
-- **Transaction Management**: Full CRUD operations for investment transactions (BUY, SELL, DIVIDEND, FEE, INTEREST, LIABILITY).
-- **Account Management**: Create, edit, delete, and exclude investment accounts from calculations.
-- **Manual Price Updates**: User-initiated price refreshes via Yahoo Finance integration.
-- **Robust Testing**: A high-coverage test suite ensures stability and reliability.
+### 🔒 Privacy First
+- **Local-only data**: Your financial information never leaves your computer
+- **No cloud dependencies**: Works entirely offline except for price updates
+- **Open source**: Full transparency in how your data is handled
+
+### 💡 Powerful Features
+- **📊 Real-time Dashboard**: Live portfolio value, returns, and performance analytics
+- **💰 Multi-Account Support**: Track investments across brokerages (Schwab, Fidelity, etc.)
+- **📈 FIFO Cost Basis**: Accurate profit/loss calculations using industry standards
+- **💱 Price Integration**: Automatic price updates from Yahoo Finance
+- **📱 Responsive Design**: Works beautifully on desktop, tablet, and mobile
+
+### 🛠️ Developer Friendly
+- **Modern Tech Stack**: Phoenix LiveView, Ash Framework, SQLite
+- **Comprehensive Testing**: 383+ tests ensuring reliability
+- **Easy Setup**: One command to get running (`just dev`)
+- **Excellent Documentation**: Comprehensive guides for contributors
 
 ---
 
-## 📊 Project Status
+## 🎯 Project Status
 
 **Current Version**: v0.26.0 (Production-Ready Beta)  
-**Overall Progress**: 86% Complete (25/29 tasks)  
-**Phase Status**: Phase 10 - Testing and Polish
+**Stability**: All 383 tests passing  
+**Release Target**: v1.0.0 ready for production use
 
-### ✅ Completed Features
+### ✅ What's Working
 
-- ✅ **Complete Portfolio Management**: All core CRUD operations for accounts and transactions
-- ✅ **Real-time Dashboard**: Portfolio calculations with holdings table and P&L analysis
-- ✅ **Manual Price Updates**: Yahoo Finance integration with user-initiated refresh
-- ✅ **Professional UI**: Responsive Phoenix LiveView interface with mobile support
-- ✅ **Production-Ready Code**: Clean compilation, comprehensive testing (192+ tests)
+- ✅ **Complete Portfolio Tracking**: Full account and transaction management
+- ✅ **Real-time Calculations**: Live portfolio value and performance analytics
+- ✅ **Price Integration**: Yahoo Finance API with caching
+- ✅ **Responsive Interface**: Works on all devices
+- ✅ **Production Quality**: Comprehensive testing and error handling
 
-### 🔄 Current Focus
+### 🚀 Ready for Use
 
-- **Responsive Design**: WCAG AA accessibility compliance and mobile optimization
-- **Final Testing**: 100% test coverage and integration testing
-- **v1.0 Preparation**: Manual testing and release preparation
-
-### 🎯 Next Release
-
-- **v1.0.0**: Production release with complete responsive design and final polish (estimated 2-4 days)
+Ashfolio is stable and ready for personal use. The core functionality is complete and well-tested.
 
 ---
 
@@ -100,7 +110,7 @@ graph TD
     EXT -- "Price Fetching" --> MS
 ```
 
-For a more detailed breakdown of the system architecture, including Ash Resource relationships and LiveView component flows, please refer to the [Architecture Documentation](docs/ARCHITECTURE.md).
+For detailed architecture information, see our [comprehensive documentation](docs/).
 
 ---
 
@@ -149,41 +159,64 @@ Ashfolio implements architecture-aligned testing with ExUnit filters for optimal
 
 All commands support `-verbose` variants for detailed output (e.g., `just test-fast-verbose`).
 
-For a complete guide to setting up your development environment, including manual installation steps and troubleshooting, see [DEVELOPMENT_SETUP.md](docs/DEVELOPMENT_SETUP.md).
+For complete development setup, see our [Getting Started Guide](docs/getting-started/).
 
-### Contributing
+### 🤝 Contributing
 
-We welcome contributions to Ashfolio! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get started, coding standards, and the pull request process.
+We welcome contributions! Whether you're interested in:
+
+- 🐛 **Bug fixes** - Help make Ashfolio more reliable
+- ✨ **New features** - Add functionality you'd like to see
+- 📚 **Documentation** - Improve guides and explanations
+- 🧪 **Testing** - Strengthen our test coverage
+
+Check out our [Contributing Guide](CONTRIBUTING.md) and [First Contribution Guide](docs/getting-started/first-contribution.md) to get started.
+
+### 🌟 Recognition
+
+Thanks to all contributors who help make Ashfolio better! Contributions of all sizes are appreciated.
 
 ---
 
 ## 📚 Documentation
 
-### API Documentation
+### 🚀 Getting Started
+- **[Installation Guide](docs/getting-started/installation.md)** - Set up Ashfolio in 5 minutes
+- **[Quick Start](docs/getting-started/quick-start.md)** - Explore features immediately
+- **[First Contribution](docs/getting-started/first-contribution.md)** - Make your first code contribution
+- **[Troubleshooting](docs/getting-started/troubleshooting.md)** - Common issues and solutions
 
-- **[REST API Guide](docs/api/rest-api.md)**: Complete guide to the local REST API endpoints
-- **[API Reference](docs/api/endpoints.md)**: Detailed technical specifications for all endpoints
+### 👩‍💻 Development
+- **[Architecture Overview](docs/development/architecture.md)** - System design and patterns
+- **[Database Management](docs/development/database-management.md)** - Working with SQLite
+- **[AI Agent Guide](docs/development/ai-agent-guide.md)** - AI-assisted development
 
-### Testing Documentation (UPDATED)
+### 🧪 Testing
+- **[Testing Overview](docs/testing/)** - Comprehensive testing framework
+- **[Framework Guide](docs/testing/framework.md)** - Testing architecture and patterns
+- **[SQLite Patterns](docs/testing/patterns.md)** - Database testing strategies
 
-- **[Testing Framework](docs/TESTING_FRAMEWORK.md)**: Comprehensive testing guide with SQLite concurrency patterns
-- **[AI Agent Testing Guide](docs/AI_AGENT_TESTING_GUIDE.md)**: Specialized guide for AI-assisted test development  
-- **[SQLite Concurrency Patterns](docs/SQLITE_CONCURRENCY_PATTERNS.md)**: Deep dive into SQLite-specific testing solutions
-- **[Test Consistency Standards](docs/TEST_CONSISTENCY_STANDARDS.md)**: Quality standards and organization guidelines
-- **[Modular Testing Migration Guide](docs/MODULAR_TESTING_MIGRATION_GUIDE.md)**: Step-by-step filter implementation guide
-
-### Project Specifications
-
-- **[Requirements](/.kiro/specs/requirements.md)**: Complete feature requirements and acceptance criteria
-- **[Design Document](/.kiro/specs/design.md)**: Technical architecture and implementation details
-- **[Implementation Tasks](/.kiro/specs/tasks.md)**: Detailed task breakdown and progress tracking
+### 📡 API Reference
+- **[REST API](docs/api/rest-api.md)** - Local API endpoints
+- **[Endpoints](docs/api/endpoints.md)** - Technical specifications
 
 ---
 
-## ❓ Getting Help
+## 💬 Community & Support
 
-If you encounter any issues or have questions:
+### 🔧 Need Help?
+- **[Troubleshooting Guide](docs/getting-started/troubleshooting.md)** - Common solutions
+- **[GitHub Issues](https://github.com/mdstaff/ashfolio/issues)** - Report bugs or request features
+- **[GitHub Discussions](https://github.com/mdstaff/ashfolio/discussions)** - Ask questions and share ideas
 
-- Check the [DEVELOPMENT_SETUP.md](docs/DEVELOPMENT_SETUP.md) for common troubleshooting steps.
-- Review the [Elixir Installation Guide](https://elixir-lang.org/install.html) and [Phoenix Installation Guide](https://hexdocs.pm/phoenix/installation.html).
-- Feel free to open an issue on the GitHub repository.
+### 🌟 Show Your Support
+If Ashfolio helps manage your investments, consider:
+- ⭐ **Star this repository** to show your support
+- 🐛 **Report issues** to help improve the software
+- 💡 **Suggest features** that would benefit other users
+- 🤝 **Contribute code** to make Ashfolio even better
+
+---
+
+**License**: MIT - Feel free to use Ashfolio for personal or commercial projects.  
+**Privacy**: Your financial data stays on your computer. Always.

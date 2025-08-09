@@ -1,4 +1,6 @@
-# Ashfolio Project Context
+# Ashfolio Project Overview - Core Context for AI Agents
+
+> This file provides essential project context, architecture, and boundaries for AI agents working with Ashfolio.
 
 ## Project Overview
 
