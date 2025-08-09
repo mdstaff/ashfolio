@@ -4,7 +4,7 @@
 
 This feature enhances the existing holdings table with sorting, filtering, and bulk operations to help users manage larger portfolios more efficiently.
 
-**Foundation**: Built on v1.0's existing holdings table and HoldingsCalculator with proven performance.
+**Foundation**: Built on v0.1.0's existing holdings table and HoldingsCalculator with proven performance.
 
 ## Requirements
 

@@ -4,7 +4,7 @@
 
 This feature adds interactive charts to the dashboard for portfolio performance visualization and asset allocation analysis, enhancing the existing dashboard with professional data visualization.
 
-**Foundation**: Built on v1.0's dashboard with existing portfolio calculations and Phoenix LiveView architecture.
+**Foundation**: Built on v0.1.0's dashboard with existing portfolio calculations and Phoenix LiveView architecture.
 
 ## Requirements
 

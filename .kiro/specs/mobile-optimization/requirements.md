@@ -4,7 +4,7 @@
 
 This feature optimizes Ashfolio's interface for mobile devices, ensuring all functionality works seamlessly on phones and tablets while maintaining the desktop experience quality.
 
-**Foundation**: Built on v1.0's existing responsive design with Tailwind CSS and Phoenix LiveView.
+**Foundation**: Built on v0.1.0's existing responsive design with Tailwind CSS and Phoenix LiveView.
 
 ## Requirements
 

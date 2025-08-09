@@ -1,8 +1,9 @@
-# Wealth Management Platform - Feature Specifications
+# Ashfolio Wealth Management App | Feature Specifications
 
 ## Core Portfolio Management
 
 ### Account Management
+
 - **Multi-Platform Account Linking**: Connect multiple brokerage accounts, crypto exchanges, and bank accounts
 - **Account Categorization**: Group accounts by type (Investment, Retirement, Checking, Savings, Crypto)
 - **Account Hierarchies**: Support for nested account structures (e.g., 401k sub-accounts)
@@ -10,6 +11,7 @@
 - **Manual Account Creation**: Support for accounts that can't be automatically synced
 
 ### Asset Support
+
 - **Stocks**: Full support for individual stock holdings with real-time pricing
 - **ETFs**: Exchange-traded fund tracking with expense ratios and holdings data
 - **Mutual Funds**: Traditional mutual fund support with daily pricing
@@ -21,6 +23,7 @@
 - **Custom Assets**: User-defined asset types for unique investments
 
 ### Transaction Management
+
 - **Transaction CRUD**: Create, read, update, delete transactions
 - **Transaction Types**: Buy, sell, dividend, split, merger, transfer, fee
 - **Bulk Import**: CSV/Excel import with mapping tools
@@ -33,6 +36,7 @@
 ## Performance Analytics
 
 ### Portfolio Performance Metrics
+
 - **Time-Weighted Return (TWR)**: Industry-standard performance calculation
 - **Money-Weighted Return (MWR)**: Dollar-weighted return calculations
 - **Return on Average Investment (ROAI)**: Ghostfolio-style metric
@@ -41,12 +45,14 @@
 - **Maximum Drawdown**: Peak-to-trough decline analysis
 
 ### Time Period Analysis
+
 - **Flexible Time Ranges**: Today, WTD, MTD, QTD, YTD, 1Y, 3Y, 5Y, 10Y, Max, Custom
 - **Rolling Returns**: 1-year, 3-year, 5-year rolling performance
 - **Year-over-Year Comparisons**: Annual performance breakdowns
 - **Monthly/Quarterly Reports**: Periodic performance summaries
 
 ### Benchmarking
+
 - **Index Comparisons**: Compare against S&P 500, NASDAQ, Russell 2000, etc.
 - **Peer Comparisons**: Compare against similar portfolio allocations
 - **Custom Benchmarks**: User-defined benchmark compositions
@@ -55,6 +61,7 @@
 ## Asset Allocation & Analysis
 
 ### Portfolio Composition
+
 - **Asset Class Breakdown**: Stocks, bonds, cash, alternatives percentages
 - **Geographic Allocation**: Domestic vs. international exposure
 - **Sector Analysis**: GICS sector classification and weighting
@@ -63,6 +70,7 @@
 - **Currency Exposure**: Multi-currency portfolio analysis
 
 ### Risk Analysis
+
 - **Portfolio Beta**: Overall market sensitivity
 - **Correlation Analysis**: Asset correlation matrices
 - **Value at Risk (VaR)**: Potential loss calculations
@@ -71,6 +79,7 @@
 - **Rebalancing Alerts**: Deviation from target allocation warnings
 
 ### Rebalancing Tools
+
 - **Target Allocation Setting**: Define desired portfolio weights
 - **Rebalancing Recommendations**: Suggested trades to reach targets
 - **Tax-Efficient Rebalancing**: Minimize tax implications
@@ -80,6 +89,7 @@
 ## Data Management & Integration
 
 ### Market Data
+
 - **Real-Time Pricing**: Live market data integration
 - **Historical Data**: Complete price history storage
 - **Fundamental Data**: P/E ratios, market cap, dividend yields
@@ -88,6 +98,7 @@
 - **Multiple Data Providers**: Support for various data sources with fallbacks
 
 ### Data Import/Export
+
 - **Brokerage Integration**: Direct API connections where available
 - **CSV Import**: Flexible CSV parsing with field mapping
 - **Excel Import**: Support for .xlsx files with multiple sheets
@@ -97,6 +108,7 @@
 - **Export Formats**: CSV, Excel, JSON, PDF reports
 
 ### Data Quality
+
 - **Duplicate Detection**: Automatic duplicate transaction identification
 - **Data Cleaning**: Price validation, missing data interpolation
 - **Audit Trail**: Complete change history for all data
@@ -106,6 +118,7 @@
 ## User Interface & Experience
 
 ### Dashboard Design
+
 - **Responsive Design**: Mobile-first approach with desktop optimization
 - **Dark/Light Themes**: User-selectable themes
 - **Zen Mode**: Distraction-free viewing mode
@@ -113,6 +126,7 @@
 - **Multiple Views**: List, card, chart-based portfolio views
 
 ### Visualization
+
 - **Interactive Charts**: Candlestick, line, area charts with zoom/pan
 - **Performance Charts**: Portfolio value over time with benchmarks
 - **Allocation Pie Charts**: Asset allocation with drill-down capability
@@ -121,6 +135,7 @@
 - **Custom Chart Builder**: User-defined chart configurations
 
 ### Navigation & Usability
+
 - **Advanced Search**: Global search across all portfolio data
 - **Filtering System**: Multi-criteria filtering for transactions and holdings
 - **Sorting Options**: Flexible sorting for all data tables
@@ -131,6 +146,7 @@
 ## Reporting & Analytics
 
 ### Standard Reports
+
 - **Portfolio Summary**: High-level portfolio overview
 - **Performance Reports**: Detailed performance analysis
 - **Tax Reports**: Capital gains/losses, dividend summaries
@@ -139,6 +155,7 @@
 - **Dividend Reports**: Dividend income tracking and projections
 
 ### Custom Reporting
+
 - **Report Builder**: Drag-and-drop report creation
 - **Scheduled Reports**: Automated report generation and delivery
 - **Report Templates**: Pre-built report templates for common needs
@@ -147,6 +164,7 @@
 - **Print Optimization**: Print-friendly report layouts
 
 ### Advanced Analytics
+
 - **Attribution Analysis**: Performance attribution by asset class/sector
 - **Risk Reports**: Comprehensive risk analysis and metrics
 - **Scenario Analysis**: What-if scenario modeling
@@ -157,6 +175,7 @@
 ## Security & Privacy
 
 ### Authentication & Authorization
+
 - **Multi-Factor Authentication**: TOTP, SMS, email verification
 - **Role-Based Access**: Different permission levels
 - **Session Management**: Secure session handling with timeouts
@@ -165,6 +184,7 @@
 - **API Authentication**: Secure API access with tokens
 
 ### Data Security
+
 - **Encryption at Rest**: Database encryption
 - **Encryption in Transit**: TLS/SSL for all communications
 - **Data Anonymization**: PII protection and anonymization
@@ -173,6 +193,7 @@
 - **GDPR Compliance**: Full GDPR compliance with data portability
 
 ### Privacy Features
+
 - **Anonymous Mode**: Use without personal identification
 - **Data Ownership**: Users own their financial data
 - **No Third-Party Tracking**: No external analytics or tracking
@@ -183,6 +204,7 @@
 ## Technical Architecture (Elixir/Phoenix/Ash)
 
 ### Core Framework Integration
+
 - **Ash Resources**: Asset, Account, Transaction, User resource definitions
 - **Ash Policies**: Granular authorization policies for data access
 - **Ash Calculations**: Real-time portfolio calculations
@@ -191,6 +213,7 @@
 - **Oban**: Background job processing for data updates
 
 ### Data Layer
+
 - **PostgreSQL**: Primary database with JSONB for flexible data
 - **Redis**: Caching layer for market data and calculations
 - **TimescaleDB**: Time-series data for price history (optional)
@@ -199,6 +222,7 @@
 - **Read Replicas**: Scalable read operations
 
 ### API Design
+
 - **GraphQL API**: Flexible API with Ash GraphQL integration
 - **REST API**: Traditional REST endpoints where appropriate
 - **Rate Limiting**: API rate limiting and throttling
@@ -207,6 +231,7 @@
 - **API Documentation**: Auto-generated API documentation
 
 ### Performance & Scalability
+
 - **Concurrent Processing**: Leverage Elixir's actor model
 - **Fault Tolerance**: Supervisor trees for reliability
 - **Horizontal Scaling**: Multi-node deployment support
@@ -217,6 +242,7 @@
 ## Configuration & Administration
 
 ### System Configuration
+
 - **Environment Management**: Development, staging, production configs
 - **Feature Flags**: Runtime feature toggling
 - **Market Data Sources**: Configurable data provider selection
@@ -225,6 +251,7 @@
 - **Logging Configuration**: Structured logging with log levels
 
 ### User Management
+
 - **User Registration**: Self-service account creation
 - **Admin Panel**: Administrative user management interface
 - **Bulk User Operations**: Import/export user data
@@ -233,6 +260,7 @@
 - **Account Recovery**: Password reset and account recovery flows
 
 ### Maintenance & Operations
+
 - **Health Checks**: System health monitoring endpoints
 - **Performance Metrics**: Application performance monitoring
 - **Error Tracking**: Comprehensive error logging and alerting

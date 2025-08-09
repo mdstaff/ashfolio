@@ -24,9 +24,9 @@ This directory contains focused, manageable specifications for Ashfolio features
 
 ### 📚 Reference Specifications
 
-- **[V1.0 Foundation](requirements.md)** - Original v1.0 requirements (completed)
-- **[V1.0 Design](design.md)** - Original v1.0 technical design (completed)
-- **[V1.0 Tasks](tasks.md)** - Original v1.0 implementation plan (97% complete)
+- **[v0.1.0 Foundation](requirements.md)** - Original v0.1.0 requirements (completed)
+- **[v0.1.0 Design](design.md)** - Original v0.1.0 technical design (completed)
+- **[v0.1.0 Tasks](tasks.md)** - Original v0.1.0 implementation plan (97% complete)
 
 ## Specification Structure
 
@@ -46,11 +46,11 @@ feature-name/
 3. **Create Design**: Develop technical design if not already present
 4. **Plan Tasks**: Break down implementation into manageable tasks
 5. **Implement**: Execute tasks while maintaining test coverage
-6. **Integrate**: Ensure feature works with existing v1.0 foundation
+6. **Integrate**: Ensure feature works with existing v0.1.0 foundation
 
 ## Foundation Status
 
-**Ashfolio v1.0**: Production-ready foundation with 383 passing tests
+**Ashfolio v0.1.0**: Production-ready foundation with 383 passing tests
 
 - ✅ Complete Ash Framework architecture
 - ✅ Phoenix LiveView interface

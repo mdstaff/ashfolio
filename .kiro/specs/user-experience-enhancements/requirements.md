@@ -13,7 +13,7 @@
 
 ## Introduction
 
-This document outlines the requirements for enhancing Ashfolio's user experience through intelligent forms, interactive visualizations, and streamlined workflows. These enhancements build upon the solid v1.0 foundation to make the application more intuitive, efficient, and visually appealing for portfolio management tasks.
+This document outlines the requirements for enhancing Ashfolio's user experience through intelligent forms, interactive visualizations, and streamlined workflows. These enhancements build upon the solid v0.1.0 foundation to make the application more intuitive, efficient, and visually appealing for portfolio management tasks.
 
 **Enhancement Scope**: Significant user experience improvements focused on daily workflow optimization and visual polish
 **Foundation**: Built on v0.1.0's production-ready architecture with 383 passing tests and comprehensive Ash Framework implementation

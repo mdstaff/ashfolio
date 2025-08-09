@@ -4,7 +4,7 @@
 
 This feature adds automatic price lookup when users select symbols in transaction forms, providing current market data to assist with accurate transaction entry.
 
-**Foundation**: Built on v1.0's existing PriceManager GenServer and Yahoo Finance integration.
+**Foundation**: Built on v0.1.0's existing PriceManager GenServer and Yahoo Finance integration.
 
 ## Requirements
 
