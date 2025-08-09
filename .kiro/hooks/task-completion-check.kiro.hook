@@ -1,0 +1,21 @@
+{
+  "enabled": true,
+  "name": "Task Completion Documentation Check",
+  "description": "After a Task is completed, we should say \"Thanks\" and ask the AI Agent to please check that all updates are made to design, specs, steering docs, changelog, and handoff documents.",
+  "version": "1",
+  "when": {
+    "type": "userTriggered",
+    "patterns": [
+      "lib/**/*.ex",
+      "test/**/*.exs",
+      "priv/**/*.exs",
+      "mix.exs",
+      "README.md",
+      "CHANGELOG.md"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Thanks for completing the task! Please check that all updates are made to design documents, specifications, steering documents, changelog, and handoff documents. Ensure documentation reflects the current state of the implementation."
+  }
+}
