@@ -39,11 +39,13 @@ Get Ashfolio up and running in minutes!
 ## ✨ Why Ashfolio?
 
 ### 🔒 Privacy First
+
 - **Local-only data**: Your financial information never leaves your computer
 - **No cloud dependencies**: Works entirely offline except for price updates
 - **Open source**: Full transparency in how your data is handled
 
 ### 💡 Powerful Features
+
 - **📊 Real-time Dashboard**: Live portfolio value, returns, and performance analytics
 - **💰 Multi-Account Support**: Track investments across brokerages (Schwab, Fidelity, etc.)
 - **📈 FIFO Cost Basis**: Accurate profit/loss calculations using industry standards
@@ -51,6 +53,7 @@ Get Ashfolio up and running in minutes!
 - **📱 Responsive Design**: Works beautifully on desktop, tablet, and mobile
 
 ### 🛠️ Developer Friendly
+
 - **Modern Tech Stack**: Phoenix LiveView, Ash Framework, SQLite
 - **Comprehensive Testing**: 383+ tests ensuring reliability
 - **Easy Setup**: One command to get running (`just dev`)
@@ -60,9 +63,9 @@ Get Ashfolio up and running in minutes!
 
 ## 🎯 Project Status
 
-**Current Version**: v0.26.0 (Production-Ready Beta)  
+**Current Version**: v0.1.0-rc(Production-Ready Beta)
 **Stability**: All 383 tests passing  
-**Release Target**: v1.0.0 ready for production use
+**Release Target**: v0.1.0
 
 ### ✅ What's Working
 
@@ -132,6 +135,7 @@ For detailed architecture information, see our [comprehensive documentation](doc
 Ashfolio uses the `just` command runner with a comprehensive modular testing strategy.
 
 #### Essential Development Commands
+
 - **`just dev`**: Sets up the environment, installs dependencies, and starts the Phoenix server.
 - **`just test`**: Runs the main test suite (excluding slower seeding tests).
 - **`just test-file <path>`**: Runs tests for a specific file.
@@ -139,19 +143,23 @@ Ashfolio uses the `just` command runner with a comprehensive modular testing str
 - **`just`**: Lists all available `just` commands with descriptions.
 
 #### Modular Testing Strategy (NEW)
+
 Ashfolio implements architecture-aligned testing with ExUnit filters for optimal development workflow:
 
 **Quick Development Feedback:**
+
 - **`just test-fast`**: Quick tests for rapid development feedback (< 100ms)
 - **`just test-smoke`**: Essential tests that must always pass
 
 **Architectural Layer Testing:**
+
 - **`just test-ash`**: Business logic tests (User, Account, Symbol, Transaction)
 - **`just test-liveview`**: Phoenix LiveView UI component tests
 - **`just test-calculations`**: Portfolio calculation and FIFO cost basis tests
 - **`just test-market-data`**: Price fetching and Yahoo Finance integration tests
 
 **Specialized Testing:**
+
 - **`just test-unit`**: Isolated unit tests with minimal dependencies
 - **`just test-integration`**: End-to-end workflow tests
 - **`just test-regression`**: Tests for previously fixed bugs
@@ -181,22 +189,26 @@ Thanks to all contributors who help make Ashfolio better! Contributions of all s
 ## 📚 Documentation
 
 ### 🚀 Getting Started
+
 - **[Installation Guide](docs/getting-started/installation.md)** - Set up Ashfolio in 5 minutes
 - **[Quick Start](docs/getting-started/quick-start.md)** - Explore features immediately
 - **[First Contribution](docs/getting-started/first-contribution.md)** - Make your first code contribution
 - **[Troubleshooting](docs/getting-started/troubleshooting.md)** - Common issues and solutions
 
 ### 👩‍💻 Development
+
 - **[Architecture Overview](docs/development/architecture.md)** - System design and patterns
 - **[Database Management](docs/development/database-management.md)** - Working with SQLite
 - **[AI Agent Guide](docs/development/ai-agent-guide.md)** - AI-assisted development
 
 ### 🧪 Testing
+
 - **[Testing Overview](docs/testing/)** - Comprehensive testing framework
 - **[Framework Guide](docs/testing/framework.md)** - Testing architecture and patterns
 - **[SQLite Patterns](docs/testing/patterns.md)** - Database testing strategies
 
 ### 📡 API Reference
+
 - **[REST API](docs/api/rest-api.md)** - Local API endpoints
 - **[Endpoints](docs/api/endpoints.md)** - Technical specifications
 
@@ -205,12 +217,15 @@ Thanks to all contributors who help make Ashfolio better! Contributions of all s
 ## 💬 Community & Support
 
 ### 🔧 Need Help?
+
 - **[Troubleshooting Guide](docs/getting-started/troubleshooting.md)** - Common solutions
 - **[GitHub Issues](https://github.com/mdstaff/ashfolio/issues)** - Report bugs or request features
 - **[GitHub Discussions](https://github.com/mdstaff/ashfolio/discussions)** - Ask questions and share ideas
 
 ### 🌟 Show Your Support
+
 If Ashfolio helps manage your investments, consider:
+
 - ⭐ **Star this repository** to show your support
 - 🐛 **Report issues** to help improve the software
 - 💡 **Suggest features** that would benefit other users

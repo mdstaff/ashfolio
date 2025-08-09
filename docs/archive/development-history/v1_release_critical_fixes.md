@@ -1,52 +1,62 @@
-# Ashfolio v1.0 Release - Critical Fixes Plan
+# Ashfolio v0.1.0 Release - Critical Fixes Plan
 
-*Created: August 7, 2025*  
-*Status: In Progress*
+_Created: August 7, 2025_  
+_Status: In Progress_
 
 ## Executive Summary
 
-Based on comprehensive code reviews from both human assessment and Claude Code GitHub PR review, Ashfolio requires critical bug fixes before v1.0 release. While the architecture and overall quality are excellent, several implementation bugs could cause runtime crashes and incorrect financial calculations.
+Based on comprehensive code reviews from both human assessment and Claude Code GitHub PR review, Ashfolio requires critical bug fixes before v0.1.0 release. While the architecture and overall quality are excellent, several implementation bugs could cause runtime crashes and incorrect financial calculations.
 
 **Current Status**: v0.95 - Critical fixes required  
-**Target**: v1.0 production release  
-**Timeline**: 2-3 days for critical fixes  
+**Target**: v0.1.0 production release  
+**Timeline**: 2-3 days for critical fixes
 
 ## Critical Issues Discovered
 
 ### Issue #1: Division by Zero Bug (CRITICAL)
+
 **Location**: `lib/ashfolio/portfolio/holdings_calculator.ex:105`  
 **Impact**: Runtime crashes during portfolio calculations  
 **Current Code**:
+
 ```elixir
 |> Decimal.div_int(unrealized_pnl)  # WRONG - dividing by PnL instead of cost
 ```
+
 **Required Fix**:
+
 ```elixir
 |> Decimal.div(unrealized_pnl, cost_basis_data.total_cost)  # Correct division order
 ```
 
 ### Issue #2: Incorrect Cost Basis Calculation (HIGH)
+
 **Location**: `lib/ashfolio/portfolio/calculator.ex:225-227`  
 **Impact**: Wrong portfolio valuations, incorrect financial accuracy  
 **Problem**: Division by zero when `net_qty` is 0, doesn't implement true FIFO  
 **Current Code**:
+
 ```elixir
 sell_ratio = Decimal.div(Decimal.abs(transaction.quantity), net_qty)
 cost_reduction = Decimal.mult(total_cost, sell_ratio)
 ```
+
 **Required Fix**: Implement proper FIFO cost basis calculation with zero-quantity guards
 
 ### Issue #3: Hardcoded Security Salt (MEDIUM-HIGH)
+
 **Location**: `config/config.exs` or similar  
 **Risk**: Security vulnerability  
 **Required Fix**: Move `live_view: [signing_salt: "..."]` to environment variable
 
 ### Issue #4: ETS Cache Memory Leak (MEDIUM)
+
 **Location**: `lib/ashfolio/cache.ex`  
 **Problem**: No TTL cleanup mechanism, cache grows indefinitely  
 **Required Fix**: Add automatic cleanup for stale entries
 
 ### Issue #5: Race Condition in Account Toggle (MEDIUM)
+
 **Location**: `lib/ashfolio_web/live/account_live/index.ex:92-103`  
 **Problem**: Optimistic UI update without rollback on failures  
 **Required Fix**: Add proper error handling and state rollback
@@ -56,6 +66,7 @@ cost_reduction = Decimal.mult(total_cost, sell_ratio)
 ### Phase 1: Critical Bug Fixes (REQUIRED FOR RELEASE)
 
 #### Task 1.1: Fix Division by Zero Bug ✅ COMPLETED
+
 - **Priority**: CRITICAL
 - **Time Taken**: 15 minutes
 - **Status**: FIXED AND TESTED
@@ -66,7 +77,8 @@ cost_reduction = Decimal.mult(total_cost, sell_ratio)
   - **Tests**: All 12 HoldingsCalculator tests pass ✅
 
 #### Task 1.2: Fix Cost Basis Calculation ✅ COMPLETED
-- **Priority**: HIGH  
+
+- **Priority**: HIGH
 - **Time Taken**: 20 minutes
 - **Status**: FIXED AND TESTED
 - **Changes Made**:
@@ -76,6 +88,7 @@ cost_reduction = Decimal.mult(total_cost, sell_ratio)
   - **Tests**: All 11 Calculator tests pass ✅
 
 #### Task 1.3: Move Signing Salt to Environment ✅ COMPLETED
+
 - **Priority**: MEDIUM-HIGH
 - **Time Taken**: 5 minutes
 - **Status**: FIXED
@@ -85,6 +98,7 @@ cost_reduction = Decimal.mult(total_cost, sell_ratio)
   - **Compilation**: Clean compilation confirmed ✅
 
 #### Task 1.4: Add ETS Cache Cleanup ✅ COMPLETED
+
 - **Priority**: MEDIUM
 - **Time Taken**: 30 minutes
 - **Status**: IMPLEMENTED
@@ -96,6 +110,7 @@ cost_reduction = Decimal.mult(total_cost, sell_ratio)
   - **Tests**: All 8 Cache tests pass ✅
 
 #### Task 1.5: Fix Race Condition in Account Toggle ✅ COMPLETED
+
 - **Priority**: MEDIUM
 - **Time Taken**: 25 minutes
 - **Status**: IMPROVED
@@ -109,6 +124,7 @@ cost_reduction = Decimal.mult(total_cost, sell_ratio)
 ### Phase 2: Performance Optimizations (RECOMMENDED)
 
 #### Task 2.1: Fix N+1 Queries
+
 - **Priority**: MEDIUM
 - **Estimated Time**: 1-2 hours
 - **Steps**:
@@ -119,6 +135,7 @@ cost_reduction = Decimal.mult(total_cost, sell_ratio)
   5. Verify functional equivalence
 
 #### Task 2.2: Optimize Input Validation
+
 - **Priority**: LOW-MEDIUM
 - **Estimated Time**: 30 minutes
 - **Steps**:
@@ -131,6 +148,7 @@ cost_reduction = Decimal.mult(total_cost, sell_ratio)
 ### Phase 3: Production Readiness (POST-RELEASE)
 
 #### Task 3.1: Enhanced Logging
+
 - **Priority**: LOW
 - **Estimated Time**: 1 hour
 - Add comprehensive logging for financial calculations
@@ -138,6 +156,7 @@ cost_reduction = Decimal.mult(total_cost, sell_ratio)
 - Add performance monitoring
 
 #### Task 3.2: Backup/Restore Improvements
+
 - **Priority**: LOW
 - **Estimated Time**: 2 hours
 - Enhance SQLite backup functionality
@@ -147,6 +166,7 @@ cost_reduction = Decimal.mult(total_cost, sell_ratio)
 ## Testing Strategy
 
 ### Critical Fix Verification
+
 1. **Unit Tests**: Update existing tests to cover fixed scenarios
 2. **Integration Tests**: Test end-to-end portfolio calculations
 3. **Edge Case Testing**: Zero quantities, empty portfolios, concurrent operations
@@ -154,6 +174,7 @@ cost_reduction = Decimal.mult(total_cost, sell_ratio)
 5. **Security Testing**: Verify environment variable usage
 
 ### Test Commands
+
 ```bash
 # Run all tests
 just test
@@ -169,11 +190,12 @@ just test-file test/ashfolio/cache_test.exs
 just test-file test/ashfolio_web/live/account_live/index_test.exs
 ```
 
-## Success Criteria for v1.0 Release
+## Success Criteria for v0.1.0 Release
 
 ### Must Have (Release Blockers) ✅ ALL COMPLETED
+
 - [✅] Division by zero bug fixed and tested
-- [✅] Cost basis calculation accuracy verified  
+- [✅] Cost basis calculation accuracy verified
 - [✅] Signing salt moved to environment variable
 - [✅] ETS cache cleanup implemented
 - [✅] Race condition in account toggle resolved
@@ -181,12 +203,14 @@ just test-file test/ashfolio_web/live/account_live/index_test.exs
 - [⏳] Manual testing of critical paths completed
 
 ### Should Have (Recommended)
+
 - [ ] N+1 queries optimized
 - [ ] Input validation enhanced
 - [ ] Performance tests pass
 - [ ] Documentation updated
 
 ### Nice to Have (Future)
+
 - [ ] Enhanced logging implemented
 - [ ] Automated backup scheduling
 - [ ] Comprehensive audit trail
@@ -194,14 +218,17 @@ just test-file test/ashfolio_web/live/account_live/index_test.exs
 ## Risk Assessment
 
 ### High Risk
+
 - **Division bug**: Could cause app crashes in production
 - **Cost basis bug**: Could result in incorrect financial data
 
 ### Medium Risk
+
 - **Security salt**: Could be exploited if config exposed
 - **Memory leak**: Could cause performance degradation over time
 
 ### Low Risk
+
 - **Race condition**: Unlikely to affect single-user local deployment
 - **N+1 queries**: Performance impact manageable for single-user
 
@@ -217,23 +244,25 @@ just test-file test/ashfolio_web/live/account_live/index_test.exs
 
 ## Version Numbering Plan
 
-- **Current**: v0.26.0 (as per CHANGELOG.md)
-- **After Critical Fixes**: v0.95.0
-- **After All Recommended Fixes**: v1.0.0-rc1
-- **Production Release**: v1.0.0
+- **Current**: v0.1.0 (as per CHANGELOG.md)
+- **After All Recommended Fixes**: v0.1.0-rc1
+- **Production Release**: v0.1.0
 
 ## Timeline
 
 ### Day 1 (Today)
+
 - [ ] Tasks 1.1-1.3 (Critical bugs + security)
 - [ ] Initial testing and verification
 
 ### Day 2
+
 - [ ] Tasks 1.4-1.5 (Cache cleanup + race condition)
 - [ ] Task 2.1 (N+1 queries optimization)
 - [ ] Comprehensive testing
 
 ### Day 3
+
 - [ ] Final verification and testing
 - [ ] Documentation updates
 - [ ] Version 1.0.0 release preparation
@@ -252,9 +281,10 @@ just test-file test/ashfolio_web/live/account_live/index_test.exs
 **Result**: Clean compilation, all critical tests passing, production-ready code
 
 **Additional Fixes Applied**:
+
 - **Missing Success Message**: Restored "Account exclusion updated successfully" flash message in toggle functionality
 - **Test Result**: AccountLive.Index tests now pass (21/21) ✅
-- **Timing Test Fix**: Changed `duration_ms > 0` to `duration_ms >= 0` in PriceManager test (operations too fast in test environment)  
+- **Timing Test Fix**: Changed `duration_ms > 0` to `duration_ms >= 0` in PriceManager test (operations too fast in test environment)
 - **Test Result**: PriceManager tests now pass (18/18) ✅
 - **Transaction Loading Bug**: Fixed `list_transactions()` to properly handle `{:ok, []}` return from `Transaction.list()`
 - **Test Content Fix**: Updated navigation test to match actual subtitle: "Manage your investment transactions"
@@ -262,20 +292,21 @@ just test-file test/ashfolio_web/live/account_live/index_test.exs
 - **Database Sandbox Concurrency**: Fixed SQLite sandbox concurrency issue by gracefully handling `MatchError` in `DataCase.setup_sandbox/1`
 - **Test Result**: Dashboard PubSub tests now pass (6/6) ✅
 - **Transaction Form Component Bug**: Fixed `Map.get(nil, :id)` error in FormComponent by adding proper user creation handling like AccountLive
-- **Test Expectation Fix**: Updated test to check for form modal display rather than incorrect URL patch expectation  
+- **Test Expectation Fix**: Updated test to check for form modal display rather than incorrect URL patch expectation
 - **Test Result**: Transaction LiveView Index tests now pass (4/4) ✅
 
 ### Summary of Fixes Applied
 
 1. **Division by Zero Bug** ✅ - Fixed unrealized P&L percentage calculation
-2. **Cost Basis Calculation** ✅ - Added zero-quantity guards to prevent crashes  
+2. **Cost Basis Calculation** ✅ - Added zero-quantity guards to prevent crashes
 3. **Security Salt** ✅ - Moved to environment variable with fallback
 4. **Cache Memory Leak** ✅ - Automated cleanup every 60 minutes
 5. **Race Condition** ✅ - Enhanced concurrent operation prevention
 
 ### Impact Assessment
 
-**Before Fixes**: 
+**Before Fixes**:
+
 - Critical runtime crashes possible
 - Incorrect financial calculations
 - Security exposure of signing salt
@@ -283,6 +314,7 @@ just test-file test/ashfolio_web/live/account_live/index_test.exs
 - UI state inconsistencies
 
 **After Fixes**:
+
 - ✅ No runtime crash potential
 - ✅ Accurate financial calculations with proper guards
 - ✅ Configurable security salt via environment
@@ -291,16 +323,16 @@ just test-file test/ashfolio_web/live/account_live/index_test.exs
 
 ## Updated Recommendation
 
-**REVISED ASSESSMENT: READY FOR v1.0 RELEASE** ✅
+**REVISED ASSESSMENT: READY FOR v0.1.0 RELEASE** ✅
 
 All critical bugs identified by Claude Code GitHub review have been successfully resolved. The fixes were implemented quickly due to the excellent existing architecture and comprehensive test suite.
 
-**Confidence Level**: 98% - Strong recommendation for v1.0 release after final manual testing.
+**Confidence Level**: 98% - Strong recommendation for v0.1.0 release after final manual testing.
 
 ## Next Steps
 
 1. **Run Full Test Suite**: `just test` (address any remaining concurrency issues)
-2. **Manual Testing**: Verify critical user workflows  
+2. **Manual Testing**: Verify critical user workflows
 3. **Performance Testing**: Ensure no regressions
 4. **Documentation Updates**: Update CHANGELOG with fixes
 5. **Release**: Ready for production deployment
@@ -319,4 +351,4 @@ These documentation updates ensure that future developers understand SQLite's te
 
 ---
 
-*Updated: August 7, 2025 - All critical fixes completed successfully.*
+_Updated: August 7, 2025 - All critical fixes completed successfully._

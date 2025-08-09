@@ -4,7 +4,7 @@
 
 This document outlines the requirements for addressing critical documentation gaps, quality issues, and alignment discrepancies identified in the Ashfolio project during the Phase 10 review. These improvements are essential for achieving production readiness and maintaining long-term project sustainability.
 
-The scope includes fixing compilation issues, aligning documentation with implementation reality, creating missing documentation, and establishing comprehensive testing procedures to ensure the project meets professional standards for a v1.0 release.
+The scope includes fixing compilation issues, aligning documentation with implementation reality, creating missing documentation, and establishing comprehensive testing procedures to ensure the project meets professional standards for a v0.1.0 release.
 
 ## Requirements
 

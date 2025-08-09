@@ -185,7 +185,7 @@ This release improves the account deletion test to be more robust in multi-accou
 
 ### ⚠️ Test Suite Stability Issues Identified
 
-This release identifies critical test stability issues that need to be addressed before v1.0 completion.
+This release identifies critical test stability issues that need to be addressed before v0.1.0 completion.
 
 #### Issues Identified
 
@@ -207,7 +207,7 @@ This release identifies critical test stability issues that need to be addressed
 
 - **Current**: 290/383 tests passing (76% pass rate)
 - **Target**: 383/383 tests passing (100% pass rate)
-- **Blocking**: v1.0 release readiness
+- **Blocking**: v0.1.0 release readiness
 
 ## [0.26.11] - 2025-08-07
 
