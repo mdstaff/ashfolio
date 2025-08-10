@@ -2,44 +2,56 @@
 
 This document provides a detailed overview of Ashfolio's technical architecture, illustrating the relationships between its core components, modules, and data flows. Understanding this architecture is crucial for new developers to effectively contribute to the project.
 
+**Note**: This architecture is evolving through the Financial Management Expansion roadmap (see [ADR-002](../architecture/adr-002-financial-domain-expansion.md)). Current documentation reflects the expanded scope from portfolio-only to comprehensive financial management.
+
 ## 1. Overall System Architecture
 
 Ashfolio is built on the Phoenix LiveView framework, leveraging Elixir's OTP capabilities and the Ash Framework for robust data modeling and business logic. It follows a clear separation of concerns to ensure maintainability and extensibility.
 
 ```mermaid
 graph TD
-    subgraph "Ashfolio Application (Elixir/Phoenix)"
+    subgraph "Ashfolio Comprehensive Financial Management (Elixir/Phoenix)"
         A[User Interface (Phoenix LiveView)] --> B{Business Logic Layer}
         B --> C[Data Layer]
         B --> D[Market Data Services]
+        B --> H[Financial Calculation Engine]
         D --> E[ETS Cache]
         D --> F[External APIs (Yahoo Finance)]
         C --> G[(SQLite Database)]
+        H --> I[Background Jobs (Oban)]
     end
 
-    subgraph "Business Logic Layer"
-        B1[Ash Resources] --> B2[Portfolio Calculators]
-        B1 --> B3[Validations & Actions]
+    subgraph "Business Logic Layer (Dual Domain)"
+        B1[Portfolio Domain] --> B2[Portfolio Calculators]
+        B3[Financial Management Domain] --> B4[Net Worth Calculators]
+        B3 --> B5[Expense Analyzers]
+        B3 --> B6[Retirement Planners]
+        B1 --> B7[Investment Resources]
+        B3 --> B8[Financial Management Resources]
     end
 
-    subgraph "Data Layer"
+    subgraph "Data Layer (Comprehensive)"
         C1[AshSqlite Data Layer] --> G
-        C2[Ecto Adapters] --> G
+        C2[Time-Series Optimizations] --> G
+        C3[Financial Analytics Queries] --> G
     end
 
-    subgraph "Market Data Services"
-        D1[PriceManager GenServer] --> D2[YahooFinance Module]
-        D1 --> E
-        D2 --> F
+    subgraph "Financial Calculation Engine"
+        H1[Net Worth Calculations] --> H2[Retirement Projections]
+        H2 --> H3[Tax Optimizations]
+        H3 --> H4[Portfolio Analytics]
     end
 
-    A -- "User Interactions (LiveView Events)" --> B
-    B -- "Data Operations (Ash Actions)" --> C
+    A -- "User Interactions" --> B
+    B -- "Data Operations" --> C
     B -- "Price Requests" --> D
+    B -- "Complex Calculations" --> H
     D -- "Cached Prices" --> E
     D -- "API Calls" --> F
     C -- "Data Storage" --> G
     E -- "Price Data" --> B
+    H -- "Background Processing" --> I
+    I -- "Completed Calculations" --> B
 ```
 
 ## 2. Ash Resources and Relationships

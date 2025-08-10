@@ -1,8 +1,8 @@
 # Ashfolio 📊
 
-**A modern, local-first portfolio management application for personal investment tracking.**
+**A comprehensive, local-first personal financial management application for complete wealth tracking and planning.**
 
-Built with Phoenix LiveView and the Ash Framework, Ashfolio provides a secure, privacy-focused solution for managing your investment portfolio on your own computer. No cloud dependencies, no data sharing—just powerful portfolio analysis at your fingertips.
+Built with Phoenix LiveView and the Ash Framework, Ashfolio provides a secure, privacy-focused solution for managing your complete financial picture on your own computer. Track investments, cash accounts, net worth, expenses, and plan for the future—all with no cloud dependencies and complete data ownership.
 
 [![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-green)](https://github.com/mdstaff/ashfolio)
 [![Test Coverage](https://img.shields.io/badge/Tests-383%20passing-brightgreen)](https://github.com/mdstaff/ashfolio)
@@ -44,13 +44,25 @@ Get Ashfolio up and running in minutes!
 - **No cloud dependencies**: Works entirely offline except for price updates
 - **Open source**: Full transparency in how your data is handled
 
-### 💡 Powerful Features
+### 💡 Comprehensive Financial Features
 
-- **📊 Real-time Dashboard**: Live portfolio value, returns, and performance analytics
-- **💰 Multi-Account Support**: Track investments across brokerages (Schwab, Fidelity, etc.)
+#### 💰 Complete Wealth Tracking
+- **Investment Portfolios**: Stock, ETF, bond, and crypto position management across brokerages
+- **Cash Management**: Checking, savings, and money market account tracking
+- **Asset Portfolio**: Real estate, vehicles, and other valuable assets
+- **Net Worth Analytics**: Complete financial position with trending and year-over-year analysis
+
+#### 📊 Financial Planning & Analysis  
+- **Expense Tracking**: Monthly spending analysis and budget management
+- **Retirement Planning**: 401k, IRA, and retirement goal projections using 25x rule
+- **Dividend Income**: Forward-looking dividend projections for early retirement planning
+- **Tax Planning**: Capital gains optimization and tax-aware strategies
+
+#### 🔧 Advanced Analytics
 - **📈 FIFO Cost Basis**: Accurate profit/loss calculations using industry standards
-- **💱 Price Integration**: Automatic price updates from Yahoo Finance
+- **💱 Real-time Pricing**: Automatic price updates from Yahoo Finance
 - **📱 Responsive Design**: Works beautifully on desktop, tablet, and mobile
+- **🎯 Goal Tracking**: Progress monitoring for financial independence and custom goals
 
 ### 🛠️ Developer Friendly
 
@@ -63,21 +75,39 @@ Get Ashfolio up and running in minutes!
 
 ## 🎯 Project Status
 
-**Current Version**: v0.1.0-rc(Production-Ready Beta)
+**Current Version**: v0.1.0-rc (Investment Portfolio Management)
 **Stability**: All 383 tests passing  
-**Release Target**: v0.1.0
+**Next Release**: v0.2.0 (Cash Management & Net Worth)
 
-### ✅ What's Working
+### ✅ Currently Available (v0.1.0)
 
-- ✅ **Complete Portfolio Tracking**: Full account and transaction management
+- ✅ **Investment Portfolio Tracking**: Complete account and transaction management
 - ✅ **Real-time Calculations**: Live portfolio value and performance analytics
 - ✅ **Price Integration**: Yahoo Finance API with caching
 - ✅ **Responsive Interface**: Works on all devices
 - ✅ **Production Quality**: Comprehensive testing and error handling
 
-### 🚀 Ready for Use
+### 🚧 Coming Soon (Comprehensive Financial Management + Enhanced Portfolio Features)
 
-Ashfolio is stable and ready for personal use. The core functionality is complete and well-tested.
+**v0.2.0 (Q3 2025) - Cash Management & Enhanced UX**:
+- 🚧 **Cash Account Management**: Checking, savings, money market tracking  
+- 🚧 **Net Worth Calculation**: Complete financial position analysis
+- 🚧 **Symbol Autocomplete**: Intelligent symbol search in transaction forms
+- 🚧 **Transaction Categories**: Custom tagging for all transaction types
+
+**Future Releases**:
+- 🚧 **Expense Tracking & Asset Management**: Monthly spending analysis and real estate/vehicle tracking (v0.3.0)
+- 🚧 **Retirement Planning & Advanced Analytics**: 25x rule calculations and professional portfolio analysis (v0.4.0)
+- 🚧 **Tax Planning & Feature Completeness**: Tax optimization and comprehensive reporting (v0.5.0)
+
+### 🎯 Development Roadmap
+
+**v0.2.0 (Q3 2025)**: Cash Management & Enhanced UX  
+**v0.3.0 (Q4 2025)**: Asset Tracking & Real-Time Features  
+**v0.4.0 (Q1 2026)**: Financial Planning & Advanced Analytics  
+**v0.5.0 (Q2 2026)**: Tax Planning & Feature Completeness
+
+See our [unified roadmap](docs/roadmap/v0.2-v0.5-roadmap.md) for detailed feature timelines and technical specifications.
 
 ---
 
