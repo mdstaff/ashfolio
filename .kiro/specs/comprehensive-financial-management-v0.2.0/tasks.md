@@ -51,7 +51,7 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - Write integration tests for net worth calculation across both domains
   - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-- [ ] 6. Create SymbolSearch module for local symbol lookup and caching
+- [x] 6. Create SymbolSearch module for local symbol lookup and caching
 
   - **Goal**: Implement local-first symbol search with ETS caching, preparing foundation for external API integration
   - **Context API Integration**: Use `Ashfolio.Context.search_symbols/2` for cross-domain symbol operations
@@ -65,9 +65,9 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - **Out of Scope**: External API integration, symbol creation, real-time price data
   - _Requirements: 4.1, 4.3_
 
-- [ ] 6a. Add external API integration to SymbolSearch
+- [x] 6a. Add external API integration to SymbolSearch
 
-  - **Goal**: Extend SymbolSearch with external API fallback when local results insufficient  
+  - **Goal**: Extend SymbolSearch with external API fallback when local results insufficient
   - **Context API Integration**: Add `Context.create_symbol_from_external/1` function
   - Implement external API fallback when local results < 3 matches
   - Add rate limiting: maximum 10 API calls per minute per user
@@ -114,7 +114,7 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
 - [ ] 8. Enhance AccountLive with Context API integration
 
   - **Goal**: Integrate existing account management with new Context API and cash account types
-  - **Context API Integration**: 
+  - **Context API Integration**:
     - Replace direct Account queries with `Context.get_user_dashboard_data/1`
     - Use `Context.get_account_with_transactions/2` for account details
     - Integrate cash account balance updates through Context layer
@@ -237,7 +237,7 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - **Goal**: Ensure seamless upgrade path from v0.1.0 to v0.2.0 with data integrity
   - **Context API Integration**: Test Context API with existing v0.1.0 data structures
   - Write migration tests for new account types with existing account data
-  - Add data integrity verification for enhanced Transaction and Account resources  
+  - Add data integrity verification for enhanced Transaction and Account resources
   - Test Context API compatibility with legacy data structures
   - Create performance benchmarks comparing v0.1.0 and v0.2.0 operations
   - Implement rollback procedures and testing for critical migration failures

@@ -1,14 +1,14 @@
 defmodule Ashfolio.Context do
   @moduledoc """
   High-level API for all financial operations - local-first design.
-  
+
   Provides reusable functions across Portfolio and FinancialManagement domains
-  that compose existing Ash resource operations efficiently. Optimized for 
+  that compose existing Ash resource operations efficiently. Optimized for
   SQLite with batched queries, prepared statements, and ETS caching.
-  
+
   This Context API follows the architect's recommendations:
   - Cross-domain access at the Ashfolio level
-  - SQLite-specific optimizations 
+  - SQLite-specific optimizations
   - Enhanced error handling with specific error types
   - Performance monitoring with telemetry integration
   """
@@ -36,12 +36,12 @@ defmodule Ashfolio.Context do
 
   @doc """
   Get comprehensive dashboard data for a user.
-  
+
   Returns user info, accounts (categorized), recent transactions, and summary.
   Optimized with batched queries and telemetry tracking.
-  
+
   ## Examples
-  
+
       iex> Context.get_user_dashboard_data()
       {:ok, %{
         user: %User{},
@@ -50,7 +50,7 @@ defmodule Ashfolio.Context do
         summary: %{total_balance: %Decimal{}, account_count: 3},
         last_updated: ~U[2025-08-10 12:00:00Z]
       }}
-      
+
       iex> Context.get_user_dashboard_data("invalid-id")
       {:error, :user_not_found}
   """
@@ -84,11 +84,11 @@ defmodule Ashfolio.Context do
 
   @doc """
   Get account details with transaction history and balance progression.
-  
+
   Returns account info, transactions, balance history, and summary statistics.
-  
+
   ## Examples
-  
+
       iex> Context.get_account_with_transactions(account_id, 25)
       {:ok, %{
         account: %Account{},
@@ -122,11 +122,11 @@ defmodule Ashfolio.Context do
 
   @doc """
   Get comprehensive portfolio summary with performance metrics.
-  
+
   Returns total value, return data, holdings, and performance statistics.
-  
+
   ## Examples
-  
+
       iex> Context.get_portfolio_summary()
       {:ok, %{
         total_value: %Decimal{},
@@ -172,9 +172,9 @@ defmodule Ashfolio.Context do
 
   @doc """
   Get recent transactions for a user across all accounts.
-  
+
   ## Examples
-  
+
       iex> Context.get_recent_transactions(user_id, 5)
       {:ok, [%Transaction{}, ...]}
   """
@@ -182,9 +182,9 @@ defmodule Ashfolio.Context do
     track_performance(:get_recent_transactions, fn ->
       with {:ok, accounts} <- Account.accounts_for_user(user_id) do
         account_ids = Enum.map(accounts, & &1.id)
-        
+
         # Get recent transactions from all accounts
-        transactions = 
+        transactions =
           account_ids
           |> Enum.flat_map(fn account_id ->
             case Transaction.by_account(account_id) do
@@ -204,9 +204,9 @@ defmodule Ashfolio.Context do
 
   @doc """
   Get net worth calculation combining investment and cash balances.
-  
+
   ## Examples
-  
+
       iex> Context.get_net_worth(user_id)
       {:ok, %{
         total_net_worth: %Decimal{},
@@ -225,7 +225,7 @@ defmodule Ashfolio.Context do
 
           cash_accounts = Enum.filter(accounts, &(&1.account_type in [:checking, :savings, :money_market, :cd]))
           investment_accounts = Enum.filter(accounts, &(&1.account_type == :investment))
-          
+
           cash_balance = calculate_total_cash_balance(cash_accounts)
           total_net_worth = Decimal.add(portfolio_value, cash_balance)
 
@@ -252,29 +252,53 @@ defmodule Ashfolio.Context do
 
   @doc """
   Search for symbols by ticker or company name with caching.
-  
+
   Provides cross-domain symbol search functionality for financial management
   operations. Results are cached for performance optimization.
-  
+
   ## Options
-  
+
   - `:max_results` - Maximum number of results to return (default: 50)
   - `:ttl_seconds` - Cache TTL in seconds (default: 300)
-  
+
   ## Examples
-  
+
       iex> Context.search_symbols("AAPL")
       {:ok, [%Symbol{symbol: "AAPL", name: "Apple Inc."}]}
-      
+
       iex> Context.search_symbols("Apple", max_results: 10)
       {:ok, [%Symbol{symbol: "AAPL", name: "Apple Inc."}]}
-      
+
       iex> Context.search_symbols("NONEXISTENT")
       {:ok, []}
   """
   def search_symbols(query, opts \\ []) do
     track_performance(:search_symbols, fn ->
       SymbolSearch.search(query, opts)
+    end)
+  end
+
+  @doc """
+  Create a new Symbol resource from external API data.
+
+  This function is used when external symbol search finds symbols that don't exist
+  locally and need to be created for use in transactions.
+
+  ## Parameters
+  - symbol_data: Map containing symbol information from external API
+
+  ## Examples
+
+      iex> Context.create_symbol_from_external(%{
+      ...>   symbol: "NVDA",
+      ...>   name: "NVIDIA Corporation",
+      ...>   price: 450.25
+      ...> })
+      {:ok, %Symbol{}}
+  """
+  def create_symbol_from_external(symbol_data) do
+    track_performance(:create_symbol_from_external, fn ->
+      SymbolSearch.create_symbol_from_external(symbol_data)
     end)
   end
 
@@ -358,13 +382,13 @@ defmodule Ashfolio.Context do
         [] -> Decimal.new(0)
         [%{balance: balance} | _] -> balance
       end
-      
+
       new_balance = case transaction.type do
-        type when type in [:buy, :sell] -> 
+        type when type in [:buy, :sell] ->
           Decimal.add(previous_balance, transaction.total_amount)
-        :dividend -> 
+        :dividend ->
           Decimal.add(previous_balance, transaction.total_amount)
-        _ -> 
+        _ ->
           previous_balance
       end
 
@@ -432,22 +456,22 @@ defmodule Ashfolio.Context do
 
   defp track_performance(operation, fun) do
     start_time = System.monotonic_time()
-    
+
     result = fun.()
-    
+
     duration = System.monotonic_time() - start_time
     duration_ms = System.convert_time_unit(duration, :native, :millisecond)
-    
+
     Logger.debug("Context.#{operation} completed in #{duration_ms}ms")
-    
+
     :telemetry.execute(
-      @telemetry_prefix ++ [operation], 
-      %{duration: duration_ms}, 
+      @telemetry_prefix ++ [operation],
+      %{duration: duration_ms},
       %{operation: operation}
     )
-    
+
     case result do
-      {:ok, _} = success -> 
+      {:ok, _} = success ->
         :telemetry.execute(@telemetry_prefix ++ [operation, :success], %{}, %{})
         success
       {:error, reason} = error ->

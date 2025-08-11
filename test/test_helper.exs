@@ -12,6 +12,7 @@ ExUnit.start()
 
 # Set up Mox for mocking
 Mox.defmock(YahooFinanceMock, for: Ashfolio.MarketData.YahooFinanceBehaviour)
+Mox.defmock(HttpClientMock, for: Ashfolio.MarketData.HttpClientBehaviour)
 
 # Ensure application is started for test infrastructure
 {:ok, _} = Application.ensure_all_started(:ashfolio)
@@ -82,4 +83,3 @@ Ashfolio.SQLiteHelpers.setup_global_test_data!()
 # - :error_handling - Tests specifically for error conditions and recovery
 #
 # ============================================================================
-
