@@ -10,7 +10,7 @@ Built with Phoenix LiveView and the Ash Framework, Ashfolio provides a secure, p
 
 ## 🚀 Quick Start
 
-Get Ashfolio up and running in minutes!
+Get Ashfolio up and running in minut`es!
 
 ### Prerequisites
 
@@ -47,18 +47,21 @@ Get Ashfolio up and running in minutes!
 ### 💡 Comprehensive Financial Features
 
 #### 💰 Complete Wealth Tracking
+
 - **Investment Portfolios**: Stock, ETF, bond, and crypto position management across brokerages
 - **Cash Management**: Checking, savings, and money market account tracking
 - **Asset Portfolio**: Real estate, vehicles, and other valuable assets
 - **Net Worth Analytics**: Complete financial position with trending and year-over-year analysis
 
-#### 📊 Financial Planning & Analysis  
+#### 📊 Financial Planning & Analysis
+
 - **Expense Tracking**: Monthly spending analysis and budget management
 - **Retirement Planning**: 401k, IRA, and retirement goal projections using 25x rule
 - **Dividend Income**: Forward-looking dividend projections for early retirement planning
 - **Tax Planning**: Capital gains optimization and tax-aware strategies
 
 #### 🔧 Advanced Analytics
+
 - **📈 FIFO Cost Basis**: Accurate profit/loss calculations using industry standards
 - **💱 Real-time Pricing**: Automatic price updates from Yahoo Finance
 - **📱 Responsive Design**: Works beautifully on desktop, tablet, and mobile
@@ -75,27 +78,32 @@ Get Ashfolio up and running in minutes!
 
 ## 🎯 Project Status
 
-**Current Version**: v0.1.0-rc (Investment Portfolio Management)
-**Stability**: All 383 tests passing  
-**Next Release**: v0.2.0 (Cash Management & Net Worth)
+**Current Version**: v0.2.0-dev (Comprehensive Financial Management)
+**Stability**: All tests passing with new financial features  
+**Next Release**: v0.2.0 (Cash Management & Net Worth - In Progress)
 
-### ✅ Currently Available (v0.1.0)
+### ✅ Currently Available (v0.1.0 + v0.2.0 Features)
 
 - ✅ **Investment Portfolio Tracking**: Complete account and transaction management
+- ✅ **Net Worth Calculation**: Cross-account financial position analysis with NetWorthCalculator
+- ✅ **Cash Account Management**: Support for checking, savings, money market, and CD accounts
+- ✅ **Transaction Categories**: Investment transaction organization and categorization
 - ✅ **Real-time Calculations**: Live portfolio value and performance analytics
 - ✅ **Price Integration**: Yahoo Finance API with caching
 - ✅ **Responsive Interface**: Works on all devices
 - ✅ **Production Quality**: Comprehensive testing and error handling
 
-### 🚧 Coming Soon (Comprehensive Financial Management + Enhanced Portfolio Features)
+### 🚧 Coming Soon (Enhanced UX & Additional Features)
 
-**v0.2.0 (Q3 2025) - Cash Management & Enhanced UX**:
-- 🚧 **Cash Account Management**: Checking, savings, money market tracking  
-- 🚧 **Net Worth Calculation**: Complete financial position analysis
-- 🚧 **Symbol Autocomplete**: Intelligent symbol search in transaction forms
-- 🚧 **Transaction Categories**: Custom tagging for all transaction types
+**v0.2.0 (Q3 2025) - Remaining Cash Management & UX Features**:
+
+- 🚧 **Symbol Autocomplete**: Intelligent symbol search in transaction forms (In Progress)
+- 🚧 **Enhanced Dashboard**: Net worth integration and cash account displays
+- 🚧 **Balance Management UI**: User-friendly cash balance update interfaces
+- 🚧 **Category Management**: UI for creating and managing transaction categories
 
 **Future Releases**:
+
 - 🚧 **Expense Tracking & Asset Management**: Monthly spending analysis and real estate/vehicle tracking (v0.3.0)
 - 🚧 **Retirement Planning & Advanced Analytics**: 25x rule calculations and professional portfolio analysis (v0.4.0)
 - 🚧 **Tax Planning & Feature Completeness**: Tax optimization and comprehensive reporting (v0.5.0)
