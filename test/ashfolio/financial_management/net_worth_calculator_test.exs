@@ -1,5 +1,5 @@
 defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
-  use Ashfolio.DataCase, async: true
+  use Ashfolio.DataCase, async: false
 
   alias Ashfolio.FinancialManagement.NetWorthCalculator
   alias Ashfolio.Portfolio.{User, Account, Symbol, Transaction}

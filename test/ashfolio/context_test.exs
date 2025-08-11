@@ -1,17 +1,17 @@
 defmodule Ashfolio.ContextTest do
   @moduledoc """
   Tests for the Ashfolio.Context module.
-  
+
   Tests the high-level Context API that provides reusable functions
   for common data access patterns across domains.
   """
 
-  use Ashfolio.DataCase, async: true
+  use Ashfolio.DataCase, async: false
 
   @moduletag :context_api
   @moduletag :unit
   @moduletag :fast
-  
+
   alias Ashfolio.Context
   alias Ashfolio.Portfolio.{User, Account, Transaction, Symbol}
 
@@ -19,7 +19,7 @@ defmodule Ashfolio.ContextTest do
     test "returns comprehensive dashboard data for default user" do
       # Get the default user that exists in the system
       {:ok, [default_user]} = User.get_default_user()
-      
+
       # Create test data for the default user
       investment_account = create_investment_account(default_user.id)
       _cash_account = create_cash_account(default_user.id)
@@ -65,10 +65,10 @@ defmodule Ashfolio.ContextTest do
 
     test "handles accounts with different types" do
       user = create_user()
-      
+
       # Create different account types
       checking = create_account(user.id, :checking, "Checking Account")
-      savings = create_account(user.id, :savings, "Savings Account") 
+      savings = create_account(user.id, :savings, "Savings Account")
       investment = create_account(user.id, :investment, "Investment Account")
 
       assert {:ok, dashboard_data} = Context.get_user_dashboard_data(user.id)
@@ -81,7 +81,7 @@ defmodule Ashfolio.ContextTest do
       cash_account_ids = Enum.map(dashboard_data.accounts.cash, & &1.id)
       assert checking.id in cash_account_ids
       assert savings.id in cash_account_ids
-      
+
       investment_account_ids = Enum.map(dashboard_data.accounts.investment, & &1.id)
       assert investment.id in investment_account_ids
     end
@@ -116,16 +116,16 @@ defmodule Ashfolio.ContextTest do
 
       assert account_data.account.id == account.id
       assert length(account_data.transactions) >= 1
-      
+
       # Check transaction summary
       assert is_integer(account_data.summary.transaction_count)
       assert is_struct(account_data.summary.total_inflow, Decimal)
       assert is_struct(account_data.summary.total_outflow, Decimal)
       assert is_struct(account_data.summary.net_flow, Decimal)
-      
+
       # Check balance history
       assert is_list(account_data.balance_history)
-      
+
       assert is_struct(account_data.last_updated, DateTime)
     end
 
@@ -133,7 +133,7 @@ defmodule Ashfolio.ContextTest do
       user = create_user()
       account = create_investment_account(user.id)
       symbol = create_symbol()
-      
+
       # Create multiple transactions
       _t1 = create_transaction(account.id, symbol.id, %{date: days_ago(3)})
       _t2 = create_transaction(account.id, symbol.id, %{date: days_ago(2)})
@@ -151,14 +151,14 @@ defmodule Ashfolio.ContextTest do
       user = create_user()
       account = create_investment_account(user.id)
       symbol = create_symbol()
-      
+
       # Create buy transaction (+inflow)
       _buy_tx = create_transaction(account.id, symbol.id, %{
         type: :buy,
         total_amount: Decimal.new(1000)
       })
-      
-      # Create dividend transaction (+inflow)  
+
+      # Create dividend transaction (+inflow)
       _div_tx = create_transaction(account.id, symbol.id, %{
         type: :dividend,
         total_amount: Decimal.new(25)
@@ -222,13 +222,13 @@ defmodule Ashfolio.ContextTest do
       account1 = create_investment_account(user.id)
       account2 = create_investment_account(user.id)
       symbol = create_symbol()
-      
+
       _tx1 = create_transaction(account1.id, symbol.id, %{date: days_ago(2)})
       _tx2 = create_transaction(account2.id, symbol.id, %{date: days_ago(1)})
 
       assert {:ok, transactions} = Context.get_recent_transactions(user.id, 10)
       assert length(transactions) >= 2
-      
+
       # Check that transactions are sorted by date (most recent first)
       dates = Enum.map(transactions, & &1.date)
       sorted_dates = Enum.sort(dates, {:desc, Date})
@@ -239,7 +239,7 @@ defmodule Ashfolio.ContextTest do
       user = create_user()
       account = create_investment_account(user.id)
       symbol = create_symbol()
-      
+
       # Create 5 transactions
       for i <- 1..5 do
         create_transaction(account.id, symbol.id, %{date: days_ago(i)})
@@ -261,10 +261,10 @@ defmodule Ashfolio.ContextTest do
   describe "get_net_worth/1" do
     test "calculates net worth combining investment and cash balances" do
       user = create_user()
-      
+
       # Create investment account with balance
       _investment = create_account(user.id, :investment, "Investment", %{balance: Decimal.new(10000)})
-      
+
       # Create cash accounts with balances
       _checking = create_account(user.id, :checking, "Checking", %{balance: Decimal.new(5000)})
       _savings = create_account(user.id, :savings, "Savings", %{balance: Decimal.new(15000)})
@@ -274,10 +274,10 @@ defmodule Ashfolio.ContextTest do
       assert is_struct(net_worth.total_net_worth, Decimal)
       assert is_struct(net_worth.investment_value, Decimal)
       assert is_struct(net_worth.cash_balance, Decimal)
-      
+
       # Cash balance should be 5000 + 15000 = 20000
       assert Decimal.equal?(net_worth.cash_balance, Decimal.new(20000))
-      
+
       # Check breakdown
       assert net_worth.breakdown.cash_accounts == 2
       assert net_worth.breakdown.investment_accounts == 1
@@ -303,7 +303,7 @@ defmodule Ashfolio.ContextTest do
     test "tracks telemetry events" do
       # Set up telemetry handler for testing
       test_pid = self()
-      
+
       handler_id = :test_handler
       :telemetry.attach_many(
         handler_id,
@@ -320,7 +320,7 @@ defmodule Ashfolio.ContextTest do
       # Create test data and call function
       user = create_user()
       _account = create_investment_account(user.id)
-      
+
       assert {:ok, _data} = Context.get_user_dashboard_data(user.id)
 
       # Check that telemetry events were emitted
@@ -339,7 +339,7 @@ defmodule Ashfolio.ContextTest do
       currency: "USD",
       locale: "en-US"
     }
-    
+
     attrs = Map.merge(default_attrs, attrs)
     {:ok, user} = User.create(attrs)
     user
@@ -362,7 +362,7 @@ defmodule Ashfolio.ContextTest do
       balance: Decimal.new(1000),
       platform: "Test Platform"
     }
-    
+
     attrs = Map.merge(default_attrs, attrs)
     {:ok, account} = Account.create(attrs)
     account
@@ -371,7 +371,7 @@ defmodule Ashfolio.ContextTest do
   defp create_symbol(attrs \\ %{}) do
     # Generate unique symbol to avoid conflicts
     unique_suffix = :crypto.strong_rand_bytes(4) |> Base.encode16()
-    
+
     default_attrs = %{
       symbol: "AAPL#{unique_suffix}",
       name: "Apple Inc. #{unique_suffix}",
@@ -379,7 +379,7 @@ defmodule Ashfolio.ContextTest do
       data_source: :manual,
       current_price: Decimal.new("150.00")
     }
-    
+
     attrs = Map.merge(default_attrs, attrs)
     {:ok, symbol} = Symbol.create(attrs)
     symbol
@@ -395,7 +395,7 @@ defmodule Ashfolio.ContextTest do
       total_amount: Decimal.new(1000),
       date: Date.utc_today()
     }
-    
+
     attrs = Map.merge(default_attrs, attrs)
     {:ok, transaction} = Transaction.create(attrs)
     transaction

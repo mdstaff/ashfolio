@@ -1,5 +1,5 @@
 defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
-  use Ashfolio.DataCase, async: true
+  use Ashfolio.DataCase, async: false
 
   alias Ashfolio.FinancialManagement.BalanceManager
   alias Ashfolio.Portfolio.{User, Account}
