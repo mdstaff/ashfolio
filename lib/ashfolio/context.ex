@@ -15,6 +15,7 @@ defmodule Ashfolio.Context do
 
   alias Ashfolio.Portfolio.{User, Account, Transaction}
   alias Ashfolio.Portfolio.Calculator
+  alias Ashfolio.FinancialManagement.SymbolSearch
 
   require Logger
 
@@ -246,6 +247,34 @@ defmodule Ashfolio.Context do
       else
         {:error, :user_not_found}
       end
+    end)
+  end
+
+  @doc """
+  Search for symbols by ticker or company name with caching.
+  
+  Provides cross-domain symbol search functionality for financial management
+  operations. Results are cached for performance optimization.
+  
+  ## Options
+  
+  - `:max_results` - Maximum number of results to return (default: 50)
+  - `:ttl_seconds` - Cache TTL in seconds (default: 300)
+  
+  ## Examples
+  
+      iex> Context.search_symbols("AAPL")
+      {:ok, [%Symbol{symbol: "AAPL", name: "Apple Inc."}]}
+      
+      iex> Context.search_symbols("Apple", max_results: 10)
+      {:ok, [%Symbol{symbol: "AAPL", name: "Apple Inc."}]}
+      
+      iex> Context.search_symbols("NONEXISTENT")
+      {:ok, []}
+  """
+  def search_symbols(query, opts \\ []) do
+    track_performance(:search_symbols, fn ->
+      SymbolSearch.search(query, opts)
     end)
   end
 
