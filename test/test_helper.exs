@@ -13,6 +13,7 @@ ExUnit.start()
 # Set up Mox for mocking
 Mox.defmock(YahooFinanceMock, for: Ashfolio.MarketData.YahooFinanceBehaviour)
 Mox.defmock(HttpClientMock, for: Ashfolio.MarketData.HttpClientBehaviour)
+Mox.defmock(Ashfolio.ContextMock, for: Ashfolio.ContextBehaviour)
 
 # Ensure application is started for test infrastructure
 {:ok, _} = Application.ensure_all_started(:ashfolio)

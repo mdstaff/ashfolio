@@ -1,4 +1,6 @@
 defmodule Ashfolio.Context do
+  @behaviour Ashfolio.ContextBehaviour
+
   @moduledoc """
   High-level API for all financial operations - local-first design.
 

@@ -429,8 +429,9 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
 
       {:error, _changeset} ->
         # Symbol might already exist, try to find it
-        case Symbol.by_symbol(symbol) do
-          {:ok, existing_symbol} -> existing_symbol
+        case Symbol.find_by_symbol(symbol) do
+          {:ok, [existing_symbol]} -> existing_symbol
+          {:ok, []} -> nil
           {:error, _} -> nil
         end
     end
