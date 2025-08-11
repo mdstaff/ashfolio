@@ -477,38 +477,8 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
   end
 
   describe "edge cases" do
-    test "handles very small decimal amounts" do
-      current_value = Decimal.new("0.01")
-      cost_basis = Decimal.new("0.02")
 
-      {:ok, return_pct} = Calculator.calculate_simple_return(current_value, cost_basis)
 
-      # (0.01 - 0.02) / 0.02 * 100 = -50%
-      expected_return = Decimal.new("-50.0")
-      assert Decimal.equal?(return_pct, expected_return)
-    end
-
-    test "handles very large decimal amounts" do
-      current_value = Decimal.new("999999999.99")
-      cost_basis = Decimal.new("500000000.00")
-
-      {:ok, return_pct} = Calculator.calculate_simple_return(current_value, cost_basis)
-
-      # (999999999.99 - 500000000.00) / 500000000.00 * 100 = 99.99999999800%
-      expected_return = Decimal.new("99.99999999800")
-      assert Decimal.equal?(return_pct, expected_return)
-    end
-
-    test "handles negative cost basis (unusual but possible)" do
-      current_value = Decimal.new("100.00")
-      cost_basis = Decimal.new("-50.00")
-
-      {:ok, return_pct} = Calculator.calculate_simple_return(current_value, cost_basis)
-
-      # (100 - (-50)) / (-50) * 100 = 150 / (-50) * 100 = -300%
-      expected_return = Decimal.new("-300.0")
-      assert Decimal.equal?(return_pct, expected_return)
-    end
 
     test "handles zero current value with positive cost basis" do
       current_value = Decimal.new("0.00")

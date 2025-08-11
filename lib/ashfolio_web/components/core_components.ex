@@ -749,10 +749,11 @@ defmodule AshfolioWeb.CoreComponents do
       <.loading_spinner class="w-8 h-8" />
   """
   attr :class, :string, default: "w-5 h-5"
+  attr :rest, :global
 
   def loading_spinner(assigns) do
     ~H"""
-    <div class={["animate-spin rounded-full border-2 border-gray-300 border-t-blue-600", @class]}>
+    <div class={["animate-spin rounded-full border-2 border-gray-300 border-t-blue-600", @class]} {@rest}>
     </div>
     """
   end

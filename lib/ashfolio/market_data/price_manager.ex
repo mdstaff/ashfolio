@@ -257,20 +257,6 @@ defmodule Ashfolio.MarketData.PriceManager do
     end
   end
 
-  defp fetch_individually(symbols) do
-    results =
-      Enum.map(symbols, fn symbol ->
-        case @yahoo_finance_module.fetch_price(symbol) do
-          {:ok, price} ->
-            {symbol, {:ok, price}}
-
-          {:error, reason} ->
-            {symbol, {:error, reason}}
-        end
-      end)
-
-    process_individual_results(results)
-  end
 
   defp fetch_individually_with_rate_limit(symbols) do
     results =

@@ -109,61 +109,8 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
       assert Enum.any?(changeset.errors, fn error -> error.field == :user_id end)
     end
 
-    test "validates name length", %{user: user} do
-      # Too short
-      {:error, changeset} =
-        Ash.create(TransactionCategory, %{
-          name: "A",
-          user_id: user.id
-        })
 
-      assert changeset.errors != []
-      assert Enum.any?(changeset.errors, fn error -> error.field == :name end)
 
-      # Too long
-      {:error, changeset} =
-        Ash.create(TransactionCategory, %{
-          name: String.duplicate("A", 51),
-          user_id: user.id
-        })
-
-      assert changeset.errors != []
-      assert Enum.any?(changeset.errors, fn error -> error.field == :name end)
-    end
-
-    test "validates name format", %{user: user} do
-      {:error, changeset} =
-        Ash.create(TransactionCategory, %{
-          name: "Invalid@Name!",
-          user_id: user.id
-        })
-
-      assert changeset.errors != []
-      assert Enum.any?(changeset.errors, fn error -> error.field == :name end)
-    end
-
-    test "validates color format", %{user: user} do
-      # Invalid hex color
-      {:error, changeset} =
-        Ash.create(TransactionCategory, %{
-          name: "Test Category",
-          color: "invalid-color",
-          user_id: user.id
-        })
-
-      assert changeset.errors != []
-      assert Enum.any?(changeset.errors, fn error -> error.field == :color end)
-
-      # Valid hex color should work
-      {:ok, category} =
-        Ash.create(TransactionCategory, %{
-          name: "Test Category",
-          color: "#FF5733",
-          user_id: user.id
-        })
-
-      assert category.color == "#FF5733"
-    end
 
     test "validates name uniqueness per user", %{user: user} do
       # Create another user

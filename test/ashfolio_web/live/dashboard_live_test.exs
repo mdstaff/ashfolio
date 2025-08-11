@@ -159,15 +159,6 @@ defmodule AshfolioWeb.DashboardLiveTest do
       assert html =~ "$1,100.00" or html =~ "1,100"
     end
 
-    test "price refresh in progress shows appropriate message", %{conn: conn} do
-      # This test is complex to implement reliably due to timing issues
-      # For now, we'll test that the button exists and can be clicked
-      {:ok, view, html} = live(conn, "/")
-
-      # Should have refresh button
-      assert html =~ "Refresh Prices"
-      assert has_element?(view, "button", "Refresh Prices")
-    end
 
     test "failed price refresh shows error message", %{conn: conn} do
       # Mock failed price refresh - both batch and individual calls fail

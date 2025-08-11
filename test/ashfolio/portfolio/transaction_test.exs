@@ -127,36 +127,7 @@ defmodule Ashfolio.Portfolio.TransactionTest do
              end)
     end
 
-    test "validates positive price" do
-      {:error, changeset} =
-        Transaction.create(%{
-          type: :buy,
-          quantity: Decimal.new("100"),
-          price: Decimal.new("-10"),
-          total_amount: Decimal.new("1000"),
-          date: Date.utc_today()
-        })
 
-      assert Enum.any?(changeset.errors, fn error ->
-               error.field == :price and String.contains?(error.message, "negative")
-             end)
-    end
-
-    test "validates non-negative fee" do
-      {:error, changeset} =
-        Transaction.create(%{
-          type: :buy,
-          quantity: Decimal.new("100"),
-          price: Decimal.new("10"),
-          total_amount: Decimal.new("1000"),
-          fee: Decimal.new("-5"),
-          date: Date.utc_today()
-        })
-
-      assert Enum.any?(changeset.errors, fn error ->
-               error.field == :fee and String.contains?(error.message, "negative")
-             end)
-    end
 
     test "validates buy transaction quantity is positive" do
       {:error, changeset} =

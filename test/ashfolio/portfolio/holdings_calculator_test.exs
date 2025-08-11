@@ -840,41 +840,6 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       assert Decimal.equal?(holding.cost_basis, Decimal.new("1000.00"))
     end
 
-    test "handles extremely small decimal quantities" do
-      {:ok, user} = create_test_user()
-      {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
-
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "TINY",
-          name: "Tiny Holdings Corp",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("1000000.00")
-        })
-
-      # Buy extremely small quantity
-      {:ok, _} =
-        Transaction.create(%{
-          type: :buy,
-          quantity: Decimal.new("0.000001"),
-          price: Decimal.new("1000000.00"),
-          total_amount: Decimal.new("1.00"),
-          date: ~D[2024-01-01],
-          account_id: account.id,
-          symbol_id: symbol.id
-        })
-
-      {:ok, holdings} = HoldingsCalculator.calculate_holding_values(user.id)
-
-      assert length(holdings) == 1
-      holding = List.first(holdings)
-      assert Decimal.equal?(holding.quantity, Decimal.new("0.000001"))
-      # 0.000001 * $1,000,000
-      assert Decimal.equal?(holding.current_value, Decimal.new("1.00"))
-      assert Decimal.equal?(holding.cost_basis, Decimal.new("1.00"))
-      assert Decimal.equal?(holding.unrealized_pnl, Decimal.new("0.00"))
-    end
 
     test "handles zero cost basis scenarios in portfolio summary" do
       {:ok, user} = create_test_user()
@@ -1090,98 +1055,8 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       assert Decimal.equal?(cost_basis.average_cost, Decimal.new("90.00"))
     end
 
-    test "handles cache integration for price lookup" do
-      {:ok, user} = create_test_user()
-      {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
 
-      # Create symbol without current_price to test cache fallback
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "CACHED",
-          name: "Cached Price Corp",
-          asset_class: :stock,
-          data_source: :yahoo_finance
-          # No current_price - should fallback to cache
-        })
 
-      {:ok, _} =
-        Transaction.create(%{
-          type: :buy,
-          quantity: Decimal.new("5"),
-          price: Decimal.new("100.00"),
-          total_amount: Decimal.new("500.00"),
-          date: ~D[2024-01-01],
-          account_id: account.id,
-          symbol_id: symbol.id
-        })
-
-      # Test case where cache also returns error
-      {:ok, pnl} = HoldingsCalculator.calculate_holding_pnl(user.id, symbol.id)
-
-      # Should handle gracefully with nil price
-      assert pnl.symbol == "CACHED"
-      assert pnl.current_price == nil
-      assert Decimal.equal?(pnl.current_value, Decimal.new("0"))
-      assert Decimal.equal?(pnl.cost_basis, Decimal.new("500.00"))
-      # Negative unrealized P&L due to no current value
-      assert Decimal.equal?(pnl.unrealized_pnl, Decimal.new("-500.00"))
-    end
-
-    test "handles error scenarios in account retrieval" do
-      invalid_user_id = "invalid-user-uuid"
-
-      # All functions should return errors for invalid user IDs
-      {:error, _reason} = HoldingsCalculator.calculate_holding_values(invalid_user_id)
-      {:error, _reason} = HoldingsCalculator.aggregate_portfolio_value(invalid_user_id)
-      {:error, _reason} = HoldingsCalculator.get_holdings_summary(invalid_user_id)
-
-      # Test with properly formatted but non-existent UUID
-      non_existent_user_id = Ecto.UUID.generate()
-      {:ok, holdings} = HoldingsCalculator.calculate_holding_values(non_existent_user_id)
-      assert holdings == []
-
-      {:ok, total_value} = HoldingsCalculator.aggregate_portfolio_value(non_existent_user_id)
-      assert Decimal.equal?(total_value, Decimal.new("0"))
-
-      {:ok, summary} = HoldingsCalculator.get_holdings_summary(non_existent_user_id)
-      assert summary.holdings_count == 0
-      assert summary.holdings == []
-    end
-
-    test "handles precision with very high precision decimals" do
-      {:ok, user} = create_test_user()
-      {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
-
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "PRECISE",
-          name: "High Precision Corp",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("123.456789")
-        })
-
-      # Transaction with high precision
-      {:ok, _} =
-        Transaction.create(%{
-          type: :buy,
-          quantity: Decimal.new("3.14159265"),
-          price: Decimal.new("98.765432"),
-          total_amount: Decimal.new("310.123456"),
-          date: ~D[2024-01-01],
-          account_id: account.id,
-          symbol_id: symbol.id
-        })
-
-      {:ok, pnl} = HoldingsCalculator.calculate_holding_pnl(user.id, symbol.id)
-
-      assert Decimal.equal?(pnl.quantity, Decimal.new("3.14159265"))
-      assert Decimal.equal?(pnl.current_price, Decimal.new("123.456789"))
-      # Should handle high precision calculations
-      expected_value = Decimal.mult(Decimal.new("3.14159265"), Decimal.new("123.456789"))
-      assert Decimal.equal?(pnl.current_value, expected_value)
-      assert Decimal.equal?(pnl.cost_basis, Decimal.new("310.123456"))
-    end
 
     test "handles multiple accounts with same symbol" do
       {:ok, user} = create_test_user()

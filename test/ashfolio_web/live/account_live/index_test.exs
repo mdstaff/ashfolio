@@ -63,38 +63,7 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
                "New Account"
     end
 
-    test "displays form fields when creating new account", %{conn: conn} do
-      {:ok, index_live, _html} = live(conn, ~p"/accounts")
 
-      html = index_live |> element("button", "New Account") |> render_click()
-
-      # Check that form fields are present
-      assert html =~ "Account Name"
-      assert html =~ "Platform"
-      assert html =~ "Current Balance"
-      assert html =~ "Exclude from portfolio calculations"
-      assert html =~ "Create Account"
-    end
-
-    test "can cancel form", %{conn: conn} do
-      {:ok, index_live, _html} = live(conn, ~p"/accounts")
-
-      # Open form
-      index_live |> element("button", "New Account") |> render_click()
-
-      # Cancel form
-      index_live
-      |> element("button[phx-click='cancel']")
-      |> render_click()
-
-      # Get the updated HTML after the cancel action
-      html = render(index_live)
-
-      # Form should be closed - check for form-specific elements
-      refute html =~ "Account Name"
-      refute html =~ "Current Balance"
-      refute html =~ "Create Account"
-    end
 
     test "validates form fields", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/accounts")

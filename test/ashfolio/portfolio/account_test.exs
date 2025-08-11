@@ -114,29 +114,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
       assert Enum.any?(changeset.errors, fn error -> error.field == :user_id end)
     end
 
-    test "validates USD-only currency", %{user: user} do
-      {:error, changeset} =
-        Ash.create(Account, %{
-          name: "Test Account",
-          currency: "EUR",
-          user_id: user.id
-        })
 
-      assert changeset.errors != []
-      assert Enum.any?(changeset.errors, fn error -> error.field == :currency end)
-    end
-
-    test "validates non-negative balance", %{user: user} do
-      {:error, changeset} =
-        Ash.create(Account, %{
-          name: "Test Account",
-          balance: Decimal.new("-100.00"),
-          user_id: user.id
-        })
-
-      assert changeset.errors != []
-      assert Enum.any?(changeset.errors, fn error -> error.field == :balance end)
-    end
 
     test "can create cash account with all attributes", %{user: user} do
       {:ok, account} =

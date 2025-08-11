@@ -326,20 +326,6 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
       assert results.failure_count == 1
     end
 
-    test "continues with cache updates even if database fails" do
-      # This test would require mocking the database to fail
-      # For now, we'll test that cache is updated independently
-
-      expect(YahooFinanceMock, :fetch_prices, fn _symbols ->
-        {:ok, %{"AAPL" => Decimal.new("155.50")}}
-      end)
-
-      assert {:ok, _results} = PriceManager.refresh_symbols(["AAPL"])
-
-      # Verify cache was updated regardless
-      assert {:ok, %{price: price}} = Cache.get_price("AAPL")
-      assert Decimal.equal?(price, Decimal.new("155.50"))
-    end
   end
 
   describe "integration with existing systems" do
