@@ -2,7 +2,7 @@
 
 Convert the feature design into a series of prompts for an AI Agent like Claude Sonnet that will implement each step in a test-driven manner. Prioritize best practices, incremental progress, and early testing, ensuring no big jumps in complexity at any stage. Make sure that each prompt builds on the previous prompts, and ends with wiring things together. There should be no hanging or orphaned code that isn't integrated into a previous step. Focus ONLY on tasks that involve writing, modifying, or testing code.
 
-- [ ] 1. Enhance Account resource for cash account types
+- [x] 1. Enhance Account resource for cash account types
 
   - Extend existing `Ashfolio.Portfolio.Account` resource with new attributes: `account_type` (atom with constraints), `interest_rate` (decimal), `minimum_balance` (decimal)
   - Add new read actions: `by_type`, `cash_accounts`, `investment_accounts`
@@ -11,7 +11,7 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - Write comprehensive tests for enhanced Account resource including new attributes, actions, and validations
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-- [ ] 2. Create FinancialManagement domain and TransactionCategory resource
+- [x] 2. Create FinancialManagement domain and TransactionCategory resource
 
   - Create new `Ashfolio.FinancialManagement` domain module
   - Implement `Ashfolio.FinancialManagement.TransactionCategory` resource with attributes: name, color, is_system, parent_category_id
@@ -21,7 +21,7 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - Write unit tests for TransactionCategory resource covering all CRUD operations and validations
   - _Requirements: 5.1, 5.2_
 
-- [ ] 3. Enhance Transaction resource with investment categories
+- [x] 3. Enhance Transaction resource with investment categories
 
   - Add optional `category_id` relationship to existing `Ashfolio.Portfolio.Transaction` resource
   - Add belongs_to relationship to TransactionCategory for investment organization
@@ -30,7 +30,7 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - Write comprehensive tests for enhanced Transaction resource including category relationships and validations
   - _Requirements: 5.4_
 
-- [ ] 4. Implement BalanceManager for manual cash balance updates
+- [x] 4. Implement BalanceManager for manual cash balance updates
 
   - Create `Ashfolio.FinancialManagement.BalanceManager` module
   - Implement `update_cash_balance/3` function for manual balance adjustments with optional notes
@@ -40,7 +40,7 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - Write integration tests for balance change notifications
   - _Requirements: 2.1, 2.3, 2.4_
 
-- [ ] 5. Implement NetWorthCalculator for cross-account calculations
+- [x] 5. Implement NetWorthCalculator for cross-account calculations
 
   - Create `Ashfolio.FinancialManagement.NetWorthCalculator` module
   - Implement `calculate_net_worth/1` function combining investment values and cash balances

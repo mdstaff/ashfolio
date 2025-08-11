@@ -62,7 +62,7 @@ config :logger, :console,
 config :phoenix, :json_library, Jason
 
 # Configure Ash Framework
-config :ashfolio, ash_domains: [Ashfolio.Portfolio]
+config :ashfolio, ash_domains: [Ashfolio.Portfolio, Ashfolio.FinancialManagement]
 
 # Configure PriceManager
 config :ashfolio, Ashfolio.MarketData.PriceManager,

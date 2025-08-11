@@ -47,6 +47,7 @@
 #   - just test-liveview: Run Phoenix LiveView UI tests
 #   - just test-calculations: Run portfolio calculation tests
 #   - just test-market-data: Run market data system tests
+#   - just test-context-api: Run Context API high-level interface tests
 #   - just test-integration: Run end-to-end workflow tests
 #   - just test-ui: Run user interface tests
 #
@@ -225,6 +226,11 @@ test-market-data:
     @echo "🧪 Running market data system tests..."
     @mix test --only market_data 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Market data tests failed - run with --include market_data for details" && exit 1)
 
+# Run Context API tests
+test-context-api:
+    @echo "🧪 Running Context API tests..."
+    @mix test --only context_api 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Context API tests failed - run with --include context_api for details" && exit 1)
+
 # Run end-to-end workflow tests
 test-integration:
     @echo "🧪 Running integration workflow tests..."
@@ -308,6 +314,10 @@ test-calculations-verbose:
 test-market-data-verbose:
     @echo "🧪 Running market data tests (verbose)..."
     mix test --only market_data --trace
+
+test-context-api-verbose:
+    @echo "🧪 Running Context API tests (verbose)..."
+    mix test --only context_api --trace
 
 test-integration-verbose:
     @echo "🧪 Running integration tests (verbose)..."

@@ -70,6 +70,11 @@ defmodule Ashfolio.Portfolio.Transaction do
       allow_nil?(false)
       description("The symbol/security involved in this transaction")
     end
+
+    belongs_to :category, Ashfolio.FinancialManagement.TransactionCategory do
+      allow_nil?(true)
+      description("Optional category for investment organization")
+    end
   end
 
   validations do
@@ -116,7 +121,8 @@ defmodule Ashfolio.Portfolio.Transaction do
         :date,
         :notes,
         :account_id,
-        :symbol_id
+        :symbol_id,
+        :category_id
       ])
 
       primary?(true)
@@ -128,7 +134,7 @@ defmodule Ashfolio.Portfolio.Transaction do
 
     update :update do
       description("Update transaction details")
-      accept([:type, :quantity, :price, :total_amount, :fee, :date, :notes])
+      accept([:type, :quantity, :price, :total_amount, :fee, :date, :notes, :category_id])
       primary?(true)
       require_atomic?(false)
 
@@ -153,6 +159,17 @@ defmodule Ashfolio.Portfolio.Transaction do
       description("Get transactions by type")
       argument(:type, :atom, allow_nil?: false)
       filter(expr(type == ^arg(:type)))
+    end
+
+    read :by_category do
+      description("Get transactions for a specific category")
+      argument(:category_id, :uuid, allow_nil?: false)
+      filter(expr(category_id == ^arg(:category_id)))
+    end
+
+    read :uncategorized do
+      description("Get transactions without a category")
+      filter(expr(is_nil(category_id)))
     end
 
     read :by_date_range do
@@ -199,6 +216,8 @@ defmodule Ashfolio.Portfolio.Transaction do
     define(:by_account, action: :by_account, args: [:account_id])
     define(:by_symbol, action: :by_symbol, args: [:symbol_id])
     define(:by_type, action: :by_type, args: [:type])
+    define(:by_category, action: :by_category, args: [:category_id])
+    define(:uncategorized_transactions, action: :uncategorized)
     define(:by_date_range, action: :by_date_range, args: [:start_date, :end_date])
     define(:recent_transactions, action: :recent)
     define(:holdings_data, action: :holdings)

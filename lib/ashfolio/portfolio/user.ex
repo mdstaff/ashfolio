@@ -82,6 +82,7 @@ defmodule Ashfolio.Portfolio.User do
 
     define(:create, action: :create)
     define(:get_default_user, action: :default_user)
+    define(:get_by_id, action: :read, get_by: [:id])
     define(:update_preferences, action: :update_preferences)
   end
 end
