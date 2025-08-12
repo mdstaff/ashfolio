@@ -2,6 +2,7 @@ defmodule AshfolioWeb.AccountLive.Index do
   use AshfolioWeb, :live_view
 
   alias Ashfolio.Portfolio.{Account, User, Transaction}
+  alias Ashfolio.Context
   alias AshfolioWeb.Live.{FormatHelpers, ErrorHelpers}
   alias AshfolioWeb.AccountLive.FormComponent
 
@@ -9,18 +10,27 @@ defmodule AshfolioWeb.AccountLive.Index do
   def mount(_params, _session, socket) do
     user_id = get_default_user_id()
 
-    {:ok,
-     socket
-     |> assign_current_page(:accounts)
-     |> assign(:page_title, "Investment Accounts")
-     |> assign(:page_subtitle, "Manage your investment accounts and balances")
-     |> assign(:user_id, user_id)
-     |> assign(:accounts, list_accounts(user_id))
-     |> assign(:show_form, false)
-     |> assign(:form_action, :new)
-     |> assign(:selected_account, nil)
-     |> assign(:toggling_account_id, nil)
-     |> assign(:deleting_account_id, nil)}
+    socket = 
+      socket
+      |> assign_current_page(:accounts)
+      |> assign(:page_title, "Accounts")
+      |> assign(:page_subtitle, "Manage your investment and cash accounts")
+      |> assign(:user_id, user_id)
+      |> assign(:show_form, false)
+      |> assign(:form_action, :new)
+      |> assign(:selected_account, nil)
+      |> assign(:toggling_account_id, nil)
+      |> assign(:deleting_account_id, nil)
+      |> assign(:account_filter, :all)
+      |> assign(:loading_dashboard, true)
+
+    # Load dashboard data using Context API
+    socket = assign_dashboard_data(socket, user_id)
+
+    # Subscribe to account updates for real-time changes
+    Ashfolio.PubSub.subscribe("accounts")
+
+    {:ok, socket}
   end
 
   @impl true
@@ -38,8 +48,20 @@ defmodule AshfolioWeb.AccountLive.Index do
   end
 
   @impl true
+  def handle_event("filter_accounts", %{"filter" => filter}, socket) do
+    filter_atom = String.to_existing_atom(filter)
+    
+    {:noreply,
+     socket
+     |> assign(:account_filter, filter_atom)
+     |> assign(:filtered_accounts, get_filtered_accounts(socket.assigns.accounts, filter_atom))}
+  end
+
+  @impl true
   def handle_event("edit_account", %{"id" => id}, socket) do
-    account = Enum.find(socket.assigns.accounts, &(&1.id == id))
+    # Find account in the Context API data structure
+    accounts_list = if is_map(socket.assigns.accounts), do: socket.assigns.accounts.all, else: socket.assigns.accounts
+    account = Enum.find(accounts_list, &(&1.id == id))
 
     {:noreply,
      socket
@@ -60,11 +82,11 @@ defmodule AshfolioWeb.AccountLive.Index do
         case Account.destroy(id) do
           :ok ->
             Ashfolio.PubSub.broadcast!("accounts", {:account_deleted, id})
+            socket = assign_dashboard_data(socket, socket.assigns.user_id)
 
             {:noreply,
              socket
              |> ErrorHelpers.put_success_flash("Account deleted successfully")
-             |> assign(:accounts, list_accounts(socket.assigns.user_id))
              |> assign(:deleting_account_id, nil)}
 
           {:error, reason} ->
@@ -93,8 +115,8 @@ defmodule AshfolioWeb.AccountLive.Index do
       {:noreply, socket}
     else
       # Store original accounts for potential rollback
-      original_accounts = socket.assigns.accounts
-      account_index = Enum.find_index(original_accounts, &(&1.id == id))
+      accounts_list = if is_map(socket.assigns.accounts), do: socket.assigns.accounts.all, else: socket.assigns.accounts
+      account_index = Enum.find_index(accounts_list, &(&1.id == id))
 
       case account_index do
         nil ->
@@ -103,37 +125,31 @@ defmodule AshfolioWeb.AccountLive.Index do
            |> ErrorHelpers.put_error_flash(:not_found, "Account not found")}
 
         _ ->
-          account = Enum.at(original_accounts, account_index)
+          account = Enum.at(accounts_list, account_index)
 
-          # Optimistically update the UI
-          updated_account = %{account | is_excluded: !account.is_excluded}
-          updated_accounts = List.replace_at(original_accounts, account_index, updated_account)
-
+          # Since we're using Context API, we'll just mark the toggling state
+          # and let the Context API reload handle the actual update
           socket =
             socket
-            |> assign(:accounts, updated_accounts)
             |> assign(:toggling_account_id, id)
 
           case Account.toggle_exclusion(account, %{is_excluded: !account.is_excluded}) do
             {:ok, updated_account_from_db} ->
               Ashfolio.PubSub.broadcast!("accounts", {:account_updated, updated_account_from_db})
 
-              # Reload accounts to ensure consistency
-              user_id = socket.assigns.user_id
-              accounts = list_accounts(user_id)
+              # Reload accounts to ensure consistency using Context API
+              socket = assign_dashboard_data(socket, socket.assigns.user_id)
               socket =
                 socket
                 |> assign(:toggling_account_id, nil)
-                |> assign(:accounts, accounts)
                 |> ErrorHelpers.put_success_flash("Account exclusion updated successfully")
 
               {:noreply, socket}
 
             {:error, reason} ->
-              # Revert the optimistic update on failure
+              # Clear the toggling state on failure
               {:noreply,
                socket
-               |> assign(:accounts, original_accounts)
                |> assign(:toggling_account_id, nil)
                |> ErrorHelpers.put_error_flash(reason, "Failed to update account exclusion")}
           end
@@ -143,22 +159,24 @@ defmodule AshfolioWeb.AccountLive.Index do
 
   @impl true
   def handle_info({FormComponent, {:saved, _account}}, socket) do
+    socket = assign_dashboard_data(socket, socket.assigns.user_id)
+    
     {:noreply,
      socket
      |> ErrorHelpers.put_success_flash("Account saved successfully")
-     |> assign(:show_form, false)
-     |> assign(:accounts, list_accounts(socket.assigns.user_id))}
+     |> assign(:show_form, false)}
   end
 
   @impl true
   def handle_info({FormComponent, {:saved, account, message}}, socket) do
     Ashfolio.PubSub.broadcast!("accounts", {:account_saved, account})
+    
+    socket = assign_dashboard_data(socket, socket.assigns.user_id)
 
     {:noreply,
      socket
      |> ErrorHelpers.put_success_flash(message)
-     |> assign(:show_form, false)
-     |> assign(:accounts, list_accounts(socket.assigns.user_id))}
+     |> assign(:show_form, false)}
   end
 
   @impl true
@@ -174,6 +192,25 @@ defmodule AshfolioWeb.AccountLive.Index do
      |> assign(:show_form, true)} # Keep the form open
   end
 
+  # PubSub handlers for real-time updates
+  @impl true
+  def handle_info({:account_updated, _account}, socket) do
+    socket = assign_dashboard_data(socket, socket.assigns.user_id)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:account_deleted, _account_id}, socket) do
+    socket = assign_dashboard_data(socket, socket.assigns.user_id)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:account_saved, _account}, socket) do
+    socket = assign_dashboard_data(socket, socket.assigns.user_id)
+    {:noreply, socket}
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -181,8 +218,8 @@ defmodule AshfolioWeb.AccountLive.Index do
       <!-- Header with New Account Button -->
       <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Investment Accounts</h1>
-          <p class="text-gray-600">Manage your investment accounts and balances</p>
+          <h1 class="text-2xl font-bold text-gray-900">Accounts</h1>
+          <p class="text-gray-600">Manage your investment and cash accounts</p>
         </div>
         <.button phx-click="new_account" class="btn-primary inline-flex items-center">
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -192,8 +229,88 @@ defmodule AshfolioWeb.AccountLive.Index do
         </.button>
       </div>
 
+      <!-- Account Filter Tabs -->
+      <%= if @accounts && Map.has_key?(@accounts, :all) do %>
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex space-x-1">
+              <button
+                class={
+                  if @account_filter == :all,
+                    do: "btn-primary text-sm px-4 py-2",
+                    else: "btn-secondary text-sm px-4 py-2"
+                }
+                phx-click="filter_accounts"
+                phx-value-filter="all"
+              >
+                All Accounts ({length(@accounts.all)})
+              </button>
+              <button
+                class={
+                  if @account_filter == :investment,
+                    do: "btn-primary text-sm px-4 py-2",
+                    else: "btn-secondary text-sm px-4 py-2"
+                }
+                phx-click="filter_accounts"
+                phx-value-filter="investment"
+              >
+                Investment ({length(@accounts.investment)})
+              </button>
+              <button
+                class={
+                  if @account_filter == :cash,
+                    do: "btn-primary text-sm px-4 py-2",
+                    else: "btn-secondary text-sm px-4 py-2"
+                }
+                phx-click="filter_accounts"
+                phx-value-filter="cash"
+              >
+                Cash ({length(@accounts.cash)})
+              </button>
+            </div>
+          </div>
+
+          <!-- Summary Stats -->
+          <%= if @summary do %>
+            <div class="px-6 py-4 bg-gray-50">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-gray-900">
+                    {FormatHelpers.format_currency(@summary.total_balance)}
+                  </div>
+                  <div class="text-sm text-gray-500">Total Balance</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-blue-600">
+                    {FormatHelpers.format_currency(@summary.investment_balance)}
+                  </div>
+                  <div class="text-sm text-gray-500">Investment Value</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-green-600">
+                    {FormatHelpers.format_currency(@summary.cash_balance)}
+                  </div>
+                  <div class="text-sm text-gray-500">Cash Balance</div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
     <!-- Accounts Table or Empty State -->
-      <%= if Enum.empty?(@accounts) do %>
+      <%= if @loading_dashboard do %>
+        <div class="bg-white shadow rounded-lg">
+          <div class="text-center py-16 px-6">
+            <.loading_spinner class="mx-auto w-8 h-8 text-blue-600 mb-4" />
+            <p class="text-gray-500">Loading accounts...</p>
+          </div>
+        </div>
+      <% else %>
+        <% 
+          display_accounts = if assigns[:filtered_accounts], do: @filtered_accounts, else: get_display_accounts(@accounts, @account_filter)
+        %>
+        <%= if Enum.empty?(display_accounts) do %>
         <!-- Enhanced Empty State -->
         <div class="bg-white shadow rounded-lg">
           <div class="text-center py-16 px-6">
@@ -228,7 +345,7 @@ defmodule AshfolioWeb.AccountLive.Index do
         <!-- Enhanced Accounts Table with Responsive Design -->
         <div class="bg-white shadow rounded-lg overflow-hidden">
           <div class="overflow-x-auto">
-            <.table id="accounts-table" rows={@accounts} class="min-w-full">
+            <.table id="accounts-table" rows={display_accounts} class="min-w-full">
               <:col :let={account} label="Account" class="min-w-0 w-full sm:w-auto">
                 <div class="flex items-center space-x-3">
                   <!-- Account Icon -->
@@ -467,17 +584,18 @@ defmodule AshfolioWeb.AccountLive.Index do
           <div class="bg-gray-50 px-6 py-3 border-t border-gray-200">
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
               <p class="text-sm text-gray-600">
-                {length(@accounts)} account{if length(@accounts) == 1, do: "", else: "s"} total
+                {length(display_accounts)} account{if length(display_accounts) == 1, do: "", else: "s"} displayed
               </p>
               <p class="text-sm font-medium text-gray-900">
-                Total Balance:
+                Filtered Balance:
                 <span class="font-mono">
-                  {FormatHelpers.format_currency(calculate_total_balance(@accounts))}
+                  {FormatHelpers.format_currency(calculate_total_balance(display_accounts))}
                 </span>
               </p>
             </div>
           </div>
         </div>
+      <% end %>
       <% end %>
     </div>
 
@@ -493,6 +611,49 @@ defmodule AshfolioWeb.AccountLive.Index do
     <% end %>
     """
   end
+
+  # Context API integration helpers
+
+  defp assign_dashboard_data(socket, user_id) do
+    socket = assign(socket, :loading_dashboard, true)
+
+    case Context.get_user_dashboard_data(user_id) do
+      {:ok, data} ->
+        socket
+        |> assign(:user, data.user)
+        |> assign(:accounts, data.accounts)
+        |> assign(:summary, data.summary)
+        |> assign(:filtered_accounts, get_filtered_accounts(data.accounts, socket.assigns.account_filter))
+        |> assign(:loading_dashboard, false)
+
+      {:error, reason} ->
+        socket
+        |> put_flash(:error, format_error_message(reason))
+        |> assign(:loading_dashboard, false)
+        |> assign(:accounts, %{all: [], investment: [], cash: []})
+        |> assign(:summary, %{total_balance: Decimal.new(0), investment_balance: Decimal.new(0), cash_balance: Decimal.new(0)})
+    end
+  end
+
+  defp get_display_accounts(accounts, filter) when is_map(accounts) do
+    case filter do
+      :all -> accounts.all
+      :investment -> accounts.investment
+      :cash -> accounts.cash
+      _ -> accounts.all
+    end
+  end
+
+  defp get_display_accounts(accounts, _filter) when is_list(accounts), do: accounts
+
+  defp get_filtered_accounts(accounts, filter) when is_map(accounts) do
+    get_display_accounts(accounts, filter)
+  end
+
+  defp get_filtered_accounts(accounts, _filter) when is_list(accounts), do: accounts
+
+  defp format_error_message(:user_not_found), do: "User not found"
+  defp format_error_message(reason), do: "Failed to load dashboard data: #{inspect(reason)}"
 
   # Defensive user creation for single-user application
   defp get_default_user_id do
@@ -538,10 +699,6 @@ defmodule AshfolioWeb.AccountLive.Index do
   defp sqlite_busy_error?(_), do: false
 
 
-
-  defp list_accounts(user_id) do
-    Account.accounts_for_user!(user_id)
-  end
 
   defp apply_action(socket, :index, _params) do
     socket

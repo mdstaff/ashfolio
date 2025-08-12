@@ -16,8 +16,8 @@ defmodule AshfolioWeb.NavigationTest do
 
     test "accounts route works", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/accounts")
-      assert html =~ "Investment Accounts"
-      assert html =~ "Manage your investment accounts and balances"
+      assert html =~ "Accounts"
+      assert html =~ "Manage your investment and cash accounts"
     end
 
     test "transactions route works", %{conn: conn} do
@@ -66,7 +66,7 @@ defmodule AshfolioWeb.NavigationTest do
         |> render_click()
         |> follow_redirect(conn)
 
-      assert html =~ "Investment Accounts"
+      assert html =~ "Accounts"
 
       # Navigate to transactions
       {:ok, view, html} =

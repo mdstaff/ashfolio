@@ -149,10 +149,9 @@ defmodule AshfolioWeb.AccountLive.ShowTest do
     test "redirects to accounts index when account not found", %{conn: conn} do
       non_existent_id = Ecto.UUID.generate()
 
-      # The LiveView should handle the NotFound error and redirect
-      assert_raise Ash.Error.Invalid, fn ->
-        live(conn, ~p"/accounts/#{non_existent_id}")
-      end
+      # The LiveView should handle the NotFound error and redirect via Context API
+      result = live(conn, ~p"/accounts/#{non_existent_id}")
+      assert {:error, {:live_redirect, %{to: "/accounts"}}} = result
     end
   end
 

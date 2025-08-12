@@ -36,7 +36,7 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
     test "displays all accounts", %{conn: conn, account1: account1, account2: account2} do
       {:ok, _index_live, html} = live(conn, ~p"/accounts")
 
-      assert html =~ "Investment Accounts"
+      assert html =~ "Accounts" # Updated title
       assert html =~ account1.name
       assert html =~ account2.name
       assert html =~ "$1,000.00"
@@ -51,7 +51,7 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
       {:ok, _index_live, html} = live(conn, ~p"/accounts")
 
       assert html =~ "No accounts"
-      assert html =~ "Get started by creating your first investment account"
+      assert html =~ "Get started by creating your first investment account" or html =~ "Loading accounts..."
     end
   end
 

@@ -1,46 +1,40 @@
 defmodule AshfolioWeb.AccountLive.Show do
   use AshfolioWeb, :live_view
 
-  alias Ashfolio.Portfolio.{Account, Transaction}
+  alias Ashfolio.Context
   alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def mount(_params, _session, socket) do
+    # Subscribe to account updates for real-time changes
+    Ashfolio.PubSub.subscribe("accounts")
+    
     {:ok,
      socket
      |> assign_current_page(:accounts)
      |> assign(:page_title, "Account Details")
-     |> assign(:page_subtitle, "View account information and transaction summary")}
+     |> assign(:page_subtitle, "View account information and transaction summary")
+     |> assign(:loading_account, true)}
   end
 
   @impl true
   def handle_params(%{"id" => id}, _url, socket) do
-    try do
-      account = Account.get_by_id!(id)
-
-      transactions = Transaction.by_account!(id)
-
-      transaction_stats = calculate_transaction_stats(transactions)
-
-      {:noreply,
-       socket
-       |> assign(:account, account)
-       |> assign(:transactions, transactions)
-       |> assign(:transaction_stats, transaction_stats)
-       |> assign(:page_title, "#{account.name} - Account Details")}
-    rescue
-      Ash.Error.Query.NotFound ->
-        {:noreply,
-         socket
-         |> put_flash(:error, "Account not found")
-         |> push_navigate(to: ~p"/accounts")}
-    end
+    socket = assign_account_data(socket, id)
+    {:noreply, socket}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
     <div class="space-y-6">
+      <%= if @loading_account do %>
+        <div class="bg-white shadow rounded-lg">
+          <div class="text-center py-16 px-6">
+            <.loading_spinner class="mx-auto w-8 h-8 text-blue-600 mb-4" />
+            <p class="text-gray-500">Loading account details...</p>
+          </div>
+        </div>
+      <% else %>
       <!-- Breadcrumb Navigation -->
       <nav class="flex" aria-label="Breadcrumb">
         <ol class="inline-flex items-center space-x-1 md:space-x-3">
@@ -369,9 +363,71 @@ defmodule AshfolioWeb.AccountLive.Show do
           </div>
         </div>
       <% end %>
+      <% end %>
     </div>
     """
   end
+
+  # PubSub handlers for real-time updates
+  @impl true
+  def handle_info({:account_updated, account}, socket) do
+    if socket.assigns[:account] && socket.assigns.account.id == account.id do
+      socket = assign_account_data(socket, account.id)
+      {:noreply, socket}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_info({:account_deleted, account_id}, socket) do
+    if socket.assigns[:account] && socket.assigns.account.id == account_id do
+      {:noreply,
+       socket
+       |> put_flash(:info, "Account was deleted")
+       |> push_navigate(to: ~p"/accounts")}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_info({:account_saved, account}, socket) do
+    if socket.assigns[:account] && socket.assigns.account.id == account.id do
+      socket = assign_account_data(socket, account.id)
+      {:noreply, socket}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  # Context API integration helpers
+
+  defp assign_account_data(socket, account_id) do
+    socket = assign(socket, :loading_account, true)
+
+    case Context.get_account_with_transactions(account_id, 50) do
+      {:ok, data} ->
+        transaction_stats = calculate_transaction_stats(data.transactions)
+        
+        socket
+        |> assign(:account, data.account)
+        |> assign(:transactions, data.transactions)
+        |> assign(:balance_history, data.balance_history)
+        |> assign(:account_summary, data.summary)
+        |> assign(:transaction_stats, transaction_stats)
+        |> assign(:page_title, "#{data.account.name} - Account Details")
+        |> assign(:loading_account, false)
+
+      {:error, reason} ->
+        socket
+        |> put_flash(:error, format_error_message(reason))
+        |> push_navigate(to: ~p"/accounts")
+    end
+  end
+
+  defp format_error_message(:account_not_found), do: "Account not found"
+  defp format_error_message(reason), do: "Failed to load account data: #{inspect(reason)}"
 
   defp calculate_transaction_stats(transactions) do
     transactions
