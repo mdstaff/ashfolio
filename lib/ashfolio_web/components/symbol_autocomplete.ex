@@ -43,7 +43,12 @@ defmodule AshfolioWeb.Components.SymbolAutocomplete do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="relative" id={"#{@id}-container"}>
+    <div
+      class="relative"
+      id={"#{@id}-container"}
+      phx-hook="SymbolAutocomplete"
+      data-testid="symbol-autocomplete"
+    >
       <!-- Input field with ARIA attributes -->
       <div class="relative">
         <.input
@@ -53,14 +58,17 @@ defmodule AshfolioWeb.Components.SymbolAutocomplete do
           autocomplete="off"
           phx-target={@myself}
           phx-change="search_input"
+          phx-keydown="keydown"
           phx-debounce={@debounce_timeout}
           aria-expanded={@show_dropdown}
           aria-haspopup="listbox"
           aria-owns={"#{@id}-results"}
+          aria-describedby={@show_dropdown && "#{@id}-help"}
           role="combobox"
           class={[
             "block w-full rounded-md border-gray-300 shadow-sm",
             "focus:border-blue-500 focus:ring-blue-500",
+            "transition-colors duration-150 ease-in-out",
             @loading && "pr-10"
           ]}
         />
@@ -99,8 +107,12 @@ defmodule AshfolioWeb.Components.SymbolAutocomplete do
         class={[
           "absolute z-50 mt-1 w-full bg-white shadow-lg",
           "max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5",
-          "overflow-auto focus:outline-none sm:text-sm"
+          "overflow-auto focus:outline-none sm:text-sm",
+          "transform transition-all duration-150 ease-in-out",
+          "opacity-0 translate-y-[-8px]",
+          @show_dropdown && "opacity-100 translate-y-0"
         ]}
+        style="display: none;"
       >
         <!-- No results message -->
         <div
@@ -133,10 +145,13 @@ defmodule AshfolioWeb.Components.SymbolAutocomplete do
           role="option"
           aria-selected={index == @selected_index}
           tabindex="-1"
+          data-index={index}
           class={[
             "cursor-pointer select-none relative py-2 pl-3 pr-9",
-            "hover:bg-blue-50 focus:bg-blue-50",
-            index == @selected_index && "bg-blue-50"
+            "hover:bg-blue-50 focus:bg-blue-50 active:bg-blue-100",
+            "transition-colors duration-150 ease-in-out",
+            "touch-manipulation", # Better touch handling on mobile
+            index == @selected_index && "bg-blue-50 ring-2 ring-blue-200 ring-inset"
           ]}
         >
           <div class="flex items-center justify-between">
@@ -170,6 +185,15 @@ defmodule AshfolioWeb.Components.SymbolAutocomplete do
         >
           Showing first <%= @max_results %> results. Type more characters to refine search.
         </div>
+      </div>
+
+      <!-- Help text for keyboard navigation -->
+      <div
+        :if={@show_dropdown}
+        id={"#{@id}-help"}
+        class="sr-only"
+      >
+        Use arrow keys to navigate, Enter to select, Escape to close
       </div>
 
       <!-- Screen reader announcements -->
@@ -286,20 +310,55 @@ defmodule AshfolioWeb.Components.SymbolAutocomplete do
      |> assign(:announcement, "Selected #{symbol} - #{name}")}
   end
 
-  # Handle keyboard navigation (future enhancement)
+  # Handle keyboard navigation
   @impl true
   def handle_event("keydown", %{"key" => "ArrowDown"}, socket) do
-    new_index = min(socket.assigns.selected_index + 1, length(socket.assigns.results) - 1)
-    {:noreply, assign(socket, :selected_index, new_index)}
+    if socket.assigns.show_dropdown and length(socket.assigns.results) > 0 do
+      new_index = min(socket.assigns.selected_index + 1, length(socket.assigns.results) - 1)
+
+      announcement =
+        if new_index >= 0 do
+          selected_symbol = Enum.at(socket.assigns.results, new_index)
+          "#{selected_symbol.symbol} - #{selected_symbol.name}"
+        else
+          ""
+        end
+
+      {:noreply,
+       socket
+       |> assign(:selected_index, new_index)
+       |> assign(:announcement, announcement)}
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_event("keydown", %{"key" => "ArrowUp"}, socket) do
-    new_index = max(socket.assigns.selected_index - 1, -1)
-    {:noreply, assign(socket, :selected_index, new_index)}
+    if socket.assigns.show_dropdown and length(socket.assigns.results) > 0 do
+      new_index = max(socket.assigns.selected_index - 1, -1)
+
+      announcement =
+        if new_index >= 0 do
+          selected_symbol = Enum.at(socket.assigns.results, new_index)
+          "#{selected_symbol.symbol} - #{selected_symbol.name}"
+        else
+          "No selection"
+        end
+
+      {:noreply,
+       socket
+       |> assign(:selected_index, new_index)
+       |> assign(:announcement, announcement)}
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_event("keydown", %{"key" => "Enter"}, socket) do
-    if socket.assigns.selected_index >= 0 and socket.assigns.selected_index < length(socket.assigns.results) do
+    if socket.assigns.show_dropdown and
+       socket.assigns.selected_index >= 0 and
+       socket.assigns.selected_index < length(socket.assigns.results) do
+
       selected_symbol = Enum.at(socket.assigns.results, socket.assigns.selected_index)
       handle_event("select_symbol", %{"symbol" => selected_symbol.symbol, "name" => selected_symbol.name}, socket)
     else
@@ -308,6 +367,15 @@ defmodule AshfolioWeb.Components.SymbolAutocomplete do
   end
 
   def handle_event("keydown", %{"key" => "Escape"}, socket) do
+    {:noreply,
+     socket
+     |> assign(:show_dropdown, false)
+     |> assign(:selected_index, -1)
+     |> assign(:announcement, "Search closed")}
+  end
+
+  def handle_event("keydown", %{"key" => "Tab"}, socket) do
+    # Allow tab to close dropdown naturally
     {:noreply,
      socket
      |> assign(:show_dropdown, false)

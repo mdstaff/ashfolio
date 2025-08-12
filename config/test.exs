@@ -52,3 +52,6 @@ config :ashfolio, Ashfolio.MarketData.PriceManager,
 
 # Use mock for Yahoo Finance in tests
 config :ashfolio, :yahoo_finance_module, YahooFinanceMock
+
+# Browser testing removed per ADR-003: Browser Testing Strategy
+# Using LiveView-First Testing Strategy instead

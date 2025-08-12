@@ -15,6 +15,8 @@ Mox.defmock(YahooFinanceMock, for: Ashfolio.MarketData.YahooFinanceBehaviour)
 Mox.defmock(HttpClientMock, for: Ashfolio.MarketData.HttpClientBehaviour)
 Mox.defmock(Ashfolio.ContextMock, for: Ashfolio.ContextBehaviour)
 
+# Browser testing removed per ADR-003: Browser Testing Strategy
+
 # Ensure application is started for test infrastructure
 {:ok, _} = Application.ensure_all_started(:ashfolio)
 
