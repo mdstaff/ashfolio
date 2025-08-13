@@ -13,6 +13,16 @@ defmodule Ashfolio.Context do
   - SQLite-specific optimizations
   - Enhanced error handling with specific error types
   - Performance monitoring with telemetry integration
+
+  ## Error Handling
+
+  All Context API functions return standardized errors:
+  - `{:error, :user_not_found}` - User does not exist
+  - `{:error, :account_not_found}` - Account does not exist
+  - `{:error, :insufficient_data}` - Missing required data for operation
+  - `{:error, :validation_failed}` - Input validation failed
+  - `{:error, :database_error}` - Database operation failed
+  - `{:error, :service_unavailable}` - External service unavailable
   """
 
   alias Ashfolio.Portfolio.{User, Account, Transaction}
@@ -76,7 +86,7 @@ defmodule Ashfolio.Context do
              last_updated: DateTime.utc_now()
            }}
         else
-          {:error, _} = error -> error
+          error -> normalize_error(error)
         end
       else
         {:error, :user_not_found}
@@ -117,7 +127,7 @@ defmodule Ashfolio.Context do
            last_updated: DateTime.utc_now()
          }}
       else
-        {:error, _} = error -> error
+        error -> normalize_error(error)
       end
     end)
   end
@@ -163,8 +173,7 @@ defmodule Ashfolio.Context do
              last_updated: DateTime.utc_now()
            }}
         else
-          {:error, %Ash.Error.Invalid{}} -> {:error, :user_not_found}
-          {:error, _} = error -> error
+          error -> normalize_error(error)
         end
       else
         {:error, :user_not_found}
@@ -185,21 +194,21 @@ defmodule Ashfolio.Context do
       with {:ok, accounts} <- Account.accounts_for_user(user_id) do
         account_ids = Enum.map(accounts, & &1.id)
 
-        # Get recent transactions from all accounts
-        transactions =
-          account_ids
-          |> Enum.flat_map(fn account_id ->
-            case Transaction.by_account(account_id) do
-              {:ok, txns} -> txns
-              _ -> []
-            end
-          end)
-          |> Enum.sort_by(& &1.date, {:desc, Date})
-          |> Enum.take(limit)
+        # Use batch query to prevent N+1 queries
+        case Transaction.by_accounts(account_ids) do
+          {:ok, transactions} ->
+            recent_transactions =
+              transactions
+              |> Enum.sort_by(& &1.date, {:desc, Date})
+              |> Enum.take(limit)
 
-        {:ok, transactions}
+            {:ok, recent_transactions}
+
+          error ->
+            normalize_error(error)
+        end
       else
-        {:error, _} = error -> error
+        error -> normalize_error(error)
       end
     end)
   end
@@ -245,8 +254,7 @@ defmodule Ashfolio.Context do
              }
            }}
         else
-          {:error, %Ash.Error.Invalid{}} -> {:error, :user_not_found}
-          {:error, _} = error -> error
+          error -> normalize_error(error)
         end
       else
         {:error, :user_not_found}
@@ -552,7 +560,7 @@ defmodule Ashfolio.Context do
       case Account.get_by_name_for_user(user_id, name) do
         {:ok, existing_account} when not is_nil(existing_account) ->
           if existing_account.id != current_account_id do
-            {:error, :name_already_taken}
+            {:error, :validation_failed}
           else
             {:ok, %{}}
           end
@@ -567,6 +575,18 @@ defmodule Ashfolio.Context do
       {:ok, %{}}
     end
   end
+
+  # Error handling standardization
+
+  defp normalize_error(%Ash.Error.Invalid{}), do: {:error, :validation_failed}
+  defp normalize_error(%Ash.Error.Query.NotFound{}), do: {:error, :account_not_found}
+  defp normalize_error({:error, :user_not_found}), do: {:error, :user_not_found}
+  defp normalize_error({:error, :account_not_found}), do: {:error, :account_not_found}
+  defp normalize_error({:error, :validation_failed}), do: {:error, :validation_failed}
+  defp normalize_error({:error, :insufficient_data}), do: {:error, :insufficient_data}
+  defp normalize_error({:error, :service_unavailable}), do: {:error, :service_unavailable}
+  defp normalize_error({:error, _}), do: {:error, :database_error}
+  defp normalize_error(_), do: {:error, :database_error}
 
   # Performance monitoring
 

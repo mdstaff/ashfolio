@@ -116,7 +116,7 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
   Clear the entire search cache.
   """
   def clear_cache do
-    create_cache_table()
+    clear_cache_contents()
     :ok
   end
 
@@ -156,15 +156,32 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
   end
 
   defp create_cache_table do
-    # Delete existing table if it exists
-    try do
-      :ets.delete(@cache_table)
-    rescue
-      ArgumentError -> :ok
-    end
+    # Only create table if it doesn't exist (safer approach)
+    case :ets.whereis(@cache_table) do
+      :undefined ->
+        try do
+          :ets.new(@cache_table, [:named_table, :public, :set])
+        rescue
+          ArgumentError ->
+            # Table was created by another process, that's fine
+            @cache_table
+        end
 
-    # Create new table
-    :ets.new(@cache_table, [:named_table, :public, :set])
+      _ ->
+        # Table already exists
+        @cache_table
+    end
+  end
+
+  defp clear_cache_contents do
+    # Clear cache contents without deleting the table (prevents service interruption)
+    try do
+      :ets.delete_all_objects(@cache_table)
+    rescue
+      ArgumentError ->
+        # Table doesn't exist, create it
+        create_cache_table()
+    end
   end
 
   defp get_from_cache(cache_key) do
@@ -351,7 +368,7 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
     url = build_yahoo_search_url(query, max_results)
 
     headers = [
-      {"User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"},
+      {"User-Agent", "Ashfolio/1.0 (Financial Portfolio Management Application)"},
       {"Accept", "application/json"}
     ]
 

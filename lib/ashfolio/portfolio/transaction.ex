@@ -150,6 +150,12 @@ defmodule Ashfolio.Portfolio.Transaction do
       filter(expr(account_id == ^arg(:account_id)))
     end
 
+    read :by_accounts do
+      description("Get transactions for multiple accounts (prevents N+1 queries)")
+      argument(:account_ids, {:array, :uuid}, allow_nil?: false)
+      filter(expr(account_id in ^arg(:account_ids)))
+    end
+
     read :by_symbol do
       description("Get transactions for a specific symbol")
       argument(:symbol_id, :uuid, allow_nil?: false)
@@ -215,6 +221,7 @@ defmodule Ashfolio.Portfolio.Transaction do
     define(:list, action: :read)
     define(:get_by_id, action: :read, get_by: [:id])
     define(:by_account, action: :by_account, args: [:account_id])
+    define(:by_accounts, action: :by_accounts, args: [:account_ids])
     define(:by_symbol, action: :by_symbol, args: [:symbol_id])
     define(:by_type, action: :by_type, args: [:type])
     define(:by_category, action: :by_category, args: [:category_id])
