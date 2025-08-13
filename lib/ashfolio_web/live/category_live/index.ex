@@ -53,7 +53,10 @@ defmodule AshfolioWeb.CategoryLive.Index do
     {:noreply,
      socket
      |> assign(:category_filter, filter_atom)
-     |> assign(:filtered_categories, get_filtered_categories(socket.assigns.categories, filter_atom))}
+     |> assign(
+       :filtered_categories,
+       get_filtered_categories(socket.assigns.categories, filter_atom)
+     )}
   end
 
   @impl true
@@ -107,7 +110,9 @@ defmodule AshfolioWeb.CategoryLive.Index do
           {:noreply,
            socket
            |> assign(:deleting_category_id, nil)
-           |> ErrorHelpers.put_error_flash("Cannot delete category that has #{count} transaction(s). Remove or reassign transactions first.")}
+           |> ErrorHelpers.put_error_flash(
+             "Cannot delete category that has #{count} transaction(s). Remove or reassign transactions first."
+           )}
       end
     end
   end
@@ -178,12 +183,11 @@ defmodule AshfolioWeb.CategoryLive.Index do
             phx-click="new_category"
             class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            <.icon name="hero-plus-mini" class="h-4 w-4 mr-2" />
-            New Category
+            <.icon name="hero-plus-mini" class="h-4 w-4 mr-2" /> New Category
           </button>
         </div>
-
-        <!-- Filter Controls -->
+        
+    <!-- Filter Controls -->
         <div class="mb-6">
           <div class="flex flex-wrap gap-2">
             <button
@@ -236,22 +240,36 @@ defmodule AshfolioWeb.CategoryLive.Index do
             </button>
           </div>
         </div>
-
-        <!-- Loading State -->
+        
+    <!-- Loading State -->
         <div :if={@loading} class="text-center py-12">
           <div class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-gray-500 bg-white transition ease-in-out duration-150">
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <svg
+              class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+              </circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              >
+              </path>
             </svg>
             Loading categories...
           </div>
         </div>
-
-        <!-- Categories Grid -->
+        
+    <!-- Categories Grid -->
         <div :if={!@loading} class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <%= for category <- get_filtered_categories(@categories, @category_filter) do %>
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow" data-category-id={category.id}>
+            <div
+              class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+              data-category-id={category.id}
+            >
               <!-- Category Header -->
               <div class="flex items-start justify-between mb-4">
                 <div class="flex items-center space-x-3">
@@ -264,19 +282,23 @@ defmodule AshfolioWeb.CategoryLive.Index do
                   <div>
                     <h3 class="text-lg font-medium text-gray-900">{category.name}</h3>
                     <div class="flex items-center space-x-2 mt-1">
-                      <span :if={category.is_system} class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
-                        <.icon name="hero-shield-check-mini" class="h-3 w-3 mr-1" />
-                        System
+                      <span
+                        :if={category.is_system}
+                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800"
+                      >
+                        <.icon name="hero-shield-check-mini" class="h-3 w-3 mr-1" /> System
                       </span>
-                      <span :if={!category.is_system} class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                        <.icon name="hero-user-mini" class="h-3 w-3 mr-1" />
-                        Custom
+                      <span
+                        :if={!category.is_system}
+                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800"
+                      >
+                        <.icon name="hero-user-mini" class="h-3 w-3 mr-1" /> Custom
                       </span>
                     </div>
                   </div>
                 </div>
                 
-                <!-- Actions Dropdown -->
+    <!-- Actions Dropdown -->
                 <div class="relative">
                   <button
                     type="button"
@@ -289,8 +311,8 @@ defmodule AshfolioWeb.CategoryLive.Index do
                   </button>
                 </div>
               </div>
-
-              <!-- Category Stats -->
+              
+    <!-- Category Stats -->
               <div class="space-y-2">
                 <div class="flex items-center justify-between text-sm">
                   <span class="text-gray-500">Transactions:</span>
@@ -311,8 +333,8 @@ defmodule AshfolioWeb.CategoryLive.Index do
                   </span>
                 </div>
               </div>
-
-              <!-- Actions -->
+              
+    <!-- Actions -->
               <div :if={!category.is_system} class="mt-4 pt-4 border-t border-gray-200">
                 <div class="flex justify-between">
                   <button
@@ -321,8 +343,7 @@ defmodule AshfolioWeb.CategoryLive.Index do
                     phx-value-id={category.id}
                     class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
-                    <.icon name="hero-pencil-mini" class="h-3 w-3 mr-1" />
-                    Edit
+                    <.icon name="hero-pencil-mini" class="h-3 w-3 mr-1" /> Edit
                   </button>
                   <button
                     type="button"
@@ -333,20 +354,37 @@ defmodule AshfolioWeb.CategoryLive.Index do
                     data-confirm={"Are you sure you want to delete \"#{category.name}\"? This action cannot be undone."}
                   >
                     <%= if @deleting_category_id == category.id do %>
-                      <svg class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        class="animate-spin h-3 w-3 mr-1"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          class="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          stroke-width="4"
+                        >
+                        </circle>
+                        <path
+                          class="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        >
+                        </path>
                       </svg>
                       Deleting...
                     <% else %>
-                      <.icon name="hero-trash-mini" class="h-3 w-3 mr-1" />
-                      Delete
+                      <.icon name="hero-trash-mini" class="h-3 w-3 mr-1" /> Delete
                     <% end %>
                   </button>
                 </div>
               </div>
-
-              <!-- System category note -->
+              
+    <!-- System category note -->
               <div :if={category.is_system} class="mt-4 pt-4 border-t border-gray-200">
                 <p class="text-xs text-gray-500">
                   <.icon name="hero-information-circle-mini" class="h-3 w-3 inline mr-1" />
@@ -354,11 +392,14 @@ defmodule AshfolioWeb.CategoryLive.Index do
                 </p>
               </div>
             </div>
-        <% end %>
+          <% end %>
         </div>
-
-        <!-- Empty State -->
-        <div :if={!@loading && length(get_filtered_categories(@categories, @category_filter)) == 0} class="text-center py-12">
+        
+    <!-- Empty State -->
+        <div
+          :if={!@loading && length(get_filtered_categories(@categories, @category_filter)) == 0}
+          class="text-center py-12"
+        >
           <.icon name="hero-tag" class="mx-auto h-12 w-12 text-gray-400" />
           <h3 class="mt-2 text-sm font-medium text-gray-900">No categories found</h3>
           <p class="mt-1 text-sm text-gray-500">
@@ -377,8 +418,7 @@ defmodule AshfolioWeb.CategoryLive.Index do
               phx-click="new_category"
               class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              <.icon name="hero-plus-mini" class="h-4 w-4 mr-2" />
-              Create your first category
+              <.icon name="hero-plus-mini" class="h-4 w-4 mr-2" /> Create your first category
             </button>
           </div>
         </div>
@@ -415,10 +455,11 @@ defmodule AshfolioWeb.CategoryLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    category = 
+    category =
       case socket.assigns[:categories] do
         categories when is_list(categories) ->
           Enum.find(categories, &(&1.id == id))
+
         _ ->
           case TransactionCategory.get_by_id(id) do
             {:ok, category} -> category
@@ -438,7 +479,10 @@ defmodule AshfolioWeb.CategoryLive.Index do
       {:ok, categories} ->
         socket
         |> assign(:categories, categories)
-        |> assign(:filtered_categories, get_filtered_categories(categories, socket.assigns.category_filter))
+        |> assign(
+          :filtered_categories,
+          get_filtered_categories(categories, socket.assigns.category_filter)
+        )
         |> assign(:loading, false)
 
       {:error, _reason} ->
@@ -467,5 +511,4 @@ defmodule AshfolioWeb.CategoryLive.Index do
       _ -> nil
     end
   end
-
 end

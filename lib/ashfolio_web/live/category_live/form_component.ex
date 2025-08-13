@@ -5,24 +5,42 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
   alias AshfolioWeb.Live.ErrorHelpers
 
   @default_colors [
-    "#EF4444", # Red
-    "#F97316", # Orange  
-    "#F59E0B", # Amber
-    "#EAB308", # Yellow
-    "#84CC16", # Lime
-    "#22C55E", # Green
-    "#10B981", # Emerald
-    "#14B8A6", # Teal
-    "#06B6D4", # Cyan
-    "#0EA5E9", # Sky
-    "#3B82F6", # Blue
-    "#6366F1", # Indigo
-    "#8B5CF6", # Violet
-    "#A855F7", # Purple
-    "#D946EF", # Fuchsia
-    "#EC4899", # Pink
-    "#F43F5E", # Rose
-    "#6B7280", # Gray
+    # Red
+    "#EF4444",
+    # Orange  
+    "#F97316",
+    # Amber
+    "#F59E0B",
+    # Yellow
+    "#EAB308",
+    # Lime
+    "#84CC16",
+    # Green
+    "#22C55E",
+    # Emerald
+    "#10B981",
+    # Teal
+    "#14B8A6",
+    # Cyan
+    "#06B6D4",
+    # Sky
+    "#0EA5E9",
+    # Blue
+    "#3B82F6",
+    # Indigo
+    "#6366F1",
+    # Violet
+    "#8B5CF6",
+    # Purple
+    "#A855F7",
+    # Fuchsia
+    "#D946EF",
+    # Pink
+    "#EC4899",
+    # Rose
+    "#F43F5E",
+    # Gray
+    "#6B7280"
   ]
 
   @investment_category_suggestions [
@@ -63,13 +81,13 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
             </svg>
           </button>
         </div>
-
-        <!-- Form-level error display -->
+        
+    <!-- Form-level error display -->
         <div :if={@form_errors != []} class="mb-4">
           <ErrorHelpers.error_list errors={@form_errors} title="Please correct the following errors:" />
         </div>
-
-        <!-- Category suggestions (only for new categories) -->
+        
+    <!-- Category suggestions (only for new categories) -->
         <div :if={@action == :new && @show_suggestions} class="mb-6">
           <div class="flex items-center justify-between mb-3">
             <h4 class="text-sm font-medium text-gray-900">Popular Investment Categories</h4>
@@ -115,8 +133,8 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
             </button>
           </div>
         </div>
-
-        <!-- Custom category form -->
+        
+    <!-- Custom category form -->
         <div :if={@action == :edit || !@show_suggestions}>
           <.simple_form
             for={@form}
@@ -140,14 +158,14 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
                 {@validation_messages[:name]}
               </div>
             </div>
-
-            <!-- Color Picker -->
+            
+    <!-- Color Picker -->
             <div class="space-y-3">
               <label class="block text-sm font-medium text-gray-700">
                 Category Color
               </label>
               
-              <!-- Current color preview -->
+    <!-- Current color preview -->
               <div class="flex items-center space-x-3">
                 <div
                   class="w-8 h-8 rounded-full border-2 border-gray-300"
@@ -159,8 +177,8 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
                   <div class="text-xs text-gray-500 uppercase">{@selected_color}</div>
                 </div>
               </div>
-
-              <!-- Color palette -->
+              
+    <!-- Color palette -->
               <div class="grid grid-cols-9 gap-2">
                 <%= for color <- @default_colors do %>
                   <button
@@ -181,8 +199,8 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
                   </button>
                 <% end %>
               </div>
-
-              <!-- Custom color input -->
+              
+    <!-- Custom color input -->
               <div class="flex items-center space-x-2">
                 <.input
                   field={@form[:color]}
@@ -206,8 +224,8 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
                 {@validation_messages[:color]}
               </div>
             </div>
-
-            <!-- Parent Category (optional) -->
+            
+    <!-- Parent Category (optional) -->
             <div :if={@available_parent_categories != []} class="space-y-1">
               <.input
                 field={@form[:parent_category_id]}
@@ -245,13 +263,31 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
                   ]}
                 >
                   <%= if @saving do %>
-                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-400 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-400 inline"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      >
+                      </circle>
+                      <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      >
+                      </path>
                     </svg>
-                    <%= if @action == :new, do: "Creating...", else: "Updating..." %>
+                    {if @action == :new, do: "Creating...", else: "Updating..."}
                   <% else %>
-                    <%= if @action == :new, do: "Create Category", else: "Update Category" %>
+                    {if @action == :new, do: "Create Category", else: "Update Category"}
                   <% end %>
                 </button>
               </div>
@@ -266,31 +302,35 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
   @impl true
   def update(%{action: action, category: category, user_id: _user_id} = assigns, socket) do
     # Prepare initial data
-    {form_data, selected_color} = 
+    {form_data, selected_color} =
       case {action, category} do
-        {:new, _} -> 
+        {:new, _} ->
           {%{"name" => "", "color" => "#3B82F6"}, "#3B82F6"}
-        {:edit, category} when not is_nil(category) -> 
+
+        {:edit, category} when not is_nil(category) ->
           {%{
-            "name" => category.name,
-            "color" => category.color || "#3B82F6",
-            "parent_category_id" => category.parent_category_id
-          }, category.color || "#3B82F6"}
-        _ -> 
+             "name" => category.name,
+             "color" => category.color || "#3B82F6",
+             "parent_category_id" => category.parent_category_id
+           }, category.color || "#3B82F6"}
+
+        _ ->
           {%{"name" => "", "color" => "#3B82F6"}, "#3B82F6"}
       end
 
     form = to_form(form_data)
 
     # Get available parent categories (exclude current category if editing)
-    available_parent_categories = get_available_parent_categories(assigns[:categories] || [], category)
+    available_parent_categories =
+      get_available_parent_categories(assigns[:categories] || [], category)
 
     {:ok,
      socket
      |> assign(assigns)
      |> assign(:form, form)
      |> assign(:form_data, form_data)
-     |> assign(:form_valid, action == :edit) # Allow editing existing valid categories
+     # Allow editing existing valid categories
+     |> assign(:form_valid, action == :edit)
      |> assign(:form_errors, [])
      |> assign(:validation_messages, %{})
      |> assign(:saving, false)
@@ -310,10 +350,11 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
     }
 
     # Validate the form
-    {form_valid, form_errors, validation_messages} = validate_category_form(form_data, socket.assigns)
+    {form_valid, form_errors, validation_messages} =
+      validate_category_form(form_data, socket.assigns)
 
     # Update selected color if valid
-    selected_color = 
+    selected_color =
       if is_valid_hex_color?(color) do
         color
       else
@@ -347,11 +388,17 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
   @impl true
   def handle_event("validate_custom_color", _params, socket) do
     color = socket.assigns.form_data["color"]
-    
+
     if is_valid_hex_color?(color) do
       {:noreply, assign(socket, :selected_color, color)}
     else
-      validation_messages = Map.put(socket.assigns.validation_messages, :color, "Invalid hex color format (e.g., #3B82F6)")
+      validation_messages =
+        Map.put(
+          socket.assigns.validation_messages,
+          :color,
+          "Invalid hex color format (e.g., #3B82F6)"
+        )
+
       {:noreply, assign(socket, :validation_messages, validation_messages)}
     end
   end
@@ -390,12 +437,14 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
     }
 
     # Final validation
-    {form_valid, form_errors, _validation_messages} = validate_category_form(form_data, socket.assigns)
+    {form_valid, form_errors, _validation_messages} =
+      validate_category_form(form_data, socket.assigns)
 
     if form_valid do
       case socket.assigns.action do
         :new ->
           create_category(socket, form_data)
+
         :edit ->
           update_category(socket, form_data)
       end
@@ -430,6 +479,7 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
 
       {:error, %Ash.Error.Invalid{} = error} ->
         errors = extract_ash_errors(error)
+
         {:noreply,
          socket
          |> assign(:saving, false)
@@ -457,6 +507,7 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
 
       {:error, %Ash.Error.Invalid{} = error} ->
         errors = extract_ash_errors(error)
+
         {:noreply,
          socket
          |> assign(:saving, false)
@@ -475,18 +526,21 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
     validation_messages = %{}
 
     # Validate name
-    {errors, validation_messages} = 
+    {errors, validation_messages} =
       case String.trim(form_data["name"]) do
         "" ->
           {["Category name is required" | errors], validation_messages}
+
         name when byte_size(name) < 2 ->
           {["Category name must be at least 2 characters" | errors], validation_messages}
+
         name when byte_size(name) > 50 ->
           {["Category name must be less than 50 characters" | errors], validation_messages}
+
         name ->
           # Check for name uniqueness
           if name_already_exists?(name, assigns) do
-            {["Category name must be unique" | errors], 
+            {["Category name must be unique" | errors],
              Map.put(validation_messages, :name, "A category with this name already exists")}
           else
             {errors, Map.put(validation_messages, :name, "Available category name")}
@@ -494,15 +548,16 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
       end
 
     # Validate color
-    {errors, validation_messages} = 
+    {errors, validation_messages} =
       case String.trim(form_data["color"]) do
         "" ->
           {["Category color is required" | errors], validation_messages}
+
         color ->
           if is_valid_hex_color?(color) do
             {errors, Map.put(validation_messages, :color, "Valid color format")}
           else
-            {["Color must be a valid hex color code (e.g., #3B82F6)" | errors], 
+            {["Color must be a valid hex color code (e.g., #3B82F6)" | errors],
              Map.put(validation_messages, :color, "Invalid hex color format")}
           end
       end
@@ -513,8 +568,9 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
   end
 
   defp name_already_exists?(name, %{categories: categories, category: current_category}) do
-    existing_category = Enum.find(categories, &(String.downcase(&1.name) == String.downcase(name)))
-    
+    existing_category =
+      Enum.find(categories, &(String.downcase(&1.name) == String.downcase(name)))
+
     case {existing_category, current_category} do
       {nil, _} -> false
       {existing, current} when not is_nil(current) -> existing.id != current.id

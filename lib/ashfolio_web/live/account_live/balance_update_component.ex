@@ -7,7 +7,10 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
   @impl true
   def render(assigns) do
     ~H"""
-    <div id="balance-update-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
+    <div
+      id="balance-update-modal"
+      class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50"
+    >
       <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-medium text-gray-900">
@@ -31,7 +34,7 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
             </svg>
           </button>
         </div>
-
+        
     <!-- Account Info -->
         <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
           <div class="flex items-center space-x-3">
@@ -60,7 +63,7 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
             </div>
           </div>
         </div>
-
+        
     <!-- Current Balance Display -->
         <div class="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-md">
           <div class="text-center">
@@ -75,12 +78,12 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
             <% end %>
           </div>
         </div>
-
+        
     <!-- Error display -->
         <div :if={@error_message} class="mb-4">
           <ErrorHelpers.error_list errors={[@error_message]} title="Validation Error:" />
         </div>
-
+        
     <!-- Update Form -->
         <.simple_form
           for={@form}
@@ -101,7 +104,7 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
               disabled={@updating}
               required
             />
-
+            
     <!-- Balance Change Preview -->
             <%= if @form_params["new_balance"] && @form_params["new_balance"] != "" do %>
               <%= case Float.parse(@form_params["new_balance"]) do %>
@@ -130,7 +133,7 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
               <% end %>
             <% end %>
           </div>
-
+          
     <!-- Notes Field -->
           <div class="space-y-1">
             <.input

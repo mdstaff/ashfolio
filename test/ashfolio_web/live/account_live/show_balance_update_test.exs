@@ -182,7 +182,8 @@ defmodule AshfolioWeb.AccountLive.ShowBalanceUpdateTest do
       {:ok, view, _html} = live(conn, ~p"/accounts/#{cash_account.id}")
 
       # Simulate external balance update via Context API
-      {:ok, updated_account} = Context.update_cash_balance(cash_account.id, Decimal.new("2000.00"), "External update")
+      {:ok, updated_account} =
+        Context.update_cash_balance(cash_account.id, Decimal.new("2000.00"), "External update")
 
       # Verify the account was updated in database
       assert Decimal.equal?(updated_account.balance, Decimal.new("2000.00"))

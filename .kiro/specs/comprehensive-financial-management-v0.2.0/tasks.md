@@ -146,7 +146,7 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - **Out of Scope**: Bulk balance updates, automated balance imports
   - _Requirements: 2.1, 2.3, 2.4_
 
-- [ ] 9. Create investment category management interface
+- [x] 9. Create investment category management interface
 
   - Create `AshfolioWeb.CategoryLive.Index` for investment category listing and management
   - Create `AshfolioWeb.CategoryLive.FormComponent` for category creation and editing
@@ -156,7 +156,7 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - Write LiveView tests for category management including CRUD operations and system category protection
   - _Requirements: 5.1, 5.2_
 
-- [ ] 10. Enhance TransactionLive with categories and symbol autocomplete
+- [x] 10. Enhance TransactionLive with categories and symbol autocomplete
 
   - Update `AshfolioWeb.TransactionLive.FormComponent` to include investment category selection dropdown
   - Integrate SymbolAutocomplete component into transaction forms

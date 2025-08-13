@@ -14,29 +14,37 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
       user = get_default_user()
 
       # Create test categories with retry logic for SQLite concurrency
-      user_category = with_retry(fn ->
-        case TransactionCategory.create(%{
-          name: "Growth Stocks",
-          color: "#22C55E",
-          user_id: user.id,
-          is_system: false
-        }, actor: user) do
-          {:ok, category} -> category
-          {:error, error} -> raise "Failed to create user category: #{inspect(error)}"
-        end
-      end)
+      user_category =
+        with_retry(fn ->
+          case TransactionCategory.create(
+                 %{
+                   name: "Growth Stocks",
+                   color: "#22C55E",
+                   user_id: user.id,
+                   is_system: false
+                 },
+                 actor: user
+               ) do
+            {:ok, category} -> category
+            {:error, error} -> raise "Failed to create user category: #{inspect(error)}"
+          end
+        end)
 
-      system_category = with_retry(fn ->
-        case TransactionCategory.create(%{
-          name: "System Growth",
-          color: "#3B82F6",
-          user_id: user.id,
-          is_system: true
-        }, actor: user) do
-          {:ok, category} -> category
-          {:error, error} -> raise "Failed to create system category: #{inspect(error)}"
-        end
-      end)
+      system_category =
+        with_retry(fn ->
+          case TransactionCategory.create(
+                 %{
+                   name: "System Growth",
+                   color: "#3B82F6",
+                   user_id: user.id,
+                   is_system: true
+                 },
+                 actor: user
+               ) do
+            {:ok, category} -> category
+            {:error, error} -> raise "Failed to create system category: #{inspect(error)}"
+          end
+        end)
 
       %{
         user: user,
@@ -45,7 +53,11 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
       }
     end
 
-    test "mounts and displays categories", %{conn: conn, user_category: user_category, system_category: system_category} do
+    test "mounts and displays categories", %{
+      conn: conn,
+      user_category: user_category,
+      system_category: system_category
+    } do
       {:ok, view, html} = live(conn, ~p"/categories")
 
       # Check page title and header
@@ -65,7 +77,11 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
       assert has_element?(view, "button", "New Category")
     end
 
-    test "filters categories by type", %{conn: conn, user_category: user_category, system_category: system_category} do
+    test "filters categories by type", %{
+      conn: conn,
+      user_category: user_category,
+      system_category: system_category
+    } do
       {:ok, view, _html} = live(conn, ~p"/categories")
 
       # Test filtering to user categories only
@@ -84,7 +100,11 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
       assert has_element?(view, "h3", system_category.name)
     end
 
-    test "displays correct category badges", %{conn: conn, user_category: user_category, system_category: system_category} do
+    test "displays correct category badges", %{
+      conn: conn,
+      user_category: user_category,
+      system_category: system_category
+    } do
       {:ok, view, _html} = live(conn, ~p"/categories")
 
       # User category should show Custom badge
@@ -113,7 +133,10 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
       assert has_element?(view, "input[placeholder*='Growth, Income, Speculative']")
     end
 
-    test "opens edit category modal for user categories", %{conn: conn, user_category: user_category} do
+    test "opens edit category modal for user categories", %{
+      conn: conn,
+      user_category: user_category
+    } do
       {:ok, view, _html} = live(conn, ~p"/categories")
 
       # Click edit button for user category
@@ -124,7 +147,10 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
       assert has_element?(view, "input[value='#{user_category.name}']")
     end
 
-    test "does not show edit/delete actions for system categories", %{conn: conn, system_category: system_category} do
+    test "does not show edit/delete actions for system categories", %{
+      conn: conn,
+      system_category: system_category
+    } do
       {:ok, view, _html} = live(conn, ~p"/categories")
 
       # System categories should not have edit/delete buttons
@@ -167,7 +193,10 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
       assert category.id == system_category.id
     end
 
-    test "shows correct empty state messages for different filters", %{conn: conn, system_category: system_category} do
+    test "shows correct empty state messages for different filters", %{
+      conn: conn,
+      system_category: system_category
+    } do
       # Use existing system category from setup
       {:ok, view, _html} = live(conn, ~p"/categories")
 
@@ -203,17 +232,21 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
       user = get_default_user()
 
       # Create test categories with retry logic for SQLite concurrency
-      user_category = with_retry(fn ->
-        case TransactionCategory.create(%{
-          name: "Growth Stocks",
-          color: "#22C55E",
-          user_id: user.id,
-          is_system: false
-        }, actor: user) do
-          {:ok, category} -> category
-          {:error, error} -> raise "Failed to create user category: #{inspect(error)}"
-        end
-      end)
+      user_category =
+        with_retry(fn ->
+          case TransactionCategory.create(
+                 %{
+                   name: "Growth Stocks",
+                   color: "#22C55E",
+                   user_id: user.id,
+                   is_system: false
+                 },
+                 actor: user
+               ) do
+            {:ok, category} -> category
+            {:error, error} -> raise "Failed to create user category: #{inspect(error)}"
+          end
+        end)
 
       %{
         user: user,
@@ -246,17 +279,18 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
       {:ok, view, _html} = live(conn, ~p"/categories")
 
       # Simulate external category creation with retry logic
-      new_category = with_retry(fn ->
-        case TransactionCategory.create(%{
-          name: "External Category",
-          color: "#EF4444",
-          user_id: user.id,
-          is_system: false
-        }) do
-          {:ok, category} -> category
-          {:error, error} -> raise "Failed to create external category: #{inspect(error)}"
-        end
-      end)
+      new_category =
+        with_retry(fn ->
+          case TransactionCategory.create(%{
+                 name: "External Category",
+                 color: "#EF4444",
+                 user_id: user.id,
+                 is_system: false
+               }) do
+            {:ok, category} -> category
+            {:error, error} -> raise "Failed to create external category: #{inspect(error)}"
+          end
+        end)
 
       # Broadcast the update
       Ashfolio.PubSub.broadcast!("categories", {:category_created, new_category})
@@ -273,7 +307,8 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
 
       # Should show transaction count (0 for new category)
       assert html =~ "Transactions:"
-      assert html =~ "0" # No transactions yet
+      # No transactions yet
+      assert html =~ "0"
     end
   end
 

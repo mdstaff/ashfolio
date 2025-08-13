@@ -15,17 +15,21 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       user = get_default_user()
 
       # Create existing categories for validation testing with retry logic
-      existing_category = with_retry(fn ->
-        case TransactionCategory.create(%{
-          name: "Existing Category",
-          color: "#22C55E",
-          user_id: user.id,
-          is_system: false
-        }, actor: user) do
-          {:ok, category} -> category
-          {:error, error} -> raise "Failed to create existing category: #{inspect(error)}"
-        end
-      end)
+      existing_category =
+        with_retry(fn ->
+          case TransactionCategory.create(
+                 %{
+                   name: "Existing Category",
+                   color: "#22C55E",
+                   user_id: user.id,
+                   is_system: false
+                 },
+                 actor: user
+               ) do
+            {:ok, category} -> category
+            {:error, error} -> raise "Failed to create existing category: #{inspect(error)}"
+          end
+        end)
 
       %{
         user: user,
@@ -51,7 +55,10 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       assert component_html =~ "Index"
     end
 
-    test "renders edit category form without suggestions", %{user: user, existing_category: existing_category} do
+    test "renders edit category form without suggestions", %{
+      user: user,
+      existing_category: existing_category
+    } do
       component_html =
         render_component(FormComponent,
           id: "test-form",
@@ -96,6 +103,7 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
 
       # Test long name
       long_name = String.duplicate("A", 51)
+
       view
       |> element("#category-form")
       |> render_change(%{"name" => long_name, "color" => "#3B82F6"})
@@ -218,7 +226,8 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       # Should populate form with suggestion data
       html = render(view)
       assert html =~ "value=\"Growth\""
-      refute html =~ "Popular Investment Categories" # Should hide suggestions
+      # Should hide suggestions
+      refute html =~ "Popular Investment Categories"
     end
 
     test "hide/show suggestions functionality", %{user: user} do
@@ -272,7 +281,10 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       assert category.is_system == false
     end
 
-    test "updates existing category successfully", %{user: user, existing_category: existing_category} do
+    test "updates existing category successfully", %{
+      user: user,
+      existing_category: existing_category
+    } do
       {view, _html} =
         live_component_isolated(FormComponent, %{
           id: "test-form",
@@ -396,17 +408,21 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
 
     test "parent category selection", %{user: user} do
       # Create a parent category with retry logic
-      parent_category = with_retry(fn ->
-        case TransactionCategory.create(%{
-          name: "Parent Category",
-          color: "#6366F1",
-          user_id: user.id,
-          is_system: false
-        }, actor: user) do
-          {:ok, category} -> category
-          {:error, error} -> raise "Failed to create parent category: #{inspect(error)}"
-        end
-      end)
+      parent_category =
+        with_retry(fn ->
+          case TransactionCategory.create(
+                 %{
+                   name: "Parent Category",
+                   color: "#6366F1",
+                   user_id: user.id,
+                   is_system: false
+                 },
+                 actor: user
+               ) do
+            {:ok, category} -> category
+            {:error, error} -> raise "Failed to create parent category: #{inspect(error)}"
+          end
+        end)
 
       {view, _html} =
         live_component_isolated(FormComponent, %{
@@ -450,17 +466,21 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
 
     test "excludes system categories from parent options", %{user: user} do
       # Create a system category with retry logic
-      system_category = with_retry(fn ->
-        case TransactionCategory.create(%{
-          name: "System Category",
-          color: "#6366F1",
-          user_id: user.id,
-          is_system: true
-        }, actor: user) do
-          {:ok, category} -> category
-          {:error, error} -> raise "Failed to create system category: #{inspect(error)}"
-        end
-      end)
+      system_category =
+        with_retry(fn ->
+          case TransactionCategory.create(
+                 %{
+                   name: "System Category",
+                   color: "#6366F1",
+                   user_id: user.id,
+                   is_system: true
+                 },
+                 actor: user
+               ) do
+            {:ok, category} -> category
+            {:error, error} -> raise "Failed to create system category: #{inspect(error)}"
+          end
+        end)
 
       {_view, html} =
         live_component_isolated(FormComponent, %{
@@ -493,7 +513,12 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
         component_assigns = session["component_assigns"]
         test_pid = session["test_pid"]
 
-        {:ok, assign(socket, component_module: component_module, component_assigns: component_assigns, test_pid: test_pid)}
+        {:ok,
+         assign(socket,
+           component_module: component_module,
+           component_assigns: component_assigns,
+           test_pid: test_pid
+         )}
       end
 
       # Forward component messages to the test process
