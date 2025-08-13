@@ -42,10 +42,14 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
 
   # ETS table for caching search results
   @cache_table :ashfolio_symbol_search_cache
-  @default_ttl_seconds 300  # 5 minutes
-  @default_max_results 50   # Maximum results to prevent UI overflow
-  @min_local_results 3      # Minimum local results before external API fallback
-  @external_api_timeout 5000 # 5 seconds timeout for external API calls
+  # 5 minutes
+  @default_ttl_seconds 300
+  # Maximum results to prevent UI overflow
+  @default_max_results 50
+  # Minimum local results before external API fallback
+  @min_local_results 3
+  # 5 seconds timeout for external API calls
+  @external_api_timeout 5000
 
   # Yahoo Finance search endpoint
   @yahoo_search_url "https://query1.finance.yahoo.com/v1/finance/search"
@@ -225,7 +229,10 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
             {:ok, Enum.take(combined_results, max_results)}
 
           {:error, reason} ->
-            Logger.info("External API search failed for '#{normalized_query}': #{inspect(reason)}, returning local results")
+            Logger.info(
+              "External API search failed for '#{normalized_query}': #{inspect(reason)}, returning local results"
+            )
+
             {:ok, local_results}
         end
       end
@@ -236,7 +243,8 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
     symbols
     |> Enum.reduce([], fn symbol, acc ->
       case calculate_relevance(symbol, query) do
-        0 -> acc  # No match
+        # No match
+        0 -> acc
         relevance -> [{relevance, symbol} | acc]
       end
     end)
@@ -251,19 +259,14 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
     cond do
       # Exact ticker match (highest priority)
       ticker == query -> 1000
-
       # Ticker starts with query (second priority)
       String.starts_with?(ticker, query) -> 800
-
       # Ticker contains query (third priority)
       String.contains?(ticker, query) -> 600
-
       # Company name starts with query (fourth priority)
       String.starts_with?(name, query) -> 400
-
       # Company name contains query (lowest priority)
       String.contains?(name, query) -> 200
-
       # No match
       true -> 0
     end
@@ -290,7 +293,8 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
     symbol_attrs = %{
       symbol: Map.get(symbol_data, :symbol) || Map.get(symbol_data, "symbol"),
       name: Map.get(symbol_data, :name) || Map.get(symbol_data, "name"),
-      asset_class: :stock,  # Default to stock for external symbols
+      # Default to stock for external symbols
+      asset_class: :stock,
       data_source: :yahoo_finance
     }
 
@@ -303,7 +307,10 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
             {:ok, symbol}
 
           {:error, changeset} ->
-            Logger.warning("Failed to create symbol from external API: #{inspect(changeset.errors)}")
+            Logger.warning(
+              "Failed to create symbol from external API: #{inspect(changeset.errors)}"
+            )
+
             {:error, :creation_failed}
         end
 
@@ -318,7 +325,7 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
   end
 
   defp validate_external_symbol_data(%{symbol: symbol, name: name})
-    when is_binary(symbol) and is_binary(name) and symbol != "" and name != "" do
+       when is_binary(symbol) and is_binary(name) and symbol != "" and name != "" do
     :ok
   end
 
@@ -342,12 +349,16 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
 
   defp perform_external_search(query, max_results) do
     url = build_yahoo_search_url(query, max_results)
+
     headers = [
       {"User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"},
       {"Accept", "application/json"}
     ]
 
-    case @http_client.get(url, headers, timeout: @external_api_timeout, recv_timeout: @external_api_timeout) do
+    case @http_client.get(url, headers,
+           timeout: @external_api_timeout,
+           recv_timeout: @external_api_timeout
+         ) do
       {:ok, %{status_code: 200, body: body}} ->
         parse_yahoo_search_response(body)
 
@@ -374,13 +385,15 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
   end
 
   defp build_yahoo_search_url(query, max_results) do
-    params = URI.encode_query(%{
-      q: query,
-      quotesCount: min(max_results, 10),  # Yahoo Finance limits
-      newsCount: 0,
-      enableFuzzyQuery: false,
-      quotesQueryId: "tss_match_phrase_query"
-    })
+    params =
+      URI.encode_query(%{
+        q: query,
+        # Yahoo Finance limits
+        quotesCount: min(max_results, 10),
+        newsCount: 0,
+        enableFuzzyQuery: false,
+        quotesQueryId: "tss_match_phrase_query"
+      })
 
     "#{@yahoo_search_url}?#{params}"
   end
@@ -392,7 +405,7 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
           quotes
           |> Enum.filter(&valid_yahoo_quote?/1)
           |> Enum.map(&convert_yahoo_quote_to_symbol/1)
-          |> Enum.filter(& &1 != nil)
+          |> Enum.filter(&(&1 != nil))
 
         {:ok, symbols}
 
@@ -407,7 +420,7 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
   end
 
   defp valid_yahoo_quote?(%{"symbol" => symbol, "shortname" => name})
-    when is_binary(symbol) and is_binary(name) and symbol != "" and name != "" do
+       when is_binary(symbol) and is_binary(name) and symbol != "" and name != "" do
     # Filter out invalid or unwanted symbols
     not String.contains?(symbol, ["=", "^", "."])
   end
@@ -443,5 +456,6 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
   defp determine_asset_class(%{"quoteType" => "ETF"}), do: :etf
   defp determine_asset_class(%{"quoteType" => "MUTUALFUND"}), do: :mutual_fund
   defp determine_asset_class(%{"quoteType" => "CRYPTOCURRENCY"}), do: :crypto
-  defp determine_asset_class(_), do: :stock  # Default to stock
+  # Default to stock
+  defp determine_asset_class(_), do: :stock
 end

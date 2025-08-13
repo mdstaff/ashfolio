@@ -31,9 +31,12 @@ defmodule AshfolioWeb.Components.SymbolAutocomplete do
   require Logger
 
   # Component configuration
-  @debounce_timeout 300  # 300ms debounce as specified
-  @max_results 10        # Maximum 10 displayed results as specified
-  @min_query_length 2    # Minimum characters before searching
+  # 300ms debounce as specified
+  @debounce_timeout 300
+  # Maximum 10 displayed results as specified
+  @max_results 10
+  # Minimum characters before searching
+  @min_query_length 2
 
   # Configurable Context module for testing
   defp context_module do
@@ -72,8 +75,8 @@ defmodule AshfolioWeb.Components.SymbolAutocomplete do
             @loading && "pr-10"
           ]}
         />
-
-        <!-- Loading indicator -->
+        
+    <!-- Loading indicator -->
         <div :if={@loading} class="absolute inset-y-0 right-0 flex items-center pr-3">
           <svg
             class="h-4 w-4 animate-spin text-gray-400"
@@ -81,14 +84,7 @@ defmodule AshfolioWeb.Components.SymbolAutocomplete do
             fill="none"
             viewBox="0 0 24 24"
           >
-            <circle
-              class="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            />
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
             <path
               class="opacity-75"
               fill="currentColor"
@@ -97,8 +93,8 @@ defmodule AshfolioWeb.Components.SymbolAutocomplete do
           </svg>
         </div>
       </div>
-
-      <!-- Dropdown results -->
+      
+    <!-- Dropdown results -->
       <div
         :if={@show_dropdown}
         id={"#{@id}-results"}
@@ -121,21 +117,16 @@ defmodule AshfolioWeb.Components.SymbolAutocomplete do
           role="option"
           aria-selected="false"
         >
-          No symbols found for "<%= @query %>"
+          No symbols found for "{@query}"
         </div>
-
-        <!-- Error message -->
-        <div
-          :if={@error}
-          class="px-4 py-2 text-sm text-red-600"
-          role="option"
-          aria-selected="false"
-        >
+        
+    <!-- Error message -->
+        <div :if={@error} class="px-4 py-2 text-sm text-red-600" role="option" aria-selected="false">
           <.icon name="hero-exclamation-triangle-mini" class="h-4 w-4 inline mr-1" />
-          <%= @error %>
+          {@error}
         </div>
-
-        <!-- Search results -->
+        
+    <!-- Search results -->
         <div
           :for={{symbol, index} <- Enum.with_index(@results)}
           phx-click="select_symbol"
@@ -146,64 +137,55 @@ defmodule AshfolioWeb.Components.SymbolAutocomplete do
           aria-selected={index == @selected_index}
           tabindex="-1"
           data-index={index}
-          class={[
-            "cursor-pointer select-none relative py-2 pl-3 pr-9",
-            "hover:bg-blue-50 focus:bg-blue-50 active:bg-blue-100",
-            "transition-colors duration-150 ease-in-out",
-            "touch-manipulation", # Better touch handling on mobile
-            index == @selected_index && "bg-blue-50 ring-2 ring-blue-200 ring-inset"
-          ]}
+          class={
+            [
+              "cursor-pointer select-none relative py-2 pl-3 pr-9",
+              "hover:bg-blue-50 focus:bg-blue-50 active:bg-blue-100",
+              "transition-colors duration-150 ease-in-out",
+              # Better touch handling on mobile
+              "touch-manipulation",
+              index == @selected_index && "bg-blue-50 ring-2 ring-blue-200 ring-inset"
+            ]
+          }
         >
           <div class="flex items-center justify-between">
             <div class="flex-1 min-w-0">
               <div class="flex items-center space-x-2">
                 <span class="font-medium text-gray-900 text-sm">
-                  <%= symbol.symbol %>
+                  {symbol.symbol}
                 </span>
                 <span class="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
-                  <%= format_asset_class(symbol.asset_class) %>
+                  {format_asset_class(symbol.asset_class)}
                 </span>
               </div>
               <div class="text-sm text-gray-600 truncate">
-                <%= symbol.name %>
+                {symbol.name}
               </div>
             </div>
-
-            <!-- Current price if available -->
+            
+    <!-- Current price if available -->
             <div :if={symbol.current_price} class="text-right">
               <div class="text-sm font-medium text-gray-900">
-                $<%= format_price(symbol.current_price) %>
+                ${format_price(symbol.current_price)}
               </div>
             </div>
           </div>
         </div>
-
-        <!-- Show more indicator -->
-        <div
-          :if={@has_more_results}
-          class="px-4 py-2 text-xs text-gray-500 border-t border-gray-100"
-        >
-          Showing first <%= @max_results %> results. Type more characters to refine search.
+        
+    <!-- Show more indicator -->
+        <div :if={@has_more_results} class="px-4 py-2 text-xs text-gray-500 border-t border-gray-100">
+          Showing first {@max_results} results. Type more characters to refine search.
         </div>
       </div>
-
-      <!-- Help text for keyboard navigation -->
-      <div
-        :if={@show_dropdown}
-        id={"#{@id}-help"}
-        class="sr-only"
-      >
+      
+    <!-- Help text for keyboard navigation -->
+      <div :if={@show_dropdown} id={"#{@id}-help"} class="sr-only">
         Use arrow keys to navigate, Enter to select, Escape to close
       </div>
-
-      <!-- Screen reader announcements -->
-      <div
-        id={"#{@id}-announcements"}
-        aria-live="polite"
-        aria-atomic="true"
-        class="sr-only"
-      >
-        <%= @announcement %>
+      
+    <!-- Screen reader announcements -->
+      <div id={"#{@id}-announcements"} aria-live="polite" aria-atomic="true" class="sr-only">
+        {@announcement}
       </div>
     </div>
     """
@@ -356,11 +338,15 @@ defmodule AshfolioWeb.Components.SymbolAutocomplete do
 
   def handle_event("keydown", %{"key" => "Enter"}, socket) do
     if socket.assigns.show_dropdown and
-       socket.assigns.selected_index >= 0 and
-       socket.assigns.selected_index < length(socket.assigns.results) do
-
+         socket.assigns.selected_index >= 0 and
+         socket.assigns.selected_index < length(socket.assigns.results) do
       selected_symbol = Enum.at(socket.assigns.results, socket.assigns.selected_index)
-      handle_event("select_symbol", %{"symbol" => selected_symbol.symbol, "name" => selected_symbol.name}, socket)
+
+      handle_event(
+        "select_symbol",
+        %{"symbol" => selected_symbol.symbol, "name" => selected_symbol.name},
+        socket
+      )
     else
       {:noreply, socket}
     end

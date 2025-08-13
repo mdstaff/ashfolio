@@ -19,7 +19,7 @@ defmodule AshfolioWeb.Components.TopBar do
               <h1 class="text-xl font-semibold text-gray-900">Ashfolio</h1>
             </.link>
           </div>
-
+          
     <!-- Navigation -->
           <nav class="hidden md:flex space-x-8" role="navigation" aria-label="Main navigation">
             <.nav_link navigate={~p"/"} current={@current_page == :dashboard}>
@@ -32,7 +32,7 @@ defmodule AshfolioWeb.Components.TopBar do
               <.icon name="hero-arrow-right-left" class="w-4 h-4 mr-2" /> Transactions
             </.nav_link>
           </nav>
-
+          
     <!-- Mobile menu button -->
           <div class="md:hidden">
             <button
@@ -47,7 +47,7 @@ defmodule AshfolioWeb.Components.TopBar do
             </button>
           </div>
         </div>
-
+        
     <!-- Mobile Navigation -->
         <div
           id="mobile-menu"

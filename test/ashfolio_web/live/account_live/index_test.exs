@@ -36,7 +36,8 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
     test "displays all accounts", %{conn: conn, account1: account1, account2: account2} do
       {:ok, _index_live, html} = live(conn, ~p"/accounts")
 
-      assert html =~ "Accounts" # Updated title
+      # Updated title
+      assert html =~ "Accounts"
       assert html =~ account1.name
       assert html =~ account2.name
       assert html =~ "$1,000.00"
@@ -51,7 +52,9 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
       {:ok, _index_live, html} = live(conn, ~p"/accounts")
 
       assert html =~ "No accounts"
-      assert html =~ "Get started by creating your first investment account" or html =~ "Loading accounts..."
+
+      assert html =~ "Get started by creating your first investment account" or
+               html =~ "Loading accounts..."
     end
   end
 
@@ -62,8 +65,6 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
       assert index_live |> element("button", "New Account") |> render_click() =~
                "New Account"
     end
-
-
 
     test "validates form fields", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/accounts")
@@ -330,12 +331,13 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
       user: user
     } do
       # Get or create a symbol for the transaction
-      symbol = get_or_create_symbol("AAPL", %{
-        name: "Apple Inc.",
-        asset_class: :stock,
-        data_source: :yahoo_finance,
-        current_price: Decimal.new("150.00")
-      })
+      symbol =
+        get_or_create_symbol("AAPL", %{
+          name: "Apple Inc.",
+          asset_class: :stock,
+          data_source: :yahoo_finance,
+          current_price: Decimal.new("150.00")
+        })
 
       # Create a transaction for account1
       {:ok, _transaction} =
@@ -375,12 +377,13 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
       user: user
     } do
       # Get or create a symbol and transaction for account1
-      symbol = get_or_create_symbol("TSLA", %{
-        name: "Tesla Inc.",
-        asset_class: :stock,
-        data_source: :yahoo_finance,
-        current_price: Decimal.new("200.00")
-      })
+      symbol =
+        get_or_create_symbol("TSLA", %{
+          name: "Tesla Inc.",
+          asset_class: :stock,
+          data_source: :yahoo_finance,
+          current_price: Decimal.new("200.00")
+        })
 
       {:ok, _transaction} =
         Transaction.create(%{
@@ -455,12 +458,13 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
       user: user
     } do
       # Get or create a symbol and transaction for account1
-      symbol = get_or_create_symbol("MSFT", %{
-        name: "Microsoft Corporation",
-        asset_class: :stock,
-        data_source: :yahoo_finance,
-        current_price: Decimal.new("250.00")
-      })
+      symbol =
+        get_or_create_symbol("MSFT", %{
+          name: "Microsoft Corporation",
+          asset_class: :stock,
+          data_source: :yahoo_finance,
+          current_price: Decimal.new("250.00")
+        })
 
       {:ok, transaction} =
         Transaction.create(%{

@@ -14,7 +14,13 @@ defmodule Ashfolio.Portfolio.TransactionTest do
     setup do
       # Use hybrid approach: get global defaults or create custom resources with retry logic
       user = SQLiteHelpers.get_default_user()
-      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Brokerage", platform: "Test Platform"})
+
+      account =
+        SQLiteHelpers.get_or_create_account(user, %{
+          name: "Test Brokerage",
+          platform: "Test Platform"
+        })
+
       symbol = SQLiteHelpers.get_common_symbol("AAPL")
 
       %{user: user, account: account, symbol: symbol}
@@ -126,8 +132,6 @@ defmodule Ashfolio.Portfolio.TransactionTest do
                error.field == :date
              end)
     end
-
-
 
     test "validates buy transaction quantity is positive" do
       {:error, changeset} =
@@ -360,20 +364,31 @@ defmodule Ashfolio.Portfolio.TransactionTest do
   describe "Transaction category relationships" do
     setup do
       user = SQLiteHelpers.get_default_user()
-      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Brokerage", platform: "Test Platform"})
+
+      account =
+        SQLiteHelpers.get_or_create_account(user, %{
+          name: "Test Brokerage",
+          platform: "Test Platform"
+        })
+
       symbol = SQLiteHelpers.get_common_symbol("AAPL")
 
       # Create a test category
-      {:ok, category} = TransactionCategory.create(%{
-        name: "Growth",
-        color: "#10B981",
-        user_id: user.id
-      })
+      {:ok, category} =
+        TransactionCategory.create(%{
+          name: "Growth",
+          color: "#10B981",
+          user_id: user.id
+        })
 
       %{user: user, account: account, symbol: symbol, category: category}
     end
 
-    test "creates transaction with category successfully", %{account: account, symbol: symbol, category: category} do
+    test "creates transaction with category successfully", %{
+      account: account,
+      symbol: symbol,
+      category: category
+    } do
       transaction_params = %{
         type: :buy,
         quantity: Decimal.new("100"),
@@ -412,7 +427,11 @@ defmodule Ashfolio.Portfolio.TransactionTest do
       assert transaction.type == :buy
     end
 
-    test "updates transaction category successfully", %{account: account, symbol: symbol, category: category} do
+    test "updates transaction category successfully", %{
+      account: account,
+      symbol: symbol,
+      category: category
+    } do
       # Create transaction without category
       {:ok, transaction} =
         Transaction.create(%{
@@ -436,7 +455,11 @@ defmodule Ashfolio.Portfolio.TransactionTest do
       assert updated_transaction.category_id == category.id
     end
 
-    test "removes category from transaction successfully", %{account: account, symbol: symbol, category: category} do
+    test "removes category from transaction successfully", %{
+      account: account,
+      symbol: symbol,
+      category: category
+    } do
       # Create transaction with category
       {:ok, transaction} =
         Transaction.create(%{
@@ -461,13 +484,19 @@ defmodule Ashfolio.Portfolio.TransactionTest do
       assert is_nil(updated_transaction.category_id)
     end
 
-    test "queries transactions by category", %{account: account, symbol: symbol, category: category, user: user} do
+    test "queries transactions by category", %{
+      account: account,
+      symbol: symbol,
+      category: category,
+      user: user
+    } do
       # Create another category
-      {:ok, income_category} = TransactionCategory.create(%{
-        name: "Income",
-        color: "#3B82F6",
-        user_id: user.id
-      })
+      {:ok, income_category} =
+        TransactionCategory.create(%{
+          name: "Income",
+          color: "#3B82F6",
+          user_id: user.id
+        })
 
       # Create transactions with different categories
       {:ok, _growth_transaction} =
@@ -505,7 +534,11 @@ defmodule Ashfolio.Portfolio.TransactionTest do
       assert hd(income_transactions).type == :dividend
     end
 
-    test "queries uncategorized transactions", %{account: account, symbol: symbol, category: category} do
+    test "queries uncategorized transactions", %{
+      account: account,
+      symbol: symbol,
+      category: category
+    } do
       # Create transaction with category
       {:ok, _categorized_transaction} =
         Transaction.create(%{
@@ -538,7 +571,10 @@ defmodule Ashfolio.Portfolio.TransactionTest do
       assert is_nil(hd(uncategorized_transactions).category_id)
     end
 
-    test "validates category belongs to valid category resource", %{account: account, symbol: symbol} do
+    test "validates category belongs to valid category resource", %{
+      account: account,
+      symbol: symbol
+    } do
       # Try to create transaction with invalid category_id
       invalid_uuid = Ecto.UUID.generate()
 
@@ -586,7 +622,11 @@ defmodule Ashfolio.Portfolio.TransactionTest do
       assert loaded_transaction.category.color == "#10B981"
     end
 
-    test "handles all transaction types with categories", %{account: account, symbol: symbol, category: category} do
+    test "handles all transaction types with categories", %{
+      account: account,
+      symbol: symbol,
+      category: category
+    } do
       transaction_types = [
         {:buy, Decimal.new("100")},
         {:sell, Decimal.new("-50")},
@@ -610,6 +650,7 @@ defmodule Ashfolio.Portfolio.TransactionTest do
               symbol_id: symbol.id,
               category_id: category.id
             })
+
           transaction
         end)
 

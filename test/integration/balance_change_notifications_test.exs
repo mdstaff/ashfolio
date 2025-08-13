@@ -10,22 +10,24 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
       # Create test user and accounts
       {:ok, user} = User.create(%{name: "Integration Test User"})
 
-      {:ok, checking_account} = Account.create(%{
-        name: "Integration Checking",
-        platform: "Test Bank",
-        user_id: user.id,
-        account_type: :checking,
-        balance: Decimal.new("2000.00")
-      })
+      {:ok, checking_account} =
+        Account.create(%{
+          name: "Integration Checking",
+          platform: "Test Bank",
+          user_id: user.id,
+          account_type: :checking,
+          balance: Decimal.new("2000.00")
+        })
 
-      {:ok, savings_account} = Account.create(%{
-        name: "Integration Savings",
-        platform: "Test Bank",
-        user_id: user.id,
-        account_type: :savings,
-        balance: Decimal.new("5000.00"),
-        interest_rate: Decimal.new("0.025")
-      })
+      {:ok, savings_account} =
+        Account.create(%{
+          name: "Integration Savings",
+          platform: "Test Bank",
+          user_id: user.id,
+          account_type: :savings,
+          balance: Decimal.new("5000.00"),
+          interest_rate: Decimal.new("0.025")
+        })
 
       %{
         user: user,
@@ -39,22 +41,26 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
       PubSub.subscribe("balance_changes")
 
       # Simulate another subscriber (like a dashboard)
-      dashboard_pid = spawn(fn ->
-        PubSub.subscribe("balance_changes")
-        receive do
-          {:balance_updated, message} ->
-            send(self(), {:dashboard_received, message})
-        end
-      end)
+      dashboard_pid =
+        spawn(fn ->
+          PubSub.subscribe("balance_changes")
+
+          receive do
+            {:balance_updated, message} ->
+              send(self(), {:dashboard_received, message})
+          end
+        end)
 
       # Simulate another subscriber (like a net worth calculator)
-      calculator_pid = spawn(fn ->
-        PubSub.subscribe("balance_changes")
-        receive do
-          {:balance_updated, message} ->
-            send(self(), {:calculator_received, message})
-        end
-      end)
+      calculator_pid =
+        spawn(fn ->
+          PubSub.subscribe("balance_changes")
+
+          receive do
+            {:balance_updated, message} ->
+              send(self(), {:calculator_received, message})
+          end
+        end)
 
       # Update balance
       new_balance = Decimal.new("2500.00")
@@ -73,7 +79,9 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
       Process.exit(calculator_pid, :normal)
     end
 
-    test "balance change notifications contain complete account information", %{savings_account: account} do
+    test "balance change notifications contain complete account information", %{
+      savings_account: account
+    } do
       PubSub.subscribe("balance_changes")
 
       old_balance = account.balance
@@ -114,10 +122,11 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
       end)
 
       # Should receive three separate notifications
-      messages = for _ <- 1..3 do
-        assert_receive {:balance_updated, message}
-        message
-      end
+      messages =
+        for _ <- 1..3 do
+          assert_receive {:balance_updated, message}
+          message
+        end
 
       # Verify each message corresponds to the correct update
       assert length(messages) == 3
@@ -127,7 +136,9 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
       actual_data = Enum.map(messages, fn msg -> {msg.new_balance, msg.notes} end)
 
       # Sort both lists by balance to compare (since order might vary)
-      expected_sorted = Enum.sort_by(expected_data, fn {balance, _} -> Decimal.to_float(balance) end)
+      expected_sorted =
+        Enum.sort_by(expected_data, fn {balance, _} -> Decimal.to_float(balance) end)
+
       actual_sorted = Enum.sort_by(actual_data, fn {balance, _} -> Decimal.to_float(balance) end)
 
       Enum.zip(expected_sorted, actual_sorted)
@@ -142,18 +153,22 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
 
       # Try to update a non-existent account
       non_existent_id = Ash.UUID.generate()
-      {:error, :account_not_found} = BalanceManager.update_cash_balance(non_existent_id, Decimal.new("1000.00"))
+
+      {:error, :account_not_found} =
+        BalanceManager.update_cash_balance(non_existent_id, Decimal.new("1000.00"))
 
       # Try to update an investment account (should fail)
-      {:ok, investment_account} = Account.create(%{
-        name: "Investment Account",
-        platform: "Broker",
-        user_id: account.user_id,
-        account_type: :investment,
-        balance: Decimal.new("10000.00")
-      })
+      {:ok, investment_account} =
+        Account.create(%{
+          name: "Investment Account",
+          platform: "Broker",
+          user_id: account.user_id,
+          account_type: :investment,
+          balance: Decimal.new("10000.00")
+        })
 
-      {:error, :not_cash_account} = BalanceManager.update_cash_balance(investment_account.id, Decimal.new("11000.00"))
+      {:error, :not_cash_account} =
+        BalanceManager.update_cash_balance(investment_account.id, Decimal.new("11000.00"))
 
       # Should not receive any notifications
       refute_receive {:balance_updated, _message}, 100
@@ -163,16 +178,19 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
       # Create accounts of different cash types
       account_types = [:checking, :savings, :money_market, :cd]
 
-      accounts = Enum.map(account_types, fn type ->
-        {:ok, account} = Account.create(%{
-          name: "#{type} Account",
-          platform: "Test Bank",
-          user_id: user.id,
-          account_type: type,
-          balance: Decimal.new("1000.00")
-        })
-        account
-      end)
+      accounts =
+        Enum.map(account_types, fn type ->
+          {:ok, account} =
+            Account.create(%{
+              name: "#{type} Account",
+              platform: "Test Bank",
+              user_id: user.id,
+              account_type: type,
+              balance: Decimal.new("1000.00")
+            })
+
+          account
+        end)
 
       PubSub.subscribe("balance_changes")
 
@@ -185,10 +203,11 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
       end)
 
       # Should receive notifications for all account types
-      messages = for _ <- 1..4 do
-        assert_receive {:balance_updated, message}
-        message
-      end
+      messages =
+        for _ <- 1..4 do
+          assert_receive {:balance_updated, message}
+          message
+        end
 
       # Verify we got notifications for all account types
       received_types = Enum.map(messages, & &1.account_type) |> Enum.sort()
@@ -200,14 +219,24 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
     test "notification message format is consistent", %{checking_account: account} do
       PubSub.subscribe("balance_changes")
 
-      {:ok, _} = BalanceManager.update_cash_balance(account.id, Decimal.new("3000.00"), "Consistency test")
+      {:ok, _} =
+        BalanceManager.update_cash_balance(account.id, Decimal.new("3000.00"), "Consistency test")
 
       assert_receive {:balance_updated, message}
 
       # Verify message structure
       assert is_map(message)
 
-      required_keys = [:account_id, :account_name, :account_type, :old_balance, :new_balance, :notes, :timestamp]
+      required_keys = [
+        :account_id,
+        :account_name,
+        :account_type,
+        :old_balance,
+        :new_balance,
+        :notes,
+        :timestamp
+      ]
+
       actual_keys = Map.keys(message) |> Enum.sort()
       expected_keys = Enum.sort(required_keys)
 
@@ -227,14 +256,25 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
       PubSub.subscribe("balance_changes")
 
       # Make an update and verify we receive it
-      {:ok, _} = BalanceManager.update_cash_balance(account.id, Decimal.new("2100.00"), "Before unsubscribe")
+      {:ok, _} =
+        BalanceManager.update_cash_balance(
+          account.id,
+          Decimal.new("2100.00"),
+          "Before unsubscribe"
+        )
+
       assert_receive {:balance_updated, _message}
 
       # Unsubscribe
       PubSub.unsubscribe("balance_changes")
 
       # Make another update
-      {:ok, _} = BalanceManager.update_cash_balance(account.id, Decimal.new("2200.00"), "After unsubscribe")
+      {:ok, _} =
+        BalanceManager.update_cash_balance(
+          account.id,
+          Decimal.new("2200.00"),
+          "After unsubscribe"
+        )
 
       # Should not receive the second notification
       refute_receive {:balance_updated, _message}, 100
@@ -248,42 +288,48 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
 
       {:ok, user} = User.create(%{name: "ETS Test User"})
 
-      {:ok, account} = Account.create(%{
-        name: "ETS Test Account",
-        platform: "Test Bank",
-        user_id: user.id,
-        account_type: :checking,
-        balance: Decimal.new("1000.00")
-      })
+      {:ok, account} =
+        Account.create(%{
+          name: "ETS Test Account",
+          platform: "Test Bank",
+          user_id: user.id,
+          account_type: :checking,
+          balance: Decimal.new("1000.00")
+        })
 
       # First, do a sequential test to ensure the basic functionality works
-      {:ok, _} = BalanceManager.update_cash_balance(account.id, Decimal.new("1100.00"), "Sequential test")
+      {:ok, _} =
+        BalanceManager.update_cash_balance(account.id, Decimal.new("1100.00"), "Sequential test")
+
       {:ok, initial_history} = BalanceManager.get_balance_history(account.id)
       assert length(initial_history) == 1
 
       # Now simulate concurrent balance updates
-      tasks = for i <- 1..3 do  # Reduced from 5 to 3 for more reliable testing
-        Task.async(fn ->
-          balance = Decimal.new("#{1200 + i * 100}.00")
-          notes = "Concurrent update #{i}"
-          BalanceManager.update_cash_balance(account.id, balance, notes)
-        end)
-      end
+      # Reduced from 5 to 3 for more reliable testing
+      tasks =
+        for i <- 1..3 do
+          Task.async(fn ->
+            balance = Decimal.new("#{1200 + i * 100}.00")
+            notes = "Concurrent update #{i}"
+            BalanceManager.update_cash_balance(account.id, balance, notes)
+          end)
+        end
 
       # Wait for all tasks to complete
       results = Task.await_many(tasks, 5000)
 
       # All updates should succeed
       assert Enum.all?(results, fn result ->
-        match?({:ok, _account}, result)
-      end)
+               match?({:ok, _account}, result)
+             end)
 
       # Give a small delay for ETS operations to complete
       :timer.sleep(100)
 
       # History should contain all updates (initial + concurrent)
       {:ok, history} = BalanceManager.get_balance_history(account.id)
-      assert length(history) >= 3  # At least the concurrent updates should be there
+      # At least the concurrent updates should be there
+      assert length(history) >= 3
     end
   end
 end

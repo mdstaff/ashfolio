@@ -109,9 +109,6 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
       assert Enum.any?(changeset.errors, fn error -> error.field == :user_id end)
     end
 
-
-
-
     test "validates name uniqueness per user", %{user: user} do
       # Create another user
       {:ok, other_user} =
@@ -339,7 +336,10 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
       # Verify our child category is in the results and all have the correct parent
       child_category_ids = Enum.map(child_categories, & &1.id)
       assert child_category.id in child_category_ids
-      assert Enum.all?(child_categories, fn category -> category.parent_category_id == parent_category.id end)
+
+      assert Enum.all?(child_categories, fn category ->
+               category.parent_category_id == parent_category.id
+             end)
     end
   end
 
@@ -486,7 +486,10 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
       # Verify our child category is in the results
       child_category_ids = Enum.map(child_categories, & &1.id)
       assert child_category.id in child_category_ids
-      assert Enum.all?(child_categories, fn cat -> cat.parent_category_id == parent_category.id end)
+
+      assert Enum.all?(child_categories, fn cat ->
+               cat.parent_category_id == parent_category.id
+             end)
     end
 
     test "update function works", %{user: user} do
@@ -545,11 +548,15 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
           user_id: user.id
         })
 
-      {:ok, categories_with_children} = TransactionCategory.get_user_categories_with_children(user.id)
+      {:ok, categories_with_children} =
+        TransactionCategory.get_user_categories_with_children(user.id)
 
       # Find our parent category in the results
-      parent_in_results = Enum.find(categories_with_children, fn cat -> cat.id == parent_category.id end)
-      child_in_results = Enum.find(categories_with_children, fn cat -> cat.id == child_category.id end)
+      parent_in_results =
+        Enum.find(categories_with_children, fn cat -> cat.id == parent_category.id end)
+
+      child_in_results =
+        Enum.find(categories_with_children, fn cat -> cat.id == child_category.id end)
 
       assert parent_in_results != nil
       assert child_in_results != nil

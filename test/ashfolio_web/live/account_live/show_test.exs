@@ -23,12 +23,13 @@ defmodule AshfolioWeb.AccountLive.ShowTest do
       })
 
     # Get or create test symbol
-    symbol = get_or_create_symbol("AAPL", %{
-      name: "Apple Inc.",
-      asset_class: :stock,
-      data_source: :yahoo_finance,
-      current_price: Decimal.new("150.00")
-    })
+    symbol =
+      get_or_create_symbol("AAPL", %{
+        name: "Apple Inc.",
+        asset_class: :stock,
+        data_source: :yahoo_finance,
+        current_price: Decimal.new("150.00")
+      })
 
     # Create test transactions
     {:ok, buy_transaction} =

@@ -39,7 +39,9 @@ defmodule Ashfolio.DataCase do
   def setup_sandbox(tags) do
     # Use shared mode for tests that need GenServer access
     # but still provide proper isolation
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Ashfolio.Repo, shared: not (tags[:async] || false))
+    pid =
+      Ecto.Adapters.SQL.Sandbox.start_owner!(Ashfolio.Repo, shared: not (tags[:async] || false))
+
     on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
   end
 

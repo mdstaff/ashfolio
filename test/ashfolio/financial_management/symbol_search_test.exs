@@ -15,50 +15,54 @@ defmodule Ashfolio.FinancialManagement.SymbolSearchTest do
 
       _symbols = [
         # Exact match scenarios
-        {:ok, aapl} = Symbol.create(%{
-          symbol: "AAPL#{unique_id}",
-          name: "Apple Inc.",
-          asset_class: :stock,
-          data_source: :yahoo_finance
-        }),
-
-        {:ok, googl} = Symbol.create(%{
-          symbol: "GOOGL#{unique_id}",
-          name: "Alphabet Inc. Class A",
-          asset_class: :stock,
-          data_source: :yahoo_finance
-        }),
-
-        {:ok, goog} = Symbol.create(%{
-          symbol: "GOOG#{unique_id}",
-          name: "Alphabet Inc. Class C",
-          asset_class: :stock,
-          data_source: :yahoo_finance
-        }),
+        {:ok, aapl} =
+          Symbol.create(%{
+            symbol: "AAPL#{unique_id}",
+            name: "Apple Inc.",
+            asset_class: :stock,
+            data_source: :yahoo_finance
+          }),
+        {:ok, googl} =
+          Symbol.create(%{
+            symbol: "GOOGL#{unique_id}",
+            name: "Alphabet Inc. Class A",
+            asset_class: :stock,
+            data_source: :yahoo_finance
+          }),
+        {:ok, goog} =
+          Symbol.create(%{
+            symbol: "GOOG#{unique_id}",
+            name: "Alphabet Inc. Class C",
+            asset_class: :stock,
+            data_source: :yahoo_finance
+          }),
 
         # Name matching scenarios
-        {:ok, msft} = Symbol.create(%{
-          symbol: "MSFT#{unique_id}",
-          name: "Microsoft Corporation",
-          asset_class: :stock,
-          data_source: :yahoo_finance
-        }),
+        {:ok, msft} =
+          Symbol.create(%{
+            symbol: "MSFT#{unique_id}",
+            name: "Microsoft Corporation",
+            asset_class: :stock,
+            data_source: :yahoo_finance
+          }),
 
         # Mixed case scenarios
-        {:ok, btc} = Symbol.create(%{
-          symbol: "BTC-USD#{unique_id}",
-          name: "Bitcoin USD",
-          asset_class: :crypto,
-          data_source: :coingecko
-        }),
+        {:ok, btc} =
+          Symbol.create(%{
+            symbol: "BTC-USD#{unique_id}",
+            name: "Bitcoin USD",
+            asset_class: :crypto,
+            data_source: :coingecko
+          }),
 
         # ETF for variety
-        {:ok, spy} = Symbol.create(%{
-          symbol: "SPY#{unique_id}",
-          name: "SPDR S&P 500 ETF Trust",
-          asset_class: :etf,
-          data_source: :yahoo_finance
-        })
+        {:ok, spy} =
+          Symbol.create(%{
+            symbol: "SPY#{unique_id}",
+            name: "SPDR S&P 500 ETF Trust",
+            asset_class: :etf,
+            data_source: :yahoo_finance
+          })
       ]
 
       %{
@@ -108,19 +112,21 @@ defmodule Ashfolio.FinancialManagement.SymbolSearchTest do
       unique_id: unique_id
     } do
       # Create additional symbols for ranking test
-      {:ok, _google_spac} = Symbol.create(%{
-        symbol: "GSPAC#{unique_id}",
-        name: "Google SPAC Corp",
-        asset_class: :stock,
-        data_source: :manual
-      })
+      {:ok, _google_spac} =
+        Symbol.create(%{
+          symbol: "GSPAC#{unique_id}",
+          name: "Google SPAC Corp",
+          asset_class: :stock,
+          data_source: :manual
+        })
 
-      {:ok, _facebook} = Symbol.create(%{
-        symbol: "META#{unique_id}",
-        name: "Meta Platforms (formerly Facebook, Google competitor)",
-        asset_class: :stock,
-        data_source: :yahoo_finance
-      })
+      {:ok, _facebook} =
+        Symbol.create(%{
+          symbol: "META#{unique_id}",
+          name: "Meta Platforms (formerly Facebook, Google competitor)",
+          asset_class: :stock,
+          data_source: :yahoo_finance
+        })
 
       # Search for "goog" - should rank by relevance
       query = "goog"

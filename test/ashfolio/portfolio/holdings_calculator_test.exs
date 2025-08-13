@@ -21,13 +21,15 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       {:ok, user} = create_test_user()
       account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
 
-      symbol1 = SQLiteHelpers.get_or_create_symbol("AAPL", %{
-        current_price: Decimal.new("150.00")
-      })
+      symbol1 =
+        SQLiteHelpers.get_or_create_symbol("AAPL", %{
+          current_price: Decimal.new("150.00")
+        })
 
-      symbol2 = SQLiteHelpers.get_or_create_symbol("MSFT", %{
-        current_price: Decimal.new("300.00")
-      })
+      symbol2 =
+        SQLiteHelpers.get_or_create_symbol("MSFT", %{
+          current_price: Decimal.new("300.00")
+        })
 
       # Create transactions
       {:ok, _} =
@@ -86,9 +88,10 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       {:ok, user} = create_test_user()
       account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
 
-      symbol = SQLiteHelpers.get_or_create_symbol("AAPL", %{
-        current_price: Decimal.new("150.00")
-      })
+      symbol =
+        SQLiteHelpers.get_or_create_symbol("AAPL", %{
+          current_price: Decimal.new("150.00")
+        })
 
       # Buy and then sell all shares
       {:ok, _} =
@@ -239,9 +242,10 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       {:ok, user} = create_test_user()
       account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
 
-      symbol = SQLiteHelpers.get_or_create_symbol("PNL", %{
-        current_price: Decimal.new("150.00")
-      })
+      symbol =
+        SQLiteHelpers.get_or_create_symbol("PNL", %{
+          current_price: Decimal.new("150.00")
+        })
 
       {:ok, _} =
         Transaction.create(%{
@@ -308,13 +312,15 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       {:ok, user} = create_test_user()
       account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
 
-      symbol1 = SQLiteHelpers.get_or_create_symbol("AAPL", %{
-        current_price: Decimal.new("150.00")
-      })
+      symbol1 =
+        SQLiteHelpers.get_or_create_symbol("AAPL", %{
+          current_price: Decimal.new("150.00")
+        })
 
-      symbol2 = SQLiteHelpers.get_or_create_symbol("MSFT", %{
-        current_price: Decimal.new("300.00")
-      })
+      symbol2 =
+        SQLiteHelpers.get_or_create_symbol("MSFT", %{
+          current_price: Decimal.new("300.00")
+        })
 
       # Create transactions
       {:ok, _} =
@@ -360,9 +366,10 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       {:ok, user} = create_test_user()
       account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
 
-      symbol = SQLiteHelpers.get_or_create_symbol("SUMMARY", %{
-        current_price: Decimal.new("150.00")
-      })
+      symbol =
+        SQLiteHelpers.get_or_create_symbol("SUMMARY", %{
+          current_price: Decimal.new("150.00")
+        })
 
       {:ok, _} =
         Transaction.create(%{
@@ -796,7 +803,9 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
     test "handles accounts with is_excluded flag" do
       {:ok, user} = create_test_user()
       {:ok, active_account} = Account.create(%{name: "Active Account", user_id: user.id})
-      {:ok, excluded_account} = Account.create(%{name: "Excluded Account", user_id: user.id, is_excluded: true})
+
+      {:ok, excluded_account} =
+        Account.create(%{name: "Excluded Account", user_id: user.id, is_excluded: true})
 
       {:ok, symbol} =
         Symbol.create(%{
@@ -839,7 +848,6 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       assert Decimal.equal?(holding.quantity, Decimal.new("10"))
       assert Decimal.equal?(holding.cost_basis, Decimal.new("1000.00"))
     end
-
 
     test "handles zero cost basis scenarios in portfolio summary" do
       {:ok, user} = create_test_user()
@@ -1054,9 +1062,6 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       assert Decimal.equal?(cost_basis.total_cost, Decimal.new("900.00"))
       assert Decimal.equal?(cost_basis.average_cost, Decimal.new("90.00"))
     end
-
-
-
 
     test "handles multiple accounts with same symbol" do
       {:ok, user} = create_test_user()

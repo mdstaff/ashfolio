@@ -9,7 +9,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
   """
 
   use AshfolioWeb.LiveViewCase, async: false
-  
+
   @moduletag :liveview
   @moduletag :ui
   @moduletag :fast
@@ -17,11 +17,27 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
   # Mock Context module for testing
   defmodule MockContext do
     def search_symbols(_query, _opts) do
-      {:ok, [
-        %{symbol: "AAPL", name: "Apple Inc.", current_price: Decimal.new("150.00"), asset_class: :stock},
-        %{symbol: "MSFT", name: "Microsoft Corporation", current_price: Decimal.new("300.00"), asset_class: :stock},
-        %{symbol: "GOOGL", name: "Alphabet Inc.", current_price: Decimal.new("2500.00"), asset_class: :stock}
-      ]}
+      {:ok,
+       [
+         %{
+           symbol: "AAPL",
+           name: "Apple Inc.",
+           current_price: Decimal.new("150.00"),
+           asset_class: :stock
+         },
+         %{
+           symbol: "MSFT",
+           name: "Microsoft Corporation",
+           current_price: Decimal.new("300.00"),
+           asset_class: :stock
+         },
+         %{
+           symbol: "GOOGL",
+           name: "Alphabet Inc.",
+           current_price: Decimal.new("2500.00"),
+           asset_class: :stock
+         }
+       ]}
     end
   end
 
@@ -52,7 +68,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
         />
 
         <div :if={@selected_symbol} data-testid="selected-symbol">
-          Selected: <%= @selected_symbol.symbol %> - <%= @selected_symbol.name %>
+          Selected: {@selected_symbol.symbol} - {@selected_symbol.name}
         </div>
       </div>
       """
@@ -107,7 +123,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
       # Test that the component renders with proper keydown handling attributes
       assert html =~ ~s(phx-keydown="keydown")
       assert html =~ ~s(phx-target="1")
-      
+
       # Component should have the necessary ARIA attributes for navigation
       assert html =~ ~s(role="combobox")
       assert html =~ ~s(aria-owns="test-autocomplete-results")
@@ -119,7 +135,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
       # Test that the component renders with proper navigation support
       assert html =~ ~s(phx-keydown="keydown")
       assert html =~ ~s(role="combobox")
-      
+
       # Component should have proper ARIA attributes
       assert html =~ ~s(aria-haspopup="listbox")
     end
@@ -131,7 +147,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
       assert html =~ ~s(phx-keydown="keydown")
       assert html =~ ~s(phx-change="search_input")
       assert html =~ ~s(phx-target="1")
-      
+
       # Component should have proper debouncing configured
       assert html =~ ~s(phx-debounce="300")
     end
@@ -141,7 +157,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
 
       # Test that the component has proper keyboard handling
       assert html =~ ~s(aria-haspopup="listbox")
-      
+
       # Component should have proper keyboard event handling
       assert html =~ ~s(phx-keydown="keydown")
       assert html =~ ~s(role="combobox")
@@ -173,7 +189,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
       # Test that the input has proper sizing for mobile interaction
       assert html =~ "block w-full"
       assert html =~ "rounded-md"
-      
+
       # Component should be structured for accessibility
       assert html =~ ~s(data-testid="symbol-autocomplete")
     end
@@ -185,7 +201,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
 
       # Test that the component has smooth transition styling classes ready
       assert html =~ "transition-colors duration-150 ease-in-out"
-      
+
       # Component should have proper focus styling
       assert html =~ "focus:border-blue-500 focus:ring-blue-500"
     end
@@ -205,7 +221,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
       assert html =~ ~s(aria-haspopup="listbox")
       assert html =~ ~s(aria-owns="test-autocomplete-results")
       assert html =~ ~s(aria-live="polite")
-      
+
       # Note: aria-expanded is dynamically rendered based on dropdown state
       # In static component tests, it may not be present when @show_dropdown is false
     end
@@ -276,7 +292,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
       assert html =~ ~s(phx-keydown="keydown")
       assert html =~ ~s(role="combobox")
       assert html =~ ~s(aria-haspopup="listbox")
-      
+
       # Component should be stable and renderable
       assert html =~ ~s(data-testid="symbol-autocomplete")
     end
@@ -285,11 +301,13 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
   # Helper function to create a test LiveView
   defp mount_live(conn, _path) do
     # Create a proper session-enabled connection
-    conn_with_session = 
+    conn_with_session =
       conn
       |> Plug.Test.init_test_session(%{})
       |> Plug.Conn.put_session(:_csrf_token, "test_token")
-    
-    Phoenix.LiveViewTest.live_isolated(conn_with_session, TestLive, session: %{"_csrf_token" => "test_token"})
+
+    Phoenix.LiveViewTest.live_isolated(conn_with_session, TestLive,
+      session: %{"_csrf_token" => "test_token"}
+    )
   end
 end

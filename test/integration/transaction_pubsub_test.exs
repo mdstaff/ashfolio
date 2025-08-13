@@ -189,15 +189,16 @@ defmodule AshfolioWeb.Integration.TransactionPubSubTest do
     attrs = Map.merge(default_attrs, attrs)
 
     # Calculate total_amount if not provided
-    attrs = if Map.has_key?(attrs, :total_amount) do
-      attrs
-    else
-      quantity = attrs[:quantity] || default_attrs[:quantity]
-      price = attrs[:price] || default_attrs[:price]
-      fee = attrs[:fee] || default_attrs[:fee]
-      total_amount = Decimal.add(Decimal.mult(quantity, price), fee)
-      Map.put(attrs, :total_amount, total_amount)
-    end
+    attrs =
+      if Map.has_key?(attrs, :total_amount) do
+        attrs
+      else
+        quantity = attrs[:quantity] || default_attrs[:quantity]
+        price = attrs[:price] || default_attrs[:price]
+        fee = attrs[:fee] || default_attrs[:fee]
+        total_amount = Decimal.add(Decimal.mult(quantity, price), fee)
+        Map.put(attrs, :total_amount, total_amount)
+      end
 
     Ashfolio.Portfolio.Transaction.create(attrs)
   end

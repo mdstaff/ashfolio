@@ -20,7 +20,7 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
   setup do
     # Clear cache before each test
     Cache.clear_all()
-    
+
     # Allow the PriceManager GenServer to access database and mocks
     Ashfolio.SQLiteHelpers.allow_price_manager_db_access()
 
@@ -33,19 +33,21 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
     msft = Ashfolio.SQLiteHelpers.get_or_create_symbol("MSFT", %{data_source: :yahoo_finance})
 
     # Create transactions to make symbols "active"
-    _transaction1 = Ashfolio.SQLiteHelpers.create_test_transaction(user, account, aapl, %{
-      type: :buy,
-      quantity: Decimal.new("10"),
-      price: Decimal.new("150.00"),
-      date: ~D[2024-01-15]
-    })
+    _transaction1 =
+      Ashfolio.SQLiteHelpers.create_test_transaction(user, account, aapl, %{
+        type: :buy,
+        quantity: Decimal.new("10"),
+        price: Decimal.new("150.00"),
+        date: ~D[2024-01-15]
+      })
 
-    _transaction2 = Ashfolio.SQLiteHelpers.create_test_transaction(user, account, msft, %{
-      type: :buy,
-      quantity: Decimal.new("5"),
-      price: Decimal.new("300.00"),
-      date: ~D[2024-01-16]
-    })
+    _transaction2 =
+      Ashfolio.SQLiteHelpers.create_test_transaction(user, account, msft, %{
+        type: :buy,
+        quantity: Decimal.new("5"),
+        price: Decimal.new("300.00"),
+        date: ~D[2024-01-16]
+      })
 
     %{
       user: user,
@@ -325,7 +327,6 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
       assert results.success_count == 0
       assert results.failure_count == 1
     end
-
   end
 
   describe "integration with existing systems" do

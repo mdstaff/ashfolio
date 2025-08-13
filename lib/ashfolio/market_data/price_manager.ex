@@ -247,7 +247,10 @@ defmodule Ashfolio.MarketData.PriceManager do
         end
 
       {:error, :rate_limited, retry_after_ms} ->
-        Logger.warning("Rate limit exceeded, cannot refresh prices. Retry after #{retry_after_ms}ms")
+        Logger.warning(
+          "Rate limit exceeded, cannot refresh prices. Retry after #{retry_after_ms}ms"
+        )
+
         %{
           success_count: 0,
           failure_count: length(symbols),
@@ -256,7 +259,6 @@ defmodule Ashfolio.MarketData.PriceManager do
         }
     end
   end
-
 
   defp fetch_individually_with_rate_limit(symbols) do
     results =

@@ -67,7 +67,8 @@ defmodule Ashfolio.FinancialManagement.TransactionCategory do
 
     # Validate name format
     validate(match(:name, ~r/^[a-zA-Z0-9\s\-_&]+$/),
-      message: "Category name can only contain letters, numbers, spaces, hyphens, underscores, and ampersands"
+      message:
+        "Category name can only contain letters, numbers, spaces, hyphens, underscores, and ampersands"
     )
 
     # Validate color format (hex color)
@@ -90,16 +91,22 @@ defmodule Ashfolio.FinancialManagement.TransactionCategory do
           |> Ash.Query.filter(user_id: user_id, name: name)
 
         # Exclude current record if updating
-        existing_query = if id do
-          Ash.Query.filter(existing_query, id != ^id)
-        else
-          existing_query
-        end
+        existing_query =
+          if id do
+            Ash.Query.filter(existing_query, id != ^id)
+          else
+            existing_query
+          end
 
         case Ash.read_first(existing_query) do
-          {:ok, nil} -> :ok
-          {:ok, _existing} -> {:error, field: :name, message: "Category name must be unique per user"}
-          {:error, _} -> :ok
+          {:ok, nil} ->
+            :ok
+
+          {:ok, _existing} ->
+            {:error, field: :name, message: "Category name must be unique per user"}
+
+          {:error, _} ->
+            :ok
         end
       else
         :ok
@@ -138,7 +145,11 @@ defmodule Ashfolio.FinancialManagement.TransactionCategory do
       change(fn changeset, _context ->
         case changeset.data do
           %{is_system: true} ->
-            Ash.Changeset.add_error(changeset, field: :is_system, message: "System categories cannot be modified")
+            Ash.Changeset.add_error(changeset,
+              field: :is_system,
+              message: "System categories cannot be modified"
+            )
+
           _ ->
             changeset
         end
@@ -181,7 +192,11 @@ defmodule Ashfolio.FinancialManagement.TransactionCategory do
       change(fn changeset, _context ->
         case changeset.data do
           %{is_system: true} ->
-            Ash.Changeset.add_error(changeset, field: :is_system, message: "System categories cannot be deleted")
+            Ash.Changeset.add_error(changeset,
+              field: :is_system,
+              message: "System categories cannot be deleted"
+            )
+
           _ ->
             changeset
         end

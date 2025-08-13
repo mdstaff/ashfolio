@@ -4,6 +4,6 @@ defmodule Ashfolio.MarketData.HttpClientBehaviour do
   """
 
   @callback get(String.t(), list(), keyword()) ::
-    {:ok, %{status_code: integer(), body: String.t()}} |
-    {:error, %HTTPoison.Error{}}
+              {:ok, %{status_code: integer(), body: String.t()}}
+              | {:error, %HTTPoison.Error{}}
 end

@@ -88,7 +88,6 @@ defmodule Ashfolio.Portfolio.SymbolTest do
       assert Enum.any?(changeset.errors, fn error -> error.field == :asset_class end)
     end
 
-
     test "validates asset_class is one of allowed values" do
       unique_symbol = "VAL#{System.unique_integer([:positive])}"
 
@@ -103,10 +102,6 @@ defmodule Ashfolio.Portfolio.SymbolTest do
       assert Enum.any?(changeset.errors, fn error -> error.field == :asset_class end)
     end
 
-
-
-
-
     test "allows valid symbol formats" do
       # Use unique identifiers to avoid conflicts
       unique_id = System.unique_integer([:positive])
@@ -114,6 +109,7 @@ defmodule Ashfolio.Portfolio.SymbolTest do
 
       for format <- valid_formats do
         unique_symbol = "#{format}#{unique_id}#{System.unique_integer([:positive])}"
+
         {:ok, symbol} =
           Ash.create(Symbol, %{
             symbol: unique_symbol,

@@ -1,25 +1,33 @@
 # Ashfolio Development Commands
 # Run `just` to see all available commands
 
-#   # Architectural focus
+# ====== DAILY WORKFLOW (Most Used) ======
+#   just work               # Start daily development workflow
+#   just quick              # Quick validation (format + compile + smoke tests)
+#   just dev                # Start development server 
+#   just test-new           # Test new v0.2.0 features
+#   just test-file <file>   # Run specific test file
+#   just test-smoke         # Essential tests that must pass
+
+# ====== V0.2.0 FEATURE TESTING ======
+#   just test-financial     # New FinancialManagement domain tests
+#   just test-symbol-search # Symbol search and autocomplete tests
+#   just test-balance       # Cash balance management tests
+#   just test-categories    # Transaction category tests
+
+# ====== ARCHITECTURAL FOCUS ======
 #   just test-ash           # Business logic tests 0 failures
 #   just test-liveview      # UI tests  18 failures
 #   just test-calculations  # Portfolio math tests 0 failures
 #   just test-market-data   # Price system tests 0 failures
-#   just test-mocked        # 0 Failures 2 Skipped
+#   just test-context-api   # Context API integration tests
 
-#   # Performance-based
-#   just test-unit          # Isolated tests 0 failures
-#   just test-fast          # Quick feedback loop 10 failures
-#   just test-slow          # Comprehensive tests 18 failures
+# ====== RARELY USED (Troubleshooting) ======
+#   just test-db-reset      # Reset test database (when tests fail)
+#   just test-coverage      # Full coverage analysis
+#   just test-all-verbose   # Full test suite with details
+#   just clean-rebuild      # Nuclear option - rebuild everything
 
-#   # Development workflow
-#   just test-smoke         # Essential tests 0 failures
-#   just test-regression    # Bug fix validation 0 tests run
-#   just test-error-handling # Fault tolerance 0 tests run
-#   just test-integration: Run end-to-end workflow tests
-#   just test-ui: Run user interface tests
-#
 # Development:
 #   - just dev: Setup and start development server (BLOCKING)
 #   - just dev-bg: Setup and start development server (BACKGROUND)
@@ -81,6 +89,54 @@
 # Show all available commands
 default:
     @just --list
+
+# ============================================================================
+# DAILY WORKFLOW COMMANDS (MOST USED)
+# ============================================================================
+
+# Complete daily development workflow
+work: format compile test-smoke
+    @echo "✅ Daily workflow complete - ready to code!"
+
+# Quick validation for rapid feedback
+quick: format compile test-smoke
+    @echo "🚀 Quick validation passed!"
+
+# Clean rebuild (nuclear option for when things break)
+clean-rebuild: clean deps compile
+    @echo "🔥 Complete rebuild finished!"
+
+# ============================================================================
+# V0.2.0 FEATURE-SPECIFIC TESTING
+# ============================================================================
+
+# Test new FinancialManagement domain features
+test-financial:
+    @echo "🧪 Testing FinancialManagement domain features..."
+    @just test-file test/ashfolio/financial_management/
+    @just test-file test/ashfolio/financial_management/balance_manager_test.exs
+    @just test-file test/ashfolio/financial_management/net_worth_calculator_test.exs
+
+# Test symbol search and autocomplete features
+test-symbol-search:
+    @echo "🧪 Testing Symbol search and autocomplete..."
+    @just test-file test/ashfolio/financial_management/symbol_search_test.exs
+    @just test-file test/ashfolio_web/components/symbol_autocomplete_test.exs
+
+# Test cash balance management
+test-balance:
+    @echo "🧪 Testing cash balance management..."
+    @just test-file test/ashfolio/financial_management/balance_manager_test.exs
+
+# Test transaction categories
+test-categories:
+    @echo "🧪 Testing transaction categories..."
+    @just test-file test/ashfolio/financial_management/transaction_category_test.exs
+
+# Test enhanced Account features for v0.2.0
+test-accounts-enhanced:
+    @echo "🧪 Testing enhanced Account features..."
+    @just test-file test/ashfolio/portfolio/account_test.exs
 
 # Setup and start development server (like npm start)
 dev: setup

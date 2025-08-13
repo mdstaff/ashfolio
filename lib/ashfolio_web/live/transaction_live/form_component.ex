@@ -171,7 +171,9 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
   # Defensive user creation for single-user application
   defp get_or_create_default_user_id do
     case User.get_default_user() do
-      {:ok, [user]} -> user.id
+      {:ok, [user]} ->
+        user.id
+
       {:ok, []} ->
         {:ok, user} = User.create(%{name: "Local User", currency: "USD", locale: "en-US"})
         user.id

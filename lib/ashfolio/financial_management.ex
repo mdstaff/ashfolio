@@ -12,6 +12,6 @@ defmodule Ashfolio.FinancialManagement do
   use Ash.Domain
 
   resources do
-    resource Ashfolio.FinancialManagement.TransactionCategory
+    resource(Ashfolio.FinancialManagement.TransactionCategory)
   end
 end

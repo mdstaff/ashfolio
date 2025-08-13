@@ -54,7 +54,8 @@ defmodule Ashfolio.Portfolio.Transaction do
 
     attribute :notes, :string do
       description("Optional notes about the transaction")
-      constraints(max_length: 500)  # Security: Limit notes to 500 characters
+      # Security: Limit notes to 500 characters
+      constraints(max_length: 500)
     end
 
     timestamps()

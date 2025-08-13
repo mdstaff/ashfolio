@@ -22,6 +22,7 @@ defmodule Ashfolio.SQLiteHelpers do
           currency: "USD",
           locale: "en-US"
         }
+
         case User.create(params) do
           {:ok, user} -> user
           {:error, error} -> raise "Failed to create default user: #{inspect(error)}"
@@ -60,6 +61,7 @@ defmodule Ashfolio.SQLiteHelpers do
           platform: "Test Platform",
           user_id: user.id
         }
+
         case Account.create(params, actor: user) do
           {:ok, account} -> account
           {:error, error} -> raise "Failed to create default account: #{inspect(error)}"
@@ -97,6 +99,7 @@ defmodule Ashfolio.SQLiteHelpers do
             current_price: Decimal.new("100.00"),
             price_updated_at: DateTime.utc_now()
           }
+
           case Symbol.create(params) do
             {:ok, symbol} -> symbol
             {:error, error} -> raise "Failed to create symbol #{ticker}: #{inspect(error)}"
@@ -131,41 +134,51 @@ defmodule Ashfolio.SQLiteHelpers do
 
   @doc """
   Validates that the global test data is properly set up.
-  
+
   This safeguard helps catch database setup issues early before tests run.
   """
   def validate_global_test_data! do
     # Check default user exists
     case User.get_default_user() do
-      {:ok, []} -> 
+      {:ok, []} ->
         raise "❌ SAFEGUARD FAILURE: Default user not found after setup"
-      {:ok, [user]} when user.name in ["Test User", "Local User"] -> 
+
+      {:ok, [user]} when user.name in ["Test User", "Local User"] ->
         IO.puts("✅ Test user validated: #{user.name}")
-      {:ok, [user]} -> 
+
+      {:ok, [user]} ->
         IO.puts("⚠️  WARNING: Test user has unexpected name: #{user.name}")
-      {:error, error} -> 
+
+      {:error, error} ->
         raise "❌ SAFEGUARD FAILURE: Could not query default user: #{inspect(error)}"
     end
 
     # Check default account exists
-    case Ashfolio.Portfolio.Account.get_by_name_for_user(get_default_user().id, "Default Test Account") do
-      {:ok, nil} -> 
+    case Ashfolio.Portfolio.Account.get_by_name_for_user(
+           get_default_user().id,
+           "Default Test Account"
+         ) do
+      {:ok, nil} ->
         raise "❌ SAFEGUARD FAILURE: Default account not found after setup"
-      {:ok, account} -> 
+
+      {:ok, account} ->
         IO.puts("✅ Test account validated: #{account.name}")
-      {:error, error} -> 
+
+      {:error, error} ->
         raise "❌ SAFEGUARD FAILURE: Could not query default account: #{inspect(error)}"
     end
 
     # Check common symbols exist
     common_tickers = ["AAPL", "MSFT", "GOOGL", "TSLA"]
-    missing_symbols = Enum.filter(common_tickers, fn ticker ->
-      case Ashfolio.Portfolio.Symbol.find_by_symbol(ticker) do
-        {:ok, []} -> true
-        {:ok, [_symbol]} -> false
-        {:error, _} -> true
-      end
-    end)
+
+    missing_symbols =
+      Enum.filter(common_tickers, fn ticker ->
+        case Ashfolio.Portfolio.Symbol.find_by_symbol(ticker) do
+          {:ok, []} -> true
+          {:ok, [_symbol]} -> false
+          {:error, _} -> true
+        end
+      end)
 
     if missing_symbols != [] do
       raise "❌ SAFEGUARD FAILURE: Missing common symbols: #{inspect(missing_symbols)}"
@@ -185,9 +198,15 @@ defmodule Ashfolio.SQLiteHelpers do
   """
   def get_or_create_default_user do
     case User.get_default_user() do
-      {:ok, [user]} -> {:ok, user}
-      {:ok, []} -> {:error, "Default user not found - ensure create_default_user!/0 was called in test_helper.exs"}
-      {:error, error} -> {:error, error}
+      {:ok, [user]} ->
+        {:ok, user}
+
+      {:ok, []} ->
+        {:error,
+         "Default user not found - ensure create_default_user!/0 was called in test_helper.exs"}
+
+      {:error, error} ->
+        {:error, error}
     end
   end
 
@@ -199,9 +218,14 @@ defmodule Ashfolio.SQLiteHelpers do
   """
   def get_default_user do
     case User.get_default_user() do
-      {:ok, [user]} -> user
-      {:ok, []} -> raise "Default user not found - ensure setup_global_test_data!/0 was called in test_helper.exs"
-      {:error, error} -> raise "Failed to fetch default user: #{inspect(error)}"
+      {:ok, [user]} ->
+        user
+
+      {:ok, []} ->
+        raise "Default user not found - ensure setup_global_test_data!/0 was called in test_helper.exs"
+
+      {:error, error} ->
+        raise "Failed to fetch default user: #{inspect(error)}"
     end
   end
 
@@ -216,9 +240,14 @@ defmodule Ashfolio.SQLiteHelpers do
     user = user || get_default_user()
 
     case Account.get_by_name_for_user(user.id, "Default Test Account") do
-      {:ok, account} when not is_nil(account) -> account
-      {:ok, nil} -> raise "Default account not found - ensure setup_global_test_data!/0 was called in test_helper.exs"
-      {:error, error} -> raise "Failed to fetch default account: #{inspect(error)}"
+      {:ok, account} when not is_nil(account) ->
+        account
+
+      {:ok, nil} ->
+        raise "Default account not found - ensure setup_global_test_data!/0 was called in test_helper.exs"
+
+      {:error, error} ->
+        raise "Failed to fetch default account: #{inspect(error)}"
     end
   end
 
@@ -229,9 +258,14 @@ defmodule Ashfolio.SQLiteHelpers do
     alias Ashfolio.Portfolio.Symbol
 
     case Symbol.find_by_symbol(ticker) do
-      {:ok, [symbol]} -> symbol
-      {:ok, []} -> raise "Common symbol #{ticker} not found - ensure setup_global_test_data!/0 was called in test_helper.exs"
-      {:error, error} -> raise "Failed to fetch symbol #{ticker}: #{inspect(error)}"
+      {:ok, [symbol]} ->
+        symbol
+
+      {:ok, []} ->
+        raise "Common symbol #{ticker} not found - ensure setup_global_test_data!/0 was called in test_helper.exs"
+
+      {:error, error} ->
+        raise "Failed to fetch symbol #{ticker}: #{inspect(error)}"
     end
   end
 
@@ -264,21 +298,29 @@ defmodule Ashfolio.SQLiteHelpers do
         account_name = attrs[:name] || "Test Account #{System.unique_integer([:positive])}"
 
         case Account.get_by_name_for_user(user.id, account_name) do
-          {:ok, account} when not is_nil(account) -> account
+          {:ok, account} when not is_nil(account) ->
+            account
+
           {:ok, nil} ->
-            params = Map.merge(%{
-              name: account_name,
-              balance: Decimal.new("5000.00"),
-              currency: "USD",
-              platform: "Test Platform",
-              user_id: user.id
-            }, attrs)
+            params =
+              Map.merge(
+                %{
+                  name: account_name,
+                  balance: Decimal.new("5000.00"),
+                  currency: "USD",
+                  platform: "Test Platform",
+                  user_id: user.id
+                },
+                attrs
+              )
 
             case Account.create(params, actor: user) do
               {:ok, account} -> account
               {:error, error} -> raise "Failed to create custom account: #{inspect(error)}"
             end
-          {:error, error} -> raise "Failed to query for account: #{inspect(error)}"
+
+          {:error, error} ->
+            raise "Failed to query for account: #{inspect(error)}"
         end
       end)
     end
@@ -301,7 +343,11 @@ defmodule Ashfolio.SQLiteHelpers do
     if ticker in common_tickers and current_price do
       # Common ticker but with custom price - get and update
       symbol = get_common_symbol(ticker)
-      case Symbol.update_price(symbol, %{current_price: current_price, price_updated_at: DateTime.utc_now()}) do
+
+      case Symbol.update_price(symbol, %{
+             current_price: current_price,
+             price_updated_at: DateTime.utc_now()
+           }) do
         {:ok, updated_symbol} -> updated_symbol
         {:error, error} -> raise "Failed to update symbol #{ticker} price: #{inspect(error)}"
       end
@@ -315,13 +361,20 @@ defmodule Ashfolio.SQLiteHelpers do
             {:ok, [symbol]} ->
               # Symbol exists - update price if provided
               if current_price do
-                case Symbol.update_price(symbol, %{current_price: current_price, price_updated_at: DateTime.utc_now()}) do
-                  {:ok, updated_symbol} -> updated_symbol
-                  {:error, error} -> raise "Failed to update symbol #{ticker} price: #{inspect(error)}"
+                case Symbol.update_price(symbol, %{
+                       current_price: current_price,
+                       price_updated_at: DateTime.utc_now()
+                     }) do
+                  {:ok, updated_symbol} ->
+                    updated_symbol
+
+                  {:error, error} ->
+                    raise "Failed to update symbol #{ticker} price: #{inspect(error)}"
                 end
               else
                 symbol
               end
+
             {:ok, []} ->
               # Default params - only include current_price if not explicitly excluded
               default_params = %{
@@ -332,16 +385,17 @@ defmodule Ashfolio.SQLiteHelpers do
               }
 
               # Add default price unless attrs explicitly exclude it
-              default_params = if Map.has_key?(attrs, :current_price) do
-                # attrs has current_price key (even if nil) - respect that
-                default_params
-              else
-                # No current_price in attrs - add default
-                Map.merge(default_params, %{
-                  current_price: Decimal.new("50.00"),
-                  price_updated_at: DateTime.utc_now()
-                })
-              end
+              default_params =
+                if Map.has_key?(attrs, :current_price) do
+                  # attrs has current_price key (even if nil) - respect that
+                  default_params
+                else
+                  # No current_price in attrs - add default
+                  Map.merge(default_params, %{
+                    current_price: Decimal.new("50.00"),
+                    price_updated_at: DateTime.utc_now()
+                  })
+                end
 
               params = Map.merge(default_params, attrs)
 
@@ -349,7 +403,9 @@ defmodule Ashfolio.SQLiteHelpers do
                 {:ok, symbol} -> symbol
                 {:error, error} -> raise "Failed to create symbol #{ticker}: #{inspect(error)}"
               end
-            {:error, error} -> raise "Failed to query for symbol #{ticker}: #{inspect(error)}"
+
+            {:error, error} ->
+              raise "Failed to query for symbol #{ticker}: #{inspect(error)}"
           end
         end)
       end
@@ -376,16 +432,20 @@ defmodule Ashfolio.SQLiteHelpers do
       fee = attrs[:fee] || Decimal.new("0.00")
       total_amount = attrs[:total_amount] || Decimal.add(Decimal.mult(quantity, price), fee)
 
-      params = Map.merge(%{
-        type: :buy,
-        quantity: quantity,
-        price: price,
-        fee: fee,
-        total_amount: total_amount,
-        date: Date.utc_today(),
-        account_id: account.id,
-        symbol_id: symbol.id
-      }, attrs)
+      params =
+        Map.merge(
+          %{
+            type: :buy,
+            quantity: quantity,
+            price: price,
+            fee: fee,
+            total_amount: total_amount,
+            date: Date.utc_today(),
+            account_id: account.id,
+            symbol_id: symbol.id
+          },
+          attrs
+        )
 
       case Transaction.create(params, actor: user) do
         {:ok, transaction} -> transaction
@@ -424,12 +484,13 @@ defmodule Ashfolio.SQLiteHelpers do
   end
 
   defp sqlite_busy_error?(%Ash.Error.Unknown{}), do: true
+
   defp sqlite_busy_error?(error) do
     error_string = inspect(error)
-    String.contains?(error_string, "Database busy") or
-    String.contains?(error_string, "database is locked")
-  end
 
+    String.contains?(error_string, "Database busy") or
+      String.contains?(error_string, "database is locked")
+  end
 
   @doc """
   Allows the PriceManager GenServer to access the database and mocks in tests.
@@ -457,7 +518,7 @@ defmodule Ashfolio.SQLiteHelpers do
 
   @doc """
   Quick health check for test database state.
-  
+
   This can be run before test suites to catch database issues early.
   Returns :ok or raises with helpful error messages.
   """
@@ -481,21 +542,21 @@ defmodule Ashfolio.SQLiteHelpers do
 
     IO.puts("📊 Database state:")
     IO.puts("   Users: #{user_count}")
-    IO.puts("   Accounts: #{account_count}")  
+    IO.puts("   Accounts: #{account_count}")
     IO.puts("   Symbols: #{symbol_count}")
 
     # Validate expected minimums for healthy test environment
     cond do
-      user_count == 0 -> 
+      user_count == 0 ->
         raise "❌ HEALTH CHECK FAILED: No users found. Run: MIX_ENV=test mix run -e \"Ashfolio.SQLiteHelpers.setup_global_test_data!()\""
-      
+
       account_count == 0 ->
         raise "❌ HEALTH CHECK FAILED: No accounts found. Run: MIX_ENV=test mix run -e \"Ashfolio.SQLiteHelpers.setup_global_test_data!()\""
-      
+
       symbol_count < 4 ->
         raise "❌ HEALTH CHECK FAILED: Expected at least 4 symbols, found #{symbol_count}. Run: MIX_ENV=test mix run -e \"Ashfolio.SQLiteHelpers.setup_global_test_data!()\""
-      
-      true -> 
+
+      true ->
         IO.puts("🛡️  Test database health check: PASSED")
         :ok
     end
@@ -503,28 +564,31 @@ defmodule Ashfolio.SQLiteHelpers do
 
   @doc """
   Emergency test database recovery procedure.
-  
+
   This implements the complete reset procedure we discovered during debugging.
   """
   def emergency_test_db_reset! do
     IO.puts("🚨 EMERGENCY: Performing complete test database reset...")
-    
+
     # This is the exact procedure that fixed our 253 test failures
     IO.puts("Step 1: Dropping test database...")
-    case Ashfolio.Repo.__adapter__.storage_down(Ashfolio.Repo.config) do
+
+    case Ashfolio.Repo.__adapter__().storage_down(Ashfolio.Repo.config()) do
       :ok -> IO.puts("✅ Database dropped")
       {:error, :already_down} -> IO.puts("✅ Database was already down")
       {:error, error} -> raise "❌ Failed to drop database: #{inspect(error)}"
     end
 
     IO.puts("Step 2: Creating clean test database...")
-    case Ashfolio.Repo.__adapter__.storage_up(Ashfolio.Repo.config) do
+
+    case Ashfolio.Repo.__adapter__().storage_up(Ashfolio.Repo.config()) do
       :ok -> IO.puts("✅ Database created")
       {:error, :already_up} -> IO.puts("✅ Database already exists")
       {:error, error} -> raise "❌ Failed to create database: #{inspect(error)}"
     end
 
     IO.puts("Step 3: Running migrations...")
+
     try do
       Ecto.Migrator.run(Ashfolio.Repo, :up, all: true)
       IO.puts("✅ Migrations completed")
@@ -537,5 +601,4 @@ defmodule Ashfolio.SQLiteHelpers do
 
     IO.puts("🎉 RECOVERY COMPLETE! Test database fully reset and validated.")
   end
-
 end

@@ -22,9 +22,9 @@ defmodule AshfolioWeb.TransactionLive.IndexTest do
 
     test "can create new transaction", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/transactions")
-      
+
       html = index_live |> element("button", "New Transaction") |> render_click()
-      
+
       # Should show the form modal
       assert html =~ "New Transaction"
       assert html =~ "Select type"

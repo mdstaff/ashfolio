@@ -27,25 +27,30 @@ defmodule AshfolioWeb.Integration.SimplifiedPortfolioViewFlowTest do
     # Allow PriceManager to access the database for price refresh tests
     SQLiteHelpers.allow_price_manager_db_access()
 
-    {:ok, account} = Account.create(%{
-      name: "Portfolio Test Account #{System.unique_integer([:positive])}",
-      platform: "Test Broker",
-      balance: Decimal.new("50000"),
-      user_id: user.id
-    })
+    {:ok, account} =
+      Account.create(%{
+        name: "Portfolio Test Account #{System.unique_integer([:positive])}",
+        platform: "Test Broker",
+        balance: Decimal.new("50000"),
+        user_id: user.id
+      })
 
     # Use existing symbols (created globally) and update their prices
     aapl = SQLiteHelpers.get_common_symbol("AAPL")
-    {:ok, aapl} = Symbol.update_price(aapl, %{
-      current_price: Decimal.new("150.00"),
-      price_updated_at: DateTime.utc_now()
-    })
+
+    {:ok, aapl} =
+      Symbol.update_price(aapl, %{
+        current_price: Decimal.new("150.00"),
+        price_updated_at: DateTime.utc_now()
+      })
 
     msft = SQLiteHelpers.get_common_symbol("MSFT")
-    {:ok, msft} = Symbol.update_price(msft, %{
-      current_price: Decimal.new("300.00"),
-      price_updated_at: DateTime.utc_now()
-    })
+
+    {:ok, msft} =
+      Symbol.update_price(msft, %{
+        current_price: Decimal.new("300.00"),
+        price_updated_at: DateTime.utc_now()
+      })
 
     # Create sample transactions for portfolio
     transactions = [
@@ -55,15 +60,16 @@ defmodule AshfolioWeb.Integration.SimplifiedPortfolioViewFlowTest do
     ]
 
     Enum.each(transactions, fn tx ->
-      {:ok, _} = Transaction.create(%{
-        type: tx.type,
-        account_id: account.id,
-        symbol_id: tx.symbol.id,
-        quantity: Decimal.new(tx.quantity),
-        price: Decimal.new(tx.price),
-        total_amount: Decimal.new(tx.total),
-        date: ~D[2024-08-01]
-      })
+      {:ok, _} =
+        Transaction.create(%{
+          type: tx.type,
+          account_id: account.id,
+          symbol_id: tx.symbol.id,
+          quantity: Decimal.new(tx.quantity),
+          price: Decimal.new(tx.price),
+          total_amount: Decimal.new(tx.total),
+          date: ~D[2024-08-01]
+        })
     end)
 
     %{user: user, account: account, symbols: [aapl, msft]}
@@ -78,7 +84,8 @@ defmodule AshfolioWeb.Integration.SimplifiedPortfolioViewFlowTest do
       assert html =~ "Portfolio Dashboard" or html =~ "Dashboard"
 
       # Verify basic portfolio structure exists
-      assert html =~ "$" # Should show dollar amounts somewhere
+      # Should show dollar amounts somewhere
+      assert html =~ "$"
 
       # Check for holdings data
       assert html =~ "AAPL" or html =~ "MSFT"
@@ -97,12 +104,14 @@ defmodule AshfolioWeb.Integration.SimplifiedPortfolioViewFlowTest do
 
           # Check for AAPL position (150 total shares)
           aapl_position = Enum.find(positions, fn pos -> pos.symbol == "AAPL" end)
+
           if aapl_position do
             assert Decimal.equal?(aapl_position.quantity, Decimal.new("150"))
           end
 
           # Check for MSFT position
           msft_position = Enum.find(positions, fn pos -> pos.symbol == "MSFT" end)
+
           if msft_position do
             assert Decimal.equal?(msft_position.quantity, Decimal.new("75"))
           end
@@ -124,10 +133,12 @@ defmodule AshfolioWeb.Integration.SimplifiedPortfolioViewFlowTest do
       expect(YahooFinanceMock, :fetch_prices, fn symbols ->
         assert "AAPL" in symbols
         assert "MSFT" in symbols
-        {:ok, %{
-          "AAPL" => Decimal.new("160.00"),
-          "MSFT" => Decimal.new("310.00")
-        }}
+
+        {:ok,
+         %{
+           "AAPL" => Decimal.new("160.00"),
+           "MSFT" => Decimal.new("310.00")
+         }}
       end)
 
       # Try to find and click refresh button
@@ -145,7 +156,6 @@ defmodule AshfolioWeb.Integration.SimplifiedPortfolioViewFlowTest do
         # Verify page still works after refresh
         updated_html = render(view)
         assert updated_html =~ "Dashboard"
-
       else
         # If no refresh button, just verify dashboard works
         assert html =~ "Dashboard"
@@ -154,18 +164,20 @@ defmodule AshfolioWeb.Integration.SimplifiedPortfolioViewFlowTest do
 
     test "dashboard handles empty portfolio gracefully", %{conn: conn} do
       # Create a user with no transactions
-      {:ok, empty_user} = User.create(%{
-        name: "Empty User",
-        currency: "USD",
-        locale: "en-US"
-      })
+      {:ok, empty_user} =
+        User.create(%{
+          name: "Empty User",
+          currency: "USD",
+          locale: "en-US"
+        })
 
-      {:ok, empty_account} = Account.create(%{
-        name: "Empty Account",
-        platform: "Test",
-        balance: Decimal.new("0"),
-        user_id: empty_user.id
-      })
+      {:ok, empty_account} =
+        Account.create(%{
+          name: "Empty Account",
+          platform: "Test",
+          balance: Decimal.new("0"),
+          user_id: empty_user.id
+        })
 
       # Navigate to dashboard - should handle empty state gracefully
       {:ok, view, html} = live(conn, "/")

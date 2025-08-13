@@ -89,9 +89,10 @@ defmodule AshfolioWeb.TransactionLive.Index do
 
   defp list_transactions() do
     case Ashfolio.Portfolio.Transaction.list() do
-      {:ok, transactions} -> 
+      {:ok, transactions} ->
         transactions |> Ash.load!([:account, :symbol])
-      {:error, _error} -> 
+
+      {:error, _error} ->
         []
     end
   end
@@ -110,7 +111,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
           <.icon name="hero-plus" class="w-4 h-4 mr-2" /> New Transaction
         </.button>
       </div>
-
+      
     <!-- Transaction List (Placeholder) -->
       <.card>
         <:header>
@@ -247,7 +248,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
           </div>
         <% end %>
       </.card>
-
+      
     <!-- Form Modal -->
       <%= if @show_form do %>
         <.live_component

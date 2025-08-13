@@ -753,7 +753,10 @@ defmodule AshfolioWeb.CoreComponents do
 
   def loading_spinner(assigns) do
     ~H"""
-    <div class={["animate-spin rounded-full border-2 border-gray-300 border-t-blue-600", @class]} {@rest}>
+    <div
+      class={["animate-spin rounded-full border-2 border-gray-300 border-t-blue-600", @class]}
+      {@rest}
+    >
     </div>
     """
   end

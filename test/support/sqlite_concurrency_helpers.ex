@@ -102,7 +102,8 @@ defmodule Ashfolio.SQLiteConcurrencyHelpers do
             end)
             |> Enum.each(&module.destroy/1)
 
-          _ -> :ok
+          _ ->
+            :ok
         end
       end)
     end)

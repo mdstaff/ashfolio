@@ -31,9 +31,6 @@ defmodule Ashfolio.Portfolio.CalculatorEdgeCasesTest do
       assert {:ok, result} = Calculator.calculate_simple_return(current_value, cost_basis)
       assert Decimal.equal?(result, Decimal.new("-100.00"))
     end
-
-
-
   end
 
   describe "portfolio value calculation edge cases" do
@@ -53,17 +50,19 @@ defmodule Ashfolio.Portfolio.CalculatorEdgeCasesTest do
       symbol = SQLiteHelpers.get_or_create_symbol("TEST", %{name: "Test Corp"})
 
       # Create buy and sell transactions that net to zero
-      _buy = SQLiteHelpers.create_test_transaction(user, account, symbol, %{
-        type: :buy,
-        quantity: Decimal.new("10"),
-        price: Decimal.new("100.00")
-      })
+      _buy =
+        SQLiteHelpers.create_test_transaction(user, account, symbol, %{
+          type: :buy,
+          quantity: Decimal.new("10"),
+          price: Decimal.new("100.00")
+        })
 
-      _sell = SQLiteHelpers.create_test_transaction(user, account, symbol, %{
-        type: :sell,
-        quantity: Decimal.new("-10"),
-        price: Decimal.new("100.00")
-      })
+      _sell =
+        SQLiteHelpers.create_test_transaction(user, account, symbol, %{
+          type: :sell,
+          quantity: Decimal.new("-10"),
+          price: Decimal.new("100.00")
+        })
 
       assert {:ok, portfolio_value} = Calculator.calculate_portfolio_value(user.id)
       assert Decimal.equal?(portfolio_value, Decimal.new("0.00"))
@@ -71,13 +70,16 @@ defmodule Ashfolio.Portfolio.CalculatorEdgeCasesTest do
 
     test "handles symbols with nil current price", %{user: user} do
       account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
-      symbol = SQLiteHelpers.get_or_create_symbol("NOPRICE", %{name: "No Price Corp", current_price: nil})
 
-      _transaction = SQLiteHelpers.create_test_transaction(user, account, symbol, %{
-        type: :buy,
-        quantity: Decimal.new("10"),
-        price: Decimal.new("100.00")
-      })
+      symbol =
+        SQLiteHelpers.get_or_create_symbol("NOPRICE", %{name: "No Price Corp", current_price: nil})
+
+      _transaction =
+        SQLiteHelpers.create_test_transaction(user, account, symbol, %{
+          type: :buy,
+          quantity: Decimal.new("10"),
+          price: Decimal.new("100.00")
+        })
 
       assert {:ok, portfolio_value} = Calculator.calculate_portfolio_value(user.id)
       assert Decimal.equal?(portfolio_value, Decimal.new("0.00"))
@@ -89,8 +91,6 @@ defmodule Ashfolio.Portfolio.CalculatorEdgeCasesTest do
       user = SQLiteHelpers.get_default_user()
       %{user: user}
     end
-
-
   end
 
   describe "error handling edge cases" do
@@ -101,6 +101,5 @@ defmodule Ashfolio.Portfolio.CalculatorEdgeCasesTest do
       assert {:error, _reason} = Calculator.calculate_position_returns(invalid_user_id)
       assert {:error, _reason} = Calculator.calculate_total_return(invalid_user_id)
     end
-
   end
 end

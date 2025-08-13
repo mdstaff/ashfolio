@@ -153,16 +153,18 @@ defmodule Ashfolio.ContextTest do
       symbol = create_symbol()
 
       # Create buy transaction (+inflow)
-      _buy_tx = create_transaction(account.id, symbol.id, %{
-        type: :buy,
-        total_amount: Decimal.new(1000)
-      })
+      _buy_tx =
+        create_transaction(account.id, symbol.id, %{
+          type: :buy,
+          total_amount: Decimal.new(1000)
+        })
 
       # Create dividend transaction (+inflow)
-      _div_tx = create_transaction(account.id, symbol.id, %{
-        type: :dividend,
-        total_amount: Decimal.new(25)
-      })
+      _div_tx =
+        create_transaction(account.id, symbol.id, %{
+          type: :dividend,
+          total_amount: Decimal.new(25)
+        })
 
       assert {:ok, account_data} = Context.get_account_with_transactions(account.id)
 
@@ -263,7 +265,8 @@ defmodule Ashfolio.ContextTest do
       user = create_user()
 
       # Create investment account with balance
-      _investment = create_account(user.id, :investment, "Investment", %{balance: Decimal.new(10000)})
+      _investment =
+        create_account(user.id, :investment, "Investment", %{balance: Decimal.new(10000)})
 
       # Create cash accounts with balances
       _checking = create_account(user.id, :checking, "Checking", %{balance: Decimal.new(5000)})
@@ -305,6 +308,7 @@ defmodule Ashfolio.ContextTest do
       test_pid = self()
 
       handler_id = :test_handler
+
       :telemetry.attach_many(
         handler_id,
         [
@@ -324,8 +328,11 @@ defmodule Ashfolio.ContextTest do
       assert {:ok, _data} = Context.get_user_dashboard_data(user.id)
 
       # Check that telemetry events were emitted
-      assert_receive {:telemetry, [:ashfolio, :context, :get_user_dashboard_data], %{duration: _}, %{operation: :get_user_dashboard_data}}
-      assert_receive {:telemetry, [:ashfolio, :context, :get_user_dashboard_data, :success], %{}, %{}}
+      assert_receive {:telemetry, [:ashfolio, :context, :get_user_dashboard_data], %{duration: _},
+                      %{operation: :get_user_dashboard_data}}
+
+      assert_receive {:telemetry, [:ashfolio, :context, :get_user_dashboard_data, :success], %{},
+                      %{}}
 
       :telemetry.detach(handler_id)
     end

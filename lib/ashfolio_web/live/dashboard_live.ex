@@ -140,9 +140,12 @@ defmodule AshfolioWeb.DashboardLive do
           </.button>
         </div>
       </div>
-
+      
     <!-- Portfolio Summary Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="portfolio-summary">
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        data-testid="portfolio-summary"
+      >
         <.stat_card
           title="Total Value"
           value={@portfolio_value}
@@ -158,9 +161,14 @@ defmodule AshfolioWeb.DashboardLive do
           positive={FormatHelpers.is_positive?(@total_return_amount)}
           data_testid="total-return"
         />
-        <.stat_card title="Holdings" value={@holdings_count} change={"#{@holdings_count} positions"} data_testid="holdings-count" />
+        <.stat_card
+          title="Holdings"
+          value={@holdings_count}
+          change={"#{@holdings_count} positions"}
+          data_testid="holdings-count"
+        />
       </div>
-
+      
     <!-- Holdings Table -->
       <.card>
         <:header>
@@ -185,7 +193,12 @@ defmodule AshfolioWeb.DashboardLive do
           </div>
         <% else %>
           <div class="overflow-x-auto">
-            <table class="min-w-full mt-4" role="table" aria-label="Portfolio holdings" data-testid="holdings-table">
+            <table
+              class="min-w-full mt-4"
+              role="table"
+              aria-label="Portfolio holdings"
+              data-testid="holdings-table"
+            >
               <thead class="text-sm text-left leading-6 text-zinc-500">
                 <tr>
                   <th class="p-0 pb-4 pr-6 font-normal">
@@ -284,7 +297,7 @@ defmodule AshfolioWeb.DashboardLive do
           </div>
         <% end %>
       </.card>
-
+      
     <!-- Recent Activity -->
       <.card>
         <:header>
@@ -370,10 +383,13 @@ defmodule AshfolioWeb.DashboardLive do
   # Defensive user creation for single-user application
   defp get_default_user do
     case User.get_default_user() do
-      {:ok, [user]} -> {:ok, user}
+      {:ok, [user]} ->
+        {:ok, user}
+
       {:ok, []} ->
         {:ok, user} = User.create(%{name: "Local User", currency: "USD", locale: "en-US"})
         {:ok, user}
+
       {:error, error} ->
         Logger.error("Failed to get or create default user: #{inspect(error)}")
         {:error, error}

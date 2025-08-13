@@ -18,19 +18,22 @@ defmodule AshfolioWeb.Integration.SimplifiedTransactionFlowTest do
     {:ok, user} = SQLiteHelpers.get_or_create_default_user()
 
     # Create a unique account for this test to avoid conflicts
-    {:ok, account} = Account.create(%{
-      name: "Smoke Test Account #{System.unique_integer([:positive])}",
-      platform: "Test Broker",
-      balance: Decimal.new("10000"),
-      user_id: user.id
-    })
+    {:ok, account} =
+      Account.create(%{
+        name: "Smoke Test Account #{System.unique_integer([:positive])}",
+        platform: "Test Broker",
+        balance: Decimal.new("10000"),
+        user_id: user.id
+      })
 
     # Use existing AAPL symbol (created globally) and update its price
     symbol = SQLiteHelpers.get_common_symbol("AAPL")
-    {:ok, symbol} = Symbol.update_price(symbol, %{
-      current_price: Decimal.new("150.00"),
-      price_updated_at: DateTime.utc_now()
-    })
+
+    {:ok, symbol} =
+      Symbol.update_price(symbol, %{
+        current_price: Decimal.new("150.00"),
+        price_updated_at: DateTime.utc_now()
+      })
 
     %{user: user, account: account, symbol: symbol}
   end
@@ -62,11 +65,12 @@ defmodule AshfolioWeb.Integration.SimplifiedTransactionFlowTest do
       assert found_transaction.id == transaction.id
 
       # Step 3: Update transaction
-      {:ok, updated_transaction} = Transaction.update(transaction, %{
-        quantity: Decimal.new("150"),
-        price: Decimal.new("148.00"),
-        total_amount: Decimal.new("22200.00")
-      })
+      {:ok, updated_transaction} =
+        Transaction.update(transaction, %{
+          quantity: Decimal.new("150"),
+          price: Decimal.new("148.00"),
+          total_amount: Decimal.new("22200.00")
+        })
 
       assert Decimal.equal?(updated_transaction.quantity, Decimal.new("150"))
       assert Decimal.equal?(updated_transaction.price, Decimal.new("148.00"))
@@ -90,14 +94,16 @@ defmodule AshfolioWeb.Integration.SimplifiedTransactionFlowTest do
         type: :buy,
         account_id: account.id,
         symbol_id: symbol.id,
-        quantity: Decimal.new("-100"), # Negative quantity should fail
+        # Negative quantity should fail
+        quantity: Decimal.new("-100"),
         price: Decimal.new("150.00"),
         total_amount: Decimal.new("15000.00"),
         date: ~D[2024-08-07]
       }
 
       {:error, error} = Transaction.create(invalid_data)
-      assert is_map(error) # Should be an Ash.Error with validation details
+      # Should be an Ash.Error with validation details
+      assert is_map(error)
 
       # Test missing required fields
       incomplete_data = %{
@@ -149,7 +155,11 @@ defmodule AshfolioWeb.Integration.SimplifiedTransactionFlowTest do
       assert :fee in types
     end
 
-    test "transaction portfolio impact calculations", %{user: user, account: account, symbol: symbol} do
+    test "transaction portfolio impact calculations", %{
+      user: user,
+      account: account,
+      symbol: symbol
+    } do
       # Create some sample transactions
       transactions = [
         %{type: :buy, quantity: "100", price: "145.00", total: "14500.00"},
@@ -158,15 +168,16 @@ defmodule AshfolioWeb.Integration.SimplifiedTransactionFlowTest do
       ]
 
       Enum.each(transactions, fn tx ->
-        {:ok, _} = Transaction.create(%{
-          type: tx.type,
-          account_id: account.id,
-          symbol_id: symbol.id,
-          quantity: Decimal.new(tx.quantity),
-          price: Decimal.new(tx.price),
-          total_amount: Decimal.new(tx.total),
-          date: ~D[2024-08-01]
-        })
+        {:ok, _} =
+          Transaction.create(%{
+            type: tx.type,
+            account_id: account.id,
+            symbol_id: symbol.id,
+            quantity: Decimal.new(tx.quantity),
+            price: Decimal.new(tx.price),
+            total_amount: Decimal.new(tx.total),
+            date: ~D[2024-08-01]
+          })
       end)
 
       # Verify portfolio calculation integration

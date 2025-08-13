@@ -82,39 +82,41 @@ defmodule AshfolioWeb.Live.FormatHelpersTest do
   describe "format_relative_time/2" do
     test "formats seconds correctly" do
       current_time = ~U[2025-01-28 10:30:00Z]
-      past_time = ~U[2025-01-28 10:29:30Z]  # 30 seconds ago
+      # 30 seconds ago
+      past_time = ~U[2025-01-28 10:29:30Z]
 
       assert FormatHelpers.format_relative_time(past_time, current_time) == "30 seconds ago"
     end
 
     test "formats minutes correctly" do
       current_time = ~U[2025-01-28 10:30:00Z]
-      past_time = ~U[2025-01-28 10:25:00Z]  # 5 minutes ago
+      # 5 minutes ago
+      past_time = ~U[2025-01-28 10:25:00Z]
 
       assert FormatHelpers.format_relative_time(past_time, current_time) == "5 minutes ago"
     end
 
-
     test "formats hours correctly" do
       current_time = ~U[2025-01-28 10:30:00Z]
-      past_time = ~U[2025-01-28 08:30:00Z]  # 2 hours ago
+      # 2 hours ago
+      past_time = ~U[2025-01-28 08:30:00Z]
 
       assert FormatHelpers.format_relative_time(past_time, current_time) == "2 hours ago"
     end
 
-
     test "formats days correctly" do
       current_time = ~U[2025-01-28 10:30:00Z]
-      past_time = ~U[2025-01-26 10:30:00Z]  # 2 days ago
+      # 2 days ago
+      past_time = ~U[2025-01-26 10:30:00Z]
 
       assert FormatHelpers.format_relative_time(past_time, current_time) == "2 days ago"
     end
 
-
     test "uses current time when not provided" do
       # This test is a bit tricky since we can't control DateTime.utc_now()
       # We'll just verify it doesn't crash and returns a reasonable string
-      past_time = DateTime.utc_now() |> DateTime.add(-300, :second)  # 5 minutes ago
+      # 5 minutes ago
+      past_time = DateTime.utc_now() |> DateTime.add(-300, :second)
       result = FormatHelpers.format_relative_time(past_time)
 
       assert String.contains?(result, "ago")

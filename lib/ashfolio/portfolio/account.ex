@@ -57,7 +57,9 @@ defmodule Ashfolio.Portfolio.Account do
     end
 
     attribute :interest_rate, :decimal do
-      description("Annual interest rate for savings/CD accounts (as decimal, e.g., 0.025 for 2.5%)")
+      description(
+        "Annual interest rate for savings/CD accounts (as decimal, e.g., 0.025 for 2.5%)"
+      )
     end
 
     attribute :minimum_balance, :decimal do
@@ -119,7 +121,9 @@ defmodule Ashfolio.Portfolio.Account do
       interest_rate = Ash.Changeset.get_attribute(changeset, :interest_rate)
 
       if interest_rate && account_type not in [:savings, :money_market, :cd] do
-        {:error, field: :interest_rate, message: "Interest rate can only be set for savings, money market, or CD accounts"}
+        {:error,
+         field: :interest_rate,
+         message: "Interest rate can only be set for savings, money market, or CD accounts"}
       else
         :ok
       end
@@ -131,7 +135,19 @@ defmodule Ashfolio.Portfolio.Account do
 
     create :create do
       description("Create a new account")
-      accept([:name, :platform, :currency, :is_excluded, :balance, :user_id, :account_type, :interest_rate, :minimum_balance])
+
+      accept([
+        :name,
+        :platform,
+        :currency,
+        :is_excluded,
+        :balance,
+        :user_id,
+        :account_type,
+        :interest_rate,
+        :minimum_balance
+      ])
+
       primary?(true)
 
       change(fn changeset, _context ->
@@ -146,7 +162,18 @@ defmodule Ashfolio.Portfolio.Account do
 
     update :update do
       description("Update account attributes")
-      accept([:name, :platform, :currency, :is_excluded, :balance, :account_type, :interest_rate, :minimum_balance])
+
+      accept([
+        :name,
+        :platform,
+        :currency,
+        :is_excluded,
+        :balance,
+        :account_type,
+        :interest_rate,
+        :minimum_balance
+      ])
+
       primary?(true)
       require_atomic?(false)
 

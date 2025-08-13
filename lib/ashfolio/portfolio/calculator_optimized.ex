@@ -65,7 +65,9 @@ defmodule Ashfolio.Portfolio.CalculatorOptimized do
     |> Enum.group_by(& &1.symbol_id)
     |> Enum.map(fn {symbol_id, symbol_transactions} ->
       case Map.get(symbol_map, symbol_id) do
-        nil -> nil
+        nil ->
+          nil
+
         symbol ->
           {net_quantity, total_cost} = calculate_position_summary(symbol_transactions)
 
@@ -94,6 +96,7 @@ defmodule Ashfolio.Portfolio.CalculatorOptimized do
 
         :sell ->
           new_qty = Decimal.add(net_qty, transaction.quantity)
+
           if Decimal.equal?(net_qty, 0) do
             {new_qty, total_cost}
           else

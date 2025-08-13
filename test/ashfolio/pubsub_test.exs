@@ -107,6 +107,7 @@ defmodule Ashfolio.PubSubTest do
 
     test "handles complex message structures" do
       topic = "complex_message_topic"
+
       complex_message = {
         :transaction_saved,
         %{

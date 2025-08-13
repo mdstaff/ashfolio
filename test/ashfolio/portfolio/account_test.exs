@@ -114,8 +114,6 @@ defmodule Ashfolio.Portfolio.AccountTest do
       assert Enum.any?(changeset.errors, fn error -> error.field == :user_id end)
     end
 
-
-
     test "can create cash account with all attributes", %{user: user} do
       {:ok, account} =
         Ash.create(Account, %{

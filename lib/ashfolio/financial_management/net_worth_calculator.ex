@@ -40,7 +40,6 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
     with {:ok, investment_value} <- Calculator.calculate_portfolio_value(user_id),
          {:ok, cash_balances} <- calculate_total_cash_balances(user_id),
          {:ok, breakdown} <- calculate_account_breakdown(user_id) do
-
       net_worth = Decimal.add(investment_value, cash_balances)
 
       result = %{
@@ -177,7 +176,8 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
         type: account.account_type,
         platform: account.platform,
         balance: account.balance,
-        value: account.balance, # Simplified - would need per-account portfolio calculation
+        # Simplified - would need per-account portfolio calculation
+        value: account.balance,
         updated_at: account.balance_updated_at
       }
     end)
@@ -213,6 +213,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
           accounts
           |> Enum.map(& &1.value)
           |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
+
         {type, total}
       end)
       |> Enum.into(%{})

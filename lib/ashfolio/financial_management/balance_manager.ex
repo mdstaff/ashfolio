@@ -44,7 +44,6 @@ defmodule Ashfolio.FinancialManagement.BalanceManager do
          {:ok, old_balance} <- get_current_balance(account),
          :ok <- record_balance_history(account_id, old_balance, new_balance, notes),
          {:ok, updated_account} <- update_account_balance(account, new_balance) do
-
       # Broadcast balance change event
       broadcast_balance_change(updated_account, old_balance, new_balance, notes)
 
@@ -74,6 +73,7 @@ defmodule Ashfolio.FinancialManagement.BalanceManager do
       {:ok, _account} ->
         history = get_balance_history_records(account_id)
         {:ok, history}
+
       {:error, reason} ->
         {:error, reason}
     end
@@ -83,10 +83,17 @@ defmodule Ashfolio.FinancialManagement.BalanceManager do
 
   defp get_account(account_id) do
     case Account.get_by_id(account_id) do
-      {:ok, account} -> {:ok, account}
-      {:error, %Ash.Error.Invalid{errors: [%Ash.Error.Query.NotFound{} | _]}} -> {:error, :account_not_found}
-      {:error, %Ash.Error.Query.NotFound{}} -> {:error, :account_not_found}
-      {:error, reason} -> {:error, reason}
+      {:ok, account} ->
+        {:ok, account}
+
+      {:error, %Ash.Error.Invalid{errors: [%Ash.Error.Query.NotFound{} | _]}} ->
+        {:error, :account_not_found}
+
+      {:error, %Ash.Error.Query.NotFound{}} ->
+        {:error, :account_not_found}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 
@@ -162,6 +169,7 @@ defmodule Ashfolio.FinancialManagement.BalanceManager do
             # Table was created by another process, just return the name
             table_name
         end
+
       _ ->
         table_name
     end

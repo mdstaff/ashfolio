@@ -159,7 +159,6 @@ defmodule AshfolioWeb.DashboardLiveTest do
       assert html =~ "$1,100.00" or html =~ "1,100"
     end
 
-
     test "failed price refresh shows error message", %{conn: conn} do
       # Mock failed price refresh - both batch and individual calls fail
       Mox.expect(YahooFinanceMock, :fetch_prices, 1, fn _symbols ->
