@@ -154,7 +154,8 @@ defmodule Ashfolio.Context do
       user_id = user_id || get_default_user_id()
 
       if user_id do
-        with {:ok, accounts} <- Account.accounts_for_user(user_id),
+        with {:ok, _user} <- get_user_by_id(user_id),
+             {:ok, accounts} <- Account.accounts_for_user(user_id),
              {:ok, total_return} <- Calculator.calculate_total_return(user_id),
              {:ok, position_returns} <- Calculator.calculate_position_returns(user_id) do
           active_accounts = Enum.filter(accounts, &(!&1.is_excluded))
@@ -231,7 +232,8 @@ defmodule Ashfolio.Context do
       user_id = user_id || get_default_user_id()
 
       if user_id do
-        with {:ok, accounts} <- Account.accounts_for_user(user_id),
+        with {:ok, _user} <- get_user_by_id(user_id),
+             {:ok, accounts} <- Account.accounts_for_user(user_id),
              {:ok, portfolio_value} <- Calculator.calculate_portfolio_value(user_id) do
           cash_accounts =
             Enum.filter(accounts, &(&1.account_type in [:checking, :savings, :money_market, :cd]))

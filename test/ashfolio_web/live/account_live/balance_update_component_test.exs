@@ -1,5 +1,4 @@
 defmodule AshfolioWeb.AccountLive.BalanceUpdateComponentTest do
-  use AshfolioWeb.ConnCase, async: false
   use AshfolioWeb.LiveViewCase
 
   import Phoenix.LiveViewTest
@@ -70,13 +69,13 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponentTest do
       |> render_change(%{"new_balance" => "-100.00", "notes" => ""})
 
       # Check that validation error appears
-      assert has_element?(view, "[data-error]", "Savings accounts cannot have negative balances")
+      assert has_element?(view, "li", "Savings accounts cannot have negative balances")
     end
 
     test "allows negative balance for investment account", %{
       investment_account: investment_account
     } do
-      # Start the component  
+      # Start the component
       {view, _html} =
         live_component_isolated(BalanceUpdateComponent, %{
           id: "test-balance-update",
@@ -89,7 +88,7 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponentTest do
       |> render_change(%{"new_balance" => "-500.00", "notes" => "Margin call"})
 
       # Check that no validation error appears
-      refute has_element?(view, "[data-error]")
+      refute has_element?(view, "li", "cannot have negative balances")
     end
 
     test "shows balance change preview", %{cash_account: cash_account} do
@@ -151,7 +150,7 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponentTest do
       |> render_change(%{"new_balance" => "invalid", "notes" => ""})
 
       # Check that validation error appears
-      assert has_element?(view, "[data-error]", "Please enter a valid number")
+      assert has_element?(view, "li", "Please enter a valid number")
     end
 
     test "handles empty balance input", %{cash_account: cash_account} do
@@ -168,7 +167,7 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponentTest do
       |> render_change(%{"new_balance" => "", "notes" => ""})
 
       # Check that validation error appears
-      assert has_element?(view, "[data-error]", "Balance is required")
+      assert has_element?(view, "li", "Balance is required")
     end
 
     test "updates balance without notes", %{cash_account: cash_account} do
@@ -245,8 +244,30 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponentTest do
 
   # Helper function for isolated component testing
   defp live_component_isolated(component_module, assigns) do
-    # Create a minimal LiveView that renders the component
-    {:ok, view, html} = live_isolated(build_conn(), component_module, assigns)
+    # Create a minimal LiveView that hosts the component
+    defmodule TestHostLiveView do
+      use Phoenix.LiveView
+
+      def render(assigns) do
+        ~H"""
+        <.live_component module={@component_module} id="test-component" {@component_assigns} />
+        """
+      end
+
+      def mount(_params, session, socket) do
+        component_module = session["component_module"]
+        component_assigns = session["component_assigns"]
+
+        {:ok, assign(socket, component_module: component_module, component_assigns: component_assigns)}
+      end
+    end
+
+    session = %{
+      "component_module" => component_module,
+      "component_assigns" => assigns
+    }
+
+    {:ok, view, html} = live_isolated(build_conn(), TestHostLiveView, session: session)
     {view, html}
   end
 end

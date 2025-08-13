@@ -7,7 +7,7 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
+    <div id="balance-update-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
       <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-medium text-gray-900">
@@ -31,7 +31,7 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
             </svg>
           </button>
         </div>
-        
+
     <!-- Account Info -->
         <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
           <div class="flex items-center space-x-3">
@@ -60,7 +60,7 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
             </div>
           </div>
         </div>
-        
+
     <!-- Current Balance Display -->
         <div class="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-md">
           <div class="text-center">
@@ -75,12 +75,12 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
             <% end %>
           </div>
         </div>
-        
+
     <!-- Error display -->
         <div :if={@error_message} class="mb-4">
           <ErrorHelpers.error_list errors={[@error_message]} title="Validation Error:" />
         </div>
-        
+
     <!-- Update Form -->
         <.simple_form
           for={@form}
@@ -101,32 +101,36 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
               disabled={@updating}
               required
             />
-            
+
     <!-- Balance Change Preview -->
             <%= if @form_params["new_balance"] && @form_params["new_balance"] != "" do %>
-              <% {new_balance_float, _} = Float.parse(@form_params["new_balance"]) %>
-              <% new_balance_decimal = Decimal.new(new_balance_float) %>
-              <% current_balance = @account.balance || Decimal.new(0) %>
-              <% change = Decimal.sub(new_balance_decimal, current_balance) %>
-              <% is_increase = Decimal.positive?(change) %>
+              <%= case Float.parse(@form_params["new_balance"]) do %>
+                <% {new_balance_float, _} -> %>
+                  <% new_balance_decimal = Decimal.new(to_string(new_balance_float)) %>
+                  <% current_balance = @account.balance || Decimal.new(0) %>
+                  <% change = Decimal.sub(new_balance_decimal, current_balance) %>
+                  <% is_increase = Decimal.positive?(change) %>
 
-              <div class="bg-blue-50 border border-blue-200 rounded-md p-3">
-                <div class="flex items-center justify-between">
-                  <span class="text-sm text-blue-800">Balance Change:</span>
-                  <span class={"text-sm font-medium #{if is_increase, do: "text-green-600", else: "text-red-600"}"}>
-                    {if is_increase, do: "+", else: ""}{FormatHelpers.format_currency(change)}
-                  </span>
-                </div>
-                <div class="flex items-center justify-between mt-1">
-                  <span class="text-sm text-blue-800">New Balance:</span>
-                  <span class="text-sm font-bold text-blue-900">
-                    {FormatHelpers.format_currency(new_balance_decimal)}
-                  </span>
-                </div>
-              </div>
+                  <div class="bg-blue-50 border border-blue-200 rounded-md p-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm text-blue-800">Balance Change:</span>
+                      <span class={"text-sm font-medium #{if is_increase, do: "text-green-600", else: "text-red-600"}"}>
+                        {if is_increase, do: "+", else: ""}{FormatHelpers.format_currency(change)}
+                      </span>
+                    </div>
+                    <div class="flex items-center justify-between mt-1">
+                      <span class="text-sm text-blue-800">New Balance:</span>
+                      <span class="text-sm font-bold text-blue-900">
+                        {FormatHelpers.format_currency(new_balance_decimal)}
+                      </span>
+                    </div>
+                  </div>
+                <% _ -> %>
+                  <!-- Invalid number format, don't show preview -->
+              <% end %>
             <% end %>
           </div>
-          
+
     <!-- Notes Field -->
           <div class="space-y-1">
             <.input
@@ -293,7 +297,7 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
       trimmed_balance ->
         case Float.parse(trimmed_balance) do
           {balance_float, ""} ->
-            new_balance = Decimal.new(balance_float)
+            new_balance = Decimal.new(to_string(balance_float))
 
             # Validate non-negative for savings/checking accounts
             if account.account_type in [:checking, :savings] && Decimal.negative?(new_balance) do
