@@ -23,6 +23,9 @@ defmodule AshfolioWeb.Router do
     live "/accounts/:id", AccountLive.Show, :show
     live "/accounts/:id/edit", AccountLive.Index, :edit
     live "/transactions", TransactionLive.Index, :index
+    live "/categories", CategoryLive.Index, :index
+    live "/categories/new", CategoryLive.Index, :new
+    live "/categories/:id/edit", CategoryLive.Index, :edit
   end
 
   # Other scopes may use custom stacks.

@@ -111,7 +111,7 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - **Out of Scope**: Advanced animations, complex styling frameworks
   - _Requirements: 4.1, 4.2_
 
-- [ ] 8. Enhance AccountLive with Context API integration
+- [x] 8. Enhance AccountLive with Context API integration
 
   - **Goal**: Integrate existing account management with new Context API and cash account types
   - **Context API Integration**:
@@ -130,7 +130,7 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - **Out of Scope**: UI redesign, new form components, manual balance entry
   - _Requirements: 1.1-1.4, 2.1_
 
-- [ ] 8a. Add manual balance update interface for cash accounts
+- [x] 8a. Add manual balance update interface for cash accounts
 
   - **Goal**: Add UI for manual cash account balance updates with audit trail
   - **Context API Integration**: Use `Context.update_cash_balance/3` for balance modifications
