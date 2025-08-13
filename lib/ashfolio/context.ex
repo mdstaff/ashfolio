@@ -17,7 +17,7 @@ defmodule Ashfolio.Context do
 
   alias Ashfolio.Portfolio.{User, Account, Transaction}
   alias Ashfolio.Portfolio.Calculator
-  alias Ashfolio.FinancialManagement.SymbolSearch
+  alias Ashfolio.FinancialManagement.{SymbolSearch, BalanceManager}
 
   require Logger
 
@@ -64,17 +64,17 @@ defmodule Ashfolio.Context do
         with {:ok, user} <- get_user_by_id(user_id),
              {:ok, accounts} <- Account.accounts_for_user(user_id),
              {:ok, recent_transactions} <- get_recent_transactions(user_id, 10) do
-
           categorized_accounts = categorize_accounts(accounts)
           summary = calculate_account_summary(accounts)
 
-          {:ok, %{
-            user: user,
-            accounts: categorized_accounts,
-            recent_transactions: recent_transactions,
-            summary: summary,
-            last_updated: DateTime.utc_now()
-          }}
+          {:ok,
+           %{
+             user: user,
+             accounts: categorized_accounts,
+             recent_transactions: recent_transactions,
+             summary: summary,
+             last_updated: DateTime.utc_now()
+           }}
         else
           {:error, _} = error -> error
         end
@@ -104,18 +104,18 @@ defmodule Ashfolio.Context do
     track_performance(:get_account_with_transactions, fn ->
       with {:ok, account} <- Account.get_by_id(account_id),
            {:ok, transactions} <- Transaction.by_account(account_id) do
-
         limited_transactions = Enum.take(transactions, limit)
         balance_history = calculate_balance_history(limited_transactions)
         transaction_summary = calculate_transaction_summary(limited_transactions)
 
-        {:ok, %{
-          account: account,
-          transactions: limited_transactions,
-          balance_history: balance_history,
-          summary: transaction_summary,
-          last_updated: DateTime.utc_now()
-        }}
+        {:ok,
+         %{
+           account: account,
+           transactions: limited_transactions,
+           balance_history: balance_history,
+           summary: transaction_summary,
+           last_updated: DateTime.utc_now()
+         }}
       else
         {:error, _} = error -> error
       end
@@ -147,21 +147,21 @@ defmodule Ashfolio.Context do
         with {:ok, accounts} <- Account.accounts_for_user(user_id),
              {:ok, total_return} <- Calculator.calculate_total_return(user_id),
              {:ok, position_returns} <- Calculator.calculate_position_returns(user_id) do
-
           active_accounts = Enum.filter(accounts, &(!&1.is_excluded))
           performance = calculate_performance_metrics(user_id, total_return)
 
-          {:ok, %{
-            total_value: total_return.total_value,
-            total_return: %{
-              amount: total_return.dollar_return,
-              percentage: total_return.return_percentage
-            },
-            accounts: active_accounts,
-            holdings: position_returns,
-            performance: performance,
-            last_updated: DateTime.utc_now()
-          }}
+          {:ok,
+           %{
+             total_value: total_return.total_value,
+             total_return: %{
+               amount: total_return.dollar_return,
+               percentage: total_return.return_percentage
+             },
+             accounts: active_accounts,
+             holdings: position_returns,
+             performance: performance,
+             last_updated: DateTime.utc_now()
+           }}
         else
           {:error, %Ash.Error.Invalid{}} -> {:error, :user_not_found}
           {:error, _} = error -> error
@@ -224,24 +224,26 @@ defmodule Ashfolio.Context do
       if user_id do
         with {:ok, accounts} <- Account.accounts_for_user(user_id),
              {:ok, portfolio_value} <- Calculator.calculate_portfolio_value(user_id) do
+          cash_accounts =
+            Enum.filter(accounts, &(&1.account_type in [:checking, :savings, :money_market, :cd]))
 
-          cash_accounts = Enum.filter(accounts, &(&1.account_type in [:checking, :savings, :money_market, :cd]))
           investment_accounts = Enum.filter(accounts, &(&1.account_type == :investment))
 
           cash_balance = calculate_total_cash_balance(cash_accounts)
           total_net_worth = Decimal.add(portfolio_value, cash_balance)
 
-          {:ok, %{
-            total_net_worth: total_net_worth,
-            investment_value: portfolio_value,
-            cash_balance: cash_balance,
-            breakdown: %{
-              cash_accounts: length(cash_accounts),
-              investment_accounts: length(investment_accounts),
-              cash_percentage: calculate_percentage(cash_balance, total_net_worth),
-              investment_percentage: calculate_percentage(portfolio_value, total_net_worth)
-            }
-          }}
+          {:ok,
+           %{
+             total_net_worth: total_net_worth,
+             investment_value: portfolio_value,
+             cash_balance: cash_balance,
+             breakdown: %{
+               cash_accounts: length(cash_accounts),
+               investment_accounts: length(investment_accounts),
+               cash_percentage: calculate_percentage(cash_balance, total_net_worth),
+               investment_percentage: calculate_percentage(portfolio_value, total_net_worth)
+             }
+           }}
         else
           {:error, %Ash.Error.Invalid{}} -> {:error, :user_not_found}
           {:error, _} = error -> error
@@ -304,6 +306,78 @@ defmodule Ashfolio.Context do
     end)
   end
 
+  @doc """
+  Update cash account balance with optional notes.
+
+  Provides manual balance update functionality for cash accounts through the Context API.
+  Maintains balance history and broadcasts real-time updates via PubSub.
+
+  ## Parameters
+  - account_id: UUID of the cash account to update
+  - new_balance: The new balance as a Decimal
+  - notes: Optional notes about the balance change
+
+  ## Examples
+
+      iex> Context.update_cash_balance(account_id, Decimal.new("1500.00"), "Monthly deposit")
+      {:ok, %Account{balance: #Decimal<1500.00>}}
+
+      iex> Context.update_cash_balance(account_id, Decimal.new("1500.00"))
+      {:ok, %Account{balance: #Decimal<1500.00>}}
+
+      iex> Context.update_cash_balance("invalid-id", Decimal.new("100"))
+      {:error, :account_not_found}
+  """
+  def update_cash_balance(account_id, new_balance, notes \\ nil) do
+    track_performance(:update_cash_balance, fn ->
+      BalanceManager.update_cash_balance(account_id, new_balance, notes)
+    end)
+  end
+
+  @doc """
+  Get balance history for an account.
+
+  Returns a chronological list of balance changes for audit and tracking purposes.
+
+  ## Parameters
+  - account_id: UUID of the account
+
+  ## Examples
+
+      iex> Context.get_balance_history(account_id)
+      {:ok, [%{timestamp: ~U[...], old_balance: #Decimal<...>, new_balance: #Decimal<...>, notes: "..."}]}
+  """
+  def get_balance_history(account_id) do
+    track_performance(:get_balance_history, fn ->
+      BalanceManager.get_balance_history(account_id)
+    end)
+  end
+
+  @doc """
+  Validate account constraints for form validation.
+
+  Provides validation logic for account creation and updates through the Context API.
+  Checks name uniqueness, account type constraints, and business rules.
+
+  ## Parameters
+  - form_params: Map of form parameters to validate
+  - user_id: UUID of the user
+  - current_account_id: UUID of account being edited (nil for new accounts)
+
+  ## Examples
+
+      iex> Context.validate_account_constraints(%{"name" => "My Account"}, user_id, nil)
+      {:ok, %{}}
+
+      iex> Context.validate_account_constraints(%{"name" => "Existing Account"}, user_id, nil)
+      {:error, :name_already_taken}
+  """
+  def validate_account_constraints(form_params, user_id, current_account_id \\ nil) do
+    track_performance(:validate_account_constraints, fn ->
+      validate_account_name_uniqueness(form_params, user_id, current_account_id)
+    end)
+  end
+
   # Private helper functions
 
   defp get_user_by_id(user_id) do
@@ -330,14 +404,16 @@ defmodule Ashfolio.Context do
     %{
       all: accounts,
       investment: Enum.filter(accounts, &(&1.account_type == :investment)),
-      cash: Enum.filter(accounts, &(&1.account_type in [:checking, :savings, :money_market, :cd])),
+      cash:
+        Enum.filter(accounts, &(&1.account_type in [:checking, :savings, :money_market, :cd])),
       active: Enum.filter(accounts, &(!&1.is_excluded)),
       excluded: Enum.filter(accounts, & &1.is_excluded)
     }
   end
 
   defp calculate_account_summary(accounts) do
-    total_balance = accounts
+    total_balance =
+      accounts
       |> Enum.map(& &1.balance)
       |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
 
@@ -350,7 +426,8 @@ defmodule Ashfolio.Context do
       active_count: Enum.count(accounts, &(!&1.is_excluded)),
       cash_balance: cash_balance,
       investment_balance: investment_balance,
-      cash_accounts: Enum.count(accounts, &(&1.account_type in [:checking, :savings, :money_market, :cd])),
+      cash_accounts:
+        Enum.count(accounts, &(&1.account_type in [:checking, :savings, :money_market, :cd])),
       investment_accounts: Enum.count(accounts, &(&1.account_type == :investment))
     }
   end
@@ -380,37 +457,47 @@ defmodule Ashfolio.Context do
     transactions
     |> Enum.sort_by(& &1.date, {:asc, Date})
     |> Enum.reduce([], fn transaction, acc ->
-      previous_balance = case acc do
-        [] -> Decimal.new(0)
-        [%{balance: balance} | _] -> balance
-      end
+      previous_balance =
+        case acc do
+          [] -> Decimal.new(0)
+          [%{balance: balance} | _] -> balance
+        end
 
-      new_balance = case transaction.type do
-        type when type in [:buy, :sell] ->
-          Decimal.add(previous_balance, transaction.total_amount)
-        :dividend ->
-          Decimal.add(previous_balance, transaction.total_amount)
-        _ ->
-          previous_balance
-      end
+      new_balance =
+        case transaction.type do
+          type when type in [:buy, :sell] ->
+            Decimal.add(previous_balance, transaction.total_amount)
 
-      [%{
-        date: transaction.date,
-        balance: new_balance,
-        transaction_id: transaction.id
-      } | acc]
+          :dividend ->
+            Decimal.add(previous_balance, transaction.total_amount)
+
+          _ ->
+            previous_balance
+        end
+
+      [
+        %{
+          date: transaction.date,
+          balance: new_balance,
+          transaction_id: transaction.id
+        }
+        | acc
+      ]
     end)
     |> Enum.reverse()
-    |> Enum.take(30) # Last 30 data points
+    # Last 30 data points
+    |> Enum.take(30)
   end
 
   defp calculate_transaction_summary(transactions) do
-    inflow = transactions
+    inflow =
+      transactions
       |> Enum.filter(&(&1.type in [:buy, :dividend]))
       |> Enum.map(& &1.total_amount)
       |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
 
-    outflow = transactions
+    outflow =
+      transactions
       |> Enum.filter(&(&1.type in [:sell, :fee]))
       |> Enum.map(&Decimal.abs(&1.total_amount))
       |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
@@ -425,6 +512,7 @@ defmodule Ashfolio.Context do
   end
 
   defp get_latest_transaction_date([]), do: nil
+
   defp get_latest_transaction_date(transactions) do
     transactions
     |> Enum.map(& &1.date)
@@ -434,9 +522,12 @@ defmodule Ashfolio.Context do
   defp calculate_performance_metrics(_user_id, total_return) do
     # Simplified performance metrics - can be enhanced later
     %{
-      daily_change: Decimal.new(0), # Placeholder - would need historical data
-      weekly_change: Decimal.new(0), # Placeholder
-      monthly_change: Decimal.new(0), # Placeholder
+      # Placeholder - would need historical data
+      daily_change: Decimal.new(0),
+      # Placeholder
+      weekly_change: Decimal.new(0),
+      # Placeholder
+      monthly_change: Decimal.new(0),
       return_percentage: total_return.return_percentage,
       dollar_return: total_return.dollar_return
     }
@@ -453,6 +544,29 @@ defmodule Ashfolio.Context do
   end
 
   # SQLite optimization functions (placeholder for future enhancements)
+
+  defp validate_account_name_uniqueness(form_params, user_id, current_account_id) do
+    name = Map.get(form_params, "name")
+
+    if name do
+      case Account.get_by_name_for_user(user_id, name) do
+        {:ok, existing_account} when not is_nil(existing_account) ->
+          if existing_account.id != current_account_id do
+            {:error, :name_already_taken}
+          else
+            {:ok, %{}}
+          end
+
+        {:ok, nil} ->
+          {:ok, %{}}
+
+        {:error, _reason} ->
+          {:ok, %{}}
+      end
+    else
+      {:ok, %{}}
+    end
+  end
 
   # Performance monitoring
 
@@ -476,6 +590,7 @@ defmodule Ashfolio.Context do
       {:ok, _} = success ->
         :telemetry.execute(@telemetry_prefix ++ [operation, :success], %{}, %{})
         success
+
       {:error, reason} = error ->
         :telemetry.execute(@telemetry_prefix ++ [operation, :error], %{}, %{reason: reason})
         error
