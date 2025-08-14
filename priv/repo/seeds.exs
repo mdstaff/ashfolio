@@ -5,6 +5,7 @@
 # This script creates the default user and sample accounts for the single-user local application.
 
 alias Ashfolio.Portfolio.{User, Account, Symbol}
+alias Ashfolio.FinancialManagement.{CategorySeeder, TransactionCategory}
 
 # Create the default user if it doesn't exist
 user =
@@ -34,6 +35,30 @@ user =
       IO.puts("❌ Error checking for default user: #{inspect(error)}")
       exit(1)
   end
+
+# Create investment system categories if they don't exist
+{:ok, existing_categories} = TransactionCategory.categories_for_user(user.id)
+
+if Enum.empty?(existing_categories) do
+  # Create investment categories
+  IO.puts("🏷️  Creating investment system categories...")
+
+  case CategorySeeder.seed_system_categories(user.id) do
+    {:ok, categories} ->
+      IO.puts("  ✅ Created #{length(categories)} investment categories:")
+
+      Enum.each(categories, fn category ->
+        IO.puts("    - #{category.name} (#{category.color})")
+      end)
+
+    {:error, error} ->
+      IO.puts("  ❌ Error creating categories: #{inspect(error)}")
+  end
+else
+  IO.puts(
+    "ℹ️  Investment categories already exist (#{length(existing_categories)} categories found)"
+  )
+end
 
 # Create sample accounts if they don't exist
 sample_accounts = [
@@ -353,8 +378,10 @@ IO.puts("   - User: #{user.name}")
 {:ok, final_accounts} = Account.accounts_for_user(user.id)
 {:ok, final_symbols} = Symbol.list()
 {:ok, final_transactions} = Transaction.list()
+{:ok, final_categories} = TransactionCategory.categories_for_user(user.id)
 
 IO.puts("   - Accounts: #{length(final_accounts)}")
 IO.puts("   - Symbols: #{length(final_symbols)}")
 IO.puts("   - Transactions: #{length(final_transactions)}")
+IO.puts("   - Categories: #{length(final_categories)}")
 IO.puts("\n🚀 Ready to start the application with: mix phx.server")

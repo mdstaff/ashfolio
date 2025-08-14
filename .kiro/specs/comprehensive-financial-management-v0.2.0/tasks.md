@@ -165,7 +165,7 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - Write LiveView tests for enhanced transaction forms including category assignment and symbol autocomplete
   - _Requirements: 4.1, 4.4, 5.3, 5.4_
 
-- [ ] 11. Enhance DashboardLive with net worth integration
+- [x] 11. Enhance DashboardLive with net worth integration
 
   - Update `AshfolioWeb.DashboardLive` to display net worth summary alongside portfolio summary
   - Add investment vs cash breakdown visualization
