@@ -2,12 +2,17 @@ defmodule AshfolioWeb.TransactionLive.Index do
   use AshfolioWeb, :live_view
 
   alias Ashfolio.Portfolio.{Transaction, User}
-  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.FinancialManagement.{TransactionCategory, TransactionFiltering}
   alias AshfolioWeb.TransactionLive.FormComponent
   alias AshfolioWeb.Live.{ErrorHelpers, FormatHelpers}
 
+  import AshfolioWeb.Components.CategoryTag
+  import AshfolioWeb.Components.TransactionFilter
+  import AshfolioWeb.Components.TransactionStats
+  import AshfolioWeb.Components.TransactionGroup
+
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     user_id = get_default_user_id()
 
     # Load categories for filtering
@@ -17,6 +22,13 @@ defmodule AshfolioWeb.TransactionLive.Index do
         {:error, _} -> []
       end
 
+    # Initialize enhanced filter state from URL parameters
+    initial_filters = parse_url_filters(params)
+    all_transactions = list_transactions()
+
+    # Apply initial filters
+    {:ok, filtered_transactions} = TransactionFiltering.apply_filters(initial_filters)
+
     socket =
       socket
       |> assign_current_page(:transactions)
@@ -24,20 +36,52 @@ defmodule AshfolioWeb.TransactionLive.Index do
       |> assign(:page_subtitle, "Manage your investment transactions")
       |> assign(:user_id, user_id)
       |> assign(:categories, categories)
-      |> assign(:category_filter, :all)
-      |> assign(:transactions, list_transactions())
-      |> assign(:filtered_transactions, list_transactions())
+      # Enhanced filter state management
+      |> assign(:filters, initial_filters)
+      |> assign(:category_filter, initial_filters.category || :all)
+      |> assign(:transactions, all_transactions)
+      |> assign(:filtered_transactions, filtered_transactions)
+      |> assign(:filter_stats, calculate_filter_stats(filtered_transactions, all_transactions))
+      # Form state
       |> assign(:show_form, false)
       |> assign(:form_action, :new)
       |> assign(:selected_transaction, nil)
       |> assign(:editing_transaction_id, nil)
       |> assign(:deleting_transaction_id, nil)
+      # Debounce state
+      |> assign(:filter_timer, nil)
 
     # Subscribe to transaction and category updates
     Ashfolio.PubSub.subscribe("transactions")
     Ashfolio.PubSub.subscribe("categories")
 
     {:ok, socket}
+  end
+
+  @impl true
+  def handle_params(params, _url, socket) do
+    # Handle URL parameter changes for filter state restoration
+    new_filters = parse_url_filters(params)
+
+    if Map.equal?(new_filters, socket.assigns.filters) do
+      {:noreply, socket}
+    else
+      case TransactionFiltering.apply_filters(new_filters) do
+        {:ok, filtered_transactions} ->
+          filter_stats =
+            calculate_filter_stats(filtered_transactions, socket.assigns.transactions)
+
+          {:noreply,
+           socket
+           |> assign(:filters, new_filters)
+           |> assign(:category_filter, new_filters[:category] || :all)
+           |> assign(:filtered_transactions, filtered_transactions)
+           |> assign(:filter_stats, filter_stats)}
+
+        {:error, _reason} ->
+          {:noreply, socket}
+      end
+    end
   end
 
   @impl true
@@ -76,13 +120,70 @@ defmodule AshfolioWeb.TransactionLive.Index do
   def handle_event("filter_by_category", %{"category_id" => category_id}, socket) do
     category_filter = if category_id == "", do: :all, else: category_id
 
-    filtered_transactions =
-      get_filtered_transactions(socket.assigns.transactions, category_filter)
+    # Enhanced filter handling with new TransactionFiltering module
+    new_filters = Map.put(socket.assigns.filters, :category, category_filter)
 
-    {:noreply,
-     socket
-     |> assign(:category_filter, category_filter)
-     |> assign(:filtered_transactions, filtered_transactions)}
+    case TransactionFiltering.apply_filters(new_filters) do
+      {:ok, filtered_transactions} ->
+        filter_stats = calculate_filter_stats(filtered_transactions, socket.assigns.transactions)
+
+        # Update URL parameters
+        filter_params = build_filter_params(new_filters)
+
+        {:noreply,
+         socket
+         |> assign(:filters, new_filters)
+         |> assign(:category_filter, category_filter)
+         |> assign(:filtered_transactions, filtered_transactions)
+         |> assign(:filter_stats, filter_stats)
+         |> push_patch(to: ~p"/transactions?#{filter_params}")}
+
+      {:error, _reason} ->
+        # Fall back to existing behavior on error
+        filtered_transactions =
+          get_filtered_transactions(socket.assigns.transactions, category_filter)
+
+        {:noreply,
+         socket
+         |> assign(:category_filter, category_filter)
+         |> assign(:filtered_transactions, filtered_transactions)}
+    end
+  end
+
+  # Enhanced event handlers for composite filtering
+  @impl true
+  def handle_event("apply_composite_filters", params, socket) do
+    new_filters = parse_form_filters(params)
+
+    socket =
+      if Map.equal?(new_filters, socket.assigns.filters) do
+        socket
+      else
+        apply_filters_with_debounce(socket, new_filters)
+      end
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("clear_filters", _params, socket) do
+    default_filters = %{category: :all}
+
+    case TransactionFiltering.apply_filters(default_filters) do
+      {:ok, filtered_transactions} ->
+        filter_stats = calculate_filter_stats(filtered_transactions, socket.assigns.transactions)
+
+        {:noreply,
+         socket
+         |> assign(:filters, default_filters)
+         |> assign(:category_filter, :all)
+         |> assign(:filtered_transactions, filtered_transactions)
+         |> assign(:filter_stats, filter_stats)
+         |> push_patch(to: ~p"/transactions")}
+
+      {:error, _reason} ->
+        {:noreply, assign(socket, :category_filter, :all)}
+    end
   end
 
   @impl true
@@ -190,6 +291,28 @@ defmodule AshfolioWeb.TransactionLive.Index do
     {:noreply, socket}
   end
 
+  # Handle debounced filter application
+  @impl true
+  def handle_info({:apply_filters, new_filters}, socket) do
+    case TransactionFiltering.apply_filters(new_filters) do
+      {:ok, filtered_transactions} ->
+        filter_stats = calculate_filter_stats(filtered_transactions, socket.assigns.transactions)
+        filter_params = build_filter_params(new_filters)
+
+        {:noreply,
+         socket
+         |> assign(:filters, new_filters)
+         |> assign(:category_filter, new_filters[:category] || :all)
+         |> assign(:filtered_transactions, filtered_transactions)
+         |> assign(:filter_stats, filter_stats)
+         |> assign(:filter_timer, nil)
+         |> push_patch(to: ~p"/transactions?#{filter_params}")}
+
+      {:error, _reason} ->
+        {:noreply, assign(socket, :filter_timer, nil)}
+    end
+  end
+
   defp list_transactions() do
     case Ashfolio.Portfolio.Transaction.list() do
       {:ok, transactions} ->
@@ -228,6 +351,211 @@ defmodule AshfolioWeb.TransactionLive.Index do
     end
   end
 
+  # Enhanced filter state management functions
+
+  defp parse_url_filters(params) do
+    %{
+      category: parse_category_filter(params["category"]),
+      transaction_type: parse_transaction_type_filter(params["type"]),
+      date_range: parse_date_range_filter(params["date_from"], params["date_to"]),
+      amount_range: parse_amount_range_filter(params["amount_min"], params["amount_max"])
+    }
+    |> Enum.reject(fn {_key, value} -> is_nil(value) end)
+    |> Enum.into(%{})
+  end
+
+  defp parse_category_filter(nil), do: :all
+  defp parse_category_filter(""), do: :all
+  defp parse_category_filter("all"), do: :all
+  defp parse_category_filter("uncategorized"), do: :uncategorized
+
+  defp parse_category_filter(category_id) when is_binary(category_id) do
+    case Ecto.UUID.cast(category_id) do
+      {:ok, _} -> category_id
+      :error -> :all
+    end
+  end
+
+  defp parse_transaction_type_filter(nil), do: nil
+  defp parse_transaction_type_filter(""), do: nil
+  defp parse_transaction_type_filter("all"), do: nil
+
+  defp parse_transaction_type_filter(type) when is_binary(type) do
+    try do
+      String.to_existing_atom(type)
+    rescue
+      ArgumentError -> nil
+    end
+  end
+
+  defp parse_date_range_filter(nil, nil), do: nil
+
+  defp parse_date_range_filter(date_from, date_to)
+       when is_binary(date_from) and is_binary(date_to) do
+    with {:ok, from_date} <- Date.from_iso8601(date_from),
+         {:ok, to_date} <- Date.from_iso8601(date_to) do
+      {from_date, to_date}
+    else
+      _ -> nil
+    end
+  end
+
+  defp parse_date_range_filter(_, _), do: nil
+
+  defp parse_amount_range_filter(nil, nil), do: nil
+
+  defp parse_amount_range_filter(min_str, max_str)
+       when is_binary(min_str) and is_binary(max_str) do
+    with {min_amount, ""} <- Float.parse(min_str),
+         {max_amount, ""} <- Float.parse(max_str) do
+      {Decimal.new(min_amount), Decimal.new(max_amount)}
+    else
+      _ -> nil
+    end
+  end
+
+  defp parse_amount_range_filter(_, _), do: nil
+
+  defp calculate_filter_stats(filtered_transactions, all_transactions) do
+    %{
+      total_count: length(all_transactions),
+      filtered_count: length(filtered_transactions),
+      filter_percentage:
+        if(length(all_transactions) > 0,
+          do: Float.round(length(filtered_transactions) / length(all_transactions) * 100, 1),
+          else: 0
+        ),
+      category_breakdown: calculate_category_breakdown(filtered_transactions)
+    }
+  end
+
+  defp calculate_category_breakdown(transactions) do
+    transactions
+    |> Enum.group_by(fn tx ->
+      cond do
+        # Handle properly loaded category
+        is_struct(tx.category) && Map.has_key?(tx.category, :name) ->
+          tx.category.name
+
+        # Handle case where category_id exists but category not loaded
+        tx.category_id != nil ->
+          "Unknown Category"
+
+        # Handle uncategorized
+        true ->
+          "Uncategorized"
+      end
+    end)
+    |> Enum.map(fn {category_name, txns} ->
+      total_amount =
+        Enum.reduce(txns, Decimal.new(0), fn tx, acc ->
+          Decimal.add(acc, tx.total_amount)
+        end)
+
+      %{
+        name: category_name,
+        count: length(txns),
+        total_amount: total_amount
+      }
+    end)
+    |> Enum.sort_by(& &1.count, :desc)
+  end
+
+  # Enhanced filter debouncing
+  @filter_debounce_ms 300
+
+  defp apply_filters_with_debounce(socket, new_filters) do
+    # Cancel existing timer
+    if socket.assigns[:filter_timer] do
+      Process.cancel_timer(socket.assigns.filter_timer)
+    end
+
+    # Set new timer
+    timer = Process.send_after(self(), {:apply_filters, new_filters}, @filter_debounce_ms)
+
+    assign(socket, :filter_timer, timer)
+  end
+
+  defp parse_form_filters(params) do
+    %{
+      category: parse_category_filter(params["category_id"]),
+      transaction_type: parse_transaction_type_filter(params["transaction_type"]),
+      date_range: parse_date_range_filter(params["date_from"], params["date_to"]),
+      amount_range: parse_amount_range_filter(params["amount_min"], params["amount_max"])
+    }
+    |> Enum.reject(fn {_key, value} -> is_nil(value) end)
+    |> Enum.into(%{})
+  end
+
+  defp build_filter_params(filters) do
+    filters
+    |> Enum.reduce(%{}, fn
+      {:category, :all}, acc ->
+        acc
+
+      {:category, value}, acc ->
+        Map.put(acc, :category, value)
+
+      {:transaction_type, value}, acc ->
+        Map.put(acc, :type, value)
+
+      {:date_range, {from_date, to_date}}, acc ->
+        acc
+        |> Map.put(:date_from, Date.to_iso8601(from_date))
+        |> Map.put(:date_to, Date.to_iso8601(to_date))
+
+      {:amount_range, {min_amount, max_amount}}, acc ->
+        acc
+        |> Map.put(:amount_min, Decimal.to_string(min_amount))
+        |> Map.put(:amount_max, Decimal.to_string(max_amount))
+
+      _, acc ->
+        acc
+    end)
+  end
+
+  defp build_filter_active_string(filters) do
+    active_filters =
+      filters
+      |> Enum.filter(fn {_key, value} ->
+        case value do
+          nil -> false
+          :all -> false
+          "" -> false
+          [] -> false
+          %{} when map_size(value) == 0 -> false
+          _ -> true
+        end
+      end)
+      |> Enum.map(fn {key, value} ->
+        case {key, value} do
+          {:category, :uncategorized} ->
+            "category:uncategorized"
+
+          {:category, category_id} when is_binary(category_id) ->
+            "category:#{category_id}"
+
+          {:transaction_type, type} ->
+            "type:#{type}"
+
+          {:date_range, {from_date, to_date}} ->
+            "date:#{Date.to_iso8601(from_date)}_#{Date.to_iso8601(to_date)}"
+
+          {:amount_range, {min_amount, max_amount}} ->
+            "amount:#{Decimal.to_string(min_amount)}_#{Decimal.to_string(max_amount)}"
+
+          _ ->
+            nil
+        end
+      end)
+      |> Enum.reject(&is_nil/1)
+
+    case active_filters do
+      [] -> "filters:none"
+      filters -> "filters:" <> Enum.join(filters, ",")
+    end
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -243,45 +571,62 @@ defmodule AshfolioWeb.TransactionLive.Index do
         </.button>
       </div>
       
-    <!-- Category Filter Controls -->
-      <div :if={@categories != []} class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              Filter by Category
-            </label>
-            <select
-              phx-change="filter_by_category"
-              name="category_id"
-              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-            >
-              <option value="" selected={@category_filter == :all}>All Categories</option>
-              <option value="uncategorized" selected={@category_filter == :uncategorized}>
-                Uncategorized
-              </option>
-              <%= for category <- @categories do %>
-                <option value={category.id} selected={@category_filter == category.id}>
-                  {category.name}
-                </option>
-              <% end %>
-            </select>
-          </div>
-          
-    <!-- Filter Summary -->
-          <div class="flex-1 text-sm text-gray-600">
-            Showing {length(@filtered_transactions)} of {length(@transactions)} transactions
-            <%= case @category_filter do %>
-              <% :all -> %>
-                <span class="font-medium">(All categories)</span>
-              <% :uncategorized -> %>
-                <span class="font-medium">(Uncategorized only)</span>
-              <% filter_id when is_binary(filter_id) -> %>
-                <% category = Enum.find(@categories, &(&1.id == filter_id)) %>
-                <span :if={category} class="font-medium">
-                  in "<span style={"color: #{category.color}"}>●</span> {category.name}"
-                </span>
-            <% end %>
-          </div>
+    <!-- Advanced Transaction Filter Component -->
+      <.transaction_filter
+        :if={@categories != []}
+        categories={@categories}
+        filters={@filters}
+        target={@myself}
+        show_filter_summary={true}
+        class="mb-6"
+      />
+      
+    <!-- Transaction Statistics -->
+      <.transaction_stats
+        :if={length(@filtered_transactions) > 0}
+        transactions={@filtered_transactions}
+        show_breakdown={true}
+        show_categories={true}
+        show_averages={true}
+        show_time_analysis={true}
+        compact={false}
+        class="mb-6"
+      />
+      
+    <!-- Transaction Grouping View -->
+      <.transaction_group
+        :if={length(@filtered_transactions) > 0}
+        transactions={@filtered_transactions}
+        group_by={:category}
+        show_group_stats={true}
+        collapsible={true}
+        compact={false}
+        class="mb-6"
+      />
+      
+    <!-- Filter Results Summary -->
+      <div
+        :if={@filter_stats}
+        class="mb-4 text-sm text-gray-600"
+        data-filter-count={@filter_stats.filtered_count}
+        data-filter-active={build_filter_active_string(@filters)}
+      >
+        <div class="flex items-center justify-between">
+          <span>
+            Showing {@filter_stats.filtered_count} of {@filter_stats.total_count} transactions
+            <span :if={@filter_stats.filter_percentage < 100} class="font-medium">
+              ({@filter_stats.filter_percentage}% of total)
+            </span>
+          </span>
+
+          <button
+            :if={@filter_stats.filtered_count < @filter_stats.total_count}
+            type="button"
+            phx-click="clear_filters"
+            class="text-blue-600 hover:text-blue-800 underline text-sm"
+          >
+            Show All Transactions
+          </button>
         </div>
       </div>
       
@@ -321,6 +666,8 @@ defmodule AshfolioWeb.TransactionLive.Index do
                   :for={transaction <- @filtered_transactions}
                   class="group hover:bg-zinc-50"
                   role="row"
+                  data-transaction-id={transaction.id}
+                  data-transaction-category={transaction.category_id || "uncategorized"}
                 >
                   <td class="relative p-0">
                     <div class="block py-4 pr-6">
@@ -348,21 +695,13 @@ defmodule AshfolioWeb.TransactionLive.Index do
                     <div class="block py-4 pr-6">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
                       <span class="relative">
-                        <%= if transaction.category do %>
-                          <span
-                            class="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
-                            style={"background-color: #{transaction.category.color}20; color: #{transaction.category.color}"}
-                          >
-                            <span
-                              class="w-2 h-2 rounded-full mr-1"
-                              style={"background-color: #{transaction.category.color}"}
-                            >
-                            </span>
-                            {transaction.category.name}
-                          </span>
-                        <% else %>
-                          <span class="text-gray-400 text-xs">Uncategorized</span>
-                        <% end %>
+                        <.category_tag
+                          category={transaction.category}
+                          size={:small}
+                          clickable={true}
+                          click_event="filter_by_category"
+                          click_value={transaction.category_id}
+                        />
                       </span>
                     </div>
                   </td>
