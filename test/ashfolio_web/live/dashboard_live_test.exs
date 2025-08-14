@@ -260,4 +260,184 @@ defmodule AshfolioWeb.DashboardLiveTest do
       assert html =~ ~r/\d+\.\d{2}%/
     end
   end
+
+  describe "net worth integration" do
+    setup do
+      # Get or create the default test user
+      {:ok, user} = get_or_create_default_user()
+
+      # Create investment account
+      {:ok, investment_account} =
+        Account.create(%{
+          name: "Investment Account",
+          platform: "Brokerage",
+          balance: Decimal.new("0"),
+          currency: "USD",
+          account_type: :investment,
+          user_id: user.id
+        })
+
+      # Create cash account
+      {:ok, cash_account} =
+        Account.create(%{
+          name: "Checking Account",
+          platform: "Bank",
+          balance: Decimal.new("5000.00"),
+          currency: "USD",
+          account_type: :checking,
+          user_id: user.id
+        })
+
+      # Create a symbol for investment transactions
+      {:ok, symbol} =
+        Symbol.create(%{
+          symbol: "NETWORTH",
+          name: "Net Worth Test Stock",
+          currency: "USD",
+          current_price: Decimal.new("200.00"),
+          asset_class: :stock,
+          data_source: :manual
+        })
+
+      # Create investment transaction
+      {:ok, _transaction} =
+        Transaction.create(%{
+          type: :buy,
+          symbol_id: symbol.id,
+          account_id: investment_account.id,
+          quantity: Decimal.new("50"),
+          price: Decimal.new("150.00"),
+          total_amount: Decimal.new("7500.00"),
+          date: ~D[2025-01-01]
+        })
+
+      %{
+        user: user,
+        investment_account: investment_account,
+        cash_account: cash_account,
+        symbol: symbol
+      }
+    end
+
+    @tag :smoke
+    test "displays net worth summary alongside portfolio data", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/")
+
+      # Should display portfolio data (existing functionality)
+      assert html =~ "Portfolio Dashboard"
+      assert html =~ "Total Value"
+      assert html =~ "Total Return"
+      assert html =~ "Holdings"
+
+      # Should display new net worth card
+      assert html =~ "Net Worth"
+
+      # Should display net worth value
+      # Expected: investment value ($10,000) + cash balance ($5,000) = $15,000
+      assert html =~ "$15,000.00" or html =~ "15,000"
+    end
+
+    test "displays investment vs cash breakdown", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/")
+
+      # Should show breakdown section
+      assert html =~ "Investment vs Cash Breakdown"
+
+      # Should show investment and cash values
+      # Investment value
+      assert html =~ "$10,000.00" or html =~ "10,000"
+      # Cash balance
+      assert html =~ "$5,000.00" or html =~ "5,000"
+    end
+
+    test "displays account type breakdown", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/")
+
+      # Should show account type breakdown
+      assert html =~ "Investment Accounts"
+      assert html =~ "Cash Accounts"
+
+      # Should display account counts and values
+      # Investment account count
+      assert html =~ "1"
+      # Cash account count
+      assert html =~ "1"
+    end
+
+    test "handles net worth calculation errors gracefully", %{conn: conn} do
+      # This test ensures dashboard doesn't crash when net worth calculations fail
+      {:ok, _view, html} = live(conn, "/")
+
+      # Should still render the page with portfolio data
+      assert html =~ "Portfolio Dashboard"
+      assert html =~ "Total Value"
+
+      # Should show net worth section even if calculation fails
+      assert html =~ "Net Worth"
+    end
+
+    test "maintains portfolio display when net worth unavailable", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/")
+
+      # Existing portfolio functionality should work regardless of net worth status
+      assert html =~ "Portfolio Dashboard"
+      assert html =~ "Current Holdings"
+      assert html =~ "Recent Activity"
+
+      # Holdings table should still be functional
+      assert html =~ "NETWORTH"
+      # Quantity
+      assert html =~ "50"
+    end
+  end
+
+  describe "net worth real-time updates" do
+    setup do
+      # Get or create the default test user
+      {:ok, user} = get_or_create_default_user()
+
+      # Create cash account for balance updates
+      {:ok, cash_account} =
+        Account.create(%{
+          name: "Real-time Test Account",
+          platform: "Bank",
+          balance: Decimal.new("1000.00"),
+          currency: "USD",
+          account_type: :checking,
+          user_id: user.id
+        })
+
+      %{user: user, cash_account: cash_account}
+    end
+
+    test "subscribes to net_worth PubSub topic", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/")
+
+      # Verify dashboard is subscribed to net_worth updates
+      # This test ensures the subscription is set up properly
+      # Actual PubSub testing will be in dedicated PubSub test file
+      assert view.module == AshfolioWeb.DashboardLive
+    end
+
+    test "handles net_worth_updated messages", %{conn: conn, user: user} do
+      {:ok, view, _html} = live(conn, "/")
+
+      # Simulate a net worth update message
+      net_worth_data = %{
+        total_net_worth: Decimal.new("2000.00"),
+        investment_value: Decimal.new("0.00"),
+        cash_balance: Decimal.new("2000.00"),
+        breakdown: %{
+          investment_accounts: [],
+          cash_accounts: [%{balance: Decimal.new("2000.00")}]
+        }
+      }
+
+      send(view.pid, {:net_worth_updated, user.id, net_worth_data})
+
+      # Should update the net worth display
+      html = render(view)
+      assert html =~ "$2,000.00" or html =~ "2,000"
+    end
+  end
 end

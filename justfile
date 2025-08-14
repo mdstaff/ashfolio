@@ -88,7 +88,7 @@
 
 # Show all available commands
 default:
-    @just --list
+    just --list
 
 # ============================================================================
 # DAILY WORKFLOW COMMANDS (MOST USED)
@@ -109,6 +109,14 @@ clean-rebuild: clean deps compile
 # ============================================================================
 # V0.2.0 FEATURE-SPECIFIC TESTING
 # ============================================================================
+
+# Test all v0.2.0 features
+test-new:
+    @echo "🧪 Testing all v0.2.0 features..."
+    @just test-financial
+    @just test-context-api
+    @just test-file test/ashfolio_web/live/dashboard_live_test.exs
+    @echo "✅ All v0.2.0 feature tests passed!"
 
 # Test new FinancialManagement domain features
 test-financial:

@@ -3,6 +3,7 @@ defmodule AshfolioWeb.DashboardLive do
 
   alias Ashfolio.Portfolio.{Calculator, HoldingsCalculator, User}
   alias Ashfolio.MarketData.PriceManager
+  alias Ashfolio.Context
   alias AshfolioWeb.Live.{ErrorHelpers, FormatHelpers}
   require Logger
 
@@ -11,6 +12,7 @@ defmodule AshfolioWeb.DashboardLive do
     if connected?(socket) do
       Ashfolio.PubSub.subscribe("accounts")
       Ashfolio.PubSub.subscribe("transactions")
+      Ashfolio.PubSub.subscribe("net_worth")
     end
 
     socket =
@@ -108,6 +110,12 @@ defmodule AshfolioWeb.DashboardLive do
   end
 
   @impl true
+  def handle_info({:net_worth_updated, _user_id, net_worth_data}, socket) do
+    Logger.debug("Received net worth update via PubSub")
+    {:noreply, assign_net_worth_data(socket, net_worth_data)}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="space-y-6">
@@ -143,7 +151,7 @@ defmodule AshfolioWeb.DashboardLive do
       
     <!-- Portfolio Summary Cards -->
       <div
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6"
         data-testid="portfolio-summary"
       >
         <.stat_card
@@ -167,7 +175,47 @@ defmodule AshfolioWeb.DashboardLive do
           change={"#{@holdings_count} positions"}
           data_testid="holdings-count"
         />
+        <.stat_card
+          title="Net Worth"
+          value={@net_worth_total}
+          change={"Inv: #{@net_worth_investment_value} • Cash: #{@net_worth_cash_balance}"}
+          positive={true}
+          data_testid="net-worth-total"
+        />
       </div>
+      
+    <!-- Investment vs Cash Breakdown -->
+      <.card>
+        <:header>
+          <h2 class="text-lg font-medium text-gray-900">Investment vs Cash Breakdown</h2>
+        </:header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+          <!-- Investment Accounts -->
+          <div class="bg-blue-50 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-medium text-blue-900">Investment Accounts</h3>
+              <span class="text-sm text-blue-600">
+                {get_account_count(@net_worth_breakdown, :investment_accounts)} accounts
+              </span>
+            </div>
+            <p class="text-2xl font-semibold text-blue-900">{@net_worth_investment_value}</p>
+            <p class="text-sm text-blue-600 mt-1">Portfolio Value</p>
+          </div>
+          
+    <!-- Cash Accounts -->
+          <div class="bg-green-50 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-medium text-green-900">Cash Accounts</h3>
+              <span class="text-sm text-green-600">
+                {get_account_count(@net_worth_breakdown, :cash_accounts)} accounts
+              </span>
+            </div>
+            <p class="text-2xl font-semibold text-green-900">{@net_worth_cash_balance}</p>
+            <p class="text-sm text-green-600 mt-1">Available Cash</p>
+          </div>
+        </div>
+      </.card>
       
     <!-- Holdings Table -->
       <.card>
@@ -356,6 +404,7 @@ defmodule AshfolioWeb.DashboardLive do
       |> assign(:sort_order, :asc)
       |> assign(:last_price_update, get_last_price_update())
       |> assign(:error, nil)
+      |> load_net_worth_data(user_id)
     else
       {:error, reason} ->
         Logger.warning("Failed to load portfolio data: #{inspect(reason)}")
@@ -378,6 +427,42 @@ defmodule AshfolioWeb.DashboardLive do
     |> assign(:sort_order, :asc)
     |> assign(:last_price_update, nil)
     |> assign(:error, "Unable to load portfolio data")
+    |> assign_default_net_worth_values()
+  end
+
+  defp load_net_worth_data(socket, user_id) do
+    Logger.debug("Loading net worth data for user: #{user_id}")
+
+    case Context.get_net_worth(user_id) do
+      {:ok, net_worth_data} ->
+        Logger.debug("Net worth data loaded successfully")
+        assign_net_worth_data(socket, net_worth_data)
+
+      {:error, reason} ->
+        Logger.warning("Failed to load net worth data: #{inspect(reason)}")
+        assign_default_net_worth_values(socket)
+    end
+  end
+
+  defp assign_net_worth_data(socket, net_worth_data) do
+    socket
+    |> assign(:net_worth_total, FormatHelpers.format_currency(net_worth_data.total_net_worth))
+    |> assign(
+      :net_worth_investment_value,
+      FormatHelpers.format_currency(net_worth_data.investment_value)
+    )
+    |> assign(:net_worth_cash_balance, FormatHelpers.format_currency(net_worth_data.cash_balance))
+    |> assign(:net_worth_breakdown, net_worth_data.breakdown)
+    |> assign(:net_worth_error, nil)
+  end
+
+  defp assign_default_net_worth_values(socket) do
+    socket
+    |> assign(:net_worth_total, "$0.00")
+    |> assign(:net_worth_investment_value, "$0.00")
+    |> assign(:net_worth_cash_balance, "$0.00")
+    |> assign(:net_worth_breakdown, %{investment_accounts: [], cash_accounts: []})
+    |> assign(:net_worth_error, "Unable to load net worth data")
   end
 
   # Defensive user creation for single-user application
@@ -456,4 +541,14 @@ defmodule AshfolioWeb.DashboardLive do
       ""
     end
   end
+
+  # Helper function to safely get account count from breakdown
+  defp get_account_count(breakdown, account_type) when is_map(breakdown) do
+    case Map.get(breakdown, account_type) do
+      accounts when is_list(accounts) -> length(accounts)
+      _ -> 0
+    end
+  end
+
+  defp get_account_count(_, _), do: 0
 end
