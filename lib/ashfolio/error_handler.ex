@@ -76,6 +76,34 @@ defmodule Ashfolio.ErrorHandler do
   defp categorize_error(%Ecto.Changeset{valid?: false}), do: :validation
   defp categorize_error(%Ash.Error.Invalid{}), do: :validation
   defp categorize_error({:error, %Ash.Error.Invalid{}}), do: :validation
+
+  # v0.2.0 Cash Balance Management errors
+  defp categorize_error({:error, :insufficient_balance}), do: :balance_management
+  defp categorize_error({:error, :negative_balance_not_allowed}), do: :balance_management
+  defp categorize_error({:error, :balance_update_failed}), do: :balance_management
+  defp categorize_error({:error, :account_not_found}), do: :account_management
+  defp categorize_error({:error, :not_cash_account}), do: :account_management
+
+  # v0.2.0 Symbol Search errors
+  defp categorize_error({:error, :symbol_api_unavailable}), do: :symbol_search
+  defp categorize_error({:error, :symbol_not_found}), do: :symbol_search
+  defp categorize_error({:error, :symbol_creation_failed}), do: :symbol_search
+  defp categorize_error({:error, :symbol_search_rate_limited}), do: :symbol_search
+
+  # v0.2.0 Category Management errors
+  defp categorize_error({:error, :system_category_protected}), do: :category_management
+  defp categorize_error({:error, :category_required}), do: :category_management
+  defp categorize_error({:error, :category_not_found}), do: :category_management
+  defp categorize_error({:error, :invalid_category_color}), do: :category_management
+
+  # v0.2.0 Net Worth Calculation errors
+  defp categorize_error({:error, :net_worth_calculation_failed}), do: :calculation
+  defp categorize_error({:error, :mixed_account_calculation_error}), do: :calculation
+
+  # v0.2.0 Context API errors
+  defp categorize_error({:error, :context_operation_failed}), do: :context_api
+  defp categorize_error({:error, :cross_domain_operation_failed}), do: :context_api
+
   defp categorize_error(_), do: :system
 
   # Log errors with appropriate severity
@@ -95,6 +123,14 @@ defmodule Ashfolio.ErrorHandler do
   defp get_log_severity(:stale_data), do: :debug
   defp get_log_severity(:validation), do: :info
   defp get_log_severity(:system), do: :error
+
+  # v0.2.0 error severities
+  defp get_log_severity(:balance_management), do: :warning
+  defp get_log_severity(:account_management), do: :info
+  defp get_log_severity(:symbol_search), do: :warning
+  defp get_log_severity(:category_management), do: :info
+  defp get_log_severity(:calculation), do: :warning
+  defp get_log_severity(:context_api), do: :error
 
   # Format user-friendly messages based on error type
   defp format_user_message(:network, _error) do
@@ -135,6 +171,80 @@ defmodule Ashfolio.ErrorHandler do
 
   defp format_user_message(:system, _error) do
     "An unexpected error occurred. Please try again."
+  end
+
+  # v0.2.0 Balance Management error messages
+  defp format_user_message(:balance_management, {:error, :insufficient_balance}) do
+    "Insufficient funds for this transaction."
+  end
+
+  defp format_user_message(:balance_management, {:error, :negative_balance_not_allowed}) do
+    "Balance cannot be negative for this account type."
+  end
+
+  defp format_user_message(:balance_management, {:error, :balance_update_failed}) do
+    "Unable to update account balance. Please try again."
+  end
+
+  # v0.2.0 Account Management error messages
+  defp format_user_message(:account_management, {:error, :account_not_found}) do
+    "Account not found."
+  end
+
+  defp format_user_message(:account_management, {:error, :not_cash_account}) do
+    "This operation is only available for cash accounts."
+  end
+
+  # v0.2.0 Symbol Search error messages
+  defp format_user_message(:symbol_search, {:error, :symbol_api_unavailable}) do
+    "Symbol search is temporarily unavailable. Using local symbols only."
+  end
+
+  defp format_user_message(:symbol_search, {:error, :symbol_not_found}) do
+    "Symbol not found. Please check the ticker symbol and try again."
+  end
+
+  defp format_user_message(:symbol_search, {:error, :symbol_creation_failed}) do
+    "Unable to add new symbol. Please try again later."
+  end
+
+  defp format_user_message(:symbol_search, {:error, :symbol_search_rate_limited}) do
+    "Too many search requests. Please wait a moment and try again."
+  end
+
+  # v0.2.0 Category Management error messages
+  defp format_user_message(:category_management, {:error, :system_category_protected}) do
+    "System categories cannot be modified or deleted."
+  end
+
+  defp format_user_message(:category_management, {:error, :category_required}) do
+    "Please select a category for this transaction."
+  end
+
+  defp format_user_message(:category_management, {:error, :category_not_found}) do
+    "Category not found."
+  end
+
+  defp format_user_message(:category_management, {:error, :invalid_category_color}) do
+    "Please select a valid color for the category."
+  end
+
+  # v0.2.0 Calculation error messages
+  defp format_user_message(:calculation, {:error, :net_worth_calculation_failed}) do
+    "Unable to calculate net worth. Please refresh and try again."
+  end
+
+  defp format_user_message(:calculation, {:error, :mixed_account_calculation_error}) do
+    "Unable to calculate combined portfolio value. Please check account data."
+  end
+
+  # v0.2.0 Context API error messages
+  defp format_user_message(:context_api, {:error, :context_operation_failed}) do
+    "Data operation failed. Please refresh and try again."
+  end
+
+  defp format_user_message(:context_api, {:error, :cross_domain_operation_failed}) do
+    "Unable to complete operation across accounts. Please try again."
   end
 
   # Helper to humanize field names for better user experience
