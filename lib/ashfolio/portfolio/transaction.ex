@@ -21,7 +21,10 @@ defmodule Ashfolio.Portfolio.Transaction do
     uuid_primary_key(:id)
 
     attribute :type, :atom do
-      constraints(one_of: [:buy, :sell, :dividend, :fee, :interest, :liability])
+      constraints(
+        one_of: [:buy, :sell, :dividend, :fee, :interest, :liability, :deposit, :withdrawal]
+      )
+
       allow_nil?(false)
       description("Transaction type")
     end
@@ -212,6 +215,173 @@ defmodule Ashfolio.Portfolio.Transaction do
         |> Ash.Query.sort(date: :desc)
       end)
     end
+
+    read :for_user_by_category do
+      description("Get transactions for a user filtered by category (optimized)")
+      argument(:user_id, :uuid, allow_nil?: false)
+      argument(:category_id, :uuid, allow_nil?: false)
+
+      prepare(fn query, _context ->
+        user_id = Ash.Query.get_argument(query, :user_id)
+        category_id = Ash.Query.get_argument(query, :category_id)
+
+        query
+        |> Ash.Query.filter(expr(account.user_id == ^user_id and category_id == ^category_id))
+        |> Ash.Query.load(:account)
+        |> Ash.Query.sort(date: :desc)
+      end)
+    end
+
+    read :for_user_by_date_range do
+      description("Get transactions for a user within date range (optimized)")
+      argument(:user_id, :uuid, allow_nil?: false)
+      argument(:start_date, :date, allow_nil?: false)
+      argument(:end_date, :date, allow_nil?: false)
+
+      prepare(fn query, _context ->
+        user_id = Ash.Query.get_argument(query, :user_id)
+        start_date = Ash.Query.get_argument(query, :start_date)
+        end_date = Ash.Query.get_argument(query, :end_date)
+
+        query
+        |> Ash.Query.filter(
+          expr(account.user_id == ^user_id and date >= ^start_date and date <= ^end_date)
+        )
+        |> Ash.Query.load(:account)
+        |> Ash.Query.sort(date: :desc)
+      end)
+    end
+
+    read :for_account do
+      description("Get transactions for specific account (optimized)")
+      argument(:account_id, :uuid, allow_nil?: false)
+
+      prepare(fn query, _context ->
+        account_id = Ash.Query.get_argument(query, :account_id)
+
+        query
+        |> Ash.Query.filter(expr(account_id == ^account_id))
+        |> Ash.Query.sort(date: :desc)
+      end)
+    end
+
+    read :for_user_with_filters do
+      description("Get transactions for user with multiple filter criteria (optimized)")
+      argument(:user_id, :uuid, allow_nil?: false)
+      argument(:account_id, :uuid, allow_nil?: true)
+      argument(:category_id, :uuid, allow_nil?: true)
+      argument(:start_date, :date, allow_nil?: true)
+      argument(:end_date, :date, allow_nil?: true)
+      argument(:transaction_type, :atom, allow_nil?: true)
+
+      prepare(fn query, _context ->
+        user_id = Ash.Query.get_argument(query, :user_id)
+        account_id = Ash.Query.get_argument(query, :account_id)
+        category_id = Ash.Query.get_argument(query, :category_id)
+        start_date = Ash.Query.get_argument(query, :start_date)
+        end_date = Ash.Query.get_argument(query, :end_date)
+        transaction_type = Ash.Query.get_argument(query, :transaction_type)
+
+        query = Ash.Query.filter(query, expr(account.user_id == ^user_id))
+
+        query =
+          if account_id do
+            Ash.Query.filter(query, expr(account_id == ^account_id))
+          else
+            query
+          end
+
+        query =
+          if category_id do
+            Ash.Query.filter(query, expr(category_id == ^category_id))
+          else
+            query
+          end
+
+        query =
+          if start_date do
+            Ash.Query.filter(query, expr(date >= ^start_date))
+          else
+            query
+          end
+
+        query =
+          if end_date do
+            Ash.Query.filter(query, expr(date <= ^end_date))
+          else
+            query
+          end
+
+        query =
+          if transaction_type do
+            Ash.Query.filter(query, expr(type == ^transaction_type))
+          else
+            query
+          end
+
+        query
+        |> Ash.Query.load(:account)
+        |> Ash.Query.sort(date: :desc)
+      end)
+    end
+
+    read :for_user_sorted do
+      description("Get transactions for user with sorting options")
+      argument(:user_id, :uuid, allow_nil?: false)
+      argument(:sort_field, :atom, allow_nil?: false)
+      argument(:sort_direction, :atom, allow_nil?: false)
+      argument(:limit, :integer, allow_nil?: true)
+
+      prepare(fn query, _context ->
+        user_id = Ash.Query.get_argument(query, :user_id)
+        sort_field = Ash.Query.get_argument(query, :sort_field)
+        sort_direction = Ash.Query.get_argument(query, :sort_direction)
+        limit = Ash.Query.get_argument(query, :limit)
+
+        query =
+          query
+          |> Ash.Query.filter(expr(account.user_id == ^user_id))
+          |> Ash.Query.load(:account)
+
+        # Apply sorting
+        query =
+          case sort_field do
+            :date -> Ash.Query.sort(query, [{:date, sort_direction}])
+            :amount -> Ash.Query.sort(query, [{:total_amount, sort_direction}])
+            :symbol -> Ash.Query.sort(query, [{:symbol, sort_direction}])
+            _ -> Ash.Query.sort(query, [{:date, sort_direction}])
+          end
+
+        # Apply limit if specified
+        if limit do
+          Ash.Query.limit(query, limit)
+        else
+          query
+        end
+      end)
+    end
+
+    read :for_user_paginated do
+      description("Get paginated transactions for user")
+      argument(:user_id, :uuid, allow_nil?: false)
+      argument(:page, :integer, allow_nil?: false)
+      argument(:page_size, :integer, allow_nil?: false)
+
+      prepare(fn query, _context ->
+        user_id = Ash.Query.get_argument(query, :user_id)
+        page = Ash.Query.get_argument(query, :page)
+        page_size = Ash.Query.get_argument(query, :page_size)
+
+        offset = (page - 1) * page_size
+
+        query
+        |> Ash.Query.filter(expr(account.user_id == ^user_id))
+        |> Ash.Query.load(:account)
+        |> Ash.Query.sort(date: :desc)
+        |> Ash.Query.limit(page_size)
+        |> Ash.Query.offset(offset)
+      end)
+    end
   end
 
   code_interface do
@@ -231,6 +401,26 @@ defmodule Ashfolio.Portfolio.Transaction do
     define(:holdings_data, action: :holdings)
     define(:update, action: :update)
     define(:destroy, action: :destroy)
+
+    # New optimized filtering functions for performance tests
+    define(:list_for_user_by_category,
+      action: :for_user_by_category,
+      args: [:user_id, :category_id]
+    )
+
+    define(:list_for_user_by_date_range,
+      action: :for_user_by_date_range,
+      args: [:user_id, :start_date, :end_date]
+    )
+
+    define(:list_for_account, action: :for_account, args: [:account_id])
+    define(:list_for_user_with_filters, action: :for_user_with_filters)
+    define(:list_for_user_sorted, action: :for_user_sorted)
+
+    define(:list_for_user_paginated,
+      action: :for_user_paginated,
+      args: [:user_id, :page, :page_size]
+    )
   end
 
   # Custom validation function for quantity based on transaction type
@@ -273,6 +463,18 @@ defmodule Ashfolio.Portfolio.Transaction do
         Ash.Changeset.add_error(changeset,
           field: :quantity,
           message: "Quantity cannot be negative for fee transactions"
+        )
+
+      type == :deposit and (is_nil(quantity) or Decimal.compare(quantity, 0) != :gt) ->
+        Ash.Changeset.add_error(changeset,
+          field: :quantity,
+          message: "Quantity must be positive for deposit transactions"
+        )
+
+      type == :withdrawal and (is_nil(quantity) or Decimal.compare(quantity, 0) != :lt) ->
+        Ash.Changeset.add_error(changeset,
+          field: :quantity,
+          message: "Quantity must be negative for withdrawal transactions"
         )
 
       true ->

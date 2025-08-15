@@ -175,16 +175,16 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - Write LiveView tests for enhanced dashboard including net worth display and real-time updates
   - _Requirements: 3.1, 3.2, 3.3_
 
-- [ ] 12. Create investment category seeding and system setup
+- [x] 12. Create investment category seeding and system setup
 
   - Create `Ashfolio.FinancialManagement.CategorySeeder` module
-  - Implement investment-focused system category seeding (Growth, Income, Speculative, Index) with appropriate colors
+  - Implement investment-focused system category seeding (Growth, Income, Speculative, Index, Cash, Bonds) with appropriate colors
   - Add category seeding to existing database seeding workflows
   - Create migration to seed system categories for existing users
   - Write tests for category seeding including idempotent seeding behavior
   - _Requirements: 5.1, 5.2_
 
-- [ ] 13. Add investment category filtering and display
+- [x] 13. Add investment category filtering and display
 
   - Implement category-based filtering in investment transaction lists
   - Add color-coded category tags to transaction displays
@@ -194,7 +194,7 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - Write tests for category filtering, display, and statistics
   - _Requirements: 5.3, 5.4_
 
-- [ ] 14. Implement performance optimizations
+- [x] 14. Implement performance optimizations
 
   - Add database indexes for new query patterns (account_type, category_id)
   - Optimize net worth calculation queries with batch loading

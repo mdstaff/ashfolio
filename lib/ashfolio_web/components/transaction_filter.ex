@@ -19,19 +19,19 @@ defmodule AshfolioWeb.Components.TransactionFilter do
   """
 
   use Phoenix.Component
-  import AshfolioWeb.CoreComponents
+  # import AshfolioWeb.CoreComponents
 
   @doc """
   Renders a comprehensive transaction filter form.
 
   ## Examples
 
-      <.transaction_filter 
+      <.transaction_filter
         categories={@categories}
         filters={@filters}
         target={@myself} />
-      
-      <.transaction_filter 
+
+      <.transaction_filter
         categories={@categories}
         filters={@filters}
         target={@myself}

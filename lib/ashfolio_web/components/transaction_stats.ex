@@ -25,8 +25,8 @@ defmodule AshfolioWeb.Components.TransactionStats do
   ## Examples
 
       <.transaction_stats transactions={@filtered_transactions} />
-      
-      <.transaction_stats 
+
+      <.transaction_stats
         transactions={@transactions}
         show_breakdown={true}
         show_categories={true}
@@ -360,7 +360,7 @@ defmodule AshfolioWeb.Components.TransactionStats do
   defp get_most_common_type([]), do: "None"
   defp get_most_common_type([{type, _data} | _]), do: String.capitalize(Atom.to_string(type))
 
-  defp format_time_span(nil), do: "None"
+  # defp format_time_span(nil), do: "None"
   defp format_time_span(%{day_count: 1}), do: "1 day"
   defp format_time_span(%{day_count: days}) when days <= 7, do: "#{days} days"
   defp format_time_span(%{day_count: days}) when days <= 31, do: "#{div(days, 7)} weeks"

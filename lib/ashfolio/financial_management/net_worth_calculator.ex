@@ -18,6 +18,9 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
   @doc """
   Calculate total net worth for a user across all account types.
 
+  TODO: Performance optimization - Consider batch loading and database aggregation
+  to improve performance from current ~167ms to <100ms target (see Task 14 Stage 2)
+
   Combines investment portfolio value from Portfolio.Calculator with
   cash account balances to provide comprehensive net worth.
 
@@ -110,6 +113,9 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
 
   @doc """
   Calculate detailed account breakdown by type for a user.
+
+  TODO: Performance optimization - Consider batch loading with single query and 
+  preloading to improve from current ~144ms to <75ms target (see Task 14 Stage 2)
 
   Provides breakdown of net worth by account type including:
   - Investment accounts (with portfolio value)

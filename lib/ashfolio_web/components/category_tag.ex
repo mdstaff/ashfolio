@@ -15,7 +15,7 @@ defmodule AshfolioWeb.Components.CategoryTag do
   """
 
   use Phoenix.Component
-  import AshfolioWeb.CoreComponents
+  # import AshfolioWeb.CoreComponents
   import Bitwise
 
   @doc """
@@ -24,9 +24,9 @@ defmodule AshfolioWeb.Components.CategoryTag do
   ## Examples
 
       <.category_tag category={%{name: "Growth", color: "#10B981"}} />
-      
-      <.category_tag 
-        category={category} 
+
+      <.category_tag
+        category={category}
         size={:small}
         clickable={true}
         click_event="filter_by_category"
