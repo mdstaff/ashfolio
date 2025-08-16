@@ -22,7 +22,7 @@ defmodule Ashfolio.SQLiteConcurrencyHelpers do
 
   ## Examples
       SQLiteConcurrencyHelpers.with_retry(fn ->
-        Ash.create(User, %{name: "Test"})
+        Ashfolio.Portfolio.User.create(%{name: "Test"})
       end)
   """
   def with_retry(operation, retries \\ @max_retries) do

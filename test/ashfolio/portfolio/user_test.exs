@@ -52,7 +52,7 @@ defmodule Ashfolio.Portfolio.UserTest do
     test "validates USD-only currency" do
       # Try to create a user with non-USD currency (this should fail validation)
       {:error, changeset} =
-        Ash.create(User, %{
+        User.create( %{
           name: "Test User",
           currency: "EUR",
           locale: "en-US"
@@ -66,7 +66,7 @@ defmodule Ashfolio.Portfolio.UserTest do
     test "default_user action works correctly" do
       # Create a user first
       {:ok, _user} =
-        Ash.create(User, %{
+        User.create( %{
           name: "Test User",
           currency: "USD",
           locale: "en-US"

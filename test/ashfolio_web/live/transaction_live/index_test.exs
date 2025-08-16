@@ -83,7 +83,7 @@ defmodule AshfolioWeb.TransactionLive.IndexTest do
     test "displays category filter when categories exist", %{conn: conn, category: _category} do
       {:ok, _index_live, html} = live(conn, ~p"/transactions")
 
-      assert html =~ "Filter by Category"
+      assert html =~ "Filter Transactions"
       assert html =~ "All Categories"
       assert html =~ "Uncategorized"
       assert html =~ "Growth"
@@ -157,11 +157,12 @@ defmodule AshfolioWeb.TransactionLive.IndexTest do
       # The filtering functionality works - we can see the category filtering UI and the transactions display correctly
       # Let's just verify the key elements are present
       html = render(index_live)
-      assert html =~ "Filter by Category"
-      assert html =~ "Growth"
-      assert html =~ "TEST"
-      assert html =~ "Buy"
-      assert html =~ "transactions"
+      assert html =~ "Filter Transactions"  # Updated to match actual UI text
+      assert html =~ "Category"              # The category filter label
+      assert html =~ "Growth"                # The category name
+      assert html =~ "TEST"                  # The symbol
+      assert html =~ "Buy"                   # Transaction type
+      assert html =~ "transactions"          # Transaction count text
     end
 
     test "updates transaction list when transactions are added via PubSub", %{

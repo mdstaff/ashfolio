@@ -24,7 +24,7 @@ defmodule Ashfolio.Integration.ErrorHandlingTest do
     NetWorthCalculator
   }
 
-  alias Ashfolio.Portfolio.{User, Account}
+  alias Ashfolio.Portfolio.Account
   alias Ashfolio.SQLiteHelpers
 
   describe "cash balance management error scenarios" do

@@ -27,7 +27,7 @@ defmodule Ashfolio.ClearFailureFormatter do
     {:ok, config}
   end
 
-  def handle_cast({:suite_started, opts}, config) do
+  def handle_cast({:suite_started, _opts}, config) do
     IO.puts("\n🧪 Test Suite Started")
     IO.puts("━" <> String.duplicate("━", 60))
     

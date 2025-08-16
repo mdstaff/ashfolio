@@ -7,7 +7,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
   @moduletag :smoke
 
   alias Ashfolio.Portfolio.Calculator
-  alias Ashfolio.Portfolio.{User, Account, Symbol, Transaction}
+  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
   alias Ashfolio.SQLiteHelpers
 
   # Helper function to create user - use global setup

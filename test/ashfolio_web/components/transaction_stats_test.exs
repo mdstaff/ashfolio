@@ -1,5 +1,5 @@
 defmodule AshfolioWeb.Components.TransactionStatsTest do
-  use AshfolioWeb.ConnCase, async: true
+  use AshfolioWeb.ConnCase, async: false
 
   @moduletag :components
   @moduletag :transaction_stats
@@ -10,34 +10,24 @@ defmodule AshfolioWeb.Components.TransactionStatsTest do
   alias Ashfolio.FinancialManagement.TransactionCategory
   alias Ashfolio.Portfolio.{Transaction, Account, Symbol}
   alias Ashfolio.SQLiteHelpers
+  alias Ashfolio.Repo
 
   describe "TransactionStats component" do
     setup do
       user = SQLiteHelpers.get_default_user()
 
       {:ok, growth_category} =
-        TransactionCategory.create(%{
-          name: "Growth",
-          color: "#10B981",
-          user_id: user.id
-        })
+        SQLiteHelpers.with_retry(fn ->
+          TransactionCategory.create(%{
+            name: "Growth",
+            color: "#10B981",
+            user_id: user.id
+          })
+        end)
 
-      {:ok, account} =
-        Account.create(%{
-          name: "Test Account",
-          platform: "Test",
-          balance: Decimal.new("10000.00"),
-          user_id: user.id
-        })
+      account = SQLiteHelpers.get_default_account(user)
 
-      {:ok, symbol} =
-        Symbol.create(%{
-          symbol: "STAT",
-          name: "Statistics Test Co",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("100.00")
-        })
+      symbol = SQLiteHelpers.get_common_symbol("AAPL")
 
       # Create sample transactions for statistics
       transactions = [
@@ -75,7 +65,8 @@ defmodule AshfolioWeb.Components.TransactionStatsTest do
       html =
         render_component(&TransactionStats.transaction_stats/1,
           transactions: transactions,
-          show_breakdown: false
+          show_breakdown: false,
+          show_time_analysis: true
         )
 
       # Should show total count
@@ -223,9 +214,7 @@ defmodule AshfolioWeb.Components.TransactionStatsTest do
       assert html =~ "custom-stats-class"
       assert html =~ "extra-styling"
     end
-  end
 
-  describe "TransactionStats calculation helpers" do
     test "correctly calculates transaction volume", %{transactions: transactions} do
       html =
         render_component(&TransactionStats.transaction_stats/1,
@@ -327,7 +316,12 @@ defmodule AshfolioWeb.Components.TransactionStatsTest do
       category_id: category.id
     }
 
-    {:ok, transaction} = Transaction.create(Map.merge(default_attrs, attrs))
-    transaction
+    {:ok, transaction} = SQLiteHelpers.with_retry(fn ->
+      Transaction.create(Map.merge(default_attrs, attrs))
+    end)
+    
+    # Load category association for component testing (using Ash)
+    {:ok, loaded_transaction} = transaction |> Ash.load([:category])
+    loaded_transaction
   end
 end

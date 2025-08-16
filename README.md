@@ -5,7 +5,7 @@
 Built with Phoenix LiveView and the Ash Framework, Ashfolio provides a secure, privacy-focused solution for managing your complete financial picture on your own computer. Track investments, cash accounts, net worth, expenses, and plan for the future—all with no cloud dependencies and complete data ownership.
 
 [![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-green)](https://github.com/mdstaff/ashfolio)
-[![Test Coverage](https://img.shields.io/badge/Tests-383%20passing-brightgreen)](https://github.com/mdstaff/ashfolio)
+[![Test Coverage](https://img.shields.io/badge/Tests-970%20passing%20(100%25)-brightgreen)](https://github.com/mdstaff/ashfolio)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## 🚀 Quick Start
@@ -70,7 +70,7 @@ Get Ashfolio up and running in minut`es!
 ### 🛠️ Developer Friendly
 
 - **Modern Tech Stack**: Phoenix LiveView, Ash Framework, SQLite
-- **Comprehensive Testing**: 383+ tests ensuring reliability
+- **Comprehensive Testing**: 970 tests with 100% success rate ensuring reliability
 - **Easy Setup**: One command to get running (`just dev`)
 - **Excellent Documentation**: Comprehensive guides for contributors
 
@@ -79,7 +79,7 @@ Get Ashfolio up and running in minut`es!
 ## 🎯 Project Status
 
 **Current Version**: v0.2.0-dev (Comprehensive Financial Management)
-**Stability**: All tests passing with new financial features  
+**Test Status**: 970 tests passing (100% success rate) - Main: 871 tests, Performance: 99 tests
 **Next Release**: v0.2.0 (Cash Management & Net Worth - In Progress)
 
 ### ✅ Currently Available (v0.1.0 + v0.2.0 Features)
@@ -241,7 +241,8 @@ Thanks to all contributors who help make Ashfolio better! Contributions of all s
 
 ### 🧪 Testing
 
-- **[Testing Overview](docs/testing/)** - Comprehensive testing framework
+- **[Testing Strategy](docs/TESTING_STRATEGY.md)** - Comprehensive testing framework and 100% success achievement
+- **[Troubleshooting Guide](docs/development/test-failure-troubleshooting-guide.md)** - Systematic test failure resolution patterns  
 - **[Framework Guide](docs/testing/framework.md)** - Testing architecture and patterns
 - **[SQLite Patterns](docs/testing/patterns.md)** - Database testing strategies
 

@@ -254,8 +254,8 @@ help topic="":
         echo "  just test-watch → Watch mode"
         echo ""
         echo "For more help: just help <topic>"
-        echo "Topics: testing, database, server, workflow"
-    elif [ "{{topic}}" = "testing" ]; then
+        echo "Topics: test, database, server, workflow"
+    elif [ "{{topic}}" = "test" ]; then
         echo "🧪 Testing Guide"
         echo ""
         echo "Test Filters:"
@@ -298,7 +298,7 @@ help topic="":
         echo "   just fix         → Auto-fix common issues"
     else
         echo "Unknown topic: {{topic}}"
-        echo "Available topics: testing, database, server, workflow"
+        echo "Available topics: test, database, server, workflow"
     fi
 
 # ============================================================================

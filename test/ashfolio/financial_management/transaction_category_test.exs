@@ -18,7 +18,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
   describe "TransactionCategory resource" do
     test "can create category with required attributes", %{user: user} do
       {:ok, category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Growth",
           user_id: user.id
         })
@@ -33,14 +33,14 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "can create category with all attributes", %{user: user} do
       {:ok, parent_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Equity",
           color: "#3B82F6",
           user_id: user.id
         })
 
       {:ok, category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Growth",
           color: "#10B981",
           is_system: true,
@@ -57,7 +57,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "can update category attributes", %{user: user} do
       {:ok, category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Test Category",
           color: "#FF0000",
           user_id: user.id
@@ -75,7 +75,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "can delete non-system category", %{user: user} do
       {:ok, category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Test Category",
           is_system: false,
           user_id: user.id
@@ -91,7 +91,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "validates required name field", %{user: user} do
       {:error, changeset} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           user_id: user.id
         })
 
@@ -101,7 +101,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "validates required user_id field" do
       {:error, changeset} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Test Category"
         })
 
@@ -112,7 +112,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
     test "validates name uniqueness per user", %{user: user} do
       # Create another user
       {:ok, other_user} =
-        Ash.create(User, %{
+        User.create( %{
           name: "Other User",
           currency: "USD",
           locale: "en-US"
@@ -120,14 +120,14 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
       # Create category for first user
       {:ok, _category1} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Growth",
           user_id: user.id
         })
 
       # Should fail to create same name for same user
       {:error, changeset} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Growth",
           user_id: user.id
         })
@@ -137,7 +137,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
       # Should succeed to create same name for different user
       {:ok, category2} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Growth",
           user_id: other_user.id
         })
@@ -148,7 +148,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "prevents circular parent relationships", %{user: user} do
       {:ok, category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Test Category",
           user_id: user.id
         })
@@ -165,7 +165,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "prevents updating system categories", %{user: user} do
       {:ok, system_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "System Category",
           is_system: true,
           user_id: user.id
@@ -182,7 +182,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "prevents deleting system categories", %{user: user} do
       {:ok, system_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "System Category",
           is_system: true,
           user_id: user.id
@@ -199,7 +199,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
     test "by_user action returns categories for specific user", %{user: user} do
       # Create another user
       {:ok, other_user} =
-        Ash.create(User, %{
+        User.create( %{
           name: "Other User",
           currency: "USD",
           locale: "en-US"
@@ -207,14 +207,14 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
       # Create category for first user
       {:ok, user_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "User Category",
           user_id: user.id
         })
 
       # Create category for other user
       {:ok, _other_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Other Category",
           user_id: other_user.id
         })
@@ -230,7 +230,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
     test "system_categories action returns only system categories", %{user: user} do
       # Create system category
       {:ok, system_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "System Category",
           is_system: true,
           user_id: user.id
@@ -238,7 +238,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
       # Create user category
       {:ok, _user_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "User Category",
           is_system: false,
           user_id: user.id
@@ -255,7 +255,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
     test "user_categories action returns only user categories", %{user: user} do
       # Create system category
       {:ok, _system_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "System Category",
           is_system: true,
           user_id: user.id
@@ -263,7 +263,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
       # Create user category
       {:ok, user_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "User Category",
           is_system: false,
           user_id: user.id
@@ -280,14 +280,14 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
     test "root_categories action returns categories without parents", %{user: user} do
       # Create root category
       {:ok, root_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Root Category",
           user_id: user.id
         })
 
       # Create child category
       {:ok, _child_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Child Category",
           parent_category_id: root_category.id,
           user_id: user.id
@@ -304,14 +304,14 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
     test "by_parent action returns categories with specific parent", %{user: user} do
       # Create parent category
       {:ok, parent_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Parent Category",
           user_id: user.id
         })
 
       # Create child category
       {:ok, child_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Child Category",
           parent_category_id: parent_category.id,
           user_id: user.id
@@ -319,13 +319,13 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
       # Create another parent and child
       {:ok, other_parent} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Other Parent",
           user_id: user.id
         })
 
       {:ok, _other_child} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Other Child",
           parent_category_id: other_parent.id,
           user_id: user.id
@@ -357,8 +357,8 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
     end
 
     test "list function works", %{user: user} do
-      {:ok, category} =
-        Ash.create(TransactionCategory, %{
+      {:ok, _category} =
+        TransactionCategory.create( %{
           name: "Test Category",
           user_id: user.id
         })
@@ -373,7 +373,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "get_by_id function works", %{user: user} do
       {:ok, category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Test Category",
           user_id: user.id
         })
@@ -386,7 +386,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "categories_for_user function works", %{user: user} do
       {:ok, category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "User Category",
           user_id: user.id
         })
@@ -401,14 +401,14 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "system_categories function works", %{user: user} do
       {:ok, system_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "System Category",
           is_system: true,
           user_id: user.id
         })
 
       {:ok, _user_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "User Category",
           is_system: false,
           user_id: user.id
@@ -424,14 +424,14 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "user_categories function works", %{user: user} do
       {:ok, _system_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "System Category",
           is_system: true,
           user_id: user.id
         })
 
       {:ok, user_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "User Category",
           is_system: false,
           user_id: user.id
@@ -447,13 +447,13 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "root_categories function works", %{user: user} do
       {:ok, root_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Root Category",
           user_id: user.id
         })
 
       {:ok, _child_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Child Category",
           parent_category_id: root_category.id,
           user_id: user.id
@@ -469,13 +469,13 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "categories_by_parent function works", %{user: user} do
       {:ok, parent_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Parent Category",
           user_id: user.id
         })
 
       {:ok, child_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Child Category",
           parent_category_id: parent_category.id,
           user_id: user.id
@@ -494,7 +494,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "update function works", %{user: user} do
       {:ok, category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Original Name",
           user_id: user.id
         })
@@ -506,7 +506,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "destroy function works", %{user: user} do
       {:ok, category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Test Category",
           is_system: false,
           user_id: user.id
@@ -522,7 +522,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "get_by_name_for_user function works", %{user: user} do
       {:ok, category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Unique Category",
           user_id: user.id
         })
@@ -536,13 +536,13 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "get_user_categories_with_children function works", %{user: user} do
       {:ok, parent_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Parent Category",
           user_id: user.id
         })
 
       {:ok, child_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Child Category",
           parent_category_id: parent_category.id,
           user_id: user.id
@@ -568,7 +568,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
   describe "TransactionCategory relationships" do
     test "belongs_to user relationship works", %{user: user} do
       {:ok, category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Test Category",
           user_id: user.id
         })
@@ -582,13 +582,13 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
     test "parent/child category relationships work", %{user: user} do
       {:ok, parent_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Parent Category",
           user_id: user.id
         })
 
       {:ok, child_category} =
-        Ash.create(TransactionCategory, %{
+        TransactionCategory.create( %{
           name: "Child Category",
           parent_category_id: parent_category.id,
           user_id: user.id

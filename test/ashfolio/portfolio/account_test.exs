@@ -6,7 +6,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
   @moduletag :fast
   @moduletag :smoke
 
-  alias Ashfolio.Portfolio.{User, Account}
+  alias Ashfolio.Portfolio.{Account, User}
   alias Ashfolio.SQLiteHelpers
 
   setup do
@@ -18,7 +18,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
   describe "Account resource" do
     test "can create account with required attributes", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Schwab Brokerage",
           platform: "Schwab",
           user_id: user.id
@@ -40,7 +40,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "can create account with all attributes", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Fidelity 401k",
           platform: "Fidelity",
           currency: "USD",
@@ -59,7 +59,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "can update account attributes", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Test Account",
           platform: "Test",
           user_id: user.id
@@ -79,7 +79,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "can delete account", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Test Account",
           user_id: user.id
         })
@@ -94,7 +94,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "validates required name field", %{user: user} do
       {:error, changeset} =
-        Ash.create(Account, %{
+        Account.create( %{
           platform: "Test",
           user_id: user.id
         })
@@ -105,7 +105,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "validates required user_id field" do
       {:error, changeset} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Test Account",
           platform: "Test"
         })
@@ -116,7 +116,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "can create cash account with all attributes", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "High Yield Savings",
           platform: "Bank",
           account_type: :savings,
@@ -137,7 +137,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "can create checking account", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Primary Checking",
           platform: "Bank",
           account_type: :checking,
@@ -151,7 +151,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "can create money market account", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Money Market",
           platform: "Bank",
           account_type: :money_market,
@@ -167,7 +167,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "can create CD account", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "12-Month CD",
           platform: "Bank",
           account_type: :cd,
@@ -183,7 +183,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "validates account_type constraints", %{user: user} do
       {:error, changeset} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Invalid Account",
           account_type: :invalid_type,
           user_id: user.id
@@ -195,7 +195,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "validates non-negative interest rate", %{user: user} do
       {:error, changeset} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Savings Account",
           account_type: :savings,
           interest_rate: Decimal.new("-0.01"),
@@ -208,7 +208,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "validates non-negative minimum balance", %{user: user} do
       {:error, changeset} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Savings Account",
           account_type: :savings,
           minimum_balance: Decimal.new("-100.00"),
@@ -222,7 +222,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
     test "validates interest rate only for appropriate account types", %{user: user} do
       # Should fail for investment account with interest rate
       {:error, changeset} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Investment Account",
           account_type: :investment,
           interest_rate: Decimal.new("0.05"),
@@ -234,7 +234,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
       # Should fail for checking account with interest rate
       {:error, changeset} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Checking Account",
           account_type: :checking,
           interest_rate: Decimal.new("0.01"),
@@ -247,7 +247,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "allows interest rate for savings accounts", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Savings Account",
           account_type: :savings,
           interest_rate: Decimal.new("0.025"),
@@ -259,7 +259,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "allows interest rate for money market accounts", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Money Market Account",
           account_type: :money_market,
           interest_rate: Decimal.new("0.035"),
@@ -271,7 +271,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "allows interest rate for CD accounts", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "CD Account",
           account_type: :cd,
           interest_rate: Decimal.new("0.045"),
@@ -286,7 +286,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
     test "active action returns only non-excluded accounts", %{user: user} do
       # Create active account
       {:ok, active_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Active Account",
           is_excluded: false,
           user_id: user.id
@@ -294,7 +294,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
       # Create excluded account
       {:ok, _excluded_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Excluded Account",
           is_excluded: true,
           user_id: user.id
@@ -311,7 +311,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
     test "by_user action returns accounts for specific user", %{user: user} do
       # Create another user
       {:ok, other_user} =
-        Ash.create(User, %{
+        User.create(%{
           name: "Other User",
           currency: "USD",
           locale: "en-US"
@@ -319,14 +319,14 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
       # Create account for first user
       {:ok, user_account} =
-        Ash.create(Account, %{
+        Account.create(%{
           name: "User Account",
           user_id: user.id
         })
 
       # Create account for other user
       {:ok, _other_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Other Account",
           user_id: other_user.id
         })
@@ -341,7 +341,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "toggle_exclusion action works correctly", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Test Account",
           is_excluded: false,
           user_id: user.id
@@ -355,7 +355,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "update_balance action works correctly", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Test Account",
           balance: Decimal.new("1000.00"),
           user_id: user.id
@@ -370,7 +370,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
     test "by_type action returns accounts of specific type", %{user: user} do
       # Create investment account
       {:ok, investment_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Investment Account",
           account_type: :investment,
           user_id: user.id
@@ -378,7 +378,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
       # Create savings account
       {:ok, _savings_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Savings Account",
           account_type: :savings,
           user_id: user.id
@@ -395,7 +395,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
     test "cash_accounts action returns only cash accounts", %{user: user} do
       # Create investment account
       {:ok, _investment_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Investment Account",
           account_type: :investment,
           user_id: user.id
@@ -403,28 +403,28 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
       # Create cash accounts
       {:ok, checking_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Checking Account",
           account_type: :checking,
           user_id: user.id
         })
 
       {:ok, savings_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Savings Account",
           account_type: :savings,
           user_id: user.id
         })
 
       {:ok, money_market_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Money Market Account",
           account_type: :money_market,
           user_id: user.id
         })
 
       {:ok, cd_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "CD Account",
           account_type: :cd,
           user_id: user.id
@@ -447,7 +447,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
     test "investment_accounts action returns only investment accounts", %{user: user} do
       # Create investment account
       {:ok, investment_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Investment Account",
           account_type: :investment,
           user_id: user.id
@@ -455,7 +455,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
       # Create cash account
       {:ok, _savings_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Savings Account",
           account_type: :savings,
           user_id: user.id
@@ -486,8 +486,8 @@ defmodule Ashfolio.Portfolio.AccountTest do
     end
 
     test "list function works", %{user: user} do
-      {:ok, account} =
-        Ash.create(Account, %{
+      {:ok, _account} =
+        Account.create( %{
           name: "Test Account",
           user_id: user.id
         })
@@ -502,7 +502,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "get_by_id function works", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Test Account",
           user_id: user.id
         })
@@ -515,14 +515,14 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "active_accounts function works", %{user: user} do
       {:ok, active_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Active Account",
           is_excluded: false,
           user_id: user.id
         })
 
       {:ok, _excluded_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Excluded Account",
           is_excluded: true,
           user_id: user.id
@@ -538,7 +538,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "accounts_for_user function works", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "User Account",
           user_id: user.id
         })
@@ -553,7 +553,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "update function works", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Original Name",
           user_id: user.id
         })
@@ -565,7 +565,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "toggle_exclusion function works", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Test Account",
           is_excluded: false,
           user_id: user.id
@@ -578,7 +578,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "update_balance function works", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Test Account",
           balance: Decimal.new("1000.00"),
           user_id: user.id
@@ -591,7 +591,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "destroy function works", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Test Account",
           user_id: user.id
         })
@@ -606,14 +606,14 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "accounts_by_type function works", %{user: user} do
       {:ok, savings_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Savings Account",
           account_type: :savings,
           user_id: user.id
         })
 
       {:ok, _investment_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Investment Account",
           account_type: :investment,
           user_id: user.id
@@ -629,14 +629,14 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "cash_accounts function works", %{user: user} do
       {:ok, checking_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Checking Account",
           account_type: :checking,
           user_id: user.id
         })
 
       {:ok, _investment_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Investment Account",
           account_type: :investment,
           user_id: user.id
@@ -655,14 +655,14 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
     test "investment_accounts function works", %{user: user} do
       {:ok, investment_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Investment Account",
           account_type: :investment,
           user_id: user.id
         })
 
       {:ok, _checking_account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Checking Account",
           account_type: :checking,
           user_id: user.id
@@ -682,7 +682,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
   describe "Account relationships" do
     test "belongs_to user relationship works", %{user: user} do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create( %{
           name: "Test Account",
           user_id: user.id
         })

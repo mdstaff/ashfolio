@@ -445,13 +445,16 @@ defmodule AshfolioWeb.DashboardLive do
   end
 
   defp assign_net_worth_data(socket, net_worth_data) do
+    # Handle both Context.get_net_worth (returns :total_net_worth) and NetWorthCalculator.calculate_net_worth (returns :net_worth)
+    net_worth_value = net_worth_data[:total_net_worth] || net_worth_data[:net_worth]
+    
     socket
-    |> assign(:net_worth_total, FormatHelpers.format_currency(net_worth_data.total_net_worth))
+    |> assign(:net_worth_total, FormatHelpers.format_currency(net_worth_value))
     |> assign(
       :net_worth_investment_value,
       FormatHelpers.format_currency(net_worth_data.investment_value)
     )
-    |> assign(:net_worth_cash_balance, FormatHelpers.format_currency(net_worth_data.cash_balance))
+    |> assign(:net_worth_cash_balance, FormatHelpers.format_currency(net_worth_data[:cash_balance] || net_worth_data[:cash_value]))
     |> assign(:net_worth_breakdown, net_worth_data.breakdown)
     |> assign(:net_worth_error, nil)
   end

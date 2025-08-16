@@ -10,7 +10,7 @@ defmodule AshfolioWeb.Integration.SimplifiedTransactionFlowTest do
   @moduletag :integration
   @moduletag :fast
 
-  alias Ashfolio.Portfolio.{User, Account, Symbol, Transaction}
+  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
   alias Ashfolio.SQLiteHelpers
 
   setup do
