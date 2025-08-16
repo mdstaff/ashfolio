@@ -392,6 +392,136 @@ defmodule AshfolioWeb.DashboardLiveTest do
     end
   end
 
+  describe "recent activity display" do
+    setup do
+      # Get or create the default test user
+      {:ok, user} = get_or_create_default_user()
+
+      # Create accounts
+      {:ok, account} =
+        Account.create(%{
+          name: "Activity Test Account",
+          platform: "Brokerage",
+          balance: Decimal.new("10000"),
+          currency: "USD",
+          user_id: user.id
+        })
+
+      # Create symbols
+      {:ok, symbol1} =
+        Symbol.create(%{
+          symbol: "ACTIVITY1",
+          name: "Activity Test Stock 1",
+          currency: "USD",
+          current_price: Decimal.new("100.00"),
+          asset_class: :stock,
+          data_source: :manual
+        })
+
+      {:ok, symbol2} =
+        Symbol.create(%{
+          symbol: "ACTIVITY2",
+          name: "Activity Test Stock 2",
+          currency: "USD",
+          current_price: Decimal.new("50.00"),
+          asset_class: :stock,
+          data_source: :manual
+        })
+
+      # Create multiple transactions for recent activity
+      {:ok, _tx1} =
+        Transaction.create(%{
+          type: :buy,
+          symbol_id: symbol1.id,
+          account_id: account.id,
+          quantity: Decimal.new("10"),
+          price: Decimal.new("95.00"),
+          total_amount: Decimal.new("950.00"),
+          date: Date.add(Date.utc_today(), -1)
+        })
+
+      {:ok, _tx2} =
+        Transaction.create(%{
+          type: :sell,
+          symbol_id: symbol2.id,
+          account_id: account.id,
+          quantity: Decimal.new("-5"),
+          price: Decimal.new("48.00"),
+          total_amount: Decimal.new("-240.00"),
+          date: Date.add(Date.utc_today(), -2)
+        })
+
+      {:ok, _tx3} =
+        Transaction.create(%{
+          type: :dividend,
+          symbol_id: symbol1.id,
+          account_id: account.id,
+          quantity: Decimal.new("10"),
+          price: Decimal.new("2.50"),
+          total_amount: Decimal.new("25.00"),
+          date: Date.add(Date.utc_today(), -3)
+        })
+
+      %{user: user, account: account, symbol1: symbol1, symbol2: symbol2}
+    end
+
+    test "displays recent transactions in activity section", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/")
+
+      # Should show recent activity section
+      assert html =~ "Recent Activity"
+
+      # Should display transaction items
+      assert html =~ "recent-transactions-list"
+      assert html =~ "recent-transaction-item"
+
+      # Should show transaction details
+      assert html =~ "ACTIVITY1"
+      assert html =~ "ACTIVITY2"
+      assert html =~ "Buy"
+      assert html =~ "Sell"
+      assert html =~ "Dividend"
+    end
+
+    test "shows proper transaction type indicators", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/")
+
+      # Should show color-coded transaction type indicators
+      assert html =~ "bg-green-500"  # buy transactions
+      assert html =~ "bg-red-500"    # sell transactions  
+      assert html =~ "bg-blue-500"   # dividend transactions
+    end
+
+    test "displays formatted currency amounts", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/")
+
+      # Should show formatted currency amounts
+      assert html =~ "$950.00" or html =~ "950"
+      assert html =~ "$240.00" or html =~ "240"
+      assert html =~ "$25.00" or html =~ "25"
+    end
+
+    test "shows View All link to transactions page", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/")
+
+      # Should have proper link to transactions page
+      assert html =~ ~s(href="/transactions")
+      assert html =~ "View All"
+    end
+
+    test "displays empty state when no transactions exist", %{conn: conn} do
+      # Clear all transactions for empty state test
+      Transaction.list!() |> Enum.each(&Transaction.destroy!/1)
+
+      {:ok, _view, html} = live(conn, "/")
+
+      # Should show empty state
+      assert html =~ "no-recent-transactions"
+      assert html =~ "No recent transactions"
+      assert html =~ "Your latest investment activity will appear here"
+    end
+  end
+
   describe "net worth real-time updates" do
     setup do
       # Get or create the default test user

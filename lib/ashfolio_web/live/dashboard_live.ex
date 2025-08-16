@@ -143,9 +143,9 @@ defmodule AshfolioWeb.DashboardLive do
             <% end %>
             {if @loading, do: "Refreshing...", else: "Refresh Prices"}
           </.button>
-          <.button type="button" class="btn-primary w-full sm:w-auto">
+          <.link href={~p"/transactions"} class="btn-primary w-full sm:w-auto inline-flex items-center justify-center">
             <.icon name="hero-plus" class="w-4 h-4 mr-2" /> Add Transaction
-          </.button>
+          </.link>
         </div>
       </div>
       
@@ -352,15 +352,74 @@ defmodule AshfolioWeb.DashboardLive do
           <h2 class="text-lg font-medium text-gray-900">Recent Activity</h2>
         </:header>
         <:actions>
-          <.button type="button" class="btn-secondary text-sm">
+          <.link href={~p"/transactions"} class="btn-secondary text-sm">
             View All
-          </.button>
+          </.link>
         </:actions>
 
-        <div class="text-center py-8">
-          <.icon name="hero-clock" class="w-8 h-8 text-gray-400 mx-auto mb-2" />
-          <p class="text-gray-600">No recent transactions</p>
-        </div>
+        <%= if Enum.empty?(@recent_transactions) do %>
+          <div class="text-center py-8" data-testid="no-recent-transactions">
+            <.icon name="hero-clock" class="w-8 h-8 text-gray-400 mx-auto mb-2" />
+            <p class="text-gray-600">No recent transactions</p>
+            <p class="text-sm text-gray-500 mt-1">
+              Your latest investment activity will appear here
+            </p>
+          </div>
+        <% else %>
+          <div class="space-y-3" data-testid="recent-transactions-list">
+            <%= for transaction <- @recent_transactions do %>
+              <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0" data-testid="recent-transaction-item">
+                <div class="flex items-start space-x-3">
+                  <div class="flex-shrink-0">
+                    <div class={[
+                      "w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium",
+                      transaction_type_color(transaction.type)
+                    ]}>
+                      {transaction_type_icon(transaction.type)}
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center space-x-2">
+                      <p class="text-sm font-medium text-gray-900 truncate">
+                        {get_transaction_symbol(transaction)}
+                      </p>
+                      <%= if get_transaction_category(transaction) do %>
+                        <AshfolioWeb.Components.CategoryTag.category_tag
+                          category={get_transaction_category(transaction)}
+                          size={:small}
+                        />
+                      <% end %>
+                    </div>
+                    <div class="flex items-center space-x-2 mt-1">
+                      <p class="text-xs text-gray-500">
+                        {String.capitalize(Atom.to_string(transaction.type))}
+                      </p>
+                      <span class="text-gray-300">•</span>
+                      <p class="text-xs text-gray-500">
+                        {format_quantity(transaction.quantity)} shares
+                      </p>
+                      <span class="text-gray-300">•</span>
+                      <p class="text-xs text-gray-500">
+                        {FormatHelpers.format_relative_time(transaction.date)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class={[
+                    "text-sm font-medium",
+                    FormatHelpers.value_color_class(transaction.total_amount)
+                  ]}>
+                    {FormatHelpers.format_currency(transaction.total_amount)}
+                  </p>
+                  <p class="text-xs text-gray-500">
+                    @ {FormatHelpers.format_currency(get_transaction_price(transaction))}
+                  </p>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
       </.card>
     </div>
     """
@@ -405,6 +464,7 @@ defmodule AshfolioWeb.DashboardLive do
       |> assign(:last_price_update, get_last_price_update())
       |> assign(:error, nil)
       |> load_net_worth_data(user_id)
+      |> load_recent_transactions(user_id)
     else
       {:error, reason} ->
         Logger.warning("Failed to load portfolio data: #{inspect(reason)}")
@@ -427,6 +487,7 @@ defmodule AshfolioWeb.DashboardLive do
     |> assign(:sort_order, :asc)
     |> assign(:last_price_update, nil)
     |> assign(:error, "Unable to load portfolio data")
+    |> assign(:recent_transactions, [])
     |> assign_default_net_worth_values()
   end
 
@@ -441,6 +502,20 @@ defmodule AshfolioWeb.DashboardLive do
       {:error, reason} ->
         Logger.warning("Failed to load net worth data: #{inspect(reason)}")
         assign_default_net_worth_values(socket)
+    end
+  end
+
+  defp load_recent_transactions(socket, user_id) do
+    Logger.debug("Loading recent transactions for user: #{user_id}")
+
+    case Context.get_recent_transactions(user_id, 5) do
+      {:ok, transactions} ->
+        Logger.debug("Loaded #{length(transactions)} recent transactions")
+        assign(socket, :recent_transactions, transactions)
+
+      {:error, reason} ->
+        Logger.warning("Failed to load recent transactions: #{inspect(reason)}")
+        assign(socket, :recent_transactions, [])
     end
   end
 
@@ -554,4 +629,33 @@ defmodule AshfolioWeb.DashboardLive do
   end
 
   defp get_account_count(_, _), do: 0
+
+  # Helper functions for Recent Activity section
+
+  defp transaction_type_color(:buy), do: "bg-green-500"
+  defp transaction_type_color(:sell), do: "bg-red-500"
+  defp transaction_type_color(:dividend), do: "bg-blue-500"
+  defp transaction_type_color(:fee), do: "bg-yellow-500"
+  defp transaction_type_color(:interest), do: "bg-purple-500"
+  defp transaction_type_color(:liability), do: "bg-gray-500"
+  defp transaction_type_color(_), do: "bg-gray-400"
+
+  defp transaction_type_icon(:buy), do: "+"
+  defp transaction_type_icon(:sell), do: "-"
+  defp transaction_type_icon(:dividend), do: "$"
+  defp transaction_type_icon(:fee), do: "F"
+  defp transaction_type_icon(:interest), do: "I"
+  defp transaction_type_icon(:liability), do: "L"
+  defp transaction_type_icon(_), do: "?"
+
+  defp get_transaction_symbol(%{symbol: %{symbol: symbol}}), do: symbol
+  defp get_transaction_symbol(%{symbol: nil}), do: "N/A"
+  defp get_transaction_symbol(_), do: "N/A"
+
+  defp get_transaction_category(%{category: category}) when not is_nil(category), do: category
+  defp get_transaction_category(_), do: nil
+
+  defp get_transaction_price(%{price: price}) when not is_nil(price), do: price
+  defp get_transaction_price(%{symbol: %{current_price: price}}) when not is_nil(price), do: price
+  defp get_transaction_price(_), do: Decimal.new("0.00")
 end

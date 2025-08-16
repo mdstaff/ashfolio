@@ -195,11 +195,14 @@ defmodule Ashfolio.Context do
       with {:ok, accounts} <- Account.accounts_for_user(user_id) do
         account_ids = Enum.map(accounts, & &1.id)
 
-        # Use batch query to prevent N+1 queries
+        # Use batch query to prevent N+1 queries, loading symbol and category relationships
         case Transaction.by_accounts(account_ids) do
           {:ok, transactions} ->
+            # Load relationships for recent transactions
+            loaded_transactions = Ash.load!(transactions, [:symbol, :category])
+            
             recent_transactions =
-              transactions
+              loaded_transactions
               |> Enum.sort_by(& &1.date, {:desc, Date})
               |> Enum.take(limit)
 
