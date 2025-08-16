@@ -9,7 +9,8 @@ defmodule Ashfolio.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      compilers: [:phoenix_live_view] ++ Mix.compilers()
     ]
   end
 
@@ -32,7 +33,8 @@ defmodule Ashfolio.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.7.21"},
+      {:lazy_html, ">= 0.0.0", only: :test},
+      {:phoenix, "~> 1.8.0"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.10"},
       {:ecto_sqlite3, "~> 0.17"},
@@ -73,7 +75,10 @@ defmodule Ashfolio.MixProject do
 
       # Test dependencies
       {:meck, "~> 0.9", only: :test},
-      {:mox, "~> 1.0", only: :test}
+      {:mox, "~> 1.0", only: :test},
+
+      # Development tools
+      {:igniter, "~> 0.6", only: [:dev, :test]}
     ]
   end
 

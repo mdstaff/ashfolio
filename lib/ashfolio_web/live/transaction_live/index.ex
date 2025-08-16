@@ -576,7 +576,6 @@ defmodule AshfolioWeb.TransactionLive.Index do
         :if={@categories != []}
         categories={@categories}
         filters={@filters}
-        target={@myself}
         show_filter_summary={true}
         class="mb-6"
       />

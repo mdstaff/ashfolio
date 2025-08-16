@@ -4,8 +4,10 @@ defmodule AshfolioWeb.Components.TopBar do
   attr :current_page, :atom, required: true
   attr :page_title, :string, required: true
   attr :page_subtitle, :string, default: nil
+  attr :id, :string, default: nil
 
   def top_bar(assigns) do
+    assigns = assign(assigns, :mobile_menu_id, assigns[:id] && "#{assigns.id}-mobile-menu" || "mobile-menu")
     ~H"""
     <header class="bg-white shadow-sm border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,9 +40,9 @@ defmodule AshfolioWeb.Components.TopBar do
             <button
               type="button"
               class="text-gray-500 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md p-2"
-              phx-click={JS.toggle(to: "#mobile-menu")}
+              phx-click={JS.toggle(to: "##{@mobile_menu_id}")}
               aria-expanded="false"
-              aria-controls="mobile-menu"
+              aria-controls={@mobile_menu_id}
               aria-label="Toggle mobile menu"
             >
               <.icon name="hero-bars-3" class="w-6 h-6" />
@@ -50,7 +52,7 @@ defmodule AshfolioWeb.Components.TopBar do
         
     <!-- Mobile Navigation -->
         <div
-          id="mobile-menu"
+          id={@mobile_menu_id}
           class="md:hidden hidden pb-4"
           role="navigation"
           data-testid="mobile-nav"

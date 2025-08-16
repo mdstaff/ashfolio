@@ -20,6 +20,7 @@ import "phoenix_html"
 // Establish Phoenix Socket and LiveView configuration.
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
+import {hooks as colocatedHooks} from "phoenix-colocated/ashfolio"
 import topbar from "../vendor/topbar"
 
 // Import JavaScript hooks
@@ -29,7 +30,8 @@ let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("
 
 // Configure hooks
 let Hooks = {
-  SymbolAutocomplete: SymbolAutocomplete
+  SymbolAutocomplete: SymbolAutocomplete,
+  ...colocatedHooks
 }
 
 let liveSocket = new LiveSocket("/live", Socket, {

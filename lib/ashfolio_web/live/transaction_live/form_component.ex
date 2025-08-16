@@ -6,6 +6,11 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
   alias AshfolioWeb.Components.SymbolAutocomplete
 
   @impl true
+  def mount(socket) do
+    {:ok, socket}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">

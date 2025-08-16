@@ -51,7 +51,7 @@ defmodule AshfolioWeb.Components.TransactionFilter do
   """
   attr :categories, :list, required: true, doc: "List of categories for filtering"
   attr :filters, :map, required: true, doc: "Current filter state"
-  attr :target, :any, required: true, doc: "Phoenix LiveView target"
+  attr :target, :any, default: nil, doc: "Phoenix LiveView target"
   attr :debounce, :integer, default: 300, doc: "Debounce delay for inputs"
   attr :show_filter_summary, :boolean, default: true, doc: "Show filter summary"
   attr :class, :string, default: "", doc: "Additional CSS classes"
@@ -88,7 +88,7 @@ defmodule AshfolioWeb.Components.TransactionFilter do
           :if={@has_active_filters}
           type="button"
           phx-click="clear_filters"
-          phx-target={@target}
+          phx-target={@target && @target}
           class="text-sm text-gray-500 hover:text-gray-700 underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
           data-testid="clear-filters-btn"
         >
@@ -100,7 +100,7 @@ defmodule AshfolioWeb.Components.TransactionFilter do
       <form
         id="composite-filter-form"
         phx-change="apply_composite_filters"
-        phx-target={@target}
+        phx-target={@target && @target}
         class="space-y-4"
       >
         <div class={[
@@ -255,7 +255,7 @@ defmodule AshfolioWeb.Components.TransactionFilter do
             <button
               type="button"
               phx-click="clear_filters"
-              phx-target={@target}
+              phx-target={@target && @target}
               class="text-sm text-blue-600 hover:text-blue-800 underline"
             >
               Clear All

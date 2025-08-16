@@ -11,19 +11,19 @@ You are an expert software architect and developer specializing in building a co
 
 ## Project Overview
 
-**Project Name**: Personal Wealth Management Platform
-**Tech Stack**: Elixir, Phoenix Framework, Ash Framework, SQLite
-**Goal**: Create a privacy-first, local-only wealth management platform for tracking stocks, ETFs, cryptocurrencies, and other assets across multiple accounts and platforms.
+Project Name: Personal Wealth Management Platform
+Tech Stack: Elixir, Phoenix Framework, Ash Framework, SQLite
+Goal: Create a privacy-first, local-only wealth management platform for tracking stocks, ETFs, cryptocurrencies, and other assets across multiple accounts and platforms.
 
-**Architecture Focus**: Local-first application with SQLite for simplicity, portability, and zero-configuration setup. Perfect for personal use with complete data ownership.
+Architecture Focus: Local-first application with SQLite for simplicity, portability, and zero-configuration setup. Perfect for personal use with complete data ownership.
 
-**Key Inspiration**: Ghostfolio (open-source wealth management software) but with improvements in architecture, performance, and feature completeness.
+Key Inspiration: Ghostfolio (open-source wealth management software) but with improvements in architecture, performance, and feature completeness.
 
 ## Core Domain Knowledge
 
 ### Financial Concepts You Must Understand
 
-**Portfolio Performance Metrics**:
+Portfolio Performance Metrics:
 
 - Time-Weighted Return (TWR): Industry standard, eliminates impact of cash flows
 - Money-Weighted Return (MWR): Dollar-weighted, includes cash flow timing impact
@@ -32,7 +32,7 @@ You are an expert software architect and developer specializing in building a co
 - Alpha/Beta: Performance vs benchmark, market sensitivity
 - Maximum Drawdown: Largest peak-to-trough decline
 
-**Asset Classes & Types**:
+Asset Classes & Types:
 
 - Equities: Stocks, ETFs, mutual funds with real-time pricing needs
 - Fixed Income: Bonds (government, corporate) with yield calculations
@@ -41,7 +41,7 @@ You are an expert software architect and developer specializing in building a co
 - Alternatives: REITs, commodities, private equity
 - Derivatives: Options, futures (basic support)
 
-**Portfolio Management**:
+Portfolio Management:
 
 - Asset allocation: Strategic vs tactical allocation
 - Rebalancing: Threshold-based, time-based, tax-efficient
@@ -50,9 +50,9 @@ You are an expert software architect and developer specializing in building a co
 
 ### Technical Architecture Requirements
 
-**Elixir/Phoenix/Ash Specific Considerations**:
+Elixir/Phoenix/Ash Specific Considerations:
 
-**Ash Framework Usage**:
+Ash Framework Usage:
 
 ```elixir
 # Core Resources Structure (SQLite optimized)
@@ -65,7 +65,7 @@ You are an expert software architect and developer specializing in building a co
 - Settings (application configuration, data sources)
 ```
 
-**Local-First Data Handling**:
+Local-First Data Handling:
 
 - GenServers for periodic market data fetching
 - Phoenix PubSub for real-time UI updates
@@ -73,7 +73,7 @@ You are an expert software architect and developer specializing in building a co
 - Oban for background job processing (data fetching, calculations)
 - SQLite WAL mode for concurrent reads during calculations
 
-**Performance Considerations**:
+Performance Considerations:
 
 - SQLite with proper indexing and WAL mode
 - In-memory ETS tables for frequently accessed market data
@@ -85,32 +85,32 @@ You are an expert software architect and developer specializing in building a co
 
 ### Code Organization
 
-1. **Domain-Driven Design**: Organize around financial concepts (Portfolio, Trading, Analytics)
-2. **Ash Resource Patterns**: Leverage Ash policies, calculations, and actions effectively
-3. **Phoenix Context Boundaries**: Clean separation between business logic and web layer
-4. **Concurrent Design**: Use Elixir's actor model for independent calculations
+1. Domain-Driven Design: Organize around financial concepts (Portfolio, Trading, Analytics)
+2. Ash Resource Patterns: Leverage Ash policies, calculations, and actions effectively
+3. Phoenix Context Boundaries: Clean separation between business logic and web layer
+4. Concurrent Design: Use Elixir's actor model for independent calculations
 
 ### Security & Privacy Focus
 
-1. **Data Encryption**: At rest and in transit
-2. **Granular Permissions**: Ash policies for fine-grained access control
-3. **Audit Trails**: Track all data changes
-4. **Anonymous Usage**: Support usage without PII
-5. **Self-hosting**: Complete deployment independence
+1. Data Encryption: At rest and in transit
+2. Granular Permissions: Ash policies for fine-grained access control
+3. Audit Trails: Track all data changes
+4. Anonymous Usage: Support usage without PII
+5. Self-hosting: Complete deployment independence
 
 ### Financial Data Accuracy
 
-1. **Decimal Precision**: Use Decimal library for all financial calculations
-2. **Transaction Integrity**: Ensure portfolio balances always reconcile
-3. **Data Validation**: Strict validation for financial data entry
-4. **Audit Reconciliation**: Regular portfolio vs transaction reconciliation
+1. Decimal Precision: Use Decimal library for all financial calculations
+2. Transaction Integrity: Ensure portfolio balances always reconcile
+3. Data Validation: Strict validation for financial data entry
+4. Audit Reconciliation: Regular portfolio vs transaction reconciliation
 
 ## Key Technical Challenges & Solutions
 
 ### Challenge 1: Local Market Data Management
 
-**Problem**: Efficiently cache and update market data locally without external dependencies
-**Solution**:
+Problem: Efficiently cache and update market data locally without external dependencies
+Solution:
 
 - SQLite tables for market data with intelligent update scheduling
 - GenServer-based periodic data fetchers
@@ -120,8 +120,8 @@ You are an expert software architect and developer specializing in building a co
 
 ### Challenge 2: SQLite Concurrent Access
 
-**Problem**: Handle concurrent reads/writes during portfolio calculations
-**Solution**:
+Problem: Handle concurrent reads/writes during portfolio calculations
+Solution:
 
 - WAL mode for better concurrency
 - Connection pooling with read/write separation
@@ -131,8 +131,8 @@ You are an expert software architect and developer specializing in building a co
 
 ### Challenge 3: Local Data Portability
 
-**Problem**: Easy backup, restore, and data migration
-**Solution**:
+Problem: Easy backup, restore, and data migration
+Solution:
 
 - Single SQLite file for complete data portability
 - Built-in export to standard formats (CSV, JSON)
@@ -142,8 +142,8 @@ You are an expert software architect and developer specializing in building a co
 
 ### Challenge 4: Offline-First Operation
 
-**Problem**: Ensure full functionality even without internet connectivity
-**Solution**:
+Problem: Ensure full functionality even without internet connectivity
+Solution:
 
 - Local data persistence with SQLite
 - Cached market data with staleness indicators
@@ -155,25 +155,25 @@ You are an expert software architect and developer specializing in building a co
 
 ### Data Ownership & Privacy
 
-1. **Complete Local Storage**: All data stored in user-controlled SQLite file
-2. **No Cloud Dependencies**: Application works completely offline
-3. **Easy Backup**: Single file backup/restore process
-4. **Data Export**: Full data export in standard formats
-5. **Zero Telemetry**: No external data transmission except chosen market data
+1. Complete Local Storage: All data stored in user-controlled SQLite file
+2. No Cloud Dependencies: Application works completely offline
+3. Easy Backup: Single file backup/restore process
+4. Data Export: Full data export in standard formats
+5. Zero Telemetry: No external data transmission except chosen market data
 
 ### Performance Optimization for SQLite
 
-1. **WAL Mode**: Enable WAL mode for better concurrent access
-2. **Smart Indexing**: Strategic indexes for time-series and lookup queries
-3. **Connection Pooling**: Efficient connection management
-4. **Prepared Statements**: Reuse prepared statements for frequent queries
-5. **Batch Operations**: Group related operations for better performance
+1. WAL Mode: Enable WAL mode for better concurrent access
+2. Smart Indexing: Strategic indexes for time-series and lookup queries
+3. Connection Pooling: Efficient connection management
+4. Prepared Statements: Reuse prepared statements for frequent queries
+5. Batch Operations: Group related operations for better performance
 
 ## Development Phases & Priorities
 
 ### Phase 1: Foundation (MVP)
 
-**Core Resources & Basic CRUD**:
+Core Resources & Basic CRUD:
 
 ```elixir
 # Priority order for Ash resources
@@ -185,7 +185,7 @@ You are an expert software architect and developer specializing in building a co
 6. Simple performance calculations
 ```
 
-**Key Deliverables**:
+Key Deliverables:
 
 - User registration/authentication
 - Manual transaction entry
@@ -194,7 +194,7 @@ You are an expert software architect and developer specializing in building a co
 
 ### Phase 2: Data Integration
 
-**Enhanced Data Management**:
+Enhanced Data Management:
 
 1. CSV import/export functionality
 2. Market data API integration
@@ -203,7 +203,7 @@ You are an expert software architect and developer specializing in building a co
 
 ### Phase 3: Analytics & Reporting
 
-**Advanced Features**:
+Advanced Features:
 
 1. Time-weighted return calculations
 2. Asset allocation analysis
@@ -212,12 +212,25 @@ You are an expert software architect and developer specializing in building a co
 
 ### Phase 4: Advanced Features
 
-**Production-Ready Enhancements**:
+Production-Ready Enhancements:
 
 1. Tax reporting & optimization
 2. Rebalancing recommendations
 3. Risk analysis tools
 4. Multi-user support & sharing
+
+## Development Lifecycle
+
+### Key Commands:
+
+- just test # Smart test runner
+- just test unit # Unit tests only
+- just test perf # Performance tests
+- just help testing # Contextual help
+- just fix # Auto-fix common issues
+- just commit # Pre-commit validation
+
+See ~/docs/TESTING_STRATEGY.md for more information
 
 ## Code Patterns & Examples
 
@@ -309,38 +322,38 @@ config :app, App.Repo,
 
 ### When to Use SQLite vs In-Memory Storage
 
-- **Use SQLite**: Persistent data (transactions, accounts, settings), historical market data
-- **Use ETS**: Hot cache data (current prices), session state, calculated metrics
-- **Use GenServer State**: Temporary calculations, streaming data processing
+- Use SQLite: Persistent data (transactions, accounts, settings), historical market data
+- Use ETS: Hot cache data (current prices), session state, calculated metrics
+- Use GenServer State: Temporary calculations, streaming data processing
 
 ### Database Design Decisions (SQLite Specific)
 
-- **Use TEXT for JSON**: Store flexible metadata as JSON TEXT fields
-- **Use DECIMAL as TEXT**: Store financial amounts as text to avoid floating point errors
-- **Use Composite Indexes**: For common query patterns (user_id + date ranges)
-- **Use FOREIGN KEY Constraints**: Enable foreign key enforcement for data integrity
-- **Avoid Deep Nesting**: Keep table structure flat for SQLite performance
+- Use TEXT for JSON: Store flexible metadata as JSON TEXT fields
+- Use DECIMAL as TEXT: Store financial amounts as text to avoid floating point errors
+- Use Composite Indexes: For common query patterns (user_id + date ranges)
+- Use FOREIGN KEY Constraints: Enable foreign key enforcement for data integrity
+- Avoid Deep Nesting: Keep table structure flat for SQLite performance
 
 ### Caching Strategy (Local-First)
 
-- **ETS Tables**: Current prices, user preferences, calculated portfolio metrics
-- **SQLite**: Historical data, transactions, persistent settings
-- **File System**: Large datasets (CSV exports, backup files)
-- **Memory**: Temporary calculations, streaming operations
+- ETS Tables: Current prices, user preferences, calculated portfolio metrics
+- SQLite: Historical data, transactions, persistent settings
+- File System: Large datasets (CSV exports, backup files)
+- Memory: Temporary calculations, streaming operations
 
 ### Local Data Management
 
-- **Single Database File**: Keep all data in one SQLite file for portability
-- **Backup Strategy**: Simple file copy with timestamp rotation
-- **Migration Strategy**: Version-controlled schema changes with rollback capability
-- **Import/Export**: Standard formats (CSV, JSON) for data interchange
+- Single Database File: Keep all data in one SQLite file for portability
+- Backup Strategy: Simple file copy with timestamp rotation
+- Migration Strategy: Version-controlled schema changes with rollback capability
+- Import/Export: Standard formats (CSV, JSON) for data interchange
 
 ### Error Handling Patterns
 
-- **Use Ash Changesets**: For validation errors
-- **Use Phoenix ErrorView**: For HTTP error responses
-- **Use Telemetry**: For monitoring and alerting
-- **Use Circuit Breakers**: For external API failures
+- Use Ash Changesets: For validation errors
+- Use Phoenix ErrorView: For HTTP error responses
+- Use Telemetry: For monitoring and alerting
+- Use Circuit Breakers: For external API failures
 
 ## Key Libraries & Dependencies
 
@@ -375,23 +388,23 @@ config :app, App.Repo,
 
 ### Technical Goals (Local-First)
 
-1. **Performance**: Portfolio calculations under 100ms for 1000+ holdings (SQLite optimized)
-2. **Reliability**: Offline-first operation with graceful online enhancement
-3. **Portability**: Single file database for easy backup/restore
-4. **Simplicity**: Zero-configuration setup, works out of the box
+1. Performance: Portfolio calculations under 100ms for 1000+ holdings (SQLite optimized)
+2. Reliability: Offline-first operation with graceful online enhancement
+3. Portability: Single file database for easy backup/restore
+4. Simplicity: Zero-configuration setup, works out of the box
 
 ### User Experience Goals
 
-1. **Privacy**: Complete local data ownership, no cloud dependencies
-2. **Accuracy**: Portfolio values match brokerage statements within $0.01
-3. **Speed**: Instant startup, responsive UI with local data
-4. **Portability**: Easy data export and backup
+1. Privacy: Complete local data ownership, no cloud dependencies
+2. Accuracy: Portfolio values match brokerage statements within $0.01
+3. Speed: Instant startup, responsive UI with local data
+4. Portability: Easy data export and backup
 
 ### Business Goals
 
-1. **Local-First**: Works completely offline with optional online features
-2. **Open Source**: Clean, maintainable codebase for community contributions
-3. **Zero-Config**: No database setup, no server configuration required
-4. **Data Freedom**: Complete data portability and export capabilities
+1. Local-First: Works completely offline with optional online features
+2. Open Source: Clean, maintainable codebase for community contributions
+3. Zero-Config: No database setup, no server configuration required
+4. Data Freedom: Complete data portability and export capabilities
 
 Remember: The local-first approach means prioritizing user data ownership and offline functionality. SQLite's simplicity allows focusing on features rather than infrastructure. Always ensure data integrity with proper transactions and consider the single-user, local-file nature of the application when making architectural decisions.
