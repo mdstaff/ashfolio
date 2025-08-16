@@ -58,7 +58,7 @@ defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
   end
 
   describe "Price Refresh Functionality" do
-    test "price refresh updates symbol prices correctly", %{symbol: symbol} do
+    test "price refresh updates symbol prices correctly", %{symbol: _symbol} do
       # Mock successful batch price fetch
       expect(YahooFinanceMock, :fetch_prices, fn symbols ->
         assert symbols == ["TEST"]
@@ -79,7 +79,7 @@ defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
       end
     end
 
-    test "price refresh handles API failures gracefully", %{symbol: symbol} do
+    test "price refresh handles API failures gracefully", %{symbol: _symbol} do
       # Mock batch API failure
       expect(YahooFinanceMock, :fetch_prices, fn symbols ->
         assert symbols == ["TEST"]
@@ -98,7 +98,7 @@ defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
       assert match?({:ok, _}, result) or match?({:error, _}, result)
     end
 
-    test "price refresh handles timeout gracefully", %{symbol: symbol} do
+    test "price refresh handles timeout gracefully", %{symbol: _symbol} do
       # Mock batch timeout
       expect(YahooFinanceMock, :fetch_prices, fn symbols ->
         assert symbols == ["TEST"]

@@ -16,14 +16,7 @@ defmodule Ashfolio.Integration.ErrorHandlingTest do
   @moduletag :error_handling
 
   alias Ashfolio.ErrorHandler
-
-  alias Ashfolio.FinancialManagement.{
-    BalanceManager,
-    TransactionCategory,
-    SymbolSearch,
-    NetWorthCalculator
-  }
-
+  alias Ashfolio.FinancialManagement.BalanceManager
   alias Ashfolio.Portfolio.Account
   alias Ashfolio.SQLiteHelpers
 
@@ -82,7 +75,7 @@ defmodule Ashfolio.Integration.ErrorHandlingTest do
       assert message == "This operation is only available for cash accounts."
     end
 
-    test "handles negative balance validation for checking account", %{checking_account: account} do
+    test "handles negative balance validation for checking account", %{} do
       # Simulate negative balance error from BalanceManager
       error = {:error, :negative_balance_not_allowed}
 
@@ -130,24 +123,6 @@ defmodule Ashfolio.Integration.ErrorHandlingTest do
   end
 
   describe "category management error scenarios" do
-    setup do
-      user = SQLiteHelpers.get_default_user()
-
-      # Create a system category for testing protection
-      {:ok, system_category} =
-        TransactionCategory.create(%{
-          name: "System Growth",
-          color: "#10B981",
-          is_system: true,
-          user_id: user.id
-        })
-
-      %{
-        user: user,
-        system_category: system_category
-      }
-    end
-
     test "handles system category protection errors" do
       error = {:error, :system_category_protected}
 
@@ -221,7 +196,7 @@ defmodule Ashfolio.Integration.ErrorHandlingTest do
         {{:error, :context_operation_failed}, :error}
       ]
 
-      Enum.each(test_cases, fn {error, expected_severity} ->
+      Enum.each(test_cases, fn {error, _expected_severity} ->
         log =
           capture_log(fn ->
             ErrorHandler.handle_error(error)

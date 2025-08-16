@@ -220,11 +220,9 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
     end
   end
 
-  defp perform_search("", max_results) do
-    # Empty query returns limited results (recent symbols)
-    {:ok, symbols} = Symbol.list()
-    limited_results = symbols |> Enum.take(max_results)
-    {:ok, limited_results}
+  defp perform_search("", _max_results) do
+    # Empty query returns no results
+    {:ok, []}
   end
 
   defp perform_search(normalized_query, max_results) do

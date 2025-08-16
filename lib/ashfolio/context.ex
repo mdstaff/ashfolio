@@ -235,24 +235,30 @@ defmodule Ashfolio.Context do
         with {:ok, _user} <- get_user_by_id(user_id),
              {:ok, accounts} <- Account.accounts_for_user(user_id),
              {:ok, portfolio_value} <- Calculator.calculate_portfolio_value(user_id) do
+          # Filter out excluded accounts first
+          active_accounts = Enum.filter(accounts, &(!&1.is_excluded))
+          
           cash_accounts =
-            Enum.filter(accounts, &(&1.account_type in [:checking, :savings, :money_market, :cd]))
+            Enum.filter(active_accounts, &(&1.account_type in [:checking, :savings, :money_market, :cd]))
 
-          investment_accounts = Enum.filter(accounts, &(&1.account_type == :investment))
+          investment_accounts = Enum.filter(active_accounts, &(&1.account_type == :investment))
 
           cash_balance = calculate_total_cash_balance(cash_accounts)
-          total_net_worth = Decimal.add(portfolio_value, cash_balance)
+          # Include investment account balances for accounts without transactions
+          investment_account_balances = calculate_total_cash_balance(investment_accounts)
+          total_investment_value = Decimal.add(portfolio_value, investment_account_balances)
+          total_net_worth = Decimal.add(total_investment_value, cash_balance)
 
           {:ok,
            %{
              total_net_worth: total_net_worth,
-             investment_value: portfolio_value,
+             investment_value: total_investment_value,
              cash_balance: cash_balance,
              breakdown: %{
                cash_accounts: length(cash_accounts),
                investment_accounts: length(investment_accounts),
                cash_percentage: calculate_percentage(cash_balance, total_net_worth),
-               investment_percentage: calculate_percentage(portfolio_value, total_net_worth)
+               investment_percentage: calculate_percentage(total_investment_value, total_net_worth)
              }
            }}
         else

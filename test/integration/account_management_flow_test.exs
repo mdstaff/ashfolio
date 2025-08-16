@@ -12,7 +12,7 @@ defmodule AshfolioWeb.Integration.AccountManagementFlowTest do
 
   import Phoenix.LiveViewTest
 
-  alias Ashfolio.Portfolio.{User, Account}
+  alias Ashfolio.Portfolio.Account
   alias Ashfolio.SQLiteHelpers
 
   setup do
@@ -38,16 +38,14 @@ defmodule AshfolioWeb.Integration.AccountManagementFlowTest do
 
       # Step 2: Create Account - Click "New Account" button (check both empty state and header)
       if render(view) =~ "Create Your First Account" do
-        view =
-          view
-          |> element("button", "Create Your First Account")
-          |> render_click()
+        view
+        |> element("button", "Create Your First Account")
+        |> render_click()
       else
         # If accounts exist, click the New Account button in header
-        view =
-          view
-          |> element("button", "New Account")
-          |> render_click()
+        view
+        |> element("button", "New Account")
+        |> render_click()
       end
 
       # Verify modal form appears
@@ -94,10 +92,13 @@ defmodule AshfolioWeb.Integration.AccountManagementFlowTest do
       current_html = render(view)
 
       # If we don't see the account data, try refreshing the view
-      if not (current_html =~ "Test Investment Account") do
-        {:ok, view, _html} = live(conn, "/accounts")
-        current_html = render(view)
-      end
+      {view, current_html} =
+        if not (current_html =~ "Test Investment Account") do
+          {:ok, new_view, _html} = live(conn, "/accounts")
+          {new_view, render(new_view)}
+        else
+          {view, current_html}
+        end
 
       # Verify account appears in the list
       assert current_html =~ "Test Investment Account"
@@ -145,17 +146,20 @@ defmodule AshfolioWeb.Integration.AccountManagementFlowTest do
       # Check if form closed and updates are visible
       current_html = render(view)
 
-      if not (current_html =~ "Updated Investment Account") do
-        {:ok, view, _html} = live(conn, "/accounts")
-        current_html = render(view)
-      end
+      {view, current_html} =
+        if not (current_html =~ "Updated Investment Account") do
+          {:ok, new_view, _html} = live(conn, "/accounts")
+          {new_view, render(new_view)}
+        else
+          {view, current_html}
+        end
 
       # Verify changes
       assert current_html =~ "Updated Investment Account"
       assert current_html =~ "Updated Brokerage"
       assert current_html =~ "$15,000.75" or current_html =~ "15,000"
 
-      # Step 7: Delete Account - Click delete button  
+      # Step 7: Delete Account - Click delete button
       view
       |> element("button[phx-click='delete_account'][phx-value-id='#{created_account.id}']")
       |> render_click()
@@ -233,8 +237,7 @@ defmodule AshfolioWeb.Integration.AccountManagementFlowTest do
 
       # Verify system handles edge cases gracefully (either success or proper error)
       # The exact behavior depends on validation rules
-      IO.inspect(render(view), label: "HTML after edge case submission")
-      # Form still exists
+      # Form still exists (either showing errors or accepting the data)
       assert has_element?(view, "form")
     end
   end
