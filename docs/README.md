@@ -16,6 +16,7 @@ Welcome to Ashfolio's comprehensive documentation. Choose your path:
 
 ## 🧪 Testing
 
+- **Testing Strategy** → [Comprehensive Framework](TESTING_STRATEGY.md)
 - **Testing Framework** → [Overview](testing/README.md)
 - **SQLite Patterns** → [Concurrency Guide](testing/patterns.md)
 - **Testing Standards** → [Consistency Standards](testing/standards.md)
@@ -25,6 +26,12 @@ Welcome to Ashfolio's comprehensive documentation. Choose your path:
 
 - **REST API** → [API Guide](api/rest-api.md)
 - **Endpoints** → [Reference](api/endpoints.md)
+
+## 🗺️ Roadmap & Planning
+
+- **Project Roadmap** → [v0.2-v0.5 Roadmap](roadmap/v0.2-v0.5-roadmap.md)
+- **Financial Expansion** → [Future Features](roadmap/financial-expansion-roadmap.md)
+- **Architecture Decisions** → [ADRs](architecture/)
 
 ## 📚 Archive
 

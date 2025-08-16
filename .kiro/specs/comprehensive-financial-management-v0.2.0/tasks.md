@@ -204,14 +204,15 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - Write performance tests and benchmarks for critical calculation paths
   - _Requirements: Performance targets from requirements_
 
-- [ ] 15. Enhance error handling for new features
+- [x] 15. Enhance error handling for new features
 
-  - Extend `Ashfolio.ErrorHandler` with cash balance management error handling
-  - Add symbol search error handling and fallback behavior
-  - Add category management error handling
-  - Create user-friendly error messages for all new error scenarios
-  - Write tests for error handling covering all new error scenarios and recovery paths
-  - _Requirements: All requirements - error handling aspects_
+  - ✅ Extended `Ashfolio.ErrorHandler` with 17 new v0.2.0 error categories (commit 2f1c155)
+  - ✅ Added comprehensive symbol search error handling and fallback behavior
+  - ✅ Added category management error handling with system category protection
+  - ✅ Created user-friendly error messages with actionable guidance for all scenarios
+  - ✅ Created comprehensive error testing: 67 handler tests + 16 component tests + 21 integration tests
+  - ✅ Implemented 5 reusable LiveView error display components with accessibility
+  - _Completed: August 15, 2025 - Production-ready error handling infrastructure_
 
 - [ ] 16. Create comprehensive integration tests
 
@@ -236,6 +237,8 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
 
   - **Goal**: Ensure seamless upgrade path from v0.1.0 to v0.2.0 with data integrity
   - **Context API Integration**: Test Context API with existing v0.1.0 data structures
+  - **Previous Attempt**: Task partially attempted but reverted due to raw SQL complexity
+  - **Lessons Learned**: Avoid raw SQL migrations, use Ash Framework's migration patterns
   - Write migration tests for new account types with existing account data
   - Add data integrity verification for enhanced Transaction and Account resources
   - Test Context API compatibility with legacy data structures
@@ -244,6 +247,6 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - Write migration tests for each database migration with realistic data volumes
   - Write compatibility tests for Context API functions with v0.1.0 data
   - Write performance tests ensuring no regression in core operation response times
-  - **Dependencies**: Tasks 1-17 complete
-  - **Out of Scope**: Zero-downtime migrations, external data imports
+  - **Dependencies**: Tasks 16-17 complete (Task 15 complete)
+  - **Out of Scope**: Zero-downtime migrations, external data imports, raw SQL approaches
   - _Requirements: All requirements - backward compatibility aspects_

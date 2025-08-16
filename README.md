@@ -10,7 +10,7 @@ Built with Phoenix LiveView and the Ash Framework, Ashfolio provides a secure, p
 
 ## 🚀 Quick Start
 
-Get Ashfolio up and running in minut`es!
+Get Ashfolio up and running in minutes!
 
 ### Prerequisites
 
