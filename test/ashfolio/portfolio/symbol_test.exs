@@ -6,7 +6,6 @@ defmodule Ashfolio.Portfolio.SymbolTest do
   @moduletag :fast
   @moduletag :smoke
 
-  import Ashfolio.SQLiteHelpers
   alias Ashfolio.Portfolio.Symbol
 
   describe "Symbol resource" do

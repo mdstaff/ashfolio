@@ -8,9 +8,8 @@ defmodule AshfolioWeb.Components.TransactionStatsTest do
 
   alias AshfolioWeb.Components.TransactionStats
   alias Ashfolio.FinancialManagement.TransactionCategory
-  alias Ashfolio.Portfolio.{Transaction, Account, Symbol}
+  alias Ashfolio.Portfolio.Transaction
   alias Ashfolio.SQLiteHelpers
-  alias Ashfolio.Repo
 
   describe "TransactionStats component" do
     setup do

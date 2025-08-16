@@ -7,7 +7,7 @@ defmodule AshfolioWeb.TransactionLive.FilteringTest do
   import Phoenix.LiveViewTest
 
   alias Ashfolio.FinancialManagement.TransactionCategory
-  alias Ashfolio.Portfolio.{Transaction, Account, Symbol, User}
+  alias Ashfolio.Portfolio.{Transaction, Account, Symbol}
   alias Ashfolio.SQLiteHelpers
 
   describe "enhanced filter state management" do

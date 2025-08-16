@@ -13,8 +13,7 @@ defmodule AshfolioWeb.AccountLive.ContextApiIntegrationTest do
   @moduletag :fast
   @moduletag :context_api
 
-  alias Ashfolio.Portfolio.{Account, User}
-  alias Ashfolio.Context
+  alias Ashfolio.Portfolio.Account
 
   setup do
     # Get or create the default test user
@@ -59,7 +58,7 @@ defmodule AshfolioWeb.AccountLive.ContextApiIntegrationTest do
 
   describe "Context API integration - AccountLive.Index" do
     test "loads dashboard data using Context API", %{conn: conn} do
-      {:ok, index_live, html} = live(conn, ~p"/accounts")
+      {:ok, _index_live, html} = live(conn, ~p"/accounts")
 
       # Should show updated title for both investment and cash accounts
       assert html =~ "Accounts"

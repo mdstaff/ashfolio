@@ -8,7 +8,7 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
   @moduletag :slow
 
   alias Ashfolio.MarketData.PriceManager
-  alias Ashfolio.Portfolio.{User, Account, Symbol, Transaction}
+  alias Ashfolio.Portfolio.{Symbol, Transaction}
   alias Ashfolio.Cache
 
   import Mox

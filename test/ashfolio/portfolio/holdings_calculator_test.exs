@@ -10,7 +10,7 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
   alias Ashfolio.SQLiteHelpers
 
   # Helper function to create user - use global setup
-  defp create_test_user(attrs \\ %{}) do
+  defp create_test_user(_attrs \\ %{}) do
     # Use the global user from SQLiteHelpers, ignore custom attrs for consistency
     {:ok, SQLiteHelpers.get_default_user()}
   end

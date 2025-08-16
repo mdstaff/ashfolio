@@ -252,7 +252,7 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
     end
 
     test "displays category color indicators", %{conn: conn, user_category: user_category} do
-      {:ok, view, html} = live(conn, ~p"/categories")
+      {:ok, _view, html} = live(conn, ~p"/categories")
 
       # Check that color indicator is present with correct color
       assert html =~ "background-color: #{user_category.color}"
@@ -299,8 +299,8 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
       assert has_element?(view, "h3", "External Category")
     end
 
-    test "displays category transaction count", %{conn: conn, user_category: user_category} do
-      {:ok, view, html} = live(conn, ~p"/categories")
+    test "displays category transaction count", %{conn: conn, user_category: _user_category} do
+      {:ok, _view, html} = live(conn, ~p"/categories")
 
       # Should show transaction count (0 for new category)
       assert html =~ "Transactions:"

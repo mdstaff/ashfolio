@@ -110,7 +110,7 @@ defmodule Ashfolio.ContextTest do
       user = create_user()
       account = create_investment_account(user.id)
       symbol = create_symbol()
-      transaction = create_transaction(account.id, symbol.id)
+      _transaction = create_transaction(account.id, symbol.id)
 
       assert {:ok, account_data} = Context.get_account_with_transactions(account.id)
 

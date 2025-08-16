@@ -265,7 +265,7 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
 
   # Helper functions
 
-  defp create_performance_test_data(user_id, account_count, transactions_per_account) do
+  defp create_performance_test_data(user_id, account_count, _transactions_per_account) do
     # Create mix of investment and cash accounts
     investment_count = round(account_count * 0.6)
     cash_count = account_count - investment_count

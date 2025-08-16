@@ -2,7 +2,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
   use Ashfolio.DataCase, async: false
 
   alias Ashfolio.FinancialManagement.NetWorthCalculator
-  alias Ashfolio.Portfolio.{User, Account, Symbol, Transaction}
+  alias Ashfolio.Portfolio.{Account, Transaction}
   alias Ashfolio.SQLiteHelpers
 
   describe "calculate_net_worth/1" do
@@ -20,7 +20,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
         })
 
       # Create cash accounts
-      {:ok, checking_account} =
+      {:ok, _checking_account} =
         Account.create(%{
           name: "Checking Account",
           platform: "Bank",
@@ -29,7 +29,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
           balance: Decimal.new("2500.00")
         })
 
-      {:ok, savings_account} =
+      {:ok, _savings_account} =
         Account.create(%{
           name: "Savings Account",
           platform: "Bank",

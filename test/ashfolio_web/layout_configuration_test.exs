@@ -23,7 +23,7 @@ defmodule AshfolioWeb.LayoutConfigurationTest do
       # This ensures the live_view function returns the correct layout config
       
       # Get the current configuration from the actual module
-      config_ast = quote do
+      _config_ast = quote do
         use AshfolioWeb, :live_view
       end
       

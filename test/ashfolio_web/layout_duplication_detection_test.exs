@@ -20,7 +20,7 @@ defmodule AshfolioWeb.LayoutDuplicationDetectionTest do
   describe "layout duplication detection" do
     test "LiveView rendering should not contain duplicate layout IDs", %{conn: conn} do
       # Render a simple LiveView page to check for duplicates
-      {:ok, view, html} = live(conn, ~p"/")
+      {:ok, _view, html} = live(conn, ~p"/")
       
       # Check for duplicate IDs that would indicate root layout duplication
       duplicate_ids = [
@@ -49,7 +49,7 @@ defmodule AshfolioWeb.LayoutDuplicationDetectionTest do
 
     test "transaction page should not have duplicate layout components", %{conn: conn} do
       # Test a more complex page that had issues
-      {:ok, view, html} = live(conn, ~p"/transactions")
+      {:ok, _view, html} = live(conn, ~p"/transactions")
       
       # Count occurrences of key layout elements  
       # Look for the actual topbar component structure
@@ -72,7 +72,7 @@ defmodule AshfolioWeb.LayoutDuplicationDetectionTest do
       ]
       
       for route <- routes_to_test do
-        {:ok, view, html} = live(conn, route)
+        {:ok, _view, html} = live(conn, route)
         
         # Quick check for any obviously duplicated content
         # If root layout renders twice, we'd see duplicate navigation, etc.

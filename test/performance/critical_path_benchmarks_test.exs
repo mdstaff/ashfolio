@@ -54,7 +54,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
       }
     end
 
-    test "database index performance benchmark", %{user: user, test_data: test_data} do
+    test "database index performance benchmark", %{user: _user, test_data: _test_data} do
       # Test account filtering performance (Stage 1)
       {time_us, results} =
         :timer.tc(fn ->
@@ -271,7 +271,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
 
     test "complete dashboard load workflow benchmark", %{user: user} do
       # Measure complete dashboard data loading workflow
-      {time_us, results} =
+      {time_us, _results} =
         :timer.tc(fn ->
           # Simulate dashboard loading all required data
           {

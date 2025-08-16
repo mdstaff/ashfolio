@@ -5,7 +5,7 @@ defmodule Ashfolio.FinancialManagement.TransactionFilteringTest do
   @moduletag :filtering
 
   alias Ashfolio.FinancialManagement.{TransactionFiltering, TransactionCategory}
-  alias Ashfolio.Portfolio.{Transaction, Account, Symbol, User}
+  alias Ashfolio.Portfolio.{Transaction, Account, Symbol}
   alias Ashfolio.SQLiteHelpers
 
   describe "single category filtering" do

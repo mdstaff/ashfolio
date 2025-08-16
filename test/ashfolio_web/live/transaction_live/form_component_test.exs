@@ -7,7 +7,6 @@ defmodule AshfolioWeb.TransactionLive.FormComponentTest do
   import Phoenix.LiveViewTest
   alias Ashfolio.Portfolio.{User, Account, Symbol, Transaction}
   alias Ashfolio.FinancialManagement.TransactionCategory
-  alias AshfolioWeb.TransactionLive.FormComponent
 
   setup do
     # Get or create default user
@@ -84,7 +83,7 @@ defmodule AshfolioWeb.TransactionLive.FormComponentTest do
     test "hides category dropdown when no categories exist", %{conn: conn} do
       # Skip this test for now - would need to test with empty categories
       # The form component already handles empty categories list correctly
-      {:ok, index_live, _html} = live(conn, ~p"/transactions")
+      {:ok, _index_live, _html} = live(conn, ~p"/transactions")
 
       # This test would work if we could clear categories
       assert true
@@ -127,7 +126,7 @@ defmodule AshfolioWeb.TransactionLive.FormComponentTest do
       category: category
     } do
       # Create a transaction to edit
-      {:ok, transaction} =
+      {:ok, _transaction} =
         Transaction.create(%{
           type: :buy,
           account_id: account.id,
@@ -160,7 +159,7 @@ defmodule AshfolioWeb.TransactionLive.FormComponentTest do
       account: account,
       symbol: symbol
     } do
-      {:ok, transaction} =
+      {:ok, _transaction} =
         Transaction.create(%{
           type: :buy,
           account_id: account.id,

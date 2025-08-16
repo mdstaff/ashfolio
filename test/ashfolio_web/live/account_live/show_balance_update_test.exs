@@ -179,7 +179,7 @@ defmodule AshfolioWeb.AccountLive.ShowBalanceUpdateTest do
       conn: conn,
       cash_account: cash_account
     } do
-      {:ok, view, _html} = live(conn, ~p"/accounts/#{cash_account.id}")
+      {:ok, _view, _html} = live(conn, ~p"/accounts/#{cash_account.id}")
 
       # Simulate external balance update via Context API
       {:ok, updated_account} =

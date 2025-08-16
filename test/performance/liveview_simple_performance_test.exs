@@ -192,7 +192,7 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
              "Rapid updates averaged #{avg_update_time}ms, expected < 25ms"
     end
 
-    test "burst updates handle efficiently", %{user: user} do
+    test "burst updates handle efficiently", %{user: _user} do
       # Simulate burst of updates (like market open)
       burst_size = 20
 

@@ -207,7 +207,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
     } do
       {:ok, view, _html} = live(conn, "/transactions?user_id=#{user.id}")
 
-      account = Enum.at(accounts, 0)
+      _account = Enum.at(accounts, 0)
       category = Enum.at(categories, 0)
 
 
@@ -265,9 +265,9 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
     end
 
     test "end-to-end update latency under 50ms", %{conn: conn, user: user, accounts: accounts} do
-      {:ok, view, _html} = live(conn, "/?user_id=#{user.id}")
+      {:ok, _view, _html} = live(conn, "/?user_id=#{user.id}")
 
-      account = Enum.at(accounts, 0)
+      _account = Enum.at(accounts, 0)
 
       # Measure end-to-end latency: data change -> PubSub -> LiveView update
       start_time = System.monotonic_time(:microsecond)
@@ -300,7 +300,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
     end
 
     test "LiveView handles multiple rapid updates efficiently", %{conn: conn, user: user} do
-      {:ok, view, _html} = live(conn, "/?user_id=#{user.id}")
+      {:ok, _view, _html} = live(conn, "/?user_id=#{user.id}")
 
       # Simulate rapid updates (like real-time price changes)
       update_times =

@@ -86,7 +86,7 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
              "Date range filtering took #{time_ms}ms, expected < 250ms"
     end
 
-    test "account filtering under 50ms", %{user: user, accounts: accounts} do
+    test "account filtering under 50ms", %{user: _user, accounts: accounts} do
       account = Enum.at(accounts, 0)
 
       {time_us, results} =
@@ -107,10 +107,10 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
       accounts: accounts,
       categories: categories
     } do
-      account = Enum.at(accounts, 0)
+      _account = Enum.at(accounts, 0)
       category = Enum.at(categories, 0)
-      start_date = Date.add(Date.utc_today(), -60)
-      end_date = Date.utc_today()
+      _start_date = Date.add(Date.utc_today(), -60)
+      _end_date = Date.utc_today()
 
       {time_us, results} =
         :timer.tc(fn ->
@@ -342,7 +342,7 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
     {accounts, categories}
   end
 
-  defp create_large_transaction_dataset(user_id, accounts, categories, count) do
+  defp create_large_transaction_dataset(_user_id, accounts, categories, count) do
     # Create test symbols
     symbols = [
       SQLiteHelpers.get_or_create_symbol("AAPL", %{

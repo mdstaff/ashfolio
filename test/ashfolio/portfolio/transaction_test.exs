@@ -6,7 +6,7 @@ defmodule Ashfolio.Portfolio.TransactionTest do
   @moduletag :fast
   @moduletag :smoke
 
-  alias Ashfolio.Portfolio.{Transaction, User, Account, Symbol}
+  alias Ashfolio.Portfolio.Transaction
   alias Ashfolio.FinancialManagement.TransactionCategory
   alias Ashfolio.SQLiteHelpers
 

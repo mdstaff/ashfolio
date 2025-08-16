@@ -7,7 +7,7 @@ defmodule AshfolioWeb.AccountLive.ShowTest do
 
   import Phoenix.LiveViewTest
 
-  alias Ashfolio.Portfolio.{User, Account, Transaction, Symbol}
+  alias Ashfolio.Portfolio.{Account, Transaction}
 
   setup do
     # Get or create the default test user (eliminates SQLite concurrency issues)

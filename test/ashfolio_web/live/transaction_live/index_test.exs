@@ -273,7 +273,7 @@ defmodule AshfolioWeb.TransactionLive.IndexTest do
     test "form hides category selection when no categories exist", %{conn: conn} do
       # Skip this test for now - the destroy_all! function doesn't exist
       # We can test this scenario by ensuring the categories list is empty
-      {:ok, index_live, _html} = live(conn, ~p"/transactions")
+      {:ok, _index_live, _html} = live(conn, ~p"/transactions")
 
       # This test would pass if we could clear all categories, but the function doesn't exist
       # The form component already handles empty categories list correctly

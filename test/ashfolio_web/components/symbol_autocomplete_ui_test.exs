@@ -46,8 +46,6 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
     use Phoenix.LiveView
 
     import Phoenix.Component
-    import Phoenix.HTML.Form
-    alias Phoenix.LiveView.JS
 
     def mount(_params, _session, socket) do
       form = to_form(%{"symbol" => ""})
@@ -92,7 +90,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
 
   describe "JavaScript hook integration" do
     test "component renders with phx-hook attribute", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Verify the hook is attached
       assert html =~ ~s(phx-hook="SymbolAutocomplete")
@@ -100,7 +98,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
     end
 
     test "component has proper data attributes for JavaScript", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Check for required elements that JavaScript will interact with
       assert html =~ ~s(role="combobox")
@@ -111,14 +109,14 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
 
   describe "keyboard navigation" do
     test "input field has keydown event handler", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Verify keydown event is configured
       assert html =~ ~s(phx-keydown="keydown")
     end
 
     test "arrow down navigation works", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Test that the component renders with proper keydown handling attributes
       assert html =~ ~s(phx-keydown="keydown")
@@ -130,7 +128,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
     end
 
     test "arrow up navigation works", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Test that the component renders with proper navigation support
       assert html =~ ~s(phx-keydown="keydown")
@@ -141,7 +139,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
     end
 
     test "enter key selects current option", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Test that the component has proper event handling setup
       assert html =~ ~s(phx-keydown="keydown")
@@ -153,7 +151,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
     end
 
     test "escape key closes dropdown", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Test that the component has proper keyboard handling
       assert html =~ ~s(aria-haspopup="listbox")
@@ -164,7 +162,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
     end
 
     test "tab key closes dropdown", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Test that the component has proper accessibility attributes
       assert html =~ ~s(aria-haspopup="listbox")
@@ -175,7 +173,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
 
   describe "responsive design and mobile support" do
     test "dropdown has mobile-friendly classes", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Test that the component has responsive design classes
       # Note: Transition classes may be overridden by core .input component
@@ -185,7 +183,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
     end
 
     test "options have proper touch targets", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Test that the input has proper sizing for mobile interaction
       assert html =~ "block w-full"
@@ -199,7 +197,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
 
   describe "visual transitions and loading states" do
     test "component has proper transition classes", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Note: Core .input component may override custom transition classes
       # Test that the component renders properly with basic styling
@@ -217,7 +215,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
 
   describe "accessibility enhancements" do
     test "component has proper ARIA attributes", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Check for comprehensive ARIA support
       assert html =~ ~s(role="combobox")
@@ -230,7 +228,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
     end
 
     test "help text is provided for keyboard navigation", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Test that the component has screen reader support structures
       assert html =~ ~s(id="test-autocomplete-announcements")
@@ -239,7 +237,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
     end
 
     test "screen reader announcements are made", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Test that the component has proper announcement structure
       assert html =~ ~s(id="test-autocomplete-announcements")
@@ -249,7 +247,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
     end
 
     test "selected options are properly announced", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Test that the component has proper ARIA labeling
       assert html =~ ~s(aria-owns="test-autocomplete-results")
@@ -258,7 +256,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
     end
 
     test "options have proper aria-selected attributes", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Test that the component has proper aria structure
       assert html =~ ~s(aria-owns="test-autocomplete-results")
@@ -269,7 +267,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
 
   describe "error handling and edge cases" do
     test "component handles empty results gracefully", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Test that the component has proper structure for showing no results
       # (The actual no results handling requires dropdown interaction)
@@ -279,7 +277,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
     end
 
     test "component handles search errors gracefully", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Test that the component has proper error handling structure
       # (The actual error display requires dropdown interaction)
@@ -289,7 +287,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
     end
 
     test "keyboard navigation handles empty results", %{conn: conn} do
-      {:ok, view, html} = mount_live(conn, "/test")
+      {:ok, _view, html} = mount_live(conn, "/test")
 
       # Test that the component has proper keyboard navigation structure
       assert html =~ ~s(phx-keydown="keydown")

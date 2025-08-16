@@ -5,8 +5,6 @@ defmodule AshfolioWeb.AccountLive.FormComponentTest do
   @moduletag :unit
   @moduletag :fast
 
-  alias Ashfolio.Portfolio.Account
-  alias AshfolioWeb.AccountLive.FormComponent
 
   describe "FormComponent" do
     test "submitting a valid form creates an account", %{conn: conn} do

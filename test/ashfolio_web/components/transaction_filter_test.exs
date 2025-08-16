@@ -300,7 +300,7 @@ defmodule AshfolioWeb.Components.TransactionFilterTest do
       html =
         render_component(&TransactionFilter.transaction_filter/1,
           categories: categories,
-          filters: edge_case_filters,
+          filters: edge_case_filters
         )
 
       # Should handle gracefully without errors

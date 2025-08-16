@@ -37,7 +37,7 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
       %{user: user, accounts: accounts}
     end
 
-    test "account type filtering performs under 10ms", %{user: user} do
+    test "account type filtering performs under 10ms", %{user: _user} do
       # Test cash account filtering
       {time_us, {:ok, cash_accounts}} =
         :timer.tc(fn ->
@@ -65,9 +65,9 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
              "Investment account filtering took #{time_ms}ms, expected < 10ms"
     end
 
-    test "composite user + account_type queries under 15ms", %{user: user} do
+    test "composite user + account_type queries under 15ms", %{user: _user} do
       # Test the common Context API pattern
-      {time_us, {:ok, accounts}} =
+      {time_us, {:ok, _accounts}} =
         :timer.tc(fn ->
           Account.accounts_by_type(:checking)
         end)
@@ -80,7 +80,7 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
 
     test "account balance filtering with type performs under 20ms", %{user: user} do
       # Test balance filtering within account types
-      {time_us, accounts} =
+      {time_us, _accounts} =
         :timer.tc(fn ->
           from(a in Account,
             where:
@@ -155,7 +155,7 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
     end
 
     test "uncategorized transaction filtering under 15ms" do
-      {time_us, transactions} =
+      {time_us, _transactions} =
         :timer.tc(fn ->
           from(t in Transaction,
             where: is_nil(t.category_id),
@@ -173,7 +173,7 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
     test "complex category + date filtering under 50ms", %{categories: [category | _]} do
       start_date = Date.add(Date.utc_today(), -30)
 
-      {time_us, transactions} =
+      {time_us, _transactions} =
         :timer.tc(fn ->
           from(t in Transaction,
             where:

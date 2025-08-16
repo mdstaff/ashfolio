@@ -5,7 +5,7 @@ defmodule Ashfolio.ValidationTest do
   alias Ashfolio.Validation
 
   # Helper function to create a basic changeset for testing
-  defp test_changeset(attrs \\ %{}) do
+  defp test_changeset(attrs) do
     types = %{
       price: :decimal,
       quantity: :decimal,

@@ -7,11 +7,11 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
   @moduletag :smoke
 
   alias Ashfolio.Portfolio.Calculator
-  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
+  alias Ashfolio.Portfolio.Transaction
   alias Ashfolio.SQLiteHelpers
 
   # Helper function to create user - use global setup
-  defp create_test_user(attrs \\ %{}) do
+  defp create_test_user(_attrs \\ %{}) do
     # Use the global user from SQLiteHelpers, ignore custom attrs for consistency
     {:ok, SQLiteHelpers.get_default_user()}
   end

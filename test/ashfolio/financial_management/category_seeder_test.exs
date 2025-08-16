@@ -5,7 +5,6 @@ defmodule Ashfolio.FinancialManagement.CategorySeederTest do
   @moduletag :financial_management
 
   alias Ashfolio.FinancialManagement.{CategorySeeder, TransactionCategory}
-  alias Ashfolio.Portfolio.User
   alias Ashfolio.SQLiteHelpers
 
   describe "seed_system_categories/1" do

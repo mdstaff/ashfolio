@@ -1,6 +1,5 @@
 defmodule AshfolioWeb.ResponsiveDesignTest do
   use AshfolioWeb.ConnCase
-  import Phoenix.LiveViewTest
 
   setup do
     # Use the global default user - no need for complex race condition handling

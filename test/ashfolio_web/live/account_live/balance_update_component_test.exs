@@ -2,7 +2,6 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponentTest do
   use AshfolioWeb.LiveViewCase
 
   import Phoenix.LiveViewTest
-  import Ash.Expr
 
   alias Ashfolio.Portfolio.{User, Account}
   alias Ashfolio.Context
