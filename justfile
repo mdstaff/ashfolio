@@ -14,6 +14,8 @@
 #   just test-symbol-search # Symbol search and autocomplete tests
 #   just test-balance       # Cash balance management tests
 #   just test-categories    # Transaction category tests
+#   just test-migration     # Migration and backward compatibility tests
+#   just test-performance   # Performance benchmarks and regression tests
 
 # ====== ARCHITECTURAL FOCUS ======
 #   just test-ash           # Business logic tests 0 failures
@@ -146,6 +148,19 @@ test-accounts-enhanced:
     @echo "🧪 Testing enhanced Account features..."
     @just test-file test/ashfolio/portfolio/account_test.exs
 
+# Test database migrations and backward compatibility
+test-migration:
+    @echo "🧪 Testing database migrations and backward compatibility..."
+    @just test-file test/migration/
+    @just test-file test/migration/database_migration_test.exs
+    @just test-file test/migration/context_api_compatibility_test.exs
+
+# Test performance benchmarks and regressions
+test-performance:
+    @echo "🧪 Testing performance benchmarks and regressions..."
+    @just test-file test/performance/
+    @just test-file test/performance/v0_1_0_v0_2_0_benchmark_test.exs
+
 # Setup and start development server (like npm start)
 dev: setup
     @echo "🚀 Starting Phoenix server..."
@@ -186,13 +201,13 @@ stop:
 
 # Run main test suite (silent by default)
 test:
-    @echo "🧪 Running main test suite..."
-    @mix test 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Tests failed - run 'just test-verbose' for details" && exit 1)
+    @echo "🧪 Running main test suite (fast tests only)..."
+    @mix test --exclude performance --exclude optimization_comparison --exclude slow --exclude integration 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Tests failed - run 'just test-verbose' for details" && exit 1)
 
 
 # Run full test suite (silent by default)
 test-all:
-    @echo "🧪 Running full test suite..."
+    @echo "🧪 Running full test suite (excluding expensive tests)..."
     @mix test 2>/dev/null | grep -E "(\.+|Finished|tests,|failures|excluded)" || (echo "❌ Tests failed - run 'just test-all-verbose' for details" && exit 1)
 
 # Run specific test file (silent by default)
@@ -229,8 +244,7 @@ test-failed:
 # Run main test suite with full output
 test-verbose:
     @echo "🧪 Running main test suite (verbose)..."
-    mix test --trace
-
+    @mix test --exclude performance --exclude optimization_comparison --exclude slow --exclude integration --trace
 
 # Run full test suite with full output
 test-all-verbose:

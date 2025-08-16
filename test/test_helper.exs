@@ -20,15 +20,13 @@ Mox.defmock(Ashfolio.ContextMock, for: Ashfolio.ContextBehaviour)
 # Ensure application is started for test infrastructure
 {:ok, _} = Application.ensure_all_started(:ashfolio)
 
-# Set up sandbox mode for test isolation
-Ecto.Adapters.SQL.Sandbox.mode(Ashfolio.Repo, :manual)
-
-# Establish database ownership BEFORE creating any data
-:ok = Ecto.Adapters.SQL.Sandbox.checkout(Ashfolio.Repo)
-
-# Create all global test data with proper database ownership
+# Create all global test data BEFORE setting up sandbox isolation
 # This ensures baseline data is committed to the database permanently
+# and available to all test processes
 Ashfolio.SQLiteHelpers.setup_global_test_data!()
+
+# Set up sandbox mode for test isolation AFTER global data is created
+Ecto.Adapters.SQL.Sandbox.mode(Ashfolio.Repo, :manual)
 
 # ============================================================================
 # MODULAR TESTING FILTER CONFIGURATION
