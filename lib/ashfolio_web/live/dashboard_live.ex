@@ -175,11 +175,11 @@ defmodule AshfolioWeb.DashboardLive do
           change={"#{@holdings_count} positions"}
           data_testid="holdings-count"
         />
-        <.stat_card
+        <.net_worth_card
           title="Net Worth"
           value={@net_worth_total}
-          change={"Inv: #{@net_worth_investment_value} • Cash: #{@net_worth_cash_balance}"}
-          positive={true}
+          investment_value={@net_worth_investment_value}
+          cash_balance={@net_worth_cash_balance}
           data_testid="net-worth-total"
         />
       </div>

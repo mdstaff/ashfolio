@@ -39,5 +39,7 @@ npm-debug.log
 /data/*.db
 /data/*.db-*
 
-# Logs directory
+# Logs directory and log files
 /logs/
+*.log
+phoenix.log

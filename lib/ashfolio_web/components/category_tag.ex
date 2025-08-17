@@ -57,13 +57,14 @@ defmodule AshfolioWeb.Components.CategoryTag do
     ~H"""
     <span
       class={[
-        "inline-flex items-center rounded font-medium select-none",
+        "inline-flex items-center rounded-full font-medium select-none border transition-all duration-150",
         size_classes(@size),
-        @clickable && "cursor-pointer hover:opacity-80 transition-opacity",
+        category_style_classes(assigns),
+        @clickable && "cursor-pointer hover:shadow-sm",
         "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
         @class
       ]}
-      style={"background-color: #{@background_color}; color: #{@text_color}"}
+      style={category_style(assigns)}
       title={@tooltip}
       role={(@clickable && "button") || "text"}
       tabindex={(@clickable && "0") || nil}
@@ -73,7 +74,7 @@ defmodule AshfolioWeb.Components.CategoryTag do
       {@rest}
     >
       <span
-        class="w-2 h-2 rounded-full mr-1 flex-shrink-0"
+        class="w-2 h-2 rounded-full mr-1.5 flex-shrink-0"
         style={"background-color: #{@category_color}"}
         aria-hidden="true"
       >
@@ -86,6 +87,9 @@ defmodule AshfolioWeb.Components.CategoryTag do
       ]}>
         {@category_name}
       </span>
+      <%= if @clickable do %>
+        <span class="ml-1 opacity-0 group-hover:opacity-50 transition-opacity text-xs" aria-hidden="true">→</span>
+      <% end %>
     </span>
     """
   end
@@ -138,9 +142,25 @@ defmodule AshfolioWeb.Components.CategoryTag do
     assign(assigns, :aria_label, aria_label)
   end
 
-  defp size_classes(:small), do: "text-xs px-1 py-0.5"
-  defp size_classes(:normal), do: "text-sm px-2 py-1"
-  defp size_classes(:large), do: "text-base px-3 py-1.5"
+  defp size_classes(:small), do: "text-xs px-2 py-1 min-h-6"
+  defp size_classes(:normal), do: "text-sm px-3 py-1.5 min-h-7"
+  defp size_classes(:large), do: "text-base px-4 py-2 min-h-8"
+  
+  defp category_style_classes(assigns) do
+    if assigns.category_name == "Uncategorized" do
+      "border-dashed hover:border-solid"
+    else
+      ""
+    end
+  end
+  
+  defp category_style(assigns) do
+    if assigns.category_name == "Uncategorized" do
+      "background-color: #F3F4F6; color: #1F2937; border-color: #9CA3AF;"
+    else
+      "background-color: #{assigns.background_color}; color: #{assigns.text_color}; border-color: #{assigns.category_color};"
+    end
+  end
 
   defp normalize_color(color) when is_binary(color) do
     case Regex.match?(~r/^#[0-9A-Fa-f]{6}$/, color) do

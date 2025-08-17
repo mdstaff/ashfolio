@@ -231,8 +231,8 @@ defmodule AshfolioWeb.CoreComponents do
     <button
       type={@type}
       class={[
-        "phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 hover:bg-zinc-700 py-2 px-3",
-        "text-sm font-semibold leading-6 text-white active:text-white/80",
+        "phx-submit-loading:opacity-75 rounded-lg border border-gray-300 bg-transparent hover:bg-gray-50 hover:border-gray-400 py-2 px-3",
+        "text-sm font-semibold leading-6 text-gray-700 transition-all duration-200",
         @class
       ]}
       {@rest}
@@ -836,6 +836,52 @@ defmodule AshfolioWeb.CoreComponents do
           ]}>
             {@change}
           </p>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a specialized net worth card with proper breakdown display.
+
+  ## Examples
+
+      <.net_worth_card
+        title="Net Worth"
+        value="$265,750.00"
+        investment_value="$265,750.00"
+        cash_balance="$0.00"
+        data_testid="net-worth-total" />
+  """
+  attr :title, :string, required: true
+  attr :value, :string, required: true
+  attr :investment_value, :string, required: true
+  attr :cash_balance, :string, required: true
+  attr :class, :string, default: nil
+  attr :data_testid, :string, default: nil
+
+  def net_worth_card(assigns) do
+    ~H"""
+    <div class={["bg-white rounded-lg shadow p-6", @class]} data-testid={@data_testid}>
+      <div class="net-worth-display">
+        <div class="net-worth-total">
+          <p class="text-sm font-medium text-gray-600">{@title}</p>
+          <p class="text-2xl font-semibold text-gray-900">{@value}</p>
+        </div>
+        <div class="net-worth-breakdown">
+          <div class="breakdown-item">
+            <span class="breakdown-label">Investment</span>
+            <span class="breakdown-value">{@investment_value}</span>
+          </div>
+          <span class="separator">•</span>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Cash</span>
+            <span class={[
+              "breakdown-value",
+              @cash_balance == "$0.00" && "cash-zero"
+            ]}>{@cash_balance}</span>
+          </div>
         </div>
       </div>
     </div>

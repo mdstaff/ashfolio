@@ -453,7 +453,7 @@ defmodule AshfolioWeb.AccountLive.Index do
                     <!-- View Button -->
                     <.link
                       navigate={~p"/accounts/#{account.id}"}
-                      class="btn-secondary text-xs sm:text-sm px-2 sm:px-3 py-1 inline-flex items-center"
+                      class="btn-view text-xs sm:text-sm px-2 sm:px-3 py-1 inline-flex items-center"
                       title="View account details"
                       aria-label={"View account details for #{account.name}"}
                     >
