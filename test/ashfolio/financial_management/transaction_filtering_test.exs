@@ -10,23 +10,19 @@ defmodule Ashfolio.FinancialManagement.TransactionFilteringTest do
 
   describe "single category filtering" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-
       # Create test categories
       {:ok, growth_category} =
         TransactionCategory.create(%{
           name: "Growth",
           color: "#10B981",
-          is_system: true,
-          user_id: user.id
+          is_system: true
         })
 
       {:ok, income_category} =
         TransactionCategory.create(%{
           name: "Income",
           color: "#3B82F6",
-          is_system: true,
-          user_id: user.id
+          is_system: true
         })
 
       # Create test account and symbol
@@ -34,8 +30,7 @@ defmodule Ashfolio.FinancialManagement.TransactionFilteringTest do
         Account.create(%{
           name: "Test Brokerage",
           platform: "Test",
-          balance: Decimal.new("10000.00"),
-          user_id: user.id
+          balance: Decimal.new("10000.00")
         })
 
       {:ok, symbol} =
@@ -87,7 +82,6 @@ defmodule Ashfolio.FinancialManagement.TransactionFilteringTest do
         })
 
       %{
-        user: user,
         growth_category: growth_category,
         income_category: income_category,
         growth_transaction: growth_transaction,
@@ -139,25 +133,22 @@ defmodule Ashfolio.FinancialManagement.TransactionFilteringTest do
 
   describe "multiple category filtering" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-
       # Create multiple categories
       {:ok, cat1} =
-        TransactionCategory.create(%{name: "Cat1", color: "#FF0000", user_id: user.id})
+        TransactionCategory.create(%{name: "Cat1", color: "#FF0000"})
 
       {:ok, cat2} =
-        TransactionCategory.create(%{name: "Cat2", color: "#00FF00", user_id: user.id})
+        TransactionCategory.create(%{name: "Cat2", color: "#00FF00"})
 
       {:ok, cat3} =
-        TransactionCategory.create(%{name: "Cat3", color: "#0000FF", user_id: user.id})
+        TransactionCategory.create(%{name: "Cat3", color: "#0000FF"})
 
       # Create account and symbol
       {:ok, account} =
         Account.create(%{
           name: "Multi Test Account",
           platform: "Test",
-          balance: Decimal.new("5000.00"),
-          user_id: user.id
+          balance: Decimal.new("5000.00")
         })
 
       {:ok, symbol} =
@@ -239,21 +230,17 @@ defmodule Ashfolio.FinancialManagement.TransactionFilteringTest do
 
   describe "composite filtering (category + date range)" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-
       {:ok, category} =
         TransactionCategory.create(%{
           name: "Composite Test",
-          color: "#FFFF00",
-          user_id: user.id
+          color: "#FFFF00"
         })
 
       {:ok, account} =
         Account.create(%{
           name: "Date Test Account",
           platform: "Test",
-          balance: Decimal.new("3000.00"),
-          user_id: user.id
+          balance: Decimal.new("3000.00")
         })
 
       {:ok, symbol} =

@@ -4,7 +4,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
 
   This module replaces the original NetWorthCalculator with performance optimizations:
   - Batch loading of accounts and related data
-  - Single query for cash balance calculations  
+  - Single query for cash balance calculations
   - Efficient preloading to prevent N+1 queries
   - Under 100ms performance target for realistic portfolios
 
@@ -34,7 +34,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
   - `{:ok, result}` - Success with net worth calculation result:
     - `:net_worth` - Total net worth (investment + cash)
     - `:investment_value` - Total value of investment accounts
-    - `:cash_value` - Total value of cash accounts  
+    - `:cash_value` - Total value of cash accounts
     - `:breakdown` - Detailed account breakdowns
   - `{:error, reason}` - Calculation failure:
     - `:batch_load_failed` - Could not load account data
@@ -49,7 +49,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
   ## Examples
 
       # Calculate complete net worth breakdown
-      iex> NetWorthCalculatorOptimized.calculate_net_worth(user_id)
+      iex> NetWorthCalculatorOptimized.calculate_net_worth()
       {:ok, %{
         net_worth: #Decimal<125000.00>,
         investment_value: #Decimal<100000.00>,
@@ -61,19 +61,19 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
       iex> NetWorthCalculatorOptimized.calculate_net_worth("invalid-id")
       {:error, :batch_load_failed}
   """
-  def calculate_net_worth(user_id) when is_binary(user_id) do
-    Logger.debug("Calculating net worth (optimized) for user: #{user_id}")
+  def calculate_net_worth() do
+    Logger.debug("Calculating net worth (optimized) - database-as-user architecture")
 
     start_time = System.monotonic_time(:millisecond)
 
-    with {:ok, accounts_data} <- batch_load_account_data(user_id),
-         {:ok, investment_value} <- Calculator.calculate_portfolio_value(user_id),
+    with {:ok, accounts_data} <- batch_load_account_data(),
+         {:ok, investment_value} <- Calculator.calculate_portfolio_value(),
          {:ok, result} <- calculate_net_worth_from_batch(accounts_data, investment_value) do
       calculation_time = System.monotonic_time(:millisecond) - start_time
       Logger.debug("Net worth calculated in #{calculation_time}ms (optimized)")
 
       # Broadcast net worth update via PubSub
-      broadcast_net_worth_update(user_id, result)
+      broadcast_net_worth_update(result)
 
       {:ok, result}
     else
@@ -91,16 +91,15 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
 
   Performance: <20ms for 100+ cash accounts
   """
-  def calculate_total_cash_balances(user_id) when is_binary(user_id) do
-    Logger.debug("Calculating total cash balances (optimized) for user: #{user_id}")
+  def calculate_total_cash_balances() do
+    Logger.debug("Calculating total cash balances (optimized) - database-as-user architecture")
 
     try do
-      # Single aggregate query at database level
+      # Single aggregate query at database level - no user_id needed
       cash_total =
         from(a in Account,
           where:
-            a.user_id == ^user_id and
-              a.account_type in [:checking, :savings, :money_market, :cd] and
+            a.account_type in [:checking, :savings, :money_market, :cd] and
               a.is_excluded == false,
           select: sum(a.balance)
         )
@@ -127,11 +126,11 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
 
   Performance: <50ms for 50+ accounts with full breakdown
   """
-  def calculate_account_breakdown(user_id) when is_binary(user_id) do
-    Logger.debug("Calculating account breakdown (optimized) for user: #{user_id}")
+  def calculate_account_breakdown() do
+    Logger.debug("Calculating account breakdown (optimized) - database-as-user architecture")
 
     try do
-      with {:ok, accounts_data} <- batch_load_account_data(user_id) do
+      with {:ok, accounts_data} <- batch_load_account_data() do
         breakdown = process_account_breakdown(accounts_data)
 
         Logger.debug("Account breakdown calculated (optimized)")
@@ -149,11 +148,11 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
   # Single query to load all account data needed for net worth calculation.
   # This replaces multiple individual queries with one efficient batch query
   # that includes all necessary data and preloads.
-  defp batch_load_account_data(user_id) do
+  defp batch_load_account_data() do
     try do
       accounts =
         from(a in Account,
-          where: a.user_id == ^user_id and a.is_excluded == false,
+          where: a.is_excluded == false,
           # Efficient ordering for processing
           order_by: [a.account_type, a.name],
           select: a
@@ -294,21 +293,16 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
   end
 
   # Broadcast net worth update via PubSub (unchanged from original).
-  defp broadcast_net_worth_update(user_id, net_worth_data) do
+  defp broadcast_net_worth_update(net_worth_data) do
     try do
-      Phoenix.PubSub.broadcast(
-        Ashfolio.PubSub,
-        "net_worth:#{user_id}",
-        {:net_worth_updated, net_worth_data}
-      )
-
+      # Database-as-user architecture: only broadcast to general topic
       Phoenix.PubSub.broadcast(
         Ashfolio.PubSub,
         "net_worth",
-        {:net_worth_updated, user_id, net_worth_data}
+        {:net_worth_updated, net_worth_data}
       )
 
-      Logger.debug("Net worth update broadcasted (optimized) for user: #{user_id}")
+      Logger.debug("Net worth update broadcasted (optimized)")
     rescue
       error ->
         Logger.warning("Failed to broadcast net worth update (optimized): #{inspect(error)}")

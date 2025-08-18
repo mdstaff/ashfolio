@@ -10,16 +10,14 @@ defmodule AshfolioWeb.AccountLive.ShowTest do
   alias Ashfolio.Portfolio.{Account, Transaction}
 
   setup do
-    # Get or create the default test user (eliminates SQLite concurrency issues)
-    {:ok, user} = get_or_create_default_user()
+    # Database-as-user architecture: No user needed
 
     # Create test account
     {:ok, account} =
       Account.create(%{
         name: "Test Account",
         platform: "Test Platform",
-        balance: Decimal.new("10000.00"),
-        user_id: user.id
+        balance: Decimal.new("10000.00")
       })
 
     # Get or create test symbol
@@ -81,7 +79,6 @@ defmodule AshfolioWeb.AccountLive.ShowTest do
       })
 
     %{
-      user: user,
       account: account,
       symbol: symbol,
       buy_transaction: buy_transaction,
@@ -157,14 +154,13 @@ defmodule AshfolioWeb.AccountLive.ShowTest do
   end
 
   describe "account with no transactions" do
-    test "displays empty state when account has no transactions", %{conn: conn, user: user} do
+    test "displays empty state when account has no transactions", %{conn: conn} do
       # Create account with no transactions
       {:ok, empty_account} =
         Account.create(%{
           name: "Empty Account",
           platform: "Test Platform",
-          balance: Decimal.new("5000.00"),
-          user_id: user.id
+          balance: Decimal.new("5000.00")
         })
 
       {:ok, _show_live, html} = live(conn, ~p"/accounts/#{empty_account.id}")

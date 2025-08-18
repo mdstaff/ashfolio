@@ -13,17 +13,16 @@ defmodule Ashfolio.Portfolio.TransactionTest do
   describe "Transaction resource" do
     setup do
       # Use hybrid approach: get global defaults or create custom resources with retry logic
-      user = SQLiteHelpers.get_default_user()
 
       account =
-        SQLiteHelpers.get_or_create_account(user, %{
+        SQLiteHelpers.get_or_create_account(%{
           name: "Test Brokerage",
           platform: "Test Platform"
         })
 
       symbol = SQLiteHelpers.get_common_symbol("AAPL")
 
-      %{user: user, account: account, symbol: symbol}
+      %{account: account, symbol: symbol}
     end
 
     test "creates a buy transaction successfully", %{account: account, symbol: symbol} do
@@ -363,10 +362,8 @@ defmodule Ashfolio.Portfolio.TransactionTest do
 
   describe "Transaction category relationships" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-
       account =
-        SQLiteHelpers.get_or_create_account(user, %{
+        SQLiteHelpers.get_or_create_account(%{
           name: "Test Brokerage",
           platform: "Test Platform"
         })
@@ -377,11 +374,10 @@ defmodule Ashfolio.Portfolio.TransactionTest do
       {:ok, category} =
         TransactionCategory.create(%{
           name: "Growth",
-          color: "#10B981",
-          user_id: user.id
+          color: "#10B981"
         })
 
-      %{user: user, account: account, symbol: symbol, category: category}
+      %{account: account, symbol: symbol, category: category}
     end
 
     test "creates transaction with category successfully", %{
@@ -488,14 +484,13 @@ defmodule Ashfolio.Portfolio.TransactionTest do
       account: account,
       symbol: symbol,
       category: category,
-      user: user
+      
     } do
       # Create another category
       {:ok, income_category} =
         TransactionCategory.create(%{
           name: "Income",
-          color: "#3B82F6",
-          user_id: user.id
+          color: "#3B82F6"
         })
 
       # Create transactions with different categories

@@ -54,7 +54,7 @@ defmodule Ashfolio.ErrorHandlerTest do
       import ExUnit.CaptureLog
 
       error = {:error, :test_error}
-      context = %{user_id: "123", action: "test_action"}
+      context = %{action: "test_action"}
 
       log =
         capture_log(fn ->

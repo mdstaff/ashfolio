@@ -300,7 +300,7 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
   end
 
   @impl true
-  def update(%{action: action, category: category, user_id: _user_id} = assigns, socket) do
+  def update(%{action: action, category: category} = assigns, socket) do
     # Prepare initial data
     {form_data, selected_color} =
       case {action, category} do
@@ -468,7 +468,6 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
     category_params = %{
       name: form_data["name"],
       color: form_data["color"],
-      user_id: socket.assigns.user_id,
       parent_category_id: parse_parent_category_id(form_data["parent_category_id"])
     }
 

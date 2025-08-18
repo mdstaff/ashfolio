@@ -1,7 +1,7 @@
 defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
   @moduledoc """
   Integration tests for critical integration points:
-  - Price refresh functionality 
+  - Price refresh functionality
   - Transaction impact on portfolio
   - Error handling scenarios
 
@@ -13,15 +13,14 @@ defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
   @moduletag :slow
   import Mox
 
-  alias Ashfolio.Portfolio.{User, Account, Symbol, Transaction}
+  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
   alias Ashfolio.MarketData.PriceManager
   alias Ashfolio.SQLiteHelpers
 
   setup :verify_on_exit!
 
   setup do
-    {:ok, user} = SQLiteHelpers.get_or_create_default_user()
-
+    # Database-as-user architecture: No user entity needed
     # Allow PriceManager to access the database for price refresh tests
     SQLiteHelpers.allow_price_manager_db_access()
 
@@ -29,8 +28,7 @@ defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
       Account.create(%{
         name: "Test Account",
         platform: "Test Platform",
-        balance: Decimal.new("10000"),
-        user_id: user.id
+        balance: Decimal.new("10000")
       })
 
     {:ok, symbol} =
@@ -42,7 +40,7 @@ defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
         current_price: Decimal.new("100.00")
       })
 
-    # Create a transaction to make the symbol "active" 
+    # Create a transaction to make the symbol "active"
     {:ok, _transaction} =
       Transaction.create(%{
         type: :buy,
@@ -54,7 +52,7 @@ defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
         date: ~D[2024-08-01]
       })
 
-    %{user: user, account: account, symbol: symbol}
+    %{account: account, symbol: symbol}
   end
 
   describe "Price Refresh Functionality" do
@@ -120,13 +118,12 @@ defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
 
   describe "Transaction Impact on Portfolio" do
     test "buy transaction increases portfolio value correctly", %{
-      user: user,
       account: account,
       symbol: symbol
     } do
       # Get initial portfolio state
       initial_portfolio =
-        case Ashfolio.Portfolio.Calculator.calculate_total_return(user.id) do
+        case Ashfolio.Portfolio.Calculator.calculate_total_return() do
           {:ok, portfolio} -> portfolio
           {:error, _} -> %{total_value: Decimal.new("0"), cost_basis: Decimal.new("0")}
         end
@@ -144,7 +141,7 @@ defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
         })
 
       # Check portfolio after transaction
-      case Ashfolio.Portfolio.Calculator.calculate_total_return(user.id) do
+      case Ashfolio.Portfolio.Calculator.calculate_total_return() do
         {:ok, updated_portfolio} ->
           # Portfolio value should have increased
           assert Decimal.gt?(updated_portfolio.cost_basis, initial_portfolio.cost_basis)
@@ -157,7 +154,6 @@ defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
     end
 
     test "sell transaction decreases holdings correctly", %{
-      user: user,
       account: account,
       symbol: symbol
     } do
@@ -187,7 +183,7 @@ defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
         })
 
       # Verify net position
-      case Ashfolio.Portfolio.Calculator.calculate_position_returns(user.id) do
+      case Ashfolio.Portfolio.Calculator.calculate_position_returns() do
         {:ok, positions} ->
           test_position = Enum.find(positions, fn pos -> pos.symbol == "TEST" end)
 
@@ -306,20 +302,14 @@ defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
     end
 
     test "portfolio calculations handle empty data gracefully" do
-      # Create user with no accounts/transactions
-      {:ok, empty_user} =
-        User.create(%{
-          name: "Empty User",
-          currency: "USD",
-          locale: "en-US"
-        })
-
-      # Portfolio calculations should handle empty state
-      case Ashfolio.Portfolio.Calculator.calculate_total_return(empty_user.id) do
+      # Database-as-user architecture: Test empty state directly
+      # Portfolio calculations should handle empty state gracefully
+      case Ashfolio.Portfolio.Calculator.calculate_total_return() do
         {:ok, portfolio} ->
-          # Should show zero values
-          assert Decimal.equal?(portfolio.total_value, Decimal.new("0"))
-          assert Decimal.equal?(portfolio.cost_basis, Decimal.new("0"))
+          # Should return valid portfolio data (may include global test data)
+          assert is_struct(portfolio.total_value, Decimal)
+          assert is_struct(portfolio.cost_basis, Decimal)
+          assert Decimal.compare(portfolio.total_value, Decimal.new("0")) != :lt
 
         {:error, _reason} ->
           # Error is acceptable for empty portfolio
@@ -332,7 +322,7 @@ defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
       # In a real scenario, you might test connection pool exhaustion, etc.
 
       # Try operations that might fail due to database issues
-      result = Account.accounts_for_user("invalid-user-id")
+      result = Account.list()
 
       # Should return error tuple, not crash
       assert match?({:error, _}, result) or match?({:ok, _}, result)

@@ -31,22 +31,19 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
 
   describe "LiveView Mount Performance" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-
       # Create realistic data for dashboard
-      {accounts, categories} = create_dashboard_test_data(user.id)
+      {accounts, categories} = create_dashboard_test_data()
 
       %{
-        user: user,
         accounts: accounts,
         categories: categories
       }
     end
 
-    test "dashboard LiveView mounts under 100ms", %{conn: conn, user: user} do
+    test "dashboard LiveView mounts under 100ms", %{conn: conn} do
       {time_us, {:ok, _view, _html}} =
         :timer.tc(fn ->
-          live(conn, "/?user_id=#{user.id}")
+          live(conn, "/")
         end)
 
       time_ms = time_us / 1000
@@ -55,10 +52,10 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
              "Dashboard mount took #{time_ms}ms, expected < 500ms"
     end
 
-    test "transaction LiveView mounts under 100ms", %{conn: conn, user: user} do
+    test "transaction LiveView mounts under 100ms", %{conn: conn} do
       {time_us, {:ok, _view, _html}} =
         :timer.tc(fn ->
-          live(conn, "/transactions?user_id=#{user.id}")
+          live(conn, "/transactions")
         end)
 
       time_ms = time_us / 1000
@@ -67,13 +64,13 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
              "Transaction LiveView mount took #{time_ms}ms, expected < 500ms"
     end
 
-    test "consistent mount performance across multiple requests", %{conn: conn, user: user} do
+    test "consistent mount performance across multiple requests", %{conn: conn} do
       # Test multiple mounts to ensure consistent performance
       times =
         for _ <- 1..5 do
           {time_us, {:ok, view, _html}} =
             :timer.tc(fn ->
-              live(conn, "/?user_id=#{user.id}")
+              live(conn, "/")
             end)
 
           # Clean up view
@@ -92,13 +89,10 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
 
   describe "PubSub Broadcasting Performance" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-      create_dashboard_test_data(user.id)
-
-      %{user: user}
+      create_dashboard_test_data()
     end
 
-    test "net worth update broadcast under 10ms", %{user: user} do
+    test "net worth update broadcast under 10ms" do
       net_worth_data = %{
         net_worth: Decimal.new("100000"),
         investment_value: Decimal.new("75000"),
@@ -110,7 +104,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
         :timer.tc(fn ->
           Phoenix.PubSub.broadcast(
             Ashfolio.PubSub,
-            "net_worth:#{user.id}",
+            "net_worth",
             {:net_worth_updated, net_worth_data}
           )
         end)
@@ -121,7 +115,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
              "PubSub broadcast took #{time_ms}ms, expected < 10ms"
     end
 
-    test "multiple concurrent broadcasts under 10ms each", %{user: user} do
+    test "multiple concurrent broadcasts under 10ms each" do
       # Test concurrent broadcasting to simulate heavy update scenarios
       tasks =
         for i <- 1..5 do
@@ -137,7 +131,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
               :timer.tc(fn ->
                 Phoenix.PubSub.broadcast(
                   Ashfolio.PubSub,
-                  "net_worth:#{user.id}",
+                  "net_worth",
                   {:net_worth_updated, data}
                 )
               end)
@@ -153,9 +147,9 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
              "Concurrent broadcasts averaged #{avg_time}ms, expected < 8ms"
     end
 
-    test "PubSub message delivery latency", %{user: user} do
+    test "PubSub message delivery latency" do
       # Subscribe to the topic
-      Phoenix.PubSub.subscribe(Ashfolio.PubSub, "net_worth:#{user.id}")
+      Phoenix.PubSub.subscribe(Ashfolio.PubSub, "net_worth")
 
       data = %{
         net_worth: Decimal.new("100000"),
@@ -168,7 +162,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
 
       Phoenix.PubSub.broadcast(
         Ashfolio.PubSub,
-        "net_worth:#{user.id}",
+        "net_worth",
         {:net_worth_updated, data}
       )
 
@@ -189,11 +183,9 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
 
   describe "LiveView Event Handling Performance" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-      {accounts, categories} = create_dashboard_test_data(user.id)
+      {accounts, categories} = create_dashboard_test_data()
 
       %{
-        user: user,
         accounts: accounts,
         categories: categories
       }
@@ -201,15 +193,13 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
 
     test "composite filter application under 50ms", %{
       conn: conn,
-      user: user,
       accounts: accounts,
       categories: categories
     } do
-      {:ok, view, _html} = live(conn, "/transactions?user_id=#{user.id}")
+      {:ok, view, _html} = live(conn, "/transactions")
 
       _account = Enum.at(accounts, 0)
       category = Enum.at(categories, 0)
-
 
       {time_us, _result} =
         :timer.tc(fn ->
@@ -222,8 +212,8 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
              "Filter application took #{time_ms}ms, expected < 250ms"
     end
 
-    test "search filter application under 50ms", %{conn: conn, user: user, categories: categories} do
-      {:ok, view, _html} = live(conn, "/transactions?user_id=#{user.id}")
+    test "search filter application under 50ms", %{conn: conn, categories: categories} do
+      {:ok, view, _html} = live(conn, "/transactions")
 
       category = Enum.at(categories, 0)
 
@@ -238,8 +228,8 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
              "Search filter application took #{time_ms}ms, expected < 250ms"
     end
 
-    test "transaction type filter under 50ms", %{conn: conn, user: user} do
-      {:ok, view, _html} = live(conn, "/transactions?user_id=#{user.id}")
+    test "transaction type filter under 50ms", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/transactions")
 
       {time_us, _result} =
         :timer.tc(fn ->
@@ -255,17 +245,15 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
 
   describe "Real-time Update Latency" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-      {accounts, _categories} = create_dashboard_test_data(user.id)
+      {accounts, _categories} = create_dashboard_test_data()
 
       %{
-        user: user,
         accounts: accounts
       }
     end
 
-    test "end-to-end update latency under 50ms", %{conn: conn, user: user, accounts: accounts} do
-      {:ok, _view, _html} = live(conn, "/?user_id=#{user.id}")
+    test "end-to-end update latency under 50ms", %{conn: conn, accounts: accounts} do
+      {:ok, _view, _html} = live(conn, "/")
 
       _account = Enum.at(accounts, 0)
 
@@ -275,7 +263,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
       # Trigger a data change that should broadcast updates
       {calculation_time_us, {:ok, net_worth_data}} =
         :timer.tc(fn ->
-          NetWorthCalculator.calculate_net_worth(user.id)
+          NetWorthCalculator.calculate_net_worth()
         end)
 
       # Wait for the LiveView to receive and process the update
@@ -299,8 +287,8 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
              "Net worth calculation took #{calculation_time_ms}ms within update cycle"
     end
 
-    test "LiveView handles multiple rapid updates efficiently", %{conn: conn, user: user} do
-      {:ok, _view, _html} = live(conn, "/?user_id=#{user.id}")
+    test "LiveView handles multiple rapid updates efficiently", %{conn: conn} do
+      {:ok, _view, _html} = live(conn, "/")
 
       # Simulate rapid updates (like real-time price changes)
       update_times =
@@ -313,7 +301,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
                   # Net worth update
                   Phoenix.PubSub.broadcast(
                     Ashfolio.PubSub,
-                    "net_worth:#{user.id}",
+                    "net_worth",
                     {:net_worth_updated, %{net_worth: Decimal.new("#{100_000 + i * 1000}")}}
                   )
 
@@ -329,7 +317,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
                   # Transaction update
                   Phoenix.PubSub.broadcast(
                     Ashfolio.PubSub,
-                    "transactions:#{user.id}",
+                    "transactions:",
                     {:transaction_updated, %{id: "test-#{i}"}}
                   )
               end
@@ -350,8 +338,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
 
   describe "Memory Efficiency During Updates" do
     test "memory usage stays reasonable during heavy update cycles" do
-      user = SQLiteHelpers.get_default_user()
-      create_dashboard_test_data(user.id)
+      create_dashboard_test_data()
 
       :erlang.garbage_collect()
       initial_memory = :erlang.memory(:total)
@@ -360,7 +347,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
       for i <- 1..100 do
         Phoenix.PubSub.broadcast(
           Ashfolio.PubSub,
-          "net_worth:#{user.id}",
+          "net_worth",
           {:net_worth_updated,
            %{
              net_worth: Decimal.new("#{100_000 + i * 100}"),
@@ -389,7 +376,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
 
   # Helper functions for test data creation
 
-  defp create_dashboard_test_data(user_id) do
+  defp create_dashboard_test_data() do
     # Create mix of accounts
     accounts =
       for i <- 1..3 do
@@ -405,8 +392,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
             name: "Test #{String.capitalize(to_string(account_type))} Account #{i}",
             platform: "Test Platform #{i}",
             account_type: account_type,
-            balance: Decimal.new("#{5000 + i * 2000}"),
-            user_id: user_id
+            balance: Decimal.new("#{5000 + i * 2000}")
           })
 
         account
@@ -419,8 +405,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
           TransactionCategory.create(%{
             name: "Test Category #{i}",
             color:
-              "##{:rand.uniform(16_777_215) |> Integer.to_string(16) |> String.pad_leading(6, "0")}",
-            user_id: user_id
+              "##{:rand.uniform(16_777_215) |> Integer.to_string(16) |> String.pad_leading(6, "0")}"
           })
 
         category

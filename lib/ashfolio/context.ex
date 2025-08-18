@@ -17,7 +17,6 @@ defmodule Ashfolio.Context do
   ## Error Handling
 
   All Context API functions return standardized errors:
-  - `{:error, :user_not_found}` - User does not exist
   - `{:error, :account_not_found}` - Account does not exist
   - `{:error, :insufficient_data}` - Missing required data for operation
   - `{:error, :validation_failed}` - Input validation failed
@@ -58,24 +57,21 @@ defmodule Ashfolio.Context do
   end
 
   @doc """
-  Get comprehensive dashboard data for a user.
+  Get comprehensive dashboard data for the database-as-user architecture.
 
-  Returns user info, accounts (categorized), recent transactions, and summary.
+  Returns user settings, accounts (categorized), recent transactions, and summary.
   Optimized with batched queries and telemetry tracking.
 
   ## Examples
 
-      iex> Context.get_user_dashboard_data()
+      iex> Context.get_dashboard_data()
       {:ok, %{
-        user: %User{},
+        user: %UserSettings{},
         accounts: %{all: [...], investment: [...], cash: [...]},
         recent_transactions: [...],
         summary: %{total_balance: %Decimal{}, account_count: 3},
         last_updated: ~U[2025-08-10 12:00:00Z]
       }}
-
-      iex> Context.get_user_dashboard_data("invalid-id")
-      {:error, :user_not_found}
   """
   def get_dashboard_data() do
     track_performance(:get_dashboard_data, fn ->
@@ -100,7 +96,7 @@ defmodule Ashfolio.Context do
   end
 
   # Backward compatibility function - redirects to get_dashboard_data
-  def get_user_dashboard_data(_user_id \\ nil) do
+  def get_user_dashboard_data() do
     get_dashboard_data()
   end
 
@@ -159,30 +155,30 @@ defmodule Ashfolio.Context do
         last_updated: ~U[2025-08-10 12:00:00Z]
       }}
   """
-  def get_portfolio_summary(_user_id \\ nil) do
+  def get_portfolio_summary() do
     track_performance(:get_portfolio_summary, fn ->
       with {:ok, _user_settings} <- get_user_settings(),
            {:ok, accounts} <- Account.list(),
-           {:ok, total_return} <- Calculator.calculate_total_return(nil),
-           {:ok, position_returns} <- Calculator.calculate_position_returns(nil) do
-          active_accounts = Enum.filter(accounts, &(!&1.is_excluded))
-          performance = calculate_performance_metrics(nil, total_return)
+           {:ok, total_return} <- Calculator.calculate_total_return(),
+           {:ok, position_returns} <- Calculator.calculate_position_returns() do
+        active_accounts = Enum.filter(accounts, &(!&1.is_excluded))
+        performance = calculate_performance_metrics(total_return)
 
-          {:ok,
-           %{
-             total_value: total_return.total_value,
-             total_return: %{
-               amount: total_return.dollar_return,
-               percentage: total_return.return_percentage
-             },
-             accounts: active_accounts,
-             holdings: position_returns,
-             performance: performance,
-             last_updated: DateTime.utc_now()
-           }}
-        else
-          error -> normalize_error(error)
-        end
+        {:ok,
+         %{
+           total_value: total_return.total_value,
+           total_return: %{
+             amount: total_return.dollar_return,
+             percentage: total_return.return_percentage
+           },
+           accounts: active_accounts,
+           holdings: position_returns,
+           performance: performance,
+           last_updated: DateTime.utc_now()
+         }}
+      else
+        error -> normalize_error(error)
+      end
     end)
   end
 
@@ -191,7 +187,7 @@ defmodule Ashfolio.Context do
 
   ## Examples
 
-      iex> Context.get_recent_transactions(user_id, 5)
+      iex> Context.get_recent_transactions(5)
       {:ok, [%Transaction{}, ...]}
   """
   def get_recent_transactions(limit \\ 10) do
@@ -204,7 +200,7 @@ defmodule Ashfolio.Context do
           {:ok, transactions} ->
             # Load relationships for recent transactions
             loaded_transactions = Ash.load!(transactions, [:symbol, :category])
-            
+
             recent_transactions =
               loaded_transactions
               |> Enum.sort_by(& &1.date, {:desc, Date})
@@ -221,17 +217,13 @@ defmodule Ashfolio.Context do
     end)
   end
 
-  def get_recent_transactions(_user_id, limit) do
-    # Backward compatibility - ignore user_id in database-as-user architecture
-    get_recent_transactions(limit)
-  end
 
   @doc """
   Get net worth calculation combining investment and cash balances.
 
   ## Examples
 
-      iex> Context.get_net_worth(user_id)
+      iex> Context.get_net_worth()
       {:ok, %{
         total_net_worth: %Decimal{},
         investment_value: %Decimal{},
@@ -239,16 +231,19 @@ defmodule Ashfolio.Context do
         breakdown: %{...}
       }}
   """
-  def get_net_worth(_user_id \\ nil) do
+  def get_net_worth() do
     track_performance(:get_net_worth, fn ->
       with {:ok, _user_settings} <- get_user_settings(),
            {:ok, accounts} <- Account.list(),
-           {:ok, portfolio_value} <- Calculator.calculate_portfolio_value(nil) do
+           {:ok, portfolio_value} <- Calculator.calculate_portfolio_value() do
         # Filter out excluded accounts first
         active_accounts = Enum.filter(accounts, &(!&1.is_excluded))
-        
+
         cash_accounts =
-          Enum.filter(active_accounts, &(&1.account_type in [:checking, :savings, :money_market, :cd]))
+          Enum.filter(
+            active_accounts,
+            &(&1.account_type in [:checking, :savings, :money_market, :cd])
+          )
 
         investment_accounts = Enum.filter(active_accounts, &(&1.account_type == :investment))
 
@@ -383,20 +378,18 @@ defmodule Ashfolio.Context do
 
   ## Parameters
   - form_params: Map of form parameters to validate
-  - user_id: UUID of the user
-  - current_account_id: UUID of account being edited (nil for new accounts)
 
   ## Examples
 
-      iex> Context.validate_account_constraints(%{"name" => "My Account"}, user_id, nil)
+      iex> Context.validate_account_constraints(%{"name" => "My Account"}, nil)
       {:ok, %{}}
 
-      iex> Context.validate_account_constraints(%{"name" => "Existing Account"}, user_id, nil)
+      iex> Context.validate_account_constraints(%{"name" => "Existing Account"}, nil)
       {:error, :name_already_taken}
   """
-  def validate_account_constraints(form_params, _user_id \\ nil, current_account_id \\ nil) do
+  def validate_account_constraints(form_params, current_account_id \\ nil) do
     track_performance(:validate_account_constraints, fn ->
-      validate_account_name_uniqueness(form_params, nil, current_account_id)
+      validate_account_name_uniqueness(form_params, current_account_id)
     end)
   end
 
@@ -524,7 +517,7 @@ defmodule Ashfolio.Context do
     |> Enum.max(Date)
   end
 
-  defp calculate_performance_metrics(_user_id, total_return) do
+  defp calculate_performance_metrics(total_return) do
     # Simplified performance metrics - can be enhanced later
     %{
       # Placeholder - would need historical data
@@ -550,7 +543,7 @@ defmodule Ashfolio.Context do
 
   # SQLite optimization functions (placeholder for future enhancements)
 
-  defp validate_account_name_uniqueness(form_params, _user_id, current_account_id) do
+  defp validate_account_name_uniqueness(form_params, current_account_id) do
     name = Map.get(form_params, "name")
 
     if name do
@@ -577,7 +570,7 @@ defmodule Ashfolio.Context do
 
   defp normalize_error(%Ash.Error.Invalid{}), do: {:error, :validation_failed}
   defp normalize_error(%Ash.Error.Query.NotFound{}), do: {:error, :account_not_found}
-  defp normalize_error({:error, :user_not_found}), do: {:error, :user_not_found}
+  # Note: :user_not_found removed - no longer applicable in database-as-user architecture
   defp normalize_error({:error, :account_not_found}), do: {:error, :account_not_found}
   defp normalize_error({:error, :validation_failed}), do: {:error, :validation_failed}
   defp normalize_error({:error, :insufficient_data}), do: {:error, :insufficient_data}

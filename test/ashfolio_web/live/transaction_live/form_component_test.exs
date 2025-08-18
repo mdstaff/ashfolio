@@ -5,26 +5,15 @@ defmodule AshfolioWeb.TransactionLive.FormComponentTest do
   @moduletag :unit
   @moduletag :fast
   import Phoenix.LiveViewTest
-  alias Ashfolio.Portfolio.{User, Account, Symbol, Transaction}
+  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
   alias Ashfolio.FinancialManagement.TransactionCategory
 
   setup do
-    # Get or create default user
-    user =
-      case User.get_default_user() do
-        {:ok, [user]} ->
-          user
-
-        {:ok, []} ->
-          {:ok, user} = User.create(%{name: "Test User", currency: "USD", locale: "en-US"})
-          user
-      end
-
+    # Database-as-user architecture: No user entity needed
     # Create test account
     {:ok, account} =
       Account.create(%{
         name: "Test Investment Account",
-        user_id: user.id,
         account_type: :investment
       })
 
@@ -42,11 +31,10 @@ defmodule AshfolioWeb.TransactionLive.FormComponentTest do
       TransactionCategory.create(%{
         name: "Growth",
         color: "#22C55E",
-        user_id: user.id,
         is_system: false
       })
 
-    %{user: user, account: account, symbol: symbol, category: category}
+    %{account: account, symbol: symbol, category: category}
   end
 
   describe "new transaction form" do
@@ -109,7 +97,7 @@ defmodule AshfolioWeb.TransactionLive.FormComponentTest do
       # The actual symbol selection happens through autocomplete interaction
       assert html =~ "symbol-autocomplete"
       assert html =~ "Search symbols"
-      
+
       # The clear button and selected symbol display are conditional
       # and require actual symbol selection through the autocomplete component
       # This test verifies the form structure supports symbol selection
@@ -194,7 +182,7 @@ defmodule AshfolioWeb.TransactionLive.FormComponentTest do
       assert html =~ "symbol-autocomplete"
       assert html =~ "phx-change=\"search_input\""
       assert html =~ "phx-target"
-      
+
       # The form should be ready to receive symbol selection events
       assert html =~ "SymbolAutocomplete"
       assert html =~ "role=\"combobox\""
@@ -236,7 +224,7 @@ defmodule AshfolioWeb.TransactionLive.FormComponentTest do
       # The actual symbol creation happens through the autocomplete workflow
       assert html =~ "symbol-autocomplete"
       assert html =~ "Search symbols"
-      
+
       # The form should support any symbol input through the search field
       assert html =~ "placeholder=\"Search symbols (e.g., AAPL, Apple)\""
       assert html =~ "symbol_search"

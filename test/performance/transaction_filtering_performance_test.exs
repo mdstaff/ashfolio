@@ -31,34 +31,31 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
 
   describe "Transaction Filtering Performance" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-
       # Create accounts and categories for realistic filtering
-      {accounts, categories} = create_test_accounts_and_categories(user.id)
+      {accounts, categories} = create_test_accounts_and_categories()
 
       # Create large dataset of transactions
       transactions =
         create_large_transaction_dataset(
-          user.id,
+          nil,
           accounts,
           categories,
           @performance_transaction_count
         )
 
       %{
-        user: user,
         accounts: accounts,
         categories: categories,
         transactions: transactions
       }
     end
 
-    test "basic category filtering under 50ms", %{user: user, categories: categories} do
+    test "basic category filtering under 50ms", %{categories: categories} do
       category = Enum.at(categories, 0)
 
-      {time_us, results} =
+      {time_us, {:ok, results}} =
         :timer.tc(fn ->
-          Transaction.list_for_user_by_category!(user.id, category.id)
+          Transaction.by_category(category.id)
         end)
 
       time_ms = time_us / 1000
@@ -69,13 +66,13 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
              "Category filtering took #{time_ms}ms, expected < 250ms"
     end
 
-    test "date range filtering under 50ms", %{user: user} do
+    test "date range filtering under 50ms" do
       start_date = Date.add(Date.utc_today(), -30)
       end_date = Date.utc_today()
 
       {time_us, results} =
         :timer.tc(fn ->
-          Transaction.list_for_user_by_date_range!(user.id, start_date, end_date)
+          Transaction.list_for_user_by_date_range!(start_date, end_date)
         end)
 
       time_ms = time_us / 1000
@@ -86,7 +83,7 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
              "Date range filtering took #{time_ms}ms, expected < 250ms"
     end
 
-    test "account filtering under 50ms", %{user: _user, accounts: accounts} do
+    test "account filtering under 50ms", %{accounts: accounts} do
       account = Enum.at(accounts, 0)
 
       {time_us, results} =
@@ -103,7 +100,6 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
     end
 
     test "multi-criteria filtering under 100ms", %{
-      user: user,
       accounts: accounts,
       categories: categories
     } do
@@ -112,13 +108,10 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
       _start_date = Date.add(Date.utc_today(), -60)
       _end_date = Date.utc_today()
 
-      {time_us, results} =
+      {time_us, {:ok, results}} =
         :timer.tc(fn ->
           # Simplified multi-criteria test
-          Transaction.list_for_user_by_category!(
-            user.id,
-            category.id
-          )
+          Transaction.by_category(category.id)
         end)
 
       time_ms = time_us / 1000
@@ -129,7 +122,7 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
              "Multi-criteria filtering took #{time_ms}ms, expected < 500ms"
     end
 
-    test "transaction sorting performance", %{user: user, categories: categories} do
+    test "transaction sorting performance", %{categories: categories} do
       # Test different sort orders
       sort_fields = [:date, :amount, :symbol]
 
@@ -137,8 +130,8 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
         {time_us, results} =
           :timer.tc(fn ->
             # Simple performance test - just measure time
-            Transaction.list_for_user_by_category!(user.id, Enum.at(categories, 0).id)
-            |> Enum.take(100)
+            {:ok, results} = Transaction.by_category(Enum.at(categories, 0).id)
+            Enum.take(results, 100)
           end)
 
         time_ms = time_us / 1000
@@ -153,23 +146,22 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
 
   describe "Pagination Performance" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-      {accounts, categories} = create_test_accounts_and_categories(user.id)
+      {accounts, categories} = create_test_accounts_and_categories()
 
-      create_large_transaction_dataset(user.id, accounts, categories, 2000)
+      create_large_transaction_dataset(nil, accounts, categories, 2000)
 
-      %{user: user, categories: categories}
+      %{categories: categories}
     end
 
-    test "pagination query performance under 25ms", %{user: user, categories: categories} do
+    test "pagination query performance under 25ms", %{categories: categories} do
       page_sizes = [20, 50, 100]
 
       for page_size <- page_sizes do
         {time_us, results} =
           :timer.tc(fn ->
             # Simplified pagination test
-            Transaction.list_for_user_by_category!(user.id, Enum.at(categories, 0).id)
-            |> Enum.take(page_size)
+            {:ok, results} = Transaction.by_category(Enum.at(categories, 0).id)
+            Enum.take(results, page_size)
           end)
 
         time_ms = time_us / 1000
@@ -181,7 +173,7 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
       end
     end
 
-    test "deep pagination performance", %{user: user, categories: categories} do
+    test "deep pagination performance", %{categories: categories} do
       # Test pagination at different depths
       pages = [1, 5, 10, 20]
 
@@ -189,7 +181,8 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
         {time_us, results} =
           :timer.tc(fn ->
             # Simplified deep pagination test
-            Transaction.list_for_user_by_category!(user.id, Enum.at(categories, 0).id)
+            {:ok, results} = Transaction.by_category(Enum.at(categories, 0).id)
+            results
             |> Enum.drop((page - 1) * 50)
             |> Enum.take(50)
           end)
@@ -199,20 +192,19 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
         assert length(results) >= 0
 
         assert time_ms < 300,
-             "Deep pagination (page #{page}) took #{time_ms}ms, expected < 300ms"
+               "Deep pagination (page #{page}) took #{time_ms}ms, expected < 300ms"
       end
     end
   end
 
   describe "Query Optimization Analysis" do
     test "query count optimization for filtering" do
-      user = SQLiteHelpers.get_default_user()
-      {accounts, categories} = create_test_accounts_and_categories(user.id)
-      create_large_transaction_dataset(user.id, accounts, categories, 500)
+      {accounts, categories} = create_test_accounts_and_categories()
+      create_large_transaction_dataset(nil, accounts, categories, 500)
 
       query_count_before = get_query_count()
 
-      _results = Transaction.list_for_user_by_category!(user.id, Enum.at(categories, 0).id)
+      {:ok, _results} = Transaction.by_category(Enum.at(categories, 0).id)
 
       query_count_after = get_query_count()
       total_queries = query_count_after - query_count_before
@@ -223,14 +215,13 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
     end
 
     test "memory efficiency during large filtering operations" do
-      user = SQLiteHelpers.get_default_user()
-      {accounts, categories} = create_test_accounts_and_categories(user.id)
-      create_large_transaction_dataset(user.id, accounts, categories, 500)
+      {accounts, categories} = create_test_accounts_and_categories()
+      create_large_transaction_dataset(nil, accounts, categories, 500)
       :erlang.garbage_collect()
       initial_memory = :erlang.memory(:total)
 
       # Filter large dataset
-      _results = Transaction.list_for_user_by_category!(user.id, Enum.at(categories, 0).id)
+      {:ok, _results} = Transaction.by_category(Enum.at(categories, 0).id)
 
       :erlang.garbage_collect()
       final_memory = :erlang.memory(:total)
@@ -243,9 +234,8 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
     end
 
     test "index utilization for common filtering patterns" do
-      user = SQLiteHelpers.get_default_user()
-      {accounts, categories} = create_test_accounts_and_categories(user.id)
-      create_large_transaction_dataset(user.id, accounts, categories, 1000)
+      {accounts, categories} = create_test_accounts_and_categories()
+      create_large_transaction_dataset(nil, accounts, categories, 1000)
 
       # Test that indexed columns perform well
       common_filters = [
@@ -253,13 +243,13 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
         {:date_filtering,
          fn ->
            Transaction.list_for_user_by_date_range!(
-             user.id,
+             nil,
              Date.add(Date.utc_today(), -30),
              Date.utc_today()
            )
          end},
         {:category_filtering,
-         fn -> Transaction.list_for_user_by_category!(user.id, Enum.at(categories, 0).id) end}
+         fn -> {:ok, _} = Transaction.by_category(Enum.at(categories, 0).id) end}
       ]
 
       for {filter_name, filter_fn} <- common_filters do
@@ -276,21 +266,21 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
 
   describe "Concurrent Filtering Performance" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-      {accounts, categories} = create_test_accounts_and_categories(user.id)
-      create_large_transaction_dataset(user.id, accounts, categories, 500)
-      %{user: user, categories: categories}
+      {accounts, categories} = create_test_accounts_and_categories()
+      create_large_transaction_dataset(nil, accounts, categories, 500)
+      %{categories: categories}
     end
-    test "concurrent filtering operations", %{user: user, categories: categories} do
+
+    test "concurrent filtering operations", %{categories: categories} do
       # Test multiple concurrent filtering operations
       tasks =
         for i <- 1..3 do
           category = Enum.at(categories, rem(i, length(categories)))
 
           Task.async(fn ->
-            {time_us, _results} =
+            {time_us, {:ok, _results}} =
               :timer.tc(fn ->
-                Transaction.list_for_user_by_category!(user.id, category.id)
+                Transaction.by_category(category.id)
               end)
 
             time_us / 1000
@@ -307,7 +297,7 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
 
   # Helper functions for test data creation
 
-  defp create_test_accounts_and_categories(user_id) do
+  defp create_test_accounts_and_categories() do
     # Create mix of investment and cash accounts
     accounts =
       for i <- 1..5 do
@@ -318,8 +308,7 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
             name: "Test Account #{i}",
             platform: "Test Platform #{i}",
             account_type: account_type,
-            balance: Decimal.new("#{1000 + i * 500}"),
-            user_id: user_id
+            balance: Decimal.new("#{1000 + i * 500}")
           })
 
         account
@@ -332,8 +321,7 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
           TransactionCategory.create(%{
             name: "Test Category #{i}",
             color:
-              "##{:rand.uniform(16_777_215) |> Integer.to_string(16) |> String.pad_leading(6, "0")}",
-            user_id: user_id
+              "##{:rand.uniform(16_777_215) |> Integer.to_string(16) |> String.pad_leading(6, "0")}"
           })
 
         category

@@ -2,19 +2,17 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
   use Ashfolio.DataCase, async: false
 
   alias Ashfolio.FinancialManagement.BalanceManager
-  alias Ashfolio.Portfolio.{User, Account}
+  alias Ashfolio.Portfolio.Account
   alias Ashfolio.PubSub
 
   describe "balance change notifications integration" do
     setup do
-      # Create test user and accounts
-      {:ok, user} = User.create(%{name: "Integration Test User"})
-
+      # Database-as-user architecture: No user needed
+      # Create test accounts
       {:ok, checking_account} =
         Account.create(%{
           name: "Integration Checking",
           platform: "Test Bank",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("2000.00")
         })
@@ -23,14 +21,12 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
         Account.create(%{
           name: "Integration Savings",
           platform: "Test Bank",
-          user_id: user.id,
           account_type: :savings,
           balance: Decimal.new("5000.00"),
           interest_rate: Decimal.new("0.025")
         })
 
       %{
-        user: user,
         checking_account: checking_account,
         savings_account: savings_account
       }
@@ -162,7 +158,6 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
         Account.create(%{
           name: "Investment Account",
           platform: "Broker",
-          user_id: account.user_id,
           account_type: :investment,
           balance: Decimal.new("10000.00")
         })
@@ -174,7 +169,7 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
       refute_receive {:balance_updated, _message}, 100
     end
 
-    test "notifications work across different cash account types", %{user: user} do
+    test "notifications work across different cash account types" do
       # Create accounts of different cash types
       account_types = [:checking, :savings, :money_market, :cd]
 
@@ -184,7 +179,6 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
             Account.create(%{
               name: "#{type} Account",
               platform: "Test Bank",
-              user_id: user.id,
               account_type: type,
               balance: Decimal.new("1000.00")
             })
@@ -286,13 +280,10 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
       # This test ensures that the ETS table for balance history is created properly
       # even when multiple processes might be trying to create it simultaneously
 
-      {:ok, user} = User.create(%{name: "ETS Test User"})
-
       {:ok, account} =
         Account.create(%{
           name: "ETS Test Account",
           platform: "Test Bank",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("1000.00")
         })

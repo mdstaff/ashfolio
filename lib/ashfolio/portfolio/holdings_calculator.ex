@@ -24,13 +24,13 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
 
   ## Examples
 
-      iex> HoldingsCalculator.calculate_holding_values(user_id)
+      iex> HoldingsCalculator.calculate_holding_values()
       {:ok, [%{symbol: "AAPL", quantity: %Decimal{}, current_value: %Decimal{}, cost_basis: %Decimal{}}]}
   """
-  def calculate_holding_values(_user_id \\ nil) do
+  def calculate_holding_values() do
     Logger.debug("Calculating holding values")
 
-    with {:ok, holdings_data} <- get_holdings_data(nil) do
+    with {:ok, holdings_data} <- get_holdings_data() do
       holdings_with_values =
         holdings_data
         |> Enum.map(&calculate_individual_holding_value/1)
@@ -52,10 +52,10 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
 
   ## Examples
 
-      iex> HoldingsCalculator.calculate_cost_basis(user_id, symbol_id)
+      iex> HoldingsCalculator.calculate_cost_basis(symbol_id)
       {:ok, %{total_cost: %Decimal{}, average_cost: %Decimal{}, quantity: %Decimal{}}}
   """
-  def calculate_cost_basis(symbol_id, _user_id \\ nil) when is_binary(symbol_id) do
+  def calculate_cost_basis(symbol_id) when is_binary(symbol_id) do
     Logger.debug("Calculating cost basis for symbol: #{symbol_id}")
 
     case get_symbol_transactions(symbol_id) do
@@ -77,11 +77,10 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
 
   ## Examples
 
-      iex> HoldingsCalculator.calculate_holding_pnl(user_id, symbol_id)
+      iex> HoldingsCalculator.calculate_holding_pnl(symbol_id)
       {:ok, %{unrealized_pnl: %Decimal{}, unrealized_pnl_pct: %Decimal{}, current_value: %Decimal{}}}
   """
-  def calculate_holding_pnl(symbol_id, _user_id \\ nil)
-      when is_binary(symbol_id) do
+  def calculate_holding_pnl(symbol_id) when is_binary(symbol_id) do
     Logger.debug("Calculating P&L for symbol: #{symbol_id}")
 
     with {:ok, cost_basis_data} <- calculate_cost_basis(symbol_id),
@@ -133,10 +132,10 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
 
   ## Examples
 
-      iex> HoldingsCalculator.aggregate_portfolio_value(user_id)
+      iex> HoldingsCalculator.aggregate_portfolio_value()
       {:ok, %Decimal{}}
   """
-  def aggregate_portfolio_value(_user_id \\ nil) do
+  def aggregate_portfolio_value() do
     Logger.debug("Aggregating portfolio value")
 
     case calculate_holding_values() do
@@ -160,7 +159,7 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
 
   Returns comprehensive holdings data including values, cost basis, and P&L.
   """
-  def get_holdings_summary(_user_id \\ nil) do
+  def get_holdings_summary() do
     Logger.debug("Getting holdings summary")
 
     with {:ok, holdings} <- calculate_holding_values(),
@@ -204,7 +203,7 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
 
   # Private functions
 
-  defp get_holdings_data(_user_id) do
+  defp get_holdings_data() do
     try do
       case Account.list() do
         {:ok, accounts} ->

@@ -3,23 +3,20 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponentTest do
 
   import Phoenix.LiveViewTest
 
-  alias Ashfolio.Portfolio.{User, Account}
+  alias Ashfolio.Portfolio.Account
   alias Ashfolio.Context
   alias AshfolioWeb.AccountLive.BalanceUpdateComponent
 
   describe "Balance Update Component" do
     setup do
-      # Create a test user
-      {:ok, user} = User.create(%{name: "Test User", currency: "USD", locale: "en-US"})
-
+      # Database-as-user architecture: No user entity needed
       # Create a cash account for testing
       {:ok, cash_account} =
         Account.create(%{
           name: "Test Savings Account",
           platform: "Test Bank",
           account_type: :savings,
-          balance: Decimal.new("1000.00"),
-          user_id: user.id
+          balance: Decimal.new("1000.00")
         })
 
       # Create an investment account for negative balance testing
@@ -28,12 +25,10 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponentTest do
           name: "Test Investment Account",
           platform: "Test Broker",
           account_type: :investment,
-          balance: Decimal.new("5000.00"),
-          user_id: user.id
+          balance: Decimal.new("5000.00")
         })
 
       %{
-        user: user,
         cash_account: cash_account,
         investment_account: investment_account
       }

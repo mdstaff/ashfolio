@@ -10,17 +10,11 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
   alias Ashfolio.Portfolio.Transaction
   alias Ashfolio.SQLiteHelpers
 
-  # Helper function to create user - use global setup
-  defp create_test_user(_attrs \\ %{}) do
-    # Use the global user from SQLiteHelpers, ignore custom attrs for consistency
-    {:ok, SQLiteHelpers.get_default_user()}
-  end
 
   describe "calculate_portfolio_value/1" do
     test "calculates total portfolio value correctly" do
       # Create test data
-      {:ok, user} = create_test_user()
-      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
+      account = SQLiteHelpers.get_or_create_account(%{name: "Test Account"})
 
       symbol1 =
         SQLiteHelpers.get_or_create_symbol("AAPL", %{
@@ -56,27 +50,24 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
         })
 
       # Calculate portfolio value
-      {:ok, portfolio_value} = Calculator.calculate_portfolio_value(user.id)
+      {:ok, portfolio_value} = Calculator.calculate_portfolio_value()
 
       # Expected: 10 * $150 + 5 * $300 = $1500 + $1500 = $3000
       expected_value = Decimal.new("3000.00")
       assert Decimal.equal?(portfolio_value, expected_value)
     end
 
-    test "returns zero for user with no holdings" do
-      {:ok, user} = create_test_user(%{name: "Empty User"})
-
-      {:ok, portfolio_value} = Calculator.calculate_portfolio_value(user.id)
+    test "returns zero for database with no holdings" do
+      {:ok, portfolio_value} = Calculator.calculate_portfolio_value()
 
       assert Decimal.equal?(portfolio_value, Decimal.new(0))
     end
 
     test "excludes excluded accounts from calculation" do
-      {:ok, user} = create_test_user()
-      active_account = SQLiteHelpers.get_or_create_account(user, %{name: "Active Account"})
+      active_account = SQLiteHelpers.get_or_create_account(%{name: "Active Account"})
 
       excluded_account =
-        SQLiteHelpers.get_or_create_account(user, %{name: "Excluded Account", is_excluded: true})
+        SQLiteHelpers.get_or_create_account(%{name: "Excluded Account", is_excluded: true})
 
       symbol =
         SQLiteHelpers.get_or_create_symbol("AAPL", %{
@@ -107,7 +98,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
           symbol_id: symbol.id
         })
 
-      {:ok, portfolio_value} = Calculator.calculate_portfolio_value(user.id)
+      {:ok, portfolio_value} = Calculator.calculate_portfolio_value()
 
       # Should only include active account: 10 * $150 = $1500
       expected_value = Decimal.new("1500.00")
@@ -162,8 +153,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
   describe "calculate_position_returns/1" do
     test "calculates individual position returns" do
       # Create test data
-      {:ok, user} = create_test_user()
-      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
+      account = SQLiteHelpers.get_or_create_account(%{name: "Test Account"})
 
       symbol1 =
         SQLiteHelpers.get_or_create_symbol("AAPL", %{
@@ -198,7 +188,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
           symbol_id: symbol2.id
         })
 
-      {:ok, positions} = Calculator.calculate_position_returns(user.id)
+      {:ok, positions} = Calculator.calculate_position_returns()
 
       assert length(positions) == 2
 
@@ -224,8 +214,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "filters out positions with zero quantity" do
-      {:ok, user} = create_test_user()
-      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
+      account = SQLiteHelpers.get_or_create_account(%{name: "Test Account"})
 
       symbol =
         SQLiteHelpers.get_or_create_symbol("AAPL", %{
@@ -255,7 +244,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
           symbol_id: symbol.id
         })
 
-      {:ok, positions} = Calculator.calculate_position_returns(user.id)
+      {:ok, positions} = Calculator.calculate_position_returns()
 
       # Should have no positions since quantity is zero
       assert length(positions) == 0
@@ -265,8 +254,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
   describe "calculate_total_return/1" do
     test "calculates total portfolio return summary" do
       # Create test data
-      {:ok, user} = create_test_user()
-      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
+      account = SQLiteHelpers.get_or_create_account(%{name: "Test Account"})
 
       symbol =
         SQLiteHelpers.get_or_create_symbol("AAPL", %{
@@ -284,7 +272,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
           symbol_id: symbol.id
         })
 
-      {:ok, summary} = Calculator.calculate_total_return(user.id)
+      {:ok, summary} = Calculator.calculate_total_return()
 
       # 10 * $150
       assert Decimal.equal?(summary.total_value, Decimal.new("1500.00"))
@@ -296,9 +284,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles portfolio with no holdings" do
-      {:ok, user} = create_test_user(%{name: "Empty User"})
-
-      {:ok, summary} = Calculator.calculate_total_return(user.id)
+      {:ok, summary} = Calculator.calculate_total_return()
 
       assert Decimal.equal?(summary.total_value, Decimal.new(0))
       assert Decimal.equal?(summary.cost_basis, Decimal.new(0))
@@ -307,8 +293,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles mixed gains and losses across positions" do
-      {:ok, user} = create_test_user()
-      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
+      account = SQLiteHelpers.get_or_create_account(%{name: "Test Account"})
 
       # Winning position
       winner =
@@ -346,7 +331,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
           symbol_id: loser.id
         })
 
-      {:ok, summary} = Calculator.calculate_total_return(user.id)
+      {:ok, summary} = Calculator.calculate_total_return()
 
       # Total value: 10 * $200 + 10 * $50 = $2000 + $500 = $2500
       assert Decimal.equal?(summary.total_value, Decimal.new("2500.00"))
@@ -359,8 +344,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles symbols with no current price" do
-      {:ok, user} = create_test_user()
-      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
+      account = SQLiteHelpers.get_or_create_account(%{name: "Test Account"})
 
       symbol =
         SQLiteHelpers.get_or_create_symbol("NOPRICE", %{
@@ -379,7 +363,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
           symbol_id: symbol.id
         })
 
-      {:ok, summary} = Calculator.calculate_total_return(user.id)
+      {:ok, summary} = Calculator.calculate_total_return()
 
       # No price means $0 current value
       assert Decimal.equal?(summary.total_value, Decimal.new("0.00"))
@@ -391,8 +375,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles complex transaction history with multiple buys and sells" do
-      {:ok, user} = create_test_user()
-      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
+      account = SQLiteHelpers.get_or_create_account(%{name: "Test Account"})
 
       symbol =
         SQLiteHelpers.get_or_create_symbol("COMPLEX", %{
@@ -435,7 +418,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
           symbol_id: symbol.id
         })
 
-      {:ok, summary} = Calculator.calculate_total_return(user.id)
+      {:ok, summary} = Calculator.calculate_total_return()
 
       # Current holdings: 20 - 5 + 10 = 25 shares
       # Current value: 25 * $120 = $3000
@@ -455,37 +438,18 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
   end
 
   describe "error handling" do
-    test "handles invalid user ID gracefully" do
-      # Use a UUID that doesn't exist
-      invalid_user_id = Ecto.UUID.generate()
 
-      {:ok, portfolio_value} = Calculator.calculate_portfolio_value(invalid_user_id)
-      assert Decimal.equal?(portfolio_value, Decimal.new(0))
+    test "handles empty portfolio gracefully" do
+      # Database-as-user architecture: functions handle empty database gracefully
+      # This test verifies the functions return appropriate zero values
+      assert {:ok, portfolio_value} = Calculator.calculate_portfolio_value()
+      assert Decimal.equal?(portfolio_value, Decimal.new("0.00"))
 
-      {:ok, positions} = Calculator.calculate_position_returns(invalid_user_id)
-      assert positions == []
+      assert {:ok, position_returns} = Calculator.calculate_position_returns()
+      assert position_returns == []
 
-      {:ok, summary} = Calculator.calculate_total_return(invalid_user_id)
-      assert Decimal.equal?(summary.total_value, Decimal.new(0))
-      assert Decimal.equal?(summary.cost_basis, Decimal.new(0))
-      assert Decimal.equal?(summary.return_percentage, Decimal.new(0))
-      assert Decimal.equal?(summary.dollar_return, Decimal.new(0))
-    end
-
-    test "handles nil user ID gracefully" do
-      # Calculator functions should handle nil gracefully by returning default values
-      # This test verifies the functions don't crash with nil input
-      assert_raise FunctionClauseError, fn ->
-        Calculator.calculate_portfolio_value(nil)
-      end
-
-      assert_raise FunctionClauseError, fn ->
-        Calculator.calculate_position_returns(nil)
-      end
-
-      assert_raise FunctionClauseError, fn ->
-        Calculator.calculate_total_return(nil)
-      end
+      assert {:ok, total_return} = Calculator.calculate_total_return()
+      assert Decimal.equal?(total_return.total_value, Decimal.new("0.00"))
     end
   end
 
@@ -502,8 +466,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles dividend transactions in portfolio calculations" do
-      {:ok, user} = create_test_user()
-      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
+      account = SQLiteHelpers.get_or_create_account(%{name: "Test Account"})
 
       symbol =
         SQLiteHelpers.get_or_create_symbol("DIVSTOCK", %{
@@ -534,7 +497,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
           symbol_id: symbol.id
         })
 
-      {:ok, summary} = Calculator.calculate_total_return(user.id)
+      {:ok, summary} = Calculator.calculate_total_return()
 
       # Dividend doesn't affect current value calculation for buy/sell positions
       assert Decimal.equal?(summary.total_value, Decimal.new("1000.00"))
@@ -544,8 +507,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles fee transactions in portfolio calculations" do
-      {:ok, user} = create_test_user()
-      account = SQLiteHelpers.get_or_create_account(user, %{name: "Test Account"})
+      account = SQLiteHelpers.get_or_create_account(%{name: "Test Account"})
 
       symbol =
         SQLiteHelpers.get_or_create_symbol("FEESTOCK", %{
@@ -576,7 +538,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
           symbol_id: symbol.id
         })
 
-      {:ok, summary} = Calculator.calculate_total_return(user.id)
+      {:ok, summary} = Calculator.calculate_total_return()
 
       # Fee doesn't affect current value calculation
       assert Decimal.equal?(summary.total_value, Decimal.new("1000.00"))
@@ -587,20 +549,9 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
   end
 
   describe "error handling and edge cases" do
-    test "handles Account.accounts_for_user/1 errors gracefully" do
-      invalid_user_id = Ecto.UUID.generate()
-
-      # This should handle the error gracefully and return empty results
-      {:ok, portfolio_value} = Calculator.calculate_portfolio_value(invalid_user_id)
-      assert Decimal.equal?(portfolio_value, Decimal.new(0))
-
-      {:ok, position_returns} = Calculator.calculate_position_returns(invalid_user_id)
-      assert position_returns == []
-    end
 
     test "handles zero cost basis in calculations" do
-      user = SQLiteHelpers.get_default_user()
-      account = SQLiteHelpers.get_or_create_account(user, %{name: "Edge Case Account"})
+      account = SQLiteHelpers.get_or_create_account(%{name: "Edge Case Account"})
 
       symbol =
         SQLiteHelpers.get_or_create_symbol("ZERO", %{
@@ -619,7 +570,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
           symbol_id: symbol.id
         })
 
-      {:ok, position_returns} = Calculator.calculate_position_returns(user.id)
+      {:ok, position_returns} = Calculator.calculate_position_returns()
       assert length(position_returns) > 0
 
       zero_cost_position = Enum.find(position_returns, fn p -> p.symbol == "ZERO" end)
@@ -629,8 +580,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles extremely small decimal quantities" do
-      user = SQLiteHelpers.get_default_user()
-      account = SQLiteHelpers.get_or_create_account(user, %{name: "Micro Account"})
+      account = SQLiteHelpers.get_or_create_account(%{name: "Micro Account"})
 
       symbol =
         SQLiteHelpers.get_or_create_symbol("MICRO", %{
@@ -649,15 +599,14 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
           symbol_id: symbol.id
         })
 
-      {:ok, position_returns} = Calculator.calculate_position_returns(user.id)
+      {:ok, position_returns} = Calculator.calculate_position_returns()
       micro_position = Enum.find(position_returns, fn p -> p.symbol == "MICRO" end)
       assert micro_position != nil
       assert Decimal.equal?(micro_position.quantity, Decimal.new("0.000001"))
     end
 
     test "handles extremely large positions" do
-      user = SQLiteHelpers.get_default_user()
-      account = SQLiteHelpers.get_or_create_account(user, %{name: "Whale Account"})
+      account = SQLiteHelpers.get_or_create_account(%{name: "Whale Account"})
 
       symbol =
         SQLiteHelpers.get_or_create_symbol("WHALE", %{
@@ -676,15 +625,14 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
           symbol_id: symbol.id
         })
 
-      {:ok, position_returns} = Calculator.calculate_position_returns(user.id)
+      {:ok, position_returns} = Calculator.calculate_position_returns()
       whale_position = Enum.find(position_returns, fn p -> p.symbol == "WHALE" end)
       assert whale_position != nil
       assert Decimal.equal?(whale_position.current_value, Decimal.new("1000000000.00"))
     end
 
     test "handles accounts with only non-buy/sell transactions" do
-      user = SQLiteHelpers.get_default_user()
-      account = SQLiteHelpers.get_or_create_account(user, %{name: "Dividend Account"})
+      account = SQLiteHelpers.get_or_create_account(%{name: "Dividend Account"})
 
       symbol =
         SQLiteHelpers.get_or_create_symbol("DIVONLY", %{
@@ -703,15 +651,14 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
           symbol_id: symbol.id
         })
 
-      {:ok, position_returns} = Calculator.calculate_position_returns(user.id)
+      {:ok, position_returns} = Calculator.calculate_position_returns()
       # Should not include dividend-only positions
       div_position = Enum.find(position_returns, fn p -> p.symbol == "DIVONLY" end)
       assert div_position == nil
     end
 
     test "handles negative holdings from overselling" do
-      user = SQLiteHelpers.get_default_user()
-      account = SQLiteHelpers.get_or_create_account(user, %{name: "Short Account"})
+      account = SQLiteHelpers.get_or_create_account(%{name: "Short Account"})
 
       symbol =
         SQLiteHelpers.get_or_create_symbol("SHORT", %{
@@ -742,7 +689,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
           symbol_id: symbol.id
         })
 
-      {:ok, position_returns} = Calculator.calculate_position_returns(user.id)
+      {:ok, position_returns} = Calculator.calculate_position_returns()
       short_position = Enum.find(position_returns, fn p -> p.symbol == "SHORT" end)
       assert short_position != nil
       assert Decimal.equal?(short_position.quantity, Decimal.new("-50"))
@@ -751,8 +698,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "handles multiple partial sells across lots" do
-      user = SQLiteHelpers.get_default_user()
-      account = SQLiteHelpers.get_or_create_account(user, %{name: "Complex Account"})
+      account = SQLiteHelpers.get_or_create_account(%{name: "Complex Account"})
 
       symbol =
         SQLiteHelpers.get_or_create_symbol("COMPLEX2", %{
@@ -804,7 +750,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
           symbol_id: symbol.id
         })
 
-      {:ok, position_returns} = Calculator.calculate_position_returns(user.id)
+      {:ok, position_returns} = Calculator.calculate_position_returns()
       complex_position = Enum.find(position_returns, fn p -> p.symbol == "COMPLEX2" end)
       assert complex_position != nil
       assert Decimal.equal?(complex_position.quantity, Decimal.new("50"))
@@ -814,8 +760,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
     end
 
     test "calculates total returns correctly with mixed scenarios" do
-      user = SQLiteHelpers.get_default_user()
-      account = SQLiteHelpers.get_or_create_account(user, %{name: "Mixed Account"})
+      account = SQLiteHelpers.get_or_create_account(%{name: "Mixed Account"})
 
       # Create multiple symbols with different scenarios
       symbols_data = [
@@ -843,12 +788,12 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
           })
       end
 
-      {:ok, total_returns} = Calculator.calculate_total_return(user.id)
+      {:ok, total_returns} = Calculator.calculate_total_return()
       assert total_returns.dollar_return != nil
       assert total_returns.return_percentage != nil
 
       # Should have mixed P&L from winners and losers
-      {:ok, portfolio_value} = Calculator.calculate_portfolio_value(user.id)
+      {:ok, portfolio_value} = Calculator.calculate_portfolio_value()
       assert Decimal.compare(portfolio_value, Decimal.new(0)) == :gt
     end
   end

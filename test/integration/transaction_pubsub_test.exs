@@ -17,8 +17,8 @@ defmodule AshfolioWeb.Integration.TransactionPubSubTest do
   describe "transaction PubSub integration" do
     test "dashboard subscribes to transaction events and updates portfolio data", %{conn: conn} do
       # Setup: Use global test data
-      user = SQLiteHelpers.get_default_user()
-      _account = SQLiteHelpers.get_default_account(user)
+
+      _account = SQLiteHelpers.get_default_account()
       _symbol = SQLiteHelpers.get_common_symbol("AAPL")
 
       # Navigate to dashboard - this should subscribe to transaction events
@@ -37,12 +37,12 @@ defmodule AshfolioWeb.Integration.TransactionPubSubTest do
 
     test "dashboard handles transaction_deleted PubSub events", %{conn: conn} do
       # Setup: Use global test data with existing transaction
-      user = SQLiteHelpers.get_default_user()
-      account = SQLiteHelpers.get_default_account(user)
+
+      account = SQLiteHelpers.get_default_account()
       symbol = SQLiteHelpers.get_common_symbol("AAPL")
 
       {:ok, transaction} =
-        create_local_transaction(user, account, symbol, %{
+        create_local_transaction(nil, account, symbol, %{
           type: :buy,
           quantity: Decimal.new("100"),
           price: Decimal.new("150.00")
@@ -60,8 +60,8 @@ defmodule AshfolioWeb.Integration.TransactionPubSubTest do
 
     test "transaction creation broadcasts PubSub event", %{conn: conn} do
       # Setup: Use global test data
-      user = SQLiteHelpers.get_default_user()
-      account = SQLiteHelpers.get_default_account(user)
+
+      account = SQLiteHelpers.get_default_account()
       symbol = SQLiteHelpers.get_common_symbol("AAPL")
 
       # Subscribe to transaction events to verify broadcasting
@@ -104,12 +104,12 @@ defmodule AshfolioWeb.Integration.TransactionPubSubTest do
 
     test "transaction deletion broadcasts PubSub event", %{conn: conn} do
       # Setup: Use global test data with existing transaction
-      user = SQLiteHelpers.get_default_user()
-      account = SQLiteHelpers.get_default_account(user)
+
+      account = SQLiteHelpers.get_default_account()
       symbol = SQLiteHelpers.get_common_symbol("AAPL")
 
       {:ok, transaction} =
-        create_local_transaction(user, account, symbol, %{
+        create_local_transaction(nil, account, symbol, %{
           type: :buy,
           quantity: Decimal.new("100"),
           price: Decimal.new("150.00")

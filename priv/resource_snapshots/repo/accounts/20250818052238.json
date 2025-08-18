@@ -24,7 +24,7 @@
       "default": "nil",
       "size": null,
       "type": "text",
-      "source": "color",
+      "source": "platform",
       "references": null,
       "allow_nil?": true,
       "generated?": false,
@@ -33,10 +33,70 @@
     {
       "default": "nil",
       "size": null,
-      "type": "boolean",
-      "source": "is_system",
+      "type": "text",
+      "source": "currency",
       "references": null,
       "allow_nil?": false,
+      "generated?": false,
+      "primary_key?": false
+    },
+    {
+      "default": "nil",
+      "size": null,
+      "type": "boolean",
+      "source": "is_excluded",
+      "references": null,
+      "allow_nil?": false,
+      "generated?": false,
+      "primary_key?": false
+    },
+    {
+      "default": "nil",
+      "size": null,
+      "type": "decimal",
+      "source": "balance",
+      "references": null,
+      "allow_nil?": false,
+      "generated?": false,
+      "primary_key?": false
+    },
+    {
+      "default": "nil",
+      "size": null,
+      "type": "utc_datetime",
+      "source": "balance_updated_at",
+      "references": null,
+      "allow_nil?": true,
+      "generated?": false,
+      "primary_key?": false
+    },
+    {
+      "default": "nil",
+      "size": null,
+      "type": "text",
+      "source": "account_type",
+      "references": null,
+      "allow_nil?": false,
+      "generated?": false,
+      "primary_key?": false
+    },
+    {
+      "default": "nil",
+      "size": null,
+      "type": "decimal",
+      "source": "interest_rate",
+      "references": null,
+      "allow_nil?": true,
+      "generated?": false,
+      "primary_key?": false
+    },
+    {
+      "default": "nil",
+      "size": null,
+      "type": "decimal",
+      "source": "minimum_balance",
+      "references": null,
+      "allow_nil?": true,
       "generated?": false,
       "primary_key?": false
     },
@@ -59,70 +119,20 @@
       "allow_nil?": false,
       "generated?": false,
       "primary_key?": false
-    },
-    {
-      "default": "nil",
-      "size": null,
-      "type": "uuid",
-      "source": "user_id",
-      "references": {
-        "name": "transaction_categories_user_id_fkey",
-        "table": "users",
-        "destination_attribute": "id",
-        "on_delete": null,
-        "primary_key?": true,
-        "multitenancy": {
-          "global": null,
-          "attribute": null,
-          "strategy": null
-        },
-        "on_update": null,
-        "deferrable": false,
-        "destination_attribute_default": null,
-        "destination_attribute_generated": null
-      },
-      "allow_nil?": false,
-      "generated?": false,
-      "primary_key?": false
-    },
-    {
-      "default": "nil",
-      "size": null,
-      "type": "uuid",
-      "source": "parent_category_id",
-      "references": {
-        "name": "transaction_categories_parent_category_id_fkey",
-        "table": "transaction_categories",
-        "destination_attribute": "id",
-        "on_delete": null,
-        "primary_key?": true,
-        "multitenancy": {
-          "global": null,
-          "attribute": null,
-          "strategy": null
-        },
-        "on_update": null,
-        "deferrable": false,
-        "destination_attribute_default": null,
-        "destination_attribute_generated": null
-      },
-      "allow_nil?": true,
-      "generated?": false,
-      "primary_key?": false
     }
   ],
-  "table": "transaction_categories",
-  "hash": "2513B5EBE6884A808749B84868B82F3282E0B15A1303DEA88FA91145C2717A4D",
+  "table": "accounts",
+  "hash": "4B9E20A1F8838BC2C5E3F13D39D7304E9B60CB45DC0B25A37B0168A1AFA45847",
   "repo": "Elixir.Ashfolio.Repo",
   "strict?": false,
+  "identities": [],
   "multitenancy": {
     "global": null,
     "attribute": null,
     "strategy": null
   },
-  "identities": [],
-  "custom_indexes": [],
   "base_filter": null,
+  "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true
 }

@@ -16,7 +16,7 @@ defmodule Ashfolio.PerformanceMonitor do
 
   ## Examples
       PerformanceMonitor.time_query("portfolio_calculation", fn ->
-        Calculator.calculate_portfolio_value(user_id)
+        Calculator.calculate_portfolio_value()
       end)
   """
   def time_query(operation_name, query_fun) do

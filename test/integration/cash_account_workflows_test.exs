@@ -16,24 +16,18 @@ defmodule Ashfolio.Integration.CashAccountWorkflowsTest do
   @moduletag :v0_2_0
 
   alias Ashfolio.Context
-  alias Ashfolio.Portfolio.{User, Account}
+  alias Ashfolio.Portfolio.Account
   alias Ashfolio.FinancialManagement.BalanceManager
   alias Phoenix.PubSub
 
   describe "complete cash account lifecycle" do
     setup do
-      {:ok, user} =
-        User.create(%{
-          name: "Cash Account Test User",
-          currency: "USD",
-          locale: "en-US"
-        })
-
-      {:ok, user: user}
+      # Database-as-user architecture: No user entity needed
+      :ok
     end
 
     test "create cash account → update balance → view history → calculate net worth", %{
-      user: user
+      
     } do
       # Step 1: Create a checking account
       {:ok, checking_account} =
@@ -41,7 +35,6 @@ defmodule Ashfolio.Integration.CashAccountWorkflowsTest do
           name: "Main Checking",
           account_type: :checking,
           currency: "USD",
-          user_id: user.id,
           balance: Decimal.new("5000.00")
         })
 
@@ -66,22 +59,22 @@ defmodule Ashfolio.Integration.CashAccountWorkflowsTest do
       assert recent_update.notes == "Monthly salary deposit"
       assert Decimal.equal?(recent_update.new_balance, Decimal.new("5500.00"))
 
-      # Step 4: Calculate net worth including cash account
-      {:ok, net_worth_data} = Context.get_net_worth(user.id)
+      # Step 4: Calculate net worth including cash account (includes global test account $10,000)
+      {:ok, net_worth_data} = Context.get_net_worth()
 
       assert Decimal.equal?(net_worth_data.cash_balance, Decimal.new("5500.00"))
-      assert Decimal.equal?(net_worth_data.total_net_worth, Decimal.new("5500.00"))
+      assert Decimal.equal?(net_worth_data.investment_value, Decimal.new("10000.00"))
+      assert Decimal.equal?(net_worth_data.total_net_worth, Decimal.new("15500.00"))
       assert net_worth_data.breakdown.cash_accounts == 1
     end
 
-    test "multiple cash accounts with different types (checking, savings, CD)", %{user: user} do
+    test "multiple cash accounts with different types (checking, savings, CD)" do
       # Create multiple cash account types
       {:ok, checking} =
         Account.create(%{
           name: "Checking Account",
           account_type: :checking,
           currency: "USD",
-          user_id: user.id,
           balance: Decimal.new("3000.00")
         })
 
@@ -90,7 +83,6 @@ defmodule Ashfolio.Integration.CashAccountWorkflowsTest do
           name: "High Yield Savings",
           account_type: :savings,
           currency: "USD",
-          user_id: user.id,
           balance: Decimal.new("10000.00"),
           interest_rate: Decimal.new("4.5")
         })
@@ -100,7 +92,6 @@ defmodule Ashfolio.Integration.CashAccountWorkflowsTest do
           name: "12-Month CD",
           account_type: :cd,
           currency: "USD",
-          user_id: user.id,
           balance: Decimal.new("25000.00"),
           interest_rate: Decimal.new("5.0"),
           minimum_balance: Decimal.new("25000.00")
@@ -115,15 +106,16 @@ defmodule Ashfolio.Integration.CashAccountWorkflowsTest do
       assert Decimal.equal?(cd_account.minimum_balance, Decimal.new("25000.00"))
 
       # Calculate total cash balance across all accounts
-      {:ok, net_worth} = Context.get_net_worth(user.id)
+      {:ok, net_worth} = Context.get_net_worth()
 
-      # 3000 + 10000 + 25000
+      # 3000 + 10000 + 25000 = 38000 cash, plus global $10,000 investment
       expected_total = Decimal.new("38000.00")
       assert Decimal.equal?(net_worth.cash_balance, expected_total)
       assert net_worth.breakdown.cash_accounts == 3
+      assert Decimal.equal?(net_worth.investment_value, Decimal.new("10000.00"))
 
       # Verify accounts are categorized correctly
-      {:ok, dashboard_data} = Context.get_user_dashboard_data(user.id)
+      {:ok, dashboard_data} = Context.get_dashboard_data()
 
       assert length(dashboard_data.accounts.cash) == 3
 
@@ -133,10 +125,10 @@ defmodule Ashfolio.Integration.CashAccountWorkflowsTest do
     end
 
     @tag :skip
-    test "cash balance updates trigger PubSub notifications", %{user: user} do
+    test "cash balance updates trigger PubSub notifications" do
       # TODO: PubSub functionality needs implementation
       # Subscribe to balance update notifications
-      topic = "balance_updates:#{user.id}"
+      topic = "balance_updates:"
       PubSub.subscribe(Ashfolio.PubSub, topic)
 
       # Create cash account
@@ -145,7 +137,6 @@ defmodule Ashfolio.Integration.CashAccountWorkflowsTest do
           name: "Notification Test Account",
           account_type: :savings,
           currency: "USD",
-          user_id: user.id,
           balance: Decimal.new("1000.00")
         })
 
@@ -166,14 +157,13 @@ defmodule Ashfolio.Integration.CashAccountWorkflowsTest do
       assert payload.notes == "Test deposit"
     end
 
-    test "cash accounts excluded from net worth when toggled", %{user: user} do
+    test "cash accounts excluded from net worth when toggled" do
       # Create included and excluded cash accounts
       {:ok, included_account} =
         Account.create(%{
           name: "Included Savings",
           account_type: :savings,
           currency: "USD",
-          user_id: user.id,
           balance: Decimal.new("5000.00"),
           is_excluded: false
         })
@@ -183,42 +173,43 @@ defmodule Ashfolio.Integration.CashAccountWorkflowsTest do
           name: "Excluded Checking",
           account_type: :checking,
           currency: "USD",
-          user_id: user.id,
           balance: Decimal.new("2000.00"),
           is_excluded: true
         })
 
       # Calculate net worth
-      {:ok, net_worth} = Context.get_net_worth(user.id)
+      {:ok, net_worth} = Context.get_net_worth()
 
-      # Only included account should count
+      # Only included account should count (plus global test account)
       assert Decimal.equal?(net_worth.cash_balance, Decimal.new("5000.00"))
+      assert Decimal.equal?(net_worth.investment_value, Decimal.new("10000.00"))
       # Only counts non-excluded
       assert net_worth.breakdown.cash_accounts == 1
 
       # Toggle exclusion status
       {:ok, _updated} = Account.update(excluded_account, %{is_excluded: false})
-      {:ok, updated_net_worth} = Context.get_net_worth(user.id)
+      {:ok, updated_net_worth} = Context.get_net_worth()
 
-      # Both accounts should now count
+      # Both accounts should now count (plus global test account)
       assert Decimal.equal?(updated_net_worth.cash_balance, Decimal.new("7000.00"))
+      assert updated_net_worth.breakdown.cash_accounts == 2
 
       # Toggle inclusion account to excluded
       {:ok, _updated} = Account.update(included_account, %{is_excluded: true})
-      {:ok, final_net_worth} = Context.get_net_worth(user.id)
+      {:ok, final_net_worth} = Context.get_net_worth()
 
-      # Only the previously excluded account counts now
+      # Only the previously excluded account counts now (plus global test account)
       assert Decimal.equal?(final_net_worth.cash_balance, Decimal.new("2000.00"))
+      assert final_net_worth.breakdown.cash_accounts == 1
     end
 
-    test "cash account balance updates with validation", %{user: user} do
+    test "cash account balance updates with validation" do
       # Create a savings account with minimum balance
       {:ok, savings} =
         Account.create(%{
           name: "Minimum Balance Savings",
           account_type: :savings,
           currency: "USD",
-          user_id: user.id,
           balance: Decimal.new("1000.00"),
           minimum_balance: Decimal.new("500.00")
         })
@@ -256,28 +247,20 @@ defmodule Ashfolio.Integration.CashAccountWorkflowsTest do
 
   describe "cross-domain cash and investment integration" do
     setup do
-      {:ok, user} =
-        User.create(%{
-          name: "Mixed Portfolio User",
-          currency: "USD",
-          locale: "en-US"
-        })
-
+      # Database-as-user architecture: No user entity needed
       # Create an investment account for mixed testing
       {:ok, investment_account} =
         Account.create(%{
           name: "Brokerage Account",
           account_type: :investment,
           currency: "USD",
-          user_id: user.id,
           balance: Decimal.new("50000.00")
         })
 
-      {:ok, user: user, investment_account: investment_account}
+      {:ok, investment_account: investment_account}
     end
 
     test "net worth combines cash and investment accounts correctly", %{
-      user: user,
       investment_account: _investment_account
     } do
       # Create cash accounts
@@ -286,7 +269,6 @@ defmodule Ashfolio.Integration.CashAccountWorkflowsTest do
           name: "Checking",
           account_type: :checking,
           currency: "USD",
-          user_id: user.id,
           balance: Decimal.new("5000.00")
         })
 
@@ -295,37 +277,35 @@ defmodule Ashfolio.Integration.CashAccountWorkflowsTest do
           name: "Savings",
           account_type: :savings,
           currency: "USD",
-          user_id: user.id,
           balance: Decimal.new("15000.00")
         })
 
       # Calculate combined net worth
-      {:ok, net_worth} = Context.get_net_worth(user.id)
+      {:ok, net_worth} = Context.get_net_worth()
 
-      # Verify totals
+      # Verify totals (includes global test account $10,000)
       assert Decimal.equal?(net_worth.cash_balance, Decimal.new("20000.00"))
-      assert Decimal.equal?(net_worth.investment_value, Decimal.new("50000.00"))
-      assert Decimal.equal?(net_worth.total_net_worth, Decimal.new("70000.00"))
+      assert Decimal.equal?(net_worth.investment_value, Decimal.new("60000.00"))
+      assert Decimal.equal?(net_worth.total_net_worth, Decimal.new("80000.00"))
 
-      # Verify breakdown
+      # Verify breakdown (includes global test account)
       assert net_worth.breakdown.cash_accounts == 2
-      assert net_worth.breakdown.investment_accounts == 1
+      assert net_worth.breakdown.investment_accounts == 2
 
       # Verify percentages
       cash_percentage = net_worth.breakdown.cash_percentage
       investment_percentage = net_worth.breakdown.investment_percentage
 
-      # Cash is ~28.57% of total
-      assert Decimal.compare(cash_percentage, Decimal.new("28")) == :gt
-      assert Decimal.compare(cash_percentage, Decimal.new("29")) == :lt
+      # Cash is 25% of total (20000/80000)
+      assert Decimal.compare(cash_percentage, Decimal.new("24")) == :gt
+      assert Decimal.compare(cash_percentage, Decimal.new("26")) == :lt
 
-      # Investment is ~71.43% of total
-      assert Decimal.compare(investment_percentage, Decimal.new("71")) == :gt
-      assert Decimal.compare(investment_percentage, Decimal.new("72")) == :lt
+      # Investment is 75% of total (60000/80000)
+      assert Decimal.compare(investment_percentage, Decimal.new("74")) == :gt
+      assert Decimal.compare(investment_percentage, Decimal.new("76")) == :lt
     end
 
     test "dashboard data correctly categorizes mixed account types", %{
-      user: user,
       investment_account: _investment_account
     } do
       # Create various account types
@@ -334,7 +314,6 @@ defmodule Ashfolio.Integration.CashAccountWorkflowsTest do
           name: "Checking",
           account_type: :checking,
           currency: "USD",
-          user_id: user.id,
           balance: Decimal.new("3000.00")
         })
 
@@ -343,27 +322,26 @@ defmodule Ashfolio.Integration.CashAccountWorkflowsTest do
           name: "Money Market",
           account_type: :money_market,
           currency: "USD",
-          user_id: user.id,
           balance: Decimal.new("8000.00")
         })
 
       # Get dashboard data
-      {:ok, dashboard} = Context.get_user_dashboard_data(user.id)
+      {:ok, dashboard} = Context.get_dashboard_data()
 
-      # Verify categorization
-      assert length(dashboard.accounts.all) == 3
-      assert length(dashboard.accounts.investment) == 1
+      # Verify categorization (includes global test account)
+      assert length(dashboard.accounts.all) == 4
+      assert length(dashboard.accounts.investment) == 2
       assert length(dashboard.accounts.cash) == 2
 
-      # Verify summary calculations
-      assert dashboard.summary.account_count == 3
+      # Verify summary calculations (includes global test account)
+      assert dashboard.summary.account_count == 4
       assert dashboard.summary.cash_accounts == 2
-      assert dashboard.summary.investment_accounts == 1
+      assert dashboard.summary.investment_accounts == 2
 
-      # Verify balance totals
+      # Verify balance totals (includes global test account $10,000)
       assert Decimal.equal?(dashboard.summary.cash_balance, Decimal.new("11000.00"))
-      assert Decimal.equal?(dashboard.summary.investment_balance, Decimal.new("50000.00"))
-      assert Decimal.equal?(dashboard.summary.total_balance, Decimal.new("61000.00"))
+      assert Decimal.equal?(dashboard.summary.investment_balance, Decimal.new("60000.00"))
+      assert Decimal.equal?(dashboard.summary.total_balance, Decimal.new("71000.00"))
     end
   end
 end

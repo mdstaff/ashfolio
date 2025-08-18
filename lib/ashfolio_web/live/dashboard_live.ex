@@ -110,7 +110,7 @@ defmodule AshfolioWeb.DashboardLive do
   end
 
   @impl true
-  def handle_info({:net_worth_updated, _user_id, net_worth_data}, socket) do
+  def handle_info({:net_worth_updated, net_worth_data}, socket) do
     Logger.debug("Received net worth update via PubSub")
     {:noreply, assign_net_worth_data(socket, net_worth_data)}
   end
@@ -143,7 +143,10 @@ defmodule AshfolioWeb.DashboardLive do
             <% end %>
             {if @loading, do: "Refreshing...", else: "Refresh Prices"}
           </.button>
-          <.link href={~p"/transactions"} class="btn-primary w-full sm:w-auto inline-flex items-center justify-center">
+          <.link
+            href={~p"/transactions"}
+            class="btn-primary w-full sm:w-auto inline-flex items-center justify-center"
+          >
             <.icon name="hero-plus" class="w-4 h-4 mr-2" /> Add Transaction
           </.link>
         </div>
@@ -368,7 +371,10 @@ defmodule AshfolioWeb.DashboardLive do
         <% else %>
           <div class="space-y-3" data-testid="recent-transactions-list">
             <%= for transaction <- @recent_transactions do %>
-              <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0" data-testid="recent-transaction-item">
+              <div
+                class="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0"
+                data-testid="recent-transaction-item"
+              >
                 <div class="flex items-start space-x-3">
                   <div class="flex-shrink-0">
                     <div class={[
@@ -469,14 +475,17 @@ defmodule AshfolioWeb.DashboardLive do
   defp assign_net_worth_data(socket, net_worth_data) do
     # Handle both Context.get_net_worth (returns :total_net_worth) and NetWorthCalculator.calculate_net_worth (returns :net_worth)
     net_worth_value = net_worth_data[:total_net_worth] || net_worth_data[:net_worth]
-    
+
     socket
     |> assign(:net_worth_total, FormatHelpers.format_currency(net_worth_value))
     |> assign(
       :net_worth_investment_value,
       FormatHelpers.format_currency(net_worth_data.investment_value)
     )
-    |> assign(:net_worth_cash_balance, FormatHelpers.format_currency(net_worth_data[:cash_balance] || net_worth_data[:cash_value]))
+    |> assign(
+      :net_worth_cash_balance,
+      FormatHelpers.format_currency(net_worth_data[:cash_balance] || net_worth_data[:cash_value])
+    )
     |> assign(:net_worth_breakdown, net_worth_data.breakdown)
     |> assign(:net_worth_error, nil)
   end
@@ -492,8 +501,13 @@ defmodule AshfolioWeb.DashboardLive do
 
   # Load dashboard data from Context API (database-as-user architecture)
   defp load_dashboard_data(socket, dashboard_data) do
-    %{user: user_settings, accounts: accounts, recent_transactions: transactions, summary: summary} = dashboard_data
-    
+    %{
+      user: user_settings,
+      accounts: accounts,
+      recent_transactions: transactions,
+      summary: summary
+    } = dashboard_data
+
     socket
     |> assign(:user_settings, user_settings)
     |> assign(:accounts, accounts.all)
@@ -501,7 +515,7 @@ defmodule AshfolioWeb.DashboardLive do
     |> assign(:account_summary, summary)
     |> load_holdings_and_net_worth()
   end
-  
+
   defp load_holdings_and_net_worth(socket) do
     # Load holdings and net worth without user_id
     case Context.get_net_worth() do
@@ -509,14 +523,15 @@ defmodule AshfolioWeb.DashboardLive do
         socket
         |> assign_net_worth_data(net_worth_data)
         |> load_holdings_data()
-      
+
       {:error, reason} ->
         Logger.warning("Failed to load net worth: #{inspect(reason)}")
+
         socket
         |> assign_default_values()
     end
   end
-  
+
   defp load_holdings_data(socket) do
     case HoldingsCalculator.get_holdings_summary() do
       {:ok, holdings_data} ->
@@ -525,16 +540,20 @@ defmodule AshfolioWeb.DashboardLive do
         |> assign(:portfolio_value, FormatHelpers.format_currency(holdings_data.total_value))
         |> assign(:portfolio_pnl, FormatHelpers.format_currency(holdings_data.total_pnl))
         |> assign(:total_return_amount, FormatHelpers.format_currency(holdings_data.total_pnl))
-        |> assign(:total_return_percent, FormatHelpers.format_percentage(holdings_data.total_pnl_pct))
+        |> assign(
+          :total_return_percent,
+          FormatHelpers.format_percentage(holdings_data.total_pnl_pct)
+        )
         |> assign(:cost_basis, FormatHelpers.format_currency(holdings_data.total_cost_basis))
         |> assign(:holdings_count, to_string(holdings_data.holdings_count))
         |> assign(:sort_by, :symbol)
         |> assign(:sort_order, :asc)
         |> assign(:last_price_update, get_last_price_update())
         |> assign(:error, nil)
-      
+
       {:error, reason} ->
         Logger.warning("Failed to load holdings: #{inspect(reason)}")
+
         socket
         |> assign(:holdings, [])
         |> assign(:portfolio_value, "$0.00")

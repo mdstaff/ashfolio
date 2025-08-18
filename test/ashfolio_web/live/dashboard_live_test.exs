@@ -27,8 +27,7 @@ defmodule AshfolioWeb.DashboardLiveTest do
 
   describe "dashboard with seeded data" do
     setup do
-      # Get or create the default test user (eliminates SQLite concurrency issues)
-      {:ok, user} = get_or_create_default_user()
+      # Database-as-user architecture: No user needed
 
       # Create an account
       {:ok, account} =
@@ -36,8 +35,7 @@ defmodule AshfolioWeb.DashboardLiveTest do
           name: "Test Account",
           platform: "Test",
           balance: Decimal.new("10000"),
-          currency: "USD",
-          user_id: user.id
+          currency: "USD"
         })
 
       # Create a symbol
@@ -63,7 +61,7 @@ defmodule AshfolioWeb.DashboardLiveTest do
           date: ~D[2025-01-01]
         })
 
-      %{user: user, account: account, symbol: symbol}
+      %{account: account, symbol: symbol}
     end
 
     test "displays portfolio data when user has transactions", %{conn: conn} do
@@ -104,15 +102,14 @@ defmodule AshfolioWeb.DashboardLiveTest do
   describe "manual price refresh" do
     setup do
       # Get or create the default test user (eliminates SQLite concurrency issues)
-      {:ok, user} = get_or_create_default_user()
+      # Database-as-user architecture: No user needed
 
       {:ok, account} =
         Account.create(%{
           name: "Refresh Test Account",
           platform: "Test",
           balance: Decimal.new("10000"),
-          currency: "USD",
-          user_id: user.id
+          currency: "USD"
         })
 
       {:ok, symbol} =
@@ -136,7 +133,7 @@ defmodule AshfolioWeb.DashboardLiveTest do
           date: ~D[2025-01-01]
         })
 
-      %{user: user, account: account, symbol: symbol}
+      %{account: account, symbol: symbol}
     end
 
     test "successful price refresh updates portfolio and shows success message", %{conn: conn} do
@@ -209,15 +206,14 @@ defmodule AshfolioWeb.DashboardLiveTest do
   describe "formatting" do
     setup do
       # Get or create the default test user (eliminates SQLite concurrency issues)
-      {:ok, user} = get_or_create_default_user()
+      # Database-as-user architecture: No user needed
 
       {:ok, account} =
         Account.create(%{
           name: "Format Test Account",
           platform: "Test",
           balance: Decimal.new("50000"),
-          currency: "USD",
-          user_id: user.id
+          currency: "USD"
         })
 
       {:ok, symbol} =
@@ -242,7 +238,7 @@ defmodule AshfolioWeb.DashboardLiveTest do
           date: ~D[2025-01-01]
         })
 
-      %{user: user, account: account, symbol: symbol}
+      %{account: account, symbol: symbol}
     end
 
     test "formats currency values correctly", %{conn: conn} do
@@ -264,7 +260,7 @@ defmodule AshfolioWeb.DashboardLiveTest do
   describe "net worth integration" do
     setup do
       # Get or create the default test user
-      {:ok, user} = get_or_create_default_user()
+      # Database-as-user architecture: No user needed
 
       # Create investment account
       {:ok, investment_account} =
@@ -273,8 +269,7 @@ defmodule AshfolioWeb.DashboardLiveTest do
           platform: "Brokerage",
           balance: Decimal.new("0"),
           currency: "USD",
-          account_type: :investment,
-          user_id: user.id
+          account_type: :investment
         })
 
       # Create cash account
@@ -284,8 +279,7 @@ defmodule AshfolioWeb.DashboardLiveTest do
           platform: "Bank",
           balance: Decimal.new("5000.00"),
           currency: "USD",
-          account_type: :checking,
-          user_id: user.id
+          account_type: :checking
         })
 
       # Create a symbol for investment transactions
@@ -312,7 +306,6 @@ defmodule AshfolioWeb.DashboardLiveTest do
         })
 
       %{
-        user: user,
         investment_account: investment_account,
         cash_account: cash_account,
         symbol: symbol
@@ -395,7 +388,7 @@ defmodule AshfolioWeb.DashboardLiveTest do
   describe "recent activity display" do
     setup do
       # Get or create the default test user
-      {:ok, user} = get_or_create_default_user()
+      # Database-as-user architecture: No user needed
 
       # Create accounts
       {:ok, account} =
@@ -403,8 +396,7 @@ defmodule AshfolioWeb.DashboardLiveTest do
           name: "Activity Test Account",
           platform: "Brokerage",
           balance: Decimal.new("10000"),
-          currency: "USD",
-          user_id: user.id
+          currency: "USD"
         })
 
       # Create symbols
@@ -462,7 +454,7 @@ defmodule AshfolioWeb.DashboardLiveTest do
           date: Date.add(Date.utc_today(), -3)
         })
 
-      %{user: user, account: account, symbol1: symbol1, symbol2: symbol2}
+      %{account: account, symbol1: symbol1, symbol2: symbol2}
     end
 
     test "displays recent transactions in activity section", %{conn: conn} do
@@ -487,9 +479,12 @@ defmodule AshfolioWeb.DashboardLiveTest do
       {:ok, _view, html} = live(conn, "/")
 
       # Should show color-coded transaction type indicators
-      assert html =~ "bg-green-500"  # buy transactions
-      assert html =~ "bg-red-500"    # sell transactions  
-      assert html =~ "bg-blue-500"   # dividend transactions
+      # buy transactions
+      assert html =~ "bg-green-500"
+      # sell transactions  
+      assert html =~ "bg-red-500"
+      # dividend transactions
+      assert html =~ "bg-blue-500"
     end
 
     test "displays formatted currency amounts", %{conn: conn} do
@@ -525,7 +520,7 @@ defmodule AshfolioWeb.DashboardLiveTest do
   describe "net worth real-time updates" do
     setup do
       # Get or create the default test user
-      {:ok, user} = get_or_create_default_user()
+      # Database-as-user architecture: No user needed
 
       # Create cash account for balance updates
       {:ok, cash_account} =
@@ -534,11 +529,10 @@ defmodule AshfolioWeb.DashboardLiveTest do
           platform: "Bank",
           balance: Decimal.new("1000.00"),
           currency: "USD",
-          account_type: :checking,
-          user_id: user.id
+          account_type: :checking
         })
 
-      %{user: user, cash_account: cash_account}
+      %{cash_account: cash_account}
     end
 
     test "subscribes to net_worth PubSub topic", %{conn: conn} do
@@ -550,7 +544,7 @@ defmodule AshfolioWeb.DashboardLiveTest do
       assert view.module == AshfolioWeb.DashboardLive
     end
 
-    test "handles net_worth_updated messages", %{conn: conn, user: user} do
+    test "handles net_worth_updated messages", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/")
 
       # Simulate a net worth update message
@@ -564,7 +558,7 @@ defmodule AshfolioWeb.DashboardLiveTest do
         }
       }
 
-      send(view.pid, {:net_worth_updated, user.id, net_worth_data})
+      send(view.pid, {:net_worth_updated, net_worth_data})
 
       # Should update the net worth display
       html = render(view)

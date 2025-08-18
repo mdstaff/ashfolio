@@ -14,7 +14,7 @@ defmodule Ashfolio.Portfolio.CalculatorOptimized do
   @doc """
   Optimized version of get_all_holdings that eliminates N+1 queries.
   """
-  def get_all_holdings_optimized(_user_id) do
+  def get_all_holdings_optimized() do
     try do
       case Account.list() do
         {:ok, accounts} ->

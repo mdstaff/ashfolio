@@ -104,7 +104,7 @@ test "net worth calculation uses batch loading for accounts" do
 
   # Monitor query count to prevent N+1
   query_count = count_database_queries(fn ->
-    {:ok, result} = NetWorthCalculator.calculate_net_worth(user.id)
+    {:ok, result} = NetWorthCalculator.calculate_net_worth()
     assert Decimal.compare(result.net_worth, 0) == :gt
   end)
 
@@ -120,7 +120,7 @@ test "net worth calculation completes under 100ms" do
   user = create_complex_portfolio_user(50) # 50 accounts, 200 transactions
 
   {calc_time, {:ok, result}} = :timer.tc(fn ->
-    NetWorthCalculator.calculate_net_worth(user.id)
+    NetWorthCalculator.calculate_net_worth()
   end)
 
   time_ms = calc_time / 1000
@@ -140,7 +140,7 @@ test "net worth calculation maintains reasonable memory usage" do
 
   initial_memory = :erlang.memory(:total)
 
-  {:ok, _result} = NetWorthCalculator.calculate_net_worth(user.id)
+  {:ok, _result} = NetWorthCalculator.calculate_net_worth()
 
   :erlang.garbage_collect()
   final_memory = :erlang.memory(:total)
@@ -427,7 +427,7 @@ test "portfolio calculations maintain performance across data sizes" do
     user = create_user_with_portfolio(size)
 
     {calc_time, {:ok, _result}} = :timer.tc(fn ->
-      Calculator.calculate_total_return(user.id)
+      Calculator.calculate_total_return()
     end)
 
     time_ms = calc_time / 1000

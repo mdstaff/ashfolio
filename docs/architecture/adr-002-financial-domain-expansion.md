@@ -3,7 +3,7 @@
 **Status**: Accepted  
 **Date**: 2025-01-10  
 **Authors**: Development Team  
-**Reviewers**: Project Architect, Technical Writing Agent  
+**Reviewers**: Project Architect, Technical Writing Agent
 
 ## Context
 
@@ -16,8 +16,9 @@ The current architecture uses Phoenix LiveView with the Ash Framework and SQLite
 **We will expand Ashfolio's architecture from portfolio-only management to comprehensive personal financial management.**
 
 This expansion includes:
+
 - Cash account management (checking, savings, money market)
-- Non-investment asset tracking (real estate, vehicles, other assets)  
+- Non-investment asset tracking (real estate, vehicles, other assets)
 - Expense tracking and categorization
 - Net worth calculation and historical trending
 - Retirement planning and financial forecasting
@@ -34,7 +35,7 @@ We will implement domain separation using Ash Framework's domain structure:
 Ashfolio.Portfolio
 ├── User
 ├── Account (investment accounts)
-├── Symbol  
+├── Symbol
 └── Transaction (investment transactions)
 
 # New domain - comprehensive financial management
@@ -85,31 +86,36 @@ config :ashfolio, Ashfolio.Repo,
 ```
 
 Strategic indexing for time-series queries:
+
 - Net worth snapshots indexed by user_id and date
-- Expenses indexed by user_id, date, and category
+- Expenses indexed by date, and category
 - Asset value updates indexed by asset_id and date
 
 ## Implementation Phases
 
 ### Phase 1: Cash Management Foundation (4-6 weeks)
+
 - Extend Portfolio.Account to support cash account types
 - Add cash transaction management
 - Implement basic net worth calculation
 - Update dashboard with net worth display
 
-### Phase 2: Asset & Expense Tracking (6-8 weeks)  
+### Phase 2: Asset & Expense Tracking (6-8 weeks)
+
 - Implement FinancialManagement.Asset resource
 - Add expense tracking and categorization
 - Create NetWorthSnapshot time-series tracking
 - Build comprehensive financial reporting
 
 ### Phase 3: Planning & Forecasting (8-10 weeks)
+
 - Add financial goal setting and tracking
 - Implement growth assumption modeling
 - Build retirement planning calculations
 - Create long-term projection capabilities
 
 ### Phase 4: Advanced Analytics (10-12 weeks)
+
 - Add tax planning and optimization tools
 - Implement advanced portfolio analytics
 - Build rebalancing recommendations
@@ -120,7 +126,7 @@ Strategic indexing for time-series queries:
 ### Advantages
 
 1. **Architectural Alignment**: The Ash/SQLite foundation scales naturally to comprehensive financial data
-2. **User Value**: Addresses real user needs for holistic financial management  
+2. **User Value**: Addresses real user needs for holistic financial management
 3. **Local-First Preservation**: Maintains privacy and data ownership principles
 4. **Incremental Development**: Phased approach minimizes risk and maintains existing functionality
 5. **Domain Separation**: Clean architectural boundaries prevent feature sprawl
@@ -136,27 +142,33 @@ Strategic indexing for time-series queries:
 ## Alternatives Considered
 
 ### Alternative 1: Separate Application
+
 Create a new application for comprehensive financial management.
 
 **Rejected because:**
+
 - Duplicates existing infrastructure and authentication
 - Forces users to manage multiple applications
 - Splits related financial data across systems
 - Increases maintenance burden
 
-### Alternative 2: Plugin Architecture  
+### Alternative 2: Plugin Architecture
+
 Build financial management as optional plugins/modules.
 
 **Rejected because:**
+
 - Adds architectural complexity without clear benefit
 - Financial data relationships are too integrated for plugin isolation
 - User experience fragmentation
 - Complicates testing and deployment
 
 ### Alternative 3: External Service Integration
+
 Integrate with existing personal finance services.
 
 **Rejected because:**
+
 - Violates local-first architectural commitment
 - Introduces external dependencies and privacy risks
 - Reduces user control over financial data
@@ -172,7 +184,7 @@ Integrate with existing personal finance services.
 4. **Privacy Preservation**: All financial data remains local
 5. **Competitive Advantage**: Few local-first comprehensive financial management solutions exist
 
-### Negative Consequences  
+### Negative Consequences
 
 1. **Increased Complexity**: More resources, relationships, and business logic to maintain
 2. **Testing Overhead**: Comprehensive financial scenarios require extensive test coverage
@@ -215,6 +227,7 @@ Integrate with existing personal finance services.
 ## Approval
 
 This ADR has been reviewed and approved by:
+
 - Project Architect: Approved - Architecture scales naturally with minimal risk
 - Technical Writing Agent: Approved - Documentation strategy aligns with expansion scope
 - Development Team: Approved - Implementation phases provide clear development path

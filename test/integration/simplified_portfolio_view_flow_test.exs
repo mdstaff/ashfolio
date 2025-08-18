@@ -21,9 +21,7 @@ defmodule AshfolioWeb.Integration.SimplifiedPortfolioViewFlowTest do
   setup :verify_on_exit!
 
   setup do
-    # Create comprehensive test data
-    {:ok, user} = SQLiteHelpers.get_or_create_default_user()
-
+    # Database-as-user architecture: No user entity needed
     # Allow PriceManager to access the database for price refresh tests
     SQLiteHelpers.allow_price_manager_db_access()
 
@@ -31,8 +29,7 @@ defmodule AshfolioWeb.Integration.SimplifiedPortfolioViewFlowTest do
       Account.create(%{
         name: "Portfolio Test Account #{System.unique_integer([:positive])}",
         platform: "Test Broker",
-        balance: Decimal.new("50000"),
-        user_id: user.id
+        balance: Decimal.new("50000")
       })
 
     # Use existing symbols (created globally) and update their prices
@@ -72,7 +69,7 @@ defmodule AshfolioWeb.Integration.SimplifiedPortfolioViewFlowTest do
         })
     end)
 
-    %{user: user, account: account, symbols: [aapl, msft]}
+    %{account: account, symbols: [aapl, msft]}
   end
 
   describe "Core Portfolio View Workflow" do
@@ -91,13 +88,13 @@ defmodule AshfolioWeb.Integration.SimplifiedPortfolioViewFlowTest do
       assert html =~ "AAPL" or html =~ "MSFT"
     end
 
-    test "portfolio calculations work correctly", %{conn: conn, user: user} do
+    test "portfolio calculations work correctly", %{conn: conn} do
       # Step 1: Load dashboard
       {:ok, view, _html} = live(conn, "/")
 
       # Step 2: Verify portfolio calculations are working
       # Check if Calculator module works
-      case Ashfolio.Portfolio.Calculator.calculate_position_returns(user.id) do
+      case Ashfolio.Portfolio.Calculator.calculate_position_returns() do
         {:ok, positions} ->
           # Verify positions were calculated
           assert length(positions) >= 1

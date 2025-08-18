@@ -61,18 +61,18 @@
       "primary_key?": false
     }
   ],
-  "table": "users",
-  "hash": "35096061B01A8C275CEB92ABFD0F439714733BD06D27571A549A9CA6BB4FA6A3",
+  "table": "user_settings",
+  "hash": "4393A448E246C3E5D90ABEF78EC2EAFBBBF29673D160C7BC4A704A25B03C0799",
   "repo": "Elixir.Ashfolio.Repo",
   "strict?": false,
   "identities": [],
-  "base_filter": null,
   "multitenancy": {
     "global": null,
     "attribute": null,
     "strategy": null
   },
+  "base_filter": null,
   "custom_indexes": [],
   "custom_statements": [],
-  "has_create_action": false
+  "has_create_action": true
 }

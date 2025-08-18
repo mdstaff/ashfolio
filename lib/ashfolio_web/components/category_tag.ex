@@ -88,7 +88,12 @@ defmodule AshfolioWeb.Components.CategoryTag do
         {@category_name}
       </span>
       <%= if @clickable do %>
-        <span class="ml-1 opacity-0 group-hover:opacity-50 transition-opacity text-xs" aria-hidden="true">→</span>
+        <span
+          class="ml-1 opacity-0 group-hover:opacity-50 transition-opacity text-xs"
+          aria-hidden="true"
+        >
+          →
+        </span>
       <% end %>
     </span>
     """
@@ -145,7 +150,7 @@ defmodule AshfolioWeb.Components.CategoryTag do
   defp size_classes(:small), do: "text-xs px-2 py-1 min-h-6"
   defp size_classes(:normal), do: "text-sm px-3 py-1.5 min-h-7"
   defp size_classes(:large), do: "text-base px-4 py-2 min-h-8"
-  
+
   defp category_style_classes(assigns) do
     if assigns.category_name == "Uncategorized" do
       "border-dashed hover:border-solid"
@@ -153,7 +158,7 @@ defmodule AshfolioWeb.Components.CategoryTag do
       ""
     end
   end
-  
+
   defp category_style(assigns) do
     if assigns.category_name == "Uncategorized" do
       "background-color: #F3F4F6; color: #1F2937; border-color: #9CA3AF;"

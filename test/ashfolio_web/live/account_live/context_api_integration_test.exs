@@ -16,8 +16,7 @@ defmodule AshfolioWeb.AccountLive.ContextApiIntegrationTest do
   alias Ashfolio.Portfolio.Account
 
   setup do
-    # Get or create the default test user
-    {:ok, user} = get_or_create_default_user()
+    # Database-as-user architecture: No user needed
 
     # Create test accounts with different types
     {:ok, investment_account} =
@@ -25,8 +24,7 @@ defmodule AshfolioWeb.AccountLive.ContextApiIntegrationTest do
         name: "Investment Account",
         platform: "Brokerage",
         balance: Decimal.new("5000.00"),
-        account_type: :investment,
-        user_id: user.id
+        account_type: :investment
       })
 
     {:ok, cash_account} =
@@ -34,8 +32,7 @@ defmodule AshfolioWeb.AccountLive.ContextApiIntegrationTest do
         name: "Savings Account",
         platform: "Bank",
         balance: Decimal.new("2000.00"),
-        account_type: :savings,
-        user_id: user.id
+        account_type: :savings
       })
 
     {:ok, excluded_account} =
@@ -44,12 +41,10 @@ defmodule AshfolioWeb.AccountLive.ContextApiIntegrationTest do
         platform: "Old Bank",
         balance: Decimal.new("100.00"),
         account_type: :checking,
-        is_excluded: true,
-        user_id: user.id
+        is_excluded: true
       })
 
     %{
-      user: user,
       investment_account: investment_account,
       cash_account: cash_account,
       excluded_account: excluded_account
@@ -140,7 +135,7 @@ defmodule AshfolioWeb.AccountLive.ContextApiIntegrationTest do
       assert html =~ "Total Balance"
     end
 
-    test "updates display when accounts change", %{conn: conn, user: user} do
+    test "updates display when accounts change", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/accounts")
 
       # Create a new account
@@ -149,8 +144,7 @@ defmodule AshfolioWeb.AccountLive.ContextApiIntegrationTest do
           name: "New Test Account",
           platform: "New Platform",
           balance: Decimal.new("1000.00"),
-          account_type: :checking,
-          user_id: user.id
+          account_type: :checking
         })
 
       # Broadcast account creation

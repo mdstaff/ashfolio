@@ -303,22 +303,23 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
             new_balance = Decimal.new(to_string(balance_float))
 
             # Security: Add reasonable maximum bounds (prevent unrealistic values)
-            max_balance = Decimal.new("1000000000.00")  # $1 billion max
-            
+            # $1 billion max
+            max_balance = Decimal.new("1000000000.00")
+
             cond do
               # Validate non-negative for savings/checking accounts
               account.account_type in [:checking, :savings] && Decimal.negative?(new_balance) ->
                 {:error,
                  "#{String.capitalize(to_string(account.account_type))} accounts cannot have negative balances"}
-              
+
               # Security: Validate maximum reasonable balance
               Decimal.gt?(new_balance, max_balance) ->
                 {:error, "Balance cannot exceed $1,000,000,000.00 (security limit)"}
-              
+
               # Security: Validate minimum bound (prevent extremely negative values)
               Decimal.lt?(new_balance, Decimal.new("-1000000000.00")) ->
                 {:error, "Balance cannot be less than -$1,000,000,000.00 (security limit)"}
-              
+
               true ->
                 {:ok, new_balance}
             end

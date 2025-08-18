@@ -168,7 +168,7 @@ defmodule Ashfolio.DatabaseManager do
     })
   end
 
-  defp create_sample_accounts(user) do
+  defp create_sample_accounts(_user) do
     accounts = [
       %{name: "Schwab Brokerage", platform: "Charles Schwab", balance: Decimal.new("50000.00")},
       %{name: "Fidelity 401k", platform: "Fidelity", balance: Decimal.new("25000.00")},
@@ -176,7 +176,7 @@ defmodule Ashfolio.DatabaseManager do
     ]
 
     Enum.map(accounts, fn account_attrs ->
-      {:ok, account} = Ash.create(Account, Map.put(account_attrs, :user_id, user.id))
+      {:ok, account} = Account.create(account_attrs)
       account
     end)
   end

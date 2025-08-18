@@ -13,24 +13,24 @@ defmodule Ashfolio.ContextTest do
   @moduletag :fast
 
   alias Ashfolio.Context
-  alias Ashfolio.Portfolio.{User, Account, Transaction, Symbol}
+  alias Ashfolio.Portfolio.{Account, Transaction, Symbol}
+  alias Ashfolio.SQLiteHelpers
 
-  describe "get_user_dashboard_data/1" do
-    test "returns comprehensive dashboard data for default user" do
-      # Get the default user that exists in the system
-      {:ok, [default_user]} = User.get_default_user()
-
-      # Create test data for the default user
-      investment_account = create_investment_account(default_user.id)
-      _cash_account = create_cash_account(default_user.id)
+  describe "get_dashboard_data/0" do
+    test "returns comprehensive dashboard data for database-as-user architecture" do
+      # Database-as-user architecture: No user entity needed
+      # Create test data directly
+      investment_account = create_investment_account()
+      _cash_account = create_cash_account()
       symbol = create_symbol()
       _transaction = create_transaction(investment_account.id, symbol.id)
 
       # Test the dashboard data
-      assert {:ok, dashboard_data} = Context.get_user_dashboard_data()
+      assert {:ok, dashboard_data} = Context.get_dashboard_data()
 
-      assert dashboard_data.user.id == default_user.id
-      assert dashboard_data.user.name == default_user.name
+      # Database-as-user architecture: user data comes from settings
+      default_user_settings = SQLiteHelpers.get_default_user_settings()
+      assert dashboard_data.user.name == default_user_settings.name
 
       # Check accounts are properly categorized
       # The default user already has at least the test accounts plus the ones we created
@@ -51,27 +51,23 @@ defmodule Ashfolio.ContextTest do
       assert is_struct(dashboard_data.last_updated, DateTime)
     end
 
-    test "returns dashboard data for specific user" do
-      user = create_user()
-      _account = create_investment_account(user.id)
+    test "returns dashboard data for database-as-user architecture" do
+      # Database-as-user architecture: No specific user needed
+      _account = create_investment_account()
 
-      assert {:ok, dashboard_data} = Context.get_user_dashboard_data(user.id)
-      assert dashboard_data.user.id == user.id
+      assert {:ok, dashboard_data} = Context.get_dashboard_data()
+      # Verify user settings are returned
+      assert dashboard_data.user != nil
     end
 
-    test "returns error for invalid user ID" do
-      assert {:error, :user_not_found} = Context.get_user_dashboard_data("invalid-uuid")
-    end
 
     test "handles accounts with different types" do
-      user = create_user()
-
       # Create different account types
-      checking = create_account(user.id, :checking, "Checking Account")
-      savings = create_account(user.id, :savings, "Savings Account")
-      investment = create_account(user.id, :investment, "Investment Account")
+      checking = create_account(:checking, "Checking Account")
+      savings = create_account(:savings, "Savings Account")
+      investment = create_account(:investment, "Investment Account")
 
-      assert {:ok, dashboard_data} = Context.get_user_dashboard_data(user.id)
+      assert {:ok, dashboard_data} = Context.get_dashboard_data()
 
       # Verify categorization
       assert length(dashboard_data.accounts.all) == 3
@@ -87,14 +83,14 @@ defmodule Ashfolio.ContextTest do
     end
 
     test "handles excluded accounts correctly" do
-      user = create_user()
-      active_account = create_investment_account(user.id)
-      excluded_account = create_investment_account(user.id, %{is_excluded: true})
+      active_account = create_investment_account()
+      excluded_account = create_investment_account(%{is_excluded: true})
 
-      assert {:ok, dashboard_data} = Context.get_user_dashboard_data(user.id)
+      assert {:ok, dashboard_data} = Context.get_dashboard_data()
 
-      assert length(dashboard_data.accounts.all) == 2
-      assert length(dashboard_data.accounts.active) == 1
+      # Note: Global test account exists in addition to test-created accounts
+      assert length(dashboard_data.accounts.all) >= 2
+      assert length(dashboard_data.accounts.active) >= 1
       assert length(dashboard_data.accounts.excluded) == 1
 
       active_ids = Enum.map(dashboard_data.accounts.active, & &1.id)
@@ -107,8 +103,7 @@ defmodule Ashfolio.ContextTest do
 
   describe "get_account_with_transactions/2" do
     test "returns account data with transaction history" do
-      user = create_user()
-      account = create_investment_account(user.id)
+      account = create_investment_account()
       symbol = create_symbol()
       _transaction = create_transaction(account.id, symbol.id)
 
@@ -130,8 +125,7 @@ defmodule Ashfolio.ContextTest do
     end
 
     test "respects transaction limit parameter" do
-      user = create_user()
-      account = create_investment_account(user.id)
+      account = create_investment_account()
       symbol = create_symbol()
 
       # Create multiple transactions
@@ -148,8 +142,7 @@ defmodule Ashfolio.ContextTest do
     end
 
     test "calculates transaction summary correctly" do
-      user = create_user()
-      account = create_investment_account(user.id)
+      account = create_investment_account()
       symbol = create_symbol()
 
       # Create buy transaction (+inflow)
@@ -176,8 +169,7 @@ defmodule Ashfolio.ContextTest do
 
   describe "get_portfolio_summary/1" do
     test "returns comprehensive portfolio summary" do
-      user = create_user()
-      account = create_investment_account(user.id)
+      account = create_investment_account()
       symbol = create_symbol()
       _transaction = create_transaction(account.id, symbol.id)
 
@@ -194,23 +186,18 @@ defmodule Ashfolio.ContextTest do
     end
 
     test "returns portfolio summary for specific user" do
-      user = create_user()
-      _account = create_investment_account(user.id)
+      _account = create_investment_account()
 
-      assert {:ok, summary} = Context.get_portfolio_summary(user.id)
+      assert {:ok, summary} = Context.get_portfolio_summary()
       assert is_struct(summary.total_value, Decimal)
     end
 
-    test "returns error for invalid user ID" do
-      assert {:error, :user_not_found} = Context.get_portfolio_summary("invalid-uuid")
-    end
 
     test "filters out excluded accounts from portfolio summary" do
-      user = create_user()
-      active_account = create_investment_account(user.id)
-      excluded_account = create_investment_account(user.id, %{is_excluded: true})
+      active_account = create_investment_account()
+      excluded_account = create_investment_account(%{is_excluded: true})
 
-      assert {:ok, summary} = Context.get_portfolio_summary(user.id)
+      assert {:ok, summary} = Context.get_portfolio_summary()
 
       account_ids = Enum.map(summary.accounts, & &1.id)
       assert active_account.id in account_ids
@@ -220,15 +207,14 @@ defmodule Ashfolio.ContextTest do
 
   describe "get_recent_transactions/2" do
     test "returns recent transactions across all accounts" do
-      user = create_user()
-      account1 = create_investment_account(user.id)
-      account2 = create_investment_account(user.id)
+      account1 = create_investment_account()
+      account2 = create_investment_account()
       symbol = create_symbol()
 
       _tx1 = create_transaction(account1.id, symbol.id, %{date: days_ago(2)})
       _tx2 = create_transaction(account2.id, symbol.id, %{date: days_ago(1)})
 
-      assert {:ok, transactions} = Context.get_recent_transactions(user.id, 10)
+      assert {:ok, transactions} = Context.get_recent_transactions(10)
       assert length(transactions) >= 2
 
       # Check that transactions are sorted by date (most recent first)
@@ -238,8 +224,7 @@ defmodule Ashfolio.ContextTest do
     end
 
     test "respects the limit parameter" do
-      user = create_user()
-      account = create_investment_account(user.id)
+      account = create_investment_account()
       symbol = create_symbol()
 
       # Create 5 transactions
@@ -247,32 +232,29 @@ defmodule Ashfolio.ContextTest do
         create_transaction(account.id, symbol.id, %{date: days_ago(i)})
       end
 
-      assert {:ok, transactions} = Context.get_recent_transactions(user.id, 3)
+      assert {:ok, transactions} = Context.get_recent_transactions(3)
       assert length(transactions) == 3
     end
 
     test "returns empty list when no transactions exist" do
-      user = create_user()
-      _account = create_investment_account(user.id)
+      _account = create_investment_account()
 
-      assert {:ok, transactions} = Context.get_recent_transactions(user.id, 10)
+      assert {:ok, transactions} = Context.get_recent_transactions(10)
       assert transactions == []
     end
   end
 
   describe "get_net_worth/1" do
     test "calculates net worth combining investment and cash balances" do
-      user = create_user()
-
       # Create investment account with balance
       _investment =
-        create_account(user.id, :investment, "Investment", %{balance: Decimal.new(10000)})
+        create_account(:investment, "Investment", %{balance: Decimal.new(10000)})
 
       # Create cash accounts with balances
-      _checking = create_account(user.id, :checking, "Checking", %{balance: Decimal.new(5000)})
-      _savings = create_account(user.id, :savings, "Savings", %{balance: Decimal.new(15000)})
+      _checking = create_account(:checking, "Checking", %{balance: Decimal.new(5000)})
+      _savings = create_account(:savings, "Savings", %{balance: Decimal.new(15000)})
 
-      assert {:ok, net_worth} = Context.get_net_worth(user.id)
+      assert {:ok, net_worth} = Context.get_net_worth()
 
       assert is_struct(net_worth.total_net_worth, Decimal)
       assert is_struct(net_worth.investment_value, Decimal)
@@ -288,15 +270,11 @@ defmodule Ashfolio.ContextTest do
       assert is_struct(net_worth.breakdown.investment_percentage, Decimal)
     end
 
-    test "returns error for invalid user ID" do
-      assert {:error, :user_not_found} = Context.get_net_worth("invalid-uuid")
-    end
 
     test "handles zero balances correctly" do
-      user = create_user()
-      _account = create_account(user.id, :checking, "Empty Account", %{balance: Decimal.new(0)})
+      _account = create_account(:checking, "Empty Account", %{balance: Decimal.new(0)})
 
-      assert {:ok, net_worth} = Context.get_net_worth(user.id)
+      assert {:ok, net_worth} = Context.get_net_worth()
       assert Decimal.equal?(net_worth.total_net_worth, Decimal.new(0))
       assert Decimal.equal?(net_worth.cash_balance, Decimal.new(0))
     end
@@ -312,8 +290,8 @@ defmodule Ashfolio.ContextTest do
       :telemetry.attach_many(
         handler_id,
         [
-          [:ashfolio, :context, :get_user_dashboard_data],
-          [:ashfolio, :context, :get_user_dashboard_data, :success]
+          [:ashfolio, :context, :get_dashboard_data],
+          [:ashfolio, :context, :get_dashboard_data, :success]
         ],
         fn event, measurements, metadata, _ ->
           send(test_pid, {:telemetry, event, measurements, metadata})
@@ -322,47 +300,32 @@ defmodule Ashfolio.ContextTest do
       )
 
       # Create test data and call function
-      user = create_user()
-      _account = create_investment_account(user.id)
 
-      assert {:ok, _data} = Context.get_user_dashboard_data(user.id)
+      _account = create_investment_account()
+
+      assert {:ok, _data} = Context.get_dashboard_data()
 
       # Check that telemetry events were emitted
-      assert_receive {:telemetry, [:ashfolio, :context, :get_user_dashboard_data], %{duration: _},
-                      %{operation: :get_user_dashboard_data}}
+      assert_receive {:telemetry, [:ashfolio, :context, :get_dashboard_data], %{duration: _},
+                      %{operation: :get_dashboard_data}}
 
-      assert_receive {:telemetry, [:ashfolio, :context, :get_user_dashboard_data, :success], %{},
+      assert_receive {:telemetry, [:ashfolio, :context, :get_dashboard_data, :success], %{},
                       %{}}
 
       :telemetry.detach(handler_id)
     end
   end
 
-  # Helper functions for creating test data
+  defp create_investment_account(attrs \\ %{}) do
+    create_account(:investment, "Investment Account", attrs)
+  end
 
-  defp create_user(attrs \\ %{}) do
+  defp create_cash_account(attrs \\ %{}) do
+    create_account(:checking, "Checking Account", attrs)
+  end
+
+  defp create_account(account_type, name, attrs \\ %{}) do
     default_attrs = %{
-      name: "Test User",
-      currency: "USD",
-      locale: "en-US"
-    }
-
-    attrs = Map.merge(default_attrs, attrs)
-    {:ok, user} = User.create(attrs)
-    user
-  end
-
-  defp create_investment_account(user_id, attrs \\ %{}) do
-    create_account(user_id, :investment, "Investment Account", attrs)
-  end
-
-  defp create_cash_account(user_id, attrs \\ %{}) do
-    create_account(user_id, :checking, "Checking Account", attrs)
-  end
-
-  defp create_account(user_id, account_type, name, attrs \\ %{}) do
-    default_attrs = %{
-      user_id: user_id,
       name: name,
       account_type: account_type,
       currency: "USD",

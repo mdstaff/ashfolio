@@ -676,7 +676,6 @@ defmodule AshfolioWeb.AccountLive.Index do
   defp format_error_message(:user_not_found), do: "User not found"
   defp format_error_message(reason), do: "Failed to load dashboard data: #{inspect(reason)}"
 
-
   defp apply_action(socket, :index, _params) do
     socket
     |> assign(:show_form, false)

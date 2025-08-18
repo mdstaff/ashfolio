@@ -10,7 +10,7 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
 
   Performance targets:
   - Account type queries: < 10ms for 100+ accounts
-  - Category filtering: < 20ms for 1000+ transactions  
+  - Category filtering: < 20ms for 1000+ transactions
   - Complex composite queries: < 50ms
   """
 
@@ -29,15 +29,14 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
 
   describe "Account Type Index Performance" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-
+      # Database-as-user architecture: No user needed
       # Create realistic account mix: 30% cash, 70% investment
-      accounts = create_performance_accounts(user.id, @performance_account_count)
+      accounts = create_performance_accounts(@performance_account_count)
 
-      %{user: user, accounts: accounts}
+      %{accounts: accounts}
     end
 
-    test "account type filtering performs under 10ms", %{user: _user} do
+    test "account type filtering performs under 10ms", %{accounts: _accounts} do
       # Test cash account filtering
       {time_us, {:ok, cash_accounts}} =
         :timer.tc(fn ->
@@ -51,7 +50,7 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
       assert time_ms < 10,
              "Cash account filtering took #{time_ms}ms, expected < 10ms"
 
-      # Test investment account filtering  
+      # Test investment account filtering
       {time_us, {:ok, investment_accounts}} =
         :timer.tc(fn ->
           Account.investment_accounts()
@@ -65,7 +64,7 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
              "Investment account filtering took #{time_ms}ms, expected < 10ms"
     end
 
-    test "composite user + account_type queries under 15ms", %{user: _user} do
+    test "composite user + account_type queries under 15ms", %{accounts: _accounts} do
       # Test the common Context API pattern
       {time_us, {:ok, _accounts}} =
         :timer.tc(fn ->
@@ -78,14 +77,13 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
              "User + account type query took #{time_ms}ms, expected < 15ms"
     end
 
-    test "account balance filtering with type performs under 20ms", %{user: user} do
+    test "account balance filtering with type performs under 20ms", %{accounts: _accounts} do
       # Test balance filtering within account types
       {time_us, _accounts} =
         :timer.tc(fn ->
           from(a in Account,
             where:
-              a.user_id == ^user.id and
-                a.account_type == :checking and
+              a.account_type == :checking and
                 a.balance > 0,
             select: a
           )
@@ -101,10 +99,9 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
 
   describe "Transaction Category Index Performance" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-
+      # Database-as-user architecture: No user needed
       # Create categories
-      {:ok, categories} = create_performance_categories(user.id)
+      {:ok, categories} = create_performance_categories()
 
       # Create account for transactions
       {:ok, account} =
@@ -112,8 +109,7 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
           name: "Performance Test Account",
           platform: "Test",
           balance: Decimal.new("10000"),
-          account_type: :investment,
-          user_id: user.id
+          account_type: :investment
         })
 
       # Create symbol
@@ -133,7 +129,7 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
           @performance_transaction_count
         )
 
-      %{user: user, account: account, categories: categories, transactions: transactions}
+      %{account: account, categories: categories, transactions: transactions}
     end
 
     test "transaction category filtering under 20ms", %{categories: [category | _]} do
@@ -219,8 +215,8 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
       # This would normally require EXPLAIN QUERY PLAN in SQLite
       # For now, we test performance which indicates index usage
 
-      user = SQLiteHelpers.get_default_user()
-      create_performance_accounts(user.id, 50)
+      # Database-as-user architecture: No user needed
+      create_performance_accounts(50)
 
       # Multiple queries should maintain consistent performance (index usage)
       times =
@@ -246,16 +242,15 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
     end
 
     test "verify category_id index is used" do
-      user = SQLiteHelpers.get_default_user()
-      {:ok, categories} = create_performance_categories(user.id)
+      # Database-as-user architecture: No user needed
+      {:ok, categories} = create_performance_categories()
 
       {:ok, account} =
         Account.create(%{
           name: "Index Test Account",
           platform: "Test",
           balance: Decimal.new("1000"),
-          account_type: :investment,
-          user_id: user.id
+          account_type: :investment
         })
 
       symbol =
@@ -291,7 +286,7 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
 
   # Helper functions for creating performance test data
 
-  defp create_performance_accounts(user_id, count) do
+  defp create_performance_accounts(count) do
     # 30% cash accounts (checking, savings), 70% investment
     account_types = [:checking, :savings, :investment, :investment, :investment]
 
@@ -303,15 +298,14 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
           name: "Performance Account #{i}",
           platform: "Platform #{rem(i, 3)}",
           balance: Decimal.new("#{1000 + i * 100}"),
-          account_type: account_type,
-          user_id: user_id
+          account_type: account_type
         })
 
       account
     end
   end
 
-  defp create_performance_categories(user_id) do
+  defp create_performance_categories() do
     categories = [
       {"Growth", "#10B981"},
       {"Income", "#3B82F6"},
@@ -325,8 +319,7 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
           TransactionCategory.create(%{
             name: name,
             color: color,
-            is_system: false,
-            user_id: user_id
+            is_system: false
           })
 
         category

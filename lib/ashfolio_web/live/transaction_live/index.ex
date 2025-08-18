@@ -1,7 +1,7 @@
 defmodule AshfolioWeb.TransactionLive.Index do
   use AshfolioWeb, :live_view
 
-  alias Ashfolio.Portfolio.{Transaction, User}
+  alias Ashfolio.Portfolio.Transaction
   alias Ashfolio.FinancialManagement.{TransactionCategory, TransactionFiltering}
   alias AshfolioWeb.TransactionLive.FormComponent
   alias AshfolioWeb.Live.{ErrorHelpers, FormatHelpers}
@@ -13,11 +13,10 @@ defmodule AshfolioWeb.TransactionLive.Index do
 
   @impl true
   def mount(params, _session, socket) do
-    user_id = get_default_user_id()
-
     # Load categories for filtering
+    # Database-as-user architecture: No user_id needed
     categories =
-      case TransactionCategory.get_user_categories_with_children(user_id) do
+      case TransactionCategory.get_categories_with_children() do
         {:ok, cats} -> cats
         {:error, _} -> []
       end
@@ -34,7 +33,6 @@ defmodule AshfolioWeb.TransactionLive.Index do
       |> assign_current_page(:transactions)
       |> assign(:page_title, "Transactions")
       |> assign(:page_subtitle, "Manage your investment transactions")
-      |> assign(:user_id, user_id)
       |> assign(:categories, categories)
       # Enhanced filter state management
       |> assign(:filters, initial_filters)
@@ -334,8 +332,9 @@ defmodule AshfolioWeb.TransactionLive.Index do
   end
 
   defp reload_categories(socket) do
+    # Database-as-user architecture: No user_id needed
     categories =
-      case TransactionCategory.get_user_categories_with_children(socket.assigns.user_id) do
+      case TransactionCategory.get_categories_with_children() do
         {:ok, cats} -> cats
         {:error, _} -> []
       end
@@ -343,13 +342,6 @@ defmodule AshfolioWeb.TransactionLive.Index do
     assign(socket, :categories, categories)
   end
 
-  defp get_default_user_id do
-    case User.get_default_user() do
-      {:ok, [user]} -> user.id
-      {:ok, user} when is_struct(user) -> user.id
-      _ -> nil
-    end
-  end
 
   # Enhanced filter state management functions
 

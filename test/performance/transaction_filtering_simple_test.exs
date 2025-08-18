@@ -20,24 +20,20 @@ defmodule Ashfolio.Performance.TransactionFilteringSimpleTest do
 
   describe "Basic Transaction Filtering Performance" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-
       # Create a test account
       {:ok, account} =
         Account.create(%{
           name: "Test Investment Account",
           platform: "Test Broker",
           account_type: :investment,
-          balance: Decimal.new("10000"),
-          user_id: user.id
+          balance: Decimal.new("10000")
         })
 
       # Create a test category
       {:ok, category} =
         TransactionCategory.create(%{
           name: "Test Category",
-          color: "#FF0000",
-          user_id: user.id
+          color: "#FF0000"
         })
 
       # Create test symbols
@@ -51,7 +47,6 @@ defmodule Ashfolio.Performance.TransactionFilteringSimpleTest do
       transactions = create_test_transactions(account.id, category.id, symbol.id, 100)
 
       %{
-        user: user,
         account: account,
         category: category,
         symbol: symbol,
@@ -59,10 +54,10 @@ defmodule Ashfolio.Performance.TransactionFilteringSimpleTest do
       }
     end
 
-    test "category filtering performance under 50ms", %{user: user, category: category} do
+    test "category filtering performance under 50ms", %{category: category} do
       {time_us, results} =
         :timer.tc(fn ->
-          Transaction.list_for_user_by_category!(user.id, category.id)
+          Transaction.by_category(category.id)
         end)
 
       time_ms = time_us / 1000
@@ -73,13 +68,13 @@ defmodule Ashfolio.Performance.TransactionFilteringSimpleTest do
              "Category filtering took #{time_ms}ms, expected < 50ms"
     end
 
-    test "date range filtering performance under 50ms", %{user: user} do
+    test "date range filtering performance under 50ms" do
       start_date = Date.add(Date.utc_today(), -30)
       end_date = Date.utc_today()
 
       {time_us, results} =
         :timer.tc(fn ->
-          Transaction.list_for_user_by_date_range!(user.id, start_date, end_date)
+          Transaction.list_for_user_by_date_range!(start_date, end_date)
         end)
 
       time_ms = time_us / 1000
@@ -104,10 +99,10 @@ defmodule Ashfolio.Performance.TransactionFilteringSimpleTest do
              "Account filtering took #{time_ms}ms, expected < 50ms"
     end
 
-    test "pagination performance under 25ms", %{user: user} do
+    test "pagination performance under 25ms" do
       {time_us, results} =
         :timer.tc(fn ->
-          Transaction.list_for_user_paginated!(user.id, 1, 20)
+          Transaction.list_for_user_paginated!(1, 20)
         end)
 
       time_ms = time_us / 1000
@@ -118,13 +113,13 @@ defmodule Ashfolio.Performance.TransactionFilteringSimpleTest do
              "Pagination took #{time_ms}ms, expected < 25ms"
     end
 
-    test "consistent performance across multiple calls", %{user: user, category: category} do
+    test "consistent performance across multiple calls", %{category: category} do
       # Run filtering multiple times to test consistency
       times =
         for _ <- 1..5 do
           {time_us, _results} =
             :timer.tc(fn ->
-              Transaction.list_for_user_by_category!(user.id, category.id)
+              Transaction.by_category(category.id)
             end)
 
           time_us / 1000

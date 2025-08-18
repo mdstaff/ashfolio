@@ -14,16 +14,13 @@ defmodule AshfolioWeb.Integration.SimplifiedTransactionFlowTest do
   alias Ashfolio.SQLiteHelpers
 
   setup do
-    # Get existing test data (created globally in test_helper.exs)
-    {:ok, user} = SQLiteHelpers.get_or_create_default_user()
-
+    # Database-as-user architecture: No user entity needed
     # Create a unique account for this test to avoid conflicts
     {:ok, account} =
       Account.create(%{
         name: "Smoke Test Account #{System.unique_integer([:positive])}",
         platform: "Test Broker",
-        balance: Decimal.new("10000"),
-        user_id: user.id
+        balance: Decimal.new("10000")
       })
 
     # Use existing AAPL symbol (created globally) and update its price
@@ -35,7 +32,7 @@ defmodule AshfolioWeb.Integration.SimplifiedTransactionFlowTest do
         price_updated_at: DateTime.utc_now()
       })
 
-    %{user: user, account: account, symbol: symbol}
+    %{account: account, symbol: symbol}
   end
 
   describe "Core Transaction Workflow - Database Integration" do
@@ -156,7 +153,6 @@ defmodule AshfolioWeb.Integration.SimplifiedTransactionFlowTest do
     end
 
     test "transaction portfolio impact calculations", %{
-      user: user,
       account: account,
       symbol: symbol
     } do
@@ -181,7 +177,7 @@ defmodule AshfolioWeb.Integration.SimplifiedTransactionFlowTest do
       end)
 
       # Verify portfolio calculation integration
-      case Ashfolio.Portfolio.Calculator.calculate_position_returns(user.id) do
+      case Ashfolio.Portfolio.Calculator.calculate_position_returns() do
         {:ok, positions} ->
           aapl_position = Enum.find(positions, fn pos -> pos.symbol == "AAPL" end)
           assert aapl_position != nil

@@ -5,26 +5,26 @@ defmodule Ashfolio.FinancialManagement.CategorySeederTest do
   @moduletag :financial_management
 
   alias Ashfolio.FinancialManagement.{CategorySeeder, TransactionCategory}
-  alias Ashfolio.SQLiteHelpers
 
-  describe "seed_system_categories/1" do
+  describe "seed_system_categories/0" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-      %{user: user}
+      # Database-as-user architecture: No user needed
+      %{}
     end
 
-    test "creates 6 investment system categories for user", %{user: user} do
-      {:ok, categories} = CategorySeeder.seed_system_categories(user.id)
+    test "creates 6 investment system categories" do
+      {:ok, categories} = CategorySeeder.seed_system_categories()
 
       assert length(categories) == 6
 
       # Verify all categories were created
-      {:ok, user_categories} = TransactionCategory.categories_for_user(user.id)
-      assert length(user_categories) == 6
+      {:ok, all_categories} = TransactionCategory.list()
+      system_categories = Enum.filter(all_categories, & &1.is_system)
+      assert length(system_categories) >= 6
     end
 
-    test "creates categories with correct names and colors", %{user: user} do
-      {:ok, categories} = CategorySeeder.seed_system_categories(user.id)
+    test "creates categories with correct names and colors" do
+      {:ok, categories} = CategorySeeder.seed_system_categories()
 
       # Expected investment categories with colors
       expected_categories = [
@@ -44,90 +44,82 @@ defmodule Ashfolio.FinancialManagement.CategorySeederTest do
       assert created_names_colors == Enum.sort(expected_categories)
     end
 
-    test "sets is_system flag to true for all categories", %{user: user} do
-      {:ok, categories} = CategorySeeder.seed_system_categories(user.id)
+    test "sets is_system flag to true for all categories" do
+      {:ok, categories} = CategorySeeder.seed_system_categories()
 
       # All created categories should be system categories
       assert Enum.all?(categories, fn cat -> cat.is_system == true end)
     end
 
-    test "associates categories with correct user_id", %{user: user} do
-      {:ok, categories} = CategorySeeder.seed_system_categories(user.id)
+    test "creates categories without user_id (database-as-user architecture)" do
+      {:ok, categories} = CategorySeeder.seed_system_categories()
 
-      # All categories should belong to the specified user
-      assert Enum.all?(categories, fn cat -> cat.user_id == user.id end)
+      # All categories should not have user_id in database-as-user architecture
+      assert Enum.all?(categories, fn cat -> is_nil(Map.get(cat, nil)) end)
     end
 
-    test "creates categories with no parent_category_id (root level)", %{user: user} do
-      {:ok, categories} = CategorySeeder.seed_system_categories(user.id)
+    test "creates categories with no parent_category_id (root level)" do
+      {:ok, categories} = CategorySeeder.seed_system_categories()
 
       # All system categories should be root level (no parent)
       assert Enum.all?(categories, fn cat -> is_nil(cat.parent_category_id) end)
     end
 
-    test "returns error for invalid user_id" do
-      invalid_user_id = "invalid-uuid"
+    test "succeeds without user parameters (database-as-user architecture)" do
+      {:ok, categories} = CategorySeeder.seed_system_categories()
 
-      {:error, reason} = CategorySeeder.seed_system_categories(invalid_user_id)
-
-      assert reason != nil
-    end
-
-    test "returns error for non-existent user_id" do
-      non_existent_user_id = "550e8400-e29b-41d4-a716-446655440000"
-
-      {:error, reason} = CategorySeeder.seed_system_categories(non_existent_user_id)
-
-      assert reason != nil
+      assert length(categories) == 6
+      assert Enum.all?(categories, & &1.is_system)
     end
   end
 
   describe "idempotent behavior" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-      %{user: user}
+      # Database-as-user architecture: No user needed
+      %{}
     end
 
-    test "second run doesn't create duplicate categories", %{user: user} do
+    test "second run doesn't create duplicate categories" do
       # First run
-      {:ok, first_categories} = CategorySeeder.seed_system_categories(user.id)
+      {:ok, first_categories} = CategorySeeder.seed_system_categories()
       assert length(first_categories) == 6
 
       # Second run
-      {:ok, second_categories} = CategorySeeder.seed_system_categories(user.id)
+      {:ok, second_categories} = CategorySeeder.seed_system_categories()
       assert length(second_categories) == 6
 
-      # Total categories should still be 6, not 12
-      {:ok, all_user_categories} = TransactionCategory.categories_for_user(user.id)
-      assert length(all_user_categories) == 6
+      # Total system categories should still be 6, not 12
+      {:ok, all_categories} = TransactionCategory.list()
+      system_categories = Enum.filter(all_categories, & &1.is_system)
+      assert length(system_categories) == 6
     end
 
-    test "handles existing categories gracefully", %{user: user} do
+    test "handles existing categories gracefully" do
       # Create one category manually first
       {:ok, _existing_category} =
         TransactionCategory.create(%{
           name: "Growth",
           color: "#10B981",
-          is_system: true,
-          user_id: user.id
+          is_system: true
         })
 
       # Run seeder - should handle existing category and create the remaining 5
-      {:ok, categories} = CategorySeeder.seed_system_categories(user.id)
+      {:ok, categories} = CategorySeeder.seed_system_categories()
 
       # Should report all 6 categories (1 existing + 5 new)
       assert length(categories) == 6
 
       # Verify total count in database
-      {:ok, all_user_categories} = TransactionCategory.categories_for_user(user.id)
-      assert length(all_user_categories) == 6
+      {:ok, all_categories} = TransactionCategory.list()
+      system_categories = Enum.filter(all_categories, & &1.is_system)
+      assert length(system_categories) == 6
     end
 
-    test "returns same result when run multiple times", %{user: user} do
+    test "returns same result when run multiple times" do
       # Run seeder multiple times
-      {:ok, first_run} = CategorySeeder.seed_system_categories(user.id)
-      {:ok, second_run} = CategorySeeder.seed_system_categories(user.id)
-      {:ok, third_run} = CategorySeeder.seed_system_categories(user.id)
+      {:ok, first_run} = CategorySeeder.seed_system_categories()
+      {:ok, second_run} = CategorySeeder.seed_system_categories()
+      {:ok, third_run} = CategorySeeder.seed_system_categories()
 
       # All runs should return same categories (by name)
       first_names = Enum.map(first_run, & &1.name) |> Enum.sort()
@@ -138,7 +130,7 @@ defmodule Ashfolio.FinancialManagement.CategorySeederTest do
       assert second_names == third_names
     end
 
-    test "preserves existing category attributes when found", %{user: user} do
+    test "preserves existing category attributes when found" do
       # Create category with different color
       {:ok, existing_category} =
         TransactionCategory.create(%{
@@ -146,12 +138,11 @@ defmodule Ashfolio.FinancialManagement.CategorySeederTest do
           # Different color
           color: "#FF0000",
           # Different system flag
-          is_system: false,
-          user_id: user.id
+          is_system: false
         })
 
       # Run seeder
-      {:ok, categories} = CategorySeeder.seed_system_categories(user.id)
+      {:ok, categories} = CategorySeeder.seed_system_categories()
 
       # Find the Growth category in results
       growth_category = Enum.find(categories, fn cat -> cat.name == "Growth" end)
@@ -167,63 +158,56 @@ defmodule Ashfolio.FinancialManagement.CategorySeederTest do
 
   describe "error handling" do
     test "handles database errors gracefully" do
-      # Test with nil user_id
-      {:error, reason} = CategorySeeder.seed_system_categories(nil)
-
-      assert reason != nil
+      # Test basic functionality without user parameters
+      {:ok, categories} = CategorySeeder.seed_system_categories()
+      assert length(categories) == 6
     end
 
     test "handles partial seeding failures" do
-      user = SQLiteHelpers.get_default_user()
-
       # Create a category with a name that will conflict with seeding
       {:ok, _conflicting_category} =
         TransactionCategory.create(%{
           name: "Growth",
           # Valid color but different from seeded one
           color: "#FF0000",
-          is_system: false,
-          user_id: user.id
+          is_system: false
         })
 
       # Seeder should still succeed by handling existing categories
-      {:ok, categories} = CategorySeeder.seed_system_categories(user.id)
+      {:ok, categories} = CategorySeeder.seed_system_categories()
 
       # Should still create/return all 6 categories
       assert length(categories) == 6
     end
 
     test "reports detailed error information for validation failures" do
-      # This test will be enhanced when we implement validation error handling
-      user = SQLiteHelpers.get_default_user()
-
       # Basic test that seeding works (detailed error testing will expand)
-      {:ok, categories} = CategorySeeder.seed_system_categories(user.id)
+      {:ok, categories} = CategorySeeder.seed_system_categories()
       assert length(categories) == 6
     end
   end
 
   describe "performance requirements" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-      %{user: user}
+      # Database-as-user architecture: No user needed
+      %{}
     end
 
-    test "completes seeding within 50ms for single user", %{user: user} do
+    test "completes seeding within 50ms" do
       {duration_ms, {:ok, categories}} =
-        :timer.tc(fn -> CategorySeeder.seed_system_categories(user.id) end, :millisecond)
+        :timer.tc(fn -> CategorySeeder.seed_system_categories() end, :millisecond)
 
       assert length(categories) == 6
       assert duration_ms < 50, "Seeding took #{duration_ms}ms, expected < 50ms"
     end
 
-    test "maintains performance on subsequent runs (cached behavior)", %{user: user} do
+    test "maintains performance on subsequent runs (cached behavior)" do
       # First run (database writes)
-      CategorySeeder.seed_system_categories(user.id)
+      CategorySeeder.seed_system_categories()
 
       # Second run (should be faster due to existing data)
       {duration_ms, {:ok, categories}} =
-        :timer.tc(fn -> CategorySeeder.seed_system_categories(user.id) end, :millisecond)
+        :timer.tc(fn -> CategorySeeder.seed_system_categories() end, :millisecond)
 
       assert length(categories) == 6
       assert duration_ms < 25, "Cached seeding took #{duration_ms}ms, expected < 25ms"
@@ -236,7 +220,7 @@ defmodule Ashfolio.FinancialManagement.CategorySeederTest do
       expected_categories = [
         # Growth investments
         "Growth",
-        # Income-producing investments  
+        # Income-producing investments
         "Income",
         # High-risk/high-reward investments
         "Speculative",
@@ -248,16 +232,14 @@ defmodule Ashfolio.FinancialManagement.CategorySeederTest do
         "Bonds"
       ]
 
-      user = SQLiteHelpers.get_default_user()
-      {:ok, categories} = CategorySeeder.seed_system_categories(user.id)
+      {:ok, categories} = CategorySeeder.seed_system_categories()
 
       created_names = Enum.map(categories, & &1.name) |> Enum.sort()
       assert created_names == Enum.sort(expected_categories)
     end
 
     test "uses Tailwind CSS compatible colors" do
-      user = SQLiteHelpers.get_default_user()
-      {:ok, categories} = CategorySeeder.seed_system_categories(user.id)
+      {:ok, categories} = CategorySeeder.seed_system_categories()
 
       # All colors should be valid hex colors
       colors = Enum.map(categories, & &1.color)

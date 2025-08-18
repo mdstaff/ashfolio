@@ -2,9 +2,8 @@ defmodule AshfolioWeb.ResponsiveDesignTest do
   use AshfolioWeb.ConnCase
 
   setup do
-    # Use the global default user - no need for complex race condition handling
-    user = Ashfolio.SQLiteHelpers.get_default_user()
-    {:ok, user: user}
+    # Database-as-user architecture: No user entity needed
+    :ok
   end
 
   describe "responsive design compliance" do

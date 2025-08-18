@@ -17,12 +17,9 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
   alias Ashfolio.SQLiteHelpers
 
   describe "PubSub Performance" do
-    setup do
-      user = SQLiteHelpers.get_default_user()
-      %{user: user}
-    end
+    # Database-as-user architecture: No user setup needed
 
-    test "PubSub broadcast under 10ms", %{user: user} do
+    test "PubSub broadcast under 10ms" do
       net_worth_data = %{
         net_worth: Decimal.new("100000"),
         investment_value: Decimal.new("75000"),
@@ -34,7 +31,7 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
         :timer.tc(fn ->
           Phoenix.PubSub.broadcast(
             Ashfolio.PubSub,
-            "net_worth:#{user.id}",
+            "net_worth",
             {:net_worth_updated, net_worth_data}
           )
         end)
@@ -45,7 +42,7 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
              "PubSub broadcast took #{time_ms}ms, expected < 10ms"
     end
 
-    test "concurrent broadcasts under 10ms each", %{user: user} do
+    test "concurrent broadcasts under 10ms each" do
       # Test concurrent broadcasting
       tasks =
         for i <- 1..5 do
@@ -61,7 +58,7 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
               :timer.tc(fn ->
                 Phoenix.PubSub.broadcast(
                   Ashfolio.PubSub,
-                  "net_worth:#{user.id}",
+                  "net_worth",
                   {:net_worth_updated, data}
                 )
               end)
@@ -77,9 +74,9 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
              "Concurrent broadcasts averaged #{avg_time}ms, expected < 8ms"
     end
 
-    test "PubSub message delivery latency under 20ms", %{user: user} do
+    test "PubSub message delivery latency under 20ms" do
       # Subscribe to the topic
-      Phoenix.PubSub.subscribe(Ashfolio.PubSub, "net_worth:#{user.id}")
+      Phoenix.PubSub.subscribe(Ashfolio.PubSub, "net_worth")
 
       data = %{
         net_worth: Decimal.new("100000"),
@@ -92,7 +89,7 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
 
       Phoenix.PubSub.broadcast(
         Ashfolio.PubSub,
-        "net_worth:#{user.id}",
+        "net_worth",
         {:net_worth_updated, data}
       )
 
@@ -110,12 +107,12 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
       end
     end
 
-    test "multiple topic broadcasts maintain performance", %{user: user} do
+    test "multiple topic broadcasts maintain performance" do
       topics = [
-        "net_worth:#{user.id}",
-        "transactions:#{user.id}",
+        "net_worth",
+        "transactions",
         "prices",
-        "portfolio:#{user.id}"
+        "portfolio"
       ]
 
       times =
@@ -141,12 +138,9 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
   end
 
   describe "Update Cycle Performance" do
-    setup do
-      user = SQLiteHelpers.get_default_user()
-      %{user: user}
-    end
+    # Database-as-user architecture: No user setup needed
 
-    test "rapid update cycles maintain performance", %{user: user} do
+    test "rapid update cycles maintain performance" do
       # Simulate rapid updates (like real-time price changes)
       update_times =
         for i <- 1..10 do
@@ -158,7 +152,7 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
                   # Net worth update
                   Phoenix.PubSub.broadcast(
                     Ashfolio.PubSub,
-                    "net_worth:#{user.id}",
+                    "net_worth",
                     {:net_worth_updated, %{net_worth: Decimal.new("#{100_000 + i * 1000}")}}
                   )
 
@@ -174,7 +168,7 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
                   # Transaction update
                   Phoenix.PubSub.broadcast(
                     Ashfolio.PubSub,
-                    "transactions:#{user.id}",
+                    "transactions",
                     {:transaction_updated, %{id: "test-#{i}"}}
                   )
               end
@@ -192,7 +186,7 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
              "Rapid updates averaged #{avg_update_time}ms, expected < 25ms"
     end
 
-    test "burst updates handle efficiently", %{user: _user} do
+    test "burst updates handle efficiently" do
       # Simulate burst of updates (like market open)
       burst_size = 20
 
@@ -220,8 +214,6 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
 
   describe "Memory Efficiency" do
     test "memory usage stays reasonable during heavy update cycles" do
-      user = SQLiteHelpers.get_default_user()
-
       :erlang.garbage_collect()
       initial_memory = :erlang.memory(:total)
 
@@ -229,7 +221,7 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
       for i <- 1..100 do
         Phoenix.PubSub.broadcast(
           Ashfolio.PubSub,
-          "net_worth:#{user.id}",
+          "net_worth",
           {:net_worth_updated,
            %{
              net_worth: Decimal.new("#{100_000 + i * 100}"),
@@ -256,8 +248,7 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
     end
 
     test "PubSub subscriber cleanup works efficiently" do
-      user = SQLiteHelpers.get_default_user()
-      topic = "test_cleanup:#{user.id}"
+      topic = "test_cleanup:"
 
       :erlang.garbage_collect()
       initial_memory = :erlang.memory(:total)
@@ -282,10 +273,8 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
 
   describe "Real-time Update Simulation" do
     test "end-to-end update latency simulation under 50ms", %{} do
-      user = SQLiteHelpers.get_default_user()
-
       # Subscribe to updates
-      Phoenix.PubSub.subscribe(Ashfolio.PubSub, "net_worth:#{user.id}")
+      Phoenix.PubSub.subscribe(Ashfolio.PubSub, "net_worth")
 
       # Measure end-to-end latency
       start_time = System.monotonic_time(:microsecond)
@@ -293,7 +282,7 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
       # Simulate a data change that triggers updates
       Phoenix.PubSub.broadcast(
         Ashfolio.PubSub,
-        "net_worth:#{user.id}",
+        "net_worth",
         {:net_worth_updated,
          %{
            net_worth: Decimal.new("150000"),
@@ -318,8 +307,7 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
     end
 
     test "concurrent subscribers receive updates efficiently", %{} do
-      user = SQLiteHelpers.get_default_user()
-      topic = "concurrent_test:#{user.id}"
+      topic = "concurrent_test:"
 
       # Create multiple subscribers
       subscriber_tasks =

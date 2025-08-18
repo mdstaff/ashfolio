@@ -318,8 +318,8 @@ defmodule Ashfolio.Portfolio.ChartDataService do
   Provides historical performance and allocation data.
   """
 
-  def get_portfolio_performance_data(user_id, period \\ :month) do
-    with {:ok, historical_data} <- get_historical_portfolio_values(user_id, period) do
+  def get_portfolio_performance_data(period \\ :month) do
+    with {:ok, historical_data} <- get_historical_portfolio_values(period) do
       chart_data = %{
         labels: Enum.map(historical_data, & &1.date),
         datasets: [
@@ -336,8 +336,8 @@ defmodule Ashfolio.Portfolio.ChartDataService do
     end
   end
 
-  def get_allocation_data(user_id, dimension \\ :asset_class) do
-    with {:ok, holdings} <- HoldingsCalculator.get_holdings_summary(user_id) do
+  def get_allocation_data(dimension \\ :asset_class) do
+    with {:ok, holdings} <- HoldingsCalculator.get_holdings_summary() do
       allocation_data =
         holdings.holdings
         |> group_by_dimension(dimension)
@@ -348,7 +348,7 @@ defmodule Ashfolio.Portfolio.ChartDataService do
     end
   end
 
-  defp get_historical_portfolio_values(user_id, period) do
+  defp get_historical_portfolio_values(period) do
     # Query historical data from new PortfolioSnapshot resource
     date_range = get_date_range(period)
 
@@ -385,13 +385,13 @@ defmodule AshfolioWeb.Components.InteractiveChart do
 
     case chart_type do
       :performance ->
-        case ChartDataService.get_portfolio_performance_data(user_id) do
+        case ChartDataService.get_portfolio_performance_data() do
           {:ok, data} -> assign(socket, chart_data: data, loading: false)
           {:error, _} -> assign(socket, chart_data: nil, loading: false, error: "Failed to load chart data")
         end
 
       :allocation ->
-        case ChartDataService.get_allocation_data(user_id) do
+        case ChartDataService.get_allocation_data() do
           {:ok, data} -> assign(socket, chart_data: data, loading: false)
           {:error, _} -> assign(socket, chart_data: nil, loading: false, error: "Failed to load chart data")
         end
@@ -511,7 +511,7 @@ defmodule AshfolioWeb.Components.AdvancedHoldingsTable do
   defp load_and_filter_holdings(socket) do
     user_id = socket.assigns.user_id
 
-    with {:ok, holdings_summary} <- HoldingsCalculator.get_holdings_summary(user_id) do
+    with {:ok, holdings_summary} <- HoldingsCalculator.get_holdings_summary() do
       filtered_holdings =
         holdings_summary.holdings
         |> apply_filters(socket.assigns.filters)
@@ -756,7 +756,7 @@ defmodule Ashfolio.Portfolio.PortfolioSnapshot do
     end
 
     read :by_user_and_date_range do
-      argument :user_id, :uuid, allow_nil?: false
+      argument allow_nil?: false
       argument :start_date, :date, allow_nil?: false
       argument :end_date, :date, allow_nil?: false
 
@@ -768,7 +768,7 @@ defmodule Ashfolio.Portfolio.PortfolioSnapshot do
     end
 
     read :latest_for_user do
-      argument :user_id, :uuid, allow_nil?: false
+      argument allow_nil?: false
       filter expr(user_id == ^arg(:user_id))
       sort date: :desc
       limit 1
@@ -781,7 +781,7 @@ defmodule Ashfolio.Portfolio.PortfolioSnapshot do
   end
 
   identities do
-    identity :unique_user_date, [:user_id, :date]
+    identity :unique_user_date, [::date]
   end
 end
 ```
@@ -820,7 +820,7 @@ defmodule Ashfolio.Portfolio.UserPreferences do
     defaults [:create, :read, :update]
 
     read :for_user do
-      argument :user_id, :uuid, allow_nil?: false
+      argument allow_nil?: false
       filter expr(user_id == ^arg(:user_id))
     end
 
@@ -1002,18 +1002,18 @@ defmodule Ashfolio.UX.PerformanceOptimizer do
   end
 
   # Preload chart data in background
-  def preload_chart_data(user_id) do
+  def preload_chart_data() do
     Task.start(fn ->
-      ChartDataService.get_portfolio_performance_data(user_id)
-      ChartDataService.get_allocation_data(user_id)
+      ChartDataService.get_portfolio_performance_data()
+      ChartDataService.get_allocation_data()
     end)
   end
 
   # Cache frequently accessed data
-  def cache_user_preferences(user_id) do
-    case UserPreferences.for_user(user_id) do
+  def cache_user_preferences() do
+    case UserPreferences.for_user() do
       {:ok, preferences} ->
-        :ets.insert(:user_preferences_cache, {user_id, preferences})
+        :ets.insert(:user_preferences_cache, {preferences})
         {:ok, preferences}
       error ->
         error
@@ -1073,9 +1073,9 @@ defmodule Ashfolio.Portfolio.ChartDataServiceTest do
   describe "portfolio performance data" do
     test "generates chart data for valid portfolio" do
       user = create_test_user()
-      create_test_portfolio_snapshots(user.id)
+      create_test_portfolio_snapshots()
 
-      {:ok, chart_data} = ChartDataService.get_portfolio_performance_data(user.id)
+      {:ok, chart_data} = ChartDataService.get_portfolio_performance_data()
 
       assert chart_data.labels |> length() > 0
       assert chart_data.datasets |> length() == 1
@@ -1085,7 +1085,7 @@ defmodule Ashfolio.Portfolio.ChartDataServiceTest do
     test "handles empty portfolio gracefully" do
       user = create_test_user()
 
-      {:ok, chart_data} = ChartDataService.get_portfolio_performance_data(user.id)
+      {:ok, chart_data} = ChartDataService.get_portfolio_performance_data()
 
       assert chart_data.labels == []
       assert chart_data.datasets |> hd() |> Map.get(:data) == []

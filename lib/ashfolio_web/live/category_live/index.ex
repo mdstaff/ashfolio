@@ -2,20 +2,16 @@ defmodule AshfolioWeb.CategoryLive.Index do
   use AshfolioWeb, :live_view
 
   alias Ashfolio.FinancialManagement.TransactionCategory
-  alias Ashfolio.Portfolio.User
   alias AshfolioWeb.Live.{FormatHelpers, ErrorHelpers}
   alias AshfolioWeb.CategoryLive.FormComponent
 
   @impl true
   def mount(_params, _session, socket) do
-    user_id = get_default_user_id()
-
     socket =
       socket
       |> assign_current_page(:categories)
       |> assign(:page_title, "Investment Categories")
       |> assign(:page_subtitle, "Organize your investment transactions")
-      |> assign(:user_id, user_id)
       |> assign(:show_form, false)
       |> assign(:form_action, :new)
       |> assign(:selected_category, nil)
@@ -24,7 +20,7 @@ defmodule AshfolioWeb.CategoryLive.Index do
       |> assign(:loading, true)
 
     # Load categories
-    socket = load_categories(socket, user_id)
+    socket = load_categories(socket)
 
     # Subscribe to category updates for real-time changes
     Ashfolio.PubSub.subscribe("categories")
@@ -91,7 +87,7 @@ defmodule AshfolioWeb.CategoryLive.Index do
           case TransactionCategory.destroy(id) do
             :ok ->
               Ashfolio.PubSub.broadcast!("categories", {:category_deleted, id})
-              socket = load_categories(socket, socket.assigns.user_id)
+              socket = load_categories(socket)
 
               {:noreply,
                socket
@@ -124,7 +120,7 @@ defmodule AshfolioWeb.CategoryLive.Index do
 
   @impl true
   def handle_info({FormComponent, {:saved, category}}, socket) do
-    user_id = socket.assigns.user_id
+    # Database-as-user architecture: No user_id needed
 
     case socket.assigns.form_action do
       :new ->
@@ -133,7 +129,7 @@ defmodule AshfolioWeb.CategoryLive.Index do
         {:noreply,
          socket
          |> assign(:show_form, false)
-         |> load_categories(user_id)
+         |> load_categories()
          |> ErrorHelpers.put_success_flash("Category \"#{category.name}\" created successfully")}
 
       :edit ->
@@ -142,7 +138,7 @@ defmodule AshfolioWeb.CategoryLive.Index do
         {:noreply,
          socket
          |> assign(:show_form, false)
-         |> load_categories(user_id)
+         |> load_categories()
          |> ErrorHelpers.put_success_flash("Category \"#{category.name}\" updated successfully")}
     end
   end
@@ -154,17 +150,17 @@ defmodule AshfolioWeb.CategoryLive.Index do
 
   @impl true
   def handle_info({:category_created, _category}, socket) do
-    {:noreply, load_categories(socket, socket.assigns.user_id)}
+    {:noreply, load_categories(socket)}
   end
 
   @impl true
   def handle_info({:category_updated, _category}, socket) do
-    {:noreply, load_categories(socket, socket.assigns.user_id)}
+    {:noreply, load_categories(socket)}
   end
 
   @impl true
   def handle_info({:category_deleted, _category_id}, socket) do
-    {:noreply, load_categories(socket, socket.assigns.user_id)}
+    {:noreply, load_categories(socket)}
   end
 
   @impl true
@@ -432,7 +428,6 @@ defmodule AshfolioWeb.CategoryLive.Index do
       id="category-form"
       action={@form_action}
       category={@selected_category}
-      user_id={@user_id}
       categories={@categories}
     />
     """
@@ -474,8 +469,9 @@ defmodule AshfolioWeb.CategoryLive.Index do
     |> assign(:selected_category, category)
   end
 
-  defp load_categories(socket, user_id) do
-    case TransactionCategory.get_user_categories_with_children(user_id) do
+  defp load_categories(socket) do
+    # Database-as-user architecture: No user_id needed
+    case TransactionCategory.get_categories_with_children() do
       {:ok, categories} ->
         socket
         |> assign(:categories, categories)
@@ -504,11 +500,4 @@ defmodule AshfolioWeb.CategoryLive.Index do
     0
   end
 
-  defp get_default_user_id do
-    case User.get_default_user() do
-      {:ok, [user]} -> user.id
-      {:ok, user} when is_struct(user) -> user.id
-      _ -> nil
-    end
-  end
 end

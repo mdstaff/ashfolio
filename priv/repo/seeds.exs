@@ -8,16 +8,15 @@ alias Ashfolio.Portfolio.{UserSettings, Account, Symbol}
 alias Ashfolio.FinancialManagement.{CategorySeeder, TransactionCategory}
 
 # Create user settings if they don't exist (database-as-user architecture)
-user_settings =
-  case UserSettings.get_or_create_settings() do
-    {:ok, settings} ->
-      IO.puts("✅ User settings ready: #{settings.name}")
-      settings
+# Temporarily disabled during migration to database-as-user architecture
+user_settings = %{
+  id: "seed-user-1",
+  name: "Seed User",
+  currency: "USD",
+  locale: "en-US"
+}
 
-    {:error, error} ->
-      IO.puts("❌ Error creating user settings: #{inspect(error)}")
-      exit(1)
-  end
+IO.puts("✅ User settings ready (temporary): #{user_settings.name}")
 
 # Create investment system categories if they don't exist
 {:ok, existing_categories} = TransactionCategory.list()

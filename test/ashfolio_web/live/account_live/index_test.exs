@@ -9,35 +9,38 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
   alias Ashfolio.SQLiteHelpers
 
   setup do
-    # Use global test data to avoid SQLite concurrency issues
-    user = SQLiteHelpers.get_default_user()
-
+    # Database-as-user architecture: No user needed
     # Use existing default account instead of creating new ones
-    account1 = SQLiteHelpers.get_default_account(user)
+    account1 = SQLiteHelpers.get_default_account()
 
     # For tests that need two accounts, create a second one only when needed
     # Most tests can work with just one account
-    %{user: user, account1: account1}
+    %{account1: account1}
   end
 
   describe "account listing" do
-    test "displays all accounts", %{conn: conn, account1: account1, user: user} do
+    test "displays all accounts", %{conn: conn, account1: account1} do
       # Create second account only for this test
-      {:ok, account2} = Account.create(%{
-        name: "Test Account 2",
-        platform: "Test Platform",
-        balance: Decimal.new("2000.00"),
-        is_excluded: true,
-        user_id: user.id
-      })
+      {:ok, account2} =
+        Account.create(%{
+          name: "Test Account 2",
+          platform: "Test Platform",
+          balance: Decimal.new("2000.00"),
+          is_excluded: true
+        })
+
       {:ok, _index_live, html} = live(conn, ~p"/accounts")
 
       # Updated title
       assert html =~ "Accounts"
-      assert html =~ account1.name # "Default Test Account"
-      assert html =~ account2.name # "Test Account #{timestamp}"
-      assert html =~ "$10,000.00" # Default account balance
-      assert html =~ "$2,000.00"   # account2 balance
+      # "Default Test Account"
+      assert html =~ account1.name
+      # "Test Account #{timestamp}"
+      assert html =~ account2.name
+      # Default account balance
+      assert html =~ "$10,000.00"
+      # account2 balance
+      assert html =~ "$2,000.00"
       assert html =~ "Excluded"
     end
 
@@ -219,16 +222,16 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
 
     test "preserves other accounts when editing one account", %{
       conn: conn,
-      account1: account1,
-      user: user
+      account1: account1
     } do
       # Create second account only for this test
-      {:ok, account2} = Account.create(%{
-        name: "Test Account 2",
-        platform: "Test Platform 2", 
-        balance: Decimal.new("3000.00"),
-        user_id: user.id
-      })
+      {:ok, account2} =
+        Account.create(%{
+          name: "Test Account 2",
+          platform: "Test Platform 2",
+          balance: Decimal.new("3000.00")
+        })
+
       {:ok, index_live, _html} = live(conn, ~p"/accounts")
 
       # Open edit form for account1
@@ -331,8 +334,7 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
 
     test "prevents deletion of account with transactions", %{
       conn: conn,
-      account1: account1,
-      user: _user
+      account1: account1
     } do
       # Get or create a symbol for the transaction
       symbol =
@@ -377,8 +379,7 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
 
     test "shows helpful error message when deletion prevented", %{
       conn: conn,
-      account1: account1,
-      user: _user
+      account1: account1
     } do
       # Get or create a symbol and transaction for account1
       symbol =
@@ -417,8 +418,7 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
 
     test "suggests account exclusion as alternative", %{
       conn: conn,
-      account1: account1,
-      user: _user
+      account1: account1
     } do
       # Create a symbol and transaction for account1
       {:ok, symbol} =
@@ -459,8 +459,7 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
 
     test "allows deletion after all transactions are removed", %{
       conn: conn,
-      account1: account1,
-      user: _user
+      account1: account1
     } do
       # Get or create a symbol and transaction for account1
       symbol =

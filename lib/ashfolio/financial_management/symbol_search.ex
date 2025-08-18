@@ -355,6 +355,7 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
 
       {:error, :rate_limited, retry_after_ms} ->
         Logger.info("Rate limited for symbol search, retry after #{retry_after_ms}ms")
+
         ErrorHandler.handle_error({:error, :symbol_search_rate_limited}, %{
           operation: :external_symbol_search,
           retry_after_ms: retry_after_ms
@@ -487,7 +488,7 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
     # Security: Only allow alphanumeric characters, hyphens, and dots for valid stock symbols
     # Filter out potentially malicious symbols (=, ^, and complex special chars)
     if Regex.match?(~r/^[A-Z0-9.-]+$/i, symbol) and
-       not String.contains?(symbol, ["=", "^", "<", ">", "&", ";", "|", "`"]) do
+         not String.contains?(symbol, ["=", "^", "<", ">", "&", ";", "|", "`"]) do
       :ok
     else
       {:error, :invalid_symbol_format}
@@ -505,10 +506,10 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
   defp validate_name_format(name) do
     # Security: Basic HTML/script tag detection for name field
     name_lower = String.downcase(name)
-    
+
     # Check for potentially malicious content
     malicious_patterns = ["<script", "</script", "<iframe", "javascript:", "data:", "vbscript:"]
-    
+
     if Enum.any?(malicious_patterns, &String.contains?(name_lower, &1)) do
       {:error, :invalid_name_format}
     else

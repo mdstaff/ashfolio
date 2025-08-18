@@ -99,7 +99,7 @@ Get Ashfolio up and running in minutes!
 
 - 🚧 **Symbol Autocomplete**: Intelligent symbol search in transaction forms (In Progress)
 - 🚧 **Enhanced Dashboard**: Net worth integration and cash account displays
-- 🚧 **Balance Management UI**: User-friendly cash balance update interfaces
+- 🚧 **Balance Management UI**: Intuitive cash balance update interfaces
 - 🚧 **Category Management**: UI for creating and managing transaction categories
 
 **Future Releases**:

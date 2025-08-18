@@ -60,20 +60,15 @@ The Ash Framework forms the backbone of Ashfolio's data model and business logic
 
 ```mermaid
 erDiagram
-    User ||--o{ Account : has
-    User ||--o{ Transaction : has
     Account ||--o{ Transaction : has
     Symbol ||--o{ Transaction : has
+    TransactionCategory ||--o{ Transaction : categorizes
 
-    User { 
-        uuid id PK
-        string name
-        string currency
-        string locale
-    }
+    %% Database-as-user architecture: Each SQLite database represents one user
+    %% No User entity needed - user data is database-wide settings
     Account {
         uuid id PK
-        uuid user_id FK
+        %% No user_id - database-as-user architecture
         string name
         string platform
         decimal balance
@@ -88,15 +83,23 @@ erDiagram
     }
     Transaction {
         uuid id PK
-        uuid user_id FK
         uuid account_id FK
         uuid symbol_id FK
+        uuid category_id FK
         atom type
         decimal quantity
-        decimal unit_price
+        decimal price
         decimal fee
         date date
         decimal total_amount
+        text notes
+    }
+    TransactionCategory {
+        uuid id PK
+        string name
+        string color
+        boolean is_system
+        uuid parent_category_id FK
     }
 ```
 

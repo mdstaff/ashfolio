@@ -13,25 +13,23 @@ defmodule AshfolioWeb.Integration.AccountManagementFlowTest do
   import Phoenix.LiveViewTest
 
   alias Ashfolio.Portfolio.Account
-  alias Ashfolio.SQLiteHelpers
 
   setup do
-    # Ensure we have a default user for single-user application
-    {:ok, user} = SQLiteHelpers.get_or_create_default_user()
-    %{user: user}
+    # Database-as-user architecture: No user entity needed
+    %{}
   end
 
   describe "Complete Account Management Workflow" do
     test "end-to-end account lifecycle: create → validate → list → edit → delete", %{
       conn: conn,
-      user: user
+      
     } do
       # Step 1: Navigate to accounts page
       {:ok, view, _html} = live(conn, "/accounts")
 
       # Verify we start with empty state or existing accounts
       initial_accounts_count =
-        case Account.accounts_for_user(user.id) do
+        case Account.list() do
           {:ok, accounts} -> length(accounts)
           _ -> 0
         end
@@ -106,7 +104,7 @@ defmodule AshfolioWeb.Integration.AccountManagementFlowTest do
       assert current_html =~ "$10,000.50" or current_html =~ "10,000"
 
       # Verify account count increased
-      {:ok, updated_accounts} = Account.accounts_for_user(user.id)
+      {:ok, updated_accounts} = Account.list()
       assert length(updated_accounts) == initial_accounts_count + 1
 
       # Get the created account for further testing
@@ -168,20 +166,19 @@ defmodule AshfolioWeb.Integration.AccountManagementFlowTest do
       :timer.sleep(100)
 
       # Verify account is removed from list
-      {:ok, final_accounts} = Account.accounts_for_user(user.id)
+      {:ok, final_accounts} = Account.list()
       assert length(final_accounts) == initial_accounts_count
 
       refute Enum.any?(final_accounts, fn acc -> acc.name == "Updated Investment Account" end)
     end
 
-    test "account exclusion toggle functionality", %{conn: conn, user: user} do
+    test "account exclusion toggle functionality", %{conn: conn} do
       # Create a test account
       {:ok, account} =
         Account.create(%{
           name: "Toggle Test Account",
           platform: "Test Platform",
-          balance: Decimal.new("5000"),
-          user_id: user.id
+          balance: Decimal.new("5000")
         })
 
       {:ok, view, _html} = live(conn, "/accounts")

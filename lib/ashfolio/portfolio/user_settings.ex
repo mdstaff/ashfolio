@@ -1,13 +1,13 @@
 defmodule Ashfolio.Portfolio.UserSettings do
   @moduledoc """
   Singleton UserSettings resource for database-as-user architecture.
-  
+
   This represents user preferences and settings for the single-user application.
   Each SQLite database contains exactly one UserSettings record representing
   the "user" of that database file.
-  
+
   ## Database-as-User Architecture
-  
+
   In this design:
   - Each SQLite database file = one user's complete portfolio
   - No user_id foreign keys needed anywhere
@@ -54,7 +54,11 @@ defmodule Ashfolio.Portfolio.UserSettings do
     validate(present(:name), message: "Name is required")
     validate(present(:currency), message: "Currency is required")
     validate(present(:locale), message: "Locale is required")
-    validate(match(:currency, ~r/^[A-Z]{3}$/), message: "Currency must be a 3-letter code (e.g., USD)")
+
+    validate(match(:currency, ~r/^[A-Z]{3}$/),
+      message: "Currency must be a 3-letter code (e.g., USD)"
+    )
+
     validate(string_length(:name, min: 1, max: 100))
   end
 
@@ -75,7 +79,7 @@ defmodule Ashfolio.Portfolio.UserSettings do
 
     read :get_singleton do
       description("Get the single UserSettings record")
-      
+
       prepare(fn query, _context ->
         Ash.Query.limit(query, 1)
       end)

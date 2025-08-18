@@ -10,21 +10,16 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
 
   describe "CategoryLive.Index" do
     setup do
-      # Use global test user following documented SQLite patterns
-      user = get_default_user()
+      # Database-as-user architecture: No user needed
 
       # Create test categories with retry logic for SQLite concurrency
       user_category =
         with_retry(fn ->
-          case TransactionCategory.create(
-                 %{
-                   name: "Growth Stocks",
-                   color: "#22C55E",
-                   user_id: user.id,
-                   is_system: false
-                 },
-                 actor: user
-               ) do
+          case TransactionCategory.create(%{
+                 name: "Growth Stocks",
+                 color: "#22C55E",
+                 is_system: false
+               }) do
             {:ok, category} -> category
             {:error, error} -> raise "Failed to create user category: #{inspect(error)}"
           end
@@ -32,22 +27,17 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
 
       system_category =
         with_retry(fn ->
-          case TransactionCategory.create(
-                 %{
-                   name: "System Growth",
-                   color: "#3B82F6",
-                   user_id: user.id,
-                   is_system: true
-                 },
-                 actor: user
-               ) do
+          case TransactionCategory.create(%{
+                 name: "System Growth",
+                 color: "#3B82F6",
+                 is_system: true
+               }) do
             {:ok, category} -> category
             {:error, error} -> raise "Failed to create system category: #{inspect(error)}"
           end
         end)
 
       %{
-        user: user,
         user_category: user_category,
         system_category: system_category
       }
@@ -209,9 +199,8 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
 
   describe "CategoryLive.Index empty state" do
     setup do
-      # Use only the global test user, no categories created
-      user = get_default_user()
-      %{user: user}
+      # Database-as-user architecture: No user needed
+      %{}
     end
 
     test "shows empty state when no categories exist", %{conn: conn} do
@@ -226,27 +215,22 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
   describe "CategoryLive.Index additional tests" do
     setup do
       # Use global test user and create categories for these tests
-      user = get_default_user()
+      # Database-as-user architecture: No user needed
 
       # Create test categories with retry logic for SQLite concurrency
       user_category =
         with_retry(fn ->
-          case TransactionCategory.create(
-                 %{
-                   name: "Growth Stocks",
-                   color: "#22C55E",
-                   user_id: user.id,
-                   is_system: false
-                 },
-                 actor: user
-               ) do
+          case TransactionCategory.create(%{
+                 name: "Growth Stocks",
+                 color: "#22C55E",
+                 is_system: false
+               }) do
             {:ok, category} -> category
             {:error, error} -> raise "Failed to create user category: #{inspect(error)}"
           end
         end)
 
       %{
-        user: user,
         user_category: user_category
       }
     end
@@ -272,7 +256,7 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
       # This tests the router configuration
     end
 
-    test "subscribes to category updates for real-time changes", %{conn: conn, user: user} do
+    test "subscribes to category updates for real-time changes", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/categories")
 
       # Simulate external category creation with retry logic
@@ -281,7 +265,6 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
           case TransactionCategory.create(%{
                  name: "External Category",
                  color: "#EF4444",
-                 user_id: user.id,
                  is_system: false
                }) do
             {:ok, category} -> category

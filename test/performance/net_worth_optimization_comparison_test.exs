@@ -29,22 +29,19 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
 
   describe "Optimized Net Worth Calculator Performance" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-
       # Create realistic test data
       create_performance_test_data(
-        user.id,
         @performance_account_count,
         @performance_transactions_per_account
       )
 
-      %{user: user}
+      %{}
     end
 
-    test "optimized net worth calculation meets <100ms target", %{user: user} do
+    test "optimized net worth calculation meets <100ms target" do
       {time_us, {:ok, result}} =
         :timer.tc(fn ->
-          NetWorthCalculatorOptimized.calculate_net_worth(user.id)
+          NetWorthCalculatorOptimized.calculate_net_worth()
         end)
 
       time_ms = time_us / 1000
@@ -61,10 +58,10 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
              "Optimized net worth calculation took #{time_ms}ms, expected < 100ms"
     end
 
-    test "optimized cash balance calculation meets <50ms target", %{user: user} do
+    test "optimized cash balance calculation meets <50ms target" do
       {time_us, {:ok, cash_total}} =
         :timer.tc(fn ->
-          NetWorthCalculatorOptimized.calculate_total_cash_balances(user.id)
+          NetWorthCalculatorOptimized.calculate_total_cash_balances()
         end)
 
       time_ms = time_us / 1000
@@ -75,10 +72,10 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
              "Optimized cash balance calculation took #{time_ms}ms, expected < 50ms"
     end
 
-    test "optimized account breakdown meets <75ms target", %{user: user} do
+    test "optimized account breakdown meets <75ms target" do
       {time_us, {:ok, breakdown}} =
         :timer.tc(fn ->
-          NetWorthCalculatorOptimized.calculate_account_breakdown(user.id)
+          NetWorthCalculatorOptimized.calculate_account_breakdown()
         end)
 
       time_ms = time_us / 1000
@@ -92,10 +89,10 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
              "Optimized account breakdown took #{time_ms}ms, expected < 75ms"
     end
 
-    test "functional equivalence with original implementation", %{user: user} do
+    test "functional equivalence with original implementation" do
       # Get results from both implementations
-      {:ok, original_result} = NetWorthCalculator.calculate_net_worth(user.id)
-      {:ok, optimized_result} = NetWorthCalculatorOptimized.calculate_net_worth(user.id)
+      {:ok, original_result} = NetWorthCalculator.calculate_net_worth()
+      {:ok, optimized_result} = NetWorthCalculatorOptimized.calculate_net_worth()
 
       # Results should be functionally equivalent
       assert Decimal.equal?(original_result.net_worth, optimized_result.net_worth)
@@ -110,17 +107,17 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
                length(optimized_result.breakdown.cash_accounts)
     end
 
-    test "performance improvement verification", %{user: user} do
+    test "performance improvement verification" do
       # Measure original implementation
       {original_time_us, {:ok, _original_result}} =
         :timer.tc(fn ->
-          NetWorthCalculator.calculate_net_worth(user.id)
+          NetWorthCalculator.calculate_net_worth()
         end)
 
-      # Measure optimized implementation  
+      # Measure optimized implementation
       {optimized_time_us, {:ok, _optimized_result}} =
         :timer.tc(fn ->
-          NetWorthCalculatorOptimized.calculate_net_worth(user.id)
+          NetWorthCalculatorOptimized.calculate_net_worth()
         end)
 
       original_time_ms = original_time_us / 1000
@@ -131,9 +128,13 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
       # Performance improvement varies by dataset size - optimized version may have overhead for small datasets
       # Main requirement is that optimized version meets performance target
       if improvement_percent > 0 do
-        IO.puts("Performance improvement: #{improvement_percent}% (#{original_time_ms}ms -> #{optimized_time_ms}ms)")
+        IO.puts(
+          "Performance improvement: #{improvement_percent}% (#{original_time_ms}ms -> #{optimized_time_ms}ms)"
+        )
       else
-        IO.puts("Performance overhead for small dataset: #{improvement_percent}% (#{original_time_ms}ms -> #{optimized_time_ms}ms)")
+        IO.puts(
+          "Performance overhead for small dataset: #{improvement_percent}% (#{original_time_ms}ms -> #{optimized_time_ms}ms)"
+        )
       end
 
       # Optimized version should meet target regardless of original performance
@@ -141,13 +142,13 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
              "Optimized implementation took #{optimized_time_ms}ms, expected < 100ms"
     end
 
-    test "consistent optimized performance across multiple runs", %{user: user} do
+    test "consistent optimized performance across multiple runs" do
       # Run optimized version multiple times
       times =
         for _ <- 1..5 do
           {time_us, {:ok, _result}} =
             :timer.tc(fn ->
-              NetWorthCalculatorOptimized.calculate_net_worth(user.id)
+              NetWorthCalculatorOptimized.calculate_net_worth()
             end)
 
           time_us / 1000
@@ -165,15 +166,15 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
 
   describe "Batch Loading Efficiency Verification" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-      create_performance_test_data(user.id, 10, 20)
-      %{user: user}
+      create_performance_test_data(10, 20)
+      %{}
     end
-    test "optimized cash balance uses database aggregation", %{user: user} do
+
+    test "optimized cash balance uses database aggregation" do
       # The optimized version should use a single aggregate query
       {time_us, {:ok, cash_total}} =
         :timer.tc(fn ->
-          NetWorthCalculatorOptimized.calculate_total_cash_balances(user.id)
+          NetWorthCalculatorOptimized.calculate_total_cash_balances()
         end)
 
       time_ms = time_us / 1000
@@ -185,11 +186,11 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
              "Optimized cash balance calculation took #{time_ms}ms, expected < 20ms (DB aggregation)"
     end
 
-    test "optimized account breakdown avoids N+1 queries", %{user: user} do
+    test "optimized account breakdown avoids N+1 queries" do
       # Should use single batch query instead of individual account queries
       {time_us, {:ok, breakdown}} =
         :timer.tc(fn ->
-          NetWorthCalculatorOptimized.calculate_account_breakdown(user.id)
+          NetWorthCalculatorOptimized.calculate_account_breakdown()
         end)
 
       time_ms = time_us / 1000
@@ -202,12 +203,12 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
              "Optimized account breakdown took #{time_ms}ms, expected < 50ms (batch loading)"
     end
 
-    test "memory efficiency of optimized implementation", %{user: user} do
+    test "memory efficiency of optimized implementation" do
       # Test memory usage of optimized version
       :erlang.garbage_collect()
       initial_memory = :erlang.memory(:total)
 
-      {:ok, _result} = NetWorthCalculatorOptimized.calculate_net_worth(user.id)
+      {:ok, _result} = NetWorthCalculatorOptimized.calculate_net_worth()
 
       :erlang.garbage_collect()
       final_memory = :erlang.memory(:total)
@@ -223,19 +224,19 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
 
   describe "Edge Cases and Error Handling" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-      create_performance_test_data(user.id, 5, 10)
-      %{user: user}
+      create_performance_test_data(5, 10)
+      %{}
     end
-    test "optimized version handles empty account list", %{user: user} do
+
+    test "optimized version handles empty account list" do
       # Remove all accounts to test edge case
-      {:ok, accounts} = Account.accounts_for_user(user.id)
+      {:ok, accounts} = Account.accounts_for_user()
 
       for account <- accounts do
         Account.destroy(account.id)
       end
 
-      {:ok, result} = NetWorthCalculatorOptimized.calculate_net_worth(user.id)
+      {:ok, result} = NetWorthCalculatorOptimized.calculate_net_worth()
 
       # Should handle empty case gracefully
       assert Decimal.equal?(result.net_worth, Decimal.new(0))
@@ -244,13 +245,13 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
       assert length(result.breakdown.cash_accounts) == 0
     end
 
-    test "optimized version handles large datasets efficiently", %{user: user} do
+    test "optimized version handles large datasets efficiently" do
       # Create larger dataset
-      create_performance_test_data(user.id, 75, 20)
+      create_performance_test_data(75, 20)
 
       {time_us, {:ok, result}} =
         :timer.tc(fn ->
-          NetWorthCalculatorOptimized.calculate_net_worth(user.id)
+          NetWorthCalculatorOptimized.calculate_net_worth()
         end)
 
       time_ms = time_us / 1000
@@ -265,7 +266,7 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
 
   # Helper functions
 
-  defp create_performance_test_data(user_id, account_count, _transactions_per_account) do
+  defp create_performance_test_data(account_count, _transactions_per_account) do
     # Create mix of investment and cash accounts
     investment_count = round(account_count * 0.6)
     cash_count = account_count - investment_count
@@ -277,8 +278,7 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
           name: "Investment Account #{i}",
           platform: "Broker #{rem(i, 3) + 1}",
           account_type: :investment,
-          balance: Decimal.new("#{5000 + i * 1000}"),
-          user_id: user_id
+          balance: Decimal.new("#{5000 + i * 1000}")
         })
     end
 
@@ -295,8 +295,7 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
           account_type: account_type,
           balance: Decimal.new("#{2000 + i * 500}"),
           interest_rate: if(account_type in [:savings, :cd], do: Decimal.new("2.5"), else: nil),
-          minimum_balance: if(account_type == :checking, do: Decimal.new("100"), else: nil),
-          user_id: user_id
+          minimum_balance: if(account_type == :checking, do: Decimal.new("100"), else: nil)
         })
     end
   end

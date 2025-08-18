@@ -91,9 +91,9 @@ defmodule AshfolioWeb.FeatureLiveTest do
 
   setup do
     # Provide consistent test context
-    user = get_default_user()
-    account = get_default_account(user)
-    %{user: user, account: account}
+
+    account = get_default_account()
+    %{ account: account}
   end
 
   describe "page_rendering" do
@@ -103,7 +103,7 @@ defmodule AshfolioWeb.FeatureLiveTest do
   end
 
   describe "user_interactions" do
-    test "handles form submission", %{conn: conn, user: user} do
+    test "handles form submission", %{conn: conn} do
       # Test implementation
     end
   end
@@ -128,7 +128,7 @@ defmodule Ashfolio.Integration.WorkflowTest do
   describe "complete_workflow_name" do
     test "user completes full workflow successfully", %{conn: conn} do
       # Step 1: Setup
-      user = get_default_user()
+
 
       # Step 2: Navigate to starting point
       {:ok, view, _html} = live(conn, "/start-url")
@@ -196,13 +196,13 @@ end
 
 ```elixir
 # ✅ GOOD - Descriptive and consistent
-user = get_default_user()
-account = get_default_account(user)
+
+account = get_default_account()
 symbol = get_common_symbol("AAPL")
 transaction = create_test_transaction(user, account, symbol)
 
 # ✅ GOOD - Context-specific names
-high_balance_account = get_or_create_account(user, %{balance: Decimal.new("100000.00")})
+high_balance_account = get_or_create_account(%{balance: Decimal.new("100000.00")})
 expensive_symbol = get_or_create_symbol("TSLA", %{current_price: Decimal.new("800.00")})
 
 # ❌ AVOID - Generic or unclear names
@@ -218,15 +218,15 @@ thing = create_test_transaction()
 1. **Global Data (Highest Priority)**
 
    ```elixir
-   user = get_default_user()
-   account = get_default_account(user)
+
+   account = get_default_account()
    symbol = get_common_symbol("AAPL")  # AAPL, MSFT, GOOGL, TSLA
    ```
 
 2. **Helper Functions (Medium Priority)**
 
    ```elixir
-   custom_account = get_or_create_account(user, %{balance: Decimal.new("50000.00")})
+   custom_account = get_or_create_account(%{balance: Decimal.new("50000.00")})
    custom_symbol = get_or_create_symbol("NVDA", %{current_price: Decimal.new("800.00")})
    transaction = create_test_transaction(user, account, symbol, %{type: :sell})
    ```
@@ -244,10 +244,10 @@ thing = create_test_transaction()
 ```elixir
 # ✅ STANDARD PATTERN - Use helper functions
 test "portfolio calculation with custom data" do
-  user = get_default_user()
+
 
   # Custom account for this test scenario
-  high_value_account = get_or_create_account(user, %{
+  high_value_account = get_or_create_account(%{
     name: "High Value Account",
     balance: Decimal.new("100000.00"),
     platform: "Premium Platform"
@@ -295,11 +295,10 @@ end
 
 # ✅ GLOBAL DATA COMPATIBLE ASSERTIONS - Work with existing data
 test "account listing with global data" do
-  user = get_default_user()
+
 
   {:ok, test_account} = Account.create(%{
-    name: "Test Account",
-    user_id: user.id
+    name: "Test Account"
   })
 
   {:ok, accounts} = Account.list()
@@ -325,9 +324,9 @@ The Ashfolio project uses a global test data strategy where default users, accou
 ```elixir
 # Resource existence checks
 test "verify test resource exists" do
-  user = get_default_user()
 
-  {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
+
+  {:ok, account} = Account.create(%{name: "Test Account"})
   {:ok, accounts} = Account.list()
 
   # Check our resource is in the results
@@ -378,7 +377,7 @@ end
 #### Global Data Resources Available
 
 - **Default User**: Available via `get_default_user()`
-- **Default Account**: Available via `get_default_account(user)`
+- **Default Account**: Available via `get_default_account()`
 - **Common Symbols**: AAPL, MSFT, GOOGL, TSLA via `get_common_symbol(ticker)`
 
 ## Assertion Standards
@@ -423,8 +422,8 @@ end
 
 # ✅ STANDARD - Test business rule violations
 test "prevents overselling stock position" do
-  user = get_default_user()
-  account = get_default_account(user)
+
+  account = get_default_account()
   symbol = get_common_symbol("AAPL")
 
   # Create position with 10 shares
@@ -466,16 +465,16 @@ end
 
 # ✅ BASIC SETUP - For tests needing consistent context
 setup do
-  user = get_default_user()
-  account = get_default_account(user)
-  %{user: user, account: account}
+
+  account = get_default_account()
+  %{ account: account}
 end
 
 # ✅ FEATURE SETUP - For related test groups
 describe "portfolio calculations" do
   setup do
-    user = get_default_user()
-    account = get_default_account(user)
+
+    account = get_default_account()
 
     # Create test portfolio scenario
     symbols = ["AAPL", "MSFT", "GOOGL"]
@@ -487,7 +486,7 @@ describe "portfolio calculations" do
       })
     end)
 
-    %{user: user, account: account, transactions: transactions}
+    %{ account: account, transactions: transactions}
   end
 
   # All tests in this describe block get this context
@@ -524,7 +523,7 @@ end
 ```elixir
 describe "error_scenarios" do
   test "handles invalid decimal values gracefully" do
-    user = get_default_user()
+
 
     # Test with various invalid inputs
     invalid_amounts = [
@@ -549,12 +548,12 @@ describe "error_scenarios" do
   end
 
   test "handles concurrent access gracefully" do
-    user = get_default_user()
+
 
     # Test retry logic under simulated contention
     result = with_retry(fn ->
       # This should succeed after retries
-      get_or_create_account(user, %{name: "Retry Test Account"})
+      get_or_create_account(%{name: "Retry Test Account"})
     end)
 
     assert %Account{name: "Retry Test Account"} = result
@@ -596,7 +595,7 @@ defmodule Ashfolio.ComplexModuleTest do
 
     test "calculates correct value for standard portfolio" do
       # Implementation with inline comments for complex logic
-      user = get_default_user()
+
 
       # Use pre-seeded portfolio data for consistent calculation base
       result = ComplexModule.primary_calculation(user, %{type: :standard})
@@ -613,8 +612,8 @@ end
 
 ```elixir
 test "handles complex FIFO cost basis calculation" do
-  user = get_default_user()
-  account = get_default_account(user)
+
+  account = get_default_account()
   symbol = get_common_symbol("AAPL")
 
   # Scenario: Multiple buy transactions at different prices
@@ -663,8 +662,8 @@ end
 # ✅ EFFICIENT - Minimize database operations
 test "efficient portfolio calculation" do
   # Use global data (no database writes)
-  user = get_default_user()
-  account = get_default_account(user)
+
+  account = get_default_account()
 
   # Batch related operations
   symbols = ["AAPL", "MSFT", "GOOGL"]
@@ -693,10 +692,10 @@ end
 # ✅ EFFICIENT - Group related tests with shared setup
 describe "with_high_value_portfolio" do
   setup do
-    user = get_default_user()
+
 
     # Create complex test scenario once for all tests in this group
-    account = get_or_create_account(user, %{balance: Decimal.new("100000.00")})
+    account = get_or_create_account(%{balance: Decimal.new("100000.00")})
 
     symbols_data = [
       {"AAPL", "500.00", "10"},
@@ -713,7 +712,7 @@ describe "with_high_value_portfolio" do
       })
     end)
 
-    %{user: user, account: account, transactions: transactions}
+    %{ account: account, transactions: transactions}
   end
 
   test "calculates high value portfolio correctly", context do

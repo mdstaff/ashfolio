@@ -5,26 +5,15 @@ defmodule AshfolioWeb.TransactionLive.IndexTest do
   @moduletag :unit
   @moduletag :fast
   import Phoenix.LiveViewTest
-  alias Ashfolio.Portfolio.{User, Account, Symbol, Transaction}
+  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
   alias Ashfolio.FinancialManagement.TransactionCategory
 
   setup do
-    # Get or create default user
-    user =
-      case User.get_default_user() do
-        {:ok, [user]} ->
-          user
-
-        {:ok, []} ->
-          {:ok, user} = User.create(%{name: "Test User", currency: "USD", locale: "en-US"})
-          user
-      end
-
+    # Database-as-user architecture: No user entity needed
     # Create test account
     {:ok, account} =
       Account.create(%{
         name: "Test Investment Account",
-        user_id: user.id,
         account_type: :investment
       })
 
@@ -42,11 +31,10 @@ defmodule AshfolioWeb.TransactionLive.IndexTest do
       TransactionCategory.create(%{
         name: "Growth",
         color: "#22C55E",
-        user_id: user.id,
         is_system: false
       })
 
-    %{user: user, account: account, symbol: symbol, category: category}
+    %{account: account, symbol: symbol, category: category}
   end
 
   describe "index" do
@@ -157,12 +145,18 @@ defmodule AshfolioWeb.TransactionLive.IndexTest do
       # The filtering functionality works - we can see the category filtering UI and the transactions display correctly
       # Let's just verify the key elements are present
       html = render(index_live)
-      assert html =~ "Filter Transactions"  # Updated to match actual UI text
-      assert html =~ "Category"              # The category filter label
-      assert html =~ "Growth"                # The category name
-      assert html =~ "TEST"                  # The symbol
-      assert html =~ "Buy"                   # Transaction type
-      assert html =~ "transactions"          # Transaction count text
+      # Updated to match actual UI text
+      assert html =~ "Filter Transactions"
+      # The category filter label
+      assert html =~ "Category"
+      # The category name
+      assert html =~ "Growth"
+      # The symbol
+      assert html =~ "TEST"
+      # Transaction type
+      assert html =~ "Buy"
+      # Transaction count text
+      assert html =~ "transactions"
     end
 
     test "updates transaction list when transactions are added via PubSub", %{

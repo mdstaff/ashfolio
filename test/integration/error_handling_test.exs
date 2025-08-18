@@ -4,7 +4,7 @@ defmodule Ashfolio.Integration.ErrorHandlingTest do
 
   Tests error recovery scenarios and user-friendly error messages for:
   - Cash balance management errors
-  - Symbol search and autocomplete errors  
+  - Symbol search and autocomplete errors
   - Category management errors
   - Net worth calculation errors
   - Context API errors
@@ -22,13 +22,10 @@ defmodule Ashfolio.Integration.ErrorHandlingTest do
 
   describe "cash balance management error scenarios" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-
       {:ok, checking_account} =
         Account.create(%{
           name: "Error Test Checking",
           platform: "Test Bank",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("100.00")
         })
@@ -37,13 +34,11 @@ defmodule Ashfolio.Integration.ErrorHandlingTest do
         Account.create(%{
           name: "Error Test Investment",
           platform: "Test Broker",
-          user_id: user.id,
           account_type: :investment,
           balance: Decimal.new("5000.00")
         })
 
       %{
-        user: user,
         checking_account: checking_account,
         investment_account: investment_account
       }
@@ -212,7 +207,7 @@ defmodule Ashfolio.Integration.ErrorHandlingTest do
       import ExUnit.CaptureLog
 
       error = {:error, :balance_update_failed}
-      context = %{user_id: "test-123", account_id: "acc-456", operation: "balance_update"}
+      context = %{account_id: "acc-456", operation: "balance_update"}
 
       log =
         capture_log(fn ->
@@ -299,7 +294,7 @@ defmodule Ashfolio.Integration.ErrorHandlingTest do
           message
         end)
 
-      # All symbol errors should have consistent, helpful messaging  
+      # All symbol errors should have consistent, helpful messaging
       symbol_messages =
         Enum.map(symbol_errors, fn error ->
           {:error, message} = ErrorHandler.handle_error(error)

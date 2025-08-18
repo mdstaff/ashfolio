@@ -25,7 +25,7 @@ defmodule Ashfolio.Portfolio.Calculator do
       iex> Calculator.calculate_portfolio_value()
       {:ok, %Decimal{}}
   """
-  def calculate_portfolio_value(_user_id \\ nil) do
+  def calculate_portfolio_value() do
     Logger.debug("Calculating portfolio value")
 
     case get_all_holdings() do
@@ -84,7 +84,7 @@ defmodule Ashfolio.Portfolio.Calculator do
       iex> Calculator.calculate_position_returns()
       {:ok, [%{symbol: "AAPL", current_value: %Decimal{}, cost_basis: %Decimal{}, return_pct: %Decimal{}}]}
   """
-  def calculate_position_returns(_user_id \\ nil) do
+  def calculate_position_returns() do
     Logger.debug("Calculating position returns")
 
     case get_all_holdings() do
@@ -124,7 +124,7 @@ defmodule Ashfolio.Portfolio.Calculator do
 
       transactions ->
         holdings = group_holdings_by_symbol(transactions)
-        
+
         total_value =
           holdings
           |> Enum.map(&calculate_holding_value/1)
@@ -140,7 +140,7 @@ defmodule Ashfolio.Portfolio.Calculator do
 
   Returns portfolio summary with total value, cost basis, and return percentage.
   """
-  def calculate_total_return(_user_id \\ nil) do
+  def calculate_total_return() do
     Logger.debug("Calculating total return")
 
     with {:ok, portfolio_value} <- calculate_portfolio_value(),

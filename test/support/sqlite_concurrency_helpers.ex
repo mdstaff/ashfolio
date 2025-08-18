@@ -68,7 +68,7 @@ defmodule Ashfolio.SQLiteConcurrencyHelpers do
   ## Examples
       SQLiteConcurrencyHelpers.create_test_data([
         {User, %{name: "Test User"}},
-        {Account, %{name: "Test Account", user_id: user.id}}
+        {Account, %{name: "Test Account"}}
       ])
   """
   def create_test_data(data_specs) do

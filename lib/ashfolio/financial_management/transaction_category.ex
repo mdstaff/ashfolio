@@ -38,11 +38,6 @@ defmodule Ashfolio.FinancialManagement.TransactionCategory do
   end
 
   relationships do
-    belongs_to :user, Ashfolio.Portfolio.User do
-      allow_nil?(false)
-      description("The user who owns this category")
-    end
-
     belongs_to :parent_category, __MODULE__ do
       description("Parent category for hierarchical organization")
     end
@@ -60,7 +55,6 @@ defmodule Ashfolio.FinancialManagement.TransactionCategory do
 
   validations do
     validate(present(:name), message: "Category name is required")
-    validate(present(:user_id), message: "User is required")
 
     # Validate name length
     validate(string_length(:name, min: 2, max: 50))
@@ -79,16 +73,16 @@ defmodule Ashfolio.FinancialManagement.TransactionCategory do
 
     # Validate name uniqueness per user
     validate(fn changeset, _context ->
-      user_id = Ash.Changeset.get_attribute(changeset, :user_id)
       name = Ash.Changeset.get_attribute(changeset, :name)
       id = Ash.Changeset.get_attribute(changeset, :id)
 
-      if user_id && name do
+      if name do
         require Ash.Query
 
+        # Database-as-user architecture: Check for unique names within the database instance
         existing_query =
           __MODULE__
-          |> Ash.Query.filter(user_id: user_id, name: name)
+          |> Ash.Query.filter(name: name)
 
         # Exclude current record if updating
         existing_query =
@@ -131,7 +125,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategory do
 
     create :create do
       description("Create a new transaction category")
-      accept([:name, :color, :is_system, :user_id, :parent_category_id])
+      accept([:name, :color, :is_system, :parent_category_id])
       primary?(true)
     end
 
@@ -154,12 +148,6 @@ defmodule Ashfolio.FinancialManagement.TransactionCategory do
             changeset
         end
       end)
-    end
-
-    read :by_user do
-      description("Returns categories for a specific user")
-      argument(:user_id, :uuid, allow_nil?: false)
-      filter(expr(user_id == ^arg(:user_id)))
     end
 
     read :system_categories do
@@ -210,7 +198,6 @@ defmodule Ashfolio.FinancialManagement.TransactionCategory do
     define(:create, action: :create)
     define(:list, action: :read)
     define(:get_by_id, action: :read, get_by: [:id])
-    define(:categories_for_user, action: :by_user, args: [:user_id])
     define(:system_categories, action: :system_categories)
     define(:user_categories, action: :user_categories)
     define(:root_categories, action: :root_categories)
@@ -218,19 +205,20 @@ defmodule Ashfolio.FinancialManagement.TransactionCategory do
     define(:update, action: :update)
     define(:destroy, action: :destroy_if_not_system)
 
-    def get_by_name_for_user(user_id, name) do
+    def get_by_name(name) do
       require Ash.Query
 
+      # Database-as-user architecture: No user_id needed
       __MODULE__
-      |> Ash.Query.filter(user_id: user_id, name: name)
+      |> Ash.Query.filter(name: name)
       |> Ash.read_first()
     end
 
-    def get_user_categories_with_children(user_id) do
+    def get_categories_with_children do
       require Ash.Query
 
+      # Database-as-user architecture: Return all categories for this database instance
       __MODULE__
-      |> Ash.Query.filter(user_id: user_id)
       |> Ash.Query.load([:child_categories, :parent_category])
       |> Ash.read()
     end

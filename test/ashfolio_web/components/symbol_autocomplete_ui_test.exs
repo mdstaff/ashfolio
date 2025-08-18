@@ -202,7 +202,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
       # Note: Core .input component may override custom transition classes
       # Test that the component renders properly with basic styling
       assert html =~ "block w-full"
-      
+
       # Component should have proper core styling from .input component
       assert html =~ "focus:ring-0"
     end

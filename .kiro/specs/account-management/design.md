@@ -76,8 +76,8 @@ defmodule AshfolioWeb.AccountLive.Index do
      |> assign_current_page(:accounts)
      |> assign(:page_title, "Investment Accounts")
      |> assign(:page_subtitle, "Manage your investment accounts and balances")
-     |> assign(:user_id, user_id)
-     |> assign(:accounts, list_accounts(user_id))
+     |> assign(:user_id)
+     |> assign(:accounts, list_accounts())
      |> assign(:show_form, false)
      |> assign(:form_action, :new)
      |> assign(:selected_account, nil)}
@@ -152,8 +152,8 @@ defmodule AshfolioWeb.AccountLive.Index do
     {:noreply, assign(socket, :show_form, false)}
   end
 
-  defp list_accounts(user_id) do
-    Account.accounts_for_user!(user_id)
+  defp list_accounts() do
+    Account.accounts_for_user!()
   end
 
   defp apply_action(socket, :index, _params) do
@@ -795,8 +795,8 @@ end
 
 ```elixir
 # Efficient account loading with preloading
-def list_accounts_with_stats(user_id) do
-  Account.accounts_for_user!(user_id)
+def list_accounts_with_stats() do
+  Account.accounts_for_user!()
   |> Ash.load([:transaction_count, :total_balance])
 end
 ```

@@ -71,7 +71,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
   data processing to minimize database round trips.
 
   Key features:
-  - Batch loading of accounts and related data  
+  - Batch loading of accounts and related data
   - Single aggregate queries for cash balance calculations
   - Efficient preloading to prevent N+1 queries
   - In-memory processing for complex calculations
@@ -91,7 +91,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
   ## Examples
 
       # Calculate complete net worth with breakdown
-      {:ok, result} = NetWorthCalculatorOptimized.calculate_net_worth(user_id)
+      {:ok, result} = NetWorthCalculatorOptimized.calculate_net_worth()
       %{
         net_worth: %Decimal{},
         investment_value: %Decimal{},
@@ -100,7 +100,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
       }
 
       # Calculate only cash balances (faster for specific use cases)
-      {:ok, cash_total} = NetWorthCalculatorOptimized.calculate_total_cash_balances(user_id)
+      {:ok, cash_total} = NetWorthCalculatorOptimized.calculate_total_cash_balances()
   """
 ```
 
@@ -176,7 +176,7 @@ Private functions should use standard `#` comments above the function definition
 #
 # Returns {:ok, accounts_data} with grouped account information, or
 # {:error, reason} if the batch load fails.
-defp batch_load_account_data(user_id) do
+defp batch_load_account_data() do
 ```
 
 ### Multi-line Comment Standards
@@ -203,9 +203,9 @@ defp calculate_net_worth_from_batch(accounts_data, investment_value) do
 All public functions SHOULD have `@spec` declarations:
 
 ```elixir
-@spec calculate_portfolio_value(String.t()) :: 
+@spec calculate_portfolio_value(String.t()) ::
   {:ok, Decimal.t()} | {:error, atom()}
-def calculate_portfolio_value(user_id) when is_binary(user_id) do
+def calculate_portfolio_value() when is_binary() do
 ```
 
 ### Complex Type Specifications
@@ -217,18 +217,18 @@ For functions with complex return types, document the structure:
 Net worth calculation result containing all financial totals and breakdowns.
 
 - `net_worth` - Total net worth (investment + cash)
-- `investment_value` - Total value of all investment accounts  
+- `investment_value` - Total value of all investment accounts
 - `cash_value` - Total value of all cash accounts
 - `breakdown` - Detailed account-by-account breakdown
 """
 @type net_worth_result :: %{
   net_worth: Decimal.t(),
-  investment_value: Decimal.t(), 
+  investment_value: Decimal.t(),
   cash_value: Decimal.t(),
   breakdown: account_breakdown()
 }
 
-@spec calculate_net_worth(String.t()) :: 
+@spec calculate_net_worth(String.t()) ::
   {:ok, net_worth_result()} | {:error, atom()}
 ```
 
@@ -248,14 +248,14 @@ Use `#` comments for:
 ```elixir
 # Group accounts by type for efficient processing
 # This avoids repeated filtering in downstream functions
-{investment_accounts, cash_accounts} = 
+{investment_accounts, cash_accounts} =
   Enum.split_with(accounts, fn account ->
     account.account_type == :investment
   end)
 
 # Single aggregate query at database level instead of loading
 # all accounts into memory - reduces memory usage by ~80%
-cash_total = 
+cash_total =
   from(a in Account,
     where: a.user_id == ^user_id and a.account_type in @cash_types,
     select: sum(a.balance)
@@ -286,7 +286,7 @@ defmodule AshfolioWeb.Components.CategoryTagTest do
 
   See docs/TESTING_STRATEGY.md for test organization and CI/CD pipeline integration.
   """
-  
+
   @moduletag :unit
 ```
 
@@ -298,14 +298,14 @@ Use descriptive test names that serve as documentation and follow our testing st
 # Good - test name explains the scenario and expectation
 test "CategoryTag calculates proper color contrast for accessibility compliance" do
 
-# Good - test name describes the specific behavior being tested  
+# Good - test name describes the specific behavior being tested
 test "TransactionFilter component validates amount range inputs with user feedback" do
 
 # Good - includes appropriate tags for test organization
 @tag :integration
 test "AccountLive displays filtered account data correctly" do
 
-# Good - performance test with appropriate tag  
+# Good - performance test with appropriate tag
 @tag :performance
 test "NetWorthCalculator handles 100+ accounts under 100ms" do
 
@@ -349,7 +349,7 @@ defmodule Ashfolio.Portfolio.Calculator do
 
   Key features:
   - Total portfolio value across all accounts
-  - Simple and time-weighted return calculations  
+  - Simple and time-weighted return calculations
   - Individual position gains/losses
   - Cost basis calculation from transaction history
 
@@ -362,10 +362,10 @@ defmodule Ashfolio.Portfolio.Calculator do
   ## Examples
 
       # Calculate total portfolio value
-      {:ok, total_value} = Calculator.calculate_portfolio_value(user_id)
+      {:ok, total_value} = Calculator.calculate_portfolio_value()
 
       # Get detailed performance metrics
-      {:ok, metrics} = Calculator.calculate_returns(user_id, period: :ytd)
+      {:ok, metrics} = Calculator.calculate_returns(period: :ytd)
   """
 
   @typedoc "Portfolio performance metrics including returns and ratios"
@@ -399,9 +399,9 @@ defmodule Ashfolio.Portfolio.Calculator do
       iex> Calculator.calculate_portfolio_value("invalid-id")
       {:error, :user_not_found}
   """
-  @spec calculate_portfolio_value(String.t()) :: 
+  @spec calculate_portfolio_value(String.t()) ::
     {:ok, Decimal.t()} | {:error, atom()}
-  def calculate_portfolio_value(user_id) when is_binary(user_id) do
+  def calculate_portfolio_value() when is_binary() do
     # Implementation with proper inline comments
   end
 ```

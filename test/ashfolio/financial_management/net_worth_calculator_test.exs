@@ -5,16 +5,15 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
   alias Ashfolio.Portfolio.{Account, Transaction}
   alias Ashfolio.SQLiteHelpers
 
-  describe "calculate_net_worth/1" do
+  describe "calculate_net_worth/0" do
     test "calculates net worth with investment and cash accounts" do
-      user = SQLiteHelpers.get_default_user()
+      # Database-as-user architecture: No user needed
 
       # Create investment account with transactions
       {:ok, investment_account} =
         Account.create(%{
           name: "Investment Account",
           platform: "Schwab",
-          user_id: user.id,
           account_type: :investment,
           balance: Decimal.new("5000.00")
         })
@@ -24,7 +23,6 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
         Account.create(%{
           name: "Checking Account",
           platform: "Bank",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("2500.00")
         })
@@ -33,7 +31,6 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
         Account.create(%{
           name: "Savings Account",
           platform: "Bank",
-          user_id: user.id,
           account_type: :savings,
           balance: Decimal.new("10000.00"),
           interest_rate: Decimal.new("0.025")
@@ -58,7 +55,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
         })
 
       # Calculate net worth
-      assert {:ok, result} = NetWorthCalculator.calculate_net_worth(user.id)
+      assert {:ok, result} = NetWorthCalculator.calculate_net_worth()
 
       # Investment value should be 10 shares * $150 = $1500
       assert Decimal.equal?(result.investment_value, Decimal.new("1500.00"))
@@ -76,14 +73,13 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
       assert Map.has_key?(result.breakdown, :totals_by_type)
     end
 
-    test "handles user with only investment accounts" do
-      user = SQLiteHelpers.get_default_user()
+    test "handles portfolio with only investment accounts" do
+      # Database-as-user architecture: No user needed
 
       {:ok, investment_account} =
         Account.create(%{
           name: "Investment Only",
           platform: "Schwab",
-          user_id: user.id,
           account_type: :investment,
           balance: Decimal.new("3000.00")
         })
@@ -105,7 +101,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
           date: ~D[2024-01-15]
         })
 
-      assert {:ok, result} = NetWorthCalculator.calculate_net_worth(user.id)
+      assert {:ok, result} = NetWorthCalculator.calculate_net_worth()
 
       # Investment value: 5 shares * $200 = $1000
       assert Decimal.equal?(result.investment_value, Decimal.new("1000.00"))
@@ -117,19 +113,18 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
       assert Decimal.equal?(result.net_worth, Decimal.new("1000.00"))
     end
 
-    test "handles user with only cash accounts" do
-      user = SQLiteHelpers.get_default_user()
+    test "handles portfolio with only cash accounts" do
+      # Database-as-user architecture: No user needed
 
       {:ok, _checking} =
         Account.create(%{
           name: "Checking Only",
           platform: "Bank",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("5000.00")
         })
 
-      assert {:ok, result} = NetWorthCalculator.calculate_net_worth(user.id)
+      assert {:ok, result} = NetWorthCalculator.calculate_net_worth()
 
       # No investment value
       assert Decimal.equal?(result.investment_value, Decimal.new("0.00"))
@@ -142,14 +137,13 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
     end
 
     test "excludes excluded accounts from calculation" do
-      user = SQLiteHelpers.get_default_user()
+      # Database-as-user architecture: No user needed
 
       # Active cash account
       {:ok, _active_account} =
         Account.create(%{
           name: "Active Account",
           platform: "Bank",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("3000.00"),
           is_excluded: false
@@ -160,33 +154,31 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
         Account.create(%{
           name: "Excluded Account",
           platform: "Bank",
-          user_id: user.id,
           account_type: :savings,
           balance: Decimal.new("7000.00"),
           is_excluded: true
         })
 
-      assert {:ok, result} = NetWorthCalculator.calculate_net_worth(user.id)
+      assert {:ok, result} = NetWorthCalculator.calculate_net_worth()
 
       # Should only include active account balance
       assert Decimal.equal?(result.cash_value, Decimal.new("3000.00"))
       assert Decimal.equal?(result.net_worth, Decimal.new("3000.00"))
     end
 
-    test "handles user with no accounts" do
-      user = SQLiteHelpers.get_default_user()
+    test "handles portfolio with no accounts" do
+      # Database-as-user architecture: No user needed
 
-      assert {:ok, result} = NetWorthCalculator.calculate_net_worth(user.id)
+      assert {:ok, result} = NetWorthCalculator.calculate_net_worth()
 
       assert Decimal.equal?(result.investment_value, Decimal.new("0.00"))
       assert Decimal.equal?(result.cash_value, Decimal.new("0.00"))
       assert Decimal.equal?(result.net_worth, Decimal.new("0.00"))
     end
 
-    test "returns zero values for invalid user_id" do
-      invalid_user_id = Ecto.UUID.generate()
-
-      assert {:ok, result} = NetWorthCalculator.calculate_net_worth(invalid_user_id)
+    test "returns zero values for empty portfolio" do
+      # In database-as-user architecture, this tests an empty database
+      assert {:ok, result} = NetWorthCalculator.calculate_net_worth()
       assert Decimal.equal?(result.investment_value, Decimal.new("0.00"))
       assert Decimal.equal?(result.cash_value, Decimal.new("0.00"))
       assert Decimal.equal?(result.net_worth, Decimal.new("0.00"))
@@ -194,14 +186,13 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
   end
 
   describe "calculate_total_cash_balances/1" do
-    test "sums all cash account balances for user" do
-      user = SQLiteHelpers.get_default_user()
+    test "sums all cash account balances" do
+      # Database-as-user architecture: No user needed
 
       {:ok, _checking} =
         Account.create(%{
           name: "Checking",
           platform: "Bank",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("1500.00")
         })
@@ -210,7 +201,6 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
         Account.create(%{
           name: "Savings",
           platform: "Bank",
-          user_id: user.id,
           account_type: :savings,
           balance: Decimal.new("8000.00")
         })
@@ -219,25 +209,23 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
         Account.create(%{
           name: "Money Market",
           platform: "Bank",
-          user_id: user.id,
           account_type: :money_market,
           balance: Decimal.new("2500.00")
         })
 
-      assert {:ok, total} = NetWorthCalculator.calculate_total_cash_balances(user.id)
+      assert {:ok, total} = NetWorthCalculator.calculate_total_cash_balances()
 
       # $1500 + $8000 + $2500 = $12000
       assert Decimal.equal?(total, Decimal.new("12000.00"))
     end
 
     test "excludes investment accounts from cash balance calculation" do
-      user = SQLiteHelpers.get_default_user()
+      # Database-as-user architecture: No user needed
 
       {:ok, _investment} =
         Account.create(%{
           name: "Investment",
           platform: "Schwab",
-          user_id: user.id,
           account_type: :investment,
           balance: Decimal.new("5000.00")
         })
@@ -246,25 +234,23 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
         Account.create(%{
           name: "Checking",
           platform: "Bank",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("2000.00")
         })
 
-      assert {:ok, total} = NetWorthCalculator.calculate_total_cash_balances(user.id)
+      assert {:ok, total} = NetWorthCalculator.calculate_total_cash_balances()
 
       # Should only include checking account balance
       assert Decimal.equal?(total, Decimal.new("2000.00"))
     end
 
     test "excludes excluded cash accounts" do
-      user = SQLiteHelpers.get_default_user()
+      # Database-as-user architecture: No user needed
 
       {:ok, _active} =
         Account.create(%{
           name: "Active Checking",
           platform: "Bank",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("3000.00"),
           is_excluded: false
@@ -274,45 +260,42 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
         Account.create(%{
           name: "Excluded Savings",
           platform: "Bank",
-          user_id: user.id,
           account_type: :savings,
           balance: Decimal.new("5000.00"),
           is_excluded: true
         })
 
-      assert {:ok, total} = NetWorthCalculator.calculate_total_cash_balances(user.id)
+      assert {:ok, total} = NetWorthCalculator.calculate_total_cash_balances()
 
       # Should only include active account
       assert Decimal.equal?(total, Decimal.new("3000.00"))
     end
 
-    test "returns zero for user with no cash accounts" do
-      user = SQLiteHelpers.get_default_user()
+    test "returns zero for portfolio with no cash accounts" do
+      # Database-as-user architecture: No user needed
 
       # Create only investment account
       {:ok, _investment} =
         Account.create(%{
           name: "Investment Only",
           platform: "Schwab",
-          user_id: user.id,
           account_type: :investment,
           balance: Decimal.new("10000.00")
         })
 
-      assert {:ok, total} = NetWorthCalculator.calculate_total_cash_balances(user.id)
+      assert {:ok, total} = NetWorthCalculator.calculate_total_cash_balances()
       assert Decimal.equal?(total, Decimal.new("0.00"))
     end
   end
 
   describe "calculate_account_breakdown/1" do
     test "provides detailed breakdown by account type" do
-      user = SQLiteHelpers.get_default_user()
+      # Database-as-user architecture: No user needed
 
       {:ok, investment_account} =
         Account.create(%{
           name: "Schwab Investment",
           platform: "Schwab",
-          user_id: user.id,
           account_type: :investment,
           balance: Decimal.new("5000.00")
         })
@@ -321,7 +304,6 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
         Account.create(%{
           name: "Main Checking",
           platform: "Chase",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("2500.00")
         })
@@ -330,13 +312,12 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
         Account.create(%{
           name: "High Yield Savings",
           platform: "Marcus",
-          user_id: user.id,
           account_type: :savings,
           balance: Decimal.new("15000.00"),
           interest_rate: Decimal.new("0.045")
         })
 
-      assert {:ok, breakdown} = NetWorthCalculator.calculate_account_breakdown(user.id)
+      assert {:ok, breakdown} = NetWorthCalculator.calculate_account_breakdown()
 
       # Should have investment accounts section (including default test account)
       assert length(breakdown.investment_accounts) == 2
@@ -370,19 +351,18 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
       assert Decimal.equal?(totals.cash_by_type.savings, Decimal.new("15000.00"))
     end
 
-    test "handles user with only one account type" do
-      user = SQLiteHelpers.get_default_user()
+    test "handles portfolio with only one account type" do
+      # Database-as-user architecture: No user needed
 
       {:ok, _checking} =
         Account.create(%{
           name: "Only Checking",
           platform: "Bank",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("3000.00")
         })
 
-      assert {:ok, breakdown} = NetWorthCalculator.calculate_account_breakdown(user.id)
+      assert {:ok, breakdown} = NetWorthCalculator.calculate_account_breakdown()
 
       # Should include default test account (investment) + new cash account
       # Default test account
@@ -395,13 +375,12 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
     end
 
     test "excludes excluded accounts from breakdown" do
-      user = SQLiteHelpers.get_default_user()
+      # Database-as-user architecture: No user needed
 
       {:ok, _active} =
         Account.create(%{
           name: "Active Account",
           platform: "Bank",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("2000.00"),
           is_excluded: false
@@ -411,13 +390,12 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
         Account.create(%{
           name: "Excluded Account",
           platform: "Bank",
-          user_id: user.id,
           account_type: :savings,
           balance: Decimal.new("8000.00"),
           is_excluded: true
         })
 
-      assert {:ok, breakdown} = NetWorthCalculator.calculate_account_breakdown(user.id)
+      assert {:ok, breakdown} = NetWorthCalculator.calculate_account_breakdown()
 
       # Should only include active account
       assert length(breakdown.cash_accounts) == 1
@@ -440,43 +418,41 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
       assert Decimal.equal?(result.net_worth, Decimal.new("0.00"))
 
       assert {:ok, cash_total} =
-               NetWorthCalculator.calculate_total_cash_balances(non_existent_user_id)
+               NetWorthCalculator.calculate_total_cash_balances()
 
       assert Decimal.equal?(cash_total, Decimal.new("0.00"))
 
       assert {:ok, breakdown} =
-               NetWorthCalculator.calculate_account_breakdown(non_existent_user_id)
+               NetWorthCalculator.calculate_account_breakdown()
 
       assert length(breakdown.investment_accounts) == 0
       assert length(breakdown.cash_accounts) == 0
     end
 
     test "handles accounts with zero balances" do
-      user = SQLiteHelpers.get_default_user()
+      # Database-as-user architecture: No user needed
 
       {:ok, _zero_balance} =
         Account.create(%{
           name: "Zero Balance",
           platform: "Bank",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("0.00")
         })
 
-      assert {:ok, result} = NetWorthCalculator.calculate_net_worth(user.id)
+      assert {:ok, result} = NetWorthCalculator.calculate_net_worth()
       assert Decimal.equal?(result.net_worth, Decimal.new("0.00"))
       assert Decimal.equal?(result.cash_value, Decimal.new("0.00"))
     end
 
     test "handles mixed positive and negative scenarios" do
-      user = SQLiteHelpers.get_default_user()
+      # Database-as-user architecture: No user needed
 
       # Positive cash balance
       {:ok, _positive} =
         Account.create(%{
           name: "Positive Account",
           platform: "Bank",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("5000.00")
         })
@@ -486,7 +462,6 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
         Account.create(%{
           name: "Investment Account",
           platform: "Schwab",
-          user_id: user.id,
           account_type: :investment,
           balance: Decimal.new("0.00")
         })
@@ -509,7 +484,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
           date: ~D[2024-01-15]
         })
 
-      assert {:ok, result} = NetWorthCalculator.calculate_net_worth(user.id)
+      assert {:ok, result} = NetWorthCalculator.calculate_net_worth()
 
       # Investment value: 10 shares * $50 = $500 (loss from $1000 cost)
       assert Decimal.equal?(result.investment_value, Decimal.new("500.00"))

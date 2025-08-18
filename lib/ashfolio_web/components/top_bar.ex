@@ -7,7 +7,13 @@ defmodule AshfolioWeb.Components.TopBar do
   attr :id, :string, default: nil
 
   def top_bar(assigns) do
-    assigns = assign(assigns, :mobile_menu_id, assigns[:id] && "#{assigns.id}-mobile-menu" || "mobile-menu")
+    assigns =
+      assign(
+        assigns,
+        :mobile_menu_id,
+        (assigns[:id] && "#{assigns.id}-mobile-menu") || "mobile-menu"
+      )
+
     ~H"""
     <header class="bg-white shadow-sm border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

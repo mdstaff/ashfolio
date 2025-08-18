@@ -260,6 +260,7 @@ help topic="":
         echo "  just dev        → Start development server"
         echo "  just test       → Run tests"
         echo "  just check      → Run all checks"
+        echo "  just recompile  → Clean compile (fixes module warnings)"
         echo ""
         echo "Testing:"
         echo "  just test unit  → Run unit tests only"
@@ -339,3 +340,10 @@ format:
 compile:
     @echo "🔨 Compiling..."
     @mix compile
+
+# 🔄 Clean compile (removes module redefinition warnings)
+recompile:
+    @echo "🔄 Clean recompile (eliminates module redefinition warnings)..."
+    @mix clean
+    @mix compile
+    @echo "✅ Clean compile complete"

@@ -188,9 +188,9 @@ end
 
 ```elixir
 defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
-  def calculate_net_worth(user_id) do
-    with {:ok, investment_value} <- Portfolio.Calculator.calculate_portfolio_value(user_id),
-         {:ok, cash_balances} <- calculate_total_cash_balances(user_id) do
+  def calculate_net_worth() do
+    with {:ok, investment_value} <- Portfolio.Calculator.calculate_portfolio_value(),
+         {:ok, cash_balances} <- calculate_total_cash_balances() do
 
       net_worth = Decimal.add(investment_value, cash_balances)
 
@@ -198,7 +198,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
         net_worth: net_worth,
         investment_value: investment_value,
         cash_value: cash_balances,
-        breakdown: calculate_account_breakdown(user_id)
+        breakdown: calculate_account_breakdown()
       }}
     end
   end
@@ -586,7 +586,7 @@ CREATE TABLE transaction_categories (
 
 ```elixir
 defmodule Ashfolio.FinancialManagement.CategorySeeder do
-  def seed_system_categories(user_id) do
+  def seed_system_categories() do
     categories = [
       %{name: "Growth", color: "#10B981", is_system: true},
       %{name: "Income", color: "#3B82F6", is_system: true},
@@ -594,7 +594,7 @@ defmodule Ashfolio.FinancialManagement.CategorySeeder do
       %{name: "Index", color: "#8B5CF6", is_system: true}
     ]
 
-    Enum.each(categories, &create_category(user_id, &1))
+    Enum.each(categories, &create_category(&1))
   end
 end
 ```

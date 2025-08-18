@@ -78,7 +78,7 @@ defmodule AshfolioWeb.NavigationTest do
       # Mobile menu is in the layout, not the LiveView
       # Test that the LiveView loads properly and would work with mobile navigation
       assert html =~ "Portfolio Dashboard"
-      
+
       # Navigation between pages should work on mobile too
       {:ok, _view, html} = live(conn, "/accounts")
       assert html =~ "Accounts"

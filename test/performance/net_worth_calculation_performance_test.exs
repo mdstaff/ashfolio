@@ -32,27 +32,23 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
 
   describe "Net Worth Calculation Performance" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-
       # Create realistic mix of accounts with transactions
       {investment_accounts, cash_accounts} =
         create_mixed_accounts_with_data(
-          user.id,
           @performance_account_count,
           @performance_transactions_per_account
         )
 
       %{
-        user: user,
         investment_accounts: investment_accounts,
         cash_accounts: cash_accounts
       }
     end
 
-    test "net worth calculation completes under 100ms", %{user: user} do
+    test "net worth calculation completes under 100ms" do
       {time_us, {:ok, result}} =
         :timer.tc(fn ->
-          NetWorthCalculator.calculate_net_worth(user.id)
+          NetWorthCalculator.calculate_net_worth()
         end)
 
       time_ms = time_us / 1000
@@ -68,10 +64,10 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
              "Net worth calculation took #{time_ms}ms, expected < 200ms"
     end
 
-    test "cash balance calculation performs under 50ms", %{user: user} do
+    test "cash balance calculation performs under 50ms" do
       {time_us, {:ok, cash_total}} =
         :timer.tc(fn ->
-          NetWorthCalculator.calculate_total_cash_balances(user.id)
+          NetWorthCalculator.calculate_total_cash_balances()
         end)
 
       time_ms = time_us / 1000
@@ -82,10 +78,10 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
              "Cash balance calculation took #{time_ms}ms, expected < 50ms"
     end
 
-    test "account breakdown calculation under 75ms", %{user: user} do
+    test "account breakdown calculation under 75ms" do
       {time_us, {:ok, breakdown}} =
         :timer.tc(fn ->
-          NetWorthCalculator.calculate_account_breakdown(user.id)
+          NetWorthCalculator.calculate_account_breakdown()
         end)
 
       time_ms = time_us / 1000
@@ -100,13 +96,12 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
     end
 
     test "query count optimization - batch loading efficiency" do
-      user = SQLiteHelpers.get_default_user()
-      create_mixed_accounts_with_data(user.id, 10, 20)
+      create_mixed_accounts_with_data(10, 20)
 
       # Reset query stats if available
       query_count_before = get_query_count()
 
-      {:ok, _result} = NetWorthCalculator.calculate_net_worth(user.id)
+      {:ok, _result} = NetWorthCalculator.calculate_net_worth()
 
       query_count_after = get_query_count()
       total_queries = query_count_after - query_count_before
@@ -121,12 +116,12 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
              "Net worth calculation used #{total_queries} queries, expected ≤ 5 (batch loading)"
     end
 
-    test "memory efficiency during calculation", %{user: user} do
+    test "memory efficiency during calculation" do
       # Force garbage collection to get clean baseline
       :erlang.garbage_collect()
       initial_memory = :erlang.memory(:total)
 
-      {:ok, _result} = NetWorthCalculator.calculate_net_worth(user.id)
+      {:ok, _result} = NetWorthCalculator.calculate_net_worth()
 
       :erlang.garbage_collect()
       final_memory = :erlang.memory(:total)
@@ -139,13 +134,13 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
              "Net worth calculation increased memory by #{memory_increase_mb}MB, expected < 50MB"
     end
 
-    test "consistent performance across multiple calculations", %{user: user} do
+    test "consistent performance across multiple calculations" do
       # Run calculation multiple times to test consistency
       times =
         for _ <- 1..5 do
           {time_us, {:ok, _result}} =
             :timer.tc(fn ->
-              NetWorthCalculator.calculate_net_worth(user.id)
+              NetWorthCalculator.calculate_net_worth()
             end)
 
           time_us / 1000
@@ -163,12 +158,11 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
 
   describe "Batch Loading Optimization Verification" do
     test "cash balance calculation uses efficient single query" do
-      user = SQLiteHelpers.get_default_user()
-      create_cash_accounts(user.id, 10)
+      create_cash_accounts(10)
 
       query_count_before = get_query_count()
 
-      {:ok, _cash_total} = NetWorthCalculator.calculate_total_cash_balances(user.id)
+      {:ok, _cash_total} = NetWorthCalculator.calculate_total_cash_balances()
 
       query_count_after = get_query_count()
       total_queries = query_count_after - query_count_before
@@ -179,12 +173,11 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
     end
 
     test "account breakdown avoids N+1 queries" do
-      user = SQLiteHelpers.get_default_user()
-      create_mixed_accounts_with_data(user.id, 15, 10)
+      create_mixed_accounts_with_data(15, 10)
 
       query_count_before = get_query_count()
 
-      {:ok, _breakdown} = NetWorthCalculator.calculate_account_breakdown(user.id)
+      {:ok, _breakdown} = NetWorthCalculator.calculate_account_breakdown()
 
       query_count_after = get_query_count()
       total_queries = query_count_after - query_count_before
@@ -195,10 +188,8 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
     end
 
     test "preloaded associations prevent additional queries" do
-      user = SQLiteHelpers.get_default_user()
-
       # Create accounts with preloaded data
-      {:ok, accounts} = Account.accounts_for_user(user.id)
+      {:ok, accounts} = Account.accounts_for_user()
 
       query_count_before = get_query_count()
 
@@ -221,14 +212,12 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
 
   describe "Performance Regression Prevention" do
     test "large account dataset performance" do
-      user = SQLiteHelpers.get_default_user()
-
       # Create larger dataset to test scalability
-      create_mixed_accounts_with_data(user.id, 50, 30)
+      create_mixed_accounts_with_data(50, 30)
 
       {time_us, {:ok, result}} =
         :timer.tc(fn ->
-          NetWorthCalculator.calculate_net_worth(user.id)
+          NetWorthCalculator.calculate_net_worth()
         end)
 
       time_ms = time_us / 1000
@@ -241,8 +230,7 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
     end
 
     test "concurrent calculation performance" do
-      user = SQLiteHelpers.get_default_user()
-      create_mixed_accounts_with_data(user.id, 15, 25)
+      create_mixed_accounts_with_data(15, 25)
 
       # Test concurrent calculations (simulating multiple dashboard loads)
       tasks =
@@ -250,7 +238,7 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
           Task.async(fn ->
             {time_us, {:ok, _result}} =
               :timer.tc(fn ->
-                NetWorthCalculator.calculate_net_worth(user.id)
+                NetWorthCalculator.calculate_net_worth()
               end)
 
             time_us / 1000
@@ -268,24 +256,23 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
 
   # Helper functions for creating test data and measuring performance
 
-  defp create_mixed_accounts_with_data(user_id, account_count, transactions_per_account) do
+  defp create_mixed_accounts_with_data(account_count, transactions_per_account) do
     # Create mix: 60% investment, 40% cash accounts
     investment_count = round(account_count * 0.6)
     cash_count = account_count - investment_count
 
     investment_accounts =
       create_investment_accounts_with_transactions(
-        user_id,
         investment_count,
         transactions_per_account
       )
 
-    cash_accounts = create_cash_accounts(user_id, cash_count)
+    cash_accounts = create_cash_accounts(cash_count)
 
     {investment_accounts, cash_accounts}
   end
 
-  defp create_investment_accounts_with_transactions(user_id, count, transactions_per_account) do
+  defp create_investment_accounts_with_transactions(count, transactions_per_account) do
     symbols = [
       SQLiteHelpers.get_or_create_symbol("AAPL", %{
         name: "Apple Inc.",
@@ -307,8 +294,7 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
           name: "Investment Account #{i}",
           platform: "Broker #{rem(i, 3) + 1}",
           account_type: :investment,
-          balance: Decimal.new("#{5000 + i * 1000}"),
-          user_id: user_id
+          balance: Decimal.new("#{5000 + i * 1000}")
         })
 
       # Create transactions for this account
@@ -339,7 +325,7 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
     end
   end
 
-  defp create_cash_accounts(user_id, count) do
+  defp create_cash_accounts(count) do
     cash_types = [:checking, :savings, :money_market, :cd]
 
     for i <- 1..count do
@@ -352,8 +338,7 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
           account_type: account_type,
           balance: Decimal.new("#{2000 + i * 500}"),
           interest_rate: if(account_type in [:savings, :cd], do: Decimal.new("2.5"), else: nil),
-          minimum_balance: if(account_type == :checking, do: Decimal.new("100"), else: nil),
-          user_id: user_id
+          minimum_balance: if(account_type == :checking, do: Decimal.new("100"), else: nil)
         })
 
       account

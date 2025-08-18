@@ -202,7 +202,7 @@ end
 ```elixir
 # Time database operations
 PerformanceMonitor.time_query("portfolio_calculation", fn ->
-  Calculator.calculate_portfolio_value(user_id)
+  Calculator.calculate_portfolio_value()
 end)
 
 # Get performance report

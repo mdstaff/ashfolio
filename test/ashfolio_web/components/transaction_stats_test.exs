@@ -13,18 +13,15 @@ defmodule AshfolioWeb.Components.TransactionStatsTest do
 
   describe "TransactionStats component" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-
       {:ok, growth_category} =
         SQLiteHelpers.with_retry(fn ->
           TransactionCategory.create(%{
             name: "Growth",
-            color: "#10B981",
-            user_id: user.id
+            color: "#10B981"
           })
         end)
 
-      account = SQLiteHelpers.get_default_account(user)
+      account = SQLiteHelpers.get_default_account()
 
       symbol = SQLiteHelpers.get_common_symbol("AAPL")
 
@@ -54,7 +51,6 @@ defmodule AshfolioWeb.Components.TransactionStatsTest do
       ]
 
       %{
-        user: user,
         transactions: transactions,
         growth_category: growth_category
       }
@@ -315,10 +311,11 @@ defmodule AshfolioWeb.Components.TransactionStatsTest do
       category_id: category.id
     }
 
-    {:ok, transaction} = SQLiteHelpers.with_retry(fn ->
-      Transaction.create(Map.merge(default_attrs, attrs))
-    end)
-    
+    {:ok, transaction} =
+      SQLiteHelpers.with_retry(fn ->
+        Transaction.create(Map.merge(default_attrs, attrs))
+      end)
+
     # Load category association for component testing (using Ash)
     {:ok, loaded_transaction} = transaction |> Ash.load([:category])
     loaded_transaction

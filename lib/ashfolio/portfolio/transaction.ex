@@ -216,41 +216,6 @@ defmodule Ashfolio.Portfolio.Transaction do
       end)
     end
 
-    read :for_user_by_category do
-      description("Get transactions for a user filtered by category (optimized)")
-      argument(:user_id, :uuid, allow_nil?: false)
-      argument(:category_id, :uuid, allow_nil?: false)
-
-      prepare(fn query, _context ->
-        user_id = Ash.Query.get_argument(query, :user_id)
-        category_id = Ash.Query.get_argument(query, :category_id)
-
-        query
-        |> Ash.Query.filter(expr(account.user_id == ^user_id and category_id == ^category_id))
-        |> Ash.Query.load(:account)
-        |> Ash.Query.sort(date: :desc)
-      end)
-    end
-
-    read :for_user_by_date_range do
-      description("Get transactions for a user within date range (optimized)")
-      argument(:user_id, :uuid, allow_nil?: false)
-      argument(:start_date, :date, allow_nil?: false)
-      argument(:end_date, :date, allow_nil?: false)
-
-      prepare(fn query, _context ->
-        user_id = Ash.Query.get_argument(query, :user_id)
-        start_date = Ash.Query.get_argument(query, :start_date)
-        end_date = Ash.Query.get_argument(query, :end_date)
-
-        query
-        |> Ash.Query.filter(
-          expr(account.user_id == ^user_id and date >= ^start_date and date <= ^end_date)
-        )
-        |> Ash.Query.load(:account)
-        |> Ash.Query.sort(date: :desc)
-      end)
-    end
 
     read :for_account do
       description("Get transactions for specific account (optimized)")
@@ -265,9 +230,38 @@ defmodule Ashfolio.Portfolio.Transaction do
       end)
     end
 
-    read :for_user_with_filters do
-      description("Get transactions for user with multiple filter criteria (optimized)")
-      argument(:user_id, :uuid, allow_nil?: false)
+    read :by_category_enhanced do
+      description("Get transactions filtered by category with enhanced features")
+      argument(:category_id, :uuid, allow_nil?: false)
+
+      prepare(fn query, _context ->
+        category_id = Ash.Query.get_argument(query, :category_id)
+
+        query
+        |> Ash.Query.filter(expr(category_id == ^category_id))
+        |> Ash.Query.load(:account)
+        |> Ash.Query.sort(date: :desc)
+      end)
+    end
+
+    read :by_date_range_enhanced do
+      description("Get transactions within date range with enhanced features")
+      argument(:start_date, :date, allow_nil?: false)
+      argument(:end_date, :date, allow_nil?: false)
+
+      prepare(fn query, _context ->
+        start_date = Ash.Query.get_argument(query, :start_date)
+        end_date = Ash.Query.get_argument(query, :end_date)
+
+        query
+        |> Ash.Query.filter(expr(date >= ^start_date and date <= ^end_date))
+        |> Ash.Query.load(:account)
+        |> Ash.Query.sort(date: :desc)
+      end)
+    end
+
+    read :with_filters do
+      description("Get transactions with multiple filter criteria")
       argument(:account_id, :uuid, allow_nil?: true)
       argument(:category_id, :uuid, allow_nil?: true)
       argument(:start_date, :date, allow_nil?: true)
@@ -275,14 +269,11 @@ defmodule Ashfolio.Portfolio.Transaction do
       argument(:transaction_type, :atom, allow_nil?: true)
 
       prepare(fn query, _context ->
-        user_id = Ash.Query.get_argument(query, :user_id)
         account_id = Ash.Query.get_argument(query, :account_id)
         category_id = Ash.Query.get_argument(query, :category_id)
         start_date = Ash.Query.get_argument(query, :start_date)
         end_date = Ash.Query.get_argument(query, :end_date)
         transaction_type = Ash.Query.get_argument(query, :transaction_type)
-
-        query = Ash.Query.filter(query, expr(account.user_id == ^user_id))
 
         query =
           if account_id do
@@ -325,23 +316,18 @@ defmodule Ashfolio.Portfolio.Transaction do
       end)
     end
 
-    read :for_user_sorted do
-      description("Get transactions for user with sorting options")
-      argument(:user_id, :uuid, allow_nil?: false)
+    read :sorted do
+      description("Get transactions with sorting options")
       argument(:sort_field, :atom, allow_nil?: false)
       argument(:sort_direction, :atom, allow_nil?: false)
       argument(:limit, :integer, allow_nil?: true)
 
       prepare(fn query, _context ->
-        user_id = Ash.Query.get_argument(query, :user_id)
         sort_field = Ash.Query.get_argument(query, :sort_field)
         sort_direction = Ash.Query.get_argument(query, :sort_direction)
         limit = Ash.Query.get_argument(query, :limit)
 
-        query =
-          query
-          |> Ash.Query.filter(expr(account.user_id == ^user_id))
-          |> Ash.Query.load(:account)
+        query = Ash.Query.load(query, :account)
 
         # Apply sorting
         query =
@@ -361,21 +347,18 @@ defmodule Ashfolio.Portfolio.Transaction do
       end)
     end
 
-    read :for_user_paginated do
-      description("Get paginated transactions for user")
-      argument(:user_id, :uuid, allow_nil?: false)
+    read :paginated do
+      description("Get paginated transactions")
       argument(:page, :integer, allow_nil?: false)
       argument(:page_size, :integer, allow_nil?: false)
 
       prepare(fn query, _context ->
-        user_id = Ash.Query.get_argument(query, :user_id)
         page = Ash.Query.get_argument(query, :page)
         page_size = Ash.Query.get_argument(query, :page_size)
 
         offset = (page - 1) * page_size
 
         query
-        |> Ash.Query.filter(expr(account.user_id == ^user_id))
         |> Ash.Query.load(:account)
         |> Ash.Query.sort(date: :desc)
         |> Ash.Query.limit(page_size)
@@ -402,25 +385,26 @@ defmodule Ashfolio.Portfolio.Transaction do
     define(:update, action: :update)
     define(:destroy, action: :destroy)
 
-    # New optimized filtering functions for performance tests
-    define(:list_for_user_by_category,
-      action: :for_user_by_category,
-      args: [:user_id, :category_id]
+    # Filtering functions for database-as-user architecture
+    define(:list_by_category,
+      action: :by_category_enhanced,
+      args: [:category_id]
     )
 
-    define(:list_for_user_by_date_range,
-      action: :for_user_by_date_range,
-      args: [:user_id, :start_date, :end_date]
+    define(:list_by_date_range,
+      action: :by_date_range_enhanced,
+      args: [:start_date, :end_date]
     )
 
     define(:list_for_account, action: :for_account, args: [:account_id])
-    define(:list_for_user_with_filters, action: :for_user_with_filters)
-    define(:list_for_user_sorted, action: :for_user_sorted)
+    define(:list_with_filters, action: :with_filters)
+    define(:list_sorted, action: :sorted)
 
-    define(:list_for_user_paginated,
-      action: :for_user_paginated,
-      args: [:user_id, :page, :page_size]
+    define(:list_paginated,
+      action: :paginated,
+      args: [:page, :page_size]
     )
+
   end
 
   # Custom validation function for quantity based on transaction type
@@ -480,5 +464,48 @@ defmodule Ashfolio.Portfolio.Transaction do
       true ->
         changeset
     end
+  end
+
+  # DEPRECATED: Backward compatibility functions for database-as-user migration
+  # These functions accept user_id but ignore it, redirecting to the new functions
+
+  @doc """
+  DEPRECATED: Use list_by_category/1 instead.
+  For backward compatibility during database-as-user migration.
+  """
+  def list_for_user_by_category(_user_id, category_id) do
+    list_by_category(category_id)
+  end
+
+  @doc """
+  DEPRECATED: Use list_by_date_range/2 instead.
+  For backward compatibility during database-as-user migration.
+  """
+  def list_for_user_by_date_range(_user_id, start_date, end_date) do
+    list_by_date_range(start_date, end_date)
+  end
+
+  @doc """
+  DEPRECATED: Use list_with_filters/1 instead.
+  For backward compatibility during database-as-user migration.
+  """
+  def list_for_user_with_filters(opts \\ []) do
+    list_with_filters(opts)
+  end
+
+  @doc """
+  DEPRECATED: Use list_sorted/1 instead.
+  For backward compatibility during database-as-user migration.
+  """
+  def list_for_user_sorted(opts \\ []) do
+    list_sorted(opts)
+  end
+
+  @doc """
+  DEPRECATED: Use list_paginated/2 instead.
+  For backward compatibility during database-as-user migration.
+  """
+  def list_for_user_paginated(_user_id, page, page_size) do
+    list_paginated(page, page_size)
   end
 end

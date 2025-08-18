@@ -191,7 +191,6 @@ defmodule Ashfolio.Portfolio.Account do
       filter(expr(is_excluded == false))
     end
 
-
     read :by_type do
       description("Returns accounts of a specific type")
       argument(:account_type, :atom, allow_nil?: false)
@@ -247,6 +246,24 @@ defmodule Ashfolio.Portfolio.Account do
       Ashfolio.Portfolio.Account
       |> Ash.Query.filter(name: name)
       |> Ash.read_first()
+    end
+
+    @doc """
+    List all accounts in the database.
+
+    In database-as-user architecture, returns all accounts since each database
+    represents one user's data.
+    """
+    def list_all_accounts() do
+      # In database-as-user architecture, get all accounts
+      Ash.read(Ashfolio.Portfolio.Account, :active)
+    end
+
+    @doc """
+    DEPRECATED: Backward compatibility function. Use list_all_accounts/0 instead.
+    """
+    def accounts_for_user(_user_id) do
+      list_all_accounts()
     end
   end
 end

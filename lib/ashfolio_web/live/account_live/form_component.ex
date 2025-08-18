@@ -264,7 +264,6 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
 
     case Context.validate_account_constraints(
            form_params,
-           socket.assigns.user_id,
            current_account_id
          ) do
       {:ok, _} ->

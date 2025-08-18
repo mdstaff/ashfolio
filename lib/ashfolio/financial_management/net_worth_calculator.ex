@@ -27,7 +27,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
 
   ## Examples
 
-      iex> NetWorthCalculator.calculate_net_worth(user_id)
+      iex> NetWorthCalculator.calculate_net_worth()
       {:ok, %{
         net_worth: %Decimal{},
         investment_value: %Decimal{},
@@ -38,12 +38,12 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
       iex> NetWorthCalculator.calculate_net_worth("invalid-id")
       {:error, :user_not_found}
   """
-  def calculate_net_worth(_user_id \\ nil) do
+  def calculate_net_worth() do
     Logger.debug("Calculating net worth")
 
-    with {:ok, investment_value} <- Calculator.calculate_portfolio_value(nil),
+    with {:ok, investment_value} <- Calculator.calculate_portfolio_value(),
          {:ok, cash_balances} <- calculate_total_cash_balances(),
-         {:ok, breakdown} <- calculate_account_breakdown(nil) do
+         {:ok, breakdown} <- calculate_account_breakdown() do
       net_worth = Decimal.add(investment_value, cash_balances)
 
       result = %{
@@ -73,13 +73,13 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
 
   ## Examples
 
-      iex> NetWorthCalculator.calculate_total_cash_balances(user_id)
+      iex> NetWorthCalculator.calculate_total_cash_balances()
       {:ok, %Decimal{}}
 
       iex> NetWorthCalculator.calculate_total_cash_balances("invalid-id")
       {:error, :user_not_found}
   """
-  def calculate_total_cash_balances(_user_id \\ nil) do
+  def calculate_total_cash_balances() do
     Logger.debug("Calculating total cash balances")
 
     try do
@@ -101,7 +101,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
     rescue
       error ->
         ErrorHandler.handle_error({:error, :net_worth_calculation_failed}, %{
-          operation: :cash_balance_calculation, 
+          operation: :cash_balance_calculation,
           exception: error
         })
     end
@@ -110,7 +110,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
   @doc """
   Calculate detailed account breakdown by type for a user.
 
-  TODO: Performance optimization - Consider batch loading with single query and 
+  TODO: Performance optimization - Consider batch loading with single query and
   preloading to improve from current ~144ms to <75ms target (see Task 14 Stage 2)
 
   Provides breakdown of net worth by account type including:
@@ -120,21 +120,20 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
 
   ## Examples
 
-      iex> NetWorthCalculator.calculate_account_breakdown(user_id)
+      iex> NetWorthCalculator.calculate_account_breakdown()
       {:ok, %{
         investment_accounts: [...],
         cash_accounts: [...],
         totals_by_type: %{...}
       }}
   """
-  def calculate_account_breakdown(_user_id) do
+  def calculate_account_breakdown() do
     Logger.debug("Calculating account breakdown")
 
     try do
       # Performance optimization: Use database-level filtering instead of loading all accounts
       with {:ok, investment_accounts} <- get_active_investment_accounts(),
            {:ok, cash_accounts} <- get_active_cash_accounts() do
-
         # Calculate investment account breakdown
         investment_breakdown = calculate_investment_account_breakdown(investment_accounts)
 
@@ -167,13 +166,13 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
   # Performance optimization: Database-level filtering for active cash accounts
   defp get_active_cash_accounts() do
     require Ash.Query
-    
+
     # Combine both filters at database level: cash account types + not excluded
-    query = 
+    query =
       Account
       |> Ash.Query.filter(account_type in [:checking, :savings, :money_market, :cd])
       |> Ash.Query.filter(is_excluded == false)
-    
+
     case Ash.read(query) do
       {:ok, accounts} -> {:ok, accounts}
       {:error, reason} -> {:error, reason}
@@ -183,13 +182,13 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
   # Performance optimization: Database-level filtering for active investment accounts
   defp get_active_investment_accounts() do
     require Ash.Query
-    
+
     # Combine both filters at database level: investment account type + not excluded
-    query = 
+    query =
       Account
       |> Ash.Query.filter(account_type == :investment)
       |> Ash.Query.filter(is_excluded == false)
-    
+
     case Ash.read(query) do
       {:ok, accounts} -> {:ok, accounts}
       {:error, reason} -> {:error, reason}
@@ -199,10 +198,11 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
   defp calculate_investment_account_breakdown(investment_accounts) do
     Enum.map(investment_accounts, fn account ->
       # Calculate actual portfolio value for investment accounts
-      portfolio_value = 
+      portfolio_value =
         case Ashfolio.Portfolio.Calculator.calculate_account_portfolio_value(account.id) do
           {:ok, value} -> value
-          _error -> account.balance  # Fallback to balance if calculation fails
+          # Fallback to balance if calculation fails
+          _error -> account.balance
         end
 
       %{
@@ -211,7 +211,8 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
         type: account.account_type,
         platform: account.platform,
         balance: account.balance,
-        value: portfolio_value,  # Now uses actual portfolio value
+        # Now uses actual portfolio value
+        value: portfolio_value,
         updated_at: account.balance_updated_at
       }
     end)

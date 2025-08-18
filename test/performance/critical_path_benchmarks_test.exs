@@ -4,7 +4,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
 
   Comprehensive benchmarking and regression detection for all optimized performance paths:
   - Database index performance benchmarks
-  - Net worth calculation performance benchmarks  
+  - Net worth calculation performance benchmarks
   - Symbol search cache performance benchmarks
   - Transaction filtering performance benchmarks
   - LiveView/PubSub performance benchmarks
@@ -43,18 +43,15 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
 
   describe "Critical Path Benchmark Suite" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-
       # Create comprehensive test data for all benchmarks
-      test_data = create_comprehensive_test_data(user.id)
+      test_data = create_comprehensive_test_data()
 
       %{
-        user: user,
         test_data: test_data
       }
     end
 
-    test "database index performance benchmark", %{user: _user, test_data: _test_data} do
+    test "database index performance benchmark", %{test_data: _test_data} do
       # Test account filtering performance (Stage 1)
       {time_us, results} =
         :timer.tc(fn ->
@@ -79,11 +76,11 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
              "Database index regression detected: #{time_ms}ms > #{@database_index_target_ms * 1.25}ms threshold"
     end
 
-    test "net worth calculation performance benchmark", %{user: user} do
+    test "net worth calculation performance benchmark" do
       # Test net worth calculation performance (Stage 2)
       {time_us, {:ok, result}} =
         :timer.tc(fn ->
-          NetWorthCalculator.calculate_net_worth(user.id)
+          NetWorthCalculator.calculate_net_worth()
         end)
 
       time_ms = time_us / 1000
@@ -104,11 +101,11 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
              "Net worth calculation regression detected: #{time_ms}ms > #{@net_worth_calculation_target_ms * 1.25}ms threshold"
     end
 
-    test "account breakdown performance benchmark", %{user: user} do
+    test "account breakdown performance benchmark" do
       # Test account breakdown performance (Stage 2)
       {time_us, {:ok, result}} =
         :timer.tc(fn ->
-          NetWorthCalculator.calculate_account_breakdown(user.id)
+          NetWorthCalculator.calculate_account_breakdown()
         end)
 
       time_ms = time_us / 1000
@@ -161,13 +158,13 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
              "Symbol cache regression detected: #{time_ms}ms > #{@symbol_cache_hit_target_ms * 1.25}ms threshold"
     end
 
-    test "transaction filtering performance benchmark", %{user: user, test_data: test_data} do
+    test "transaction filtering performance benchmark", %{test_data: test_data} do
       # Test transaction filtering performance (Stage 4)
       category = Enum.at(test_data.categories, 0)
 
       {time_us, results} =
         :timer.tc(fn ->
-          Transaction.list_for_user_by_category!(user.id, category.id)
+          Transaction.by_category(category.id)
         end)
 
       time_ms = time_us / 1000
@@ -188,7 +185,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
              "Transaction filtering regression detected: #{time_ms}ms > #{@transaction_filtering_target_ms * 1.25}ms threshold"
     end
 
-    test "pubsub broadcast performance benchmark", %{user: user} do
+    test "pubsub broadcast performance benchmark" do
       # Test PubSub broadcast performance (Stage 5)
       data = %{
         net_worth: Decimal.new("100000"),
@@ -200,7 +197,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
         :timer.tc(fn ->
           Phoenix.PubSub.broadcast(
             Ashfolio.PubSub,
-            "net_worth:#{user.id}",
+            "net_worth",
             {:net_worth_updated, data}
           )
         end)
@@ -222,16 +219,16 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
              "PubSub broadcast regression detected: #{time_ms}ms > #{@pubsub_broadcast_target_ms * 1.25}ms threshold"
     end
 
-    test "pubsub delivery latency benchmark", %{user: user} do
+    test "pubsub delivery latency benchmark" do
       # Test PubSub delivery performance (Stage 5)
-      Phoenix.PubSub.subscribe(Ashfolio.PubSub, "benchmark:#{user.id}")
+      Phoenix.PubSub.subscribe(Ashfolio.PubSub, "benchmark")
 
       data = %{timestamp: System.monotonic_time(:microsecond)}
       start_time = System.monotonic_time(:microsecond)
 
       Phoenix.PubSub.broadcast(
         Ashfolio.PubSub,
-        "benchmark:#{user.id}",
+        "benchmark",
         {:benchmark_message, data}
       )
 
@@ -263,21 +260,20 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
 
   describe "End-to-End Workflow Benchmarks" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-      test_data = create_comprehensive_test_data(user.id)
+      test_data = create_comprehensive_test_data()
 
-      %{user: user, test_data: test_data}
+      %{test_data: test_data}
     end
 
-    test "complete dashboard load workflow benchmark", %{user: user} do
+    test "complete dashboard load workflow benchmark" do
       # Measure complete dashboard data loading workflow
       {time_us, _results} =
         :timer.tc(fn ->
           # Simulate dashboard loading all required data
           {
-            NetWorthCalculator.calculate_net_worth(user.id),
+            NetWorthCalculator.calculate_net_worth(),
             Transaction.recent_transactions(),
-            Account.accounts_for_user(user.id)
+            Account.accounts_for_user()
           }
         end)
 
@@ -299,7 +295,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
              "Dashboard load workflow regression detected: #{time_ms}ms > #{target_ms * 1.25}ms threshold"
     end
 
-    test "transaction search and filter workflow benchmark", %{user: user, test_data: test_data} do
+    test "transaction search and filter workflow benchmark", %{test_data: test_data} do
       # Measure transaction search and filtering workflow
       category = Enum.at(test_data.categories, 0)
       start_date = Date.add(Date.utc_today(), -30)
@@ -308,9 +304,9 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
       {time_us, _results} =
         :timer.tc(fn ->
           # Simulate transaction search workflow
-          Transaction.list_for_user_by_category!(user.id, category.id)
-          Transaction.list_for_user_by_date_range!(user.id, start_date, end_date)
-          Transaction.list_for_user_paginated!(user.id, 1, 20)
+          Transaction.by_category(category.id)
+          Transaction.list_for_user_by_date_range!(start_date, end_date)
+          Transaction.list_for_user_paginated!(1, 20)
         end)
 
       time_ms = time_us / 1000
@@ -331,22 +327,22 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
              "Transaction search workflow regression detected: #{time_ms}ms > #{target_ms * 1.25}ms threshold"
     end
 
-    test "real-time update workflow benchmark", %{user: user} do
+    test "real-time update workflow benchmark" do
       # Measure real-time update propagation workflow
-      Phoenix.PubSub.subscribe(Ashfolio.PubSub, "workflow:#{user.id}")
+      Phoenix.PubSub.subscribe(Ashfolio.PubSub, "workflow:")
 
       start_time = System.monotonic_time(:microsecond)
 
       # Simulate data change that triggers updates
       {calc_time_us, {:ok, net_worth_data}} =
         :timer.tc(fn ->
-          NetWorthCalculator.calculate_net_worth(user.id)
+          NetWorthCalculator.calculate_net_worth()
         end)
 
       # Broadcast update
       Phoenix.PubSub.broadcast(
         Ashfolio.PubSub,
-        "workflow:#{user.id}",
+        "workflow:",
         {:workflow_update, net_worth_data}
       )
 
@@ -383,20 +379,19 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
 
   describe "Memory Usage Regression Detection" do
     test "memory usage regression detection across all operations" do
-      user = SQLiteHelpers.get_default_user()
-      create_comprehensive_test_data(user.id)
+      create_comprehensive_test_data()
 
       :erlang.garbage_collect()
       initial_memory = :erlang.memory(:total)
 
       # Perform all critical operations to measure memory impact
       operations = [
-        fn -> NetWorthCalculator.calculate_net_worth(user.id) end,
-        fn -> NetWorthCalculator.calculate_account_breakdown(user.id) end,
+        fn -> NetWorthCalculator.calculate_net_worth() end,
+        fn -> NetWorthCalculator.calculate_account_breakdown() end,
         fn -> SymbolSearch.search("AAPL") end,
         fn -> SymbolSearch.search("GOOGL") end,
         fn -> Transaction.recent_transactions() end,
-        fn -> Account.accounts_for_user(user.id) end
+        fn -> Account.accounts_for_user() end
       ]
 
       for operation <- operations do
@@ -407,7 +402,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
       for i <- 1..50 do
         Phoenix.PubSub.broadcast(
           Ashfolio.PubSub,
-          "memory_test:#{user.id}",
+          "memory_test:",
           {:test_update, %{iteration: i}}
         )
       end
@@ -435,15 +430,14 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
 
   describe "Performance Trend Analysis" do
     test "performance consistency check across multiple runs" do
-      user = SQLiteHelpers.get_default_user()
-      create_comprehensive_test_data(user.id)
+      create_comprehensive_test_data()
 
       # Run net worth calculation multiple times to check consistency
       times =
         for _ <- 1..5 do
           {time_us, {:ok, _result}} =
             :timer.tc(fn ->
-              NetWorthCalculator.calculate_net_worth(user.id)
+              NetWorthCalculator.calculate_net_worth()
             end)
 
           time_us / 1000
@@ -477,7 +471,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
 
   # Helper functions
 
-  defp create_comprehensive_test_data(user_id) do
+  defp create_comprehensive_test_data() do
     # Create accounts
     accounts =
       for i <- 1..5 do
@@ -493,8 +487,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
             name: "Benchmark Account #{i}",
             platform: "Benchmark Platform #{i}",
             account_type: account_type,
-            balance: Decimal.new("#{10000 + i * 5000}"),
-            user_id: user_id
+            balance: Decimal.new("#{10000 + i * 5000}")
           })
 
         account
@@ -507,8 +500,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
           TransactionCategory.create(%{
             name: "Benchmark Category #{i}",
             color:
-              "##{:rand.uniform(16_777_215) |> Integer.to_string(16) |> String.pad_leading(6, "0")}",
-            user_id: user_id
+              "##{:rand.uniform(16_777_215) |> Integer.to_string(16) |> String.pad_leading(6, "0")}"
           })
 
         category

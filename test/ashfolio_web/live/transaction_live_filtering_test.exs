@@ -12,23 +12,19 @@ defmodule AshfolioWeb.TransactionLive.FilteringTest do
 
   describe "enhanced filter state management" do
     setup %{conn: conn} do
-      user = SQLiteHelpers.get_default_user()
-
       # Create test categories
       {:ok, growth_category} =
         TransactionCategory.create(%{
           name: "Growth",
           color: "#10B981",
-          is_system: true,
-          user_id: user.id
+          is_system: true
         })
 
       {:ok, income_category} =
         TransactionCategory.create(%{
           name: "Income",
           color: "#3B82F6",
-          is_system: true,
-          user_id: user.id
+          is_system: true
         })
 
       # Create test account and symbol
@@ -36,8 +32,7 @@ defmodule AshfolioWeb.TransactionLive.FilteringTest do
         Account.create(%{
           name: "Filter Test Account",
           platform: "Test",
-          balance: Decimal.new("20000.00"),
-          user_id: user.id
+          balance: Decimal.new("20000.00")
         })
 
       {:ok, symbol} =
@@ -90,7 +85,6 @@ defmodule AshfolioWeb.TransactionLive.FilteringTest do
 
       %{
         conn: conn,
-        user: user,
         growth_category: growth_category,
         income_category: income_category,
         growth_tx: growth_tx,
@@ -116,8 +110,8 @@ defmodule AshfolioWeb.TransactionLive.FilteringTest do
 
       # Verify filter state is restored
       # Verify filter state is restored
-html = render(new_view)
-assert html =~ category.name
+      html = render(new_view)
+      assert html =~ category.name
     end
 
     test "handles concurrent filter updates gracefully", %{
@@ -142,8 +136,8 @@ assert html =~ category.name
 
       # Final state should be "all categories"
       # Verify no category filter is active
-html = render(view)
-assert html =~ "All Categories"
+      html = render(view)
+      assert html =~ "All Categories"
     end
 
     test "persists filter state to URL parameters", %{conn: conn, growth_category: category} do
@@ -164,7 +158,7 @@ assert html =~ "All Categories"
       # Mount with URL parameters
       {:ok, view, _html} = live(conn, ~p"/transactions?category=#{category.id}")
 
-      # Verify filter state is restored from URL  
+      # Verify filter state is restored from URL
       html = render(view)
       assert html =~ category.name
 
@@ -195,28 +189,24 @@ assert html =~ "All Categories"
 
       # Final state should be correctly applied
       # Verify no category filter is active
-html = render(view)
-assert html =~ "All Categories"
+      html = render(view)
+      assert html =~ "All Categories"
     end
   end
 
   describe "composite filter state management" do
     setup %{conn: conn} do
-      user = SQLiteHelpers.get_default_user()
-
       {:ok, category} =
         TransactionCategory.create(%{
           name: "Composite Filter Test",
-          color: "#FF5733",
-          user_id: user.id
+          color: "#FF5733"
         })
 
       {:ok, account} =
         Account.create(%{
           name: "Composite Test Account",
           platform: "Test",
-          balance: Decimal.new("15000.00"),
-          user_id: user.id
+          balance: Decimal.new("15000.00")
         })
 
       {:ok, symbol} =
@@ -283,10 +273,10 @@ assert html =~ "All Categories"
 
       # Verify both filters are active
       # Verify category filter is active
-html = render(view)  
-assert html =~ category.name
+      html = render(view)
+      assert html =~ category.name
       # Verify transaction type filter is active
-assert html =~ "buy"
+      assert html =~ "buy"
     end
 
     test "preserves filter combinations across navigation", %{conn: conn, category: category} do
@@ -319,13 +309,13 @@ assert html =~ "buy"
 
       # Check if clear button appears (it may not if the component doesn't detect active filters)
       html = render(view)
-      
+
       # If clear button exists, click it
       if html =~ "clear-filters-btn" do
         view
         |> element("[data-testid='clear-filters-btn']")
         |> render_click()
-        
+
         # Verify filters are cleared
         html = render(view)
         assert html =~ "All Categories"
@@ -338,7 +328,7 @@ assert html =~ "buy"
           transaction_type: ""
         })
         |> render_change()
-        
+
         # Verify filters are cleared
         html = render(view)
         assert html =~ "All Categories"
@@ -349,14 +339,11 @@ assert html =~ "buy"
 
   describe "filter state validation and error handling" do
     setup %{conn: conn} do
-      user = SQLiteHelpers.get_default_user()
-
       # Create minimal test data for validation tests
       {:ok, category} =
         TransactionCategory.create(%{
           name: "Validation Test",
-          color: "#FF5733",
-          user_id: user.id
+          color: "#FF5733"
         })
 
       %{conn: conn, category: category}
@@ -369,7 +356,7 @@ assert html =~ "buy"
       # Should fall back to default filter state - check that filter form is present
       assert has_element?(view, "#composite-filter-form")
       assert has_element?(view, "#category-filter")
-      
+
       # Should show "All Categories" as default selection
       html = render(view)
       assert html =~ "All Categories"
@@ -394,8 +381,10 @@ assert html =~ "buy"
 
       # Test various valid parameter formats that test edge cases
       valid_edge_params = [
-        %{category_id: ""},           # Empty string - should show all
-        %{category_id: "uncategorized"} # Special "uncategorized" value
+        # Empty string - should show all
+        %{category_id: ""},
+        # Special "uncategorized" value
+        %{category_id: "uncategorized"}
       ]
 
       Enum.each(valid_edge_params, fn params ->
@@ -405,20 +394,18 @@ assert html =~ "buy"
 
         # Should either apply valid defaults or maintain current state
         html = render(view)
-        assert html =~ "Filter Transactions"  # Form should still be functional
+        # Form should still be functional
+        assert html =~ "Filter Transactions"
       end)
     end
   end
 
   describe "real-time filter updates" do
     setup %{conn: conn} do
-      user = SQLiteHelpers.get_default_user()
-
       {:ok, category} =
         TransactionCategory.create(%{
           name: "Real-time Test",
-          color: "#ABCDEF",
-          user_id: user.id
+          color: "#ABCDEF"
         })
 
       %{conn: conn, category: category}

@@ -60,7 +60,7 @@ Target: `test/ashfolio/portfolio/calculator_edge_cases_test.exs`
 Targets: Account, Symbol, Transaction, TransactionCategory tests
 
 - Remove: Duplicate field validation tests (keep 2 per resource)
-- Keep: Primary field validations (user_id, name, required fields)
+- Keep: Primary field validations (name, required fields)
 - Consolidate: Error message assertion patterns
 - Coverage Impact: <1% - Core validations preserved
 

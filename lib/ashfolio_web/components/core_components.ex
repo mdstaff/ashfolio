@@ -880,7 +880,9 @@ defmodule AshfolioWeb.CoreComponents do
             <span class={[
               "breakdown-value",
               @cash_balance == "$0.00" && "cash-zero"
-            ]}>{@cash_balance}</span>
+            ]}>
+              {@cash_balance}
+            </span>
           </div>
         </div>
       </div>

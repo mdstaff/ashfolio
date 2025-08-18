@@ -11,39 +11,32 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
 
   describe "FormComponent" do
     setup do
-      # Use global test user following documented SQLite patterns
-      user = get_default_user()
+      # Database-as-user architecture: No user needed
 
       # Create existing categories for validation testing with retry logic
       existing_category =
         with_retry(fn ->
-          case TransactionCategory.create(
-                 %{
-                   name: "Existing Category",
-                   color: "#22C55E",
-                   user_id: user.id,
-                   is_system: false
-                 },
-                 actor: user
-               ) do
+          case TransactionCategory.create(%{
+                 name: "Existing Category",
+                 color: "#22C55E",
+                 is_system: false
+               }) do
             {:ok, category} -> category
             {:error, error} -> raise "Failed to create existing category: #{inspect(error)}"
           end
         end)
 
       %{
-        user: user,
         existing_category: existing_category
       }
     end
 
-    test "renders new category form with suggestions", %{user: user} do
+    test "renders new category form with suggestions", %{} do
       component_html =
         render_component(FormComponent,
           id: "test-form",
           action: :new,
           category: nil,
-          user_id: user.id,
           categories: []
         )
 
@@ -56,7 +49,6 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
     end
 
     test "renders edit category form without suggestions", %{
-      user: user,
       existing_category: existing_category
     } do
       component_html =
@@ -64,7 +56,6 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
           id: "test-form",
           action: :edit,
           category: existing_category,
-          user_id: user.id,
           categories: [existing_category]
         )
 
@@ -74,13 +65,12 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       refute component_html =~ "Popular Investment Categories"
     end
 
-    test "validates category name", %{user: user} do
+    test "validates category name", %{} do
       {view, _html} =
         live_component_isolated(FormComponent, %{
           id: "test-form",
           action: :new,
           category: nil,
-          user_id: user.id,
           categories: []
         })
 
@@ -118,13 +108,12 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       refute has_element?(view, "li", "Category name")
     end
 
-    test "validates category name uniqueness", %{user: user, existing_category: existing_category} do
+    test "validates category name uniqueness", %{existing_category: existing_category} do
       {view, _html} =
         live_component_isolated(FormComponent, %{
           id: "test-form",
           action: :new,
           category: nil,
-          user_id: user.id,
           categories: [existing_category]
         })
 
@@ -146,13 +135,12 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       refute has_element?(view, "li", "unique")
     end
 
-    test "validates color format", %{user: user} do
+    test "validates color format", %{} do
       {view, _html} =
         live_component_isolated(FormComponent, %{
           id: "test-form",
           action: :new,
           category: nil,
-          user_id: user.id,
           categories: []
         })
 
@@ -188,13 +176,12 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       refute has_element?(view, "li", "Color must be a valid hex color")
     end
 
-    test "color picker functionality", %{user: user} do
+    test "color picker functionality", %{} do
       {view, _html} =
         live_component_isolated(FormComponent, %{
           id: "test-form",
           action: :new,
           category: nil,
-          user_id: user.id,
           categories: []
         })
 
@@ -208,13 +195,12 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       assert html =~ "background-color: #EF4444"
     end
 
-    test "suggestion selection functionality", %{user: user} do
+    test "suggestion selection functionality", %{} do
       {view, _html} =
         live_component_isolated(FormComponent, %{
           id: "test-form",
           action: :new,
           category: nil,
-          user_id: user.id,
           categories: []
         })
 
@@ -230,13 +216,12 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       refute html =~ "Popular Investment Categories"
     end
 
-    test "hide/show suggestions functionality", %{user: user} do
+    test "hide/show suggestions functionality", %{} do
       {view, _html} =
         live_component_isolated(FormComponent, %{
           id: "test-form",
           action: :new,
           category: nil,
-          user_id: user.id,
           categories: []
         })
 
@@ -251,13 +236,12 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       refute has_element?(view, "h4", "Popular Investment Categories")
     end
 
-    test "creates new category successfully", %{user: user} do
+    test "creates new category successfully", %{} do
       {view, _html} =
         live_component_isolated(FormComponent, %{
           id: "test-form",
           action: :new,
           category: nil,
-          user_id: user.id,
           categories: []
         })
 
@@ -277,12 +261,10 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       assert_receive {AshfolioWeb.CategoryLive.FormComponent, {:saved, category}}
       assert category.name == "New Growth Category"
       assert category.color == "#22C55E"
-      assert category.user_id == user.id
       assert category.is_system == false
     end
 
     test "updates existing category successfully", %{
-      user: user,
       existing_category: existing_category
     } do
       {view, _html} =
@@ -290,7 +272,6 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
           id: "test-form",
           action: :edit,
           category: existing_category,
-          user_id: user.id,
           categories: [existing_category]
         })
 
@@ -310,13 +291,12 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       assert category.id == existing_category.id
     end
 
-    test "handles validation errors on save", %{user: user, existing_category: existing_category} do
+    test "handles validation errors on save", %{existing_category: existing_category} do
       {view, _html} =
         live_component_isolated(FormComponent, %{
           id: "test-form",
           action: :new,
           category: nil,
-          user_id: user.id,
           categories: [existing_category]
         })
 
@@ -336,13 +316,12 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       assert has_element?(view, "li", "Category name must be unique")
     end
 
-    test "cancels form", %{user: user} do
+    test "cancels form", %{} do
       {view, _html} =
         live_component_isolated(FormComponent, %{
           id: "test-form",
           action: :new,
           category: nil,
-          user_id: user.id,
           categories: []
         })
 
@@ -355,13 +334,12 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       assert_receive {AshfolioWeb.CategoryLive.FormComponent, :cancelled}
     end
 
-    test "validates custom color input", %{user: user} do
+    test "validates custom color input", %{} do
       {view, _html} =
         live_component_isolated(FormComponent, %{
           id: "test-form",
           action: :new,
           category: nil,
-          user_id: user.id,
           categories: []
         })
 
@@ -383,13 +361,12 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       assert html =~ "background-color: #FF5733"
     end
 
-    test "shows loading state during save", %{user: user} do
+    test "shows loading state during save", %{} do
       {view, _html} =
         live_component_isolated(FormComponent, %{
           id: "test-form",
           action: :new,
           category: nil,
-          user_id: user.id,
           categories: []
         })
 
@@ -406,19 +383,15 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       # - "Creating..." text
     end
 
-    test "parent category selection", %{user: user} do
+    test "parent category selection", %{} do
       # Create a parent category with retry logic
       parent_category =
         with_retry(fn ->
-          case TransactionCategory.create(
-                 %{
-                   name: "Parent Category",
-                   color: "#6366F1",
-                   user_id: user.id,
-                   is_system: false
-                 },
-                 actor: user
-               ) do
+          case TransactionCategory.create(%{
+                 name: "Parent Category",
+                 color: "#6366F1",
+                 is_system: false
+               }) do
             {:ok, category} -> category
             {:error, error} -> raise "Failed to create parent category: #{inspect(error)}"
           end
@@ -429,7 +402,6 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
           id: "test-form",
           action: :new,
           category: nil,
-          user_id: user.id,
           categories: [parent_category]
         })
 
@@ -464,19 +436,15 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       assert category.parent_category_id == parent_category.id
     end
 
-    test "excludes system categories from parent options", %{user: user} do
+    test "excludes system categories from parent options", %{} do
       # Create a system category with retry logic
       system_category =
         with_retry(fn ->
-          case TransactionCategory.create(
-                 %{
-                   name: "System Category",
-                   color: "#6366F1",
-                   user_id: user.id,
-                   is_system: true
-                 },
-                 actor: user
-               ) do
+          case TransactionCategory.create(%{
+                 name: "System Category",
+                 color: "#6366F1",
+                 is_system: true
+               }) do
             {:ok, category} -> category
             {:error, error} -> raise "Failed to create system category: #{inspect(error)}"
           end
@@ -487,7 +455,6 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
           id: "test-form",
           action: :new,
           category: nil,
-          user_id: user.id,
           categories: [system_category]
         })
 

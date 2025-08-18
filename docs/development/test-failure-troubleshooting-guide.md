@@ -15,6 +15,7 @@ This guide documents proven patterns for resolving test failures systematically,
 **Pattern**: Tests fail with `KeyError` when accessing data structures that may have different key names depending on the implementation.
 
 **Example Error**:
+
 ```
 ** (KeyError) key :cash_balance not found in: %{cash_value: #Decimal<25000.00>, ...}
 ```
@@ -27,7 +28,7 @@ This guide documents proven patterns for resolving test failures systematically,
 # Handle both :cash_balance and :cash_value
 cash_value = net_worth_data[:cash_balance] || net_worth_data[:cash_value]
 
-# Handle both :total_net_worth and :net_worth  
+# Handle both :total_net_worth and :net_worth
 net_worth_value = net_worth_data[:total_net_worth] || net_worth_data[:net_worth]
 ```
 
@@ -38,6 +39,7 @@ net_worth_value = net_worth_data[:total_net_worth] || net_worth_data[:net_worth]
 **Pattern**: Tests fail with "database is locked" or "database is busy" errors, especially in parallel test execution.
 
 **Example Error**:
+
 ```
 ** (Sqlite.DbConnection.Error) BUSY: database is locked
 ```
@@ -55,8 +57,8 @@ setup do
 end
 
 # GOOD: Create additional data only in tests that need it
-test "specific test", %{account1: account1, user: user} do
-  {:ok, account2} = Account.create(%{...user_id: user.id})
+test "specific test", %{account1: account1 do
+  {:ok, account2} = Account.create(%{...})
   # test logic
 end
 ```
@@ -68,6 +70,7 @@ end
 **Pattern**: Tests fail when asserting presence of HTML attributes that don't actually exist in the rendered output.
 
 **Example Error**:
+
 ```
 Expected element with selector "[data-filter-active='category:123']" to be present
 ```
@@ -93,6 +96,7 @@ assert html =~ "Growth"  # Or other expected content
 **Pattern**: LiveView tests fail when trying to click navigation elements that exist in the layout but aren't accessible from the LiveView test context.
 
 **Example Error**:
+
 ```
 ** (ArgumentError) element with selector "nav.hidden a[href='/accounts']" was not found
 ```
@@ -117,6 +121,7 @@ assert html =~ "Account List"
 **Pattern**: Tests fail when expecting specific CSS classes that don't match the actual component implementation.
 
 **Example Error**:
+
 ```
 Expected element with class "rounded-md" but found "rounded-lg"
 ```
@@ -137,6 +142,7 @@ assert has_element?(view, ".rounded-lg")  # Not .rounded-md
 **Pattern**: Performance tests fail due to unrealistic timing expectations or external API timeouts.
 
 **Example Error**:
+
 ```
 Performance test timeout after 30 seconds
 Expected < 50ms but got 120ms
@@ -163,6 +169,7 @@ assert time_ms < 500  # Was 100ms, increased to 500ms for test env
 **Pattern**: Tests fail when SQLiteHelpers.with_retry() calls are nested, causing function clause errors.
 
 **Example Error**:
+
 ```
 ** (FunctionClauseError) no function clause matching in SQLiteHelpers.with_retry/1
 ```
@@ -184,8 +191,7 @@ end)
   SQLiteHelpers.with_retry(fn ->
     TransactionCategory.create(%{
       name: "Growth",
-      color: "#10B981",
-      user_id: user.id
+      color: "#10B981"
     })
   end)
 ```
@@ -197,6 +203,7 @@ end)
 ### 1. Identify the Pattern
 
 When a test fails, ask:
+
 - Is this error type occurring in multiple tests?
 - What's the common root cause across similar failures?
 - Is this a configuration issue, data structure mismatch, or environment difference?
@@ -204,6 +211,7 @@ When a test fails, ask:
 ### 2. Group Similar Failures
 
 Run the full test suite and categorize failures:
+
 ```bash
 just test all > test-results.txt
 grep -E "(Error|Failed)" test-results.txt | sort | uniq -c
@@ -212,6 +220,7 @@ grep -E "(Error|Failed)" test-results.txt | sort | uniq -c
 ### 3. Apply Pattern-Based Fixes
 
 Fix all instances of the same pattern simultaneously:
+
 - Database key mismatches: Update all data access points
 - CSS class mismatches: Update all component assertions
 - Concurrency issues: Review all shared setup blocks
@@ -219,6 +228,7 @@ Fix all instances of the same pattern simultaneously:
 ### 4. Validate Incrementally
 
 Test your fixes in stages:
+
 ```bash
 just test <specific-file>  # Test individual files
 just test unit             # Test unit suite
@@ -234,6 +244,7 @@ Add the pattern and solution to this guide for future reference.
 ### 1. Consistent Naming Conventions
 
 Establish and document key naming conventions across implementations:
+
 - Use the same key names in all calculator implementations
 - Document expected data structure formats
 - Use TypeSpecs to enforce structure contracts
@@ -241,16 +252,16 @@ Establish and document key naming conventions across implementations:
 ### 2. Shared Test Utilities
 
 Create helper functions for common test patterns:
+
 ```elixir
 defmodule TestHelpers do
-  def create_test_account(user_id, overrides \\ %{}) do
+  def create_test_account(overrides \\ %{}) do
     defaults = %{
       name: "Test Account",
-      platform: "Test Platform", 
-      balance: Decimal.new("1000.00"),
-      user_id: user_id
+      platform: "Test Platform",
+      balance: Decimal.new("1000.00")
     }
-    
+
     Account.create(Map.merge(defaults, overrides))
   end
 end
@@ -259,6 +270,7 @@ end
 ### 3. Component Contract Testing
 
 Test component contracts, not implementation details:
+
 ```elixir
 # Good: Test user-visible behavior
 test "displays account balance" do
@@ -275,6 +287,7 @@ end
 ### 4. Performance Test Environment Awareness
 
 Design performance tests that account for test environment limitations:
+
 - Use lower iteration counts
 - Accept realistic timing thresholds
 - Mock external dependencies when possible
@@ -286,6 +299,7 @@ If you encounter massive test failures (50+ failures):
 ### 1. Stop and Assess
 
 Don't fix tests individually. Run the full suite and categorize:
+
 ```bash
 just test all 2>&1 | tee test-failures.log
 ```
@@ -293,6 +307,7 @@ just test all 2>&1 | tee test-failures.log
 ### 2. Fix Database Issues First
 
 Database problems often cascade:
+
 ```bash
 just db test-reset  # Reset test database
 just fix            # Run automated fixes
@@ -301,6 +316,7 @@ just fix            # Run automated fixes
 ### 3. Identify Top 3 Patterns
 
 Focus on the most common failure types first:
+
 ```bash
 grep -E "Error:" test-failures.log | sort | uniq -c | sort -nr | head -3
 ```
@@ -312,6 +328,7 @@ Use this guide to apply pattern-based solutions to the top failure types.
 ### 5. Validate Progress
 
 After each pattern fix, re-run tests to measure progress:
+
 ```bash
 just test all | grep -E "(failures|tests)"
 ```
@@ -319,6 +336,7 @@ just test all | grep -E "(failures|tests)"
 ## Success Metrics
 
 Track your progress toward 100% success:
+
 - **Target**: 0 failures across all test suites
 - **Main Suite**: ~871 tests should pass
 - **Performance Suite**: ~99 tests should pass

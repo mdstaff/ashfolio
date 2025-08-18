@@ -43,7 +43,7 @@ defmodule Ashfolio.Portfolio.Context do
   def get_account_summary(user_id \\ nil)
 
   # Transaction operations
-  def get_recent_transactions(user_id, limit \\ 10)
+  def get_recent_transactions(limit \\ 10)
 end
 ```
 

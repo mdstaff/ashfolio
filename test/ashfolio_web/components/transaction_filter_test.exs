@@ -13,14 +13,11 @@ defmodule AshfolioWeb.Components.TransactionFilterTest do
 
   describe "TransactionFilter component" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-
       {:ok, growth_category} =
         SQLiteHelpers.with_retry(fn ->
           TransactionCategory.create(%{
             name: "Growth",
-            color: "#10B981",
-            user_id: user.id
+            color: "#10B981"
           })
         end)
 
@@ -28,15 +25,13 @@ defmodule AshfolioWeb.Components.TransactionFilterTest do
         SQLiteHelpers.with_retry(fn ->
           TransactionCategory.create(%{
             name: "Income",
-            color: "#3B82F6",
-            user_id: user.id
+            color: "#3B82F6"
           })
         end)
 
       categories = [growth_category, income_category]
 
       %{
-        user: user,
         categories: categories,
         growth_category: growth_category,
         income_category: income_category
@@ -238,14 +233,11 @@ defmodule AshfolioWeb.Components.TransactionFilterTest do
 
   describe "TransactionFilter filter state helpers" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-
       {:ok, growth_category} =
         SQLiteHelpers.with_retry(fn ->
           TransactionCategory.create(%{
             name: "Growth",
-            color: "#10B981",
-            user_id: user.id
+            color: "#10B981"
           })
         end)
 
@@ -253,15 +245,13 @@ defmodule AshfolioWeb.Components.TransactionFilterTest do
         SQLiteHelpers.with_retry(fn ->
           TransactionCategory.create(%{
             name: "Income",
-            color: "#3B82F6",
-            user_id: user.id
+            color: "#3B82F6"
           })
         end)
 
       categories = [growth_category, income_category]
 
       %{
-        user: user,
         categories: categories,
         growth_category: growth_category,
         income_category: income_category
@@ -314,14 +304,11 @@ defmodule AshfolioWeb.Components.TransactionFilterTest do
 
   describe "TransactionFilter performance and UX" do
     setup do
-      user = SQLiteHelpers.get_default_user()
-
       {:ok, growth_category} =
         SQLiteHelpers.with_retry(fn ->
           TransactionCategory.create(%{
             name: "Growth",
-            color: "#10B981",
-            user_id: user.id
+            color: "#10B981"
           })
         end)
 
@@ -329,15 +316,13 @@ defmodule AshfolioWeb.Components.TransactionFilterTest do
         SQLiteHelpers.with_retry(fn ->
           TransactionCategory.create(%{
             name: "Income",
-            color: "#3B82F6",
-            user_id: user.id
+            color: "#3B82F6"
           })
         end)
 
       categories = [growth_category, income_category]
 
       %{
-        user: user,
         categories: categories,
         growth_category: growth_category,
         income_category: income_category

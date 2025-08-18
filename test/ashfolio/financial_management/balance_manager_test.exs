@@ -2,20 +2,16 @@ defmodule Ashfolio.FinancialManagement.BalanceManagerTest do
   use Ashfolio.DataCase, async: false
 
   alias Ashfolio.FinancialManagement.BalanceManager
-  alias Ashfolio.Portfolio.{User, Account}
+  alias Ashfolio.Portfolio.Account
   alias Ashfolio.PubSub
 
   describe "update_cash_balance/3" do
     setup do
-      # Create a test user
-      {:ok, user} = User.create(%{name: "Test User"})
-
       # Create a cash account
       {:ok, cash_account} =
         Account.create(%{
           name: "Test Checking",
           platform: "Test Bank",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("1000.00")
         })
@@ -25,13 +21,11 @@ defmodule Ashfolio.FinancialManagement.BalanceManagerTest do
         Account.create(%{
           name: "Test Investment",
           platform: "Test Broker",
-          user_id: user.id,
           account_type: :investment,
           balance: Decimal.new("5000.00")
         })
 
       %{
-        user: user,
         cash_account: cash_account,
         investment_account: investment_account
       }
@@ -123,18 +117,15 @@ defmodule Ashfolio.FinancialManagement.BalanceManagerTest do
 
   describe "get_balance_history/1" do
     setup do
-      {:ok, user} = User.create(%{name: "Test User"})
-
       {:ok, cash_account} =
         Account.create(%{
           name: "Test Checking",
           platform: "Test Bank",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("1000.00")
         })
 
-      %{user: user, cash_account: cash_account}
+      %{cash_account: cash_account}
     end
 
     test "returns empty history for account with no balance changes", %{cash_account: account} do
@@ -177,13 +168,12 @@ defmodule Ashfolio.FinancialManagement.BalanceManagerTest do
       assert {:error, :account_not_found} = BalanceManager.get_balance_history(non_existent_id)
     end
 
-    test "history is isolated per account", %{user: user} do
+    test "history is isolated per account" do
       # Create two accounts
       {:ok, account1} =
         Account.create(%{
           name: "Account 1",
           platform: "Bank 1",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("1000.00")
         })
@@ -192,7 +182,6 @@ defmodule Ashfolio.FinancialManagement.BalanceManagerTest do
         Account.create(%{
           name: "Account 2",
           platform: "Bank 2",
-          user_id: user.id,
           account_type: :savings,
           balance: Decimal.new("2000.00")
         })
@@ -226,13 +215,10 @@ defmodule Ashfolio.FinancialManagement.BalanceManagerTest do
 
   describe "PubSub integration" do
     setup do
-      {:ok, user} = User.create(%{name: "Test User"})
-
       {:ok, cash_account} =
         Account.create(%{
           name: "Test Checking",
           platform: "Test Bank",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("1000.00")
         })
@@ -240,7 +226,7 @@ defmodule Ashfolio.FinancialManagement.BalanceManagerTest do
       # Subscribe to balance change events
       PubSub.subscribe("balance_changes")
 
-      %{user: user, cash_account: cash_account}
+      %{cash_account: cash_account}
     end
 
     test "broadcasts balance change event with notes", %{cash_account: account} do
@@ -292,18 +278,15 @@ defmodule Ashfolio.FinancialManagement.BalanceManagerTest do
 
   describe "edge cases and error handling" do
     setup do
-      {:ok, user} = User.create(%{name: "Test User"})
-
       {:ok, cash_account} =
         Account.create(%{
           name: "Test Checking",
           platform: "Test Bank",
-          user_id: user.id,
           account_type: :checking,
           balance: Decimal.new("1000.00")
         })
 
-      %{user: user, cash_account: cash_account}
+      %{cash_account: cash_account}
     end
 
     test "handles very large balance amounts", %{cash_account: account} do
