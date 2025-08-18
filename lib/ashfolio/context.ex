@@ -53,7 +53,7 @@ defmodule Ashfolio.Context do
   Sets up ETS table for caching and prepared statements.
   """
   def start_link do
-    :ets.new(@ets_table, [:named_table, :public, :set])
+    :ets.new(@ets_table, [:named_table, :protected, :set])
     {:ok, self()}
   end
 

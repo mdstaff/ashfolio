@@ -88,6 +88,11 @@ defmodule Ashfolio.Portfolio.Account do
       message: "Account balance cannot be negative"
     )
 
+    # Security: Validate maximum reasonable balance
+    validate(compare(:balance, less_than_or_equal_to: Decimal.new("1000000000.00")),
+      message: "Account balance cannot exceed $1,000,000,000.00 (security limit)"
+    )
+
     # Validate name length
     validate(string_length(:name, min: 2, max: 100))
 

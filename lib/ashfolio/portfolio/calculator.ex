@@ -103,6 +103,39 @@ defmodule Ashfolio.Portfolio.Calculator do
   end
 
   @doc """
+  Calculate portfolio value for a specific account.
+
+  Returns the total value of all holdings in the given account.
+  For cash accounts, this should return the account balance.
+  For investment accounts, this calculates the current market value of all holdings.
+
+  ## Examples
+
+      iex> Calculator.calculate_account_portfolio_value(account_id)
+      {:ok, %Decimal{}}
+  """
+  def calculate_account_portfolio_value(account_id) when is_binary(account_id) do
+    Logger.debug("Calculating portfolio value for account: #{account_id}")
+
+    case get_holdings_for_account(account_id) do
+      [] ->
+        # No holdings in this account
+        {:ok, Decimal.new(0)}
+
+      transactions ->
+        holdings = group_holdings_by_symbol(transactions)
+        
+        total_value =
+          holdings
+          |> Enum.map(&calculate_holding_value/1)
+          |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
+
+        Logger.debug("Account #{account_id} portfolio value: #{total_value}")
+        {:ok, total_value}
+    end
+  end
+
+  @doc """
   Get total return tracking data for the portfolio.
 
   Returns portfolio summary with total value, cost basis, and return percentage.

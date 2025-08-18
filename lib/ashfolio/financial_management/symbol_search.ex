@@ -35,6 +35,7 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
 
   alias Ashfolio.Portfolio.Symbol
   alias Ashfolio.MarketData.RateLimiter
+  alias Ashfolio.ErrorHandler
   require Logger
 
   # HTTP client for external API calls (configurable for testing)
@@ -160,7 +161,7 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
     case :ets.whereis(@cache_table) do
       :undefined ->
         try do
-          :ets.new(@cache_table, [:named_table, :public, :set])
+          :ets.new(@cache_table, [:named_table, :protected, :set])
         rescue
           ArgumentError ->
             # Table was created by another process, that's fine
@@ -354,12 +355,17 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
 
       {:error, :rate_limited, retry_after_ms} ->
         Logger.info("Rate limited for symbol search, retry after #{retry_after_ms}ms")
-        {:error, :rate_limited}
+        ErrorHandler.handle_error({:error, :symbol_search_rate_limited}, %{
+          operation: :external_symbol_search,
+          retry_after_ms: retry_after_ms
+        })
     end
   rescue
     error ->
-      Logger.error("External API search error: #{inspect(error)}")
-      {:error, :api_unavailable}
+      ErrorHandler.handle_error({:error, :symbol_api_unavailable}, %{
+        operation: :external_symbol_search,
+        exception: error
+      })
   end
 
   defp perform_external_search(query, max_results) do
@@ -429,15 +435,24 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
         {:ok, []}
 
       {:error, reason} ->
-        Logger.warning("Failed to parse Yahoo Finance search response: #{inspect(reason)}")
-        {:error, :parse_error}
+        ErrorHandler.handle_error({:error, :symbol_api_unavailable}, %{
+          operation: :yahoo_response_parsing,
+          parse_error: reason
+        })
     end
   end
 
   defp valid_yahoo_quote?(%{"symbol" => symbol, "shortname" => name})
        when is_binary(symbol) and is_binary(name) and symbol != "" and name != "" do
-    # Filter out invalid or unwanted symbols
-    not String.contains?(symbol, ["=", "^", "."])
+    # Enhanced input sanitization for external symbol data validation
+    with :ok <- validate_symbol_format(symbol),
+         :ok <- validate_symbol_length(symbol),
+         :ok <- validate_name_format(name),
+         :ok <- validate_name_length(name) do
+      true
+    else
+      _ -> false
+    end
   end
 
   defp valid_yahoo_quote?(_), do: false
@@ -465,6 +480,48 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
     end
   rescue
     _error -> nil
+  end
+
+  # Enhanced input sanitization functions for external symbol data validation
+  defp validate_symbol_format(symbol) do
+    # Security: Only allow alphanumeric characters, hyphens, and dots for valid stock symbols
+    # Filter out potentially malicious symbols (=, ^, and complex special chars)
+    if Regex.match?(~r/^[A-Z0-9.-]+$/i, symbol) and
+       not String.contains?(symbol, ["=", "^", "<", ">", "&", ";", "|", "`"]) do
+      :ok
+    else
+      {:error, :invalid_symbol_format}
+    end
+  end
+
+  defp validate_symbol_length(symbol) do
+    # Security: Reasonable length limits for stock symbols (typically 1-5 chars, max 10)
+    case String.length(symbol) do
+      len when len >= 1 and len <= 10 -> :ok
+      _ -> {:error, :invalid_symbol_length}
+    end
+  end
+
+  defp validate_name_format(name) do
+    # Security: Basic HTML/script tag detection for name field
+    name_lower = String.downcase(name)
+    
+    # Check for potentially malicious content
+    malicious_patterns = ["<script", "</script", "<iframe", "javascript:", "data:", "vbscript:"]
+    
+    if Enum.any?(malicious_patterns, &String.contains?(name_lower, &1)) do
+      {:error, :invalid_name_format}
+    else
+      :ok
+    end
+  end
+
+  defp validate_name_length(name) do
+    # Security: Reasonable length limits for company names (max 200 chars)
+    case String.length(name) do
+      len when len >= 1 and len <= 200 -> :ok
+      _ -> {:error, :invalid_name_length}
+    end
   end
 
   defp determine_asset_class(%{"quoteType" => "EQUITY"}), do: :stock
