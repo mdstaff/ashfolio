@@ -70,11 +70,6 @@ defmodule Ashfolio.Portfolio.Account do
   end
 
   relationships do
-    belongs_to :user, Ashfolio.Portfolio.User do
-      allow_nil?(false)
-      description("The user who owns this account")
-    end
-
     has_many :transactions, Ashfolio.Portfolio.Transaction do
       description("Transactions that occurred in this account")
     end
@@ -142,7 +137,6 @@ defmodule Ashfolio.Portfolio.Account do
         :currency,
         :is_excluded,
         :balance,
-        :user_id,
         :account_type,
         :interest_rate,
         :minimum_balance
@@ -192,11 +186,6 @@ defmodule Ashfolio.Portfolio.Account do
       filter(expr(is_excluded == false))
     end
 
-    read :by_user do
-      description("Returns accounts for a specific user")
-      argument(:user_id, :uuid, allow_nil?: false)
-      filter(expr(user_id == ^arg(:user_id)))
-    end
 
     read :by_type do
       description("Returns accounts of a specific type")
@@ -239,7 +228,6 @@ defmodule Ashfolio.Portfolio.Account do
     define(:list, action: :read)
     define(:get_by_id, action: :read, get_by: [:id])
     define(:active_accounts, action: :active)
-    define(:accounts_for_user, action: :by_user, args: [:user_id])
     define(:accounts_by_type, action: :by_type, args: [:account_type])
     define(:cash_accounts, action: :cash_accounts)
     define(:investment_accounts, action: :investment_accounts)
@@ -248,11 +236,11 @@ defmodule Ashfolio.Portfolio.Account do
     define(:update_balance, action: :update_balance)
     define(:destroy, action: :destroy)
 
-    def get_by_name_for_user(user_id, name) do
+    def get_by_name(name) do
       require Ash.Query
 
       Ashfolio.Portfolio.Account
-      |> Ash.Query.filter(user_id: user_id, name: name)
+      |> Ash.Query.filter(name: name)
       |> Ash.read_first()
     end
   end

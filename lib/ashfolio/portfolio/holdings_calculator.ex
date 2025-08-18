@@ -27,10 +27,10 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
       iex> HoldingsCalculator.calculate_holding_values(user_id)
       {:ok, [%{symbol: "AAPL", quantity: %Decimal{}, current_value: %Decimal{}, cost_basis: %Decimal{}}]}
   """
-  def calculate_holding_values(user_id) when is_binary(user_id) do
-    Logger.debug("Calculating holding values for user: #{user_id}")
+  def calculate_holding_values(_user_id \\ nil) do
+    Logger.debug("Calculating holding values")
 
-    with {:ok, holdings_data} <- get_holdings_data(user_id) do
+    with {:ok, holdings_data} <- get_holdings_data(nil) do
       holdings_with_values =
         holdings_data
         |> Enum.map(&calculate_individual_holding_value/1)
@@ -55,10 +55,10 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
       iex> HoldingsCalculator.calculate_cost_basis(user_id, symbol_id)
       {:ok, %{total_cost: %Decimal{}, average_cost: %Decimal{}, quantity: %Decimal{}}}
   """
-  def calculate_cost_basis(user_id, symbol_id) when is_binary(user_id) and is_binary(symbol_id) do
-    Logger.debug("Calculating cost basis for user: #{user_id}, symbol: #{symbol_id}")
+  def calculate_cost_basis(symbol_id, _user_id \\ nil) when is_binary(symbol_id) do
+    Logger.debug("Calculating cost basis for symbol: #{symbol_id}")
 
-    case get_symbol_transactions(user_id, symbol_id) do
+    case get_symbol_transactions(symbol_id) do
       {:ok, transactions} ->
         cost_basis_data = calculate_cost_basis_from_transactions(transactions)
         Logger.debug("Cost basis calculated: #{inspect(cost_basis_data)}")
@@ -80,11 +80,11 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
       iex> HoldingsCalculator.calculate_holding_pnl(user_id, symbol_id)
       {:ok, %{unrealized_pnl: %Decimal{}, unrealized_pnl_pct: %Decimal{}, current_value: %Decimal{}}}
   """
-  def calculate_holding_pnl(user_id, symbol_id)
-      when is_binary(user_id) and is_binary(symbol_id) do
-    Logger.debug("Calculating P&L for user: #{user_id}, symbol: #{symbol_id}")
+  def calculate_holding_pnl(symbol_id, _user_id \\ nil)
+      when is_binary(symbol_id) do
+    Logger.debug("Calculating P&L for symbol: #{symbol_id}")
 
-    with {:ok, cost_basis_data} <- calculate_cost_basis(user_id, symbol_id),
+    with {:ok, cost_basis_data} <- calculate_cost_basis(symbol_id),
          {:ok, symbol} <- Symbol.get_by_id(symbol_id) do
       current_price = get_current_price(symbol)
 
@@ -136,10 +136,10 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
       iex> HoldingsCalculator.aggregate_portfolio_value(user_id)
       {:ok, %Decimal{}}
   """
-  def aggregate_portfolio_value(user_id) when is_binary(user_id) do
-    Logger.debug("Aggregating portfolio value for user: #{user_id}")
+  def aggregate_portfolio_value(_user_id \\ nil) do
+    Logger.debug("Aggregating portfolio value")
 
-    case calculate_holding_values(user_id) do
+    case calculate_holding_values() do
       {:ok, holdings} ->
         total_value =
           holdings
@@ -160,11 +160,11 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
 
   Returns comprehensive holdings data including values, cost basis, and P&L.
   """
-  def get_holdings_summary(user_id) when is_binary(user_id) do
-    Logger.debug("Getting holdings summary for user: #{user_id}")
+  def get_holdings_summary(_user_id \\ nil) do
+    Logger.debug("Getting holdings summary")
 
-    with {:ok, holdings} <- calculate_holding_values(user_id),
-         {:ok, total_value} <- aggregate_portfolio_value(user_id) do
+    with {:ok, holdings} <- calculate_holding_values(),
+         {:ok, total_value} <- aggregate_portfolio_value() do
       total_cost_basis =
         holdings
         |> Enum.map(& &1.cost_basis)
@@ -204,9 +204,9 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
 
   # Private functions
 
-  defp get_holdings_data(user_id) do
+  defp get_holdings_data(_user_id) do
     try do
-      case Account.accounts_for_user(user_id) do
+      case Account.list() do
         {:ok, accounts} ->
           active_accounts =
             Enum.filter(accounts, fn account ->
@@ -351,8 +351,8 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
     }
   end
 
-  defp get_symbol_transactions(user_id, symbol_id) do
-    case Account.accounts_for_user(user_id) do
+  defp get_symbol_transactions(symbol_id) do
+    case Account.list() do
       {:ok, accounts} ->
         active_accounts =
           Enum.filter(accounts, fn account ->

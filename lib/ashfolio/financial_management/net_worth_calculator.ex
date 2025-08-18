@@ -37,12 +37,12 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
       iex> NetWorthCalculator.calculate_net_worth("invalid-id")
       {:error, :user_not_found}
   """
-  def calculate_net_worth(user_id) when is_binary(user_id) do
-    Logger.debug("Calculating net worth for user: #{user_id}")
+  def calculate_net_worth(_user_id \\ nil) do
+    Logger.debug("Calculating net worth")
 
-    with {:ok, investment_value} <- Calculator.calculate_portfolio_value(user_id),
-         {:ok, cash_balances} <- calculate_total_cash_balances(user_id),
-         {:ok, breakdown} <- calculate_account_breakdown(user_id) do
+    with {:ok, investment_value} <- Calculator.calculate_portfolio_value(nil),
+         {:ok, cash_balances} <- calculate_total_cash_balances(),
+         {:ok, breakdown} <- calculate_account_breakdown(nil) do
       net_worth = Decimal.add(investment_value, cash_balances)
 
       result = %{
@@ -54,8 +54,8 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
 
       Logger.debug("Net worth calculated: #{inspect(result)}")
 
-      # Broadcast net worth update via PubSub
-      broadcast_net_worth_update(user_id, result)
+      # Broadcast net worth update via PubSub (simplified for database-as-user)
+      broadcast_net_worth_update(result)
 
       {:ok, result}
     else
@@ -79,21 +79,21 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
       iex> NetWorthCalculator.calculate_total_cash_balances("invalid-id")
       {:error, :user_not_found}
   """
-  def calculate_total_cash_balances(user_id) when is_binary(user_id) do
-    Logger.debug("Calculating total cash balances for user: #{user_id}")
+  def calculate_total_cash_balances(_user_id \\ nil) do
+    Logger.debug("Calculating total cash balances")
 
     try do
       case Account.cash_accounts() do
         {:ok, all_cash_accounts} ->
-          # Filter for user's accounts that are not excluded
-          user_cash_accounts =
+          # Filter for accounts that are not excluded
+          active_cash_accounts =
             all_cash_accounts
             |> Enum.filter(fn account ->
-              account.user_id == user_id and not account.is_excluded
+              not account.is_excluded
             end)
 
           total_cash =
-            user_cash_accounts
+            active_cash_accounts
             |> Enum.map(& &1.balance)
             |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
 
@@ -131,11 +131,11 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
         totals_by_type: %{...}
       }}
   """
-  def calculate_account_breakdown(user_id) when is_binary(user_id) do
-    Logger.debug("Calculating account breakdown for user: #{user_id}")
+  def calculate_account_breakdown(_user_id) do
+    Logger.debug("Calculating account breakdown")
 
     try do
-      with {:ok, all_accounts} <- Account.accounts_for_user(user_id) do
+      with {:ok, all_accounts} <- Account.list() do
         # Filter active accounts only
         active_accounts = Enum.filter(all_accounts, fn account -> not account.is_excluded end)
 
@@ -236,22 +236,16 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
     }
   end
 
-  defp broadcast_net_worth_update(user_id, net_worth_data) do
+  defp broadcast_net_worth_update(net_worth_data) do
     try do
-      Phoenix.PubSub.broadcast(
-        Ashfolio.PubSub,
-        "net_worth:#{user_id}",
-        {:net_worth_updated, net_worth_data}
-      )
-
-      # Also broadcast to general net worth topic for dashboard updates
+      # Broadcast to general net worth topic for dashboard updates
       Phoenix.PubSub.broadcast(
         Ashfolio.PubSub,
         "net_worth",
-        {:net_worth_updated, user_id, net_worth_data}
+        {:net_worth_updated, net_worth_data}
       )
 
-      Logger.debug("Net worth update broadcasted for user: #{user_id}")
+      Logger.debug("Net worth update broadcasted")
     rescue
       error ->
         Logger.warning("Failed to broadcast net worth update: #{inspect(error)}")

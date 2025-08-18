@@ -52,11 +52,11 @@
   }
   
   .holdings-table tbody tr:nth-child(even) {
-    @apply bg-gray-25;
+    @apply bg-gray-50;
   }
   
   .holdings-table tbody tr:nth-child(even):hover {
-    @apply bg-gray-75;
+    @apply bg-gray-100;
   }
   
   /* General table improvements */

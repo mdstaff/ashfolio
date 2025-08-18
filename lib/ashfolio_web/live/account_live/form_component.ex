@@ -315,8 +315,6 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
   end
 
   defp save_account(socket, :new, form_params) do
-    form_params = Map.put(form_params, "user_id", socket.assigns.user_id)
-
     case AshPhoenix.Form.submit(socket.assigns.form, params: form_params) do
       {:ok, account} ->
         success_message =

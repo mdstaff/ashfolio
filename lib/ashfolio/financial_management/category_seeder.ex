@@ -1,10 +1,10 @@
 defmodule Ashfolio.FinancialManagement.CategorySeeder do
   @moduledoc """
-  Module for seeding investment system categories for users.
+  Module for seeding investment system categories in the database-as-user architecture.
 
   Provides idempotent category seeding functionality that creates standard
   investment categories (Growth, Income, Speculative, Index, Cash, Bonds)
-  for users while avoiding duplicates.
+  while avoiding duplicates.
 
   ## Investment Categories
 
@@ -19,29 +19,24 @@ defmodule Ashfolio.FinancialManagement.CategorySeeder do
 
   ## Usage
 
-      # Seed categories for a specific user
-      {:ok, categories} = CategorySeeder.seed_system_categories(user_id)
+      # Seed categories for the database-as-user architecture
+      {:ok, categories} = CategorySeeder.seed_system_categories()
       
       # Safe to run multiple times - idempotent behavior
-      {:ok, categories} = CategorySeeder.seed_system_categories(user_id)
+      {:ok, categories} = CategorySeeder.seed_system_categories()
 
   """
 
   require Ash.Query
 
   alias Ashfolio.FinancialManagement.TransactionCategory
-  alias Ashfolio.Portfolio.User
 
   @doc """
-  Seeds investment system categories for a specific user.
+  Seeds investment system categories for the database-as-user architecture.
 
   Creates 6 standard investment categories with predefined names and colors.
   This function is idempotent - running it multiple times will not create
   duplicate categories.
-
-  ## Parameters
-
-  - `user_id` - The UUID of the user to seed categories for
 
   ## Returns
 
@@ -50,29 +45,18 @@ defmodule Ashfolio.FinancialManagement.CategorySeeder do
 
   ## Examples
 
-      {:ok, categories} = CategorySeeder.seed_system_categories(user.id)
+      {:ok, categories} = CategorySeeder.seed_system_categories()
       assert length(categories) == 6
       
       # Running again returns same categories
-      {:ok, same_categories} = CategorySeeder.seed_system_categories(user.id)
+      {:ok, same_categories} = CategorySeeder.seed_system_categories()
       assert length(same_categories) == 6
 
   """
-  @spec seed_system_categories(String.t()) :: {:ok, [TransactionCategory.t()]} | {:error, term()}
-  def seed_system_categories(user_id) when is_binary(user_id) do
-    # Validate user exists first
-    case validate_user_exists(user_id) do
-      {:ok, _user} ->
-        # Create or find categories (no transaction wrapper needed for this simple case)
-        create_or_find_categories(user_id)
-
-      {:error, reason} ->
-        {:error, reason}
-    end
-  end
-
-  def seed_system_categories(_invalid_user_id) do
-    {:error, :invalid_user_id}
+  @spec seed_system_categories() :: {:ok, [TransactionCategory.t()]} | {:error, term()}
+  def seed_system_categories() do
+    # Create or find categories (no user validation needed for database-as-user architecture)
+    create_or_find_categories()
   end
 
   # Private helper functions
@@ -86,17 +70,9 @@ defmodule Ashfolio.FinancialManagement.CategorySeeder do
     {"Bonds", "#059669"}
   ]
 
-  defp validate_user_exists(user_id) do
-    case User.get_by_id(user_id) do
-      {:ok, user} when not is_nil(user) -> {:ok, user}
-      {:ok, nil} -> {:error, :user_not_found}
-      {:error, reason} -> {:error, reason}
-    end
-  end
-
-  defp create_or_find_categories(user_id) do
-    # Get existing categories for this user
-    existing_categories = get_existing_categories(user_id)
+  defp create_or_find_categories() do
+    # Get existing categories (database-as-user architecture)
+    existing_categories = get_existing_categories()
     existing_names = MapSet.new(existing_categories, & &1.name)
 
     # Create missing categories
@@ -108,13 +84,13 @@ defmodule Ashfolio.FinancialManagement.CategorySeeder do
           Enum.find(existing_categories, &(&1.name == name))
         else
           # Create new category
-          case create_category(user_id, name, color) do
+          case create_category(name, color) do
             {:ok, category} ->
               category
 
             {:error, _reason} ->
               # If creation fails, try to find existing (race condition handling)
-              case find_category_by_name(user_id, name) do
+              case find_category_by_name(name) do
                 {:ok, category} when not is_nil(category) -> category
                 _ -> nil
               end
@@ -131,27 +107,26 @@ defmodule Ashfolio.FinancialManagement.CategorySeeder do
     end
   end
 
-  defp get_existing_categories(user_id) do
-    case TransactionCategory.categories_for_user(user_id) do
+  defp get_existing_categories() do
+    case TransactionCategory.list() do
       {:ok, categories} -> categories
       {:error, _} -> []
     end
   end
 
-  defp create_category(user_id, name, color) do
+  defp create_category(name, color) do
     TransactionCategory.create(%{
       name: name,
       color: color,
       is_system: true,
-      user_id: user_id,
       parent_category_id: nil
     })
   end
 
-  defp find_category_by_name(user_id, name) do
+  defp find_category_by_name(name) do
     query =
       TransactionCategory
-      |> Ash.Query.filter(user_id == ^user_id and name == ^name)
+      |> Ash.Query.filter(name == ^name)
       |> Ash.Query.limit(1)
 
     case Ash.read(query) do

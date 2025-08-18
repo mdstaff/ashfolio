@@ -2,48 +2,31 @@
 #
 #     mix run priv/repo/seeds.exs
 #
-# This script creates the default user and sample accounts for the single-user local application.
+# This script creates sample data for the database-as-user architecture.
 
-alias Ashfolio.Portfolio.{User, Account, Symbol}
+alias Ashfolio.Portfolio.{UserSettings, Account, Symbol}
 alias Ashfolio.FinancialManagement.{CategorySeeder, TransactionCategory}
 
-# Create the default user if it doesn't exist
-user =
-  case Ash.read(User, action: :default_user) do
-    {:ok, []} ->
-      # No user exists, create the default user
-      case Ash.create(User, %{
-             name: "Local User",
-             currency: "USD",
-             locale: "en-US"
-           }) do
-        {:ok, user} ->
-          IO.puts("✅ Created default user: #{user.name}")
-          user
-
-        {:error, error} ->
-          IO.puts("❌ Error creating default user: #{inspect(error)}")
-          exit(1)
-      end
-
-    {:ok, [user]} ->
-      # User already exists
-      IO.puts("ℹ️  Default user already exists: #{user.name}")
-      user
+# Create user settings if they don't exist (database-as-user architecture)
+user_settings =
+  case UserSettings.get_or_create_settings() do
+    {:ok, settings} ->
+      IO.puts("✅ User settings ready: #{settings.name}")
+      settings
 
     {:error, error} ->
-      IO.puts("❌ Error checking for default user: #{inspect(error)}")
+      IO.puts("❌ Error creating user settings: #{inspect(error)}")
       exit(1)
   end
 
 # Create investment system categories if they don't exist
-{:ok, existing_categories} = TransactionCategory.categories_for_user(user.id)
+{:ok, existing_categories} = TransactionCategory.list()
 
 if Enum.empty?(existing_categories) do
   # Create investment categories
   IO.puts("🏷️  Creating investment system categories...")
 
-  case CategorySeeder.seed_system_categories(user.id) do
+  case CategorySeeder.seed_system_categories() do
     {:ok, categories} ->
       IO.puts("  ✅ Created #{length(categories)} investment categories:")
 
@@ -83,16 +66,14 @@ sample_accounts = [
 ]
 
 # Check if accounts already exist
-{:ok, existing_accounts} = Account.accounts_for_user(user.id)
+{:ok, existing_accounts} = Account.list()
 
 if Enum.empty?(existing_accounts) do
   # Create sample accounts
   IO.puts("🏦 Creating sample accounts...")
 
   Enum.each(sample_accounts, fn account_attrs ->
-    account_attrs_with_user = Map.put(account_attrs, :user_id, user.id)
-
-    case Account.create(account_attrs_with_user) do
+    case Account.create(account_attrs) do
       {:ok, account} ->
         IO.puts(
           "  ✅ Created account: #{account.name} (#{account.platform}) - $#{account.balance}"
@@ -219,7 +200,7 @@ alias Ashfolio.Portfolio.Transaction
 
 if Enum.empty?(existing_transactions) do
   # Get the created accounts and symbols for transaction creation
-  {:ok, accounts} = Account.accounts_for_user(user.id)
+  {:ok, accounts} = Account.list()
   {:ok, symbols} = Symbol.list()
 
   # Find specific accounts and symbols
@@ -373,12 +354,12 @@ end
 
 IO.puts("\n✅ Database seeding completed!")
 IO.puts("📊 Summary:")
-IO.puts("   - User: #{user.name}")
+IO.puts("   - User: #{user_settings.name}")
 
-{:ok, final_accounts} = Account.accounts_for_user(user.id)
+{:ok, final_accounts} = Account.list()
 {:ok, final_symbols} = Symbol.list()
 {:ok, final_transactions} = Transaction.list()
-{:ok, final_categories} = TransactionCategory.categories_for_user(user.id)
+{:ok, final_categories} = TransactionCategory.list()
 
 IO.puts("   - Accounts: #{length(final_accounts)}")
 IO.puts("   - Symbols: #{length(final_symbols)}")

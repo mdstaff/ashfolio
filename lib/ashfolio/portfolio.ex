@@ -3,6 +3,7 @@ defmodule Ashfolio.Portfolio do
 
   resources do
     resource(Ashfolio.Portfolio.User)
+    resource(Ashfolio.Portfolio.UserSettings)
     resource(Ashfolio.Portfolio.Account)
     resource(Ashfolio.Portfolio.Symbol)
     resource(Ashfolio.Portfolio.Transaction)

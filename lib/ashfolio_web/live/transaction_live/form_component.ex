@@ -1,7 +1,7 @@
 defmodule AshfolioWeb.TransactionLive.FormComponent do
   use AshfolioWeb, :live_component
 
-  alias Ashfolio.Portfolio.{Account, Symbol, Transaction, User}
+  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
   alias Ashfolio.FinancialManagement.TransactionCategory
   alias AshfolioWeb.Components.SymbolAutocomplete
 
@@ -138,14 +138,13 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
 
   @impl true
   def update(%{transaction: _transaction} = assigns, socket) do
-    # Get default user, creating if needed (defensive for single-user app)
-    user_id = get_or_create_default_user_id()
-    accounts = Account.accounts_for_user!(user_id)
+    # Database-as-user architecture - no user_id needed
+    accounts = Account.list!()
     symbols = Symbol.list!()
 
-    # Load user categories for investment organization
+    # Load transaction categories for investment organization
     categories =
-      case TransactionCategory.get_user_categories_with_children(user_id) do
+      case TransactionCategory.list() do
         {:ok, cats} -> cats
         {:error, _} -> []
       end
@@ -327,18 +326,6 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
 
       {:error, _} ->
         {:error, :symbol_not_found}
-    end
-  end
-
-  # Defensive user creation for single-user application
-  defp get_or_create_default_user_id do
-    case User.get_default_user() do
-      {:ok, [user]} ->
-        user.id
-
-      {:ok, []} ->
-        {:ok, user} = User.create(%{name: "Local User", currency: "USD", locale: "en-US"})
-        user.id
     end
   end
 end

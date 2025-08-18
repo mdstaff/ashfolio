@@ -1,7 +1,7 @@
 defmodule AshfolioWeb.DashboardLive do
   use AshfolioWeb, :live_view
 
-  alias Ashfolio.Portfolio.{Calculator, HoldingsCalculator, User}
+  alias Ashfolio.Portfolio.HoldingsCalculator
   alias Ashfolio.MarketData.PriceManager
   alias Ashfolio.Context
   alias AshfolioWeb.Live.{ErrorHelpers, FormatHelpers}
@@ -430,50 +430,21 @@ defmodule AshfolioWeb.DashboardLive do
   defp load_portfolio_data(socket) do
     Logger.debug("Loading portfolio data for dashboard")
 
-    case get_default_user() do
-      {:ok, user} ->
-        load_user_portfolio_data(socket, user.id)
+    # Database-as-user architecture - load data directly without user lookup
+    case Context.get_dashboard_data() do
+      {:ok, dashboard_data} ->
+        load_dashboard_data(socket, dashboard_data)
 
       {:error, reason} ->
-        Logger.warning("Failed to get default user: #{inspect(reason)}")
-
-        socket
-        |> assign_default_values()
-        |> ErrorHelpers.put_error_flash("Unable to load user data")
-    end
-  end
-
-  defp load_user_portfolio_data(socket, user_id) do
-    with {:ok, total_return_data} <- Calculator.calculate_total_return(user_id),
-         {:ok, holdings_summary} <- HoldingsCalculator.get_holdings_summary(user_id) do
-      socket
-      |> assign(:portfolio_value, FormatHelpers.format_currency(total_return_data.total_value))
-      |> assign(
-        :total_return_amount,
-        FormatHelpers.format_currency(total_return_data.dollar_return)
-      )
-      |> assign(
-        :total_return_percent,
-        FormatHelpers.format_percentage(total_return_data.return_percentage)
-      )
-      |> assign(:cost_basis, FormatHelpers.format_currency(total_return_data.cost_basis))
-      |> assign(:holdings_count, to_string(holdings_summary.holdings_count))
-      |> assign(:holdings, holdings_summary.holdings)
-      |> assign(:sort_by, :symbol)
-      |> assign(:sort_order, :asc)
-      |> assign(:last_price_update, get_last_price_update())
-      |> assign(:error, nil)
-      |> load_net_worth_data(user_id)
-      |> load_recent_transactions(user_id)
-    else
-      {:error, reason} ->
-        Logger.warning("Failed to load portfolio data: #{inspect(reason)}")
+        Logger.warning("Failed to load dashboard data: #{inspect(reason)}")
 
         socket
         |> assign_default_values()
         |> ErrorHelpers.put_error_flash("Unable to load portfolio data")
     end
   end
+
+  # This function is no longer needed - replaced by load_dashboard_data
 
   defp assign_default_values(socket) do
     socket
@@ -491,33 +462,9 @@ defmodule AshfolioWeb.DashboardLive do
     |> assign_default_net_worth_values()
   end
 
-  defp load_net_worth_data(socket, user_id) do
-    Logger.debug("Loading net worth data for user: #{user_id}")
+  # This function is now handled in load_holdings_and_net_worth
 
-    case Context.get_net_worth(user_id) do
-      {:ok, net_worth_data} ->
-        Logger.debug("Net worth data loaded successfully")
-        assign_net_worth_data(socket, net_worth_data)
-
-      {:error, reason} ->
-        Logger.warning("Failed to load net worth data: #{inspect(reason)}")
-        assign_default_net_worth_values(socket)
-    end
-  end
-
-  defp load_recent_transactions(socket, user_id) do
-    Logger.debug("Loading recent transactions for user: #{user_id}")
-
-    case Context.get_recent_transactions(user_id, 5) do
-      {:ok, transactions} ->
-        Logger.debug("Loaded #{length(transactions)} recent transactions")
-        assign(socket, :recent_transactions, transactions)
-
-      {:error, reason} ->
-        Logger.warning("Failed to load recent transactions: #{inspect(reason)}")
-        assign(socket, :recent_transactions, [])
-    end
-  end
+  # This function is now handled in load_dashboard_data via Context.get_dashboard_data
 
   defp assign_net_worth_data(socket, net_worth_data) do
     # Handle both Context.get_net_worth (returns :total_net_worth) and NetWorthCalculator.calculate_net_worth (returns :net_worth)
@@ -543,24 +490,61 @@ defmodule AshfolioWeb.DashboardLive do
     |> assign(:net_worth_error, "Unable to load net worth data")
   end
 
-  # Defensive user creation for single-user application
-  defp get_default_user do
-    case User.get_default_user() do
-      {:ok, [user]} ->
-        {:ok, user}
-
-      {:ok, []} ->
-        {:ok, user} = User.create(%{name: "Local User", currency: "USD", locale: "en-US"})
-        {:ok, user}
-
-      {:error, error} ->
-        Logger.error("Failed to get or create default user: #{inspect(error)}")
-        {:error, error}
+  # Load dashboard data from Context API (database-as-user architecture)
+  defp load_dashboard_data(socket, dashboard_data) do
+    %{user: user_settings, accounts: accounts, recent_transactions: transactions, summary: summary} = dashboard_data
+    
+    socket
+    |> assign(:user_settings, user_settings)
+    |> assign(:accounts, accounts.all)
+    |> assign(:recent_transactions, transactions)
+    |> assign(:account_summary, summary)
+    |> load_holdings_and_net_worth()
+  end
+  
+  defp load_holdings_and_net_worth(socket) do
+    # Load holdings and net worth without user_id
+    case Context.get_net_worth() do
+      {:ok, net_worth_data} ->
+        socket
+        |> assign_net_worth_data(net_worth_data)
+        |> load_holdings_data()
+      
+      {:error, reason} ->
+        Logger.warning("Failed to load net worth: #{inspect(reason)}")
+        socket
+        |> assign_default_values()
     end
-  rescue
-    error ->
-      Logger.error("Failed to get or create default user: #{inspect(error)}")
-      {:error, error}
+  end
+  
+  defp load_holdings_data(socket) do
+    case HoldingsCalculator.get_holdings_summary() do
+      {:ok, holdings_data} ->
+        socket
+        |> assign(:holdings, holdings_data.holdings)
+        |> assign(:portfolio_value, FormatHelpers.format_currency(holdings_data.total_value))
+        |> assign(:portfolio_pnl, FormatHelpers.format_currency(holdings_data.total_pnl))
+        |> assign(:total_return_amount, FormatHelpers.format_currency(holdings_data.total_pnl))
+        |> assign(:total_return_percent, FormatHelpers.format_percentage(holdings_data.total_pnl_pct))
+        |> assign(:cost_basis, FormatHelpers.format_currency(holdings_data.total_cost_basis))
+        |> assign(:holdings_count, to_string(holdings_data.holdings_count))
+        |> assign(:sort_by, :symbol)
+        |> assign(:sort_order, :asc)
+        |> assign(:last_price_update, get_last_price_update())
+        |> assign(:error, nil)
+      
+      {:error, reason} ->
+        Logger.warning("Failed to load holdings: #{inspect(reason)}")
+        socket
+        |> assign(:holdings, [])
+        |> assign(:portfolio_value, "$0.00")
+        |> assign(:portfolio_pnl, "$0.00")
+        |> assign(:total_return_amount, "$0.00")
+        |> assign(:total_return_percent, "0.00%")
+        |> assign(:cost_basis, "$0.00")
+        |> assign(:holdings_count, "0")
+        |> assign(:error, "Unable to load holdings data")
+    end
   end
 
   defp get_last_price_update do

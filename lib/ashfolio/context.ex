@@ -25,7 +25,7 @@ defmodule Ashfolio.Context do
   - `{:error, :service_unavailable}` - External service unavailable
   """
 
-  alias Ashfolio.Portfolio.{User, Account, Transaction}
+  alias Ashfolio.Portfolio.{Account, Transaction, UserSettings}
   alias Ashfolio.Portfolio.Calculator
   alias Ashfolio.FinancialManagement.{SymbolSearch, BalanceManager}
 
@@ -36,6 +36,17 @@ defmodule Ashfolio.Context do
 
   # ETS table for prepared statement caching
   @ets_table :ashfolio_context_cache
+
+  @doc """
+  Get user settings for the database-as-user architecture.
+  """
+  @spec get_user_settings() :: {:ok, map()} | {:error, term()}
+  def get_user_settings() do
+    case UserSettings.Api.get_settings() do
+      {:ok, settings} -> {:ok, settings}
+      {:error, reason} -> {:error, reason}
+    end
+  end
 
   @doc """
   Initialize the Context module.
@@ -66,32 +77,31 @@ defmodule Ashfolio.Context do
       iex> Context.get_user_dashboard_data("invalid-id")
       {:error, :user_not_found}
   """
-  def get_user_dashboard_data(user_id \\ nil) do
-    track_performance(:get_user_dashboard_data, fn ->
-      user_id = user_id || get_default_user_id()
+  def get_dashboard_data() do
+    track_performance(:get_dashboard_data, fn ->
+      with {:ok, user_settings} <- get_user_settings(),
+           {:ok, accounts} <- Account.list(),
+           {:ok, recent_transactions} <- get_recent_transactions(10) do
+        categorized_accounts = categorize_accounts(accounts)
+        summary = calculate_account_summary(accounts)
 
-      if user_id do
-        with {:ok, user} <- get_user_by_id(user_id),
-             {:ok, accounts} <- Account.accounts_for_user(user_id),
-             {:ok, recent_transactions} <- get_recent_transactions(user_id, 10) do
-          categorized_accounts = categorize_accounts(accounts)
-          summary = calculate_account_summary(accounts)
-
-          {:ok,
-           %{
-             user: user,
-             accounts: categorized_accounts,
-             recent_transactions: recent_transactions,
-             summary: summary,
-             last_updated: DateTime.utc_now()
-           }}
-        else
-          error -> normalize_error(error)
-        end
+        {:ok,
+         %{
+           user: user_settings,
+           accounts: categorized_accounts,
+           recent_transactions: recent_transactions,
+           summary: summary,
+           last_updated: DateTime.utc_now()
+         }}
       else
-        {:error, :user_not_found}
+        error -> normalize_error(error)
       end
     end)
+  end
+
+  # Backward compatibility function - redirects to get_dashboard_data
+  def get_user_dashboard_data(_user_id \\ nil) do
+    get_dashboard_data()
   end
 
   @doc """
@@ -149,17 +159,14 @@ defmodule Ashfolio.Context do
         last_updated: ~U[2025-08-10 12:00:00Z]
       }}
   """
-  def get_portfolio_summary(user_id \\ nil) do
+  def get_portfolio_summary(_user_id \\ nil) do
     track_performance(:get_portfolio_summary, fn ->
-      user_id = user_id || get_default_user_id()
-
-      if user_id do
-        with {:ok, _user} <- get_user_by_id(user_id),
-             {:ok, accounts} <- Account.accounts_for_user(user_id),
-             {:ok, total_return} <- Calculator.calculate_total_return(user_id),
-             {:ok, position_returns} <- Calculator.calculate_position_returns(user_id) do
+      with {:ok, _user_settings} <- get_user_settings(),
+           {:ok, accounts} <- Account.list(),
+           {:ok, total_return} <- Calculator.calculate_total_return(nil),
+           {:ok, position_returns} <- Calculator.calculate_position_returns(nil) do
           active_accounts = Enum.filter(accounts, &(!&1.is_excluded))
-          performance = calculate_performance_metrics(user_id, total_return)
+          performance = calculate_performance_metrics(nil, total_return)
 
           {:ok,
            %{
@@ -176,9 +183,6 @@ defmodule Ashfolio.Context do
         else
           error -> normalize_error(error)
         end
-      else
-        {:error, :user_not_found}
-      end
     end)
   end
 
@@ -190,9 +194,9 @@ defmodule Ashfolio.Context do
       iex> Context.get_recent_transactions(user_id, 5)
       {:ok, [%Transaction{}, ...]}
   """
-  def get_recent_transactions(user_id, limit \\ 10) do
+  def get_recent_transactions(limit \\ 10) do
     track_performance(:get_recent_transactions, fn ->
-      with {:ok, accounts} <- Account.accounts_for_user(user_id) do
+      with {:ok, accounts} <- Account.list() do
         account_ids = Enum.map(accounts, & &1.id)
 
         # Use batch query to prevent N+1 queries, loading symbol and category relationships
@@ -217,6 +221,11 @@ defmodule Ashfolio.Context do
     end)
   end
 
+  def get_recent_transactions(_user_id, limit) do
+    # Backward compatibility - ignore user_id in database-as-user architecture
+    get_recent_transactions(limit)
+  end
+
   @doc """
   Get net worth calculation combining investment and cash balances.
 
@@ -230,45 +239,39 @@ defmodule Ashfolio.Context do
         breakdown: %{...}
       }}
   """
-  def get_net_worth(user_id \\ nil) do
+  def get_net_worth(_user_id \\ nil) do
     track_performance(:get_net_worth, fn ->
-      user_id = user_id || get_default_user_id()
+      with {:ok, _user_settings} <- get_user_settings(),
+           {:ok, accounts} <- Account.list(),
+           {:ok, portfolio_value} <- Calculator.calculate_portfolio_value(nil) do
+        # Filter out excluded accounts first
+        active_accounts = Enum.filter(accounts, &(!&1.is_excluded))
+        
+        cash_accounts =
+          Enum.filter(active_accounts, &(&1.account_type in [:checking, :savings, :money_market, :cd]))
 
-      if user_id do
-        with {:ok, _user} <- get_user_by_id(user_id),
-             {:ok, accounts} <- Account.accounts_for_user(user_id),
-             {:ok, portfolio_value} <- Calculator.calculate_portfolio_value(user_id) do
-          # Filter out excluded accounts first
-          active_accounts = Enum.filter(accounts, &(!&1.is_excluded))
-          
-          cash_accounts =
-            Enum.filter(active_accounts, &(&1.account_type in [:checking, :savings, :money_market, :cd]))
+        investment_accounts = Enum.filter(active_accounts, &(&1.account_type == :investment))
 
-          investment_accounts = Enum.filter(active_accounts, &(&1.account_type == :investment))
+        cash_balance = calculate_total_cash_balance(cash_accounts)
+        # Include investment account balances for accounts without transactions
+        investment_account_balances = calculate_total_cash_balance(investment_accounts)
+        total_investment_value = Decimal.add(portfolio_value, investment_account_balances)
+        total_net_worth = Decimal.add(total_investment_value, cash_balance)
 
-          cash_balance = calculate_total_cash_balance(cash_accounts)
-          # Include investment account balances for accounts without transactions
-          investment_account_balances = calculate_total_cash_balance(investment_accounts)
-          total_investment_value = Decimal.add(portfolio_value, investment_account_balances)
-          total_net_worth = Decimal.add(total_investment_value, cash_balance)
-
-          {:ok,
-           %{
-             total_net_worth: total_net_worth,
-             investment_value: total_investment_value,
-             cash_balance: cash_balance,
-             breakdown: %{
-               cash_accounts: length(cash_accounts),
-               investment_accounts: length(investment_accounts),
-               cash_percentage: calculate_percentage(cash_balance, total_net_worth),
-               investment_percentage: calculate_percentage(total_investment_value, total_net_worth)
-             }
-           }}
-        else
-          error -> normalize_error(error)
-        end
+        {:ok,
+         %{
+           total_net_worth: total_net_worth,
+           investment_value: total_investment_value,
+           cash_balance: cash_balance,
+           breakdown: %{
+             cash_accounts: length(cash_accounts),
+             investment_accounts: length(investment_accounts),
+             cash_percentage: calculate_percentage(cash_balance, total_net_worth),
+             investment_percentage: calculate_percentage(total_investment_value, total_net_worth)
+           }
+         }}
       else
-        {:error, :user_not_found}
+        error -> normalize_error(error)
       end
     end)
   end
@@ -391,33 +394,16 @@ defmodule Ashfolio.Context do
       iex> Context.validate_account_constraints(%{"name" => "Existing Account"}, user_id, nil)
       {:error, :name_already_taken}
   """
-  def validate_account_constraints(form_params, user_id, current_account_id \\ nil) do
+  def validate_account_constraints(form_params, _user_id \\ nil, current_account_id \\ nil) do
     track_performance(:validate_account_constraints, fn ->
-      validate_account_name_uniqueness(form_params, user_id, current_account_id)
+      validate_account_name_uniqueness(form_params, nil, current_account_id)
     end)
   end
 
   # Private helper functions
 
-  defp get_user_by_id(user_id) do
-    # Single-user app: just return the user if a valid ID is provided
-    # For testing, this allows test users; in production there's only one anyway
-    case User.get_by_id(user_id) do
-      {:ok, user} when not is_nil(user) -> {:ok, user}
-      {:ok, nil} -> {:error, :user_not_found}
-      {:error, _} -> {:error, :user_not_found}
-    end
-  rescue
-    _ -> {:error, :user_not_found}
-  end
-
-  defp get_default_user_id do
-    case User.get_default_user() do
-      {:ok, [user]} -> user.id
-      {:ok, user} when is_struct(user) -> user.id
-      _ -> nil
-    end
-  end
+  # Helper functions for database-as-user architecture
+  # Note: These functions are kept for backward compatibility but are no longer used
 
   defp categorize_accounts(accounts) do
     %{
@@ -564,11 +550,11 @@ defmodule Ashfolio.Context do
 
   # SQLite optimization functions (placeholder for future enhancements)
 
-  defp validate_account_name_uniqueness(form_params, user_id, current_account_id) do
+  defp validate_account_name_uniqueness(form_params, _user_id, current_account_id) do
     name = Map.get(form_params, "name")
 
     if name do
-      case Account.get_by_name_for_user(user_id, name) do
+      case Account.get_by_name(name) do
         {:ok, existing_account} when not is_nil(existing_account) ->
           if existing_account.id != current_account_id do
             {:error, :validation_failed}

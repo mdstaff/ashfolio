@@ -1,21 +1,18 @@
 defmodule AshfolioWeb.AccountLive.Index do
   use AshfolioWeb, :live_view
 
-  alias Ashfolio.Portfolio.{Account, User, Transaction}
+  alias Ashfolio.Portfolio.{Account, Transaction}
   alias Ashfolio.Context
   alias AshfolioWeb.Live.{FormatHelpers, ErrorHelpers}
   alias AshfolioWeb.AccountLive.FormComponent
 
   @impl true
   def mount(_params, _session, socket) do
-    user_id = get_default_user_id()
-
     socket =
       socket
       |> assign_current_page(:accounts)
       |> assign(:page_title, "Accounts")
       |> assign(:page_subtitle, "Manage your investment and cash accounts")
-      |> assign(:user_id, user_id)
       |> assign(:show_form, false)
       |> assign(:form_action, :new)
       |> assign(:selected_account, nil)
@@ -25,7 +22,7 @@ defmodule AshfolioWeb.AccountLive.Index do
       |> assign(:loading_dashboard, true)
 
     # Load dashboard data using Context API
-    socket = assign_dashboard_data(socket, user_id)
+    socket = assign_dashboard_data(socket)
 
     # Subscribe to account updates for real-time changes
     Ashfolio.PubSub.subscribe("accounts")
@@ -86,7 +83,7 @@ defmodule AshfolioWeb.AccountLive.Index do
         case Account.destroy(id) do
           :ok ->
             Ashfolio.PubSub.broadcast!("accounts", {:account_deleted, id})
-            socket = assign_dashboard_data(socket, socket.assigns.user_id)
+            socket = assign_dashboard_data(socket)
 
             {:noreply,
              socket
@@ -146,7 +143,7 @@ defmodule AshfolioWeb.AccountLive.Index do
               Ashfolio.PubSub.broadcast!("accounts", {:account_updated, updated_account_from_db})
 
               # Reload accounts to ensure consistency using Context API
-              socket = assign_dashboard_data(socket, socket.assigns.user_id)
+              socket = assign_dashboard_data(socket)
 
               socket =
                 socket
@@ -168,7 +165,7 @@ defmodule AshfolioWeb.AccountLive.Index do
 
   @impl true
   def handle_info({FormComponent, {:saved, _account}}, socket) do
-    socket = assign_dashboard_data(socket, socket.assigns.user_id)
+    socket = assign_dashboard_data(socket)
 
     {:noreply,
      socket
@@ -180,7 +177,7 @@ defmodule AshfolioWeb.AccountLive.Index do
   def handle_info({FormComponent, {:saved, account, message}}, socket) do
     Ashfolio.PubSub.broadcast!("accounts", {:account_saved, account})
 
-    socket = assign_dashboard_data(socket, socket.assigns.user_id)
+    socket = assign_dashboard_data(socket)
 
     {:noreply,
      socket
@@ -208,19 +205,19 @@ defmodule AshfolioWeb.AccountLive.Index do
   # PubSub handlers for real-time updates
   @impl true
   def handle_info({:account_updated, _account}, socket) do
-    socket = assign_dashboard_data(socket, socket.assigns.user_id)
+    socket = assign_dashboard_data(socket)
     {:noreply, socket}
   end
 
   @impl true
   def handle_info({:account_deleted, _account_id}, socket) do
-    socket = assign_dashboard_data(socket, socket.assigns.user_id)
+    socket = assign_dashboard_data(socket)
     {:noreply, socket}
   end
 
   @impl true
   def handle_info({:account_saved, _account}, socket) do
-    socket = assign_dashboard_data(socket, socket.assigns.user_id)
+    socket = assign_dashboard_data(socket)
     {:noreply, socket}
   end
 
@@ -624,7 +621,6 @@ defmodule AshfolioWeb.AccountLive.Index do
         id="account-form"
         action={@form_action}
         account={@selected_account || %Account{}}
-        user_id={@user_id}
       />
     <% end %>
     """
@@ -632,10 +628,10 @@ defmodule AshfolioWeb.AccountLive.Index do
 
   # Context API integration helpers
 
-  defp assign_dashboard_data(socket, user_id) do
+  defp assign_dashboard_data(socket) do
     socket = assign(socket, :loading_dashboard, true)
 
-    case Context.get_user_dashboard_data(user_id) do
+    case Context.get_dashboard_data() do
       {:ok, data} ->
         socket
         |> assign(:user, data.user)
@@ -680,54 +676,6 @@ defmodule AshfolioWeb.AccountLive.Index do
   defp format_error_message(:user_not_found), do: "User not found"
   defp format_error_message(reason), do: "Failed to load dashboard data: #{inspect(reason)}"
 
-  # Defensive user creation for single-user application
-  defp get_default_user_id do
-    case User.get_default_user() do
-      {:ok, [user]} ->
-        user.id
-
-      {:ok, []} ->
-        create_user_with_retry()
-    end
-  end
-
-  # SQLite retry helper for user creation
-  defp create_user_with_retry(max_attempts \\ 3, delay_ms \\ 100) do
-    do_create_user_with_retry(max_attempts, delay_ms, 1)
-  end
-
-  defp do_create_user_with_retry(max_attempts, delay_ms, attempt) do
-    case User.create(%{name: "Local User", currency: "USD", locale: "en-US"}) do
-      {:ok, user} ->
-        user.id
-
-      {:error, error} ->
-        if sqlite_busy_error?(error) and attempt < max_attempts do
-          # Exponential backoff with jitter
-          sleep_time = delay_ms * attempt + :rand.uniform(50)
-          Process.sleep(sleep_time)
-          do_create_user_with_retry(max_attempts, delay_ms, attempt + 1)
-        else
-          # If it's still failing, maybe the user was created by another process
-          case User.get_default_user() do
-            {:ok, [user]} -> user.id
-            _ -> raise "Failed to create or retrieve default user: #{inspect(error)}"
-          end
-        end
-    end
-  end
-
-  defp sqlite_busy_error?(%Ash.Error.Unknown{errors: errors}) do
-    Enum.any?(errors, fn
-      %Ash.Error.Unknown.UnknownError{error: error} when is_binary(error) ->
-        String.contains?(error, "Database busy")
-
-      _ ->
-        false
-    end)
-  end
-
-  defp sqlite_busy_error?(_), do: false
 
   defp apply_action(socket, :index, _params) do
     socket

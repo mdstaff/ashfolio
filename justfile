@@ -155,7 +155,7 @@ ci stage="all":
 # ============================================================================
 
 # 🗄️ Database operations
-db action="status":
+db action="status" force="":
     #!/usr/bin/env bash
     case "{{action}}" in
         status)
@@ -165,6 +165,15 @@ db action="status":
         reset)
             echo "🔄 Resetting database..."
             mix ecto.reset
+            ;;
+        setup)
+            if [ "{{force}}" = "force" ] || [ "{{force}}" = "--force" ]; then
+                echo "🔧 Force setting up database (will backup existing)..."
+                mix run scripts/setup-database.exs -- --force
+            else
+                echo "🔧 Setting up database with database-as-user architecture..."
+                mix run scripts/setup-database.exs
+            fi
             ;;
         test-reset)
             echo "🔄 Resetting test database..."
@@ -187,7 +196,11 @@ db action="status":
             ;;
         *)
             echo "Unknown action: {{action}}"
-            echo "Available actions: status, reset, test-reset, backup, restore, fix"
+            echo "Available actions: status, reset, setup, test-reset, backup, restore, fix"
+            echo ""
+            echo "Setup usage:"
+            echo "  just db setup        # Setup new database (fails if exists)"
+            echo "  just db setup force  # Force setup (backs up existing)"
             ;;
     esac
 
