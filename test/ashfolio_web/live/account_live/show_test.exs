@@ -7,28 +7,27 @@ defmodule AshfolioWeb.AccountLive.ShowTest do
 
   import Phoenix.LiveViewTest
 
-  alias Ashfolio.Portfolio.{User, Account, Transaction, Symbol}
+  alias Ashfolio.Portfolio.{Account, Transaction}
 
   setup do
-    # Get or create the default test user (eliminates SQLite concurrency issues)
-    {:ok, user} = get_or_create_default_user()
+    # Database-as-user architecture: No user needed
 
     # Create test account
     {:ok, account} =
       Account.create(%{
         name: "Test Account",
         platform: "Test Platform",
-        balance: Decimal.new("10000.00"),
-        user_id: user.id
+        balance: Decimal.new("10000.00")
       })
 
     # Get or create test symbol
-    symbol = get_or_create_symbol("AAPL", %{
-      name: "Apple Inc.",
-      asset_class: :stock,
-      data_source: :yahoo_finance,
-      current_price: Decimal.new("150.00")
-    })
+    symbol =
+      get_or_create_symbol("AAPL", %{
+        name: "Apple Inc.",
+        asset_class: :stock,
+        data_source: :yahoo_finance,
+        current_price: Decimal.new("150.00")
+      })
 
     # Create test transactions
     {:ok, buy_transaction} =
@@ -80,7 +79,6 @@ defmodule AshfolioWeb.AccountLive.ShowTest do
       })
 
     %{
-      user: user,
       account: account,
       symbol: symbol,
       buy_transaction: buy_transaction,
@@ -149,22 +147,20 @@ defmodule AshfolioWeb.AccountLive.ShowTest do
     test "redirects to accounts index when account not found", %{conn: conn} do
       non_existent_id = Ecto.UUID.generate()
 
-      # The LiveView should handle the NotFound error and redirect
-      assert_raise Ash.Error.Invalid, fn ->
-        live(conn, ~p"/accounts/#{non_existent_id}")
-      end
+      # The LiveView should handle the NotFound error and redirect via Context API
+      result = live(conn, ~p"/accounts/#{non_existent_id}")
+      assert {:error, {:live_redirect, %{to: "/accounts"}}} = result
     end
   end
 
   describe "account with no transactions" do
-    test "displays empty state when account has no transactions", %{conn: conn, user: user} do
+    test "displays empty state when account has no transactions", %{conn: conn} do
       # Create account with no transactions
       {:ok, empty_account} =
         Account.create(%{
           name: "Empty Account",
           platform: "Test Platform",
-          balance: Decimal.new("5000.00"),
-          user_id: user.id
+          balance: Decimal.new("5000.00")
         })
 
       {:ok, _show_live, html} = live(conn, ~p"/accounts/#{empty_account.id}")

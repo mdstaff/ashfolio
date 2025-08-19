@@ -247,7 +247,10 @@ defmodule Ashfolio.MarketData.PriceManager do
         end
 
       {:error, :rate_limited, retry_after_ms} ->
-        Logger.warning("Rate limit exceeded, cannot refresh prices. Retry after #{retry_after_ms}ms")
+        Logger.warning(
+          "Rate limit exceeded, cannot refresh prices. Retry after #{retry_after_ms}ms"
+        )
+
         %{
           success_count: 0,
           failure_count: length(symbols),
@@ -255,21 +258,6 @@ defmodule Ashfolio.MarketData.PriceManager do
           failures: Enum.map(symbols, &{&1, :rate_limited})
         }
     end
-  end
-
-  defp fetch_individually(symbols) do
-    results =
-      Enum.map(symbols, fn symbol ->
-        case @yahoo_finance_module.fetch_price(symbol) do
-          {:ok, price} ->
-            {symbol, {:ok, price}}
-
-          {:error, reason} ->
-            {symbol, {:error, reason}}
-        end
-      end)
-
-    process_individual_results(results)
   end
 
   defp fetch_individually_with_rate_limit(symbols) do

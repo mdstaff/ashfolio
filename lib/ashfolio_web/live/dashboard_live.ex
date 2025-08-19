@@ -1,8 +1,9 @@
 defmodule AshfolioWeb.DashboardLive do
   use AshfolioWeb, :live_view
 
-  alias Ashfolio.Portfolio.{Calculator, HoldingsCalculator, User}
+  alias Ashfolio.Portfolio.HoldingsCalculator
   alias Ashfolio.MarketData.PriceManager
+  alias Ashfolio.Context
   alias AshfolioWeb.Live.{ErrorHelpers, FormatHelpers}
   require Logger
 
@@ -11,6 +12,7 @@ defmodule AshfolioWeb.DashboardLive do
     if connected?(socket) do
       Ashfolio.PubSub.subscribe("accounts")
       Ashfolio.PubSub.subscribe("transactions")
+      Ashfolio.PubSub.subscribe("net_worth")
     end
 
     socket =
@@ -108,6 +110,12 @@ defmodule AshfolioWeb.DashboardLive do
   end
 
   @impl true
+  def handle_info({:net_worth_updated, net_worth_data}, socket) do
+    Logger.debug("Received net worth update via PubSub")
+    {:noreply, assign_net_worth_data(socket, net_worth_data)}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="space-y-6">
@@ -135,14 +143,20 @@ defmodule AshfolioWeb.DashboardLive do
             <% end %>
             {if @loading, do: "Refreshing...", else: "Refresh Prices"}
           </.button>
-          <.button type="button" class="btn-primary w-full sm:w-auto">
+          <.link
+            href={~p"/transactions"}
+            class="btn-primary w-full sm:w-auto inline-flex items-center justify-center"
+          >
             <.icon name="hero-plus" class="w-4 h-4 mr-2" /> Add Transaction
-          </.button>
+          </.link>
         </div>
       </div>
-
+      
     <!-- Portfolio Summary Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="portfolio-summary">
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6"
+        data-testid="portfolio-summary"
+      >
         <.stat_card
           title="Total Value"
           value={@portfolio_value}
@@ -158,9 +172,54 @@ defmodule AshfolioWeb.DashboardLive do
           positive={FormatHelpers.is_positive?(@total_return_amount)}
           data_testid="total-return"
         />
-        <.stat_card title="Holdings" value={@holdings_count} change={"#{@holdings_count} positions"} data_testid="holdings-count" />
+        <.stat_card
+          title="Holdings"
+          value={@holdings_count}
+          change={"#{@holdings_count} positions"}
+          data_testid="holdings-count"
+        />
+        <.net_worth_card
+          title="Net Worth"
+          value={@net_worth_total}
+          investment_value={@net_worth_investment_value}
+          cash_balance={@net_worth_cash_balance}
+          data_testid="net-worth-total"
+        />
       </div>
+      
+    <!-- Investment vs Cash Breakdown -->
+      <.card>
+        <:header>
+          <h2 class="text-lg font-medium text-gray-900">Investment vs Cash Breakdown</h2>
+        </:header>
 
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+          <!-- Investment Accounts -->
+          <div class="bg-blue-50 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-medium text-blue-900">Investment Accounts</h3>
+              <span class="text-sm text-blue-600">
+                {get_account_count(@net_worth_breakdown, :investment_accounts)} accounts
+              </span>
+            </div>
+            <p class="text-2xl font-semibold text-blue-900">{@net_worth_investment_value}</p>
+            <p class="text-sm text-blue-600 mt-1">Portfolio Value</p>
+          </div>
+          
+    <!-- Cash Accounts -->
+          <div class="bg-green-50 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-medium text-green-900">Cash Accounts</h3>
+              <span class="text-sm text-green-600">
+                {get_account_count(@net_worth_breakdown, :cash_accounts)} accounts
+              </span>
+            </div>
+            <p class="text-2xl font-semibold text-green-900">{@net_worth_cash_balance}</p>
+            <p class="text-sm text-green-600 mt-1">Available Cash</p>
+          </div>
+        </div>
+      </.card>
+      
     <!-- Holdings Table -->
       <.card>
         <:header>
@@ -185,7 +244,12 @@ defmodule AshfolioWeb.DashboardLive do
           </div>
         <% else %>
           <div class="overflow-x-auto">
-            <table class="min-w-full mt-4" role="table" aria-label="Portfolio holdings" data-testid="holdings-table">
+            <table
+              class="min-w-full mt-4"
+              role="table"
+              aria-label="Portfolio holdings"
+              data-testid="holdings-table"
+            >
               <thead class="text-sm text-left leading-6 text-zinc-500">
                 <tr>
                   <th class="p-0 pb-4 pr-6 font-normal">
@@ -284,22 +348,84 @@ defmodule AshfolioWeb.DashboardLive do
           </div>
         <% end %>
       </.card>
-
+      
     <!-- Recent Activity -->
       <.card>
         <:header>
           <h2 class="text-lg font-medium text-gray-900">Recent Activity</h2>
         </:header>
         <:actions>
-          <.button type="button" class="btn-secondary text-sm">
+          <.link href={~p"/transactions"} class="btn-secondary text-sm">
             View All
-          </.button>
+          </.link>
         </:actions>
 
-        <div class="text-center py-8">
-          <.icon name="hero-clock" class="w-8 h-8 text-gray-400 mx-auto mb-2" />
-          <p class="text-gray-600">No recent transactions</p>
-        </div>
+        <%= if Enum.empty?(@recent_transactions) do %>
+          <div class="text-center py-8" data-testid="no-recent-transactions">
+            <.icon name="hero-clock" class="w-8 h-8 text-gray-400 mx-auto mb-2" />
+            <p class="text-gray-600">No recent transactions</p>
+            <p class="text-sm text-gray-500 mt-1">
+              Your latest investment activity will appear here
+            </p>
+          </div>
+        <% else %>
+          <div class="space-y-3" data-testid="recent-transactions-list">
+            <%= for transaction <- @recent_transactions do %>
+              <div
+                class="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0"
+                data-testid="recent-transaction-item"
+              >
+                <div class="flex items-start space-x-3">
+                  <div class="flex-shrink-0">
+                    <div class={[
+                      "w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium",
+                      transaction_type_color(transaction.type)
+                    ]}>
+                      {transaction_type_icon(transaction.type)}
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center space-x-2">
+                      <p class="text-sm font-medium text-gray-900 truncate">
+                        {get_transaction_symbol(transaction)}
+                      </p>
+                      <%= if get_transaction_category(transaction) do %>
+                        <AshfolioWeb.Components.CategoryTag.category_tag
+                          category={get_transaction_category(transaction)}
+                          size={:small}
+                        />
+                      <% end %>
+                    </div>
+                    <div class="flex items-center space-x-2 mt-1">
+                      <p class="text-xs text-gray-500">
+                        {String.capitalize(Atom.to_string(transaction.type))}
+                      </p>
+                      <span class="text-gray-300">•</span>
+                      <p class="text-xs text-gray-500">
+                        {format_quantity(transaction.quantity)} shares
+                      </p>
+                      <span class="text-gray-300">•</span>
+                      <p class="text-xs text-gray-500">
+                        {FormatHelpers.format_relative_time(transaction.date)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class={[
+                    "text-sm font-medium",
+                    FormatHelpers.value_color_class(transaction.total_amount)
+                  ]}>
+                    {FormatHelpers.format_currency(transaction.total_amount)}
+                  </p>
+                  <p class="text-xs text-gray-500">
+                    @ {FormatHelpers.format_currency(get_transaction_price(transaction))}
+                  </p>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
       </.card>
     </div>
     """
@@ -310,48 +436,21 @@ defmodule AshfolioWeb.DashboardLive do
   defp load_portfolio_data(socket) do
     Logger.debug("Loading portfolio data for dashboard")
 
-    case get_default_user() do
-      {:ok, user} ->
-        load_user_portfolio_data(socket, user.id)
+    # Database-as-user architecture - load data directly without user lookup
+    case Context.get_dashboard_data() do
+      {:ok, dashboard_data} ->
+        load_dashboard_data(socket, dashboard_data)
 
       {:error, reason} ->
-        Logger.warning("Failed to get default user: #{inspect(reason)}")
-
-        socket
-        |> assign_default_values()
-        |> ErrorHelpers.put_error_flash("Unable to load user data")
-    end
-  end
-
-  defp load_user_portfolio_data(socket, user_id) do
-    with {:ok, total_return_data} <- Calculator.calculate_total_return(user_id),
-         {:ok, holdings_summary} <- HoldingsCalculator.get_holdings_summary(user_id) do
-      socket
-      |> assign(:portfolio_value, FormatHelpers.format_currency(total_return_data.total_value))
-      |> assign(
-        :total_return_amount,
-        FormatHelpers.format_currency(total_return_data.dollar_return)
-      )
-      |> assign(
-        :total_return_percent,
-        FormatHelpers.format_percentage(total_return_data.return_percentage)
-      )
-      |> assign(:cost_basis, FormatHelpers.format_currency(total_return_data.cost_basis))
-      |> assign(:holdings_count, to_string(holdings_summary.holdings_count))
-      |> assign(:holdings, holdings_summary.holdings)
-      |> assign(:sort_by, :symbol)
-      |> assign(:sort_order, :asc)
-      |> assign(:last_price_update, get_last_price_update())
-      |> assign(:error, nil)
-    else
-      {:error, reason} ->
-        Logger.warning("Failed to load portfolio data: #{inspect(reason)}")
+        Logger.warning("Failed to load dashboard data: #{inspect(reason)}")
 
         socket
         |> assign_default_values()
         |> ErrorHelpers.put_error_flash("Unable to load portfolio data")
     end
   end
+
+  # This function is no longer needed - replaced by load_dashboard_data
 
   defp assign_default_values(socket) do
     socket
@@ -365,23 +464,106 @@ defmodule AshfolioWeb.DashboardLive do
     |> assign(:sort_order, :asc)
     |> assign(:last_price_update, nil)
     |> assign(:error, "Unable to load portfolio data")
+    |> assign(:recent_transactions, [])
+    |> assign_default_net_worth_values()
   end
 
-  # Defensive user creation for single-user application
-  defp get_default_user do
-    case User.get_default_user() do
-      {:ok, [user]} -> {:ok, user}
-      {:ok, []} ->
-        {:ok, user} = User.create(%{name: "Local User", currency: "USD", locale: "en-US"})
-        {:ok, user}
-      {:error, error} ->
-        Logger.error("Failed to get or create default user: #{inspect(error)}")
-        {:error, error}
+  # This function is now handled in load_holdings_and_net_worth
+
+  # This function is now handled in load_dashboard_data via Context.get_dashboard_data
+
+  defp assign_net_worth_data(socket, net_worth_data) do
+    # Handle both Context.get_net_worth (returns :total_net_worth) and NetWorthCalculator.calculate_net_worth (returns :net_worth)
+    net_worth_value = net_worth_data[:total_net_worth] || net_worth_data[:net_worth]
+
+    socket
+    |> assign(:net_worth_total, FormatHelpers.format_currency(net_worth_value))
+    |> assign(
+      :net_worth_investment_value,
+      FormatHelpers.format_currency(net_worth_data.investment_value)
+    )
+    |> assign(
+      :net_worth_cash_balance,
+      FormatHelpers.format_currency(net_worth_data[:cash_balance] || net_worth_data[:cash_value])
+    )
+    |> assign(:net_worth_breakdown, net_worth_data.breakdown)
+    |> assign(:net_worth_error, nil)
+  end
+
+  defp assign_default_net_worth_values(socket) do
+    socket
+    |> assign(:net_worth_total, "$0.00")
+    |> assign(:net_worth_investment_value, "$0.00")
+    |> assign(:net_worth_cash_balance, "$0.00")
+    |> assign(:net_worth_breakdown, %{investment_accounts: [], cash_accounts: []})
+    |> assign(:net_worth_error, "Unable to load net worth data")
+  end
+
+  # Load dashboard data from Context API (database-as-user architecture)
+  defp load_dashboard_data(socket, dashboard_data) do
+    %{
+      user: user_settings,
+      accounts: accounts,
+      recent_transactions: transactions,
+      summary: summary
+    } = dashboard_data
+
+    socket
+    |> assign(:user_settings, user_settings)
+    |> assign(:accounts, accounts.all)
+    |> assign(:recent_transactions, transactions)
+    |> assign(:account_summary, summary)
+    |> load_holdings_and_net_worth()
+  end
+
+  defp load_holdings_and_net_worth(socket) do
+    # Load holdings and net worth without user_id
+    case Context.get_net_worth() do
+      {:ok, net_worth_data} ->
+        socket
+        |> assign_net_worth_data(net_worth_data)
+        |> load_holdings_data()
+
+      {:error, reason} ->
+        Logger.warning("Failed to load net worth: #{inspect(reason)}")
+
+        socket
+        |> assign_default_values()
     end
-  rescue
-    error ->
-      Logger.error("Failed to get or create default user: #{inspect(error)}")
-      {:error, error}
+  end
+
+  defp load_holdings_data(socket) do
+    case HoldingsCalculator.get_holdings_summary() do
+      {:ok, holdings_data} ->
+        socket
+        |> assign(:holdings, holdings_data.holdings)
+        |> assign(:portfolio_value, FormatHelpers.format_currency(holdings_data.total_value))
+        |> assign(:portfolio_pnl, FormatHelpers.format_currency(holdings_data.total_pnl))
+        |> assign(:total_return_amount, FormatHelpers.format_currency(holdings_data.total_pnl))
+        |> assign(
+          :total_return_percent,
+          FormatHelpers.format_percentage(holdings_data.total_pnl_pct)
+        )
+        |> assign(:cost_basis, FormatHelpers.format_currency(holdings_data.total_cost_basis))
+        |> assign(:holdings_count, to_string(holdings_data.holdings_count))
+        |> assign(:sort_by, :symbol)
+        |> assign(:sort_order, :asc)
+        |> assign(:last_price_update, get_last_price_update())
+        |> assign(:error, nil)
+
+      {:error, reason} ->
+        Logger.warning("Failed to load holdings: #{inspect(reason)}")
+
+        socket
+        |> assign(:holdings, [])
+        |> assign(:portfolio_value, "$0.00")
+        |> assign(:portfolio_pnl, "$0.00")
+        |> assign(:total_return_amount, "$0.00")
+        |> assign(:total_return_percent, "0.00%")
+        |> assign(:cost_basis, "$0.00")
+        |> assign(:holdings_count, "0")
+        |> assign(:error, "Unable to load holdings data")
+    end
   end
 
   defp get_last_price_update do
@@ -440,4 +622,43 @@ defmodule AshfolioWeb.DashboardLive do
       ""
     end
   end
+
+  # Helper function to safely get account count from breakdown
+  defp get_account_count(breakdown, account_type) when is_map(breakdown) do
+    case Map.get(breakdown, account_type) do
+      accounts when is_list(accounts) -> length(accounts)
+      _ -> 0
+    end
+  end
+
+  defp get_account_count(_, _), do: 0
+
+  # Helper functions for Recent Activity section
+
+  defp transaction_type_color(:buy), do: "bg-green-500"
+  defp transaction_type_color(:sell), do: "bg-red-500"
+  defp transaction_type_color(:dividend), do: "bg-blue-500"
+  defp transaction_type_color(:fee), do: "bg-yellow-500"
+  defp transaction_type_color(:interest), do: "bg-purple-500"
+  defp transaction_type_color(:liability), do: "bg-gray-500"
+  defp transaction_type_color(_), do: "bg-gray-400"
+
+  defp transaction_type_icon(:buy), do: "+"
+  defp transaction_type_icon(:sell), do: "-"
+  defp transaction_type_icon(:dividend), do: "$"
+  defp transaction_type_icon(:fee), do: "F"
+  defp transaction_type_icon(:interest), do: "I"
+  defp transaction_type_icon(:liability), do: "L"
+  defp transaction_type_icon(_), do: "?"
+
+  defp get_transaction_symbol(%{symbol: %{symbol: symbol}}), do: symbol
+  defp get_transaction_symbol(%{symbol: nil}), do: "N/A"
+  defp get_transaction_symbol(_), do: "N/A"
+
+  defp get_transaction_category(%{category: category}) when not is_nil(category), do: category
+  defp get_transaction_category(_), do: nil
+
+  defp get_transaction_price(%{price: price}) when not is_nil(price), do: price
+  defp get_transaction_price(%{symbol: %{current_price: price}}) when not is_nil(price), do: price
+  defp get_transaction_price(_), do: Decimal.new("0.00")
 end

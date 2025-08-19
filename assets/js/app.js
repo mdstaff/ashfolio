@@ -20,12 +20,24 @@ import "phoenix_html"
 // Establish Phoenix Socket and LiveView configuration.
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
+import {hooks as colocatedHooks} from "phoenix-colocated/ashfolio"
 import topbar from "../vendor/topbar"
 
+// Import JavaScript hooks
+import SymbolAutocomplete from "./hooks/symbol_autocomplete"
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+
+// Configure hooks
+let Hooks = {
+  SymbolAutocomplete: SymbolAutocomplete,
+  ...colocatedHooks
+}
+
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  params: {_csrf_token: csrfToken}
+  params: {_csrf_token: csrfToken},
+  hooks: Hooks
 })
 
 // Show progress bar on live navigation and form submits

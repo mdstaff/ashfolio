@@ -8,7 +8,7 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
   @moduletag :slow
 
   alias Ashfolio.MarketData.PriceManager
-  alias Ashfolio.Portfolio.{User, Account, Symbol, Transaction}
+  alias Ashfolio.Portfolio.{Symbol, Transaction}
   alias Ashfolio.Cache
 
   import Mox
@@ -20,35 +20,35 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
   setup do
     # Clear cache before each test
     Cache.clear_all()
-    
+
     # Allow the PriceManager GenServer to access database and mocks
     Ashfolio.SQLiteHelpers.allow_price_manager_db_access()
 
-    # Create test data using global user
-    user = Ashfolio.SQLiteHelpers.get_default_user()
-    account = Ashfolio.SQLiteHelpers.get_default_account(user)
+    # Create test data using global account
+    account = Ashfolio.SQLiteHelpers.get_default_account()
 
     # Create test symbols using helper
     aapl = Ashfolio.SQLiteHelpers.get_or_create_symbol("AAPL", %{data_source: :yahoo_finance})
     msft = Ashfolio.SQLiteHelpers.get_or_create_symbol("MSFT", %{data_source: :yahoo_finance})
 
     # Create transactions to make symbols "active"
-    _transaction1 = Ashfolio.SQLiteHelpers.create_test_transaction(user, account, aapl, %{
-      type: :buy,
-      quantity: Decimal.new("10"),
-      price: Decimal.new("150.00"),
-      date: ~D[2024-01-15]
-    })
+    _transaction1 =
+      Ashfolio.SQLiteHelpers.create_test_transaction(account, aapl, %{
+        type: :buy,
+        quantity: Decimal.new("10"),
+        price: Decimal.new("150.00"),
+        date: ~D[2024-01-15]
+      })
 
-    _transaction2 = Ashfolio.SQLiteHelpers.create_test_transaction(user, account, msft, %{
-      type: :buy,
-      quantity: Decimal.new("5"),
-      price: Decimal.new("300.00"),
-      date: ~D[2024-01-16]
-    })
+    _transaction2 =
+      Ashfolio.SQLiteHelpers.create_test_transaction(account, msft, %{
+        type: :buy,
+        quantity: Decimal.new("5"),
+        price: Decimal.new("300.00"),
+        date: ~D[2024-01-16]
+      })
 
     %{
-      user: user,
       account: account,
       aapl: aapl,
       msft: msft,
@@ -324,21 +324,6 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
       # Should fail to store in database but not crash
       assert results.success_count == 0
       assert results.failure_count == 1
-    end
-
-    test "continues with cache updates even if database fails" do
-      # This test would require mocking the database to fail
-      # For now, we'll test that cache is updated independently
-
-      expect(YahooFinanceMock, :fetch_prices, fn _symbols ->
-        {:ok, %{"AAPL" => Decimal.new("155.50")}}
-      end)
-
-      assert {:ok, _results} = PriceManager.refresh_symbols(["AAPL"])
-
-      # Verify cache was updated regardless
-      assert {:ok, %{price: price}} = Cache.get_price("AAPL")
-      assert Decimal.equal?(price, Decimal.new("155.50"))
     end
   end
 

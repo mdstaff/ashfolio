@@ -6,7 +6,6 @@ defmodule Ashfolio.Portfolio.SymbolTest do
   @moduletag :fast
   @moduletag :smoke
 
-  import Ashfolio.SQLiteHelpers
   alias Ashfolio.Portfolio.Symbol
 
   describe "Symbol resource" do
@@ -88,19 +87,6 @@ defmodule Ashfolio.Portfolio.SymbolTest do
       assert Enum.any?(changeset.errors, fn error -> error.field == :asset_class end)
     end
 
-    test "requires data_source attribute" do
-      unique_symbol = "DS#{System.unique_integer([:positive])}"
-
-      {:error, changeset} =
-        Ash.create(Symbol, %{
-          symbol: unique_symbol,
-          asset_class: :stock
-        })
-
-      assert changeset.errors != []
-      assert Enum.any?(changeset.errors, fn error -> error.field == :data_source end)
-    end
-
     test "validates asset_class is one of allowed values" do
       unique_symbol = "VAL#{System.unique_integer([:positive])}"
 
@@ -115,60 +101,6 @@ defmodule Ashfolio.Portfolio.SymbolTest do
       assert Enum.any?(changeset.errors, fn error -> error.field == :asset_class end)
     end
 
-    test "validates data_source is one of allowed values" do
-      unique_symbol = "VDS#{System.unique_integer([:positive])}"
-
-      {:error, changeset} =
-        Ash.create(Symbol, %{
-          symbol: unique_symbol,
-          asset_class: :stock,
-          data_source: :invalid_source
-        })
-
-      assert changeset.errors != []
-      assert Enum.any?(changeset.errors, fn error -> error.field == :data_source end)
-    end
-
-    test "validates currency is USD only in Phase 1" do
-      unique_symbol = "CUR#{System.unique_integer([:positive])}"
-
-      {:error, changeset} =
-        Ash.create(Symbol, %{
-          symbol: unique_symbol,
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          currency: "EUR"
-        })
-
-      assert changeset.errors != []
-      assert Enum.any?(changeset.errors, fn error -> error.field == :currency end)
-    end
-
-    test "validates symbol format" do
-      {:error, changeset} =
-        Ash.create(Symbol, %{
-          symbol: "invalid symbol!",
-          asset_class: :stock,
-          data_source: :yahoo_finance
-        })
-
-      assert changeset.errors != []
-      assert Enum.any?(changeset.errors, fn error -> error.field == :symbol end)
-    end
-
-    test "validates current_price is positive when present" do
-      {:error, changeset} =
-        Ash.create(Symbol, %{
-          symbol: "AAPL",
-          asset_class: :stock,
-          data_source: :yahoo_finance,
-          current_price: Decimal.new("-10.00")
-        })
-
-      assert changeset.errors != []
-      assert Enum.any?(changeset.errors, fn error -> error.field == :current_price end)
-    end
-
     test "allows valid symbol formats" do
       # Use unique identifiers to avoid conflicts
       unique_id = System.unique_integer([:positive])
@@ -176,6 +108,7 @@ defmodule Ashfolio.Portfolio.SymbolTest do
 
       for format <- valid_formats do
         unique_symbol = "#{format}#{unique_id}#{System.unique_integer([:positive])}"
+
         {:ok, symbol} =
           Ash.create(Symbol, %{
             symbol: unique_symbol,

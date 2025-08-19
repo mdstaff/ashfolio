@@ -2,6 +2,7 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
   use AshfolioWeb, :live_component
 
   alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Context
   alias AshfolioWeb.Live.{FormatHelpers, ErrorHelpers}
 
   @impl true
@@ -261,11 +262,25 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
     current_account_id =
       if socket.assigns.action == :edit, do: socket.assigns.account.id, else: nil
 
-    case check_name_uniqueness(form_params, socket.assigns.user_id, current_account_id) do
+    case Context.validate_account_constraints(
+           form_params,
+           current_account_id
+         ) do
       {:ok, _} ->
         save_account(socket, socket.assigns.action, form_params)
 
-      {:error, error_message} ->
+      {:error, :name_already_taken} ->
+        name = Map.get(form_params, "name")
+        error_message = "Account name '#{name}' is already taken. Please choose another."
+
+        {:noreply,
+         socket
+         |> assign(:saving, false)
+         |> assign(:form_errors, [error_message])}
+
+      {:error, reason} ->
+        error_message = "Validation failed: #{inspect(reason)}"
+
         {:noreply,
          socket
          |> assign(:saving, false)
@@ -299,8 +314,6 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
   end
 
   defp save_account(socket, :new, form_params) do
-    form_params = Map.put(form_params, "user_id", socket.assigns.user_id)
-
     case AshPhoenix.Form.submit(socket.assigns.form, params: form_params) do
       {:ok, account} ->
         success_message =
@@ -576,27 +589,4 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
   defp humanize_field(field), do: to_string(field)
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
-
-  defp check_name_uniqueness(form_params, user_id, current_account_id) do
-    name = Map.get(form_params, "name")
-
-    if name do
-      case Account.get_by_name_for_user(user_id, name) do
-        {:ok, existing_account} when not is_nil(existing_account) ->
-          if existing_account.id != current_account_id do
-            {:error, "Account name '#{name}' is already taken. Please choose another."}
-          else
-            {:ok, form_params}
-          end
-
-        {:ok, nil} ->
-          {:ok, form_params}
-
-        {:error, _reason} ->
-          {:ok, form_params}
-      end
-    else
-      {:ok, form_params}
-    end
-  end
 end

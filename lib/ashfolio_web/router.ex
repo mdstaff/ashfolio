@@ -23,12 +23,26 @@ defmodule AshfolioWeb.Router do
     live "/accounts/:id", AccountLive.Show, :show
     live "/accounts/:id/edit", AccountLive.Index, :edit
     live "/transactions", TransactionLive.Index, :index
+    live "/categories", CategoryLive.Index, :index
+    live "/categories/new", CategoryLive.Index, :new
+    live "/categories/:id/edit", CategoryLive.Index, :edit
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", AshfolioWeb do
-  #   pipe_through :api
-  # end
+  # Health check endpoints - accessible without authentication
+  scope "/", AshfolioWeb do
+    pipe_through :api
+
+    get "/health", HealthController, :check
+    get "/ping", HealthController, :ping
+  end
+
+  # API routes for future expansion
+  scope "/api", AshfolioWeb do
+    pipe_through :api
+
+    get "/health", HealthController, :check
+    get "/ping", HealthController, :ping
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:ashfolio, :dev_routes) do

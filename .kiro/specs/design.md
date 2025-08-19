@@ -303,9 +303,9 @@ defmodule Ashfolio.Portfolio.Calculator do
   position gains/losses using simple formulas suitable for Phase 1 scope.
   """
 
-  def calculate_portfolio_value(user_id) do
+  def calculate_portfolio_value() do
     # Calculate total portfolio value as sum of all holdings
-    case get_all_holdings(user_id) do
+    case get_all_holdings() do
       {:ok, holdings} ->
         total_value =
           holdings
@@ -330,9 +330,9 @@ defmodule Ashfolio.Portfolio.Calculator do
     end
   end
 
-  def calculate_position_returns(user_id) do
+  def calculate_position_returns() do
     # Calculate individual position gains/losses for all holdings
-    case get_all_holdings(user_id) do
+    case get_all_holdings() do
       {:ok, holdings} ->
         positions =
           holdings
@@ -343,10 +343,10 @@ defmodule Ashfolio.Portfolio.Calculator do
     end
   end
 
-  def calculate_total_return(user_id) do
+  def calculate_total_return() do
     # Get total return tracking data for the portfolio
-    with {:ok, portfolio_value} <- calculate_portfolio_value(user_id),
-         {:ok, total_cost_basis} <- calculate_total_cost_basis(user_id),
+    with {:ok, portfolio_value} <- calculate_portfolio_value(),
+         {:ok, total_cost_basis} <- calculate_total_cost_basis(),
          {:ok, return_percentage} <- calculate_simple_return(portfolio_value, total_cost_basis) do
 
       summary = %{
@@ -372,9 +372,9 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
   and profit/loss calculations with FIFO cost basis method.
   """
 
-  def calculate_holding_values(user_id) do
+  def calculate_holding_values() do
     # Calculate current holding values for all positions
-    with {:ok, holdings_data} <- get_holdings_data(user_id) do
+    with {:ok, holdings_data} <- get_holdings_data() do
       holdings_with_values =
         holdings_data
         |> Enum.map(&calculate_individual_holding_value/1)
@@ -383,9 +383,9 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
     end
   end
 
-  def calculate_cost_basis(user_id, symbol_id) do
+  def calculate_cost_basis(symbol_id) do
     # Calculate cost basis from transaction history using FIFO method
-    case get_symbol_transactions(user_id, symbol_id) do
+    case get_symbol_transactions(symbol_id) do
       {:ok, transactions} ->
         cost_basis_data = calculate_cost_basis_from_transactions(transactions)
         {:ok, cost_basis_data}
@@ -393,9 +393,9 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
     end
   end
 
-  def calculate_holding_pnl(user_id, symbol_id) do
+  def calculate_holding_pnl(symbol_id) do
     # Calculate profit/loss for individual holdings
-    with {:ok, cost_basis_data} <- calculate_cost_basis(user_id, symbol_id),
+    with {:ok, cost_basis_data} <- calculate_cost_basis(symbol_id),
          {:ok, symbol} <- Symbol.get_by_id(symbol_id) do
 
       current_price = get_current_price(symbol)
@@ -422,10 +422,10 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
     end
   end
 
-  def get_holdings_summary(user_id) do
+  def get_holdings_summary() do
     # Get comprehensive holdings summary with all calculations
-    with {:ok, holdings} <- calculate_holding_values(user_id),
-         {:ok, total_value} <- aggregate_portfolio_value(user_id) do
+    with {:ok, holdings} <- calculate_holding_values(),
+         {:ok, total_value} <- aggregate_portfolio_value() do
 
       total_cost_basis =
         holdings
@@ -501,7 +501,7 @@ defmodule Ashfolio.Portfolio.CalculatorOptimized do
   - Reduced database round trips
   """
 
-  def get_all_holdings_optimized(user_id) do
+  def get_all_holdings_optimized() do
     # Batch fetch all symbols in single query - eliminates N+1
     case Symbol.get_by_ids(symbol_ids) do
       {:ok, symbols} ->
@@ -536,8 +536,8 @@ defmodule AshfolioWeb.DashboardLive do
     # Load portfolio data using Calculator modules
     user_id = get_default_user_id()
 
-    with {:ok, total_return} <- Portfolio.Calculator.calculate_total_return(user_id),
-         {:ok, holdings} <- Portfolio.HoldingsCalculator.calculate_holding_values(user_id) do
+    with {:ok, total_return} <- Portfolio.Calculator.calculate_total_return(),
+         {:ok, holdings} <- Portfolio.HoldingsCalculator.calculate_holding_values() do
 
       socket =
         socket
@@ -686,7 +686,7 @@ Based on research findings, the holdings table will use the following technical 
 
 ```elixir
 # In DashboardLive mount/3
-{:ok, holdings} = HoldingsCalculator.calculate_holding_values(user_id)
+{:ok, holdings} = HoldingsCalculator.calculate_holding_values()
 
 # Holdings data structure:
 %{
@@ -876,7 +876,7 @@ CREATE INDEX idx_symbols_symbol ON symbols(symbol);
   {:write_concurrency, true},
   {:read_concurrency, true}
 ])
-# Structure: {user_id, %{period => performance_data}}
+# Structure: {%{period => performance_data}}
 
 # Memory monitoring for 16GB systems
 defmodule CacheMonitor do

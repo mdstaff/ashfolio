@@ -21,7 +21,10 @@ defmodule Ashfolio.Portfolio.Transaction do
     uuid_primary_key(:id)
 
     attribute :type, :atom do
-      constraints(one_of: [:buy, :sell, :dividend, :fee, :interest, :liability])
+      constraints(
+        one_of: [:buy, :sell, :dividend, :fee, :interest, :liability, :deposit, :withdrawal]
+      )
+
       allow_nil?(false)
       description("Transaction type")
     end
@@ -54,7 +57,8 @@ defmodule Ashfolio.Portfolio.Transaction do
 
     attribute :notes, :string do
       description("Optional notes about the transaction")
-      constraints(max_length: 500)  # Security: Limit notes to 500 characters
+      # Security: Limit notes to 500 characters
+      constraints(max_length: 500)
     end
 
     timestamps()
@@ -69,6 +73,11 @@ defmodule Ashfolio.Portfolio.Transaction do
     belongs_to :symbol, Ashfolio.Portfolio.Symbol do
       allow_nil?(false)
       description("The symbol/security involved in this transaction")
+    end
+
+    belongs_to :category, Ashfolio.FinancialManagement.TransactionCategory do
+      allow_nil?(true)
+      description("Optional category for investment organization")
     end
   end
 
@@ -116,7 +125,8 @@ defmodule Ashfolio.Portfolio.Transaction do
         :date,
         :notes,
         :account_id,
-        :symbol_id
+        :symbol_id,
+        :category_id
       ])
 
       primary?(true)
@@ -128,7 +138,7 @@ defmodule Ashfolio.Portfolio.Transaction do
 
     update :update do
       description("Update transaction details")
-      accept([:type, :quantity, :price, :total_amount, :fee, :date, :notes])
+      accept([:type, :quantity, :price, :total_amount, :fee, :date, :notes, :category_id])
       primary?(true)
       require_atomic?(false)
 
@@ -143,6 +153,12 @@ defmodule Ashfolio.Portfolio.Transaction do
       filter(expr(account_id == ^arg(:account_id)))
     end
 
+    read :by_accounts do
+      description("Get transactions for multiple accounts (prevents N+1 queries)")
+      argument(:account_ids, {:array, :uuid}, allow_nil?: false)
+      filter(expr(account_id in ^arg(:account_ids)))
+    end
+
     read :by_symbol do
       description("Get transactions for a specific symbol")
       argument(:symbol_id, :uuid, allow_nil?: false)
@@ -153,6 +169,17 @@ defmodule Ashfolio.Portfolio.Transaction do
       description("Get transactions by type")
       argument(:type, :atom, allow_nil?: false)
       filter(expr(type == ^arg(:type)))
+    end
+
+    read :by_category do
+      description("Get transactions for a specific category")
+      argument(:category_id, :uuid, allow_nil?: false)
+      filter(expr(category_id == ^arg(:category_id)))
+    end
+
+    read :uncategorized do
+      description("Get transactions without a category")
+      filter(expr(is_nil(category_id)))
     end
 
     read :by_date_range do
@@ -188,6 +215,155 @@ defmodule Ashfolio.Portfolio.Transaction do
         |> Ash.Query.sort(date: :desc)
       end)
     end
+
+    read :for_account do
+      description("Get transactions for specific account (optimized)")
+      argument(:account_id, :uuid, allow_nil?: false)
+
+      prepare(fn query, _context ->
+        account_id = Ash.Query.get_argument(query, :account_id)
+
+        query
+        |> Ash.Query.filter(expr(account_id == ^account_id))
+        |> Ash.Query.sort(date: :desc)
+      end)
+    end
+
+    read :by_category_enhanced do
+      description("Get transactions filtered by category with enhanced features")
+      argument(:category_id, :uuid, allow_nil?: false)
+
+      prepare(fn query, _context ->
+        category_id = Ash.Query.get_argument(query, :category_id)
+
+        query
+        |> Ash.Query.filter(expr(category_id == ^category_id))
+        |> Ash.Query.load(:account)
+        |> Ash.Query.sort(date: :desc)
+      end)
+    end
+
+    read :by_date_range_enhanced do
+      description("Get transactions within date range with enhanced features")
+      argument(:start_date, :date, allow_nil?: false)
+      argument(:end_date, :date, allow_nil?: false)
+
+      prepare(fn query, _context ->
+        start_date = Ash.Query.get_argument(query, :start_date)
+        end_date = Ash.Query.get_argument(query, :end_date)
+
+        query
+        |> Ash.Query.filter(expr(date >= ^start_date and date <= ^end_date))
+        |> Ash.Query.load(:account)
+        |> Ash.Query.sort(date: :desc)
+      end)
+    end
+
+    read :with_filters do
+      description("Get transactions with multiple filter criteria")
+      argument(:account_id, :uuid, allow_nil?: true)
+      argument(:category_id, :uuid, allow_nil?: true)
+      argument(:start_date, :date, allow_nil?: true)
+      argument(:end_date, :date, allow_nil?: true)
+      argument(:transaction_type, :atom, allow_nil?: true)
+
+      prepare(fn query, _context ->
+        account_id = Ash.Query.get_argument(query, :account_id)
+        category_id = Ash.Query.get_argument(query, :category_id)
+        start_date = Ash.Query.get_argument(query, :start_date)
+        end_date = Ash.Query.get_argument(query, :end_date)
+        transaction_type = Ash.Query.get_argument(query, :transaction_type)
+
+        query =
+          if account_id do
+            Ash.Query.filter(query, expr(account_id == ^account_id))
+          else
+            query
+          end
+
+        query =
+          if category_id do
+            Ash.Query.filter(query, expr(category_id == ^category_id))
+          else
+            query
+          end
+
+        query =
+          if start_date do
+            Ash.Query.filter(query, expr(date >= ^start_date))
+          else
+            query
+          end
+
+        query =
+          if end_date do
+            Ash.Query.filter(query, expr(date <= ^end_date))
+          else
+            query
+          end
+
+        query =
+          if transaction_type do
+            Ash.Query.filter(query, expr(type == ^transaction_type))
+          else
+            query
+          end
+
+        query
+        |> Ash.Query.load(:account)
+        |> Ash.Query.sort(date: :desc)
+      end)
+    end
+
+    read :sorted do
+      description("Get transactions with sorting options")
+      argument(:sort_field, :atom, allow_nil?: false)
+      argument(:sort_direction, :atom, allow_nil?: false)
+      argument(:limit, :integer, allow_nil?: true)
+
+      prepare(fn query, _context ->
+        sort_field = Ash.Query.get_argument(query, :sort_field)
+        sort_direction = Ash.Query.get_argument(query, :sort_direction)
+        limit = Ash.Query.get_argument(query, :limit)
+
+        query = Ash.Query.load(query, :account)
+
+        # Apply sorting
+        query =
+          case sort_field do
+            :date -> Ash.Query.sort(query, [{:date, sort_direction}])
+            :amount -> Ash.Query.sort(query, [{:total_amount, sort_direction}])
+            :symbol -> Ash.Query.sort(query, [{:symbol, sort_direction}])
+            _ -> Ash.Query.sort(query, [{:date, sort_direction}])
+          end
+
+        # Apply limit if specified
+        if limit do
+          Ash.Query.limit(query, limit)
+        else
+          query
+        end
+      end)
+    end
+
+    read :paginated do
+      description("Get paginated transactions")
+      argument(:page, :integer, allow_nil?: false)
+      argument(:page_size, :integer, allow_nil?: false)
+
+      prepare(fn query, _context ->
+        page = Ash.Query.get_argument(query, :page)
+        page_size = Ash.Query.get_argument(query, :page_size)
+
+        offset = (page - 1) * page_size
+
+        query
+        |> Ash.Query.load(:account)
+        |> Ash.Query.sort(date: :desc)
+        |> Ash.Query.limit(page_size)
+        |> Ash.Query.offset(offset)
+      end)
+    end
   end
 
   code_interface do
@@ -197,13 +373,36 @@ defmodule Ashfolio.Portfolio.Transaction do
     define(:list, action: :read)
     define(:get_by_id, action: :read, get_by: [:id])
     define(:by_account, action: :by_account, args: [:account_id])
+    define(:by_accounts, action: :by_accounts, args: [:account_ids])
     define(:by_symbol, action: :by_symbol, args: [:symbol_id])
     define(:by_type, action: :by_type, args: [:type])
+    define(:by_category, action: :by_category, args: [:category_id])
+    define(:uncategorized_transactions, action: :uncategorized)
     define(:by_date_range, action: :by_date_range, args: [:start_date, :end_date])
     define(:recent_transactions, action: :recent)
     define(:holdings_data, action: :holdings)
     define(:update, action: :update)
     define(:destroy, action: :destroy)
+
+    # Filtering functions for database-as-user architecture
+    define(:list_by_category,
+      action: :by_category_enhanced,
+      args: [:category_id]
+    )
+
+    define(:list_by_date_range,
+      action: :by_date_range_enhanced,
+      args: [:start_date, :end_date]
+    )
+
+    define(:list_for_account, action: :for_account, args: [:account_id])
+    define(:list_with_filters, action: :with_filters)
+    define(:list_sorted, action: :sorted)
+
+    define(:list_paginated,
+      action: :paginated,
+      args: [:page, :page_size]
+    )
   end
 
   # Custom validation function for quantity based on transaction type
@@ -248,8 +447,63 @@ defmodule Ashfolio.Portfolio.Transaction do
           message: "Quantity cannot be negative for fee transactions"
         )
 
+      type == :deposit and (is_nil(quantity) or Decimal.compare(quantity, 0) != :gt) ->
+        Ash.Changeset.add_error(changeset,
+          field: :quantity,
+          message: "Quantity must be positive for deposit transactions"
+        )
+
+      type == :withdrawal and (is_nil(quantity) or Decimal.compare(quantity, 0) != :lt) ->
+        Ash.Changeset.add_error(changeset,
+          field: :quantity,
+          message: "Quantity must be negative for withdrawal transactions"
+        )
+
       true ->
         changeset
     end
+  end
+
+  # DEPRECATED: Backward compatibility functions for database-as-user migration
+  # These functions accept user_id but ignore it, redirecting to the new functions
+
+  @doc """
+  DEPRECATED: Use list_by_category/1 instead.
+  For backward compatibility during database-as-user migration.
+  """
+  def list_for_user_by_category(_user_id, category_id) do
+    list_by_category(category_id)
+  end
+
+  @doc """
+  DEPRECATED: Use list_by_date_range/2 instead.
+  For backward compatibility during database-as-user migration.
+  """
+  def list_for_user_by_date_range(_user_id, start_date, end_date) do
+    list_by_date_range(start_date, end_date)
+  end
+
+  @doc """
+  DEPRECATED: Use list_with_filters/1 instead.
+  For backward compatibility during database-as-user migration.
+  """
+  def list_for_user_with_filters(opts \\ []) do
+    list_with_filters(opts)
+  end
+
+  @doc """
+  DEPRECATED: Use list_sorted/1 instead.
+  For backward compatibility during database-as-user migration.
+  """
+  def list_for_user_sorted(opts \\ []) do
+    list_sorted(opts)
+  end
+
+  @doc """
+  DEPRECATED: Use list_paginated/2 instead.
+  For backward compatibility during database-as-user migration.
+  """
+  def list_for_user_paginated(_user_id, page, page_size) do
+    list_paginated(page, page_size)
   end
 end

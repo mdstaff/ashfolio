@@ -1,7 +1,14 @@
 defmodule AshfolioWeb.TransactionLive.FormComponent do
   use AshfolioWeb, :live_component
 
-  alias Ashfolio.Portfolio.{Account, Symbol, Transaction, User}
+  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
+  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias AshfolioWeb.Components.SymbolAutocomplete
+
+  @impl true
+  def mount(socket) do
+    {:ok, socket}
+  end
 
   @impl true
   def render(assigns) do
@@ -40,7 +47,7 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
           <.input
             field={@form[:type]}
             type="select"
-            label="Type"
+            label="Transaction Type"
             options={[
               {"Buy", :buy},
               {"Sell", :sell},
@@ -61,15 +68,56 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
             prompt="Select account"
             required
           />
-
-          <.input
-            field={@form[:symbol_id]}
-            type="select"
-            label="Symbol"
-            options={Enum.map(@symbols, fn s -> {s.symbol, s.id} end)}
-            prompt="Select symbol"
-            required
-          />
+          
+    <!-- Enhanced Symbol Selection with Autocomplete -->
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">
+              Symbol <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <.live_component
+                module={SymbolAutocomplete}
+                id="transaction-symbol-autocomplete"
+                field={@symbol_field}
+              />
+              <.input
+                field={@form[:symbol_id]}
+                type="text"
+                value={@selected_symbol_id || ""}
+                class="hidden"
+              />
+            </div>
+            <div :if={@selected_symbol} class="text-sm text-gray-600">
+              <div class="flex items-center space-x-2">
+                <span class="font-medium">{@selected_symbol.symbol}</span>
+                <span>-</span>
+                <span>{@selected_symbol.name}</span>
+                <button
+                  type="button"
+                  phx-click="clear_symbol"
+                  phx-target={@myself}
+                  class="text-red-600 hover:text-red-800"
+                  title="Clear selection"
+                >
+                  <.icon name="hero-x-mark-mini" class="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+          
+    <!-- Investment Category Selection -->
+          <div :if={@categories != []} class="space-y-2">
+            <.input
+              field={@form[:category_id]}
+              type="select"
+              label="Investment Category (Optional)"
+              options={Enum.map(@categories, fn c -> {c.name, c.id} end)}
+              prompt="Select category"
+            />
+            <div class="text-xs text-gray-500">
+              Organize your investment transactions by category
+            </div>
+          </div>
 
           <.input field={@form[:quantity]} type="number" label="Quantity" step="0.000001" required />
           <.input field={@form[:price]} type="number" label="Price" step="0.0001" required />
@@ -90,19 +138,77 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
 
   @impl true
   def update(%{transaction: _transaction} = assigns, socket) do
-    # Get default user, creating if needed (defensive for single-user app)
-    user_id = get_or_create_default_user_id()
-    accounts = Account.accounts_for_user!(user_id)
+    # Database-as-user architecture - no user_id needed
+    accounts = Account.list!()
     symbols = Symbol.list!()
+
+    # Load transaction categories for investment organization
+    categories =
+      case TransactionCategory.list() do
+        {:ok, cats} -> cats
+        {:error, _} -> []
+      end
+
+    # Initialize symbol autocomplete field
+    symbol_field = %Phoenix.HTML.FormField{
+      form: %Phoenix.HTML.Form{},
+      field: :symbol_search,
+      id: "symbol_search",
+      name: "symbol_search",
+      value: "",
+      errors: []
+    }
+
+    # Handle existing transaction for editing
+    {selected_symbol, selected_symbol_id} =
+      case assigns.transaction do
+        %Transaction{symbol: %Symbol{} = symbol} ->
+          {%{symbol: symbol.symbol, name: symbol.name}, symbol.id}
+
+        %Transaction{symbol_id: symbol_id} when not is_nil(symbol_id) ->
+          case Enum.find(symbols, &(&1.id == symbol_id)) do
+            %Symbol{} = symbol ->
+              {%{symbol: symbol.symbol, name: symbol.name}, symbol.id}
+
+            _ ->
+              {nil, nil}
+          end
+
+        _ ->
+          {nil, nil}
+      end
 
     {:ok,
      socket
      |> assign(assigns)
      |> assign(:accounts, accounts)
      |> assign(:symbols, symbols)
+     |> assign(:categories, categories)
+     |> assign(:symbol_field, symbol_field)
+     |> assign(:selected_symbol, selected_symbol)
+     |> assign(:selected_symbol_id, selected_symbol_id)
      |> assign_new(:form, fn ->
        to_form(AshPhoenix.Form.for_create(Transaction, :create, as: "transaction"))
      end)}
+  end
+
+  @impl true
+  def update(%{symbol_selected: symbol_data} = _assigns, socket) when is_map(symbol_data) do
+    # Handle symbol selection from autocomplete component via send_update
+    case find_or_create_symbol(symbol_data) do
+      {:ok, symbol} ->
+        {:ok,
+         socket
+         |> assign(:selected_symbol, symbol_data)
+         |> assign(:selected_symbol_id, symbol.id)}
+
+      {:error, _reason} ->
+        # Fallback: just show the symbol data without ID
+        {:ok,
+         socket
+         |> assign(:selected_symbol, symbol_data)
+         |> assign(:selected_symbol_id, nil)}
+    end
   end
 
   @impl true
@@ -122,7 +228,23 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
     {:noreply, socket}
   end
 
+  @impl true
+  def handle_event("clear_symbol", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:selected_symbol, nil)
+     |> assign(:selected_symbol_id, nil)}
+  end
+
   defp save_transaction(socket, :new, transaction_params) do
+    # Ensure symbol_id is set from autocomplete selection
+    transaction_params =
+      if socket.assigns.selected_symbol_id do
+        Map.put(transaction_params, "symbol_id", socket.assigns.selected_symbol_id)
+      else
+        transaction_params
+      end
+
     # Need to calculate total_amount before saving
     quantity = Decimal.new(transaction_params["quantity"] || "0")
     price = Decimal.new(transaction_params["price"] || "0")
@@ -142,10 +264,24 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
 
       {:error, %Ash.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
+
+      {:error, %Ash.Error.Invalid{} = error} ->
+        # Handle validation errors by creating a changeset from the error
+        changeset = AshPhoenix.Form.for_create(Transaction, :create, as: "transaction")
+        changeset = %{changeset | errors: error.errors}
+        {:noreply, assign(socket, form: to_form(changeset))}
     end
   end
 
   defp save_transaction(socket, :edit, transaction_params) do
+    # Ensure symbol_id is set from autocomplete selection
+    transaction_params =
+      if socket.assigns.selected_symbol_id do
+        Map.put(transaction_params, "symbol_id", socket.assigns.selected_symbol_id)
+      else
+        transaction_params
+      end
+
     # Need to calculate total_amount before saving
     quantity = Decimal.new(transaction_params["quantity"] || "0")
     price = Decimal.new(transaction_params["price"] || "0")
@@ -163,18 +299,33 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
 
       {:error, %Ash.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
+
+      {:error, %Ash.Error.Invalid{} = error} ->
+        # Handle validation errors by creating a changeset from the error
+        changeset =
+          AshPhoenix.Form.for_update(socket.assigns.transaction, :update, as: "transaction")
+
+        changeset = %{changeset | errors: error.errors}
+        {:noreply, assign(socket, form: to_form(changeset))}
     end
   end
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
 
-  # Defensive user creation for single-user application
-  defp get_or_create_default_user_id do
-    case User.get_default_user() do
-      {:ok, [user]} -> user.id
+  # Find existing symbol or create new one from autocomplete selection
+  defp find_or_create_symbol(%{symbol: symbol_ticker, name: _name}) do
+    # First try to find existing symbol
+    case Symbol.find_by_symbol(symbol_ticker) do
+      {:ok, [symbol]} ->
+        {:ok, symbol}
+
       {:ok, []} ->
-        {:ok, user} = User.create(%{name: "Local User", currency: "USD", locale: "en-US"})
-        user.id
+        # Symbol doesn't exist locally, for now just return an error
+        # In a full implementation, this would create the symbol through Context API
+        {:error, :symbol_not_found}
+
+      {:error, _} ->
+        {:error, :symbol_not_found}
     end
   end
 end

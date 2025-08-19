@@ -347,7 +347,7 @@ defmodule Ashfolio.PerformanceTest do
       # Test: Portfolio calculation performance
       {time_microseconds, {:ok, portfolio_data}} =
         :timer.tc(fn ->
-          Ashfolio.Portfolio.Calculator.calculate_total_return(user_id)
+          Ashfolio.Portfolio.Calculator.calculate_total_return()
         end)
 
       # Verify: Calculation completes within performance threshold

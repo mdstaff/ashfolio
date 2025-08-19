@@ -16,22 +16,19 @@ defmodule Ashfolio.Portfolio.Calculator do
   require Logger
 
   @doc """
-  Calculate the total portfolio value for a user.
+  Calculate the total portfolio value for the database-as-user architecture.
 
   Returns the sum of all current holdings values across all accounts.
 
   ## Examples
 
-      iex> Calculator.calculate_portfolio_value(user_id)
+      iex> Calculator.calculate_portfolio_value()
       {:ok, %Decimal{}}
-
-      iex> Calculator.calculate_portfolio_value("invalid-id")
-      {:error, :user_not_found}
   """
-  def calculate_portfolio_value(user_id) when is_binary(user_id) do
-    Logger.debug("Calculating portfolio value for user: #{user_id}")
+  def calculate_portfolio_value() do
+    Logger.debug("Calculating portfolio value")
 
-    case get_all_holdings(user_id) do
+    case get_all_holdings() do
       {:ok, holdings} ->
         total_value =
           holdings
@@ -84,13 +81,13 @@ defmodule Ashfolio.Portfolio.Calculator do
 
   ## Examples
 
-      iex> Calculator.calculate_position_returns(user_id)
+      iex> Calculator.calculate_position_returns()
       {:ok, [%{symbol: "AAPL", current_value: %Decimal{}, cost_basis: %Decimal{}, return_pct: %Decimal{}}]}
   """
-  def calculate_position_returns(user_id) when is_binary(user_id) do
-    Logger.debug("Calculating position returns for user: #{user_id}")
+  def calculate_position_returns() do
+    Logger.debug("Calculating position returns")
 
-    case get_all_holdings(user_id) do
+    case get_all_holdings() do
       {:ok, holdings} ->
         positions =
           holdings
@@ -106,15 +103,48 @@ defmodule Ashfolio.Portfolio.Calculator do
   end
 
   @doc """
+  Calculate portfolio value for a specific account.
+
+  Returns the total value of all holdings in the given account.
+  For cash accounts, this should return the account balance.
+  For investment accounts, this calculates the current market value of all holdings.
+
+  ## Examples
+
+      iex> Calculator.calculate_account_portfolio_value(account_id)
+      {:ok, %Decimal{}}
+  """
+  def calculate_account_portfolio_value(account_id) when is_binary(account_id) do
+    Logger.debug("Calculating portfolio value for account: #{account_id}")
+
+    case get_holdings_for_account(account_id) do
+      [] ->
+        # No holdings in this account
+        {:ok, Decimal.new(0)}
+
+      transactions ->
+        holdings = group_holdings_by_symbol(transactions)
+
+        total_value =
+          holdings
+          |> Enum.map(&calculate_holding_value/1)
+          |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
+
+        Logger.debug("Account #{account_id} portfolio value: #{total_value}")
+        {:ok, total_value}
+    end
+  end
+
+  @doc """
   Get total return tracking data for the portfolio.
 
   Returns portfolio summary with total value, cost basis, and return percentage.
   """
-  def calculate_total_return(user_id) when is_binary(user_id) do
-    Logger.debug("Calculating total return for user: #{user_id}")
+  def calculate_total_return() do
+    Logger.debug("Calculating total return")
 
-    with {:ok, portfolio_value} <- calculate_portfolio_value(user_id),
-         {:ok, total_cost_basis} <- calculate_total_cost_basis(user_id),
+    with {:ok, portfolio_value} <- calculate_portfolio_value(),
+         {:ok, total_cost_basis} <- calculate_total_cost_basis(),
          {:ok, return_percentage} <- calculate_simple_return(portfolio_value, total_cost_basis) do
       summary = %{
         total_value: portfolio_value,
@@ -134,10 +164,10 @@ defmodule Ashfolio.Portfolio.Calculator do
 
   # Private functions
 
-  defp get_all_holdings(user_id) do
+  defp get_all_holdings() do
     try do
-      # Get all accounts for the user (excluding excluded accounts)
-      case Account.accounts_for_user(user_id) do
+      # Get all accounts (excluding excluded accounts) - database-as-user architecture
+      case Account.list() do
         {:ok, accounts} ->
           active_accounts =
             Enum.filter(accounts, fn account ->
@@ -145,7 +175,7 @@ defmodule Ashfolio.Portfolio.Calculator do
             end)
 
           if Enum.empty?(active_accounts) do
-            Logger.debug("No active accounts found for user: #{user_id}")
+            Logger.debug("No active accounts found")
             {:ok, []}
           else
             # Get all transactions for these accounts
@@ -160,7 +190,7 @@ defmodule Ashfolio.Portfolio.Calculator do
           end
 
         {:error, reason} ->
-          Logger.warning("Failed to get accounts for user #{user_id}: #{inspect(reason)}")
+          Logger.warning("Failed to get accounts: #{inspect(reason)}")
           {:error, reason}
       end
     rescue
@@ -283,8 +313,8 @@ defmodule Ashfolio.Portfolio.Calculator do
     end
   end
 
-  defp calculate_total_cost_basis(user_id) do
-    case get_all_holdings(user_id) do
+  defp calculate_total_cost_basis() do
+    case get_all_holdings() do
       {:ok, holdings} ->
         total_cost =
           holdings

@@ -2,44 +2,56 @@
 
 This document provides a detailed overview of Ashfolio's technical architecture, illustrating the relationships between its core components, modules, and data flows. Understanding this architecture is crucial for new developers to effectively contribute to the project.
 
+**Note**: This architecture is evolving through the Financial Management Expansion roadmap (see [ADR-002](../architecture/adr-002-financial-domain-expansion.md)). Current documentation reflects the expanded scope from portfolio-only to comprehensive financial management.
+
 ## 1. Overall System Architecture
 
 Ashfolio is built on the Phoenix LiveView framework, leveraging Elixir's OTP capabilities and the Ash Framework for robust data modeling and business logic. It follows a clear separation of concerns to ensure maintainability and extensibility.
 
 ```mermaid
 graph TD
-    subgraph "Ashfolio Application (Elixir/Phoenix)"
+    subgraph "Ashfolio Comprehensive Financial Management (Elixir/Phoenix)"
         A[User Interface (Phoenix LiveView)] --> B{Business Logic Layer}
         B --> C[Data Layer]
         B --> D[Market Data Services]
+        B --> H[Financial Calculation Engine]
         D --> E[ETS Cache]
         D --> F[External APIs (Yahoo Finance)]
         C --> G[(SQLite Database)]
+        H --> I[Background Jobs (Oban)]
     end
 
-    subgraph "Business Logic Layer"
-        B1[Ash Resources] --> B2[Portfolio Calculators]
-        B1 --> B3[Validations & Actions]
+    subgraph "Business Logic Layer (Dual Domain)"
+        B1[Portfolio Domain] --> B2[Portfolio Calculators]
+        B3[Financial Management Domain] --> B4[Net Worth Calculators]
+        B3 --> B5[Expense Analyzers]
+        B3 --> B6[Retirement Planners]
+        B1 --> B7[Investment Resources]
+        B3 --> B8[Financial Management Resources]
     end
 
-    subgraph "Data Layer"
+    subgraph "Data Layer (Comprehensive)"
         C1[AshSqlite Data Layer] --> G
-        C2[Ecto Adapters] --> G
+        C2[Time-Series Optimizations] --> G
+        C3[Financial Analytics Queries] --> G
     end
 
-    subgraph "Market Data Services"
-        D1[PriceManager GenServer] --> D2[YahooFinance Module]
-        D1 --> E
-        D2 --> F
+    subgraph "Financial Calculation Engine"
+        H1[Net Worth Calculations] --> H2[Retirement Projections]
+        H2 --> H3[Tax Optimizations]
+        H3 --> H4[Portfolio Analytics]
     end
 
-    A -- "User Interactions (LiveView Events)" --> B
-    B -- "Data Operations (Ash Actions)" --> C
+    A -- "User Interactions" --> B
+    B -- "Data Operations" --> C
     B -- "Price Requests" --> D
+    B -- "Complex Calculations" --> H
     D -- "Cached Prices" --> E
     D -- "API Calls" --> F
     C -- "Data Storage" --> G
     E -- "Price Data" --> B
+    H -- "Background Processing" --> I
+    I -- "Completed Calculations" --> B
 ```
 
 ## 2. Ash Resources and Relationships
@@ -48,20 +60,15 @@ The Ash Framework forms the backbone of Ashfolio's data model and business logic
 
 ```mermaid
 erDiagram
-    User ||--o{ Account : has
-    User ||--o{ Transaction : has
     Account ||--o{ Transaction : has
     Symbol ||--o{ Transaction : has
+    TransactionCategory ||--o{ Transaction : categorizes
 
-    User { 
-        uuid id PK
-        string name
-        string currency
-        string locale
-    }
+    %% Database-as-user architecture: Each SQLite database represents one user
+    %% No User entity needed - user data is database-wide settings
     Account {
         uuid id PK
-        uuid user_id FK
+        %% No user_id - database-as-user architecture
         string name
         string platform
         decimal balance
@@ -76,15 +83,23 @@ erDiagram
     }
     Transaction {
         uuid id PK
-        uuid user_id FK
         uuid account_id FK
         uuid symbol_id FK
+        uuid category_id FK
         atom type
         decimal quantity
-        decimal unit_price
+        decimal price
         decimal fee
         date date
         decimal total_amount
+        text notes
+    }
+    TransactionCategory {
+        uuid id PK
+        string name
+        string color
+        boolean is_system
+        uuid parent_category_id FK
     }
 ```
 
@@ -138,22 +153,15 @@ While Ash Resources provide the primary interface for data modeling, it's helpfu
 
 ```mermaid
 erDiagram
-    users { 
-        text id PK
-        text name
-        text currency
-        text locale
-        datetime inserted_at
-        datetime updated_at
-    }
     accounts {
         text id PK
-        text user_id FK
         text name
         text platform
-        text currency
+        text account_type
         boolean is_excluded
         decimal balance
+        decimal interest_rate
+        decimal minimum_balance
         datetime inserted_at
         datetime updated_at
     }
@@ -163,10 +171,6 @@ erDiagram
         text name
         text asset_class
         text currency
-        text isin
-        text sectors
-        text countries
-        text data_source
         decimal current_price
         datetime price_updated_at
         datetime inserted_at
@@ -174,9 +178,9 @@ erDiagram
     }
     transactions {
         text id PK
-        text user_id FK
         text account_id FK
         text symbol_id FK
+        text category_id FK
         text type
         decimal quantity
         decimal unit_price
@@ -184,8 +188,21 @@ erDiagram
         date date
         text currency
         text comment
-        boolean is_draft
         datetime inserted_at
         datetime updated_at
     }
+    transaction_categories {
+        text id PK
+        text name
+        text color
+        boolean is_system
+        text parent_category_id FK
+        datetime inserted_at
+        datetime updated_at
+    }
+
+    accounts ||--o{ transactions : has
+    symbols ||--o{ transactions : has  
+    transaction_categories ||--o{ transactions : categorizes
+    transaction_categories ||--o{ transaction_categories : parent_child
 ```

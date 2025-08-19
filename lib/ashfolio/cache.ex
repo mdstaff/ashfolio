@@ -171,7 +171,9 @@ defmodule Ashfolio.Cache do
 
     cleanup_count = cleanup_stale_entries(trunc(max_age))
 
-    Logger.debug("Memory-aware cleanup: #{cleanup_count} entries removed, #{memory_mb}MB cache size")
+    Logger.debug(
+      "Memory-aware cleanup: #{cleanup_count} entries removed, #{memory_mb}MB cache size"
+    )
 
     %{
       entries_removed: cleanup_count,

@@ -49,6 +49,7 @@ mix ecto.gen.migration migration_name
 The following indexes have been added for optimal query performance:
 
 **Transactions Table:**
+
 - `idx_transactions_account_id` - Queries by account
 - `idx_transactions_symbol_id` - Queries by symbol
 - `idx_transactions_date` - Date-based queries
@@ -57,17 +58,20 @@ The following indexes have been added for optimal query performance:
 - `idx_transactions_account_symbol` - Account-symbol combinations
 
 **Symbols Table:**
+
 - `idx_symbols_symbol_unique` - Unique symbol lookup
 - `idx_symbols_asset_class` - Asset class filtering
 - `idx_symbols_data_source` - Data source queries
 - `idx_symbols_price_updated_at` - Stale price detection
 
 **Accounts Table:**
+
 - `idx_accounts_user_id` - User-specific accounts
 - `idx_accounts_is_excluded` - Active account filtering
 - `idx_accounts_user_active` - Combined user and active status
 
 **Users Table:**
+
 - `idx_users_currency` - Currency-based queries (future-proofing)
 
 ## Database Seeding
@@ -77,16 +81,19 @@ The following indexes have been added for optimal query performance:
 The application includes comprehensive sample data for development:
 
 **Default User:**
+
 - Name: "Local User"
 - Currency: "USD"
 - Locale: "en-US"
 
 **Sample Accounts:**
+
 - Schwab Brokerage ($50,000 balance)
 - Fidelity 401k ($25,000 balance)
 - Crypto Wallet ($5,000 balance)
 
 **Sample Symbols:**
+
 - AAPL (Apple Inc.) - Stock
 - MSFT (Microsoft Corporation) - Stock
 - GOOGL (Alphabet Inc.) - Stock
@@ -95,6 +102,7 @@ The application includes comprehensive sample data for development:
 - BTC-USD (Bitcoin) - Crypto
 
 **Sample Transactions:**
+
 - 7 transactions across different accounts and symbols
 - Mix of buy, sell, dividend, and fee transactions
 - Realistic dates and amounts
@@ -227,11 +235,13 @@ Ashfolio.DatabaseManager.replicate_staging_to_dev()   # Not implemented
 When production and staging environments are available:
 
 1. **Production → Staging**
+
    - Automated daily replication
    - Sanitized data (remove PII)
    - Schema and data sync
 
 2. **Staging → Development**
+
    - On-demand replication
    - Subset of data for performance
    - Developer-initiated sync
@@ -260,14 +270,14 @@ just sanitize-data        # Remove PII from copied data
 users (id, name, currency, locale, timestamps)
 
 -- Investment accounts
-accounts (id, user_id, name, platform, currency, is_excluded, balance, timestamps)
+accounts (id, name, platform, currency, is_excluded, balance, timestamps)
 
 -- Financial symbols
-symbols (id, symbol, name, asset_class, currency, isin, sectors, countries, 
+symbols (id, symbol, name, asset_class, currency, isin, sectors, countries,
          data_source, current_price, price_updated_at, timestamps)
 
 -- Transactions
-transactions (id, account_id, symbol_id, type, quantity, price, total_amount, 
+transactions (id, account_id, symbol_id, type, quantity, price, total_amount,
               fee, date, notes, timestamps)
 ```
 
@@ -321,6 +331,7 @@ just test-verbose      # Get detailed output for debugging
 ### Common Issues
 
 **Migration Errors:**
+
 ```bash
 # Check migration status
 mix ecto.migrations
@@ -330,6 +341,7 @@ just reset
 ```
 
 **Seeding Failures:**
+
 ```bash
 # Check for constraint violations
 just db-status
@@ -339,6 +351,7 @@ just reset
 ```
 
 **Backup/Restore Issues:**
+
 ```bash
 # Verify file exists
 ls -la data/backups/

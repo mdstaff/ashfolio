@@ -22,7 +22,7 @@ defmodule Ashfolio.SQLiteConcurrencyHelpers do
 
   ## Examples
       SQLiteConcurrencyHelpers.with_retry(fn ->
-        Ash.create(User, %{name: "Test"})
+        Ashfolio.Portfolio.User.create(%{name: "Test"})
       end)
   """
   def with_retry(operation, retries \\ @max_retries) do
@@ -31,9 +31,42 @@ defmodule Ashfolio.SQLiteConcurrencyHelpers do
     rescue
       error ->
         if retries > 0 and sqlite_busy_error?(error) do
+          # Temporarily suppress error logging during retries by capturing logs
+          # Only log debug message if we're going to retry
           Logger.debug("SQLite busy, retrying... (#{retries} attempts left)")
           Process.sleep(@retry_delay_ms)
           with_retry(operation, retries - 1)
+        else
+          reraise error, __STACKTRACE__
+        end
+    end
+  end
+
+  @doc """
+  Execute operation with retry logic and suppressed connection error logging.
+
+  This version attempts to reduce log noise from expected SQLite connection errors
+  during test runs by temporarily adjusting log levels during retries.
+  """
+  def with_retry_quiet(operation, retries \\ @max_retries) do
+    # Store original log level
+    original_level = Logger.level()
+
+    try do
+      operation.()
+    rescue
+      error ->
+        if retries > 0 and sqlite_busy_error?(error) do
+          # Temporarily increase log level to suppress connection error logs
+          # Only during retries - restore original level after
+          Logger.configure(level: :critical)
+          Process.sleep(@retry_delay_ms)
+
+          try do
+            with_retry_quiet(operation, retries - 1)
+          after
+            Logger.configure(level: original_level)
+          end
         else
           reraise error, __STACKTRACE__
         end
@@ -68,7 +101,7 @@ defmodule Ashfolio.SQLiteConcurrencyHelpers do
   ## Examples
       SQLiteConcurrencyHelpers.create_test_data([
         {User, %{name: "Test User"}},
-        {Account, %{name: "Test Account", user_id: user.id}}
+        {Account, %{name: "Test Account"}}
       ])
   """
   def create_test_data(data_specs) do
@@ -102,24 +135,34 @@ defmodule Ashfolio.SQLiteConcurrencyHelpers do
             end)
             |> Enum.each(&module.destroy/1)
 
-          _ -> :ok
+          _ ->
+            :ok
         end
       end)
     end)
   end
 
   @doc """
-  Check if an error is a SQLite busy/locked error.
+  Check if an error is a SQLite busy/locked error or connection error that should be retried.
   """
   def sqlite_busy_error?(error) do
     error_message =
       case error do
         %{message: message} -> String.downcase(message)
         %{reason: reason} when is_binary(reason) -> String.downcase(reason)
+        %DBConnection.ConnectionError{message: message} -> String.downcase(message)
         _ -> ""
       end
 
-    String.contains?(error_message, ["database is locked", "database is busy", "sqlite_busy"])
+    String.contains?(error_message, [
+      "database is locked",
+      "database is busy",
+      "sqlite_busy",
+      "client",
+      "exited",
+      "connection",
+      "disconnected"
+    ])
   end
 
   @doc """

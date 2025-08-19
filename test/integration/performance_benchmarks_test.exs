@@ -14,21 +14,21 @@ defmodule AshfolioWeb.Integration.PerformanceBenchmarksTest do
   @moduletag :performance
   import Phoenix.LiveViewTest
 
-  alias Ashfolio.Portfolio.{User, Account, Symbol, Transaction}
+  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
   alias Ashfolio.SQLiteHelpers
 
   setup do
-    {:ok, user} = SQLiteHelpers.get_or_create_default_user()
-
-    {:ok, account} = Account.create(%{
-      name: "Performance Test Account",
-      platform: "Test Platform",
-      balance: Decimal.new("100000"),
-      user_id: user.id
-    })
+    # Database-as-user architecture: No user entity needed
+    {:ok, account} =
+      Account.create(%{
+        name: "Performance Test Account",
+        platform: "Test Platform",
+        balance: Decimal.new("100000")
+      })
 
     # Create multiple symbols for realistic testing
     symbols = ["AAPL", "MSFT", "GOOGL", "TSLA", "AMZN"]
+
     created_symbols =
       Enum.map(symbols, fn symbol_name ->
         SQLiteHelpers.get_or_create_symbol(symbol_name, %{
@@ -44,115 +44,126 @@ defmodule AshfolioWeb.Integration.PerformanceBenchmarksTest do
       # Create 10 transactions per symbol
       for i <- 1..10 do
         tx_type = if rem(i, 4) == 0, do: :sell, else: :buy
-        tx_quantity = if rem(i, 4) == 0, do: Decimal.new("-#{10 + i}"), else: Decimal.new("#{10 + i}")
 
-        {:ok, _} = Transaction.create(%{
-          type: tx_type,
-          account_id: account.id,
-          symbol_id: symbol.id,
-          quantity: tx_quantity,
-          price: Decimal.new("#{100 + i}.00"),
-          total_amount: Decimal.new("#{1000 + i * 100}.00"),
-          date: Date.add(~D[2024-01-01], i)
-        })
+        tx_quantity =
+          if rem(i, 4) == 0, do: Decimal.new("-#{10 + i}"), else: Decimal.new("#{10 + i}")
+
+        {:ok, _} =
+          Transaction.create(%{
+            type: tx_type,
+            account_id: account.id,
+            symbol_id: symbol.id,
+            quantity: tx_quantity,
+            price: Decimal.new("#{100 + i}.00"),
+            total_amount: Decimal.new("#{1000 + i * 100}.00"),
+            date: Date.add(~D[2024-01-01], i)
+          })
       end
     end)
 
-    %{user: user, account: account, symbols: created_symbols}
+    %{account: account, symbols: created_symbols}
   end
 
   describe "Performance Benchmarks" do
     test "dashboard page load time under 500ms", %{conn: conn} do
       # Measure page load time
-      {time_microseconds, {:ok, _view, _html}} = :timer.tc(fn ->
-        live(conn, "/")
-      end)
+      {time_microseconds, {:ok, _view, _html}} =
+        :timer.tc(fn ->
+          live(conn, "/")
+        end)
 
       time_milliseconds = time_microseconds / 1000
 
       # Should load under 500ms
       assert time_milliseconds < 500,
-        "Dashboard loaded in #{time_milliseconds}ms, expected < 500ms"
+             "Dashboard loaded in #{time_milliseconds}ms, expected < 500ms"
     end
 
     test "accounts page load time under 500ms", %{conn: conn} do
-      {time_microseconds, {:ok, _view, _html}} = :timer.tc(fn ->
-        live(conn, "/accounts")
-      end)
+      {time_microseconds, {:ok, _view, _html}} =
+        :timer.tc(fn ->
+          live(conn, "/accounts")
+        end)
 
       time_milliseconds = time_microseconds / 1000
 
       assert time_milliseconds < 500,
-        "Accounts page loaded in #{time_milliseconds}ms, expected < 500ms"
+             "Accounts page loaded in #{time_milliseconds}ms, expected < 500ms"
     end
 
     test "transactions page load time under 500ms", %{conn: conn} do
-      {time_microseconds, {:ok, _view, _html}} = :timer.tc(fn ->
-        live(conn, "/transactions")
-      end)
+      {time_microseconds, {:ok, _view, _html}} =
+        :timer.tc(fn ->
+          live(conn, "/transactions")
+        end)
 
       time_milliseconds = time_microseconds / 1000
 
       assert time_milliseconds < 500,
-        "Transactions page loaded in #{time_milliseconds}ms, expected < 500ms"
+             "Transactions page loaded in #{time_milliseconds}ms, expected < 500ms"
     end
 
-    test "portfolio calculations under 100ms", %{user: user} do
+    test "portfolio calculations under 100ms" do
       # Measure portfolio calculation time
-      {time_microseconds, _result} = :timer.tc(fn ->
-        Ashfolio.Portfolio.Calculator.calculate_total_return(user.id)
-      end)
+      {time_microseconds, _result} =
+        :timer.tc(fn ->
+          Ashfolio.Portfolio.Calculator.calculate_total_return()
+        end)
 
       time_milliseconds = time_microseconds / 1000
 
       assert time_milliseconds < 100,
-        "Portfolio calculations took #{time_milliseconds}ms, expected < 100ms"
+             "Portfolio calculations took #{time_milliseconds}ms, expected < 100ms"
     end
 
-    test "holdings calculations under 100ms", %{user: user} do
-      {time_microseconds, _result} = :timer.tc(fn ->
-        Ashfolio.Portfolio.HoldingsCalculator.get_holdings_summary(user.id)
-      end)
+    test "holdings calculations under 100ms" do
+      {time_microseconds, _result} =
+        :timer.tc(fn ->
+          Ashfolio.Portfolio.HoldingsCalculator.get_holdings_summary()
+        end)
 
       time_milliseconds = time_microseconds / 1000
 
       assert time_milliseconds < 100,
-        "Holdings calculations took #{time_milliseconds}ms, expected < 100ms"
+             "Holdings calculations took #{time_milliseconds}ms, expected < 100ms"
     end
 
     test "large transaction list performance", %{account: account} do
       # Test listing many transactions
-      {time_microseconds, _result} = :timer.tc(fn ->
-        Transaction.by_account(account.id)
-      end)
+      {time_microseconds, _result} =
+        :timer.tc(fn ->
+          Transaction.by_account(account.id)
+        end)
 
       time_milliseconds = time_microseconds / 1000
 
       # Should be able to list 50+ transactions quickly
       assert time_milliseconds < 50,
-        "Transaction listing took #{time_milliseconds}ms, expected < 50ms"
+             "Transaction listing took #{time_milliseconds}ms, expected < 50ms"
     end
 
-    test "account operations performance", %{user: user} do
-      {time_microseconds, _result} = :timer.tc(fn ->
-        Account.accounts_for_user(user.id)
-      end)
+    test "account operations performance" do
+      {time_microseconds, _result} =
+        :timer.tc(fn ->
+          Account.list()
+        end)
 
       time_milliseconds = time_microseconds / 1000
 
       assert time_milliseconds < 50,
-        "Account listing took #{time_milliseconds}ms, expected < 50ms"
+             "Account listing took #{time_milliseconds}ms, expected < 50ms"
     end
 
     test "symbol operations performance" do
-      {time_microseconds, _result} = :timer.tc(fn ->
-        Symbol.list!()
-      end)
+      {time_microseconds, _result} =
+        :timer.tc(fn ->
+          Symbol.list!()
+        end)
 
       time_milliseconds = time_microseconds / 1000
 
       assert time_milliseconds < 50,
-        "Symbol listing took #{time_milliseconds}ms, expected < 50ms"
+             "Symbol listing took #{time_milliseconds}ms, expected < 50ms"
     end
 
     # Note: Price refresh performance test would require mocking the external API
@@ -160,25 +171,26 @@ defmodule AshfolioWeb.Integration.PerformanceBenchmarksTest do
 
     test "database connection performance" do
       # Test basic database operations
-      {time_microseconds, _result} = :timer.tc(fn ->
-        # Simple database query
-        User.get_default_user()
-      end)
+      {time_microseconds, _result} =
+        :timer.tc(fn ->
+          # Simple database query - test account listing instead
+          Account.list()
+        end)
 
       time_milliseconds = time_microseconds / 1000
 
       assert time_milliseconds < 20,
-        "Database query took #{time_milliseconds}ms, expected < 20ms"
+             "Database query took #{time_milliseconds}ms, expected < 20ms"
     end
 
-    test "memory usage is reasonable during calculations", %{user: user} do
+    test "memory usage is reasonable during calculations" do
       # Get initial memory
       :erlang.garbage_collect()
       initial_memory = :erlang.memory(:total)
 
       # Perform calculations
-      _result = Ashfolio.Portfolio.Calculator.calculate_total_return(user.id)
-      _result = Ashfolio.Portfolio.HoldingsCalculator.get_holdings_summary(user.id)
+      _result = Ashfolio.Portfolio.Calculator.calculate_total_return()
+      _result = Ashfolio.Portfolio.HoldingsCalculator.get_holdings_summary()
 
       # Force garbage collection and check memory
       :erlang.garbage_collect()
@@ -189,7 +201,7 @@ defmodule AshfolioWeb.Integration.PerformanceBenchmarksTest do
 
       # Memory increase should be reasonable (< 10MB for this test)
       assert memory_increase_mb < 10,
-        "Memory increased by #{memory_increase_mb}MB during calculations, expected < 10MB"
+             "Memory increased by #{memory_increase_mb}MB during calculations, expected < 10MB"
     end
   end
 end

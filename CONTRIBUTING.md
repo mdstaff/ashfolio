@@ -27,7 +27,7 @@ just dev
 
 ### 1. Find a Task
 
-Check the [tasks.md](.kiro/specs/tasks.md) file for a list of planned features and bug fixes. If you have an idea for a new feature not listed, please open an issue first to discuss it.
+Check the [GitHub Issues](https://github.com/mdstaff/ashfolio/issues) for tasks and planned features. If you have an idea for a new feature not listed, please open an issue first to discuss it.
 
 ### 2. Branching Strategy
 
@@ -74,7 +74,7 @@ This completes Phase 9 and allows users to manage their investment records.
 
 ## Coding Standards
 
-Ashfolio adheres to specific coding standards to maintain consistency and quality. Please review the detailed guidelines in [Coding Standards](.kiro/steering/02-coding-standards.md). Key highlights include:
+Ashfolio adheres to specific coding standards to maintain consistency and quality. Key highlights include:
 
 *   **Ash Framework Usage**: All business logic must be implemented as Ash resources. No direct Ecto usage.
 *   **Financial Data Handling**: Always use `Decimal` types for monetary values and keep everything in USD.
@@ -94,20 +94,16 @@ Maintaining a robust test suite is crucial for Ashfolio's stability. We expect a
     just test-file <path/to/your_test_file.exs>
     just test-watch
     ```
-*   **Test Coverage**: Aim for high test coverage for new features. You can check coverage with:
-    ```bash
-    just test-coverage
-    ```
+*   **Test Coverage**: Aim for high test coverage for new features.
 *   **Mocking External APIs**: Never make real API calls in tests. Use Mox for mocking external services like Yahoo Finance.
-*   **GenServer Testing**: Be aware of the specific patterns for testing singleton GenServers and shared state, as detailed in our [testing documentation](docs/testing/) and [project overview](.kiro/steering/00-project-overview.md).
+*   **GenServer Testing**: Be aware of the specific patterns for testing singleton GenServers and shared state, as detailed in our [testing documentation](docs/testing/).
 
 ## Documentation
 
 Keep documentation up-to-date. If your changes affect any of the following, please update them:
 
 *   `CHANGELOG.md`: Summarize your changes for the next release.
-*   `tasks.md`: Update the status of the task you're working on.
-*   `.kiro/steering/00-project-overview.md`: Add key learnings or significant technical decisions.
+*   GitHub Issues: Update any related issues with your progress.
 *   `docs/development/architecture.md`: If your changes impact the overall system design.
 
 ## Before Submitting a Pull Request - Checklist
@@ -117,7 +113,7 @@ Keep documentation up-to-date. If your changes affect any of the following, plea
 *   [ ] All tests pass (`just test`).
 *   [ ] Your code is formatted (`just format`).
 *   [ ] Your commit messages are clear and descriptive.
-*   [ ] You have updated relevant documentation (CHANGELOG, tasks, project context, architecture).
+*   [ ] You have updated relevant documentation (CHANGELOG, architecture docs if needed).
 *   [ ] You have pulled the latest changes from `main` and resolved any conflicts.
 
 Thank you for contributing to Ashfolio!

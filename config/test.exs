@@ -10,14 +10,18 @@ config :ashfolio, Ashfolio.Repo,
   database: "data/ashfolio_test#{System.get_env("MIX_TEST_PARTITION")}.db",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2,
-  # SQLite optimizations for testing
+  # SQLite optimizations for testing with improved connection handling
   pragma: [
     journal_mode: :wal,
     synchronous: :normal,
     temp_store: :memory,
     mmap_size: 268_435_456,
     busy_timeout: 30_000
-  ]
+  ],
+  # Improved connection pool settings to reduce disconnections
+  pool_timeout: 15_000,
+  ownership_timeout: 15_000,
+  timeout: 15_000
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
@@ -34,6 +38,21 @@ config :swoosh, :api_client, false
 
 # Print only warnings and errors during test
 config :logger, level: :warning
+
+# Filter out expected SQLite connection errors during concurrent tests
+config :logger, :console,
+  format: "[$level] $message\n",
+  metadata: [:request_id],
+  level: :warning
+
+# Add custom filter to reduce noise from expected SQLite concurrency issues
+config :logger,
+  backends: [:console],
+  compile_time_purge_matching: [
+    [level_lower_than: :warning]
+  ]
+
+# Note: Logger filters are configured in application.ex for runtime filtering
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
@@ -52,3 +71,6 @@ config :ashfolio, Ashfolio.MarketData.PriceManager,
 
 # Use mock for Yahoo Finance in tests
 config :ashfolio, :yahoo_finance_module, YahooFinanceMock
+
+# Browser testing removed per ADR-003: Browser Testing Strategy
+# Using LiveView-First Testing Strategy instead

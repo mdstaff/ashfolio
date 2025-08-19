@@ -49,15 +49,27 @@ defmodule Ashfolio.Portfolio.Account do
       description("Timestamp when balance was last updated")
     end
 
+    attribute :account_type, :atom do
+      constraints(one_of: [:investment, :checking, :savings, :money_market, :cd])
+      default(:investment)
+      allow_nil?(false)
+      description("Type of account - investment or cash account types")
+    end
+
+    attribute :interest_rate, :decimal do
+      description(
+        "Annual interest rate for savings/CD accounts (as decimal, e.g., 0.025 for 2.5%)"
+      )
+    end
+
+    attribute :minimum_balance, :decimal do
+      description("Minimum balance requirement for the account")
+    end
+
     timestamps()
   end
 
   relationships do
-    belongs_to :user, Ashfolio.Portfolio.User do
-      allow_nil?(false)
-      description("The user who owns this account")
-    end
-
     has_many :transactions, Ashfolio.Portfolio.Transaction do
       description("Transactions that occurred in this account")
     end
@@ -66,6 +78,7 @@ defmodule Ashfolio.Portfolio.Account do
   validations do
     validate(present(:name), message: "Account name is required")
     validate(present(:currency), message: "Currency is required")
+    validate(present(:account_type), message: "Account type is required")
 
     # Phase 1: USD-only validation
     validate(match(:currency, ~r/^USD$/), message: "Only USD currency is supported in Phase 1")
@@ -73,6 +86,11 @@ defmodule Ashfolio.Portfolio.Account do
     # Validate balance is not negative
     validate(compare(:balance, greater_than_or_equal_to: 0),
       message: "Account balance cannot be negative"
+    )
+
+    # Security: Validate maximum reasonable balance
+    validate(compare(:balance, less_than_or_equal_to: Decimal.new("1000000000.00")),
+      message: "Account balance cannot exceed $1,000,000,000.00 (security limit)"
     )
 
     # Validate name length
@@ -85,6 +103,31 @@ defmodule Ashfolio.Portfolio.Account do
     validate(match(:name, ~r/^[a-zA-Z0-9\s\-_]+$/),
       message: "Account name can only contain letters, numbers, spaces, hyphens, and underscores"
     )
+
+    # Cash account specific validations
+    validate(compare(:interest_rate, greater_than_or_equal_to: 0),
+      where: present(:interest_rate),
+      message: "Interest rate cannot be negative"
+    )
+
+    validate(compare(:minimum_balance, greater_than_or_equal_to: 0),
+      where: present(:minimum_balance),
+      message: "Minimum balance cannot be negative"
+    )
+
+    # Interest rate should only be set for savings/CD accounts
+    validate(fn changeset, _context ->
+      account_type = Ash.Changeset.get_attribute(changeset, :account_type)
+      interest_rate = Ash.Changeset.get_attribute(changeset, :interest_rate)
+
+      if interest_rate && account_type not in [:savings, :money_market, :cd] do
+        {:error,
+         field: :interest_rate,
+         message: "Interest rate can only be set for savings, money market, or CD accounts"}
+      else
+        :ok
+      end
+    end)
   end
 
   actions do
@@ -92,7 +135,18 @@ defmodule Ashfolio.Portfolio.Account do
 
     create :create do
       description("Create a new account")
-      accept([:name, :platform, :currency, :is_excluded, :balance, :user_id])
+
+      accept([
+        :name,
+        :platform,
+        :currency,
+        :is_excluded,
+        :balance,
+        :account_type,
+        :interest_rate,
+        :minimum_balance
+      ])
+
       primary?(true)
 
       change(fn changeset, _context ->
@@ -107,7 +161,18 @@ defmodule Ashfolio.Portfolio.Account do
 
     update :update do
       description("Update account attributes")
-      accept([:name, :platform, :currency, :is_excluded, :balance])
+
+      accept([
+        :name,
+        :platform,
+        :currency,
+        :is_excluded,
+        :balance,
+        :account_type,
+        :interest_rate,
+        :minimum_balance
+      ])
+
       primary?(true)
       require_atomic?(false)
 
@@ -126,15 +191,26 @@ defmodule Ashfolio.Portfolio.Account do
       filter(expr(is_excluded == false))
     end
 
-    read :by_user do
-      description("Returns accounts for a specific user")
-      argument(:user_id, :uuid, allow_nil?: false)
-      filter(expr(user_id == ^arg(:user_id)))
+    read :by_type do
+      description("Returns accounts of a specific type")
+      argument(:account_type, :atom, allow_nil?: false)
+      filter(expr(account_type == ^arg(:account_type)))
+    end
+
+    read :cash_accounts do
+      description("Returns only cash accounts (checking, savings, money_market, cd)")
+      filter(expr(account_type in [:checking, :savings, :money_market, :cd]))
+    end
+
+    read :investment_accounts do
+      description("Returns only investment accounts")
+      filter(expr(account_type == :investment))
     end
 
     update :toggle_exclusion do
       description("Toggle whether account is excluded from calculations")
       accept([:is_excluded])
+      require_atomic?(false)
     end
 
     update :update_balance do
@@ -156,18 +232,38 @@ defmodule Ashfolio.Portfolio.Account do
     define(:list, action: :read)
     define(:get_by_id, action: :read, get_by: [:id])
     define(:active_accounts, action: :active)
-    define(:accounts_for_user, action: :by_user, args: [:user_id])
+    define(:accounts_by_type, action: :by_type, args: [:account_type])
+    define(:cash_accounts, action: :cash_accounts)
+    define(:investment_accounts, action: :investment_accounts)
     define(:update, action: :update)
     define(:toggle_exclusion, action: :toggle_exclusion)
     define(:update_balance, action: :update_balance)
     define(:destroy, action: :destroy)
 
-    def get_by_name_for_user(user_id, name) do
+    def get_by_name(name) do
       require Ash.Query
 
       Ashfolio.Portfolio.Account
-      |> Ash.Query.filter(user_id: user_id, name: name)
+      |> Ash.Query.filter(name: name)
       |> Ash.read_first()
+    end
+
+    @doc """
+    List all accounts in the database.
+
+    In database-as-user architecture, returns all accounts since each database
+    represents one user's data.
+    """
+    def list_all_accounts() do
+      # In database-as-user architecture, get all accounts
+      Ash.read(Ashfolio.Portfolio.Account, action: :active)
+    end
+
+    @doc """
+    DEPRECATED: Backward compatibility function. Use list_all_accounts/0 instead.
+    """
+    def accounts_for_user(_user_id) do
+      list_all_accounts()
     end
   end
 end

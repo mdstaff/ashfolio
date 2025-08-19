@@ -12,23 +12,31 @@ Welcome to Ashfolio's comprehensive documentation. Choose your path:
 
 - **Architecture Overview** → [System Design](development/architecture.md)
 - **Database Management** → [Database Guide](development/database-management.md)
+- **Elixir & Mix Insights** → [Environment Detection, Logger Filters](development/elixir-mix-insights.md)
 - **AI Agent Development** → [AI Guide](development/ai-agent-guide.md)
 
-## 🧪 Testing
+## Testing
 
-- **Testing Framework** → [Overview](testing/README.md)
-- **SQLite Patterns** → [Concurrency Guide](testing/patterns.md)
-- **Testing Standards** → [Consistency Standards](testing/standards.md)
-- **AI-Assisted Testing** → [AI Testing](testing/ai-testing.md)
+- **Testing Strategy** → [Framework](TESTING_STRATEGY.md)
+- **Testing Overview** → [Quick Start](testing/README.md)
+- **SQLite Patterns** → [Database Testing](testing/patterns.md)
+- **Testing Standards** → [Standards](testing/standards.md)
+- **AI Testing** → [AI Guidelines](testing/ai-testing.md)
 
-## 📡 API Reference
+## API Reference
 
 - **REST API** → [API Guide](api/rest-api.md)
 - **Endpoints** → [Reference](api/endpoints.md)
 
-## 📚 Archive
+## Roadmap & Planning
 
-Historical documentation and development artifacts can be found in the [archive](archive/) directory.
+- **Project Roadmap** → [v0.2-v0.5 Roadmap](roadmap/v0.2-v0.5-roadmap.md)
+- **Financial Expansion** → [Future Features](roadmap/financial-expansion-roadmap.md)
+- **Architecture Decisions** → [ADRs](architecture/)
+
+## Archive
+
+Historical documentation and development artifacts in the [archive](archive/) directory.
 
 ---
 

@@ -6,22 +6,19 @@ defmodule Ashfolio.Portfolio.AccountTest do
   @moduletag :fast
   @moduletag :smoke
 
-  alias Ashfolio.Portfolio.{User, Account}
-  alias Ashfolio.SQLiteHelpers
+  alias Ashfolio.Portfolio.Account
 
   setup do
-    # Use the global default user - no concurrency issues with async: false
-    user = SQLiteHelpers.get_default_user()
-    %{user: user}
+    # Database-as-user architecture: No user entity needed
+    %{}
   end
 
   describe "Account resource" do
-    test "can create account with required attributes", %{user: user} do
+    test "can create account with required attributes" do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create(%{
           name: "Schwab Brokerage",
-          platform: "Schwab",
-          user_id: user.id
+          platform: "Schwab"
         })
 
       assert account.name == "Schwab Brokerage"
@@ -32,19 +29,20 @@ defmodule Ashfolio.Portfolio.AccountTest do
       assert account.is_excluded == false
       # Default value
       assert Decimal.equal?(account.balance, Decimal.new(0))
-      assert account.user_id == user.id
+      # Default value
+      assert account.account_type == :investment
+      # Database-as-user architecture: No user_id field needed
       assert account.id != nil
     end
 
-    test "can create account with all attributes", %{user: user} do
+    test "can create account with all attributes" do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create(%{
           name: "Fidelity 401k",
           platform: "Fidelity",
           currency: "USD",
           is_excluded: true,
-          balance: Decimal.new("50000.00"),
-          user_id: user.id
+          balance: Decimal.new("50000.00")
         })
 
       assert account.name == "Fidelity 401k"
@@ -52,15 +50,14 @@ defmodule Ashfolio.Portfolio.AccountTest do
       assert account.currency == "USD"
       assert account.is_excluded == true
       assert Decimal.equal?(account.balance, Decimal.new("50000.00"))
-      assert account.user_id == user.id
+      # Database-as-user architecture: No user_id field needed
     end
 
-    test "can update account attributes", %{user: user} do
+    test "can update account attributes" do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create(%{
           name: "Test Account",
-          platform: "Test",
-          user_id: user.id
+          platform: "Test"
         })
 
       {:ok, updated_account} =
@@ -75,11 +72,10 @@ defmodule Ashfolio.Portfolio.AccountTest do
       assert Decimal.equal?(updated_account.balance, Decimal.new("1000.00"))
     end
 
-    test "can delete account", %{user: user} do
+    test "can delete account" do
       {:ok, account} =
-        Ash.create(Account, %{
-          name: "Test Account",
-          user_id: user.id
+        Account.create(%{
+          name: "Test Account"
         })
 
       :ok = Ash.destroy(account)
@@ -90,69 +86,189 @@ defmodule Ashfolio.Portfolio.AccountTest do
       refute account.id in account_ids
     end
 
-    test "validates required name field", %{user: user} do
+    test "validates required name field" do
       {:error, changeset} =
-        Ash.create(Account, %{
-          platform: "Test",
-          user_id: user.id
+        Account.create(%{
+          platform: "Test"
         })
 
       assert changeset.errors != []
       assert Enum.any?(changeset.errors, fn error -> error.field == :name end)
     end
 
-    test "validates required user_id field" do
-      {:error, changeset} =
-        Ash.create(Account, %{
-          name: "Test Account",
-          platform: "Test"
+    # Database-as-user architecture: No user_id validation needed
+    # All accounts belong to the database user by default
+
+    test "can create cash account with all attributes" do
+      {:ok, account} =
+        Account.create(%{
+          name: "High Yield Savings",
+          platform: "Bank",
+          account_type: :savings,
+          interest_rate: Decimal.new("0.045"),
+          minimum_balance: Decimal.new("1000.00"),
+          balance: Decimal.new("5000.00")
         })
 
-      assert changeset.errors != []
-      assert Enum.any?(changeset.errors, fn error -> error.field == :user_id end)
+      assert account.name == "High Yield Savings"
+      assert account.platform == "Bank"
+      assert account.account_type == :savings
+      assert Decimal.equal?(account.interest_rate, Decimal.new("0.045"))
+      assert Decimal.equal?(account.minimum_balance, Decimal.new("1000.00"))
+      assert Decimal.equal?(account.balance, Decimal.new("5000.00"))
+      # Database-as-user architecture: No user_id field needed
     end
 
-    test "validates USD-only currency", %{user: user} do
-      {:error, changeset} =
-        Ash.create(Account, %{
-          name: "Test Account",
-          currency: "EUR",
-          user_id: user.id
+    test "can create checking account" do
+      {:ok, account} =
+        Account.create(%{
+          name: "Primary Checking",
+          platform: "Bank",
+          account_type: :checking,
+          balance: Decimal.new("2500.00")
         })
 
-      assert changeset.errors != []
-      assert Enum.any?(changeset.errors, fn error -> error.field == :currency end)
+      assert account.account_type == :checking
+      assert Decimal.equal?(account.balance, Decimal.new("2500.00"))
     end
 
-    test "validates non-negative balance", %{user: user} do
+    test "can create money market account" do
+      {:ok, account} =
+        Account.create(%{
+          name: "Money Market",
+          platform: "Bank",
+          account_type: :money_market,
+          interest_rate: Decimal.new("0.035"),
+          minimum_balance: Decimal.new("2500.00")
+        })
+
+      assert account.account_type == :money_market
+      assert Decimal.equal?(account.interest_rate, Decimal.new("0.035"))
+      assert Decimal.equal?(account.minimum_balance, Decimal.new("2500.00"))
+    end
+
+    test "can create CD account" do
+      {:ok, account} =
+        Account.create(%{
+          name: "12-Month CD",
+          platform: "Bank",
+          account_type: :cd,
+          interest_rate: Decimal.new("0.055"),
+          minimum_balance: Decimal.new("10000.00")
+        })
+
+      assert account.account_type == :cd
+      assert Decimal.equal?(account.interest_rate, Decimal.new("0.055"))
+      assert Decimal.equal?(account.minimum_balance, Decimal.new("10000.00"))
+    end
+
+    test "validates account_type constraints" do
       {:error, changeset} =
-        Ash.create(Account, %{
-          name: "Test Account",
-          balance: Decimal.new("-100.00"),
-          user_id: user.id
+        Account.create(%{
+          name: "Invalid Account",
+          account_type: :invalid_type
         })
 
       assert changeset.errors != []
-      assert Enum.any?(changeset.errors, fn error -> error.field == :balance end)
+      assert Enum.any?(changeset.errors, fn error -> error.field == :account_type end)
+    end
+
+    test "validates non-negative interest rate" do
+      {:error, changeset} =
+        Account.create(%{
+          name: "Savings Account",
+          account_type: :savings,
+          interest_rate: Decimal.new("-0.01")
+        })
+
+      assert changeset.errors != []
+      assert Enum.any?(changeset.errors, fn error -> error.field == :interest_rate end)
+    end
+
+    test "validates non-negative minimum balance" do
+      {:error, changeset} =
+        Account.create(%{
+          name: "Savings Account",
+          account_type: :savings,
+          minimum_balance: Decimal.new("-100.00")
+        })
+
+      assert changeset.errors != []
+      assert Enum.any?(changeset.errors, fn error -> error.field == :minimum_balance end)
+    end
+
+    test "validates interest rate only for appropriate account types" do
+      # Should fail for investment account with interest rate
+      {:error, changeset} =
+        Account.create(%{
+          name: "Investment Account",
+          account_type: :investment,
+          interest_rate: Decimal.new("0.05")
+        })
+
+      assert changeset.errors != []
+      assert Enum.any?(changeset.errors, fn error -> error.field == :interest_rate end)
+
+      # Should fail for checking account with interest rate
+      {:error, changeset} =
+        Account.create(%{
+          name: "Checking Account",
+          account_type: :checking,
+          interest_rate: Decimal.new("0.01")
+        })
+
+      assert changeset.errors != []
+      assert Enum.any?(changeset.errors, fn error -> error.field == :interest_rate end)
+    end
+
+    test "allows interest rate for savings accounts" do
+      {:ok, account} =
+        Account.create(%{
+          name: "Savings Account",
+          account_type: :savings,
+          interest_rate: Decimal.new("0.025")
+        })
+
+      assert Decimal.equal?(account.interest_rate, Decimal.new("0.025"))
+    end
+
+    test "allows interest rate for money market accounts" do
+      {:ok, account} =
+        Account.create(%{
+          name: "Money Market Account",
+          account_type: :money_market,
+          interest_rate: Decimal.new("0.035")
+        })
+
+      assert Decimal.equal?(account.interest_rate, Decimal.new("0.035"))
+    end
+
+    test "allows interest rate for CD accounts" do
+      {:ok, account} =
+        Account.create(%{
+          name: "CD Account",
+          account_type: :cd,
+          interest_rate: Decimal.new("0.045")
+        })
+
+      assert Decimal.equal?(account.interest_rate, Decimal.new("0.045"))
     end
   end
 
   describe "Account actions" do
-    test "active action returns only non-excluded accounts", %{user: user} do
+    test "active action returns only non-excluded accounts" do
       # Create active account
       {:ok, active_account} =
-        Ash.create(Account, %{
+        Account.create(%{
           name: "Active Account",
-          is_excluded: false,
-          user_id: user.id
+          is_excluded: false
         })
 
       # Create excluded account
       {:ok, _excluded_account} =
-        Ash.create(Account, %{
+        Account.create(%{
           name: "Excluded Account",
-          is_excluded: true,
-          user_id: user.id
+          is_excluded: true
         })
 
       {:ok, active_accounts} = Ash.read(Account, action: :active)
@@ -163,43 +279,32 @@ defmodule Ashfolio.Portfolio.AccountTest do
       assert Enum.all?(active_accounts, fn account -> account.is_excluded == false end)
     end
 
-    test "by_user action returns accounts for specific user", %{user: user} do
-      # Create another user
-      {:ok, other_user} =
-        Ash.create(User, %{
-          name: "Other User",
-          currency: "USD",
-          locale: "en-US"
+    test "list action returns all accounts in database" do
+      # Database-as-user architecture: All accounts belong to this database
+      {:ok, account1} =
+        Account.create(%{
+          name: "Account 1"
         })
 
-      # Create account for first user
-      {:ok, user_account} =
-        Ash.create(Account, %{
-          name: "User Account",
-          user_id: user.id
+      {:ok, account2} =
+        Account.create(%{
+          name: "Account 2"
         })
 
-      # Create account for other user
-      {:ok, _other_account} =
-        Ash.create(Account, %{
-          name: "Other Account",
-          user_id: other_user.id
-        })
+      {:ok, all_accounts} = Account.list()
 
-      {:ok, user_accounts} = Account.accounts_for_user(user.id)
-
-      # Verify our account is in the results and all accounts belong to the user
-      user_account_ids = Enum.map(user_accounts, & &1.id)
-      assert user_account.id in user_account_ids
-      assert Enum.all?(user_accounts, fn account -> account.user_id == user.id end)
+      # Verify our accounts are in the results
+      account_ids = Enum.map(all_accounts, & &1.id)
+      assert account1.id in account_ids
+      assert account2.id in account_ids
+      assert length(all_accounts) >= 2
     end
 
-    test "toggle_exclusion action works correctly", %{user: user} do
+    test "toggle_exclusion action works correctly" do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create(%{
           name: "Test Account",
-          is_excluded: false,
-          user_id: user.id
+          is_excluded: false
         })
 
       {:ok, updated_account} =
@@ -208,12 +313,11 @@ defmodule Ashfolio.Portfolio.AccountTest do
       assert updated_account.is_excluded == true
     end
 
-    test "update_balance action works correctly", %{user: user} do
+    test "update_balance action works correctly" do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create(%{
           name: "Test Account",
-          balance: Decimal.new("1000.00"),
-          user_id: user.id
+          balance: Decimal.new("1000.00")
         })
 
       {:ok, updated_account} =
@@ -221,26 +325,119 @@ defmodule Ashfolio.Portfolio.AccountTest do
 
       assert Decimal.equal?(updated_account.balance, Decimal.new("2000.00"))
     end
+
+    test "by_type action returns accounts of specific type" do
+      # Create investment account
+      {:ok, investment_account} =
+        Account.create(%{
+          name: "Investment Account",
+          account_type: :investment
+        })
+
+      # Create savings account
+      {:ok, _savings_account} =
+        Account.create(%{
+          name: "Savings Account",
+          account_type: :savings
+        })
+
+      {:ok, investment_accounts} = Account.accounts_by_type(:investment)
+
+      # Verify our investment account is in the results and all are investment type
+      investment_account_ids = Enum.map(investment_accounts, & &1.id)
+      assert investment_account.id in investment_account_ids
+      assert Enum.all?(investment_accounts, fn account -> account.account_type == :investment end)
+    end
+
+    test "cash_accounts action returns only cash accounts" do
+      # Create investment account
+      {:ok, _investment_account} =
+        Account.create(%{
+          name: "Investment Account",
+          account_type: :investment
+        })
+
+      # Create cash accounts
+      {:ok, checking_account} =
+        Account.create(%{
+          name: "Checking Account",
+          account_type: :checking
+        })
+
+      {:ok, savings_account} =
+        Account.create(%{
+          name: "Savings Account",
+          account_type: :savings
+        })
+
+      {:ok, money_market_account} =
+        Account.create(%{
+          name: "Money Market Account",
+          account_type: :money_market
+        })
+
+      {:ok, cd_account} =
+        Account.create(%{
+          name: "CD Account",
+          account_type: :cd
+        })
+
+      {:ok, cash_accounts} = Ash.read(Account, action: :cash_accounts)
+
+      # Verify all our cash accounts are in the results
+      cash_account_ids = Enum.map(cash_accounts, & &1.id)
+      assert checking_account.id in cash_account_ids
+      assert savings_account.id in cash_account_ids
+      assert money_market_account.id in cash_account_ids
+      assert cd_account.id in cash_account_ids
+
+      # Verify all accounts are cash account types
+      cash_types = [:checking, :savings, :money_market, :cd]
+      assert Enum.all?(cash_accounts, fn account -> account.account_type in cash_types end)
+    end
+
+    test "investment_accounts action returns only investment accounts" do
+      # Create investment account
+      {:ok, investment_account} =
+        Account.create(%{
+          name: "Investment Account",
+          account_type: :investment
+        })
+
+      # Create cash account
+      {:ok, _savings_account} =
+        Account.create(%{
+          name: "Savings Account",
+          account_type: :savings
+        })
+
+      {:ok, investment_accounts} = Ash.read(Account, action: :investment_accounts)
+
+      # Verify our investment account is in the results
+      investment_account_ids = Enum.map(investment_accounts, & &1.id)
+      assert investment_account.id in investment_account_ids
+
+      # Verify all accounts are investment type
+      assert Enum.all?(investment_accounts, fn account -> account.account_type == :investment end)
+    end
   end
 
   describe "Account code interface" do
-    test "create function works", %{user: user} do
+    test "create function works" do
       {:ok, account} =
         Account.create(%{
           name: "Interface Account",
-          platform: "Interface",
-          user_id: user.id
+          platform: "Interface"
         })
 
       assert account.name == "Interface Account"
       assert account.platform == "Interface"
     end
 
-    test "list function works", %{user: user} do
-      {:ok, account} =
-        Ash.create(Account, %{
-          name: "Test Account",
-          user_id: user.id
+    test "list function works" do
+      {:ok, _account} =
+        Account.create(%{
+          name: "Test Account"
         })
 
       {:ok, accounts} = Account.list()
@@ -251,11 +448,10 @@ defmodule Ashfolio.Portfolio.AccountTest do
       assert length(accounts) >= 1
     end
 
-    test "get_by_id function works", %{user: user} do
+    test "get_by_id function works" do
       {:ok, account} =
-        Ash.create(Account, %{
-          name: "Test Account",
-          user_id: user.id
+        Account.create(%{
+          name: "Test Account"
         })
 
       {:ok, found_account} = Account.get_by_id(account.id)
@@ -264,19 +460,17 @@ defmodule Ashfolio.Portfolio.AccountTest do
       assert found_account.name == "Test Account"
     end
 
-    test "active_accounts function works", %{user: user} do
+    test "active_accounts function works" do
       {:ok, active_account} =
-        Ash.create(Account, %{
+        Account.create(%{
           name: "Active Account",
-          is_excluded: false,
-          user_id: user.id
+          is_excluded: false
         })
 
       {:ok, _excluded_account} =
-        Ash.create(Account, %{
+        Account.create(%{
           name: "Excluded Account",
-          is_excluded: true,
-          user_id: user.id
+          is_excluded: true
         })
 
       {:ok, active_accounts} = Account.active_accounts()
@@ -287,26 +481,24 @@ defmodule Ashfolio.Portfolio.AccountTest do
       assert Enum.all?(active_accounts, fn account -> account.is_excluded == false end)
     end
 
-    test "accounts_for_user function works", %{user: user} do
+    test "list function works (database-as-user architecture)" do
       {:ok, account} =
-        Ash.create(Account, %{
-          name: "User Account",
-          user_id: user.id
+        Account.create(%{
+          name: "Database Account"
         })
 
-      {:ok, user_accounts} = Account.accounts_for_user(user.id)
+      {:ok, all_accounts} = Account.list()
 
-      # Verify our account is in the results and all belong to the user
-      user_account_ids = Enum.map(user_accounts, & &1.id)
-      assert account.id in user_account_ids
-      assert Enum.all?(user_accounts, fn acc -> acc.user_id == user.id end)
+      # Verify our account is in the results (database-as-user architecture)
+      account_ids = Enum.map(all_accounts, & &1.id)
+      assert account.id in account_ids
+      assert length(all_accounts) >= 1
     end
 
-    test "update function works", %{user: user} do
+    test "update function works" do
       {:ok, account} =
-        Ash.create(Account, %{
-          name: "Original Name",
-          user_id: user.id
+        Account.create(%{
+          name: "Original Name"
         })
 
       {:ok, updated_account} = Account.update(account, %{name: "Updated Name"})
@@ -314,12 +506,11 @@ defmodule Ashfolio.Portfolio.AccountTest do
       assert updated_account.name == "Updated Name"
     end
 
-    test "toggle_exclusion function works", %{user: user} do
+    test "toggle_exclusion function works" do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create(%{
           name: "Test Account",
-          is_excluded: false,
-          user_id: user.id
+          is_excluded: false
         })
 
       {:ok, updated_account} = Account.toggle_exclusion(account, %{is_excluded: true})
@@ -327,12 +518,11 @@ defmodule Ashfolio.Portfolio.AccountTest do
       assert updated_account.is_excluded == true
     end
 
-    test "update_balance function works", %{user: user} do
+    test "update_balance function works" do
       {:ok, account} =
-        Ash.create(Account, %{
+        Account.create(%{
           name: "Test Account",
-          balance: Decimal.new("1000.00"),
-          user_id: user.id
+          balance: Decimal.new("1000.00")
         })
 
       {:ok, updated_account} = Account.update_balance(account, %{balance: Decimal.new("2500.00")})
@@ -340,11 +530,10 @@ defmodule Ashfolio.Portfolio.AccountTest do
       assert Decimal.equal?(updated_account.balance, Decimal.new("2500.00"))
     end
 
-    test "destroy function works", %{user: user} do
+    test "destroy function works" do
       {:ok, account} =
-        Ash.create(Account, %{
-          name: "Test Account",
-          user_id: user.id
+        Account.create(%{
+          name: "Test Account"
         })
 
       :ok = Account.destroy(account)
@@ -354,21 +543,76 @@ defmodule Ashfolio.Portfolio.AccountTest do
       account_ids = Enum.map(accounts, & &1.id)
       refute account.id in account_ids
     end
-  end
 
-  describe "Account relationships" do
-    test "belongs_to user relationship works", %{user: user} do
-      {:ok, account} =
-        Ash.create(Account, %{
-          name: "Test Account",
-          user_id: user.id
+    test "accounts_by_type function works" do
+      {:ok, savings_account} =
+        Account.create(%{
+          name: "Savings Account",
+          account_type: :savings
         })
 
-      # Load the user relationship
-      account_with_user = Ash.load!(account, :user)
+      {:ok, _investment_account} =
+        Account.create(%{
+          name: "Investment Account",
+          account_type: :investment
+        })
 
-      assert account_with_user.user.id == user.id
-      assert account_with_user.user.name == user.name
+      {:ok, savings_accounts} = Account.accounts_by_type(:savings)
+
+      # Verify our savings account is in the results and all are savings type
+      savings_account_ids = Enum.map(savings_accounts, & &1.id)
+      assert savings_account.id in savings_account_ids
+      assert Enum.all?(savings_accounts, fn account -> account.account_type == :savings end)
+    end
+
+    test "cash_accounts function works" do
+      {:ok, checking_account} =
+        Account.create(%{
+          name: "Checking Account",
+          account_type: :checking
+        })
+
+      {:ok, _investment_account} =
+        Account.create(%{
+          name: "Investment Account",
+          account_type: :investment
+        })
+
+      {:ok, cash_accounts} = Account.cash_accounts()
+
+      # Verify our checking account is in the results
+      cash_account_ids = Enum.map(cash_accounts, & &1.id)
+      assert checking_account.id in cash_account_ids
+
+      # Verify all accounts are cash account types
+      cash_types = [:checking, :savings, :money_market, :cd]
+      assert Enum.all?(cash_accounts, fn account -> account.account_type in cash_types end)
+    end
+
+    test "investment_accounts function works" do
+      {:ok, investment_account} =
+        Account.create(%{
+          name: "Investment Account",
+          account_type: :investment
+        })
+
+      {:ok, _checking_account} =
+        Account.create(%{
+          name: "Checking Account",
+          account_type: :checking
+        })
+
+      {:ok, investment_accounts} = Account.investment_accounts()
+
+      # Verify our investment account is in the results
+      investment_account_ids = Enum.map(investment_accounts, & &1.id)
+      assert investment_account.id in investment_account_ids
+
+      # Verify all accounts are investment type
+      assert Enum.all?(investment_accounts, fn account -> account.account_type == :investment end)
     end
   end
+
+  # Database-as-user architecture: No user relationships needed
+  # All accounts in the database belong to the single user represented by the database
 end

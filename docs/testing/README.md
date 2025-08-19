@@ -1,6 +1,6 @@
 # Testing Overview
 
-Ashfolio maintains comprehensive testing practices with a modular, architecture-aligned approach optimized for SQLite concurrency and AI-assisted development.
+Ashfolio testing overview and quick commands.
 
 ## Quick Start
 
@@ -18,13 +18,9 @@ just test-integration   # End-to-end workflows
 
 ## Testing Architecture
 
-### Modular Testing Framework
+### Testing Framework
 
-Our testing strategy aligns with system architecture:
-
-- **Architecture-Aligned**: Tests organized by system layers (Ash Resources, LiveView, Market Data, Calculations)
-- **Performance-Optimized**: Fast/slow categorization for optimal development workflow
-- **SQLite-Aware**: Comprehensive patterns for SQLite concurrency handling
+Tests organized by system layers with performance categorization and SQLite concurrency handling.
 
 ### Core Testing Categories
 
@@ -45,24 +41,7 @@ Our testing strategy aligns with system architecture:
 - **[Standards](standards.md)** - Testing consistency standards and best practices
 - **[AI Testing](ai-testing.md)** - AI-assisted testing patterns and guidelines
 
-### Key Testing Patterns
-
-#### SQLite Testing Architecture
-- All tests use `async: false` for SQLite compatibility
-- Global test data pattern reduces database contention
-- Built-in retry logic for "Database busy" errors
-- Comprehensive database safeguards with health checks
-
-#### Test Organization
-- ExUnit filters for modular test execution
-- Performance-based categorization (fast/slow/unit/integration)
-- Dependency-based grouping (external_deps/genserver/ets_cache)
-- Workflow categories (smoke/regression/edge_cases)
-
-#### AI-Assisted Testing
-- Specialized patterns for AI agents working with test code
-- Documentation templates for AI-generated tests
-- Best practices for AI-human collaboration in testing
+For detailed testing patterns and strategies, see [Testing Strategy](../TESTING_STRATEGY.md).
 
 ## Test Database Management
 

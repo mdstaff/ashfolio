@@ -8,8 +8,10 @@ defmodule Ashfolio.MarketData.RateLimiter do
   use GenServer
   require Logger
 
-  @default_rate_limit 10  # requests per minute
-  @default_burst_limit 5  # burst capacity
+  # requests per minute
+  @default_rate_limit 10
+  # burst capacity
+  @default_burst_limit 5
 
   def start_link(opts \\ []) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)

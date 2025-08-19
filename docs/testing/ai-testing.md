@@ -96,7 +96,7 @@ defmodule Ashfolio.MyModuleTest do
   describe "function_name/1" do
     test "handles valid input" do
       # Use global data when possible
-      user = get_default_user()
+
 
       # Test the function
       result = MyModule.function_name(user)
@@ -125,9 +125,9 @@ defmodule AshfolioWeb.MyLiveTest do
 
   setup do
     # Always provide basic context
-    user = get_default_user()
-    account = get_default_account(user)
-    %{user: user, account: account}
+
+    account = get_default_account()
+    %{ account: account}
   end
 
   describe "page rendering" do
@@ -139,7 +139,7 @@ defmodule AshfolioWeb.MyLiveTest do
   end
 
   describe "user interactions" do
-    test "handles button click", %{conn: conn, user: user} do
+    test "handles button click", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/my-page")
 
       # Simulate user interaction
@@ -164,7 +164,7 @@ defmodule Ashfolio.Integration.MyWorkflowTest do
   describe "complete workflow" do
     test "user can complete full process", %{conn: conn} do
       # Step 1: Setup
-      user = get_default_user()
+
 
       # Step 2: Navigate to starting point
       {:ok, view, _html} = live(conn, "/start-page")
@@ -230,8 +230,8 @@ end
 ```elixir
 test "portfolio calculation" do
   # ✅ FAST - Uses pre-created data
-  user = get_default_user()
-  account = get_default_account(user)
+
+  account = get_default_account()
   symbol = get_common_symbol("AAPL")  # AAPL, MSFT, GOOGL, TSLA available
 
   # Your test logic here
@@ -244,10 +244,10 @@ end
 
 ```elixir
 test "custom account scenario" do
-  user = get_default_user()
+
 
   # ✅ SAFE - Uses retry logic internally
-  custom_account = get_or_create_account(user, %{
+  custom_account = get_or_create_account(%{
     name: "High Balance Account",
     balance: Decimal.new("50000.00"),
     platform: "Custom Platform"
@@ -266,8 +266,8 @@ end
 
 ```elixir
 test "multiple transaction types" do
-  user = get_default_user()
-  account = get_default_account(user)
+
+  account = get_default_account()
   symbol = get_common_symbol("MSFT")
 
   # ✅ EFFICIENT - Uses helper with retry logic
@@ -302,11 +302,6 @@ test "handles invalid input gracefully" do
 end
 
 test "validates required fields" do
-  user = get_default_user()
-
-  # Test validation errors
-  result = Account.create(%{user_id: user.id}, actor: user)  # Missing required fields
-
   assert {:error, changeset} = result
   assert %{name: ["is required"]} = errors_on(changeset)
 end
@@ -316,17 +311,16 @@ end
 
 ```elixir
 test "handles database constraints" do
-  user = get_default_user()
+
 
   # First account with name
-  account1 = get_or_create_account(user, %{name: "Unique Name"})
+  account1 = get_or_create_account(%{name: "Unique Name"})
   assert account1.name == "Unique Name"
 
   # Attempt duplicate name (should fail gracefully)
   result = with_retry(fn ->
     Account.create(%{
       name: "Unique Name",  # Duplicate name
-      user_id: user.id,
       balance: Decimal.new("1000.00")
     }, actor: user)
   end)
@@ -375,7 +369,7 @@ just test-all           # Comprehensive suite including seeding tests
 
 ```elixir
 # Portfolio calculations
-user = get_default_user()
+
 holdings = Calculator.calculate_holdings(user)
 
 # Symbol lookups
@@ -396,7 +390,7 @@ price = symbol.current_price
 
 ```elixir
 # High-balance account for testing
-account = get_or_create_account(user, %{
+account = get_or_create_account(%{
   balance: Decimal.new("1000000.00")
 })
 
@@ -458,7 +452,7 @@ just test-file-verbose test/path/to/failing_test.exs
 {:ok, account} = Account.create(params)
 
 # With retry helper:
-account = get_or_create_account(user, params)
+account = get_or_create_account(params)
 
 # Fix 2: Missing GenServer Permissions
 # Add to setup block:
@@ -478,7 +472,7 @@ end)
 {:ok, user} = User.create(%{name: "Test"})
 
 # With global data:
-user = get_default_user()
+
 ```
 
 ### Step 3: Verification Steps
@@ -504,7 +498,7 @@ just compile-warnings
 ```elixir
 # ✅ FAST - Uses existing data
 test "fast test" do
-  user = get_default_user()        # No DB write
+          # No DB write
   account = get_default_account()  # No DB write
   # Test logic
 end
@@ -540,7 +534,7 @@ defmodule MyTest do
   # Group related tests that can share setup
   describe "with basic data" do
     setup do
-      user = get_default_user()
+
       %{user: user}
     end
 
@@ -555,9 +549,9 @@ defmodule MyTest do
 
   describe "with custom data" do
     setup do
-      user = get_default_user()
-      custom_account = get_or_create_account(user, %{balance: Decimal.new("50000.00")})
-      %{user: user, account: custom_account}
+
+      custom_account = get_or_create_account(%{balance: Decimal.new("50000.00")})
+      %{ account: custom_account}
     end
 
     # Tests that need custom data
@@ -635,8 +629,7 @@ When testing LiveView forms, ensure the test data matches what the form expects:
 ```elixir
 # ❌ PROBLEMATIC - Creates data that form doesn't recognize
 test "form submission" do
-  {:ok, user} = User.create(%{name: "Test User"})
-  {:ok, account} = Account.create(%{name: "Test Account", user_id: user.id})
+  {:ok, account} = Account.create(%{name: "Test Account"})
 
   # Form will fail because account.id isn't in form's select options
   form_data = %{account_id: account.id, ...}
@@ -644,8 +637,8 @@ end
 
 # ✅ CORRECT - Uses global data that form recognizes
 test "form submission" do
-  user = SQLiteHelpers.get_default_user()
-  account = SQLiteHelpers.get_default_account(user)
+
+  account = SQLiteHelpers.get_default_account()
 
   # Form will work because account.id matches form's select options
   form_data = %{account_id: account.id, ...}
@@ -659,8 +652,8 @@ For performance tests that need realistic data volumes:
 ```elixir
 # ✅ CORRECT - Uses get_or_create for existing symbols
 test "performance with realistic data" do
-  user = SQLiteHelpers.get_default_user()
-  account = SQLiteHelpers.get_default_account(user)
+
+  account = SQLiteHelpers.get_default_account()
 
   # Use existing symbols or create if needed
   symbols = ["AAPL", "MSFT", "GOOGL", "TSLA", "AMZN"]
@@ -685,8 +678,8 @@ For testing real-time events and LiveView updates:
 ```elixir
 test "PubSub event broadcasting" do
   # Use global data for consistency
-  user = SQLiteHelpers.get_default_user()
-  account = SQLiteHelpers.get_default_account(user)
+
+  account = SQLiteHelpers.get_default_account()
   symbol = SQLiteHelpers.get_common_symbol("AAPL")
 
   # Subscribe to events

@@ -12,19 +12,21 @@ ExUnit.start()
 
 # Set up Mox for mocking
 Mox.defmock(YahooFinanceMock, for: Ashfolio.MarketData.YahooFinanceBehaviour)
+Mox.defmock(HttpClientMock, for: Ashfolio.MarketData.HttpClientBehaviour)
+Mox.defmock(Ashfolio.ContextMock, for: Ashfolio.ContextBehaviour)
+
+# Browser testing removed per ADR-003: Browser Testing Strategy
 
 # Ensure application is started for test infrastructure
 {:ok, _} = Application.ensure_all_started(:ashfolio)
 
-# Set up sandbox mode for test isolation
-Ecto.Adapters.SQL.Sandbox.mode(Ashfolio.Repo, :manual)
-
-# Establish database ownership BEFORE creating any data
-:ok = Ecto.Adapters.SQL.Sandbox.checkout(Ashfolio.Repo)
-
-# Create all global test data with proper database ownership
+# Create all global test data BEFORE setting up sandbox isolation
 # This ensures baseline data is committed to the database permanently
+# and available to all test processes
 Ashfolio.SQLiteHelpers.setup_global_test_data!()
+
+# Set up sandbox mode for test isolation AFTER global data is created
+Ecto.Adapters.SQL.Sandbox.mode(Ashfolio.Repo, :manual)
 
 # ============================================================================
 # MODULAR TESTING FILTER CONFIGURATION
@@ -82,4 +84,3 @@ Ashfolio.SQLiteHelpers.setup_global_test_data!()
 # - :error_handling - Tests specifically for error conditions and recovery
 #
 # ============================================================================
-

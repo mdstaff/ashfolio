@@ -91,7 +91,7 @@ get_default_account(user \\ nil)
 get_common_symbol(ticker)
 
 # Custom Resource Creation (with retry logic)
-get_or_create_account(user, attrs \\ %{})
+get_or_create_account(attrs \\ %{})
 get_or_create_symbol(ticker, attrs \\ %{})
 create_test_transaction(user, account, symbol, attrs \\ %{})
 ```
@@ -173,9 +173,9 @@ defmodule AshfolioWeb.DashboardLiveTest do
   import Ashfolio.SQLiteHelpers
 
   setup do
-    user = get_default_user()
-    account = get_default_account(user)
-    %{user: user, account: account}
+
+    account = get_default_account()
+    %{ account: account}
   end
 
   describe "dashboard functionality" do
@@ -227,8 +227,8 @@ end
 
 ```elixir
 test "portfolio calculation with default data" do
-  user = get_default_user()
-  account = get_default_account(user)
+
+  account = get_default_account()
   symbol = get_common_symbol("AAPL")
 
   # Use existing data - no creation needed
@@ -239,10 +239,10 @@ end
 
 ```elixir
 test "custom account scenarios" do
-  user = get_default_user()
+
 
   # Custom account with retry logic
-  account = get_or_create_account(user, %{
+  account = get_or_create_account(%{
     name: "Custom Account",
     balance: Decimal.new("25000.00")
   })
@@ -391,8 +391,8 @@ ExUnit.configure(
 
 ```elixir
 # ✅ CORRECT - Use global data when possible
-user = get_default_user()
-account = get_default_account(user)
+
+account = get_default_account()
 symbol = get_common_symbol("AAPL")
 
 # ❌ AVOID - Creating unnecessary data
@@ -503,12 +503,12 @@ defmodule AshfolioWeb.MyLiveTest do
   import Ashfolio.SQLiteHelpers
 
   setup do
-    user = get_default_user()
+
     %{user: user}
   end
 
   describe "liveview_feature" do
-    test "interaction", %{conn: conn, user: user} do
+    test "interaction", %{conn: conn} do
       # LiveView test implementation
     end
   end
@@ -552,7 +552,7 @@ end)
 Ashfolio.SQLiteHelpers.setup_global_test_data!()
 
 # Verify data exists
-user = get_default_user()  # Should not raise
+  # Should not raise
 ```
 
 #### PriceManager Tests Failing

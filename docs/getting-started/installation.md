@@ -1,6 +1,6 @@
 # Ashfolio Development Environment Setup
 
-This guide will help you set up the development environment for Ashfolio on macOS, specifically optimized for Apple Silicon (M1/M2) Macs with 16GB+ RAM.
+Development environment setup for Ashfolio on macOS.
 
 ## Prerequisites
 
@@ -11,7 +11,7 @@ This guide will help you set up the development environment for Ashfolio on macO
 
 ## Quick Setup (Recommended)
 
-The fastest way to get started is using our automated setup script:
+Quick setup:
 
 ```bash
 # Clone the repository (if not already done)
@@ -22,11 +22,11 @@ cd ashfolio
 ./scripts/setup-dev-env.sh
 ```
 
-This script will automatically install all required dependencies and verify the installation.
+Installs dependencies and verifies installation.
 
 ## Manual Setup
 
-If you prefer to install dependencies manually or need to troubleshoot the automated setup:
+Manual installation:
 
 ### 1. Install Homebrew
 
