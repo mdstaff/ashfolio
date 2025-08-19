@@ -18,7 +18,6 @@ defmodule Ashfolio.Integration.ErrorHandlingTest do
   alias Ashfolio.ErrorHandler
   alias Ashfolio.FinancialManagement.BalanceManager
   alias Ashfolio.Portfolio.Account
-  alias Ashfolio.SQLiteHelpers
 
   describe "cash balance management error scenarios" do
     setup do

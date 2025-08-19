@@ -22,7 +22,6 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
 
   alias Ashfolio.FinancialManagement.{NetWorthCalculator, NetWorthCalculatorOptimized}
   alias Ashfolio.Portfolio.Account
-  alias Ashfolio.SQLiteHelpers
 
   @performance_account_count 25
   @performance_transactions_per_account 30
@@ -230,7 +229,7 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
 
     test "optimized version handles empty account list" do
       # Remove all accounts to test edge case
-      {:ok, accounts} = Account.accounts_for_user()
+      accounts = Account.list_all_accounts()
 
       for account <- accounts do
         Account.destroy(account.id)

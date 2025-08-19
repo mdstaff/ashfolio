@@ -161,7 +161,7 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
     case :ets.whereis(@cache_table) do
       :undefined ->
         try do
-          :ets.new(@cache_table, [:named_table, :protected, :set])
+          :ets.new(@cache_table, [:named_table, :public, :set])
         rescue
           ArgumentError ->
             # Table was created by another process, that's fine

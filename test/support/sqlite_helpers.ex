@@ -338,13 +338,15 @@ defmodule Ashfolio.SQLiteHelpers do
       # Common ticker but with custom price - get and update
       symbol = get_common_symbol(ticker)
 
-      case Symbol.update_price(symbol, %{
-             current_price: current_price,
-             price_updated_at: DateTime.utc_now()
-           }) do
-        {:ok, updated_symbol} -> updated_symbol
-        {:error, error} -> raise "Failed to update symbol #{ticker} price: #{inspect(error)}"
-      end
+      with_retry(fn ->
+        case Symbol.update_price(symbol, %{
+               current_price: current_price,
+               price_updated_at: DateTime.utc_now()
+             }) do
+          {:ok, updated_symbol} -> updated_symbol
+          {:error, error} -> raise "Failed to update symbol #{ticker} price: #{inspect(error)}"
+        end
+      end)
     else
       if ticker in common_tickers and attrs == %{} do
         get_common_symbol(ticker)

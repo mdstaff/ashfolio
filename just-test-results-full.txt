@@ -1,0 +1,354 @@
+🧪 Running ALL tests...
+     warning: redefining module YahooFinanceMock (current version loaded from _build/test/lib/ashfolio/ebin/Elixir.YahooFinanceMock.beam)
+     │
+ 491 │     Module.create(name, [info | body], Macro.Env.location(__ENV__))
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ deps/mox/lib/mox.ex:491: YahooFinanceMock (module)
+
+✅ Test database settings validated: Test User
+✅ Test account validated: Default Test Account
+✅ Test symbols validated: 4 common symbols found
+🛡️  Global test data validation: ALL CHECKS PASSED
+Running ExUnit with seed: 638587, max_cases: 16
+
+...............................    warning: unused alias SQLiteHelpers
+    │
+ 21 │   alias Ashfolio.SQLiteHelpers
+    │   ~
+    │
+    └─ test/integration/error_handling_test.exs:21:3
+
+....    warning: unused alias SQLiteHelpers
+    │
+ 17 │   alias Ashfolio.SQLiteHelpers
+    │   ~
+    │
+    └─ test/performance/liveview_simple_performance_test.exs:17:3
+
+    warning: unused alias SQLiteHelpers
+    │
+ 25 │   alias Ashfolio.SQLiteHelpers
+    │   ~
+    │
+    └─ test/performance/net_worth_optimization_comparison_test.exs:25:3
+
+    warning: unused alias SQLiteHelpers
+    │
+ 11 │   alias Ashfolio.SQLiteHelpers
+    │   ~
+    │
+    └─ test/ashfolio_web/live/transaction_live_filtering_test.exs:11:3
+
+    warning: unused alias SQLiteHelpers
+    │
+  9 │   alias Ashfolio.SQLiteHelpers
+    │   ~
+    │
+    └─ test/ashfolio/financial_management/transaction_filtering_test.exs:9:3
+
+..     warning: variable "account" is unused (if the variable is not meant to be used, prefix it with an underscore)
+     │
+ 147 │     test "failed balance updates do not generate notifications", %{checking_account: account} do
+     │                                                                                      ~~~~~~~
+     │
+     └─ test/integration/balance_change_notifications_test.exs:147:86: Ashfolio.Integration.BalanceChangeNotificationsTest."test balance change notifications integration failed balance updates do not generate notifications"/1
+
+...     warning: variable "checking" is unused (if the variable is not meant to be used, prefix it with an underscore)
+     │
+ 276 │       {:ok, checking} =
+     │             ~~~~~~~~
+     │
+     └─ test/ashfolio/migration/v0_2_0_compatibility_test.exs:276:13: Ashfolio.Migration.V020CompatibilityTest."test Context API functionality Context.get_net_worth includes all account types"/1
+
+     warning: variable "investment" is unused (if the variable is not meant to be used, prefix it with an underscore)
+     │
+ 269 │       {:ok, investment} =
+     │             ~~~~~~~~~~
+     │
+     └─ test/ashfolio/migration/v0_2_0_compatibility_test.exs:269:13: Ashfolio.Migration.V020CompatibilityTest."test Context API functionality Context.get_net_worth includes all account types"/1
+
+..............................................    warning: unused alias Symbol
+    │
+ 22 │   alias Ashfolio.Portfolio.{Account, Transaction, Symbol}
+    │   ~
+    │
+    └─ test/ashfolio/migration/v0_2_0_compatibility_test.exs:22:3
+
+...........................    warning: unused alias SQLiteHelpers
+    │
+ 17 │   alias Ashfolio.SQLiteHelpers
+    │   ~
+    │
+    └─ test/ashfolio/context_test.exs:17:3
+
+........................................................................................................................
+
+  1) test Memory Usage Regression Detection memory usage regression detection across all operations (Ashfolio.Performance.CriticalPathBenchmarksTest)
+     test/performance/critical_path_benchmarks_test.exs:381
+     ** (ArgumentError) Expected a keyword list in `Ash.read/2`, got: :active
+     code: for operation <- operations do
+     stacktrace:
+       (ash 3.5.34) lib/ash.ex:2752: Ash.read/2
+       test/performance/critical_path_benchmarks_test.exs:398: anonymous fn/2 in Ashfolio.Performance.CriticalPathBenchmarksTest."test Memory Usage Regression Detection memory usage regression detection across all operations"/1
+       (elixir 1.18.4) lib/enum.ex:2546: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/performance/critical_path_benchmarks_test.exs:397: (test)
+
+BENCHMARK_RESULT: {"timestamp":"2025-08-19T00:07:47.644446Z","operation":"database_index_account_filtering","time_ms":0.241,"target_ms":10,"regression_check":true,"result_count":2}
+.BENCHMARK_RESULT: {"timestamp":"2025-08-19T00:07:47.677521Z","operation":"symbol_search_cache_hit","time_ms":0.006,"target_ms":10,"regression_check":true,"result_count":7,"cache_hit":true}
+.BENCHMARK_RESULT: {"timestamp":"2025-08-19T00:07:47.698873Z","operation":"transaction_search_workflow","time_ms":13.993,"target_ms":120,"regression_check":true}
+.BENCHMARK_RESULT: {"timestamp":"2025-08-19T00:07:47.705756Z","operation":"transaction_filtering_by_category","time_ms":0.27,"target_ms":50,"regression_check":true,"result_count":0}
+.BENCHMARK_RESULT: {"timestamp":"2025-08-19T00:07:47.712843Z","operation":"pubsub_broadcast","time_ms":0.007,"target_ms":10,"regression_check":true}
+.BENCHMARK_RESULT: {"timestamp":"2025-08-19T00:07:47.723204Z","operation":"realtime_update_workflow","time_ms":3.494,"target_ms":250,"regression_check":true,"calculation_time_ms":3.491}
+.BENCHMARK_RESULT: {"timestamp":"2025-08-19T00:07:47.745260Z","operation":"performance_consistency_analysis","avg_time_ms":3.05,"std_dev_ms":0.184441860758343,"max_time_ms":3.403,"min_time_ms":2.866,"consistency_check":true}
+.BENCHMARK_RESULT: {"timestamp":"2025-08-19T00:07:47.752106Z","operation":"pubsub_delivery_latency","time_ms":0.003,"target_ms":20,"regression_check":true}
+.
+
+  2) test End-to-End Workflow Benchmarks complete dashboard load workflow benchmark (Ashfolio.Performance.CriticalPathBenchmarksTest)
+     test/performance/critical_path_benchmarks_test.exs:268
+     ** (ArgumentError) Expected a keyword list in `Ash.read/2`, got: :active
+     code: :timer.tc(fn ->
+     stacktrace:
+       (ash 3.5.34) lib/ash.ex:2752: Ash.read/2
+       test/performance/critical_path_benchmarks_test.exs:276: anonymous fn/0 in Ashfolio.Performance.CriticalPathBenchmarksTest."test End-to-End Workflow Benchmarks complete dashboard load workflow benchmark"/1
+       (stdlib 7.0.2) timer.erl:599: :timer.tc/2
+       test/performance/critical_path_benchmarks_test.exs:271: (test)
+
+BENCHMARK_RESULT: {"timestamp":"2025-08-19T00:07:47.769866Z","operation":"account_breakdown_calculation","time_ms":1.527,"target_ms":150,"regression_check":true,"account_count":6}
+.BENCHMARK_RESULT: {"timestamp":"2025-08-19T00:07:47.779776Z","operation":"net_worth_calculation","net_worth":"94540","time_ms":3.459,"target_ms":200,"regression_check":true}
+.*.......................................................................................................................................     
+warning: redefining module AshfolioWeb.AccountLive.BalanceUpdateComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 242 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/account_live/balance_update_component_test.exs:242: AshfolioWeb.AccountLive.BalanceUpdateComponentTest.TestHostLiveView (module)
+
+.     warning: redefining module AshfolioWeb.AccountLive.BalanceUpdateComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 242 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/account_live/balance_update_component_test.exs:242: AshfolioWeb.AccountLive.BalanceUpdateComponentTest.TestHostLiveView (module)
+
+.     warning: redefining module AshfolioWeb.AccountLive.BalanceUpdateComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 242 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/account_live/balance_update_component_test.exs:242: AshfolioWeb.AccountLive.BalanceUpdateComponentTest.TestHostLiveView (module)
+
+.     warning: redefining module AshfolioWeb.AccountLive.BalanceUpdateComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 242 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/account_live/balance_update_component_test.exs:242: AshfolioWeb.AccountLive.BalanceUpdateComponentTest.TestHostLiveView (module)
+
+..     warning: redefining module AshfolioWeb.AccountLive.BalanceUpdateComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 242 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/account_live/balance_update_component_test.exs:242: AshfolioWeb.AccountLive.BalanceUpdateComponentTest.TestHostLiveView (module)
+
+.     warning: redefining module AshfolioWeb.AccountLive.BalanceUpdateComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 242 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/account_live/balance_update_component_test.exs:242: AshfolioWeb.AccountLive.BalanceUpdateComponentTest.TestHostLiveView (module)
+
+.     warning: redefining module AshfolioWeb.AccountLive.BalanceUpdateComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 242 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/account_live/balance_update_component_test.exs:242: AshfolioWeb.AccountLive.BalanceUpdateComponentTest.TestHostLiveView (module)
+
+.     warning: redefining module AshfolioWeb.AccountLive.BalanceUpdateComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 242 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/account_live/balance_update_component_test.exs:242: AshfolioWeb.AccountLive.BalanceUpdateComponentTest.TestHostLiveView (module)
+
+...................*....................................
+
+  3) test error recovery and logging error context is preserved in logging (Ashfolio.Integration.ErrorHandlingTest)
+     test/integration/error_handling_test.exs:206
+     Assertion with =~ failed
+     code:  assert log =~ "test-123"
+     left:  "19:07:54.407 [warning] Error occurred: {:error, :balance_update_failed} (type: balance_management, context: %{operation: \"balance_update\", account_id: \"acc-456\"})\n"
+     right: "test-123"
+     stacktrace:
+       test/integration/error_handling_test.exs:219: (test)
+
+     The following output was logged:
+     19:07:54.407 [warning] Error occurred: {:error, :balance_update_failed} (type: balance_management, context: %{operation: "balance_update", account_id: "acc-456"})
+     
+.............................................................................................****................................................................
+Performance improvement: 41.82322531837095% (7.931ms -> 4.614ms)
+..
+
+  4) test Edge Cases and Error Handling optimized version handles empty account list (Ashfolio.Performance.NetWorthOptimizationComparisonTest)
+     test/performance/net_worth_optimization_comparison_test.exs:231
+     ** (ArgumentError) Expected a keyword list in `Ash.read/2`, got: :active
+     code: accounts = Account.list_all_accounts()
+     stacktrace:
+       (ash 3.5.34) lib/ash.ex:2752: Ash.read/2
+       test/performance/net_worth_optimization_comparison_test.exs:233: (test)
+
+...............*...........................................................
+
+  5) test Batch Loading Optimization Verification preloaded associations prevent additional queries (Ashfolio.Performance.NetWorthCalculationPerformanceTest)
+     test/performance/net_worth_calculation_performance_test.exs:190
+     ** (ArgumentError) Expected a keyword list in `Ash.read/2`, got: :active
+     code: accounts = Account.list_all_accounts()
+     stacktrace:
+       (ash 3.5.34) lib/ash.ex:2752: Ash.read/2
+       test/performance/net_worth_calculation_performance_test.exs:192: (test)
+
+.............
+
+  6) test account editing preserves other accounts when editing one account (AshfolioWeb.AccountLive.IndexTest)
+     test/ashfolio_web/live/account_live/index_test.exs:223
+     ** (MatchError) no match of right hand side value: {...}
+     code: {:ok, account2} =
+     stacktrace:
+       test/ashfolio_web/live/account_live/index_test.exs:228: (test)
+
+     The following output was logged:
+     19:08:03.948 [error] Exqlite.Connection (#PID<0.358.0>) disconnected: ** (DBConnection.ConnectionError) client #PID<0.8854.0> exited
+     
+.19:08:03.965 [error] Exqlite.Connection (#PID<0.353.0>) disconnected: ** (DBConnection.ConnectionError) client #PID<0.8879.0> exited
+........19:08:04.044 [error] Exqlite.Connection (#PID<0.346.0>) disconnected: ** (DBConnection.ConnectionError) client #PID<0.8993.0> exited
+19:08:04.054 [error] Exqlite.Connection (#PID<0.356.0>) disconnected: ** (DBConnection.ConnectionError) client #PID<0.9007.0> exited
+..................................................................✅ Current configuration is CORRECT: LiveView uses :app layout
+
+To test regression detection:
+1. Change ashfolio_web.ex line ~56 to: layout: {AshfolioWeb.Layouts, :root}
+2. Run: mix test test/ashfolio_web/layout_*test.exs
+3. You should see failures detecting duplicate IDs
+4. Change back to: layout: {AshfolioWeb.Layouts, :app}
+5. Run tests again - they should pass
+
+This validates the regression tests work correctly.
+
+.Configuration examples:
+# ✅ CORRECT - What we have now
+use Phoenix.LiveView,
+  layout: {AshfolioWeb.Layouts, :app}
+
+# ❌ INCORRECT - What caused the issue
+use Phoenix.LiveView,
+  layout: {AshfolioWeb.Layouts, :root}
+
+..     warning: redefining module AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 469 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/category_live/form_component_test.exs:469: AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (module)
+
+.     warning: redefining module AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 469 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/category_live/form_component_test.exs:469: AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (module)
+
+..     warning: redefining module AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 469 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/category_live/form_component_test.exs:469: AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (module)
+
+.     warning: redefining module AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 469 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/category_live/form_component_test.exs:469: AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (module)
+
+.     warning: redefining module AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 469 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/category_live/form_component_test.exs:469: AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (module)
+
+.     warning: redefining module AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 469 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/category_live/form_component_test.exs:469: AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (module)
+
+.     warning: redefining module AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 469 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/category_live/form_component_test.exs:469: AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (module)
+
+.     warning: redefining module AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 469 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/category_live/form_component_test.exs:469: AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (module)
+
+.     warning: redefining module AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 469 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/category_live/form_component_test.exs:469: AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (module)
+
+.     warning: redefining module AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 469 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/category_live/form_component_test.exs:469: AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (module)
+
+.     warning: redefining module AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 469 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/category_live/form_component_test.exs:469: AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (module)
+
+.     warning: redefining module AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 469 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/category_live/form_component_test.exs:469: AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (module)
+
+.     warning: redefining module AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (current version defined in memory)
+     │
+ 469 │     defmodule TestHostLiveView do
+     │     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     │
+     └─ test/ashfolio_web/live/category_live/form_component_test.exs:469: AshfolioWeb.CategoryLive.FormComponentTest.TestHostLiveView (module)
+
+...............................................
+
+  7) test Real-time Update Latency LiveView handles multiple rapid updates efficiently (Ashfolio.Performance.LiveViewUpdatePerformanceTest)
+     test/performance/liveview_update_performance_test.exs:291
+     ** (EXIT from #PID<0.10567.0>) an exception was raised:
+         ** (KeyError) key :investment_value not found in: %{net_worth: Decimal.new("103000")}
+             (ashfolio 0.1.0) lib/ashfolio_web/live/dashboard_live.ex:483: AshfolioWeb.DashboardLive.assign_net_worth_data/2
+             (ashfolio 0.1.0) lib/ashfolio_web/live/dashboard_live.ex:115: AshfolioWeb.DashboardLive.handle_info/2
+             (phoenix_live_view 1.1.4) lib/phoenix_live_view/channel.ex:360: Phoenix.LiveView.Channel.handle_info/2
+             (stdlib 7.0.2) gen_server.erl:2434: :gen_server.try_handle_info/3
+             (stdlib 7.0.2) gen_server.erl:2420: :gen_server.handle_msg/3
+             (stdlib 7.0.2) proc_lib.erl:333: :proc_lib.init_p_do_apply/3
+
+.....................................................
+Finished in 41.1 seconds (1.3s async, 39.8s sync)
+892 tests, 7 failures, 7 skipped
+error: Recipe `test` failed with exit code 2

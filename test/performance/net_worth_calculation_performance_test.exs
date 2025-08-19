@@ -189,7 +189,7 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
 
     test "preloaded associations prevent additional queries" do
       # Create accounts with preloaded data
-      {:ok, accounts} = Account.accounts_for_user()
+      accounts = Account.list_all_accounts()
 
       query_count_before = get_query_count()
 

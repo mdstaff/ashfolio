@@ -8,7 +8,6 @@ defmodule AshfolioWeb.TransactionLive.FilteringTest do
 
   alias Ashfolio.FinancialManagement.TransactionCategory
   alias Ashfolio.Portfolio.{Transaction, Account, Symbol}
-  alias Ashfolio.SQLiteHelpers
 
   describe "enhanced filter state management" do
     setup %{conn: conn} do

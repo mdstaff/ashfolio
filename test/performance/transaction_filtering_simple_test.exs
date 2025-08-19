@@ -55,7 +55,7 @@ defmodule Ashfolio.Performance.TransactionFilteringSimpleTest do
     end
 
     test "category filtering performance under 50ms", %{category: category} do
-      {time_us, results} =
+      {time_us, {:ok, results}} =
         :timer.tc(fn ->
           Transaction.by_category(category.id)
         end)
@@ -72,9 +72,9 @@ defmodule Ashfolio.Performance.TransactionFilteringSimpleTest do
       start_date = Date.add(Date.utc_today(), -30)
       end_date = Date.utc_today()
 
-      {time_us, results} =
+      {time_us, {:ok, results}} =
         :timer.tc(fn ->
-          Transaction.list_for_user_by_date_range!(start_date, end_date)
+          Transaction.list_by_date_range(start_date, end_date)
         end)
 
       time_ms = time_us / 1000
@@ -100,9 +100,9 @@ defmodule Ashfolio.Performance.TransactionFilteringSimpleTest do
     end
 
     test "pagination performance under 25ms" do
-      {time_us, results} =
+      {time_us, {:ok, results}} =
         :timer.tc(fn ->
-          Transaction.list_for_user_paginated!(1, 20)
+          Transaction.list_paginated(1, 20)
         end)
 
       time_ms = time_us / 1000
@@ -117,7 +117,7 @@ defmodule Ashfolio.Performance.TransactionFilteringSimpleTest do
       # Run filtering multiple times to test consistency
       times =
         for _ <- 1..5 do
-          {time_us, _results} =
+          {time_us, {:ok, _results}} =
             :timer.tc(fn ->
               Transaction.by_category(category.id)
             end)

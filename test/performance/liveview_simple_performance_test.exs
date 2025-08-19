@@ -14,7 +14,6 @@ defmodule Ashfolio.Performance.LiveViewSimplePerformanceTest do
   @moduletag :slow
   @moduletag :liveview_performance
 
-  alias Ashfolio.SQLiteHelpers
 
   describe "PubSub Performance" do
     # Database-as-user architecture: No user setup needed

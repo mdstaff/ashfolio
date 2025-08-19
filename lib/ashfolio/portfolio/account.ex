@@ -256,7 +256,7 @@ defmodule Ashfolio.Portfolio.Account do
     """
     def list_all_accounts() do
       # In database-as-user architecture, get all accounts
-      Ash.read(Ashfolio.Portfolio.Account, :active)
+      Ash.read(Ashfolio.Portfolio.Account, action: :active)
     end
 
     @doc """

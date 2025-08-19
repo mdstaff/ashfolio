@@ -20,34 +20,34 @@ test filter="":
     #!/usr/bin/env bash
     if [ -z "{{filter}}" ]; then
         echo "🧪 Running standard test suite..."
-        mix test --exclude performance --exclude slow --exclude integration
+        mix test --exclude performance --exclude slow --exclude integration --no-color
     elif [ "{{filter}}" = "all" ]; then
         echo "🧪 Running ALL tests..."
-        mix test
+        mix test --no-color
     elif [ "{{filter}}" = "unit" ]; then
         echo "🧪 Running unit tests..."
-        mix test --only unit
+        mix test --only unit --no-color
     elif [ "{{filter}}" = "integration" ]; then
         echo "🧪 Running integration tests..."
-        mix test --only integration
+        mix test --only integration --no-color
     elif [ "{{filter}}" = "live" ]; then
         echo "🧪 Running LiveView tests..."
-        mix test --only liveview
+        mix test --only liveview --no-color
     elif [ "{{filter}}" = "perf" ]; then
         echo "🧪 Running performance tests..."
-        mix test test/performance/ --trace
+        mix test test/performance/ --trace --no-color
     elif [ "{{filter}}" = "failed" ]; then
         echo "🧪 Re-running failed tests..."
-        mix test --failed
+        mix test --failed --no-color
     elif [ "{{filter}}" = "smoke" ]; then
         echo "🧪 Running smoke tests..."
-        mix test --only smoke
+        mix test --only smoke --no-color
     elif [ -f "{{filter}}" ]; then
         echo "🧪 Testing {{filter}}..."
-        mix test {{filter}}
+        mix test --no-color {{filter}} 
     else
         echo "🧪 Running tests matching '{{filter}}'..."
-        mix test --only {{filter}}
+        mix test --only {{filter}} --no-color
     fi
 
 # ✅ Run all checks (format, compile, test)
@@ -122,19 +122,19 @@ ci stage="all":
     case "{{stage}}" in
         unit)
             echo "🤖 CI Stage 1: Unit Tests"
-            mix test --only unit --only smoke
+            mix test --only unit --only smoke --no-color
             ;;
         integration)
             echo "🤖 CI Stage 2: Integration Tests"
-            mix test --only integration
+            mix test --only integration --no-color
             ;;
         e2e)
             echo "🤖 CI Stage 3: End-to-End Tests"
-            mix test --only liveview --only ui
+            mix test --only liveview --only ui --no-color
             ;;
         perf)
             echo "🤖 CI Stage 4: Performance Tests"
-            mix test test/performance/
+            mix test --no-color test/performance/
             ;;
         all)
             echo "🤖 Running full CI pipeline..."

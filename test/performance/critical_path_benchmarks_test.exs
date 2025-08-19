@@ -162,7 +162,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
       # Test transaction filtering performance (Stage 4)
       category = Enum.at(test_data.categories, 0)
 
-      {time_us, results} =
+      {time_us, {:ok, results}} =
         :timer.tc(fn ->
           Transaction.by_category(category.id)
         end)
@@ -273,7 +273,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
           {
             NetWorthCalculator.calculate_net_worth(),
             Transaction.recent_transactions(),
-            Account.accounts_for_user()
+            Account.list_all_accounts()
           }
         end)
 
@@ -304,9 +304,9 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
       {time_us, _results} =
         :timer.tc(fn ->
           # Simulate transaction search workflow
-          Transaction.by_category(category.id)
-          Transaction.list_for_user_by_date_range!(start_date, end_date)
-          Transaction.list_for_user_paginated!(1, 20)
+          {:ok, _} = Transaction.by_category(category.id)
+          {:ok, _} = Transaction.list_by_date_range(start_date, end_date)
+          {:ok, _} = Transaction.list_paginated(1, 20)
         end)
 
       time_ms = time_us / 1000
@@ -391,7 +391,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
         fn -> SymbolSearch.search("AAPL") end,
         fn -> SymbolSearch.search("GOOGL") end,
         fn -> Transaction.recent_transactions() end,
-        fn -> Account.accounts_for_user() end
+        fn -> Account.list_all_accounts() end
       ]
 
       for operation <- operations do

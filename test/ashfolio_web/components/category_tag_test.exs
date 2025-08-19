@@ -32,21 +32,21 @@ defmodule AshfolioWeb.Components.CategoryTagTest do
         render_component(&CategoryTag.category_tag/1, category: category, size: :small)
 
       assert small_html =~ "text-xs"
-      assert small_html =~ "px-1"
+      assert small_html =~ "px-2"
 
       # Test normal size (default)
       normal_html =
         render_component(&CategoryTag.category_tag/1, category: category)
 
       assert normal_html =~ "text-sm"
-      assert normal_html =~ "px-2"
+      assert normal_html =~ "px-3"
 
       # Test large size
       large_html =
         render_component(&CategoryTag.category_tag/1, category: category, size: :large)
 
       assert large_html =~ "text-base"
-      assert large_html =~ "px-3"
+      assert large_html =~ "px-4"
     end
 
     test "handles missing category data gracefully" do
@@ -93,7 +93,7 @@ defmodule AshfolioWeb.Components.CategoryTagTest do
         )
 
       assert clickable_html =~ "cursor-pointer"
-      assert clickable_html =~ "hover:opacity-80"
+      assert clickable_html =~ "hover:shadow-sm"
       assert clickable_html =~ "phx-click"
       assert clickable_html =~ "filter_by_category"
     end

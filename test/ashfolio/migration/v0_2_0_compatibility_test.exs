@@ -43,8 +43,7 @@ defmodule Ashfolio.Migration.V020CompatibilityTest do
       # Context API should categorize correctly
       {:ok, dashboard_data} = Context.get_user_dashboard_data()
 
-      investment_accounts =
-        Enum.filter(dashboard_data.accounts, &(&1.account_type == :investment))
+      investment_accounts = dashboard_data.accounts.investment
 
       assert length(investment_accounts) >= 1
     end
@@ -230,7 +229,7 @@ defmodule Ashfolio.Migration.V020CompatibilityTest do
       # Context API should work without user_id parameters
       {:ok, dashboard_data} = Context.get_user_dashboard_data()
 
-      assert is_list(dashboard_data.accounts)
+      assert is_map(dashboard_data.accounts)
       assert is_struct(dashboard_data.summary.total_balance, Decimal)
       assert is_integer(dashboard_data.summary.account_count)
       assert is_list(dashboard_data.recent_transactions)
@@ -267,14 +266,14 @@ defmodule Ashfolio.Migration.V020CompatibilityTest do
 
     test "Context.get_net_worth includes all account types" do
       # Create mixed account types
-      {:ok, investment} =
+      {:ok, _investment} =
         Account.create(%{
           name: "Brokerage",
           balance: Decimal.new("50000"),
           account_type: :investment
         })
 
-      {:ok, checking} =
+      {:ok, _checking} =
         Account.create(%{
           name: "Checking",
           balance: Decimal.new("5000"),

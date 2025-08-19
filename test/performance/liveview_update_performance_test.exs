@@ -89,7 +89,8 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
 
   describe "PubSub Broadcasting Performance" do
     setup do
-      create_dashboard_test_data()
+      {accounts, categories} = create_dashboard_test_data()
+      %{accounts: accounts, categories: categories}
     end
 
     test "net worth update broadcast under 10ms" do
@@ -302,7 +303,12 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
                   Phoenix.PubSub.broadcast(
                     Ashfolio.PubSub,
                     "net_worth",
-                    {:net_worth_updated, %{net_worth: Decimal.new("#{100_000 + i * 1000}")}}
+                    {:net_worth_updated, %{
+                      net_worth: Decimal.new("#{100_000 + i * 1000}"),
+                      investment_value: Decimal.new("75000"),
+                      cash_value: Decimal.new("25000"),
+                      breakdown: %{}
+                    }}
                   )
 
                 1 ->
@@ -338,7 +344,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
 
   describe "Memory Efficiency During Updates" do
     test "memory usage stays reasonable during heavy update cycles" do
-      create_dashboard_test_data()
+      {_accounts, _categories} = create_dashboard_test_data()
 
       :erlang.garbage_collect()
       initial_memory = :erlang.memory(:total)

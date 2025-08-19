@@ -70,9 +70,9 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
       start_date = Date.add(Date.utc_today(), -30)
       end_date = Date.utc_today()
 
-      {time_us, results} =
+      {time_us, {:ok, results}} =
         :timer.tc(fn ->
-          Transaction.list_for_user_by_date_range!(start_date, end_date)
+          Transaction.list_by_date_range(start_date, end_date)
         end)
 
       time_ms = time_us / 1000
@@ -242,11 +242,11 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
         {:account_filtering, fn -> Transaction.list_for_account!(Enum.at(accounts, 0).id) end},
         {:date_filtering,
          fn ->
-           Transaction.list_for_user_by_date_range!(
-             nil,
+           {:ok, results} = Transaction.list_by_date_range(
              Date.add(Date.utc_today(), -30),
              Date.utc_today()
            )
+           results
          end},
         {:category_filtering,
          fn -> {:ok, _} = Transaction.by_category(Enum.at(categories, 0).id) end}
@@ -256,7 +256,14 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
         {time_us, results} = :timer.tc(filter_fn)
         time_ms = time_us / 1000
 
-        assert length(results) >= 0
+        # Extract actual results if wrapped in {:ok, results} tuple
+        actual_results = case results do
+          {:ok, list} when is_list(list) -> list
+          list when is_list(list) -> list
+          _ -> []
+        end
+
+        assert length(actual_results) >= 0
 
         assert time_ms < 100,
                "#{filter_name} took #{time_ms}ms, expected < 100ms (should use index)"

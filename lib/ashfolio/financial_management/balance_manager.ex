@@ -163,7 +163,7 @@ defmodule Ashfolio.FinancialManagement.BalanceManager do
     case :ets.whereis(table_name) do
       :undefined ->
         try do
-          :ets.new(table_name, [:named_table, :protected, :bag])
+          :ets.new(table_name, [:named_table, :public, :bag])
         rescue
           ArgumentError ->
             # Table was created by another process, just return the name
