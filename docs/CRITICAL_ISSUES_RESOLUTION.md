@@ -1,4 +1,5 @@
 # Critical Issues Resolution Guide
+
 ## Financial Management v0.2.0 Implementation
 
 **Document Version:** 1.0  
@@ -40,6 +41,7 @@ end
 ### Root Cause
 
 The `TransactionCategory` resource declares its domain correctly:
+
 ```elixir
 use Ash.Resource, domain: Ashfolio.FinancialManagement
 ```
@@ -53,6 +55,7 @@ But the domain doesn't register the resource, creating a mismatch that prevents 
 **File:** `/Users/matthewstaff/Projects/github.com/mdstaff/ashfolio/lib/ashfolio/financial_management.ex`
 
 **Change Required:**
+
 ```elixir
 defmodule Ashfolio.FinancialManagement do
   @moduledoc """
@@ -76,6 +79,7 @@ end
 ### Step 2: Verify Cross-Domain Relationship
 
 After the fix, verify the relationship works by running:
+
 ```bash
 mix ash.codegen --domains Ashfolio.Portfolio,Ashfolio.FinancialManagement
 ```
@@ -85,6 +89,7 @@ This should complete without errors and recognize the cross-domain relationship.
 ### Step 3: Test Domain Registration
 
 Run a quick test to ensure the domain is properly configured:
+
 ```elixir
 # In IEx
 Ashfolio.FinancialManagement.Info.resources()
@@ -106,13 +111,15 @@ Ashfolio.FinancialManagement.Info.resources()
 **Issue:** The `BalanceManager` module uses `Ashfolio.PubSub` but we should verify this module is properly configured.
 
 **Current Usage in BalanceManager:**
+
 ```elixir
 # Line 137 in balance_manager.ex
 PubSub.broadcast("balance_changes", {:balance_updated, message})
 ```
 
 **Verification Steps:**
-1. Confirm `Ashfolio.PubSub` is started in `application.ex` (✅ Already verified - line 17)
+
+1. Confirm `Ashfolio.PubSub` is started in `application.ex` ( Already verified - line 17)
 2. Test PubSub functionality in BalanceManager tests
 3. Ensure topic naming convention follows project standards
 
@@ -121,11 +128,12 @@ PubSub.broadcast("balance_changes", {:balance_updated, message})
 **Issue:** The `BalanceManager` uses ETS tables for balance history storage which may need review for production readiness.
 
 **Current Implementation:**
+
 ```elixir
 # Lines 152-170 in balance_manager.ex
 defp balance_history_table do
   table_name = :balance_history
-  
+
   case :ets.whereis(table_name) do
     :undefined ->
       try do
@@ -137,12 +145,13 @@ defp balance_history_table do
     _ ->
       table_name
   end
-  
+
   table_name
 end
 ```
 
 **Considerations:**
+
 - ETS data is not persisted across application restarts
 - Consider if balance history should be stored in database for audit trails
 - Current implementation is acceptable for v0.2.0 MVP
@@ -150,14 +159,17 @@ end
 ## Implementation Priority
 
 ### 🚨 IMMEDIATE (Must fix before any testing)
+
 1. **Fix domain registration** - Register `TransactionCategory` in `FinancialManagement` domain
 2. **Verify cross-domain relationship** - Ensure Transaction → TransactionCategory works
 
 ### 🟡 HIGH (Verify during current sprint)
+
 3. **Application configuration check** - Ensure domain is properly configured in app config
 4. **PubSub functionality test** - Verify BalanceManager PubSub integration works
 
 ### 🟢 MEDIUM (Address in next sprint)
+
 5. **ETS storage review** - Consider database persistence for balance history
 
 ## Testing Checklist
@@ -175,12 +187,14 @@ After fixing the critical issue, verify these work correctly:
 ## Team Coordination
 
 ### For the Development Team
+
 1. **STOP** all work on FinancialManagement features until domain registration is fixed
 2. **PRIORITY FIX** - One developer should immediately implement the domain registration fix
 3. **TESTING** - After fix, run full test suite to ensure no regressions
 4. **COORDINATION** - Notify the other agent working on BalanceManager tests that this fix is required first
 
 ### For the Agent Working on BalanceManager
+
 - The BalanceManager implementation looks solid overall
 - Tests can proceed after domain registration is fixed
 - PubSub integration should be tested as part of your test suite
@@ -190,11 +204,11 @@ After fixing the critical issue, verify these work correctly:
 
 The critical issue is resolved when:
 
-1. ✅ Application starts without domain-related errors
-2. ✅ `Ashfolio.FinancialManagement.Info.resources()` returns `[Ashfolio.FinancialManagement.TransactionCategory]`
-3. ✅ Cross-domain Transaction → TransactionCategory relationship works in tests
-4. ✅ All existing tests continue to pass (383/383)
-5. ✅ New FinancialManagement features can be tested and developed
+1.  Application starts without domain-related errors
+2.  `Ashfolio.FinancialManagement.Info.resources()` returns `[Ashfolio.FinancialManagement.TransactionCategory]`
+3.  Cross-domain Transaction → TransactionCategory relationship works in tests
+4.  All existing tests continue to pass (383/383)
+5.  New FinancialManagement features can be tested and developed
 
 ## Architect Assessment Validation
 

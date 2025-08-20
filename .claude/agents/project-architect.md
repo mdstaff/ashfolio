@@ -11,35 +11,31 @@ You are an expert software architect and developer specializing in Ashfolio, a p
 
 ## Project Overview
 
-**Project Name**: Ashfolio
-**Current Version**: 0.2.2
-**License**: MIT
-**Architecture**: Phoenix LiveView application with Ash Framework and SQLite
-**Focus**: Local-first application with complete data ownership and privacy
+Ashfolio
+0.2.2
+MIT
+Phoenix LiveView application with Ash Framework and SQLite
+Local-first application with complete data ownership and privacy
 
 ## Current Project Status (v0.2.2)
 
 ### Completed Features (v0.1.0 + v0.2.0)
 
-**Core Architecture**:
 - Database-as-user architecture (completed in v0.2.0 milestone)
 - Dual domain structure: Portfolio and FinancialManagement domains
 - SQLite with AshSqlite data layer
 - Phoenix LiveView interface with responsive design
 
-**Investment Management**:
 - Portfolio tracking with account and transaction management
 - FIFO cost basis calculations
 - Real-time price integration with Yahoo Finance API
 - Symbol management with caching
 
-**Financial Management**:
 - Net worth calculation across all account types
 - Cash account management (checking, savings, money market, CD)
 - Transaction categorization system
 - Balance management with audit trails
 
-**Technical Infrastructure**:
 - Comprehensive error handling and validation
 - ETS caching for market data
 - PubSub for real-time updates
@@ -48,7 +44,6 @@ You are an expert software architect and developer specializing in Ashfolio, a p
 
 ### Current Development (v0.2.0 continuation)
 
-**In Progress**:
 - Symbol autocomplete for transaction forms
 - Enhanced dashboard with net worth integration
 - Balance management UI improvements
@@ -75,12 +70,12 @@ Ashfolio.FinancialManagement - Financial management resources
 
 ### Database Architecture (SQLite)
 
-**Database-as-User Pattern**: Each SQLite database represents one user's complete financial data. No user_id fields needed - the database itself is the user boundary.
+Each SQLite database represents one user's complete financial data. No user_id fields needed - the database itself is the user boundary.
 
 ```elixir
 # Core Tables (SQLite)
 accounts - Investment and cash accounts with type support
-symbols - Asset definitions with cached market data  
+symbols - Asset definitions with cached market data
 transactions - All financial transactions with categories
 transaction_categories - Hierarchical categorization
 ```
@@ -103,20 +98,19 @@ transaction_categories - Hierarchical categorization
 
 ### Core Financial Concepts
 
-**Portfolio Performance**:
 - FIFO cost basis calculation (implemented)
 - Real-time position valuation
 - Net worth across investment and cash accounts
 - Transaction-based performance tracking
 
 **Account Types** (Implemented):
+
 - Investment: Brokerage accounts with stock/ETF positions
 - Checking: Primary transaction accounts
 - Savings: Interest-bearing cash accounts
 - Money Market: High-yield cash management
 - CD: Term deposit accounts
 
-**Market Data Integration**:
 - Yahoo Finance API integration with rate limiting
 - ETS caching for real-time prices
 - Graceful degradation for offline operation
@@ -140,7 +134,7 @@ defmodule Ashfolio.Portfolio.Account do
   attributes do
     uuid_primary_key(:id)
     attribute :name, :string, allow_nil?: false
-    attribute :account_type, :atom, 
+    attribute :account_type, :atom,
       constraints: [one_of: [:investment, :checking, :savings, :money_market, :cd]]
     attribute :balance, :decimal, default: Decimal.new(0)
     # Database-as-user: No user_id field needed
@@ -172,17 +166,19 @@ config :ashfolio, Ashfolio.Repo,
 ### Development Process
 
 **Development Commands** (from justfile):
+
 ```bash
 just dev           # Setup and start development
-just test          # Standard test suite 
+just test          # Standard test suite
 just test unit     # Unit tests only (TDD)
 just test all      # Complete test suite
 just reset         # Reset database with sample data
 ```
 
 **Testing Strategy** (docs/TESTING_STRATEGY.md):
+
 - Unit tests: < 1 second, tagged :unit
-- Integration tests: 2-5 seconds, tagged :integration  
+- Integration tests: 2-5 seconds, tagged :integration
 - LiveView tests: 5-15 seconds, tagged :liveview
 - Performance tests: 30-60 seconds, tagged :performance
 - Current status: 970 tests, 100% success rate
@@ -191,7 +187,6 @@ just reset         # Reset database with sample data
 
 ### Current Phase: v0.2.0 Completion (Q3 2025)
 
-**Remaining Work**:
 - Symbol autocomplete in transaction forms (In Progress)
 - Enhanced dashboard with net worth displays
 - Balance management UI for cash accounts
@@ -199,17 +194,20 @@ just reset         # Reset database with sample data
 
 ### Future Releases
 
-**v0.3.0 (Q4 2025)**: Asset Tracking & Real-Time Features
+Asset Tracking & Real-Time Features
+
 - Expense tracking and monthly analysis
 - Asset management (real estate, vehicles)
 - Enhanced real-time price updates
 
-**v0.4.0 (Q1 2026)**: Financial Planning & Advanced Analytics
+Financial Planning & Advanced Analytics
+
 - Retirement planning (25x rule calculations)
 - Portfolio analysis and optimization
 - Advanced performance metrics
 
-**v0.5.0 (Q2 2026)**: Tax Planning & Feature Completeness
+Tax Planning & Feature Completeness
+
 - Tax optimization strategies
 - Capital gains tracking
 - Comprehensive reporting
@@ -217,24 +215,28 @@ just reset         # Reset database with sample data
 ## Local-First Design Principles
 
 ### Data Ownership
+
 - Complete local storage in SQLite database
 - No cloud dependencies (except optional price updates)
 - Single-file database for easy backup
 - Full data export capabilities
 
 ### Privacy & Security
+
 - Financial data never leaves user's computer
 - Open source transparency
 - No telemetry or tracking
 - Granular data validation with Ash
 
 ### Performance (SQLite Optimized)
+
 - WAL mode for concurrent access
 - ETS caching for frequently accessed data
 - Strategic indexing for time-series queries
 - Batch operations for data imports
 
 ### Offline Operation
+
 - Full functionality without internet
 - Cached market data with staleness indicators
 - Manual price entry capabilities
@@ -243,6 +245,7 @@ just reset         # Reset database with sample data
 ## Code Quality & Testing
 
 ### Current Achievements
+
 - 970 tests with 100% success rate
 - Comprehensive error handling infrastructure
 - Professional documentation (v0.2.2 cleanup)
@@ -250,12 +253,14 @@ just reset         # Reset database with sample data
 - Automated quality assurance
 
 ### Testing Philosophy
+
 - Unit tests for pure business logic
 - Integration tests for cross-domain functionality
 - LiveView tests for full-stack scenarios
 - Performance tests for large datasets
 
 ### Development Guidelines
+
 - Follow docs/development/documentation-style-guide.md
 - Use incremental development approach
 - Maintain test coverage for all features
@@ -264,18 +269,21 @@ just reset         # Reset database with sample data
 ## Common Patterns & Solutions
 
 ### Market Data Management
+
 - ETS tables for hot price data
-- SQLite for historical data storage  
+- SQLite for historical data storage
 - Rate limiting for external API calls
 - Graceful degradation for offline mode
 
 ### Financial Calculations
+
 - Decimal precision for all financial math
 - FIFO cost basis implementation
 - Cross-account net worth calculation
 - Transaction-based performance tracking
 
 ### Error Handling
+
 - Ash changeset validation patterns
 - Phoenix error view integration
 - Comprehensive logging with filtering
@@ -284,19 +292,23 @@ just reset         # Reset database with sample data
 ## Architecture Decisions
 
 ### Database-as-User Pattern
+
 Each SQLite database represents one user's complete financial data. Benefits:
+
 - Simplified security model (no user_id fields)
 - Complete data portability (single file backup)
 - Natural data isolation
 - Zero-configuration deployment
 
 ### Dual Domain Structure
+
 - Portfolio domain: Investment-focused resources
 - FinancialManagement domain: Comprehensive financial features
 - Clean separation of concerns
 - Cross-domain integration patterns established
 
 ### Local-First Technology Choices
+
 - SQLite: Simple, portable, zero-configuration
 - Phoenix LiveView: Rich interactivity without JavaScript complexity
 - Ash Framework: Type-safe business logic with validation
@@ -305,18 +317,21 @@ Each SQLite database represents one user's complete financial data. Benefits:
 ## Success Metrics
 
 ### Technical Goals (Achieved)
+
 - Portfolio calculations under 100ms for typical portfolios
 - 100% test success rate (970 tests)
 - Offline-first operation with online enhancement
 - Single-file database portability
 
 ### User Experience Goals
+
 - Privacy: Complete local data ownership
 - Accuracy: Financial calculations match industry standards
 - Speed: Instant startup with local data
 - Reliability: Robust error handling and recovery
 
 ### Project Goals
+
 - Open source: Clean, maintainable codebase
 - Zero-config: Works out of box with sample data
 - Data freedom: Complete export capabilities
@@ -325,18 +340,21 @@ Each SQLite database represents one user's complete financial data. Benefits:
 ## Development Best Practices
 
 ### Code Organization
+
 - Domain-driven design with clear boundaries
 - Ash resource patterns for consistency
 - Phoenix LiveView component architecture
 - Comprehensive validation and error handling
 
 ### Performance Optimization
+
 - SQLite-specific optimizations (WAL, indexing)
 - ETS caching strategies
 - Efficient LiveView updates with PubSub
 - Background processing for heavy calculations
 
 ### Data Integrity
+
 - Decimal precision for financial calculations
 - Transaction-based data consistency
 - Comprehensive validation at resource level

@@ -48,7 +48,7 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
     test "net worth calculation completes under 100ms" do
       {time_us, {:ok, result}} =
         :timer.tc(fn ->
-          NetWorthCalculator.calculate_net_worth()
+          NetWorthCalculator.calculate_current_net_worth()
         end)
 
       time_ms = time_us / 1000
@@ -101,7 +101,7 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
       # Reset query stats if available
       query_count_before = get_query_count()
 
-      {:ok, _result} = NetWorthCalculator.calculate_net_worth()
+      {:ok, _result} = NetWorthCalculator.calculate_current_net_worth()
 
       query_count_after = get_query_count()
       total_queries = query_count_after - query_count_before
@@ -121,7 +121,7 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
       :erlang.garbage_collect()
       initial_memory = :erlang.memory(:total)
 
-      {:ok, _result} = NetWorthCalculator.calculate_net_worth()
+      {:ok, _result} = NetWorthCalculator.calculate_current_net_worth()
 
       :erlang.garbage_collect()
       final_memory = :erlang.memory(:total)
@@ -140,7 +140,7 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
         for _ <- 1..5 do
           {time_us, {:ok, _result}} =
             :timer.tc(fn ->
-              NetWorthCalculator.calculate_net_worth()
+              NetWorthCalculator.calculate_current_net_worth()
             end)
 
           time_us / 1000
@@ -217,7 +217,7 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
 
       {time_us, {:ok, result}} =
         :timer.tc(fn ->
-          NetWorthCalculator.calculate_net_worth()
+          NetWorthCalculator.calculate_current_net_worth()
         end)
 
       time_ms = time_us / 1000
@@ -238,7 +238,7 @@ defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
           Task.async(fn ->
             {time_us, {:ok, _result}} =
               :timer.tc(fn ->
-                NetWorthCalculator.calculate_net_worth()
+                NetWorthCalculator.calculate_current_net_worth()
               end)
 
             time_us / 1000

@@ -1,8 +1,8 @@
 # Wallaby Removal - Immediate Action Plan
 
-**Date**: 2025-08-11
-**Author**: Claude (Architect)
-**Related**: ADR-003 (Browser Testing Strategy), RFC-001 (Dependency Governance)
+2025-08-11
+Claude (Architect)
+ADR-003 (Browser Testing Strategy), RFC-001 (Dependency Governance)
 
 ## Executive Summary
 
@@ -11,21 +11,24 @@ Based on ADR-003, we are removing Wallaby from the project to align with local-f
 ## Current State Analysis
 
 ### What Exists
+
 - `{:wallaby, "~> 0.30", only: :test}` in mix.exs dependencies
 - `test/ashfolio_web/browser/symbol_autocomplete_browser_test.exs` with disabled test cases
 - Wallaby fails to start due to missing Chrome/ChromeDriver system dependencies
 - Comprehensive LiveView tests already exist in `symbol_autocomplete_ui_test.exs`
 
 ### Impact Assessment
-- **Risk**: Low - Wallaby tests are disabled and not contributing to CI/CD
-- **Complexity**: Low - Single dependency removal with minimal code cleanup
-- **Testing Coverage**: No reduction - LiveView tests provide comprehensive coverage
+
+- Low - Wallaby tests are disabled and not contributing to CI/CD
+- Low - Single dependency removal with minimal code cleanup
+- No reduction - LiveView tests provide comprehensive coverage
 
 ## Immediate Actions (Priority Order)
 
 ### 1. Remove Wallaby Dependency
-**Timeline**: Immediate
-**Risk**: None - dependency not functional
+
+Immediate
+None - dependency not functional
 
 ```bash
 # Edit mix.exs to remove wallaby line
@@ -33,32 +36,32 @@ Based on ADR-003, we are removing Wallaby from the project to align with local-f
 # Run mix deps.get to update lock file
 ```
 
-**Files to modify**:
 - `/Users/matthewstaff/Projects/github.com/mdstaff/ashfolio/mix.exs` (remove line 77)
 
 ### 2. Remove Browser Test Directory
-**Timeline**: Immediate  
-**Risk**: None - contains only disabled tests
+
+Immediate  
+ None - contains only disabled tests
 
 ```bash
 # Remove entire browser test directory
 rm -rf test/ashfolio_web/browser/
 ```
 
-**Files to remove**:
 - `/Users/matthewstaff/Projects/github.com/mdstaff/ashfolio/test/ashfolio_web/browser/symbol_autocomplete_browser_test.exs`
 
 ### 3. Update Test Configuration
-**Timeline**: Immediate
-**Risk**: None - removing unused test tags
 
-**Files to check/update**:
+Immediate
+None - removing unused test tags
+
 - `test/test_helper.exs` - Remove any Wallaby-specific configuration
 - `config/test.exs` - Remove any Wallaby-specific settings
 
 ### 4. Verify Test Suite
-**Timeline**: Immediate
-**Risk**: Low - ensure no broken references
+
+Immediate
+Low - ensure no broken references
 
 ```bash
 # Run full test suite to verify no issues
@@ -68,10 +71,10 @@ mix test test/ashfolio_web/components/symbol_autocomplete_ui_test.exs
 ```
 
 ### 5. Update Documentation
-**Timeline**: Same day
-**Risk**: None - documentation update
 
-**Files to update**:
+Same day
+None - documentation update
+
 - Update any testing documentation to reflect browser testing decision
 - Ensure manual testing guidelines are in place
 
@@ -79,12 +82,11 @@ mix test test/ashfolio_web/components/symbol_autocomplete_ui_test.exs
 
 ### Step 1: Remove Wallaby from mix.exs
 
-**Current Line 77**:
 ```elixir
 {:wallaby, "~> 0.30", only: :test}
 ```
 
-**Action**: Delete this line entirely
+Delete this line entirely
 
 ### Step 2: Clean Up Dependencies
 
@@ -134,7 +136,9 @@ mix test test/ashfolio_web/components/symbol_autocomplete_ui_test.exs
 ## Testing Strategy Post-Removal
 
 ### Primary: Enhanced LiveView Tests
+
 The existing `symbol_autocomplete_ui_test.exs` provides:
+
 - Component rendering verification
 - Event handler testing
 - Accessibility attribute validation
@@ -142,7 +146,9 @@ The existing `symbol_autocomplete_ui_test.exs` provides:
 - Keyboard navigation server-side logic
 
 ### Secondary: Manual Testing Guidelines
+
 Create checklist for JavaScript functionality:
+
 - Keyboard navigation (arrows, enter, escape, tab)
 - Click-outside-to-close behavior
 - Mobile responsiveness and touch interactions
@@ -150,7 +156,9 @@ Create checklist for JavaScript functionality:
 - Screen reader compatibility
 
 ### Documentation: Test Case References
+
 Document the disabled browser test cases as manual test scenarios:
+
 - Convert commented test cases to manual testing checklist
 - Include in component documentation
 - Add to PR review template
@@ -158,30 +166,36 @@ Document the disabled browser test cases as manual test scenarios:
 ## Risk Mitigation
 
 ### Potential Issues
-1. **Hidden Wallaby Dependencies**: Other components might reference Wallaby
-2. **Test Configuration**: Wallaby config might be in multiple files
-3. **CI/CD Scripts**: Build scripts might reference browser tests
+
+1.  Other components might reference Wallaby
+2.  Wallaby config might be in multiple files
+3.  Build scripts might reference browser tests
 
 ### Mitigation Steps
-1. **Comprehensive Search**: Grep entire codebase for Wallaby references
-2. **Full Test Run**: Verify complete test suite after removal
-3. **Documentation Review**: Check all test-related documentation
+
+1.  Grep entire codebase for Wallaby references
+2.  Verify complete test suite after removal
+3.  Check all test-related documentation
 
 ### Rollback Plan
+
 If issues arise:
-1. **Git Revert**: Simple revert of dependency removal commit
-2. **Re-add Dependency**: Add Wallaby back with version pin
-3. **Restore Tests**: Restore browser test directory from git history
+
+1.  Simple revert of dependency removal commit
+2.  Add Wallaby back with version pin
+3.  Restore browser test directory from git history
 
 ## Success Criteria
 
 ### Technical Success
+
 - [ ] Mix compilation succeeds without Wallaby
 - [ ] All existing tests continue to pass
 - [ ] No dependency conflicts introduced
 - [ ] Clean `mix deps.tree` output
 
 ### Process Success
+
 - [ ] ADR-003 implementation completed
 - [ ] Dependency governance process followed
 - [ ] Documentation updated appropriately
@@ -189,17 +203,14 @@ If issues arise:
 
 ## Timeline
 
-**Immediate (Next 30 minutes)**:
 - Remove Wallaby dependency and browser tests
 - Verify test suite passes
 - Update documentation references
 
-**Same Day**:
 - Create manual testing checklist
 - Update any related documentation
 - Communicate change to team/stakeholders
 
-**This Week**:
 - Integrate manual testing into PR review process
 - Monitor for any issues or missing test coverage
 - Complete documentation of new testing approach
@@ -207,23 +218,26 @@ If issues arise:
 ## Communication
 
 ### Stakeholders to Notify
+
 - Development team
 - QA/Testing team (if separate)
 - Any external contributors
 
 ### Key Messages
-1. **Alignment with Architecture**: Decision supports local-first principles
-2. **No Functionality Loss**: JavaScript behavior remains unchanged
-3. **Improved Development Experience**: Simpler setup, faster tests
-4. **Enhanced Testing Strategy**: Better LiveView test coverage
+
+1.  Decision supports local-first principles
+2.  JavaScript behavior remains unchanged
+3.  Simpler setup, faster tests
+4.  Better LiveView test coverage
 
 ### Follow-up Items
+
 - Monitor for any user-reported issues that manual testing missed
 - Evaluate testing strategy effectiveness after 1 month
 - Consider tooling improvements for manual testing workflow
 
 ---
 
-**Status**: Ready for Implementation
-**Owner**: Development Team
-**Review**: ADR-003 provides full architectural justification
+Ready for Implementation
+Development Team
+ADR-003 provides full architectural justification

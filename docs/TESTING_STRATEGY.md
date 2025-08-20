@@ -21,6 +21,8 @@ Tags: `@tag :unit`
 - Component rendering tests
 - Calculation modules
 
+Use global test data when possible. See [Global Test Data Requirements](testing/global-test-data-requirements.md) for details.
+
 ### 🔗 Integration Tests (2-5 seconds)
 
 Purpose: Cross-module interactions  
@@ -31,6 +33,8 @@ Tags: `@tag :integration`
 - Context API tests
 - Cross-domain interactions
 - PubSub communication
+
+Integration tests **must** reset global account balances in setup. See [Global Test Data Requirements](testing/global-test-data-requirements.md) for proper patterns.
 
 ### 🌐 LiveView Tests (5-15 seconds)
 
@@ -149,7 +153,7 @@ GET /health
 GET /api/health
 
 # Simple ping endpoint for load balancers
-GET /ping  
+GET /ping
 GET /api/ping
 ```
 
@@ -160,13 +164,14 @@ Enhanced server management with health monitoring:
 ```bash
 just server status  # Check server status with health endpoint
 just server         # Start server
-just server bg      # Start in background  
+just server bg      # Start in background
 just server stop    # Stop server
 ```
 
 The `just server status` command now provides:
+
 - Process status check
-- Health endpoint verification  
+- Health endpoint verification
 - Database connectivity status
 - Memory usage and uptime (with jq installed)
 
@@ -252,30 +257,30 @@ end
 
 ## Current Status
 
-- ✅ **COMPLETE SUCCESS**: 970 tests, 0 failures (100% success rate)
-- ✅ Main test suite: 871 tests, 0 failures, 220 excluded
-- ✅ Performance suite: 99 tests, 0 failures
-- ✅ Simplified justfile deployed and operational
-- ✅ Enhanced failure reporting with ClearFailureFormatter
-- ✅ Documentation style guide established
-- ✅ Systematic test failure resolution patterns documented
+- 970 tests, 0 failures (100% success rate)
+- Main test suite: 871 tests, 0 failures, 220 excluded
+- Performance suite: 99 tests, 0 failures
+- Simplified justfile deployed and operational
+- Enhanced failure reporting with ClearFailureFormatter
+- Documentation style guide established
+- Systematic test failure resolution patterns documented
 
 ## Key Learnings from 100% Success Achievement
 
 ### Pattern-Based Test Failure Resolution
 
-1. **Database Key Mismatches**: Handle both `:cash_balance`/`:cash_value` and `:total_net_worth`/`:net_worth` keys in implementations
-2. **SQLite Concurrency**: Remove shared account creation from setup to prevent race conditions
-3. **Component Testing**: Replace assertions on non-existent attributes with content-based assertions
-4. **Performance Thresholds**: Use realistic timing expectations for test environments
-5. **External API Limits**: Reduce high-volume external calls (1000→50) to prevent timeouts
+1.  Handle both `:cash_balance`/`:cash_value` and `:total_net_worth`/`:net_worth` keys in implementations
+2.  Remove shared account creation from setup to prevent race conditions
+3.  Replace assertions on non-existent attributes with content-based assertions
+4.  Use realistic timing expectations for test environments
+5.  Reduce high-volume external calls (1000→50) to prevent timeouts
 
 ### Systematic Approach That Works
 
-1. **Identify Patterns**: Group similar failures by error type and root cause
-2. **Fix Pattern, Not Instance**: Apply the same solution across all similar cases
-3. **Validate Incrementally**: Run targeted test subsets after each fix batch
-4. **Document Learnings**: Capture the patterns for future prevention
+1.  Group similar failures by error type and root cause
+2.  Apply the same solution across all similar cases
+3.  Run targeted test subsets after each fix batch
+4.  Capture the patterns for future prevention
 
 ## Benefits
 
@@ -302,11 +307,12 @@ def live_view do
   end
 end
 
-# In lib/ashfolio_web/router.ex  
+# In lib/ashfolio_web/router.ex
 plug :put_root_layout, html: {AshfolioWeb.Layouts, :root}
 ```
 
-This caused the **root layout to render twice**:
+This caused the
+
 1. Router applies root layout as outer shell
 2. LiveView applies root layout again as inner content
 3. Result: All IDs duplicated (topbar, flash, navigation, etc.)
@@ -314,12 +320,12 @@ This caused the **root layout to render twice**:
 ### The Fix
 
 ```elixir
-# CORRECT CONFIGURATION  
+# CORRECT CONFIGURATION
 # In lib/ashfolio_web.ex
 def live_view do
   quote do
     use Phoenix.LiveView,
-      layout: {AshfolioWeb.Layouts, :app}  # ✅ CORRECT!
+      layout: {AshfolioWeb.Layouts, :app}  #  CORRECT!
   end
 end
 
@@ -334,7 +340,7 @@ plug :put_root_layout, html: {AshfolioWeb.Layouts, :root}
 │ Root Layout (:root)                         │
 │ ┌─────────────────────────────────────────┐ │
 │ │ <html>, <head>, <body>                  │ │
-│ │ TopBar Component                        │ │  
+│ │ TopBar Component                        │ │
 │ │ Flash Components                        │ │
 │ │ ┌─────────────────────────────────────┐ │ │
 │ │ │ App Layout (:app)                   │ │ │
@@ -346,9 +352,9 @@ plug :put_root_layout, html: {AshfolioWeb.Layouts, :root}
 
 ### Impact
 
-- **Before**: 71+ failures due to duplicate IDs
-- **After**: 125/128 tests passing (97.7% success rate)  
-- **Root Cause**: Phoenix LiveView 1.1's stricter duplicate ID validation exposed the issue
+- 71+ failures due to duplicate IDs
+- 125/128 tests passing (97.7% success rate)
+- Phoenix LiveView 1.1's stricter duplicate ID validation exposed the issue
 
 ### Prevention
 

@@ -4,7 +4,7 @@
 
 This feature enhances the existing holdings table with sorting, filtering, and bulk operations to help users manage larger portfolios more efficiently.
 
-**Foundation**: Built on v0.1.0's existing holdings table and HoldingsCalculator with proven performance.
+Built on v0.1.0's existing holdings table and HoldingsCalculator with proven performance.
 
 ## Requirements
 
@@ -60,10 +60,10 @@ This feature enhances the existing holdings table with sorting, filtering, and b
 
 ### Integration Points
 
-- **Existing Holdings Table**: Enhance current table component
-- **HoldingsCalculator**: Use existing calculation engine
-- **Phoenix LiveView**: Leverage existing real-time capabilities
-- **User Preferences**: Store sort/filter preferences (new feature)
+- Enhance current table component
+- Use existing calculation engine
+- Leverage existing real-time capabilities
+- Store sort/filter preferences (new feature)
 
 ### Performance Targets
 

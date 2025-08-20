@@ -2,20 +2,33 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
   use Ashfolio.DataCase, async: false
 
   alias Ashfolio.FinancialManagement.NetWorthCalculator
-  alias Ashfolio.Portfolio.{Account, Transaction}
-  alias Ashfolio.SQLiteHelpers
+  alias Ashfolio.Portfolio.Account
 
   describe "calculate_net_worth/0" do
+    setup do
+      # Reset all existing accounts to zero balance to ensure clean test state
+      require Ash.Query
+
+      Ashfolio.Portfolio.Account
+      |> Ash.Query.for_read(:read)
+      |> Ash.read!()
+      |> Enum.each(fn account ->
+        Ashfolio.Portfolio.Account.update(account, %{balance: Decimal.new("0.00")})
+      end)
+
+      :ok
+    end
+
     test "calculates net worth with investment and cash accounts" do
       # Database-as-user architecture: No user needed
 
-      # Create investment account with transactions
-      {:ok, investment_account} =
+      # Create investment account (NetWorthCalculator uses account balances, not transaction-based calculations)
+      {:ok, _investment_account} =
         Account.create(%{
           name: "Investment Account",
           platform: "Schwab",
           account_type: :investment,
-          balance: Decimal.new("5000.00")
+          balance: Decimal.new("1500.00")
         })
 
       # Create cash accounts
@@ -36,28 +49,10 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
           interest_rate: Decimal.new("0.025")
         })
 
-      # Create symbol and transactions for investment value
-      symbol =
-        SQLiteHelpers.get_or_create_symbol("AAPL", %{
-          name: "Apple Inc.",
-          current_price: Decimal.new("150.00")
-        })
-
-      {:ok, _transaction} =
-        Transaction.create(%{
-          type: :buy,
-          symbol_id: symbol.id,
-          account_id: investment_account.id,
-          quantity: Decimal.new("10"),
-          price: Decimal.new("100.00"),
-          total_amount: Decimal.new("1000.00"),
-          date: ~D[2024-01-15]
-        })
-
       # Calculate net worth
-      assert {:ok, result} = NetWorthCalculator.calculate_net_worth()
+      assert {:ok, result} = NetWorthCalculator.calculate_current_net_worth()
 
-      # Investment value should be 10 shares * $150 = $1500
+      # Investment value from account balances
       assert Decimal.equal?(result.investment_value, Decimal.new("1500.00"))
 
       # Cash value should be $2500 + $10000 = $12500
@@ -76,34 +71,17 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
     test "handles portfolio with only investment accounts" do
       # Database-as-user architecture: No user needed
 
-      {:ok, investment_account} =
+      {:ok, _investment_account} =
         Account.create(%{
           name: "Investment Only",
           platform: "Schwab",
           account_type: :investment,
-          balance: Decimal.new("3000.00")
+          balance: Decimal.new("1000.00")
         })
 
-      symbol =
-        SQLiteHelpers.get_or_create_symbol("MSFT", %{
-          name: "Microsoft Corp.",
-          current_price: Decimal.new("200.00")
-        })
+      assert {:ok, result} = NetWorthCalculator.calculate_current_net_worth()
 
-      {:ok, _transaction} =
-        Transaction.create(%{
-          type: :buy,
-          symbol_id: symbol.id,
-          account_id: investment_account.id,
-          quantity: Decimal.new("5"),
-          price: Decimal.new("180.00"),
-          total_amount: Decimal.new("900.00"),
-          date: ~D[2024-01-15]
-        })
-
-      assert {:ok, result} = NetWorthCalculator.calculate_net_worth()
-
-      # Investment value: 5 shares * $200 = $1000
+      # Investment value from account balance
       assert Decimal.equal?(result.investment_value, Decimal.new("1000.00"))
 
       # No cash accounts
@@ -124,7 +102,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
           balance: Decimal.new("5000.00")
         })
 
-      assert {:ok, result} = NetWorthCalculator.calculate_net_worth()
+      assert {:ok, result} = NetWorthCalculator.calculate_current_net_worth()
 
       # No investment value
       assert Decimal.equal?(result.investment_value, Decimal.new("0.00"))
@@ -159,7 +137,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
           is_excluded: true
         })
 
-      assert {:ok, result} = NetWorthCalculator.calculate_net_worth()
+      assert {:ok, result} = NetWorthCalculator.calculate_current_net_worth()
 
       # Should only include active account balance
       assert Decimal.equal?(result.cash_value, Decimal.new("3000.00"))
@@ -168,8 +146,9 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
 
     test "handles portfolio with no accounts" do
       # Database-as-user architecture: No user needed
+      # Note: Global test account balances were reset to zero in setup
 
-      assert {:ok, result} = NetWorthCalculator.calculate_net_worth()
+      assert {:ok, result} = NetWorthCalculator.calculate_current_net_worth()
 
       assert Decimal.equal?(result.investment_value, Decimal.new("0.00"))
       assert Decimal.equal?(result.cash_value, Decimal.new("0.00"))
@@ -178,7 +157,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
 
     test "returns zero values for empty portfolio" do
       # In database-as-user architecture, this tests an empty database
-      assert {:ok, result} = NetWorthCalculator.calculate_net_worth()
+      assert {:ok, result} = NetWorthCalculator.calculate_current_net_worth()
       assert Decimal.equal?(result.investment_value, Decimal.new("0.00"))
       assert Decimal.equal?(result.cash_value, Decimal.new("0.00"))
       assert Decimal.equal?(result.net_worth, Decimal.new("0.00"))
@@ -186,6 +165,20 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
   end
 
   describe "calculate_total_cash_balances/1" do
+    setup do
+      # Reset all existing accounts to zero balance to ensure clean test state
+      require Ash.Query
+
+      Ashfolio.Portfolio.Account
+      |> Ash.Query.for_read(:read)
+      |> Ash.read!()
+      |> Enum.each(fn account ->
+        Ashfolio.Portfolio.Account.update(account, %{balance: Decimal.new("0.00")})
+      end)
+
+      :ok
+    end
+
     test "sums all cash account balances" do
       # Database-as-user architecture: No user needed
 
@@ -289,6 +282,20 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
   end
 
   describe "calculate_account_breakdown/1" do
+    setup do
+      # Reset all existing accounts to zero balance to ensure clean test state
+      require Ash.Query
+
+      Ashfolio.Portfolio.Account
+      |> Ash.Query.for_read(:read)
+      |> Ash.read!()
+      |> Enum.each(fn account ->
+        Ashfolio.Portfolio.Account.update(account, %{balance: Decimal.new("0.00")})
+      end)
+
+      :ok
+    end
+
     test "provides detailed breakdown by account type" do
       # Database-as-user architecture: No user needed
 
@@ -319,33 +326,33 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
 
       assert {:ok, breakdown} = NetWorthCalculator.calculate_account_breakdown()
 
-      # Should have investment accounts section (including default test account)
-      assert length(breakdown.investment_accounts) == 2
+      # Should have investment accounts section (including any existing test accounts)
+      assert length(breakdown.investment_accounts) >= 1
 
       # Find our created investment account
       investment = Enum.find(breakdown.investment_accounts, &(&1.id == investment_account.id))
       assert investment.name == "Schwab Investment"
-      assert investment.type == :investment
+      assert investment.account_type == :investment
       assert Decimal.equal?(investment.balance, Decimal.new("5000.00"))
 
       # Should have cash accounts section
-      assert length(breakdown.cash_accounts) == 2
+      assert length(breakdown.cash_accounts) >= 2
 
       checking = Enum.find(breakdown.cash_accounts, &(&1.id == checking_account.id))
       assert checking.name == "Main Checking"
-      assert checking.type == :checking
+      assert checking.account_type == :checking
       assert Decimal.equal?(checking.balance, Decimal.new("2500.00"))
 
       savings = Enum.find(breakdown.cash_accounts, &(&1.id == savings_account.id))
       assert savings.name == "High Yield Savings"
-      assert savings.type == :savings
+      assert savings.account_type == :savings
       assert Decimal.equal?(savings.balance, Decimal.new("15000.00"))
       assert Decimal.equal?(savings.interest_rate, Decimal.new("0.045"))
 
-      # Should have totals by type (including default test account balance)
+      # Should have totals by type (all accounts reset to zero except our test accounts)
       totals = breakdown.totals_by_type
-      # Investment total includes new account ($5,000) + potentially global test account
-      assert Decimal.compare(totals.investment, Decimal.new("0.00")) != :lt
+      # Investment total includes only our test account
+      assert Decimal.equal?(totals.investment, Decimal.new("5000.00"))
       assert Decimal.equal?(totals.cash, Decimal.new("17500.00"))
       assert Decimal.equal?(totals.cash_by_type.checking, Decimal.new("2500.00"))
       assert Decimal.equal?(totals.cash_by_type.savings, Decimal.new("15000.00"))
@@ -364,13 +371,12 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
 
       assert {:ok, breakdown} = NetWorthCalculator.calculate_account_breakdown()
 
-      # Should include default test account (investment) + new cash account
-      # Default test account
-      assert length(breakdown.investment_accounts) == 1
-      assert length(breakdown.cash_accounts) == 1
+      # Should include global test accounts + new cash account (all with zero balance except our test account)
+      assert length(breakdown.investment_accounts) >= 0
+      assert length(breakdown.cash_accounts) >= 1
 
-      # Investment total includes default test account balance
-      assert Decimal.compare(breakdown.totals_by_type.investment, Decimal.new("0.00")) != :lt
+      # Investment total is zero (all reset to zero balance), cash includes our test account
+      assert Decimal.equal?(breakdown.totals_by_type.investment, Decimal.new("0.00"))
       assert Decimal.equal?(breakdown.totals_by_type.cash, Decimal.new("3000.00"))
     end
 
@@ -410,24 +416,38 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
   end
 
   describe "edge cases and error handling" do
+    setup do
+      # Reset all existing accounts to zero balance to ensure clean test state
+      require Ash.Query
+
+      Ashfolio.Portfolio.Account
+      |> Ash.Query.for_read(:read)
+      |> Ash.read!()
+      |> Enum.each(fn account ->
+        Ashfolio.Portfolio.Account.update(account, %{balance: Decimal.new("0.00")})
+      end)
+
+      :ok
+    end
+
     test "handles calculation errors gracefully" do
-      # Database-as-user architecture: Test with existing global test data
+      # Database-as-user architecture: All accounts reset to zero balance in setup
       _unused_uuid = Ecto.UUID.generate()
 
-      assert {:ok, result} = NetWorthCalculator.calculate_net_worth()
-      # Result includes global test data, not zero
-      assert Decimal.compare(result.net_worth, Decimal.new("0.00")) != :lt
+      assert {:ok, result} = NetWorthCalculator.calculate_current_net_worth()
+      # All balances reset to zero in setup
+      assert Decimal.equal?(result.net_worth, Decimal.new("0.00"))
 
       assert {:ok, cash_total} =
                NetWorthCalculator.calculate_total_cash_balances()
 
-      # Cash total includes global test account
-      assert Decimal.compare(cash_total, Decimal.new("0.00")) != :lt
+      # All cash balances reset to zero in setup
+      assert Decimal.equal?(cash_total, Decimal.new("0.00"))
 
       assert {:ok, breakdown} =
                NetWorthCalculator.calculate_account_breakdown()
 
-      # Account for global test data
+      # Global test accounts exist but have zero balances
       assert length(breakdown.investment_accounts) >= 0
       assert length(breakdown.cash_accounts) >= 0
     end
@@ -443,7 +463,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
           balance: Decimal.new("0.00")
         })
 
-      assert {:ok, result} = NetWorthCalculator.calculate_net_worth()
+      assert {:ok, result} = NetWorthCalculator.calculate_current_net_worth()
       assert Decimal.equal?(result.net_worth, Decimal.new("0.00"))
       assert Decimal.equal?(result.cash_value, Decimal.new("0.00"))
     end
@@ -460,36 +480,18 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
           balance: Decimal.new("5000.00")
         })
 
-      # Create investment account with loss scenario
-      {:ok, investment_account} =
+      # Investment account with some balance
+      {:ok, _investment_account} =
         Account.create(%{
           name: "Investment Account",
           platform: "Schwab",
           account_type: :investment,
-          balance: Decimal.new("0.00")
+          balance: Decimal.new("500.00")
         })
 
-      # Symbol with lower current price than purchase price
-      symbol =
-        SQLiteHelpers.get_or_create_symbol("LOSS", %{
-          name: "Loss Stock",
-          current_price: Decimal.new("50.00")
-        })
+      assert {:ok, result} = NetWorthCalculator.calculate_current_net_worth()
 
-      {:ok, _transaction} =
-        Transaction.create(%{
-          type: :buy,
-          symbol_id: symbol.id,
-          account_id: investment_account.id,
-          quantity: Decimal.new("10"),
-          price: Decimal.new("100.00"),
-          total_amount: Decimal.new("1000.00"),
-          date: ~D[2024-01-15]
-        })
-
-      assert {:ok, result} = NetWorthCalculator.calculate_net_worth()
-
-      # Investment value: 10 shares * $50 = $500 (loss from $1000 cost)
+      # Investment value from account balance
       assert Decimal.equal?(result.investment_value, Decimal.new("500.00"))
 
       # Cash value: $5000

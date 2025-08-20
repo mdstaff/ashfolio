@@ -1,5 +1,8 @@
 import Config
 
+# Disable Oban in test environment
+config :ashfolio, Oban, testing: :manual
+
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used

@@ -1,9 +1,9 @@
 # ADR-002: Financial Domain Expansion Architecture
 
-**Status**: Accepted  
-**Date**: 2025-01-10  
-**Authors**: Development Team  
-**Reviewers**: Project Architect, Technical Writing Agent
+Accepted  
+ 2025-01-10  
+ Development Team  
+ Project Architect, Technical Writing Agent
 
 ## Context
 
@@ -122,19 +122,19 @@ Strategic indexing for time-series queries:
 
 ### Advantages
 
-1. **Architectural Alignment**: The Ash/SQLite foundation scales naturally to comprehensive financial data
-2. **User Value**: Addresses real user needs for holistic financial management
-3. **Local-First Preservation**: Maintains privacy and data ownership principles
-4. **Incremental Development**: Phased approach minimizes risk and maintains existing functionality
-5. **Domain Separation**: Clean architectural boundaries prevent feature sprawl
-6. **SQLite Performance**: Proven capable of handling comprehensive financial datasets
+1.  The Ash/SQLite foundation scales naturally to comprehensive financial data
+2.  Addresses real user needs for holistic financial management
+3.  Maintains privacy and data ownership principles
+4.  Phased approach minimizes risk and maintains existing functionality
+5.  Clean architectural boundaries prevent feature sprawl
+6.  Proven capable of handling comprehensive financial datasets
 
 ### Technical Feasibility
 
-- **Ash Framework**: Resource and relationship patterns scale to financial management domain
-- **SQLite Performance**: Current system handles 1000+ positions efficiently; financial data follows similar patterns
-- **Calculation Precision**: Existing Decimal precision infrastructure extends naturally
-- **Time-Series Data**: SQLite with proper indexing handles historical financial data effectively
+- Resource and relationship patterns scale to financial management domain
+- Current system handles 1000+ positions efficiently; financial data follows similar patterns
+- Existing Decimal precision infrastructure extends naturally
+- SQLite with proper indexing handles historical financial data effectively
 
 ## Alternatives Considered
 
@@ -175,27 +175,27 @@ Integrate with existing personal finance services.
 
 ### Positive Consequences
 
-1. **Comprehensive Solution**: Single application handles complete financial picture
-2. **Architectural Consistency**: Maintains Ash/SQLite patterns throughout
-3. **User Experience**: Unified interface for all financial management
-4. **Privacy Preservation**: All financial data remains local
-5. **Competitive Advantage**: Few local-first comprehensive financial management solutions exist
+1.  Single application handles complete financial picture
+2.  Maintains Ash/SQLite patterns throughout
+3.  Unified interface for all financial management
+4.  All financial data remains local
+5.  Few local-first comprehensive financial management solutions exist
 
 ### Negative Consequences
 
-1. **Increased Complexity**: More resources, relationships, and business logic to maintain
-2. **Testing Overhead**: Comprehensive financial scenarios require extensive test coverage
-3. **User Migration**: Existing users must understand expanded scope and capabilities
-4. **Performance Monitoring**: Larger datasets require ongoing performance validation
-5. **Support Complexity**: More features mean more potential user issues
+1.  More resources, relationships, and business logic to maintain
+2.  Comprehensive financial scenarios require extensive test coverage
+3.  Existing users must understand expanded scope and capabilities
+4.  Larger datasets require ongoing performance validation
+5.  More features mean more potential user issues
 
 ### Risk Mitigation Strategies
 
-1. **Incremental Development**: Four-phase rollout minimizes risk of feature disruption
-2. **Backward Compatibility**: All v0.1.x functionality remains intact
-3. **Comprehensive Testing**: Property-based testing for financial calculations
-4. **Performance Monitoring**: Telemetry and benchmarking for SQLite performance
-5. **User Feedback**: Validation at each phase before proceeding
+1.  Four-phase rollout minimizes risk of feature disruption
+2.  All v0.1.x functionality remains intact
+3.  Property-based testing for financial calculations
+4.  Telemetry and benchmarking for SQLite performance
+5.  Validation at each phase before proceeding
 
 ## Compliance and Monitoring
 
@@ -209,10 +209,10 @@ Integrate with existing personal finance services.
 
 ### Success Metrics
 
-- **Technical**: Sub-second performance for comprehensive financial calculations
-- **User**: Monthly financial updates complete in <30 minutes
-- **Data**: 100% backward compatibility with existing portfolio data
-- **Features**: Full replacement of spreadsheet-based workflow capabilities
+- Sub-second performance for comprehensive financial calculations
+- Monthly financial updates complete in <30 minutes
+- 100% backward compatibility with existing portfolio data
+- Full replacement of spreadsheet-based workflow capabilities
 
 ## References
 
@@ -229,5 +229,5 @@ This ADR has been reviewed and approved by:
 - Technical Writing Agent: Approved - Documentation strategy aligns with expansion scope
 - Development Team: Approved - Implementation phases provide clear development path
 
-**Final Status**: Accepted  
-**Implementation Start**: Immediate (Phase 1: Cash Management Foundation)
+Accepted  
+ Immediate (Phase 1: Cash Management Foundation)

@@ -4,7 +4,7 @@
 
 The database-as-user architecture migration is nearly complete! This document tracks the final remaining items.
 
-## ✅ Completed Work (Phases 1-6)
+## Completed Work (Phases 1-6)
 
 - **100% of production code** migrated to database-as-user architecture
 - **100% of test files** refactored (20/20 files)
@@ -15,17 +15,20 @@ The database-as-user architecture migration is nearly complete! This document tr
 ## 🚧 Remaining Items (Phase 7&8)
 
 ### Minor Function Call Updates
+
 - [ ] Fix `Transaction.list_for_user_by_date_range!` calls in performance tests
 - [ ] Fix `Transaction.list_for_user_paginated!` calls in performance tests
 - [ ] Update `NetWorthCalculator.calculate_net_worth/1` calls (should be /0)
 
 ### Documentation Cleanup
+
 - [ ] Update TESTING_STRATEGY.md to remove User references
 - [ ] Review and update inline code comments
 - [ ] Update @doc strings on public functions
 - [ ] Deprecate old migration planning documents
 
 ### Final Validation
+
 - [ ] Run full test suite with all tags
 - [ ] Verify all performance benchmarks pass
 - [ ] Confirm no User references remain in codebase
@@ -42,6 +45,7 @@ The database-as-user architecture migration is nearly complete! This document tr
 ## Impact Summary
 
 The migration has successfully transformed Ashfolio into a true single-user, database-centric application:
+
 - **Simpler architecture** - No user management complexity
 - **Better performance** - No user_id lookups or joins
 - **Enhanced privacy** - Complete data isolation

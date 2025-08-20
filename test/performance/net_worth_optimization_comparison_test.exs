@@ -28,6 +28,16 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
 
   describe "Optimized Net Worth Calculator Performance" do
     setup do
+      # Reset all existing accounts to zero balance to ensure clean test state
+      require Ash.Query
+
+      Ashfolio.Portfolio.Account
+      |> Ash.Query.for_read(:read)
+      |> Ash.read!()
+      |> Enum.each(fn account ->
+        Ashfolio.Portfolio.Account.update(account, %{balance: Decimal.new("0.00")})
+      end)
+
       # Create realistic test data
       create_performance_test_data(
         @performance_account_count,
@@ -90,7 +100,7 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
 
     test "functional equivalence with original implementation" do
       # Get results from both implementations
-      {:ok, original_result} = NetWorthCalculator.calculate_net_worth()
+      {:ok, original_result} = NetWorthCalculator.calculate_current_net_worth()
       {:ok, optimized_result} = NetWorthCalculatorOptimized.calculate_net_worth()
 
       # Results should be functionally equivalent
@@ -110,7 +120,7 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
       # Measure original implementation
       {original_time_us, {:ok, _original_result}} =
         :timer.tc(fn ->
-          NetWorthCalculator.calculate_net_worth()
+          NetWorthCalculator.calculate_current_net_worth()
         end)
 
       # Measure optimized implementation
@@ -163,6 +173,16 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
 
   describe "Batch Loading Efficiency Verification" do
     setup do
+      # Reset all existing accounts to zero balance to ensure clean test state
+      require Ash.Query
+
+      Ashfolio.Portfolio.Account
+      |> Ash.Query.for_read(:read)
+      |> Ash.read!()
+      |> Enum.each(fn account ->
+        Ashfolio.Portfolio.Account.update(account, %{balance: Decimal.new("0.00")})
+      end)
+
       create_performance_test_data(10, 20)
       %{}
     end
@@ -221,6 +241,16 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
 
   describe "Edge Cases and Error Handling" do
     setup do
+      # Reset all existing accounts to zero balance to ensure clean test state
+      require Ash.Query
+
+      Ashfolio.Portfolio.Account
+      |> Ash.Query.for_read(:read)
+      |> Ash.read!()
+      |> Enum.each(fn account ->
+        Ashfolio.Portfolio.Account.update(account, %{balance: Decimal.new("0.00")})
+      end)
+
       create_performance_test_data(5, 10)
       %{}
     end

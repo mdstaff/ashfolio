@@ -54,6 +54,7 @@ brew install erlang elixir
 ```
 
 **Recommended Versions:**
+
 - Erlang/OTP: 26.0+
 - Elixir: 1.15.0+
 
@@ -261,13 +262,15 @@ sqlite3 --version
 If tests fail with database sandbox errors:
 
 **Symptoms:**
-- Tests fail with `{:badmatch, :already_shared}` errors  
+
+- Tests fail with `{:badmatch, :already_shared}` errors
 - Multiple tests failing with sandbox-related messages
 - Intermittent test failures in CI/CD
 
 **Cause:** SQLite has limited concurrent access compared to PostgreSQL
 
 **Resolution:**
+
 - The test infrastructure automatically handles these conflicts
 - Tests should pass on retry
 - For persistent issues, run individual test files: `just test-file path/to/test.exs`
@@ -332,10 +335,10 @@ MIX_ENV=dev
 
 After completing the setup:
 
-1. **Read the Architecture Documentation**: Review `docs/ARCHITECTURE.md` to understand the system design
-2. **Explore the Codebase**: Start with `lib/ashfolio.ex` and `lib/ashfolio_web.ex`
-3. **Run Tests**: Execute `mix test` to ensure everything is working
-4. **Start Development**: Begin with the first implementation task in the project plan
+1.  Review `docs/ARCHITECTURE.md` to understand the system design
+2.  Start with `lib/ashfolio.ex` and `lib/ashfolio_web.ex`
+3.  Execute `mix test` to ensure everything is working
+4.  Begin with the first implementation task in the project plan
 
 ## Getting Help
 
@@ -350,10 +353,10 @@ If you encounter issues not covered in this guide:
 
 Expected performance on Apple Silicon (M1 Pro, 16GB RAM):
 
-- **Application Startup**: < 3 seconds
-- **Test Suite Execution**: < 10 seconds
-- **Asset Compilation**: < 5 seconds
-- **Database Migration**: < 2 seconds
-- **Phoenix Server Start**: < 2 seconds
+- < 3 seconds
+- < 10 seconds
+- < 5 seconds
+- < 2 seconds
+- < 2 seconds
 
 If your setup doesn't meet these benchmarks, review the optimization sections above.

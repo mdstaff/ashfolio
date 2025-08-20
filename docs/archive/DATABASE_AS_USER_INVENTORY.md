@@ -3,16 +3,18 @@
 ## Analysis Results
 
 ### Overall Statistics
-- **Production files with "user" references**: 24 files
-- **Test files with "user" references**: 46 files  
-- **Functions with user_id parameters**: 23 functions
-- **Total impacted files**: ~70 files
+
+- 24 files
+- 46 files
+- 23 functions
+- ~70 files
 
 ## Detailed Inventory
 
 ### 1. Production Code - Functions to Refactor
 
 #### Calculator Modules (lib/ashfolio/portfolio/)
+
 ```elixir
 # Files with user_id parameters that need removal:
 calculator.ex
@@ -29,6 +31,7 @@ calculator_optimized.ex
 ```
 
 #### Financial Management Modules
+
 ```elixir
 net_worth_calculator.ex
   - calculate_net_worth(user_id)
@@ -41,6 +44,7 @@ net_worth_calculator_optimized.ex
 ```
 
 #### Context Module
+
 ```elixir
 context.ex
   - get_user_dashboard_data(user_id)
@@ -51,13 +55,15 @@ context.ex
 ### 2. Production Code - Misleading Names
 
 #### Account Module
+
 ```elixir
 # Current -> Should Be
 accounts_for_user() -> list_all_accounts()
 active_for_user() -> list_active_accounts()
 ```
 
-#### Transaction Module  
+#### Transaction Module
+
 ```elixir
 # Current -> Should Be
 list_for_user() -> list_all()
@@ -68,6 +74,7 @@ list_for_user_by_date_range() -> list_by_date_range()
 ### 3. LiveView Modules - Dead Code
 
 #### Files with unused user_id fetching:
+
 ```
 lib/ashfolio_web/live/dashboard_live.ex
 lib/ashfolio_web/live/account_live/index.ex
@@ -76,6 +83,7 @@ lib/ashfolio_web/live/category_live/index.ex
 ```
 
 All have pattern:
+
 ```elixir
 _user_id = get_default_user_id()  # Fetched but never used
 ```
@@ -83,12 +91,14 @@ _user_id = get_default_user_id()  # Fetched but never used
 ### 4. Test Files - Compatibility Layer Usage
 
 #### Test Support Files to Remove:
+
 ```
 test/support/user_compatibility.ex - Fake User module
 test/support/sqlite_helpers.ex - Has user-related helpers
 ```
 
 #### Test Files Using User.create():
+
 - Over 40 test files contain `User.create()` calls
 - Most have `setup` blocks creating users
 - Many have `%{user: user}` pattern matches
@@ -96,6 +106,7 @@ test/support/sqlite_helpers.ex - Has user-related helpers
 ### 5. Documentation Files
 
 #### Architecture Documentation:
+
 ```
 docs/development/architecture.md - Has User in ER diagrams
 docs/TESTING_STRATEGY.md - References user setup patterns
@@ -103,6 +114,7 @@ docs/README.md - Shows multi-user examples
 ```
 
 #### Migration Documentation:
+
 ```
 docs/DATABASE_AS_USER_MIGRATION.md - Original plan (partially executed)
 docs/DATABASE_AS_USER_ASSESSMENT.md - Current state analysis
@@ -122,10 +134,10 @@ def calculate_portfolio_value(_user_id \\ nil) do
 # After:
 def calculate_portfolio_value() do
 
-# Context Module  
+# Context Module
 # Before:
 def get_user_dashboard_data(user_id) do
-  
+
 # After:
 def get_dashboard_data() do
 
@@ -133,13 +145,14 @@ def get_dashboard_data() do
 # Before:
 def accounts_for_user(user_id) do
 
-# After:  
+# After:
 def list_all_accounts() do
 ```
 
 ## Test Pattern Changes Needed
 
 ### Current Test Pattern (to remove):
+
 ```elixir
 setup do
   {:ok, user} = User.create(%{name: "Test User"})
@@ -153,6 +166,7 @@ end
 ```
 
 ### New Test Pattern (to implement):
+
 ```elixir
 setup do
   {:ok, account} = Account.create(%{name: "Test Account"})
@@ -167,52 +181,60 @@ end
 ## PubSub Topics to Update
 
 ### Current (already mostly updated):
+
 ```elixir
 "net_worth" # Good - no user reference
-"portfolio_update" # Good - no user reference  
+"portfolio_update" # Good - no user reference
 "balance_changes" # Good - no user reference
 ```
 
 ### Any remaining user-specific topics:
+
 - Need to grep for any remaining `"*:#{user.id}"` patterns
 - Most have been cleaned up already
 
 ## Priority Order for Refactoring
 
 ### High Priority (Core Functions):
+
 1. Calculator modules - remove user_id parameters
 2. Context module - fix API functions
 3. Account/Transaction - rename misleading functions
 
 ### Medium Priority (Clean Code):
+
 4. LiveView modules - remove dead code
 5. Test infrastructure - remove compatibility
 6. Test files - update patterns
 
 ### Low Priority (Documentation):
+
 7. Architecture docs - update diagrams
 8. Code comments - fix references
 9. README - update examples
 
 ## Estimated Line Changes
 
-- **Production code**: ~500 lines
-- **Test code**: ~2000 lines  
-- **Documentation**: ~200 lines
-- **Total**: ~2700 lines of changes
+- ~500 lines
+- ~2000 lines
+- ~200 lines
+- ~2700 lines of changes
 
 ## Risk Areas
 
 ### High Risk:
+
 - Calculator modules (core business logic)
 - Context API (used everywhere)
 - Test infrastructure (could break all tests)
 
 ### Medium Risk:
+
 - LiveView modules (UI might break)
 - Account/Transaction queries
 
 ### Low Risk:
+
 - Documentation updates
 - Comment fixes
 - Variable renames
@@ -220,6 +242,7 @@ end
 ## Validation Checklist
 
 After refactoring, verify:
+
 - [ ] No "User.create" in any test file
 - [ ] No "user_id" parameters in any function
 - [ ] No "user:" in test contexts

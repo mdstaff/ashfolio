@@ -12,17 +12,15 @@ This guide documents proven patterns for resolving test failures systematically,
 
 ### 1. Database Key Mismatches
 
-**Pattern**: Tests fail with `KeyError` when accessing data structures that may have different key names depending on the implementation.
-
-**Example Error**:
+Tests fail with `KeyError` when accessing data structures that may have different key names depending on the implementation.
 
 ```
 ** (KeyError) key :cash_balance not found in: %{cash_value: #Decimal<25000.00>, ...}
 ```
 
-**Root Cause**: Different calculator implementations use different key names for the same data.
+Different calculator implementations use different key names for the same data.
 
-**Solution**: Handle both key variants with fallbacks:
+Handle both key variants with fallbacks:
 
 ```elixir
 # Handle both :cash_balance and :cash_value
@@ -32,21 +30,19 @@ cash_value = net_worth_data[:cash_balance] || net_worth_data[:cash_value]
 net_worth_value = net_worth_data[:total_net_worth] || net_worth_data[:net_worth]
 ```
 
-**Files Fixed**: `lib/ashfolio_web/live/dashboard_live.ex:457`
+`lib/ashfolio_web/live/dashboard_live.ex:457`
 
 ### 2. SQLite Concurrency Issues
 
-**Pattern**: Tests fail with "database is locked" or "database is busy" errors, especially in parallel test execution.
-
-**Example Error**:
+Tests fail with "database is locked" or "database is busy" errors, especially in parallel test execution.
 
 ```
 ** (Sqlite.DbConnection.Error) BUSY: database is locked
 ```
 
-**Root Cause**: Shared test data creation in setup blocks causes race conditions when multiple tests run simultaneously.
+Shared test data creation in setup blocks causes race conditions when multiple tests run simultaneously.
 
-**Solution**: Move data creation from shared setup to individual tests:
+Move data creation from shared setup to individual tests:
 
 ```elixir
 # BAD: Shared setup creates concurrent conflicts
@@ -63,21 +59,19 @@ test "specific test", %{account1: account1 do
 end
 ```
 
-**Files Fixed**: `test/ashfolio_web/live/account_live/index_test.exs`
+`test/ashfolio_web/live/account_live/index_test.exs`
 
 ### 3. Non-Existent DOM Attributes
 
-**Pattern**: Tests fail when asserting presence of HTML attributes that don't actually exist in the rendered output.
-
-**Example Error**:
+Tests fail when asserting presence of HTML attributes that don't actually exist in the rendered output.
 
 ```
 Expected element with selector "[data-filter-active='category:123']" to be present
 ```
 
-**Root Cause**: Tests were written expecting certain data attributes that were never implemented in the actual components.
+Tests were written expecting certain data attributes that were never implemented in the actual components.
 
-**Solution**: Replace attribute-based assertions with content-based assertions:
+Replace attribute-based assertions with content-based assertions:
 
 ```elixir
 # BAD: Asserts on non-existent attributes
@@ -89,21 +83,19 @@ assert html =~ category.name
 assert html =~ "Growth"  # Or other expected content
 ```
 
-**Files Fixed**: `test/ashfolio_web/live/transaction_live_filtering_test.exs`
+`test/ashfolio_web/live/transaction_live_filtering_test.exs`
 
 ### 4. Navigation Test Limitations
 
-**Pattern**: LiveView tests fail when trying to click navigation elements that exist in the layout but aren't accessible from the LiveView test context.
-
-**Example Error**:
+LiveView tests fail when trying to click navigation elements that exist in the layout but aren't accessible from the LiveView test context.
 
 ```
 ** (ArgumentError) element with selector "nav.hidden a[href='/accounts']" was not found
 ```
 
-**Root Cause**: Navigation elements are rendered in the root layout, but LiveView tests only have access to the LiveView-specific content.
+Navigation elements are rendered in the root layout, but LiveView tests only have access to the LiveView-specific content.
 
-**Solution**: Use direct navigation instead of clicking nav elements:
+Use direct navigation instead of clicking nav elements:
 
 ```elixir
 # BAD: Try to click navigation in layout (not accessible)
@@ -114,43 +106,39 @@ view |> element("nav.hidden a[href='/accounts']") |> render_click()
 assert html =~ "Account List"
 ```
 
-**Files Fixed**: `test/ashfolio_web/live/navigation_test.exs`
+`test/ashfolio_web/live/navigation_test.exs`
 
 ### 5. CSS Class Mismatches
 
-**Pattern**: Tests fail when expecting specific CSS classes that don't match the actual component implementation.
-
-**Example Error**:
+Tests fail when expecting specific CSS classes that don't match the actual component implementation.
 
 ```
 Expected element with class "rounded-md" but found "rounded-lg"
 ```
 
-**Root Cause**: Component styles were updated but tests weren't synchronized.
+Component styles were updated but tests weren't synchronized.
 
-**Solution**: Update test expectations to match actual component implementation:
+Update test expectations to match actual component implementation:
 
 ```elixir
 # Check actual component for correct classes
 assert has_element?(view, ".rounded-lg")  # Not .rounded-md
 ```
 
-**Files Fixed**: Multiple component test files
+Multiple component test files
 
 ### 6. Performance Test Timing Issues
 
-**Pattern**: Performance tests fail due to unrealistic timing expectations or external API timeouts.
-
-**Example Error**:
+Performance tests fail due to unrealistic timing expectations or external API timeouts.
 
 ```
 Performance test timeout after 30 seconds
 Expected < 50ms but got 120ms
 ```
 
-**Root Cause**: Aggressive performance targets or high-volume external API calls in test environment.
+Aggressive performance targets or high-volume external API calls in test environment.
 
-**Solution**: Adjust expectations for test environment and reduce external dependencies:
+Adjust expectations for test environment and reduce external dependencies:
 
 ```elixir
 # Reduce external API calls
@@ -162,21 +150,19 @@ end
 assert time_ms < 500  # Was 100ms, increased to 500ms for test env
 ```
 
-**Files Fixed**: `test/performance/symbol_search_cache_performance_test.exs`
+`test/performance/symbol_search_cache_performance_test.exs`
 
 ### 7. Nested Database Retry Calls
 
-**Pattern**: Tests fail when SQLiteHelpers.with_retry() calls are nested, causing function clause errors.
-
-**Example Error**:
+Tests fail when SQLiteHelpers.with_retry() calls are nested, causing function clause errors.
 
 ```
 ** (FunctionClauseError) no function clause matching in SQLiteHelpers.with_retry/1
 ```
 
-**Root Cause**: Calling `with_retry()` inside another `with_retry()` block creates invalid nesting.
+Calling `with_retry()` inside another `with_retry()` block creates invalid nesting.
 
-**Solution**: Remove nested retry calls and fix syntax:
+Remove nested retry calls and fix syntax:
 
 ```elixir
 # BAD: Nested retry calls
@@ -196,7 +182,7 @@ end)
   end)
 ```
 
-**Files Fixed**: `test/ashfolio_web/components/transaction_filter_test.exs`
+`test/ashfolio_web/components/transaction_filter_test.exs`
 
 ## Systematic Resolution Process
 
@@ -337,9 +323,9 @@ just test all | grep -E "(failures|tests)"
 
 Track your progress toward 100% success:
 
-- **Target**: 0 failures across all test suites
-- **Main Suite**: ~871 tests should pass
-- **Performance Suite**: ~99 tests should pass
-- **Total Coverage**: ~970 tests at 100% success rate
+- 0 failures across all test suites
+- ~871 tests should pass
+- ~99 tests should pass
+- ~970 tests at 100% success rate
 
 The systematic approach documented here achieved this target, demonstrating that comprehensive test suite success is achievable with the right patterns and persistence.

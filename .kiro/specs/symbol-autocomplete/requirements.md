@@ -4,7 +4,7 @@
 
 This feature adds intelligent symbol autocomplete to transaction forms, building on Ashfolio's solid v0.1.0 foundation. The autocomplete will search existing symbols and optionally query external APIs to help users quickly find and select securities.
 
-**Foundation**: Built on v0.1.0's production-ready architecture with 383 passing tests and comprehensive Ash Framework implementation.
+Built on v0.1.0's production-ready architecture with 383 passing tests and comprehensive Ash Framework implementation.
 
 ## Requirements
 
@@ -48,10 +48,10 @@ This feature adds intelligent symbol autocomplete to transaction forms, building
 
 ### Integration Points
 
-- **Existing Symbol Resource**: Extend with search capabilities
-- **Yahoo Finance Service**: Reuse existing API integration
-- **Transaction Forms**: Integrate with existing form components
-- **ETS Cache**: Utilize existing caching infrastructure
+- Extend with search capabilities
+- Reuse existing API integration
+- Integrate with existing form components
+- Utilize existing caching infrastructure
 
 ### Performance Targets
 

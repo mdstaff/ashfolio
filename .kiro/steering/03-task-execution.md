@@ -59,13 +59,13 @@ This steering rule provides specific guidance for executing tasks from the Ashfo
 ### Testing Commands (Use Justfile Only)
 
 - Review the justfile #[[file:justfile]]
-- **Development testing**: `just test-watch` - Continuous testing during development
-- **Focused testing**: `just test-file <path>` - Test specific files (preferred for targeted testing)
-- **Main test suite**: `just test` - Run core tests (excludes seeding for speed)
-- **Coverage analysis**: `just test-coverage` - Ensure adequate test coverage for new code
-- **Seeding tests**: `just test-seeding` - Run seeding tests separately when needed
-- **Failed tests**: `just test-failed` - Re-run only previously failed tests
-- **Debugging**: `just test-file-verbose <file>` - Use only when debugging specific failures
+- `just test-watch` - Continuous testing during development
+- `just test-file <path>` - Test specific files (preferred for targeted testing)
+- `just test` - Run core tests (excludes seeding for speed)
+- `just test-coverage` - Ensure adequate test coverage for new code
+- `just test-seeding` - Run seeding tests separately when needed
+- `just test-failed` - Re-run only previously failed tests
+- `just test-file-verbose <file>` - Use only when debugging specific failures
 
 ### Documentation
 
@@ -73,7 +73,7 @@ This steering rule provides specific guidance for executing tasks from the Ashfo
 - Add code comments for complex business logic
 - Update `.kiro/steering/project-context.md` if significant decisions are made
 - Keep steering documents current with project progress
-- **Capture Key Learnings**: Document technical patterns, gotchas, configuration requirements, testing approaches, and architectural decisions that future tasks should know about
+- Document technical patterns, gotchas, configuration requirements, testing approaches, and architectural decisions that future tasks should know about
 
 ## After Task Completion
 

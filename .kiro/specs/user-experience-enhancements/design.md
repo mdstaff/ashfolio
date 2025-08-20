@@ -6,12 +6,12 @@ This design document outlines the technical architecture and implementation appr
 
 ### Core Design Principles
 
-- **Progressive Enhancement**: Build upon existing v0.1.0 architecture without breaking changes
-- **Performance First**: Maintain sub-2-second load times and responsive interactions
-- **Accessibility by Design**: WCAG AA compliance integrated from the start
-- **Mobile-First**: Responsive design optimized for all device sizes
-- **Real-Time Updates**: Leverage Phoenix LiveView for seamless user experience
-- **Maintainable Code**: Follow established Ash Framework and Phoenix patterns
+- Build upon existing v0.1.0 architecture without breaking changes
+- Maintain sub-2-second load times and responsive interactions
+- WCAG AA compliance integrated from the start
+- Responsive design optimized for all device sizes
+- Leverage Phoenix LiveView for seamless user experience
+- Follow established Ash Framework and Phoenix patterns
 
 ## Architecture
 
@@ -54,11 +54,11 @@ graph TB
 
 ### Technology Stack Enhancements
 
-- **Frontend Enhancements**: Chart.js for interactive charts, enhanced Tailwind CSS components
-- **Backend Services**: New Ash resources for historical data and user preferences
-- **Real-Time Features**: Enhanced Phoenix PubSub for notifications and live updates
-- **Search & Autocomplete**: Optimized database queries with ETS caching
-- **Mobile Optimization**: Progressive Web App (PWA) capabilities
+- Chart.js for interactive charts, enhanced Tailwind CSS components
+- New Ash resources for historical data and user preferences
+- Enhanced Phoenix PubSub for notifications and live updates
+- Optimized database queries with ETS caching
+- Progressive Web App (PWA) capabilities
 
 ## Components and Interfaces
 

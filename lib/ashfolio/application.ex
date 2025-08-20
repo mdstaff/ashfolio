@@ -17,6 +17,8 @@ defmodule Ashfolio.Application do
       {Phoenix.PubSub, name: Ashfolio.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: Ashfolio.Finch},
+      # Background job scheduler (SQLite-compatible alternative to Oban)
+      Ashfolio.BackgroundJobs.Scheduler,
       # Start the RateLimiter for API rate limiting
       Ashfolio.MarketData.RateLimiter,
       # Start the PriceManager for coordinating market data updates

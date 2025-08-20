@@ -1,283 +1,168 @@
 defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
   @moduledoc """
-  Net worth calculation module for comprehensive financial management.
+  NetWorthCalculator calculates and manages net worth snapshots.
 
-  Combines investment portfolio values with cash account balances to provide
-  complete net worth calculations across all account types.
-
-  Key calculations:
-  - Total net worth (investments + cash)
-  - Investment vs cash breakdown
-  - Account-level breakdown by type
-  - Real-time updates via PubSub integration
+  Aggregates balances across all account types (investment, cash) to compute
+  total net worth and creates historical snapshots for tracking progress.
   """
 
-  alias Ashfolio.Portfolio.{Calculator, Account}
-  alias Ashfolio.ErrorHandler
-  require Logger
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.FinancialManagement.NetWorthSnapshot
 
   @doc """
-  Calculate total net worth for a user across all account types.
+  Calculates current net worth from all accounts.
 
-  Performance optimized: Uses database-level filtering instead of in-memory operations
-  to achieve <100ms target performance. Database aggregation reduces query overhead.
-
-  Combines investment portfolio value from Portfolio.Calculator with
-  cash account balances to provide comprehensive net worth.
-
-  ## Examples
-
-      iex> NetWorthCalculator.calculate_net_worth()
-      {:ok, %{
-        net_worth: %Decimal{},
-        investment_value: %Decimal{},
-        cash_value: %Decimal{},
-        breakdown: %{...}
-      }}
-
-      iex> NetWorthCalculator.calculate_net_worth("invalid-id")
-      {:error, :user_not_found}
+  Returns a map with:
+  - total_assets: Sum of all account balances
+  - total_liabilities: Always 0 for now (future: debt tracking)
+  - net_worth: total_assets - total_liabilities
+  - investment_value: Sum of investment account balances
+  - cash_value: Sum of cash account balances
+  - other_assets_value: Always 0 for now (future: real estate, etc.)
   """
-  def calculate_net_worth() do
-    Logger.debug("Calculating net worth")
+  def calculate_current_net_worth do
+    # Use account balances for both investment and cash accounts for net worth snapshots
+    investment_total = calculate_investment_accounts_value()
+    cash_total = calculate_cash_accounts_value()
 
-    with {:ok, investment_value} <- Calculator.calculate_portfolio_value(),
-         {:ok, cash_balances} <- calculate_total_cash_balances(),
-         {:ok, breakdown} <- calculate_account_breakdown() do
-      net_worth = Decimal.add(investment_value, cash_balances)
+    # Future: Add other assets and liabilities
+    other_assets = Decimal.new(0)
+    liabilities = Decimal.new(0)
 
-      result = %{
-        net_worth: net_worth,
-        investment_value: investment_value,
-        cash_value: cash_balances,
-        breakdown: breakdown
-      }
+    total_assets =
+      investment_total
+      |> Decimal.add(cash_total)
+      |> Decimal.add(other_assets)
 
-      Logger.debug("Net worth calculated: #{inspect(result)}")
+    net_worth = Decimal.sub(total_assets, liabilities)
 
-      # Broadcast net worth update via PubSub (simplified for database-as-user)
-      broadcast_net_worth_update(result)
+    # Get breakdown data
+    {:ok, breakdown} = calculate_account_breakdown()
 
-      {:ok, result}
-    else
-      error ->
-        ErrorHandler.handle_error(error, %{operation: :net_worth_calculation})
-    end
+    result = %{
+      total_assets: total_assets,
+      total_liabilities: liabilities,
+      net_worth: net_worth,
+      investment_value: investment_total,
+      cash_value: cash_total,
+      other_assets_value: other_assets,
+      breakdown: breakdown
+    }
+
+    {:ok, result}
   end
 
   @doc """
-  Calculate total cash balances across all cash accounts for a user.
+  Creates a net worth snapshot for a specific date.
 
-  Sums balances from checking, savings, money market, and CD accounts
-  that are not excluded from calculations.
-
-  ## Examples
-
-      iex> NetWorthCalculator.calculate_total_cash_balances()
-      {:ok, %Decimal{}}
-
-      iex> NetWorthCalculator.calculate_total_cash_balances("invalid-id")
-      {:error, :user_not_found}
+  If no date is provided, uses today's date.
   """
-  def calculate_total_cash_balances() do
-    Logger.debug("Calculating total cash balances")
+  def create_snapshot(snapshot_date \\ nil) do
+    snapshot_date = snapshot_date || Date.utc_today()
+    {:ok, calculation} = calculate_current_net_worth()
 
-    try do
-      # Performance optimization: Use database-level filtering instead of in-memory
-      # Combine cash account type filter with active (non-excluded) filter at the database level
-      case get_active_cash_accounts() do
-        {:ok, active_cash_accounts} ->
-          total_cash =
-            active_cash_accounts
-            |> Enum.map(& &1.balance)
-            |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
+    # Remove breakdown field as it's not part of NetWorthSnapshot schema
+    snapshot_data =
+      calculation
+      |> Map.delete(:breakdown)
+      |> Map.merge(%{
+        snapshot_date: snapshot_date,
+        is_automated: true
+      })
 
-          Logger.debug("Total cash balances calculated: #{total_cash}")
-          {:ok, total_cash}
-
-        error ->
-          ErrorHandler.handle_error(error, %{operation: :cash_balance_calculation})
-      end
-    rescue
-      error ->
-        ErrorHandler.handle_error({:error, :net_worth_calculation_failed}, %{
-          operation: :cash_balance_calculation,
-          exception: error
-        })
-    end
+    NetWorthSnapshot.create(snapshot_data)
   end
 
   @doc """
-  Calculate detailed account breakdown by type for a user.
+  Calculates total cash balances across all cash accounts.
 
-  TODO: Performance optimization - Consider batch loading with single query and
-  preloading to improve from current ~144ms to <75ms target (see Task 14 Stage 2)
-
-  Provides breakdown of net worth by account type including:
-  - Investment accounts (with portfolio value)
-  - Cash accounts by type (checking, savings, etc.)
-  - Account-level details
-
-  ## Examples
-
-      iex> NetWorthCalculator.calculate_account_breakdown()
-      {:ok, %{
-        investment_accounts: [...],
-        cash_accounts: [...],
-        totals_by_type: %{...}
-      }}
+  Returns the sum of balances for checking, savings, money market, and CD accounts.
   """
-  def calculate_account_breakdown() do
-    Logger.debug("Calculating account breakdown")
-
-    try do
-      # Performance optimization: Use database-level filtering instead of loading all accounts
-      with {:ok, investment_accounts} <- get_active_investment_accounts(),
-           {:ok, cash_accounts} <- get_active_cash_accounts() do
-        # Calculate investment account breakdown
-        investment_breakdown = calculate_investment_account_breakdown(investment_accounts)
-
-        # Calculate cash account breakdown
-        cash_breakdown = calculate_cash_account_breakdown(cash_accounts)
-
-        # Calculate totals by type
-        totals_by_type = calculate_totals_by_type(investment_breakdown, cash_breakdown)
-
-        breakdown = %{
-          investment_accounts: investment_breakdown,
-          cash_accounts: cash_breakdown,
-          totals_by_type: totals_by_type
-        }
-
-        Logger.debug("Account breakdown calculated: #{inspect(breakdown)}")
-        {:ok, breakdown}
-      end
-    rescue
-      error ->
-        ErrorHandler.handle_error({:error, :net_worth_calculation_failed}, %{
-          operation: :account_breakdown_calculation,
-          exception: error
-        })
-    end
+  def calculate_total_cash_balances do
+    total = calculate_cash_accounts_value()
+    {:ok, total}
   end
 
-  # Private helper functions
+  @doc """
+  Provides detailed breakdown by account type.
 
-  # Performance optimization: Database-level filtering for active cash accounts
-  defp get_active_cash_accounts() do
+  Returns a map with accounts grouped by investment vs cash, plus totals.
+  """
+  def calculate_account_breakdown do
     require Ash.Query
 
-    # Combine both filters at database level: cash account types + not excluded
-    query =
+    # Get all non-excluded accounts
+    accounts =
       Account
-      |> Ash.Query.filter(account_type in [:checking, :savings, :money_market, :cd])
       |> Ash.Query.filter(is_excluded == false)
+      |> Ash.read!()
 
-    case Ash.read(query) do
-      {:ok, accounts} -> {:ok, accounts}
-      {:error, reason} -> {:error, reason}
-    end
-  end
+    # Separate investment and cash accounts
+    investment_accounts = Enum.filter(accounts, &(&1.account_type == :investment))
+    cash_account_types = [:checking, :savings, :money_market, :cd]
+    cash_accounts = Enum.filter(accounts, &(&1.account_type in cash_account_types))
 
-  # Performance optimization: Database-level filtering for active investment accounts
-  defp get_active_investment_accounts() do
-    require Ash.Query
-
-    # Combine both filters at database level: investment account type + not excluded
-    query =
-      Account
-      |> Ash.Query.filter(account_type == :investment)
-      |> Ash.Query.filter(is_excluded == false)
-
-    case Ash.read(query) do
-      {:ok, accounts} -> {:ok, accounts}
-      {:error, reason} -> {:error, reason}
-    end
-  end
-
-  defp calculate_investment_account_breakdown(investment_accounts) do
-    Enum.map(investment_accounts, fn account ->
-      # Calculate actual portfolio value for investment accounts
-      portfolio_value =
-        case Ashfolio.Portfolio.Calculator.calculate_account_portfolio_value(account.id) do
-          {:ok, value} -> value
-          # Fallback to balance if calculation fails
-          _error -> account.balance
-        end
-
-      %{
-        id: account.id,
-        name: account.name,
-        type: account.account_type,
-        platform: account.platform,
-        balance: account.balance,
-        # Now uses actual portfolio value
-        value: portfolio_value,
-        updated_at: account.balance_updated_at
-      }
-    end)
-  end
-
-  defp calculate_cash_account_breakdown(cash_accounts) do
-    Enum.map(cash_accounts, fn account ->
-      %{
-        id: account.id,
-        name: account.name,
-        type: account.account_type,
-        platform: account.platform,
-        balance: account.balance,
-        value: account.balance,
-        interest_rate: account.interest_rate,
-        minimum_balance: account.minimum_balance,
-        updated_at: account.balance_updated_at
-      }
-    end)
-  end
-
-  defp calculate_totals_by_type(investment_breakdown, cash_breakdown) do
+    # Calculate totals
     investment_total =
-      investment_breakdown
-      |> Enum.map(& &1.value)
+      investment_accounts
+      |> Enum.map(& &1.balance)
       |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
 
-    cash_totals_by_type =
-      cash_breakdown
-      |> Enum.group_by(& &1.type)
-      |> Enum.map(fn {type, accounts} ->
+    cash_total =
+      cash_accounts
+      |> Enum.map(& &1.balance)
+      |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
+
+    # Calculate cash breakdown by type
+    cash_by_type =
+      cash_accounts
+      |> Enum.group_by(& &1.account_type)
+      |> Enum.map(fn {type, accts} ->
         total =
-          accounts
-          |> Enum.map(& &1.value)
+          accts
+          |> Enum.map(& &1.balance)
           |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
 
         {type, total}
       end)
       |> Enum.into(%{})
 
-    total_cash =
-      cash_totals_by_type
-      |> Map.values()
-      |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
-
-    %{
-      investment: investment_total,
-      cash: total_cash,
-      cash_by_type: cash_totals_by_type
+    breakdown = %{
+      investment_accounts: investment_accounts,
+      cash_accounts: cash_accounts,
+      totals_by_type: %{
+        investment: investment_total,
+        cash: cash_total,
+        cash_by_type: cash_by_type
+      }
     }
+
+    {:ok, breakdown}
   end
 
-  defp broadcast_net_worth_update(net_worth_data) do
-    try do
-      # Broadcast to general net worth topic for dashboard updates
-      Phoenix.PubSub.broadcast(
-        Ashfolio.PubSub,
-        "net_worth",
-        {:net_worth_updated, net_worth_data}
-      )
+  # Private helper functions
 
-      Logger.debug("Net worth update broadcasted")
-    rescue
-      error ->
-        Logger.warning("Failed to broadcast net worth update: #{inspect(error)}")
-    end
+  defp calculate_investment_accounts_value do
+    require Ash.Query
+
+    Account
+    |> Ash.Query.filter(account_type == :investment)
+    |> Ash.Query.filter(is_excluded == false)
+    |> Ash.read!()
+    |> Enum.map(& &1.balance)
+    |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
+  end
+
+  defp calculate_cash_accounts_value do
+    require Ash.Query
+
+    cash_account_types = [:checking, :savings, :money_market, :cd]
+
+    Account
+    |> Ash.Query.filter(account_type in ^cash_account_types)
+    |> Ash.Query.filter(is_excluded == false)
+    |> Ash.read!()
+    |> Enum.map(& &1.balance)
+    |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
   end
 end

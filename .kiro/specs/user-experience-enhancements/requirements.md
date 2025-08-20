@@ -15,16 +15,16 @@
 
 This document outlines the requirements for enhancing Ashfolio's user experience through intelligent forms, interactive visualizations, and streamlined workflows. These enhancements build upon the solid v0.1.0 foundation to make the application more intuitive, efficient, and visually appealing for portfolio management tasks.
 
-**Enhancement Scope**: Significant user experience improvements focused on daily workflow optimization and visual polish
-**Foundation**: Built on v0.1.0's production-ready architecture with 383 passing tests and comprehensive Ash Framework implementation
+Significant user experience improvements focused on daily workflow optimization and visual polish
+Built on v0.1.0's production-ready architecture with 383 passing tests and comprehensive Ash Framework implementation
 
 The user experience enhancements focus on:
 
-- **Intelligent Forms**: Symbol autocomplete and real-time price lookup
-- **Enhanced Dashboard**: Interactive charts and improved data visualization
-- **Streamlined Workflows**: Faster transaction entry and portfolio management
-- **Visual Polish**: Professional charts, better responsive design, and accessibility improvements
-- **Performance**: Optimized user interactions and reduced friction
+- Symbol autocomplete and real-time price lookup
+- Interactive charts and improved data visualization
+- Faster transaction entry and portfolio management
+- Professional charts, better responsive design, and accessibility improvements
+- Optimized user interactions and reduced friction
 
 ## Requirements
 
@@ -200,22 +200,22 @@ The user experience enhancements focus on:
 
 ### Integration with Existing Architecture
 
-1. **Ash Framework Integration**: All new features SHALL be implemented using existing Ash resource patterns and actions
-2. **Phoenix LiveView**: Real-time features SHALL leverage existing LiveView architecture and PubSub system
-3. **Database Compatibility**: New features SHALL work with existing SQLite database and migration system
-4. **Test Coverage**: All new features SHALL include comprehensive test coverage maintaining the current 100% pass rate
-5. **Performance**: New features SHALL not degrade existing performance benchmarks
+1.  All new features SHALL be implemented using existing Ash resource patterns and actions
+2.  Real-time features SHALL leverage existing LiveView architecture and PubSub system
+3.  New features SHALL work with existing SQLite database and migration system
+4.  All new features SHALL include comprehensive test coverage maintaining the current 100% pass rate
+5.  New features SHALL not degrade existing performance benchmarks
 
 ### External Dependencies
 
-1. **Chart Library**: Implement using Chart.js or similar lightweight charting library compatible with Phoenix LiveView
-2. **API Integration**: Extend existing Yahoo Finance integration for symbol search and price lookup
-3. **Mobile Optimization**: Use existing Tailwind CSS framework for responsive design enhancements
-4. **Accessibility**: Leverage existing accessibility patterns and enhance where needed
+1.  Implement using Chart.js or similar lightweight charting library compatible with Phoenix LiveView
+2.  Extend existing Yahoo Finance integration for symbol search and price lookup
+3.  Use existing Tailwind CSS framework for responsive design enhancements
+4.  Leverage existing accessibility patterns and enhance where needed
 
 ### Data Requirements
 
-1. **Historical Data**: Implement basic historical price storage for chart functionality
-2. **Symbol Metadata**: Extend Symbol resource with additional metadata for better autocomplete
-3. **User Preferences**: Add user preference storage for dashboard customization and table settings
-4. **Cache Management**: Enhance existing ETS caching for improved performance
+1.  Implement basic historical price storage for chart functionality
+2.  Extend Symbol resource with additional metadata for better autocomplete
+3.  Add user preference storage for dashboard customization and table settings
+4.  Enhance existing ETS caching for improved performance

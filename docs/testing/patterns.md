@@ -8,10 +8,10 @@ This document provides detailed patterns and solutions for handling SQLite concu
 
 ### Core Limitations
 
-1. **Single Writer**: Only one process can write to SQLite at a time
-2. **Lock Contention**: Multiple processes competing for database access cause "Database busy" errors
-3. **No True Concurrency**: Unlike PostgreSQL, SQLite can't handle multiple simultaneous transactions
-4. **GenServer Isolation**: GenServers running in separate processes need special database access permissions
+1.  Only one process can write to SQLite at a time
+2.  Multiple processes competing for database access cause "Database busy" errors
+3.  Unlike PostgreSQL, SQLite can't handle multiple simultaneous transactions
+4.  GenServers running in separate processes need special database access permissions
 
 ### Common Error Patterns
 
@@ -29,9 +29,9 @@ This document provides detailed patterns and solutions for handling SQLite concu
 
 ### 1. Global Test Data Strategy
 
-**Problem**: Creating users/accounts in each test causes concurrency conflicts.
+Creating users/accounts in each test causes concurrency conflicts.
 
-**Solution**: Pre-create all common test data once before any tests run.
+Pre-create all common test data once before any tests run.
 
 ```elixir
 # test_helper.exs - Called ONCE before test suite starts
@@ -44,8 +44,6 @@ Ashfolio.SQLiteHelpers.setup_global_test_data!()
 # - All committed to database permanently
 ```
 
-**Benefits**:
-
 - Eliminates user creation race conditions
 - Provides consistent test data across all tests
 - Reduces test execution time
@@ -53,9 +51,9 @@ Ashfolio.SQLiteHelpers.setup_global_test_data!()
 
 ### 2. Retry Logic with Exponential Backoff
 
-**Problem**: Occasional "Database busy" errors for custom resource creation.
+Occasional "Database busy" errors for custom resource creation.
 
-**Solution**: Retry pattern with intelligent backoff.
+Retry pattern with intelligent backoff.
 
 ```elixir
 def with_retry(fun, max_attempts \\ 3, delay_ms \\ 100) do
@@ -87,8 +85,6 @@ defp sqlite_busy_error?(error) do
 end
 ```
 
-**Usage Example**:
-
 ```elixir
 # Creating custom account with retry protection
 account = with_retry(fn ->
@@ -101,9 +97,9 @@ end)
 
 ### 3. Sandbox Management
 
-**Problem**: SQLite sandbox mode needs careful management.
+SQLite sandbox mode needs careful management.
 
-**Solution**: Dedicated DataCase with proper checkout/checkin.
+Dedicated DataCase with proper checkout/checkin.
 
 ```elixir
 # test/support/data_case.ex
@@ -113,17 +109,15 @@ def setup_sandbox(_tags) do
 end
 ```
 
-**Key Differences from PostgreSQL**:
-
 - No `Sandbox.mode/2` calls needed
 - No `allow/3` for most tests (single-threaded)
 - Checkout/checkin pattern works reliably
 
 ### 4. GenServer Database Access
 
-**Problem**: PriceManager GenServer can't access test database.
+PriceManager GenServer can't access test database.
 
-**Solution**: Explicit permission granting.
+Explicit permission granting.
 
 ```elixir
 def allow_price_manager_db_access do
@@ -143,8 +137,6 @@ def allow_price_manager_db_access do
 end
 ```
 
-**When to Use**:
-
 - Tests that trigger PriceManager.refresh_prices/1
 - Integration tests involving price fetching
 - Any test that indirectly calls GenServer functions
@@ -154,7 +146,7 @@ end
 ### Pattern 1: Global Data First
 
 ```elixir
-# ✅ PREFERRED - Use pre-created global data
+#  PREFERRED - Use pre-created global data
 test "portfolio calculation" do
              # No database write
   account = get_default_account() # No database write
@@ -174,7 +166,7 @@ end
 ### Pattern 2: Custom Resources with Retry
 
 ```elixir
-# ✅ CORRECT - Custom data with retry protection
+#  CORRECT - Custom data with retry protection
 test "special account scenario" do
 
 
@@ -206,7 +198,7 @@ end
 ### Pattern 3: Transaction Creation
 
 ```elixir
-# ✅ PREFERRED - Using helper with retry logic
+#  PREFERRED - Using helper with retry logic
 test "transaction scenarios" do
 
   account = get_default_account()
@@ -263,15 +255,13 @@ end
 ### Strategy 1: Async False Always
 
 ```elixir
-# ✅ REQUIRED for SQLite
+#  REQUIRED for SQLite
 defmodule MyTest do
   use Ashfolio.DataCase, async: false  # Always false
 
   # Test implementation
 end
 ```
-
-**Why async: false is required**:
 
 - SQLite can't handle concurrent database access
 - Tests running in parallel cause lock contention
@@ -319,14 +309,14 @@ end
 ### Strategy 3: Setup Block Patterns
 
 ```elixir
-# ✅ LIGHTWEIGHT - For tests using global data only
+#  LIGHTWEIGHT - For tests using global data only
 setup do
 
   account = get_default_account()
   %{ account: account}
 end
 
-# ✅ CUSTOM DATA - For tests needing special resources
+#  CUSTOM DATA - For tests needing special resources
 setup do
 
 
@@ -338,7 +328,7 @@ setup do
   %{ special_account: special_account}
 end
 
-# ✅ GENSERVER TESTS - For PriceManager integration
+#  GENSERVER TESTS - For PriceManager integration
 setup do
   allow_price_manager_db_access()
 
@@ -427,7 +417,7 @@ end
 ### Optimization 1: Batch Operations
 
 ```elixir
-# ✅ EFFICIENT - Batch multiple related operations
+#  EFFICIENT - Batch multiple related operations
 def create_portfolio_scenario do
   with_retry(fn ->
 

@@ -381,7 +381,7 @@ defmodule Ashfolio.Integration.NetWorthIntegrationTest do
 
       # Measure direct calculator time
       calculator_start = System.monotonic_time()
-      {:ok, calculator_result} = NetWorthCalculator.calculate_net_worth()
+      {:ok, calculator_result} = NetWorthCalculator.calculate_current_net_worth()
       calculator_end = System.monotonic_time()
 
       calculator_duration =

@@ -57,7 +57,7 @@ From `.kiro/specs/comprehensive-financial-management-v0.2.0/tasks.md`:
 
 ## Test Implementation Status
 
-### Completed Test Scenarios ✅
+### Completed Test Scenarios
 
 1. Account Migration Tests
 

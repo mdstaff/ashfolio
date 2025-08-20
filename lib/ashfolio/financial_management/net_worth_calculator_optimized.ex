@@ -14,7 +14,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
   - Better memory efficiency through streaming
   """
 
-  alias Ashfolio.Portfolio.{Calculator, Account}
+  alias Ashfolio.Portfolio.Account
   alias Ashfolio.Repo
   require Logger
   import Ecto.Query
@@ -67,8 +67,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
     start_time = System.monotonic_time(:millisecond)
 
     with {:ok, accounts_data} <- batch_load_account_data(),
-         {:ok, investment_value} <- Calculator.calculate_portfolio_value(),
-         {:ok, result} <- calculate_net_worth_from_batch(accounts_data, investment_value) do
+         {:ok, result} <- calculate_net_worth_from_batch(accounts_data) do
       calculation_time = System.monotonic_time(:millisecond) - start_time
       Logger.debug("Net worth calculated in #{calculation_time}ms (optimized)")
 
@@ -169,6 +168,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
         all_accounts: accounts,
         investment_accounts: investment_accounts,
         cash_accounts: cash_accounts,
+        investment_total: calculate_investment_total_from_accounts(investment_accounts),
         cash_total: calculate_cash_total_from_accounts(cash_accounts),
         account_count: length(accounts)
       }
@@ -184,7 +184,8 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
   # Calculate net worth from pre-loaded batch data.
   # All data is already in memory, so this is pure computation
   # without additional database queries.
-  defp calculate_net_worth_from_batch(accounts_data, investment_value) do
+  defp calculate_net_worth_from_batch(accounts_data) do
+    investment_value = accounts_data.investment_total
     cash_value = accounts_data.cash_total
     net_worth = Decimal.add(investment_value, cash_value)
 
@@ -192,7 +193,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
     breakdown = %{
       investment_accounts: build_investment_breakdown(accounts_data.investment_accounts),
       cash_accounts: build_cash_breakdown(accounts_data.cash_accounts),
-      totals_by_type: calculate_totals_by_type_from_batch(accounts_data, investment_value)
+      totals_by_type: calculate_totals_by_type_from_batch(accounts_data)
     }
 
     result = %{
@@ -214,6 +215,13 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
     |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
   end
 
+  # Calculate investment total from already-loaded account data.
+  defp calculate_investment_total_from_accounts(investment_accounts) do
+    investment_accounts
+    |> Enum.map(& &1.balance)
+    |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
+  end
+
   # Process account breakdown from batch-loaded data.
   # No additional queries needed since all data is already in memory.
   defp process_account_breakdown(accounts_data) do
@@ -221,7 +229,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
       investment_accounts: build_investment_breakdown(accounts_data.investment_accounts),
       cash_accounts: build_cash_breakdown(accounts_data.cash_accounts),
       totals_by_type: %{
-        investment: calculate_investment_total(accounts_data.investment_accounts),
+        investment: accounts_data.investment_total,
         cash: accounts_data.cash_total,
         cash_by_type: calculate_cash_by_type(accounts_data.cash_accounts)
       }
@@ -264,19 +272,14 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
   end
 
   # Calculate type totals from batch data without additional queries.
-  defp calculate_totals_by_type_from_batch(accounts_data, investment_value) do
+  defp calculate_totals_by_type_from_batch(accounts_data) do
     %{
-      investment: investment_value,
+      investment: accounts_data.investment_total,
       cash: accounts_data.cash_total,
       cash_by_type: calculate_cash_by_type(accounts_data.cash_accounts)
     }
   end
 
-  defp calculate_investment_total(investment_accounts) do
-    investment_accounts
-    |> Enum.map(& &1.balance)
-    |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
-  end
 
   defp calculate_cash_by_type(cash_accounts) do
     cash_accounts

@@ -1,9 +1,11 @@
 # Ashfolio QA Testing Script - Playwright MCP
 
 ## Overview
+
 This script provides comprehensive QA testing for the Ashfolio personal finance application using Playwright MCP commands. It tests core functionality, backwards compatibility, and user workflows to ensure the application meets quality standards.
 
 ## Prerequisites
+
 - Ashfolio development server running (`just dev`)
 - Server accessible at `http://localhost:4000`
 - Database seeded with sample data
@@ -12,8 +14,8 @@ This script provides comprehensive QA testing for the Ashfolio personal finance 
 
 ### 1. Application Bootstrap & Health Check
 
-**Goal**: Verify application loads and core systems are operational
-**Priority**: Critical
+Verify application loads and core systems are operational
+Critical
 
 ```
 # Start the server first
@@ -32,7 +34,6 @@ mcp__playwright__browser_console_messages {}
 mcp__playwright__browser_snapshot {}
 ```
 
-**Expected Results**:
 - Page loads successfully
 - No console errors
 - Navigation elements visible
@@ -40,8 +41,8 @@ mcp__playwright__browser_snapshot {}
 
 ### 2. Navigation & Core Routes Testing
 
-**Goal**: Verify all main navigation routes work correctly
-**Priority**: High
+Verify all main navigation routes work correctly
+High
 
 ```
 # Test dashboard route
@@ -52,7 +53,7 @@ mcp__playwright__browser_snapshot {}
 mcp__playwright__browser_navigate {"url": "http://localhost:4000/accounts"}
 mcp__playwright__browser_snapshot {}
 
-# Test transactions route  
+# Test transactions route
 mcp__playwright__browser_navigate {"url": "http://localhost:4000/transactions"}
 mcp__playwright__browser_snapshot {}
 
@@ -64,15 +65,14 @@ mcp__playwright__browser_snapshot {}
 mcp__playwright__browser_take_screenshot {"filename": "qa-02-navigation-test.png", "fullPage": true}
 ```
 
-**Expected Results**:
 - All routes load successfully
 - LiveView components render correctly
 - No 404 or server errors
 
 ### 3. Account Management Workflow
 
-**Goal**: Test account creation and management functionality
-**Priority**: High
+Test account creation and management functionality
+High
 
 ```
 # Navigate to accounts page
@@ -94,15 +94,14 @@ mcp__playwright__browser_snapshot {}
 mcp__playwright__browser_take_screenshot {"filename": "qa-03-account-created.png"}
 ```
 
-**Expected Results**:
 - Account form displays correctly
 - Account is created successfully
 - Redirect to account detail or list page
 
 ### 4. Transaction Management Workflow
 
-**Goal**: Test transaction creation and viewing
-**Priority**: High
+Test transaction creation and viewing
+High
 
 ```
 # Navigate to transactions page
@@ -125,15 +124,14 @@ mcp__playwright__browser_snapshot {}
 mcp__playwright__browser_take_screenshot {"filename": "qa-04-transaction-created.png"}
 ```
 
-**Expected Results**:
 - Transaction form functions correctly
 - Transaction is saved and displayed
 - Calculations are accurate
 
 ### 5. Dashboard Functionality Test
 
-**Goal**: Verify dashboard calculations and data display
-**Priority**: High
+Verify dashboard calculations and data display
+High
 
 ```
 # Navigate to dashboard
@@ -154,15 +152,14 @@ mcp__playwright__browser_resize {"width": 1200, "height": 800}
 mcp__playwright__browser_take_screenshot {"filename": "qa-05-dashboard-desktop.png"}
 ```
 
-**Expected Results**:
 - Net worth calculations display correctly
 - Account summaries are accurate
 - Responsive design works on different screen sizes
 
 ### 6. Symbol Autocomplete Testing
 
-**Goal**: Test symbol search and autocomplete functionality
-**Priority**: Medium
+Test symbol search and autocomplete functionality
+Medium
 
 ```
 # Navigate to transaction form
@@ -184,15 +181,14 @@ mcp__playwright__browser_press_key {"key": "Enter"}
 mcp__playwright__browser_take_screenshot {"filename": "qa-06-symbol-autocomplete.png"}
 ```
 
-**Expected Results**:
 - Autocomplete suggestions appear
 - Symbol selection works correctly
 - No JavaScript errors
 
 ### 7. Error Handling & Edge Cases
 
-**Goal**: Test application resilience and error handling
-**Priority**: Medium
+Test application resilience and error handling
+Medium
 
 ```
 # Test invalid routes
@@ -213,15 +209,14 @@ mcp__playwright__browser_click {"element": "Save button", "ref": "[type='submit'
 mcp__playwright__browser_take_screenshot {"filename": "qa-07-error-handling.png"}
 ```
 
-**Expected Results**:
 - 404 page displays for invalid routes
 - Form validation prevents invalid submissions
 - Error messages are user-friendly
 
 ### 8. Performance & Load Testing
 
-**Goal**: Basic performance validation
-**Priority**: Low
+Basic performance validation
+Low
 
 ```
 # Measure page load times
@@ -239,15 +234,14 @@ mcp__playwright__browser_console_messages {}
 mcp__playwright__browser_take_screenshot {"filename": "qa-08-performance-test.png"}
 ```
 
-**Expected Results**:
 - Page load times under 2 seconds
 - No memory leak warnings
 - Smooth navigation between pages
 
 ### 9. Database Integration Testing
 
-**Goal**: Verify data persistence and integrity
-**Priority**: High
+Verify data persistence and integrity
+High
 
 ```
 # Create test data and verify persistence
@@ -268,15 +262,14 @@ mcp__playwright__browser_evaluate {"function": "() => { return document.body.tex
 mcp__playwright__browser_take_screenshot {"filename": "qa-09-persistence-test.png"}
 ```
 
-**Expected Results**:
 - Data persists across page reloads
 - Database operations complete successfully
 - No data corruption
 
 ### 10. Backwards Compatibility Verification
 
-**Goal**: Ensure recent v0.2.1 changes don't break existing functionality
-**Priority**: Critical
+Ensure recent v0.2.1 changes don't break existing functionality
+Critical
 
 ```
 # Test existing transaction workflow (v0.1.0 functionality)
@@ -297,7 +290,6 @@ mcp__playwright__browser_evaluate {"function": "() => { const netWorth = documen
 mcp__playwright__browser_take_screenshot {"filename": "qa-10-backwards-compatibility.png"}
 ```
 
-**Expected Results**:
 - All v0.1.0 features continue to work
 - No regression in existing functionality
 - Data migration was successful
@@ -320,11 +312,11 @@ mcp__playwright__browser_take_screenshot {"filename": "qa-10-backwards-compatibi
 
 ## Post-Test Actions
 
-1. **Review Screenshots**: Check all captured screenshots for visual regressions
-2. **Analyze Console Output**: Review any JavaScript errors or warnings
-3. **Performance Metrics**: Validate page load times and memory usage
-4. **Test Report**: Document any failures or issues found
-5. **Clean Up**: Remove any test data created during QA
+1.  Check all captured screenshots for visual regressions
+2.  Review any JavaScript errors or warnings
+3.  Validate page load times and memory usage
+4.  Document any failures or issues found
+5.  Remove any test data created during QA
 
 ## Integration with CI/CD
 

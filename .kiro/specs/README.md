@@ -41,22 +41,22 @@ feature-name/
 
 ## Development Workflow
 
-1. **Choose a Feature**: Select a focused spec that aligns with project priorities
-2. **Review Requirements**: Ensure requirements are clear and complete
-3. **Create Design**: Develop technical design if not already present
-4. **Plan Tasks**: Break down implementation into manageable tasks
-5. **Implement**: Execute tasks while maintaining test coverage
-6. **Integrate**: Ensure feature works with existing v0.1.0 foundation
+1.  Select a focused spec that aligns with project priorities
+2.  Ensure requirements are clear and complete
+3.  Develop technical design if not already present
+4.  Break down implementation into manageable tasks
+5.  Execute tasks while maintaining test coverage
+6.  Ensure feature works with existing v0.1.0 foundation
 
 ## Foundation Status
 
-**Ashfolio v0.1.0**: Production-ready foundation with 383 passing tests
+Production-ready foundation with 383 passing tests
 
-- ✅ Complete Ash Framework architecture
-- ✅ Phoenix LiveView interface
-- ✅ Portfolio calculations and market data
-- ✅ Account and transaction management
-- ✅ Comprehensive test coverage
+- Complete Ash Framework architecture
+- Phoenix LiveView interface
+- Portfolio calculations and market data
+- Account and transaction management
+- Comprehensive test coverage
 
 All new features build upon this solid foundation without breaking existing functionality.
 

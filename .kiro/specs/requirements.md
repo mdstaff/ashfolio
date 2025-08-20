@@ -4,16 +4,16 @@
 
 This document outlines the requirements for creating Ashfolio Phase 1, a simplified portfolio management application built with Elixir/Phoenix and the Ash Framework. This phase focuses on delivering core portfolio tracking functionality with high confidence and minimal complexity.
 
-**Phase 1 Scope**: Core portfolio tracking with manual price updates and simple calculations
-**Future Phases**: Real-time updates, advanced analytics, data import/export, macOS optimizations
+Core portfolio tracking with manual price updates and simple calculations
+Real-time updates, advanced analytics, data import/export, macOS optimizations
 
 The application architecture:
 
-- **Backend**: Phoenix (Elixir) with Ash Framework
-- **Frontend**: Phoenix LiveView (simplified UI)
-- **Database**: SQLite with basic indexing
-- **Cache**: Simple ETS for price caching
-- **Market Data**: Yahoo Finance with manual refresh
+- Phoenix (Elixir) with Ash Framework
+- Phoenix LiveView (simplified UI)
+- SQLite with basic indexing
+- Simple ETS for price caching
+- Yahoo Finance with manual refresh
 
 ## Requirements
 
@@ -274,8 +274,8 @@ The application architecture:
 
 #### Technical Requirements
 
-- **GenServer Testing**: Tests must handle singleton GenServers with `async: false` and proper Mox setup using `set_mox_from_context`
-- **State Management**: Tests must handle persistent state between runs and not assume clean state
-- **Mock Configuration**: External API calls must be mocked with proper expectation counts for shared processes
-- **Database Testing**: Must use `Ashfolio.DataCase` with proper sandbox setup and handle list vs single record returns from Ash resources
-- **Test Isolation**: Each test must clean up its own state and not interfere with other tests
+- Tests must handle singleton GenServers with `async: false` and proper Mox setup using `set_mox_from_context`
+- Tests must handle persistent state between runs and not assume clean state
+- External API calls must be mocked with proper expectation counts for shared processes
+- Must use `Ashfolio.DataCase` with proper sandbox setup and handle list vs single record returns from Ash resources
+- Each test must clean up its own state and not interfere with other tests

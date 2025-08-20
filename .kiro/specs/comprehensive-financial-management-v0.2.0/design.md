@@ -4,9 +4,9 @@
 
 This design document outlines the technical architecture for Ashfolio v0.2.0, which extends the existing portfolio-only investment tracking system to comprehensive personal financial management. The design maintains 100% backward compatibility with existing v0.1.0 functionality while adding cash account management, net worth calculation, symbol autocomplete, and transaction categorization.
 
-**Strategic Evolution**: Portfolio-only investment tracking → Comprehensive financial management (investments + cash + net worth)
+Portfolio-only investment tracking → Comprehensive financial management (investments + cash + net worth)
 
-**Architecture Philosophy**: Extend existing Portfolio domain with new capabilities while introducing a focused FinancialManagement domain for cross-account features.
+Extend existing Portfolio domain with new capabilities while introducing a focused FinancialManagement domain for cross-account features.
 
 ## Architecture
 

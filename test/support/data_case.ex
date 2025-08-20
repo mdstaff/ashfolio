@@ -53,11 +53,25 @@ defmodule Ashfolio.DataCase do
       assert %{password: ["password is too short"]} = errors_on(changeset)
 
   """
-  def errors_on(changeset) do
+  def errors_on(%Ecto.Changeset{} = changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn {message, opts} ->
       Regex.replace(~r"%{(\w+)}", message, fn _, key ->
         opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
       end)
     end)
+  end
+
+  # Handle Ash errors
+  def errors_on(%Ash.Error.Invalid{errors: errors}) do
+    errors
+    |> Enum.reduce(%{}, fn error, acc ->
+      field = Map.get(error, :field, :base)
+      message = Map.get(error, :message, "is invalid")
+      Map.update(acc, field, [message], &[message | &1])
+    end)
+  end
+
+  def errors_on(error) do
+    %{base: ["Unknown error: #{inspect(error)}"]}
   end
 end

@@ -43,7 +43,7 @@
 - Graceful degradation for API failures (use cached data)
 - Never crash the application - handle errors gracefully
 - Format changeset errors for user-friendly display
-- **SQLite Handling**: Use standard Ash error handling patterns for database operations
+- Use standard Ash error handling patterns for database operations
 
 ### Testing Requirements
 
@@ -58,21 +58,21 @@
 
 ### Testing Commands (Always Use Justfile)
 
-- **Primary test command**: `just test` - Run main test suite (excludes seeding tests for speed)
-- **Individual test files**: `just test-file <path>` - Run specific test file (preferred for focused testing)
-- **Seeding tests**: `just test-seeding` - Run seeding tests separately (tagged with `:seeding`)
-- **All tests**: `just test-all` - Run complete test suite including seeding tests
-- **Coverage reports**: `just test-coverage` - Run tests with coverage analysis
-- **Watch mode**: `just test-watch` - Run tests in watch mode for development
-- **Failed tests only**: `just test-failed` - Re-run only previously failed tests
+- `just test` - Run main test suite (excludes seeding tests for speed)
+- `just test-file <path>` - Run specific test file (preferred for focused testing)
+- `just test-seeding` - Run seeding tests separately (tagged with `:seeding`)
+- `just test-all` - Run complete test suite including seeding tests
+- `just test-coverage` - Run tests with coverage analysis
+- `just test-watch` - Run tests in watch mode for development
+- `just test-failed` - Re-run only previously failed tests
 
 ### Testing Best Practices
 
-- **Avoid verbose commands**: Don't use `just test-verbose` or `just test-all-verbose` unless debugging specific failures
-- **Use targeted testing**: Prefer `just test-file <specific_test>` over running entire test suite during development
-- **Silent by default**: Regular test commands are optimized for clean output and speed
-- **Debug when needed**: Use verbose versions (`just test-file-verbose <file>`) only when investigating specific test failures
-- **Seeding separation**: Seeding tests are excluded by default for performance - run separately with `just test-seeding`
+- Don't use `just test-verbose` or `just test-all-verbose` unless debugging specific failures
+- Prefer `just test-file <specific_test>` over running entire test suite during development
+- Regular test commands are optimized for clean output and speed
+- Use verbose versions (`just test-file-verbose <file>`) only when investigating specific test failures
+- Seeding tests are excluded by default for performance - run separately with `just test-seeding`
 
 ## Phase 1 Scope Boundaries
 

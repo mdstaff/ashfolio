@@ -2,7 +2,7 @@
 
 This document provides a detailed overview of Ashfolio's technical architecture, illustrating the relationships between its core components, modules, and data flows. Understanding this architecture is crucial for new developers to effectively contribute to the project.
 
-**Note**: This architecture is evolving through the Financial Management Expansion roadmap (see [ADR-002](../architecture/adr-002-financial-domain-expansion.md)). Current documentation reflects the expanded scope from portfolio-only to comprehensive financial management.
+This architecture is evolving through the Financial Management Expansion roadmap (see [ADR-002](../architecture/adr-002-financial-domain-expansion.md)). Current documentation reflects the expanded scope from portfolio-only to comprehensive financial management.
 
 ## 1. Overall System Architecture
 
@@ -202,7 +202,7 @@ erDiagram
     }
 
     accounts ||--o{ transactions : has
-    symbols ||--o{ transactions : has  
+    symbols ||--o{ transactions : has
     transaction_categories ||--o{ transactions : categorizes
     transaction_categories ||--o{ transaction_categories : parent_child
 ```

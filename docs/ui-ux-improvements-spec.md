@@ -5,6 +5,7 @@
 This document outlines UI/UX improvements identified during the v0.2.0 review of Ashfolio. The application currently has a clean, professional design with excellent functionality. These improvements focus on polish, accessibility, and user experience enhancements.
 
 **Current Grade: B+ (Very Good)**
+
 - Functionality: A
 - Visual Design: B+
 - User Experience: B+
@@ -13,6 +14,7 @@ This document outlines UI/UX improvements identified during the v0.2.0 review of
 ## Visual Evidence
 
 Screenshots analyzed:
+
 - Dashboard page (ashfolio-v0-2-0-dashboard.png)
 - Accounts page (ashfolio-accounts-page.png)
 - Transactions page (ashfolio-transactions-v0-2-0-features.png)
@@ -23,9 +25,8 @@ These are high-impact, low-effort improvements that can be implemented immediate
 
 ### 1.1 Button Styling Improvements
 
-**Problem**: Action buttons (Edit, Exclude, Delete) use heavy black backgrounds that dominate the interface.
+Action buttons (Edit, Exclude, Delete) use heavy black backgrounds that dominate the interface.
 
-**Current State**:
 ```css
 .btn-action {
   background: #000000;
@@ -33,7 +34,6 @@ These are high-impact, low-effort improvements that can be implemented immediate
 }
 ```
 
-**Proposed Solution**:
 ```css
 /* Primary actions */
 .btn-view {
@@ -81,7 +81,6 @@ These are high-impact, low-effort improvements that can be implemented immediate
 }
 ```
 
-**Acceptance Criteria**:
 - [ ] All action buttons use outlined style by default
 - [ ] Hover states provide clear visual feedback
 - [ ] Destructive actions (Delete) use red color coding
@@ -89,13 +88,11 @@ These are high-impact, low-effort improvements that can be implemented immediate
 
 ### 1.2 Table Row Spacing
 
-**Problem**: Table rows are too densely packed, making it harder to scan information.
+Table rows are too densely packed, making it harder to scan information.
 
-**Current State**:
 - Minimal padding (appears to be ~8px)
 - No visual separation between rows
 
-**Proposed Solution**:
 ```css
 /* Table row improvements */
 .table-row {
@@ -121,7 +118,6 @@ These are high-impact, low-effort improvements that can be implemented immediate
 }
 ```
 
-**Acceptance Criteria**:
 - [ ] Rows have 12px vertical padding minimum
 - [ ] Subtle hover state for interactive rows
 - [ ] Optional: Zebra striping for long tables
@@ -129,13 +125,11 @@ These are high-impact, low-effort improvements that can be implemented immediate
 
 ### 1.3 Category Pills Enhancement
 
-**Problem**: "Uncategorized" pills have poor contrast and don't stand out.
+"Uncategorized" pills have poor contrast and don't stand out.
 
-**Current State**:
 - Gray background with gray text
 - Small click target
 
-**Proposed Solution**:
 ```css
 .category-pill {
   display: inline-flex;
@@ -180,7 +174,6 @@ These are high-impact, low-effort improvements that can be implemented immediate
 }
 ```
 
-**Acceptance Criteria**:
 - [ ] Pills have minimum 24px height for better touch targets
 - [ ] Clear visual distinction between categorized and uncategorized
 - [ ] Hover state indicates interactivity
@@ -188,14 +181,12 @@ These are high-impact, low-effort improvements that can be implemented immediate
 
 ### 1.4 Net Worth Display Alignment
 
-**Problem**: Net worth breakdown text is cramped and misaligned.
+Net worth breakdown text is cramped and misaligned.
 
-**Current State**:
 ```html
 <span>Inv: $265,750.00 • Cash: $0.00</span>
 ```
 
-**Proposed Solution**:
 ```html
 <div class="net-worth-display">
   <div class="net-worth-total">
@@ -245,7 +236,6 @@ These are high-impact, low-effort improvements that can be implemented immediate
 }
 ```
 
-**Acceptance Criteria**:
 - [ ] Clear visual hierarchy between total and breakdown
 - [ ] Proper spacing between elements
 - [ ] De-emphasize zero values
@@ -257,22 +247,21 @@ These improvements enhance the user experience with new functionality.
 
 ### 2.1 Collapsible Filter Section
 
-**Problem**: Filter section takes significant vertical space even when not in use.
+Filter section takes significant vertical space even when not in use.
 
-**Implementation**:
 ```typescript
 // LiveView implementation
 defmodule AshfolioWeb.TransactionLive.FilterComponent do
   use AshfolioWeb, :live_component
-  
+
   @impl true
   def mount(socket) do
-    {:ok, assign(socket, 
+    {:ok, assign(socket,
       filters_expanded: false,
       active_filter_count: 0
     )}
   end
-  
+
   @impl true
   def handle_event("toggle_filters", _params, socket) do
     {:noreply, update(socket, :filters_expanded, &(!&1))}
@@ -290,14 +279,14 @@ end
         <span class="filter-badge"><%= @active_filter_count %> active</span>
       <% end %>
     </button>
-    
+
     <%= if @active_filter_count > 0 do %>
       <button phx-click="clear_filters" class="clear-filters-link">
         Clear all
       </button>
     <% end %>
   </div>
-  
+
   <div class={"filter-content #{if @filters_expanded, do: "expanded", else: "collapsed"}"}>
     <!-- Existing filter controls -->
   </div>
@@ -328,7 +317,6 @@ end
 }
 ```
 
-**Acceptance Criteria**:
 - [ ] Filters collapsed by default
 - [ ] Smooth animation when expanding/collapsing
 - [ ] Show count of active filters when collapsed
@@ -337,14 +325,12 @@ end
 
 ### 2.2 Empty State Improvements
 
-**Problem**: Empty states don't guide users to take action.
+Empty states don't guide users to take action.
 
-**Current State**:
 ```html
 <div>$0.00</div>
 ```
 
-**Proposed Solution**:
 ```html
 <!-- Empty cash accounts -->
 <div class="empty-state-card">
@@ -415,7 +401,6 @@ end
 }
 ```
 
-**Acceptance Criteria**:
 - [ ] Each empty state has icon, title, description, and CTA
 - [ ] CTAs are contextually relevant
 - [ ] Visual style consistent across app
@@ -423,9 +408,8 @@ end
 
 ### 2.3 Skeleton Loaders
 
-**Problem**: No loading states while data fetches.
+No loading states while data fetches.
 
-**Implementation**:
 ```html
 <!-- Skeleton loader component -->
 <div class="skeleton-loader">
@@ -473,7 +457,6 @@ end
 }
 ```
 
-**Acceptance Criteria**:
 - [ ] Show skeletons during initial page load
 - [ ] Match layout of actual content
 - [ ] Smooth transition to real content
@@ -481,55 +464,54 @@ end
 
 ### 2.4 Tooltip System
 
-**Problem**: No explanations for abbreviations or complex features.
+No explanations for abbreviations or complex features.
 
-**Implementation**:
 ```javascript
 // tooltip_hook.js
 export const Tooltip = {
   mounted() {
     this.initTooltip();
   },
-  
+
   initTooltip() {
     const text = this.el.dataset.tooltip;
-    const position = this.el.dataset.tooltipPosition || 'top';
-    
-    this.el.addEventListener('mouseenter', () => {
+    const position = this.el.dataset.tooltipPosition || "top";
+
+    this.el.addEventListener("mouseenter", () => {
       this.showTooltip(text, position);
     });
-    
-    this.el.addEventListener('mouseleave', () => {
+
+    this.el.addEventListener("mouseleave", () => {
       this.hideTooltip();
     });
   },
-  
+
   showTooltip(text, position) {
-    const tooltip = document.createElement('div');
+    const tooltip = document.createElement("div");
     tooltip.className = `tooltip tooltip-${position}`;
     tooltip.textContent = text;
-    
+
     document.body.appendChild(tooltip);
-    
+
     const rect = this.el.getBoundingClientRect();
     this.positionTooltip(tooltip, rect, position);
-    
+
     requestAnimationFrame(() => {
-      tooltip.classList.add('tooltip-visible');
+      tooltip.classList.add("tooltip-visible");
     });
-    
+
     this.tooltip = tooltip;
   },
-  
+
   hideTooltip() {
     if (this.tooltip) {
-      this.tooltip.classList.remove('tooltip-visible');
+      this.tooltip.classList.remove("tooltip-visible");
       setTimeout(() => {
         this.tooltip?.remove();
         this.tooltip = null;
       }, 200);
     }
-  }
+  },
 };
 ```
 
@@ -556,7 +538,7 @@ export const Tooltip = {
 }
 
 .tooltip::before {
-  content: '';
+  content: "";
   position: absolute;
   border: 6px solid transparent;
 }
@@ -569,20 +551,22 @@ export const Tooltip = {
 }
 ```
 
-**Usage**:
 ```html
-<span phx-hook="Tooltip" 
-      data-tooltip="Profit & Loss: The difference between current value and cost basis">
+<span
+  phx-hook="Tooltip"
+  data-tooltip="Profit & Loss: The difference between current value and cost basis"
+>
   P&L
 </span>
 
-<span phx-hook="Tooltip" 
-      data-tooltip="This account is excluded from portfolio calculations">
+<span
+  phx-hook="Tooltip"
+  data-tooltip="This account is excluded from portfolio calculations"
+>
   Excluded
 </span>
 ```
 
-**Acceptance Criteria**:
 - [ ] Tooltips for all abbreviations (P&L, ROI, etc.)
 - [ ] Tooltips for complex features
 - [ ] Consistent styling
@@ -595,9 +579,8 @@ These improvements enhance the overall quality and accessibility of the applicat
 
 ### 3.1 Focus States & Keyboard Navigation
 
-**Problem**: Missing or inconsistent focus indicators for keyboard users.
+Missing or inconsistent focus indicators for keyboard users.
 
-**Implementation**:
 ```css
 /* Universal focus style */
 :focus-visible {
@@ -640,21 +623,19 @@ These improvements enhance the overall quality and accessibility of the applicat
 }
 ```
 
-**Keyboard Shortcuts**:
 ```javascript
 // keyboard_shortcuts.js
 const shortcuts = {
-  'n': () => document.querySelector('[data-shortcut="new-transaction"]')?.click(),
-  'a': () => document.querySelector('[data-shortcut="new-account"]')?.click(),
-  '/': () => document.querySelector('[data-shortcut="search"]')?.focus(),
-  'g h': () => navigate('/'),
-  'g a': () => navigate('/accounts'),
-  'g t': () => navigate('/transactions'),
-  '?': () => showKeyboardHelp()
+  n: () => document.querySelector('[data-shortcut="new-transaction"]')?.click(),
+  a: () => document.querySelector('[data-shortcut="new-account"]')?.click(),
+  "/": () => document.querySelector('[data-shortcut="search"]')?.focus(),
+  "g h": () => navigate("/"),
+  "g a": () => navigate("/accounts"),
+  "g t": () => navigate("/transactions"),
+  "?": () => showKeyboardHelp(),
 };
 ```
 
-**Acceptance Criteria**:
 - [ ] All interactive elements have visible focus states
 - [ ] Tab order is logical
 - [ ] Skip links for main content
@@ -663,27 +644,25 @@ const shortcuts = {
 
 ### 3.2 Color Contrast Improvements
 
-**Problem**: Some text doesn't meet WCAG AA standards.
+Some text doesn't meet WCAG AA standards.
 
-**Current Issues**:
 - Gray text on white: #9ca3af (4.5:1 ratio)
 - Green on white: #10b981 (3.1:1 ratio)
 
-**Proposed Solution**:
 ```css
 :root {
   /* WCAG AA compliant colors */
-  --text-primary: #111827;    /* 15.3:1 */
-  --text-secondary: #4b5563;  /* 8.1:1 */
-  --text-tertiary: #6b7280;   /* 5.6:1 */
-  --text-disabled: #9ca3af;   /* 4.5:1 - AA for large text only */
-  
+  --text-primary: #111827; /* 15.3:1 */
+  --text-secondary: #4b5563; /* 8.1:1 */
+  --text-tertiary: #6b7280; /* 5.6:1 */
+  --text-disabled: #9ca3af; /* 4.5:1 - AA for large text only */
+
   /* Status colors with better contrast */
-  --success-text: #059669;    /* 4.5:1 */
+  --success-text: #059669; /* 4.5:1 */
   --success-bg: #d1fae5;
-  --error-text: #dc2626;      /* 4.5:1 */
+  --error-text: #dc2626; /* 4.5:1 */
   --error-bg: #fee2e2;
-  --warning-text: #d97706;    /* 4.5:1 */
+  --warning-text: #d97706; /* 4.5:1 */
   --warning-bg: #fed7aa;
 }
 
@@ -703,7 +682,6 @@ const shortcuts = {
 }
 ```
 
-**Acceptance Criteria**:
 - [ ] All text meets WCAG AA standards (4.5:1 for normal, 3:1 for large)
 - [ ] Status colors are accessible
 - [ ] Disabled states are clearly indicated
@@ -711,9 +689,8 @@ const shortcuts = {
 
 ### 3.3 Animation & Micro-interactions
 
-**Problem**: Limited feedback for user actions.
+Limited feedback for user actions.
 
-**Implementation**:
 ```css
 /* Page transitions */
 .page-enter {
@@ -749,9 +726,15 @@ const shortcuts = {
 
 /* Success feedback */
 @keyframes success-pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .success-animation {
@@ -765,7 +748,7 @@ const shortcuts = {
 }
 
 .btn.loading::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 16px;
   height: 16px;
@@ -780,11 +763,12 @@ const shortcuts = {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 ```
 
-**Acceptance Criteria**:
 - [ ] Smooth page transitions
 - [ ] Hover effects for interactive elements
 - [ ] Loading states for async actions
@@ -793,9 +777,8 @@ const shortcuts = {
 
 ### 3.4 Responsive Design Improvements
 
-**Problem**: Some layouts not optimized for mobile.
+Some layouts not optimized for mobile.
 
-**Implementation**:
 ```css
 /* Mobile-first approach */
 
@@ -805,12 +788,12 @@ const shortcuts = {
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  
+
   .date-range-inputs {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .date-range-inputs input {
     width: 100%;
   }
@@ -822,7 +805,7 @@ const shortcuts = {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-  
+
   /* Or convert to cards */
   .table-row {
     display: block;
@@ -831,13 +814,13 @@ const shortcuts = {
     padding: 16px;
     margin-bottom: 8px;
   }
-  
+
   .table-cell {
     display: flex;
     justify-content: space-between;
     padding: 4px 0;
   }
-  
+
   .table-cell::before {
     content: attr(data-label);
     font-weight: 500;
@@ -862,14 +845,13 @@ const shortcuts = {
     justify-content: center;
     z-index: 100;
   }
-  
+
   .header-actions {
     display: none; /* Hide desktop buttons */
   }
 }
 ```
 
-**Acceptance Criteria**:
 - [ ] All features usable on 320px width
 - [ ] Touch targets minimum 44x44px
 - [ ] No horizontal scrolling (except tables)
@@ -879,18 +861,21 @@ const shortcuts = {
 ## Implementation Plan
 
 ### Week 1: Priority 1 Items
+
 - Day 1-2: Button styling, table spacing
 - Day 3: Category pills, net worth display
 - Day 4: Testing and refinement
 - Day 5: Deploy to staging
 
 ### Week 2: Priority 2 Items
+
 - Day 1-2: Collapsible filters
 - Day 3: Empty states
 - Day 4: Skeleton loaders
 - Day 5: Tooltip system
 
 ### Week 3: Priority 3 Items
+
 - Day 1-2: Focus states and keyboard navigation
 - Day 3: Color contrast improvements
 - Day 4: Animations and micro-interactions
@@ -899,12 +884,14 @@ const shortcuts = {
 ## Success Metrics
 
 ### Quantitative Metrics
+
 - [ ] Lighthouse Accessibility score > 95
 - [ ] All WCAG AA standards met
 - [ ] Time to Interactive < 3s
 - [ ] First Contentful Paint < 1.5s
 
 ### Qualitative Metrics
+
 - [ ] User feedback on improved usability
 - [ ] Reduced support requests for UI issues
 - [ ] Increased task completion rates
@@ -913,12 +900,14 @@ const shortcuts = {
 ## Testing Requirements
 
 ### Accessibility Testing
+
 - [ ] Keyboard-only navigation
 - [ ] Screen reader testing (NVDA, JAWS)
 - [ ] Color blindness simulation
 - [ ] Browser zoom to 200%
 
 ### Cross-browser Testing
+
 - [ ] Chrome (latest)
 - [ ] Firefox (latest)
 - [ ] Safari (latest)
@@ -927,6 +916,7 @@ const shortcuts = {
 - [ ] Chrome Mobile (Android)
 
 ### Device Testing
+
 - [ ] Desktop (1920x1080, 1366x768)
 - [ ] Tablet (768x1024)
 - [ ] Mobile (375x667, 320x568)
@@ -934,18 +924,20 @@ const shortcuts = {
 ## Future Considerations
 
 ### Phase 2 Enhancements
-1. **Dark Mode**: Full theme support with system preference detection
-2. **Data Density Options**: Compact/Comfortable/Spacious views
-3. **Advanced Animations**: Page transitions, drag-and-drop
-4. **Customization**: User-defined color themes, layout preferences
-5. **Progressive Web App**: Offline support, installable
+
+1.  Full theme support with system preference detection
+2.  Compact/Comfortable/Spacious views
+3.  Page transitions, drag-and-drop
+4.  User-defined color themes, layout preferences
+5.  Offline support, installable
 
 ### Phase 3 Enhancements
-1. **AI-Powered Insights**: Smart tooltips with contextual help
-2. **Voice Navigation**: Accessibility enhancement
-3. **Gesture Support**: Swipe actions on mobile
-4. **Real-time Collaboration**: Multiple users viewing same data
-5. **Advanced Visualizations**: Charts, graphs, trends
+
+1.  Smart tooltips with contextual help
+2.  Accessibility enhancement
+3.  Swipe actions on mobile
+4.  Multiple users viewing same data
+5.  Charts, graphs, trends
 
 ## Conclusion
 

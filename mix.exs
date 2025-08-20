@@ -73,6 +73,10 @@ defmodule Ashfolio.MixProject do
       {:decimal, "~> 2.0"},
       {:httpoison, "~> 2.0"},
 
+      # v0.3.0 Financial Analytics dependencies
+      {:oban, "~> 2.17"},
+      {:contex, "~> 0.5.0"},
+
       # Test dependencies
       {:meck, "~> 0.9", only: :test},
       {:mox, "~> 1.0", only: :test},

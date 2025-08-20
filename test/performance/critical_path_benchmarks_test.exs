@@ -80,7 +80,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
       # Test net worth calculation performance (Stage 2)
       {time_us, {:ok, result}} =
         :timer.tc(fn ->
-          NetWorthCalculator.calculate_net_worth()
+          NetWorthCalculator.calculate_current_net_worth()
         end)
 
       time_ms = time_us / 1000
@@ -271,7 +271,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
         :timer.tc(fn ->
           # Simulate dashboard loading all required data
           {
-            NetWorthCalculator.calculate_net_worth(),
+            NetWorthCalculator.calculate_current_net_worth(),
             Transaction.recent_transactions(),
             Account.list_all_accounts()
           }
@@ -336,7 +336,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
       # Simulate data change that triggers updates
       {calc_time_us, {:ok, net_worth_data}} =
         :timer.tc(fn ->
-          NetWorthCalculator.calculate_net_worth()
+          NetWorthCalculator.calculate_current_net_worth()
         end)
 
       # Broadcast update
@@ -386,7 +386,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
 
       # Perform all critical operations to measure memory impact
       operations = [
-        fn -> NetWorthCalculator.calculate_net_worth() end,
+        fn -> NetWorthCalculator.calculate_current_net_worth() end,
         fn -> NetWorthCalculator.calculate_account_breakdown() end,
         fn -> SymbolSearch.search("AAPL") end,
         fn -> SymbolSearch.search("GOOGL") end,
@@ -437,7 +437,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
         for _ <- 1..5 do
           {time_us, {:ok, _result}} =
             :timer.tc(fn ->
-              NetWorthCalculator.calculate_net_worth()
+              NetWorthCalculator.calculate_current_net_worth()
             end)
 
           time_us / 1000

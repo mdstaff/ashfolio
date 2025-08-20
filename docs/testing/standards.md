@@ -151,10 +151,10 @@ end
 
 ### Test Function Names
 
-**Pattern**: `test "verb + object + condition"`
+`test "verb + object + condition"`
 
 ```elixir
-# ✅ GOOD - Clear, descriptive names
+#  GOOD - Clear, descriptive names
 test "creates user with valid attributes"
 test "updates account balance successfully"
 test "validates symbol format requirements"
@@ -170,10 +170,10 @@ test "error"
 
 ### Describe Block Names
 
-**Pattern**: Use function names or feature groups
+Use function names or feature groups
 
 ```elixir
-# ✅ GOOD - Function-based organization
+#  GOOD - Function-based organization
 describe "calculate_portfolio_value/1" do
   # Tests for this specific function
 end
@@ -182,7 +182,7 @@ describe "create/2" do
   # Tests for create function with various scenarios
 end
 
-# ✅ GOOD - Feature-based organization
+#  GOOD - Feature-based organization
 describe "validation" do
   # All validation-related tests
 end
@@ -195,13 +195,13 @@ end
 ### Variable Names
 
 ```elixir
-# ✅ GOOD - Descriptive and consistent
+#  GOOD - Descriptive and consistent
 
 account = get_default_account()
 symbol = get_common_symbol("AAPL")
 transaction = create_test_transaction(user, account, symbol)
 
-# ✅ GOOD - Context-specific names
+#  GOOD - Context-specific names
 high_balance_account = get_or_create_account(%{balance: Decimal.new("100000.00")})
 expensive_symbol = get_or_create_symbol("TSLA", %{current_price: Decimal.new("800.00")})
 
@@ -242,7 +242,7 @@ thing = create_test_transaction()
 ### Data Creation Patterns
 
 ```elixir
-# ✅ STANDARD PATTERN - Use helper functions
+#  STANDARD PATTERN - Use helper functions
 test "portfolio calculation with custom data" do
 
 
@@ -279,7 +279,7 @@ test "portfolio calculation with custom data" do
   assert %Decimal{} = result
 end
 
-# ✅ GLOBAL DATA CONFLICT AVOIDANCE - Use unique identifiers
+#  GLOBAL DATA CONFLICT AVOIDANCE - Use unique identifiers
 test "symbol validation with unique data" do
   # Avoid conflicts with global symbols (AAPL, MSFT, GOOGL, TSLA)
   unique_symbol = "TEST#{System.unique_integer([:positive])}"
@@ -293,7 +293,7 @@ test "symbol validation with unique data" do
   assert symbol.symbol == unique_symbol
 end
 
-# ✅ GLOBAL DATA COMPATIBLE ASSERTIONS - Work with existing data
+#  GLOBAL DATA COMPATIBLE ASSERTIONS - Work with existing data
 test "account listing with global data" do
 
 
@@ -306,7 +306,7 @@ test "account listing with global data" do
   # ❌ AVOID - Expects exact count (fails with global data)
   # assert length(accounts) == 1
 
-  # ✅ CORRECT - Verifies test data exists alongside global data
+  #  CORRECT - Verifies test data exists alongside global data
   account_names = Enum.map(accounts, & &1.name)
   assert "Test Account" in account_names
   assert length(accounts) >= 1
@@ -319,7 +319,7 @@ end
 
 The Ashfolio project uses a global test data strategy where default users, accounts, and symbols are created once and persist across tests. Tests must be designed to work alongside this existing data.
 
-#### ✅ Global Data Compatible Patterns
+#### Global Data Compatible Patterns
 
 ```elixir
 # Resource existence checks
@@ -376,35 +376,35 @@ end
 
 #### Global Data Resources Available
 
-- **Default User**: Available via `get_default_user()`
-- **Default Account**: Available via `get_default_account()`
-- **Common Symbols**: AAPL, MSFT, GOOGL, TSLA via `get_common_symbol(ticker)`
+- Available via `get_default_user()`
+- Available via `get_default_account()`
+- AAPL, MSFT, GOOGL, TSLA via `get_common_symbol(ticker)`
 
 ## Assertion Standards
 
 ### Assertion Types and Usage
 
 ```elixir
-# ✅ Pattern Matching - Preferred for structured data
+#  Pattern Matching - Preferred for structured data
 assert {:ok, user} = User.create(params)
 assert {:error, changeset} = User.create(invalid_params)
 assert %User{name: "Test User"} = user
 
-# ✅ Specific Value Assertions - For exact matches
+#  Specific Value Assertions - For exact matches
 assert user.name == "Test User"
 assert account.balance == Decimal.new("10000.00")
 assert length(transactions) == 3
 
-# ✅ Type and Structure Assertions - For flexible validation
+#  Type and Structure Assertions - For flexible validation
 assert %Decimal{} = portfolio_value
 assert is_list(holdings)
 assert is_binary(error_message)
 
-# ✅ Content Assertions - For UI and text validation
+#  Content Assertions - For UI and text validation
 assert html =~ "Portfolio Dashboard"
 assert has_element?(view, "[data-test='account-balance']")
 
-# ✅ Boolean Assertions - For state validation
+#  Boolean Assertions - For state validation
 assert account.excluded == false
 assert symbol.price_updated_at != nil
 ```
@@ -412,7 +412,7 @@ assert symbol.price_updated_at != nil
 ### Error Assertion Patterns
 
 ```elixir
-# ✅ STANDARD - Test expected errors
+#  STANDARD - Test expected errors
 test "validates required email field" do
   params = %{name: "Test User"}  # Missing email
 
@@ -420,7 +420,7 @@ test "validates required email field" do
   assert %{email: ["is required"]} = errors_on(changeset)
 end
 
-# ✅ STANDARD - Test business rule violations
+#  STANDARD - Test business rule violations
 test "prevents overselling stock position" do
 
   account = get_default_account()
@@ -441,7 +441,7 @@ test "prevents overselling stock position" do
   assert {:error, _error} = result
 end
 
-# ✅ STANDARD - Test external service errors
+#  STANDARD - Test external service errors
 test "handles yahoo finance API timeout" do
   expect(YahooFinanceMock, :fetch_price, fn _symbol ->
     {:error, :timeout}
@@ -457,20 +457,20 @@ end
 ### Setup Block Patterns
 
 ```elixir
-# ✅ MINIMAL SETUP - For tests using only global data
+#  MINIMAL SETUP - For tests using only global data
 setup do
   # No setup needed - use get_default_user() in tests
   :ok
 end
 
-# ✅ BASIC SETUP - For tests needing consistent context
+#  BASIC SETUP - For tests needing consistent context
 setup do
 
   account = get_default_account()
   %{ account: account}
 end
 
-# ✅ FEATURE SETUP - For related test groups
+#  FEATURE SETUP - For related test groups
 describe "portfolio calculations" do
   setup do
 
@@ -492,7 +492,7 @@ describe "portfolio calculations" do
   # All tests in this describe block get this context
 end
 
-# ✅ GENSERVER SETUP - For PriceManager tests
+#  GENSERVER SETUP - For PriceManager tests
 setup do
   allow_price_manager_db_access()
 
@@ -507,7 +507,7 @@ end
 ### No Explicit Teardown
 
 ```elixir
-# ✅ CORRECT - No teardown needed
+#  CORRECT - No teardown needed
 # DataCase automatically handles database cleanup via sandbox
 # No manual cleanup required for:
 # - Database records
@@ -659,7 +659,7 @@ end
 ### Test Execution Efficiency
 
 ```elixir
-# ✅ EFFICIENT - Minimize database operations
+#  EFFICIENT - Minimize database operations
 test "efficient portfolio calculation" do
   # Use global data (no database writes)
 
@@ -689,7 +689,7 @@ end
 ### Test Organization for Performance
 
 ```elixir
-# ✅ EFFICIENT - Group related tests with shared setup
+#  EFFICIENT - Group related tests with shared setup
 describe "with_high_value_portfolio" do
   setup do
 
@@ -733,35 +733,25 @@ end
 
 ### Pre-submission Checklist
 
-**File Structure**:
-
 - [ ] Correct module name and file location
 - [ ] `use Ashfolio.DataCase, async: false` (never async: true)
 - [ ] Proper imports (`import Ashfolio.SQLiteHelpers`)
 - [ ] Logical describe block organization
-
-**Test Data**:
 
 - [ ] Used global data when possible (`get_default_user()`, etc.)
 - [ ] Used helper functions for custom resources
 - [ ] No direct resource creation without retry logic
 - [ ] Appropriate data complexity for test scope
 
-**Test Quality**:
-
 - [ ] Descriptive test names explaining behavior
 - [ ] Both success and error scenarios covered
 - [ ] Appropriate assertion types used
 - [ ] Complex logic explained with comments
 
-**SQLite Compatibility**:
-
 - [ ] No async: true usage
 - [ ] Proper GenServer database permissions when needed
 - [ ] Mox expectations for external services
 - [ ] No direct database operations without retry protection
-
-**Performance**:
 
 - [ ] Minimized unnecessary database operations
 - [ ] Shared setup for related tests
@@ -770,13 +760,11 @@ end
 
 ### Code Review Standards
 
-**Reviewers should check for**:
-
-1. **Consistency**: Follows established patterns and naming conventions
-2. **Reliability**: Proper SQLite concurrency handling
-3. **Efficiency**: Minimal database operations and appropriate data usage
-4. **Coverage**: Tests both happy path and error scenarios
-5. **Clarity**: Descriptive names and adequate documentation
-6. **Maintainability**: Uses helper functions and avoids duplication
+1.  Follows established patterns and naming conventions
+2.  Proper SQLite concurrency handling
+3.  Minimal database operations and appropriate data usage
+4.  Tests both happy path and error scenarios
+5.  Descriptive names and adequate documentation
+6.  Uses helper functions and avoids duplication
 
 This standards document ensures all tests in the Ashfolio project maintain consistency, reliability, and performance while being accessible to both human developers and AI agents.
