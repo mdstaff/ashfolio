@@ -26,6 +26,9 @@ defmodule AshfolioWeb.Router do
     live "/categories", CategoryLive.Index, :index
     live "/categories/new", CategoryLive.Index, :new
     live "/categories/:id/edit", CategoryLive.Index, :edit
+    live "/expenses", ExpenseLive.Index, :index
+    live "/expenses/new", ExpenseLive.Index, :new
+    live "/expenses/:id/edit", ExpenseLive.Index, :edit
   end
 
   # Health check endpoints - accessible without authentication
