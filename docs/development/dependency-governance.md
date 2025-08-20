@@ -2,7 +2,7 @@
 
 ## Quick Reference for Agents
 
-### ✅ Pre-Approved Dependencies
+### Pre-Approved Dependencies
 
 Use immediately without approval:
 
@@ -90,7 +90,7 @@ Phoenix LiveView 1.0 → 1.1.4
 - Migration tool: Used igniter for automated migration (`mix igniter.install phoenix_live_view`)
 - Breaking changes: Layout architecture updates, @myself parameter handling improvements
 - Impact: Enhanced LiveView component reliability, fixed duplicate ID issues
-- Status: ✅ Successfully migrated, 125/128 tests passing
+- Status: Successfully migrated, 125/128 tests passing
 
 Phoenix 1.7 → 1.8.0
 
@@ -98,14 +98,14 @@ Phoenix 1.7 → 1.8.0
 - Migration: Manual upgrade with dependency review
 - Breaking changes: Minor template and configuration changes
 - Impact: Better LiveView integration, improved error handling
-- Status: ✅ Successfully migrated
+- Status: Successfully migrated
 
 Igniter 0.6.27 (New)
 
 - Reason: Automated Phoenix migration tooling
 - Scope: Development and test environments only
 - Purpose: Safe, automated dependency upgrades and code transformations
-- Status: ✅ Added as dev dependency for future migrations
+- Status: Added as dev dependency for future migrations
 
 ### Upgrade Decision Process
 

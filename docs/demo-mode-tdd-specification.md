@@ -6,11 +6,11 @@ This specification defines the test-driven development approach for implementing
 
 ## Design Principles
 
-- **Obviously Fake Data**: Demo data should be clearly artificial
-- **One-Click Dismissible**: Easy exit from demo mode
-- **Minimal Hand-holding**: Users explore at their own pace
-- **Clean Transition**: Exit to empty state with helpful prompts
-- **User Satisfaction Focus**: Instant value demonstration
+- Demo data should be clearly artificial
+- Easy exit from demo mode
+- Users explore at their own pace
+- Exit to empty state with helpful prompts
+- Instant value demonstration
 
 ## Test Structure
 
@@ -814,16 +814,16 @@ test.describe("Demo Mode End-to-End", () => {
 
 **Demo Mode Must:**
 
-1. ✅ Activate within 500ms
-2. ✅ Create obviously fake data (names like "Demo Stock Inc.")
-3. ✅ Show clear visual indicators (banner, "Demo Mode" text)
-4. ✅ Be dismissible with one click
-5. ✅ Work with all existing v0.2.0 features
-6. ✅ Transition cleanly to empty state
-7. ✅ Not interfere with real user data
-8. ✅ Perform well under load
-9. ✅ Be accessible (keyboard navigation, screen readers)
-10. ✅ Pass all automated tests
+1.  Activate within 500ms
+2.  Create obviously fake data (names like "Demo Stock Inc.")
+3.  Show clear visual indicators (banner, "Demo Mode" text)
+4.  Be dismissible with one click
+5.  Work with all existing v0.2.0 features
+6.  Transition cleanly to empty state
+7.  Not interfere with real user data
+8.  Perform well under load
+9.  Be accessible (keyboard navigation, screen readers)
+10. Pass all automated tests
 
 **Demo Mode Must Not:**
 
@@ -851,10 +851,10 @@ When implementing this specification:
 
 Track these metrics to validate demo mode effectiveness:
 
-- **Activation Rate**: % of users who try demo mode
-- **Completion Rate**: % who explore multiple sections
-- **Conversion Rate**: % who exit demo and add real data
-- **Time to Value**: Seconds until user sees value in the app
-- **Feature Discovery**: Which v0.2.0 features get discovered most
+- % of users who try demo mode
+- % who explore multiple sections
+- % who exit demo and add real data
+- Seconds until user sees value in the app
+- Which v0.2.0 features get discovered most
 
 The goal is to create the **fastest path to value** while maintaining **user trust** through obvious fake data indicators.

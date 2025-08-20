@@ -7,11 +7,13 @@ Welcome! This guide will help you make your first contribution to Ashfolio in 30
 Perfect for getting familiar with the codebase:
 
 ### 1. Find a Good First Issue
+
 - Check [GitHub Issues](https://github.com/mdstaff/ashfolio/issues) labeled "good first issue"
 - Look for documentation improvements, typo fixes, or small UI enhancements
 - Or fix a typo you notice while exploring the code!
 
 ### 2. Set Up Your Development Environment
+
 ```bash
 # Fork the repository on GitHub, then:
 git clone https://github.com/YOUR_USERNAME/ashfolio.git
@@ -20,12 +22,15 @@ just dev  # This sets everything up
 ```
 
 ### 3. Create a Branch
+
 ```bash
 git checkout -b fix/your-improvement-description
 ```
 
 ### 4. Make Your Change
+
 Examples of great first contributions:
+
 - Fix a typo in documentation
 - Improve a comment or error message
 - Add a helpful code comment
@@ -33,6 +38,7 @@ Examples of great first contributions:
 - Improve formatting or styling
 
 ### 5. Test Your Change
+
 ```bash
 just test              # Run all tests
 just format            # Format your code
@@ -40,6 +46,7 @@ just check             # Run format + compile + test
 ```
 
 ### 6. Submit Your PR
+
 ```bash
 git add .
 git commit -m "fix: improve error message clarity in Account validation"
@@ -53,13 +60,16 @@ Then open a Pull Request on GitHub with a clear description!
 Ready for something more substantial:
 
 ### 1. Choose a Small Feature
+
 Look for features in the project tasks:
+
 - Small UI improvements
 - Additional validation
 - New helper functions
 - Test improvements
 
 ### 2. Follow the TDD Pattern
+
 ```bash
 # 1. Write a failing test first
 just test-file test/path/to/your_test.exs
@@ -79,6 +89,7 @@ just test
 Let's walk through adding a small feature:
 
 **Step 1: Write a failing test** (`test/ashfolio/portfolio/transaction_test.exs`):
+
 ```elixir
 test "validates quantity is not zero for BUY transactions" do
   attrs = @valid_attrs |> Map.put(:quantity, Decimal.new("0"))
@@ -86,12 +97,12 @@ test "validates quantity is not zero for BUY transactions" do
 end
 ```
 
-**Step 2: Run the test (it should fail)**:
 ```bash
 just test-file test/ashfolio/portfolio/transaction_test.exs
 ```
 
 **Step 3: Implement the feature** (`lib/ashfolio/portfolio/transaction.ex`):
+
 ```elixir
 validations do
   validate validate_quantity_not_zero(:quantity)
@@ -106,7 +117,6 @@ defp validate_quantity_not_zero(quantity) do
 end
 ```
 
-**Step 4: Make the test pass**:
 ```bash
 just test-file test/ashfolio/portfolio/transaction_test.exs
 just test  # Ensure no regressions
@@ -116,14 +126,15 @@ just test  # Ensure no regressions
 
 Ashfolio follows specific patterns:
 
-- **Ash Framework**: All business logic in Ash resources
-- **Decimal Types**: Always use `Decimal` for monetary values
-- **Error Handling**: Use `ErrorHandler` for consistent messages
-- **Testing**: Write tests for all new functionality
+- All business logic in Ash resources
+- Always use `Decimal` for monetary values
+- Use `ErrorHandler` for consistent messages
+- Write tests for all new functionality
 
 ### 5. Update Documentation
 
 If your feature changes behavior:
+
 - Update relevant `.md` files
 - Add comments to complex code
 - Update the CHANGELOG.md
@@ -132,16 +143,17 @@ If your feature changes behavior:
 
 Before submitting your PR:
 
-- [ ] **Tests Pass**: `just test` shows all green
-- [ ] **Code Formatted**: `just format` applied
-- [ ] **No Warnings**: `just check` succeeds
-- [ ] **Clear Commit Message**: Explains what and why
-- [ ] **Documentation Updated**: If behavior changed
-- [ ] **Self-Review**: You've reviewed your own changes
+- [ ] `just test` shows all green
+- [ ] `just format` applied
+- [ ] `just check` succeeds
+- [ ] Explains what and why
+- [ ] If behavior changed
+- [ ] You've reviewed your own changes
 
 ## Common Patterns in Ashfolio
 
 ### Ash Resource Pattern
+
 ```elixir
 # Always use Ash resources for business logic
 {:ok, user} = User.create(%{name: "New User"})
@@ -149,16 +161,18 @@ Before submitting your PR:
 ```
 
 ### Error Handling Pattern
+
 ```elixir
 case Account.create(attrs) do
-  {:ok, account} -> 
+  {:ok, account} ->
     # Success path
-  {:error, error} -> 
+  {:error, error} ->
     ErrorHandler.handle_error(error, "Failed to create account")
 end
 ```
 
 ### Testing Pattern
+
 ```elixir
 describe "create/1" do
   test "creates account with valid attributes" do
@@ -179,19 +193,19 @@ end
 
 ## What Makes a Great First Contribution?
 
-1. **Solves a Real Problem**: Even small improvements help
-2. **Includes Tests**: Shows you understand the codebase
-3. **Follows Patterns**: Consistent with existing code
-4. **Clear Description**: Explains the what and why
-5. **Respects Standards**: Formatted, tested, documented
+1.  Even small improvements help
+2.  Shows you understand the codebase
+3.  Consistent with existing code
+4.  Explains the what and why
+5.  Formatted, tested, documented
 
 ## Next Steps After Your First PR
 
-1. **Review Feedback**: Learn from code review comments
-2. **Tackle Bigger Features**: Look for more complex issues
-3. **Help Others**: Review other contributors' PRs
-4. **Improve Documentation**: Share what you learned
-5. **Suggest Features**: Propose new functionality
+1.  Learn from code review comments
+2.  Look for more complex issues
+3.  Review other contributors' PRs
+4.  Share what you learned
+5.  Propose new functionality
 
 ---
 

@@ -6,13 +6,13 @@ This design document outlines the technical architecture for Ashfolio Phase 1, a
 
 ### Core Design Principles
 
-- **Simplicity First**: Minimal complexity to ensure high development success rate
-- **Local-First**: Zero-configuration deployment with file-based SQLite database
-- **No Authentication**: No registration or login process required - direct access to portfolio
-- **Manual Updates**: User-initiated price updates instead of real-time automation
-- **Domain-Driven**: Ash Framework for data modeling and business logic
-- **Basic Performance**: Simple ETS caching without complex optimization
-- **Standard Configuration**: Phoenix defaults without platform-specific tuning
+- Minimal complexity to ensure high development success rate
+- Zero-configuration deployment with file-based SQLite database
+- No registration or login process required - direct access to portfolio
+- User-initiated price updates instead of real-time automation
+- Ash Framework for data modeling and business logic
+- Simple ETS caching without complex optimization
+- Phoenix defaults without platform-specific tuning
 
 ## Architecture
 
@@ -68,14 +68,14 @@ graph TB
 
 ### Technology Stack
 
-- **Runtime**: Elixir/OTP with BEAM VM (standard configuration)
-- **Web Framework**: Phoenix 1.7+ with LiveView
-- **Data Framework**: Ash Framework 3.0+
-- **Database**: SQLite with Ecto adapter
-- **Cache**: Simple ETS for price caching
-- **Background Processing**: Basic GenServer for price updates
-- **HTTP Client**: HTTPoison for Yahoo Finance API calls
-- **Platform**: Cross-platform (macOS, Linux, Windows)
+- Elixir/OTP with BEAM VM (standard configuration)
+- Phoenix 1.7+ with LiveView
+- Ash Framework 3.0+
+- SQLite with Ecto adapter
+- Simple ETS for price caching
+- Basic GenServer for price updates
+- HTTPoison for Yahoo Finance API calls
+- Cross-platform (macOS, Linux, Windows)
 
 ## Components and Interfaces
 
@@ -289,8 +289,8 @@ end
 
 The portfolio calculation system uses a dual calculator architecture for different use cases:
 
-- **`Ashfolio.Portfolio.Calculator`**: Main portfolio calculations for general use
-- **`Ashfolio.Portfolio.HoldingsCalculator`**: Specialized holdings analysis with detailed cost basis tracking
+- Main portfolio calculations for general use
+- Specialized holdings analysis with detailed cost basis tracking
 
 #### Main Portfolio Calculator
 
@@ -515,13 +515,13 @@ end
 
 #### Key Features
 
-- **Financial Precision**: All calculations use Decimal types for accurate financial mathematics
-- **FIFO Cost Basis**: Simplified First In, First Out method for cost basis calculations
-- **Multi-Account Support**: Calculations work across multiple accounts with exclusion filtering
-- **Error Handling**: Comprehensive error handling with logging and graceful degradation
-- **Price Integration**: Uses both database prices and ETS cache fallback
-- **Real-time Updates**: Calculations reflect current market prices when available
-- **Performance Optimization**: CalculatorOptimized module eliminates N+1 queries for better scalability
+- All calculations use Decimal types for accurate financial mathematics
+- Simplified First In, First Out method for cost basis calculations
+- Calculations work across multiple accounts with exclusion filtering
+- Comprehensive error handling with logging and graceful degradation
+- Uses both database prices and ETS cache fallback
+- Calculations reflect current market prices when available
+- CalculatorOptimized module eliminates N+1 queries for better scalability
 
 ### LiveView Components
 
@@ -942,33 +942,26 @@ end
 
 ### API Resilience Strategy
 
-1. **Circuit Breaker Pattern**:
+1.  - 5 consecutive failures = open circuit
+    - 30-second recovery timeout before attempting half_open
+    - 2 consecutive successes = close circuit
+    - Per-data-source circuit breaker state management
 
-   - 5 consecutive failures = open circuit
-   - 30-second recovery timeout before attempting half_open
-   - 2 consecutive successes = close circuit
-   - Per-data-source circuit breaker state management
+2.  - Fall back to cached prices when APIs fail
+    - Allow manual price entry when all sources unavailable
+    - Prioritize data sources: Yahoo Finance → CoinGecko → Manual
+    - Display staleness indicators for cached data
 
-2. **Graceful Degradation**:
+3.  - Exponential backoff: 1s, 2s, 4s, 8s intervals
+    - Maximum 3 retry attempts per request
+    - Different strategies for different error types (network vs rate limit)
+    - Structured logging for all retry attempts
+    - Standard Ash error handling patterns for database operations
 
-   - Fall back to cached prices when APIs fail
-   - Allow manual price entry when all sources unavailable
-   - Prioritize data sources: Yahoo Finance → CoinGecko → Manual
-   - Display staleness indicators for cached data
-
-3. **Retry Logic**:
-
-   - Exponential backoff: 1s, 2s, 4s, 8s intervals
-   - Maximum 3 retry attempts per request
-   - Different strategies for different error types (network vs rate limit)
-   - Structured logging for all retry attempts
-   - **SQLite Handling**: Standard Ash error handling patterns for database operations
-
-4. **Cache Fallback**:
-   - Use last known prices with staleness indicators
-   - ETS cache with configurable TTL (default: 1 hour)
-   - Background refresh jobs continue attempting updates
-   - Memory-aware cache cleanup for 16GB systems
+4.  - Use last known prices with staleness indicators
+    - ETS cache with configurable TTL (default: 1 hour)
+    - Background refresh jobs continue attempting updates
+    - Memory-aware cache cleanup for 16GB systems
 
 ### Enhanced Data Validation
 
@@ -992,11 +985,11 @@ defmodule Ashfolio.Validation do
 end
 ```
 
-1. **Ash Validations**: Leverage Ash's built-in validation system with custom validators
-2. **Financial Precision**: Use Decimal types for all monetary calculations with proper rounding
-3. **Date Validation**: Ensure transaction dates are reasonable (not future, not before 1900)
-4. **Symbol Validation**: Verify symbols exist in data sources before creating transactions
-5. **Recovery Suggestions**: Provide specific guidance for validation failures
+1.  Leverage Ash's built-in validation system with custom validators
+2.  Use Decimal types for all monetary calculations with proper rounding
+3.  Ensure transaction dates are reasonable (not future, not before 1900)
+4.  Verify symbols exist in data sources before creating transactions
+5.  Provide specific guidance for validation failures
 
 ### Memory Management and Monitoring
 
@@ -1035,28 +1028,28 @@ end
 
 ### Unit Testing
 
-- **Ash Resource Tests**: Test all resource actions and validations
-- **Calculation Tests**: Verify ROAI and performance calculations
-- **Market Data Tests**: Mock external APIs for reliable testing
-- **LiveView Tests**: Test user interactions and real-time updates
+- Test all resource actions and validations
+- Verify ROAI and performance calculations
+- Mock external APIs for reliable testing
+- Test user interactions and real-time updates
 
 ### Integration Testing
 
-- **Database Integration**: Test Ecto/SQLite interactions
-- **API Integration**: Test external service integrations
-- **Cache Integration**: Test ETS cache behavior
-- **End-to-End Workflows**: Test complete user journeys
+- Test Ecto/SQLite interactions
+- Test external service integrations
+- Test ETS cache behavior
+- Test complete user journeys
 
 ### Performance Testing
 
-- **Load Testing**: Test with maximum expected data volumes
-- **Memory Testing**: Verify ETS cache memory usage
-- **Query Performance**: Ensure database queries are efficient
-- **Real-time Performance**: Test LiveView update latency
+- Test with maximum expected data volumes
+- Verify ETS cache memory usage
+- Ensure database queries are efficient
+- Test LiveView update latency
 
 ### GenServer Testing Patterns
 
-**Critical Learning**: Testing singleton GenServers requires special handling to avoid race conditions and state pollution between tests.
+Testing singleton GenServers requires special handling to avoid race conditions and state pollution between tests.
 
 #### Shared GenServer Challenges
 
@@ -1401,12 +1394,12 @@ end
 
 This configuration system provides:
 
-- **Flexible deployment**: Easy customization via environment variables
-- **Sensible defaults**: Works out-of-the-box for local development
-- **API key management**: Optional CoinGecko API key for higher rate limits
-- **Runtime updates**: Ability to adjust settings without restart
-- **Validation**: Ensures configuration is valid on startup
-- **Documentation**: Clear examples and templates for users
+- Easy customization via environment variables
+- Works out-of-the-box for local development
+- Optional CoinGecko API key for higher rate limits
+- Ability to adjust settings without restart
+- Ensures configuration is valid on startup
+- Clear examples and templates for users
 
 ## UI/UX Design Specification
 
@@ -1414,11 +1407,11 @@ This configuration system provides:
 
 The user interface follows a **clean, data-focused design** that prioritizes:
 
-- **Immediate value**: Key portfolio metrics visible at first glance
-- **Real-time feedback**: Live updates without page refreshes using LiveView
-- **Local-first UX**: No loading states for authentication or user management
-- **Financial clarity**: Clear typography and color coding for gains/losses
-- **Responsive design**: Works well on desktop and tablet (primary use case)
+- Key portfolio metrics visible at first glance
+- Live updates without page refreshes using LiveView
+- No loading states for authentication or user management
+- Clear typography and color coding for gains/losses
+- Works well on desktop and tablet (primary use case)
 
 ### Application Layout Structure
 
@@ -1441,7 +1434,7 @@ The user interface follows a **clean, data-focused design** that prioritizes:
 
 #### 1. Portfolio Dashboard (Main Landing Page)
 
-**Layout**: Grid-based dashboard with real-time updates
+Grid-based dashboard with real-time updates
 
 ```
 ┌─────────────────┬─────────────────┬─────────────────┐
@@ -1471,8 +1464,6 @@ The user interface follows a **clean, data-focused design** that prioritizes:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**LiveView Features**:
-
 - Real-time price updates every 5-15 seconds
 - Animated counters for value changes
 - Color-coded gains/losses (green/red)
@@ -1481,7 +1472,7 @@ The user interface follows a **clean, data-focused design** that prioritizes:
 
 #### 2. Account Management Interface
 
-**Layout**: Master-detail view for account management
+Master-detail view for account management
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -1502,8 +1493,6 @@ The user interface follows a **clean, data-focused design** that prioritizes:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**Features**:
-
 - Inline editing for account details
 - Account exclusion toggle for calculations
 - Quick balance updates
@@ -1511,7 +1500,7 @@ The user interface follows a **clean, data-focused design** that prioritizes:
 
 #### 3. Transaction Management
 
-**Layout**: Spreadsheet-like interface with filtering and bulk operations
+Spreadsheet-like interface with filtering and bulk operations
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -1536,8 +1525,6 @@ The user interface follows a **clean, data-focused design** that prioritizes:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**Features**:
-
 - Real-time validation and calculations
 - Symbol autocomplete with current prices
 - Bulk import with CSV mapping interface
@@ -1546,7 +1533,7 @@ The user interface follows a **clean, data-focused design** that prioritizes:
 
 #### 4. Analytics and Performance
 
-**Layout**: Multi-tab analytics dashboard
+Multi-tab analytics dashboard
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -1667,28 +1654,28 @@ end
 
 ### Accessibility Features
 
-- **Keyboard Navigation**: Full keyboard support for all interactions
-- **Screen Reader Support**: Proper ARIA labels for financial data
-- **Color Contrast**: WCAG AA compliance for text and backgrounds
-- **Focus Management**: Clear focus indicators and logical tab order
-- **Alternative Text**: Descriptive alt text for charts and graphs
+- Full keyboard support for all interactions
+- Proper ARIA labels for financial data
+- WCAG AA compliance for text and backgrounds
+- Clear focus indicators and logical tab order
+- Descriptive alt text for charts and graphs
 
 ### Mobile Considerations
 
 While desktop is the primary target, basic mobile support includes:
 
-- **Responsive tables**: Horizontal scrolling for transaction tables
-- **Touch-friendly**: Larger tap targets for mobile devices
-- **Simplified navigation**: Collapsible sidebar on mobile
-- **Essential features**: Core portfolio viewing and transaction entry
+- Horizontal scrolling for transaction tables
+- Larger tap targets for mobile devices
+- Collapsible sidebar on mobile
+- Core portfolio viewing and transaction entry
 
 ### Performance Optimizations
 
-- **Lazy loading**: Charts and detailed data load on demand
-- **Virtual scrolling**: For large transaction lists
-- **Debounced updates**: Prevent excessive re-renders during rapid price changes
-- **Cached calculations**: Store computed values to avoid recalculation
-- **Progressive enhancement**: Core functionality works without JavaScript
+- Charts and detailed data load on demand
+- For large transaction lists
+- Prevent excessive re-renders during rapid price changes
+- Store computed values to avoid recalculation
+- Core functionality works without JavaScript
 
 This UI/UX design provides a professional, data-focused interface that leverages Phoenix LiveView's real-time capabilities while maintaining the simplicity expected from a local portfolio management application.
 
@@ -1761,11 +1748,11 @@ Visit `http://localhost:4000` to access your portfolio.
 
 ## Key Technologies
 
-- **Phoenix LiveView**: Real-time UI updates
-- **Ash Framework**: Domain modeling and business logic
-- **Oban**: Background job processing
-- **SQLite**: Local database storage
-- **ETS**: In-memory caching
+- Real-time UI updates
+- Domain modeling and business logic
+- Background job processing
+- Local database storage
+- In-memory caching
 
 ## New to Elixir?
 
@@ -2242,8 +2229,8 @@ end
 ## Development Issues
 
 ### "Mix command not found"
-**Problem**: Elixir/Mix not in PATH
-**Solution**:
+ Elixir/Mix not in PATH
+
 ```bash
 # Add to your shell profile
 export PATH="$PATH:/usr/local/bin/elixir"
@@ -2252,8 +2239,7 @@ source ~/.bashrc  # or ~/.zshrc
 
 ### Database Connection Errors
 
-**Problem**: SQLite database locked or permission issues
-**Solution**:
+SQLite database locked or permission issues
 
 ```bash
 # Check file permissions
@@ -2267,8 +2253,7 @@ mix ecto.migrate
 
 ### LiveView Not Updating
 
-**Problem**: Real-time updates not working
-**Solution**:
+Real-time updates not working
 
 1. Check PubSub subscription in `mount/3`
 2. Verify message broadcasting
@@ -2276,8 +2261,7 @@ mix ecto.migrate
 
 ### Oban Jobs Not Running
 
-**Problem**: Background jobs stuck in queue
-**Solution**:
+Background jobs stuck in queue
 
 ```elixir
 # Check job status in IEx
@@ -2291,7 +2275,7 @@ iex> from(j in Oban.Job, where: j.state == "retryable") |> Repo.all()
 
 ### Slow Database Queries
 
-**Solution**: Add appropriate indexes
+Add appropriate indexes
 
 ```elixir
 # In migration
@@ -2302,7 +2286,7 @@ create index(:transactions, [:date])
 
 ### High Memory Usage
 
-**Solution**: Monitor ETS cache size
+Monitor ETS cache size
 
 ```elixir
 # Check ETS table size
@@ -2321,24 +2305,24 @@ end
 
 ### Architecture Decision: Web-First with Optional Native Integration
 
-**Primary Application**: Ashfolio is fundamentally a **Phoenix LiveView web application** that runs locally on `localhost:4000`. Users access it through their preferred web browser (Safari, Chrome, Firefox) for the full portfolio management experience.
+ Ashfolio is fundamentally a **Phoenix LiveView web application** that runs locally on `localhost:4000`. Users access it through their preferred web browser (Safari, Chrome, Firefox) for the full portfolio management experience.
 
 **Why Web-First?**
-- **Rapid Development**: Leverage Phoenix LiveView's real-time capabilities without complex native UI code
-- **Cross-Platform Compatibility**: Works on any operating system with a web browser
-- **Familiar Development**: Standard web technologies and debugging tools
-- **Rich UI**: Modern web capabilities for charts, tables, and interactive elements
-- **Real-Time Updates**: Phoenix LiveView provides seamless real-time data updates
+-  Leverage Phoenix LiveView's real-time capabilities without complex native UI code
+-  Works on any operating system with a web browser
+-  Standard web technologies and debugging tools
+-  Modern web capabilities for charts, tables, and interactive elements
+-  Phoenix LiveView provides seamless real-time data updates
 
-**Optional Native macOS Enhancements**: The following integrations are **optional additions** that enhance the user experience on macOS without replacing the core web application:
+ The following integrations are **optional additions** that enhance the user experience on macOS without replacing the core web application:
 
-- **Application Bundle**: Wraps the web app in a native `.app` for easier launching
-- **System Integration**: Menu bar widgets, native notifications, Spotlight indexing
-- **Native Feel**: Removes browser chrome for a more integrated experience
+-  Wraps the web app in a native `.app` for easier launching
+-  Menu bar widgets, native notifications, Spotlight indexing
+-  Removes browser chrome for a more integrated experience
 
-**Implementation Priority**:
-1. **Phase 1**: Build the complete Phoenix LiveView web application
-2. **Phase 2**: Add optional macOS native integrations for enhanced UX
+
+1.  Build the complete Phoenix LiveView web application
+2.  Add optional macOS native integrations for enhanced UX
 
 This approach provides the development speed of web technologies with the option to add native macOS polish when desired.
 
@@ -2499,9 +2483,9 @@ end
 
 #### Application Bundle Creation (Optional)
 
-**Purpose**: Creates a native macOS `.app` bundle that launches the Phoenix server and opens the web application automatically, providing a more integrated user experience.
+Creates a native macOS `.app` bundle that launches the Phoenix server and opens the web application automatically, providing a more integrated user experience.
 
-**When to Implement**: After the core web application is fully functional and you want to provide a more native macOS experience.
+After the core web application is fully functional and you want to provide a more native macOS experience.
 
 #### Application Bundle Creation
 

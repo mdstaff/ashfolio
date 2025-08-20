@@ -53,22 +53,22 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
 
 - [x] 6. Create SymbolSearch module for local symbol lookup and caching
 
-  - **Goal**: Implement local-first symbol search with ETS caching, preparing foundation for external API integration
-  - **Context API Integration**: Use `Ashfolio.Context.search_symbols/2` for cross-domain symbol operations
+  - Implement local-first symbol search with ETS caching, preparing foundation for external API integration
+  - Use `Ashfolio.Context.search_symbols/2` for cross-domain symbol operations
   - Create `Ashfolio.FinancialManagement.SymbolSearch` module for local Symbol resource search
   - Implement local search by ticker and company name (case-insensitive) with relevance ranking
   - Add ETS-based result caching with configurable TTL (default: 5 minutes)
   - Maximum 50 results per search to prevent UI overflow
   - Write unit tests for search logic, cache operations, and result ranking
   - Write integration tests for ETS table lifecycle and cache expiration
-  - **Dependencies**: Tasks 1-5 complete
-  - **Out of Scope**: External API integration, symbol creation, real-time price data
+  - Tasks 1-5 complete
+  - External API integration, symbol creation, real-time price data
   - _Requirements: 4.1, 4.3_
 
 - [x] 6a. Add external API integration to SymbolSearch
 
-  - **Goal**: Extend SymbolSearch with external API fallback when local results insufficient
-  - **Context API Integration**: Add `Context.create_symbol_from_external/1` function
+  - Extend SymbolSearch with external API fallback when local results insufficient
+  - Add `Context.create_symbol_from_external/1` function
   - Implement external API fallback when local results < 3 matches
   - Add rate limiting: maximum 10 API calls per minute per user
   - Add `create_symbol_from_external/1` function with validation
@@ -76,14 +76,14 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - Add error handling with specific types (:rate_limited, :api_unavailable)
   - Write unit tests with mocked API responses using ExUnit.Mox
   - Write integration tests for symbol creation and rate limiting
-  - **Dependencies**: Task 6 complete
-  - **Out of Scope**: Real-time price updates, premium API features
+  - Task 6 complete
+  - Real-time price updates, premium API features
   - _Requirements: 4.2, 4.4_
 
 - [x] 7. Create SymbolAutocomplete server-side component
 
-  - **Goal**: Implement LiveView server-side autocomplete logic with debouncing and state management
-  - **Context API Integration**: Use `Context.search_symbols/2` for all symbol lookups
+  - Implement LiveView server-side autocomplete logic with debouncing and state management
+  - Use `Context.search_symbols/2` for all symbol lookups
   - Create `AshfolioWeb.Components.SymbolAutocomplete` LiveView component
   - Implement server-side debouncing (300ms) to prevent excessive searches
   - Add search state management (loading, results, error states)
@@ -92,14 +92,14 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - Write unit tests for component state transitions and debounce logic
   - Write LiveView tests for event handling, state updates, error scenarios
   - Write integration tests for Context API integration and search flow
-  - **Dependencies**: Task 6 complete
-  - **Out of Scope**: JavaScript hooks, complex UI animations, keyboard navigation
+  - Task 6 complete
+  - JavaScript hooks, complex UI animations, keyboard navigation
   - _Requirements: 4.1, 4.2_
 
 - [ ] 7a. Add SymbolAutocomplete UI enhancements
 
-  - **Goal**: Add client-side enhancements for improved user experience
-  - **Context API Integration**: None (pure UI layer)
+  - Add client-side enhancements for improved user experience
+  - None (pure UI layer)
   - Add JavaScript hooks for keyboard navigation (arrow keys, enter, escape)
   - Implement dropdown positioning and responsive design
   - Add visual loading indicators and smooth transitions
@@ -107,15 +107,14 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - Write LiveView tests for user interaction scenarios
   - Write browser tests for keyboard navigation and mobile responsiveness
   - Write accessibility tests for screen reader compatibility
-  - **Dependencies**: Task 7 complete
-  - **Out of Scope**: Advanced animations, complex styling frameworks
+  - Task 7 complete
+  - Advanced animations, complex styling frameworks
   - _Requirements: 4.1, 4.2_
 
 - [x] 8. Enhance AccountLive with Context API integration
 
-  - **Goal**: Integrate existing account management with new Context API and cash account types
-  - **Context API Integration**:
-    - Replace direct Account queries with `Context.get_user_dashboard_data/1`
+  - Integrate existing account management with new Context API and cash account types
+  - - Replace direct Account queries with `Context.get_user_dashboard_data/1`
     - Use `Context.get_account_with_transactions/2` for account details
     - Integrate cash account balance updates through Context layer
   - Update `AshfolioWeb.AccountLive.Index` to use Context API for account data
@@ -126,14 +125,14 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - Write unit tests for Context API integration and data transformation
   - Write LiveView tests for account filtering, balance display, form handling
   - Write integration tests for PubSub subscription and real-time updates
-  - **Dependencies**: Tasks 1-5 complete, Context API available
-  - **Out of Scope**: UI redesign, new form components, manual balance entry
+  - Tasks 1-5 complete, Context API available
+  - UI redesign, new form components, manual balance entry
   - _Requirements: 1.1-1.4, 2.1_
 
 - [x] 8a. Add manual balance update interface for cash accounts
 
-  - **Goal**: Add UI for manual cash account balance updates with audit trail
-  - **Context API Integration**: Use `Context.update_cash_balance/3` for balance modifications
+  - Add UI for manual cash account balance updates with audit trail
+  - Use `Context.update_cash_balance/3` for balance modifications
   - Add modal form for balance updates (current balance, new balance, notes)
   - Implement balance change confirmation with before/after display
   - Add balance history timeline in account details view
@@ -142,8 +141,8 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - Write LiveView tests for modal interactions, form validation, confirmation flow
   - Write integration tests for balance update workflow and history display
   - Write error tests for invalid balance scenarios and validation failures
-  - **Dependencies**: Task 8 complete, BalanceManager available
-  - **Out of Scope**: Bulk balance updates, automated balance imports
+  - Task 8 complete, BalanceManager available
+  - Bulk balance updates, automated balance imports
   - _Requirements: 2.1, 2.3, 2.4_
 
 - [x] 9. Create investment category management interface
@@ -206,39 +205,39 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
 
 - [x] 15. Enhance error handling for new features
 
-  - ✅ Extended `Ashfolio.ErrorHandler` with 17 new v0.2.0 error categories (commit 2f1c155)
-  - ✅ Added comprehensive symbol search error handling and fallback behavior
-  - ✅ Added category management error handling with system category protection
-  - ✅ Created user-friendly error messages with actionable guidance for all scenarios
-  - ✅ Created comprehensive error testing: 67 handler tests + 16 component tests + 21 integration tests
-  - ✅ Implemented 5 reusable LiveView error display components with accessibility
+  - Extended `Ashfolio.ErrorHandler` with 17 new v0.2.0 error categories (commit 2f1c155)
+  - Added comprehensive symbol search error handling and fallback behavior
+  - Added category management error handling with system category protection
+  - Created user-friendly error messages with actionable guidance for all scenarios
+  - Created comprehensive error testing: 67 handler tests + 16 component tests + 21 integration tests
+  - Implemented 5 reusable LiveView error display components with accessibility
   - _Completed: August 15, 2025 - Production-ready error handling infrastructure_
 
 - [x] 16. Create comprehensive integration tests
 
-  - ✅ Write end-to-end tests for complete cash account workflows with manual balance management (Task 16)
-  - ✅ Create integration tests for net worth calculation across mixed account types (Task 16)
-  - ✅ Test symbol autocomplete integration with transaction creation (Task 16)
-  - ✅ Write tests for investment category assignment and filtering workflows (Task 16)
-  - ✅ Test backward compatibility with existing v0.1.0 investment functionality (Task 16)
+  - Write end-to-end tests for complete cash account workflows with manual balance management (Task 16)
+  - Create integration tests for net worth calculation across mixed account types (Task 16)
+  - Test symbol autocomplete integration with transaction creation (Task 16)
+  - Write tests for investment category assignment and filtering workflows (Task 16)
+  - Test backward compatibility with existing v0.1.0 investment functionality (Task 16)
   - _Completed: Task 16 - 970 tests passing with comprehensive integration coverage_
 
 - [x] 17. Final system integration and validation
 
-  - ✅ Verify all PubSub integrations work correctly across domains (Task 17)
-  - ✅ Test real-time updates for net worth, balances, and dashboard (Task 17)
-  - ✅ Validate backward compatibility with existing data and functionality (Task 17)
-  - ✅ Run complete test suite and ensure 100% pass rate (907 tests, 0 failures)
-  - ✅ Polish dashboard UI/UX with Recent Activity and v0.2.0 features
-  - ✅ Clean up integration test warnings for better log readability
+  - Verify all PubSub integrations work correctly across domains (Task 17)
+  - Test real-time updates for net worth, balances, and dashboard (Task 17)
+  - Validate backward compatibility with existing data and functionality (Task 17)
+  - Run complete test suite and ensure 100% pass rate (907 tests, 0 failures)
+  - Polish dashboard UI/UX with Recent Activity and v0.2.0 features
+  - Clean up integration test warnings for better log readability
   - _Completed: Task 17 - System fully integrated and production-ready_
 
 - [x] 18. Create comprehensive migration and backward compatibility tests
 
-  - **Goal**: Ensure seamless upgrade path from v0.1.0 to v0.2.0 with data integrity
-  - **Context API Integration**: Test Context API with existing v0.1.0 data structures
-  - **Previous Attempt**: Task partially attempted but reverted due to raw SQL complexity
-  - **Lessons Learned**: Avoid raw SQL migrations, use Ash Framework's migration patterns
+  - Ensure seamless upgrade path from v0.1.0 to v0.2.0 with data integrity
+  - Test Context API with existing v0.1.0 data structures
+  - Task partially attempted but reverted due to raw SQL complexity
+  - Avoid raw SQL migrations, use Ash Framework's migration patterns
   - Write migration tests for new account types with existing account data
   - Add data integrity verification for enhanced Transaction and Account resources
   - Test Context API compatibility with legacy data structures
@@ -247,6 +246,6 @@ Convert the feature design into a series of prompts for an AI Agent like Claude 
   - Write migration tests for each database migration with realistic data volumes
   - Write compatibility tests for Context API functions with v0.1.0 data
   - Write performance tests ensuring no regression in core operation response times
-  - **Dependencies**: Tasks 16-17 complete (Task 15 complete)
-  - **Out of Scope**: Zero-downtime migrations, external data imports, raw SQL approaches
+  - Tasks 16-17 complete (Task 15 complete)
+  - Zero-downtime migrations, external data imports, raw SQL approaches
   - _Requirements: All requirements - backward compatibility aspects_

@@ -41,10 +41,10 @@ just test-ash-verbose                   # Business logic tests with detailed out
 
 ### Critical File Locations
 
-- **Test Helper**: `test/test_helper.exs` - Global configuration
-- **SQLite Helpers**: `test/support/sqlite_helpers.ex` - Core helper functions
-- **Data Case**: `test/support/data_case.ex` - Database setup
-- **LiveView Case**: `test/support/live_view_case.ex` - LiveView setup
+- `test/test_helper.exs` - Global configuration
+- `test/support/sqlite_helpers.ex` - Core helper functions
+- `test/support/data_case.ex` - Database setup
+- `test/support/live_view_case.ex` - LiveView setup
 
 ## Decision Tree for AI Agents
 
@@ -229,7 +229,7 @@ end
 
 ```elixir
 test "portfolio calculation" do
-  # ✅ FAST - Uses pre-created data
+  #  FAST - Uses pre-created data
 
   account = get_default_account()
   symbol = get_common_symbol("AAPL")  # AAPL, MSFT, GOOGL, TSLA available
@@ -246,14 +246,14 @@ end
 test "custom account scenario" do
 
 
-  # ✅ SAFE - Uses retry logic internally
+  #  SAFE - Uses retry logic internally
   custom_account = get_or_create_account(%{
     name: "High Balance Account",
     balance: Decimal.new("50000.00"),
     platform: "Custom Platform"
   })
 
-  # ✅ SAFE - Updates existing or creates new
+  #  SAFE - Updates existing or creates new
   expensive_symbol = get_or_create_symbol("NVDA", %{
     current_price: Decimal.new("800.00")
   })
@@ -270,7 +270,7 @@ test "multiple transaction types" do
   account = get_default_account()
   symbol = get_common_symbol("MSFT")
 
-  # ✅ EFFICIENT - Uses helper with retry logic
+  #  EFFICIENT - Uses helper with retry logic
   buy_tx = create_test_transaction(user, account, symbol, %{
     type: :buy,
     quantity: Decimal.new("10"),
@@ -337,17 +337,17 @@ end
 #### New: Use Modular Testing Commands for Focused Development
 
 ```bash
-# ✅ FAST DEVELOPMENT - Use targeted commands for development workflow
+#  FAST DEVELOPMENT - Use targeted commands for development workflow
 just test-fast           # Quick feedback during development (< 100ms tests)
 just test-smoke          # Essential functionality verification
 
-# ✅ ARCHITECTURAL FOCUS - Match your development area
+#  ARCHITECTURAL FOCUS - Match your development area
 just test-ash           # When working on business logic (User, Account, Symbol, Transaction)
 just test-liveview      # When working on UI components and interactions
 just test-calculations  # When working on portfolio math and FIFO calculations
 just test-market-data   # When working on price fetching and Yahoo Finance
 
-# ✅ SCOPE-BASED DEVELOPMENT - Choose appropriate test scope
+#  SCOPE-BASED DEVELOPMENT - Choose appropriate test scope
 just test-unit          # For isolated functionality testing
 just test-integration   # For end-to-end workflow testing
 just test-regression    # For bug fix validation
@@ -358,14 +358,10 @@ just test               # Full test suite (slow feedback loop)
 just test-all           # Comprehensive suite including seeding tests
 ```
 
-**✅ Use Global Data When**:
-
 - Testing calculations with standard data
 - Need basic user/account/symbol for context
 - Testing read-only operations
 - Performance is important
-
-**Examples**:
 
 ```elixir
 # Portfolio calculations
@@ -379,14 +375,10 @@ price = symbol.current_price
 
 ### When to Create Custom Data
 
-**✅ Create Custom Data When**:
-
 - Testing edge cases or specific scenarios
 - Need unusual attribute combinations
 - Testing validation logic
 - Simulating complex portfolios
-
-**Examples**:
 
 ```elixir
 # High-balance account for testing
@@ -402,14 +394,10 @@ symbol = get_or_create_symbol("TEST", %{
 
 ### When to Use Integration Tests
 
-**✅ Create Integration Test When**:
-
 - Testing complete user workflows
 - Multiple modules interact
 - UI and backend integration
 - Testing system behavior
-
-**Examples**:
 
 - Account creation → Transaction entry → Portfolio calculation
 - Price refresh → Cache update → Dashboard display
@@ -423,8 +411,6 @@ symbol = get_or_create_symbol("TEST", %{
 # Run specific failing test with full output
 just test-file-verbose test/path/to/failing_test.exs
 ```
-
-**Look for these error patterns**:
 
 ```
 # SQLite Concurrency Issue
@@ -496,7 +482,7 @@ just compile-warnings
 ### Tip 1: Minimize Database Writes
 
 ```elixir
-# ✅ FAST - Uses existing data
+#  FAST - Uses existing data
 test "fast test" do
           # No DB write
   account = get_default_account()  # No DB write
@@ -514,14 +500,14 @@ end
 ### Tip 2: Use Appropriate Test Types
 
 ```elixir
-# ✅ UNIT TEST - Fast, focused
+#  UNIT TEST - Fast, focused
 test "calculation logic" do
   input = %{amount: Decimal.new("100.00")}
   result = Calculator.add_fee(input, Decimal.new("5.00"))
   assert result == Decimal.new("105.00")
 end
 
-# ✅ INTEGRATION TEST - Slower, comprehensive
+#  INTEGRATION TEST - Slower, comprehensive
 test "complete portfolio workflow" do
   # Multi-step workflow testing
 end
@@ -563,35 +549,35 @@ end
 
 Before submitting test code, verify:
 
-### ✅ Structure Checklist
+### Structure Checklist
 
 - [ ] `use Ashfolio.DataCase, async: false` (never async: true)
 - [ ] `import Ashfolio.SQLiteHelpers` included
 - [ ] Tests organized in logical `describe` blocks
 - [ ] Descriptive test names explaining behavior
 
-### ✅ Data Usage Checklist
+### Data Usage Checklist
 
 - [ ] Used global data (`get_default_user()`) when possible
 - [ ] Used retry helpers for custom resources
 - [ ] No direct `User.create()` or `Account.create()` calls without retry
 - [ ] Used `create_test_transaction()` for transaction tests
 
-### ✅ Error Handling Checklist
+### Error Handling Checklist
 
 - [ ] Tests both success and error cases
 - [ ] Uses `assert {:ok, _}` and `assert {:error, _}` patterns
 - [ ] Validates error messages when relevant
 - [ ] Handles expected exceptions gracefully
 
-### ✅ Performance Checklist
+### Performance Checklist
 
 - [ ] Minimized database write operations
 - [ ] Used appropriate test type (unit vs integration)
 - [ ] Avoided unnecessary data creation
 - [ ] Shared setup data when possible
 
-### ✅ Special Cases Checklist
+### Special Cases Checklist
 
 - [ ] Added `allow_price_manager_db_access()` for GenServer tests
 - [ ] Added Mox expectations for external API calls
@@ -600,8 +586,6 @@ Before submitting test code, verify:
 
 ## Summary for AI Agents
 
-**Key Success Patterns**:
-
 1. **Always use `async: false`** for SQLite compatibility
 2. **Prefer global data** over custom creation for performance
 3. **Use retry helpers** when custom resources are needed
@@ -609,14 +593,12 @@ Before submitting test code, verify:
 5. **Handle both success and error cases**
 6. **Add proper setup** for GenServer and LiveView tests
 
-**Common Mistakes to Avoid**:
-
-1. Using `async: true` (causes SQLite conflicts)
-2. Creating users/accounts directly without retry logic
-3. Missing GenServer database permissions
-4. Forgetting Mox expectations for external calls
-5. Not testing error scenarios
-6. Creating unnecessary custom data
+7. Using `async: true` (causes SQLite conflicts)
+8. Creating users/accounts directly without retry logic
+9. Missing GenServer database permissions
+10. Forgetting Mox expectations for external calls
+11. Not testing error scenarios
+12. Creating unnecessary custom data
 
 Following these patterns will result in reliable, fast, maintainable tests that work well with Ashfolio's SQLite-based architecture.
 
@@ -635,7 +617,7 @@ test "form submission" do
   form_data = %{account_id: account.id, ...}
 end
 
-# ✅ CORRECT - Uses global data that form recognizes
+#  CORRECT - Uses global data that form recognizes
 test "form submission" do
 
   account = SQLiteHelpers.get_default_account()
@@ -650,7 +632,7 @@ end
 For performance tests that need realistic data volumes:
 
 ```elixir
-# ✅ CORRECT - Uses get_or_create for existing symbols
+#  CORRECT - Uses get_or_create for existing symbols
 test "performance with realistic data" do
 
   account = SQLiteHelpers.get_default_account()
@@ -706,14 +688,14 @@ end
 
 ### Fix: Performance Benchmarks Test
 
-- **Issue**: Symbol creation conflicts with global test data
-- **Solution**: Used `SQLiteHelpers.get_or_create_symbol()` instead of direct `Symbol.create()`
-- **File**: `test/integration/performance_benchmarks_test.exs`
+- Symbol creation conflicts with global test data
+- Used `SQLiteHelpers.get_or_create_symbol()` instead of direct `Symbol.create()`
+- `test/integration/performance_benchmarks_test.exs`
 
 ### Fix: Transaction PubSub Test
 
-- **Issue**: Form validation errors due to account ID mismatch
-- **Solution**: Used global test data helpers consistently
-- **File**: `test/integration/transaction_pubsub_test.exs`
+- Form validation errors due to account ID mismatch
+- Used global test data helpers consistently
+- `test/integration/transaction_pubsub_test.exs`
 
 These fixes demonstrate the importance of the global test data strategy for integration tests.

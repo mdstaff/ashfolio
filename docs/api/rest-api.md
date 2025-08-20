@@ -282,16 +282,16 @@ The API has no rate limiting since it's designed for localhost-only access. Howe
 
 ## Data Formats
 
-- **Dates**: ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ) for timestamps, YYYY-MM-DD for date-only fields
-- **Currency**: USD amounts as decimal strings with 2 decimal places (e.g., "1234.56")
-- **Quantities**: Share quantities as decimal strings with up to 6 decimal places (e.g., "100.000000")
-- **Percentages**: Percentage values as decimal strings (e.g., "11.11" for 11.11%)
+- ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ) for timestamps, YYYY-MM-DD for date-only fields
+- USD amounts as decimal strings with 2 decimal places (e.g., "1234.56")
+- Share quantities as decimal strings with up to 6 decimal places (e.g., "100.000000")
+- Percentage values as decimal strings (e.g., "11.11" for 11.11%)
 
 ## Security Considerations
 
-- **Localhost Only**: The API is only accessible from localhost (127.0.0.1)
-- **No Authentication**: No API keys or authentication required
-- **No HTTPS**: Uses HTTP since it's localhost-only
-- **No CORS**: Cross-origin requests are not supported
+- The API is only accessible from localhost (127.0.0.1)
+- No API keys or authentication required
+- Uses HTTP since it's localhost-only
+- Cross-origin requests are not supported
 
 This API is designed for local development, testing, and personal automation. It should not be exposed to external networks or used in production environments without proper security measures.

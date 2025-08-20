@@ -264,7 +264,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
       # Trigger a data change that should broadcast updates
       {calculation_time_us, {:ok, net_worth_data}} =
         :timer.tc(fn ->
-          NetWorthCalculator.calculate_net_worth()
+          NetWorthCalculator.calculate_current_net_worth()
         end)
 
       # Wait for the LiveView to receive and process the update

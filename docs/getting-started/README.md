@@ -5,7 +5,7 @@ Welcome to Ashfolio! This guide will get you from zero to your first contributio
 ## Your Journey
 
 1. **Setup** → [Installation Guide](installation.md) (5 minutes)
-2. **Explore** → [Quick Start](quick-start.md) (10 minutes)  
+2. **Explore** → [Quick Start](quick-start.md) (10 minutes)
 3. **Understand** → [Architecture Overview](../development/architecture.md) (20 minutes)
 4. **Contribute** → [First Contribution](first-contribution.md) (30 minutes)
 
@@ -14,35 +14,39 @@ Welcome to Ashfolio! This guide will get you from zero to your first contributio
 Choose the path that matches your interest:
 
 ### 🎨 Frontend Developer
-- **Focus**: Phoenix LiveView components and user interfaces
-- **Key Files**: `lib/ashfolio_web/live/`, `lib/ashfolio_web/components/`
-- **First Tasks**: UI improvements, responsive design, accessibility
-- **Testing**: `just test-liveview` and `just test-ui`
 
-### ⚙️ Backend Developer  
-- **Focus**: Ash resources, business logic, and data models
-- **Key Files**: `lib/ashfolio/portfolio/`, `lib/ashfolio/market_data/`
-- **First Tasks**: New Ash resources, portfolio calculations, API integrations
-- **Testing**: `just test-ash` and `just test-calculations`
+- Phoenix LiveView components and user interfaces
+- `lib/ashfolio_web/live/`, `lib/ashfolio_web/components/`
+- UI improvements, responsive design, accessibility
+- `just test-liveview` and `just test-ui`
+
+### ⚙️ Backend Developer
+
+- Ash resources, business logic, and data models
+- `lib/ashfolio/portfolio/`, `lib/ashfolio/market_data/`
+- New Ash resources, portfolio calculations, API integrations
+- `just test-ash` and `just test-calculations`
 
 ### 🤖 AI Agent Developer
-- **Focus**: AI-assisted development and tooling
-- **Key Files**: `.kiro/`, `docs/development/ai-agent-guide.md`
-- **First Tasks**: Improve AI context, testing patterns, documentation
-- **Testing**: `just test-ai` and AI testing patterns
+
+- AI-assisted development and tooling
+- `.kiro/`, `docs/development/ai-agent-guide.md`
+- Improve AI context, testing patterns, documentation
+- `just test-ai` and AI testing patterns
 
 ### 🧪 Quality Assurance
-- **Focus**: Testing, reliability, and performance
-- **Key Files**: `test/`, `docs/testing/`
-- **First Tasks**: Test coverage, performance testing, edge cases
-- **Testing**: All test categories, focus on `just test-integration`
+
+- Testing, reliability, and performance
+- `test/`, `docs/testing/`
+- Test coverage, performance testing, edge cases
+- All test categories, focus on `just test-integration`
 
 ## Prerequisites
 
-- **macOS**: Currently optimized for macOS (Monterey 12.0+)
-- **Development Tools**: Elixir 1.14+, Phoenix 1.7+, Just task runner
-- **Git Knowledge**: Basic Git workflow (branch, commit, push, PR)
-- **Time Commitment**: 30-60 minutes for first contribution
+- Currently optimized for macOS (Monterey 12.0+)
+- Elixir 1.14+, Phoenix 1.7+, Just task runner
+- Basic Git workflow (branch, commit, push, PR)
+- 30-60 minutes for first contribution
 
 ## Quick Commands Reference
 
@@ -57,10 +61,10 @@ just check                  # Format + compile + test
 
 ## Need Help?
 
-- **Installation Issues**: See [Troubleshooting](troubleshooting.md)
-- **Architecture Questions**: Review [Architecture Guide](../development/architecture.md)
-- **Testing Problems**: Check [Testing Overview](../testing/README.md)
-- **General Questions**: Open a GitHub issue or discussion
+- See [Troubleshooting](troubleshooting.md)
+- Review [Architecture Guide](../development/architecture.md)
+- Check [Testing Overview](../testing/README.md)
+- Open a GitHub issue or discussion
 
 ## Success Indicators
 

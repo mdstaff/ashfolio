@@ -410,10 +410,10 @@ defmodule Ashfolio.Portfolio.Calculator do
 
 This style guide extends the existing CLAUDE.md guidelines:
 
-- **Code Quality**: Documentation is part of our "no linter/formatter warnings" standard
-- **Testability**: Good documentation makes code more testable by clarifying expected behavior
-- **Readability**: "Will someone understand this in 6 months?" applies especially to documentation
-- **Consistency**: Follow these patterns across all modules for consistency
+- Documentation is part of our "no linter/formatter warnings" standard
+- Good documentation makes code more testable by clarifying expected behavior
+- "Will someone understand this in 6 months?" applies especially to documentation
+- Follow these patterns across all modules for consistency
 
 ## Tools and Enforcement
 

@@ -4,7 +4,7 @@
 
 This feature adds interactive charts to the dashboard for portfolio performance visualization and asset allocation analysis, enhancing the existing dashboard with professional data visualization.
 
-**Foundation**: Built on v0.1.0's dashboard with existing portfolio calculations and Phoenix LiveView architecture.
+Built on v0.1.0's dashboard with existing portfolio calculations and Phoenix LiveView architecture.
 
 ## Requirements
 
@@ -48,14 +48,14 @@ This feature adds interactive charts to the dashboard for portfolio performance 
 
 ### New Dependencies
 
-- **Chart.js**: Lightweight charting library compatible with Phoenix LiveView
-- **Historical Data Storage**: New PortfolioSnapshot resource for time-series data
+- Lightweight charting library compatible with Phoenix LiveView
+- New PortfolioSnapshot resource for time-series data
 
 ### Integration Points
 
-- **Existing Dashboard**: Enhance current DashboardLive module
-- **Portfolio Calculators**: Use existing calculation engines
-- **Phoenix LiveView**: Leverage existing real-time capabilities
+- Enhance current DashboardLive module
+- Use existing calculation engines
+- Leverage existing real-time capabilities
 
 ### Performance Targets
 

@@ -6,11 +6,11 @@ Transform Ashfolio from user-centric to database-centric architecture where each
 
 ## Benefits
 
-- **True Single-User**: Each database file = one user's data
-- **Data Portability**: Copy .db file = backup/share portfolio
-- **Privacy**: Complete data isolation by default
-- **Simplicity**: No user_id foreign keys needed
-- **Local-First**: Perfect alignment with local-first principles
+- Each database file = one user's data
+- Copy .db file = backup/share portfolio
+- Complete data isolation by default
+- No user_id foreign keys needed
+- Perfect alignment with local-first principles
 
 ## Current State Analysis
 
@@ -21,10 +21,10 @@ Transform Ashfolio from user-centric to database-centric architecture where each
 
 ### Resources with user_id dependencies:
 
-1. **Account resource**: belongs_to :user, user_id FK
-2. **Transaction resource**: queries via account.user_id
-3. **Calculator modules**: All take user_id parameters
-4. **Context API**: All functions take user_id parameters
+1.  belongs_to :user, user_id FK
+2.  queries via account.user_id
+3.  All take user_id parameters
+4.  All functions take user_id parameters
 
 ## Migration Strategy
 
@@ -253,18 +253,18 @@ If issues arise:
 
 ## Benefits After Migration
 
-1. **Simplified API**: No user_id parameters anywhere
-2. **Better UX**: Database file = user's portfolio
-3. **Easy Backup**: Copy .db file
-4. **Multi-Portfolio**: User can have multiple .db files
-5. **Cleaner Code**: Remove ~50+ user_id references
+1.  No user_id parameters anywhere
+2.  Database file = user's portfolio
+3.  Copy .db file
+4.  User can have multiple .db files
+5.  Remove ~50+ user_id references
 
 ## Risks & Considerations
 
-1. **Breaking Changes**: Major API changes throughout
-2. **Testing**: Need comprehensive test updates
-3. **Migration Complexity**: Multi-phase database changes
-4. **Backward Compatibility**: Existing databases need migration
+1.  Major API changes throughout
+2.  Need comprehensive test updates
+3.  Multi-phase database changes
+4.  Existing databases need migration
 
 ## Next Steps
 

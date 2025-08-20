@@ -4,7 +4,7 @@
 
 ### Key Discovery: `Mix.env()` vs `System.get_env("MIX_ENV")`
 
-**TL;DR**: Use `Mix.env()` for runtime environment detection, not `System.get_env("MIX_ENV")`.
+Use `Mix.env()` for runtime environment detection, not `System.get_env("MIX_ENV")`.
 
 #### The Issue
 
@@ -14,7 +14,7 @@ When implementing logger filters that needed to detect test environment at runti
 # ❌ INCORRECT - Returns nil during test runs
 System.get_env("MIX_ENV")
 
-# ✅ CORRECT - Returns :test during test runs  
+#  CORRECT - Returns :test during test runs
 Mix.env()
 ```
 
@@ -50,29 +50,26 @@ end
 
 #### Best Practices
 
-1. **For Runtime Environment Detection**:
-   ```elixir
-   # ✅ CORRECT
-   if Mix.env() == :test do
-     # test-specific logic
-   end
-   ```
+1.  ```elixir
+    #  CORRECT
+    if Mix.env() == :test do
+      # test-specific logic
+    end
+    ```
 
-2. **For Logger Filters and Conditional Logic**:
-   ```elixir
-   # ✅ CORRECT - Safe runtime detection
-   filter_enabled = 
-     Mix.env() == :test and
-     System.get_env("FEATURE_FLAG", "true") in ["true", "1"]
-   ```
+2.  ```elixir
+    #  CORRECT - Safe runtime detection
+    filter_enabled =
+      Mix.env() == :test and
+      System.get_env("FEATURE_FLAG", "true") in ["true", "1"]
+    ```
 
-3. **For Configuration Files**:
-   ```elixir
-   # config/test.exs - Mix handles this automatically
-   import Config
-   
-   config :logger, level: :warning
-   ```
+3.  ```elixir
+    # config/test.exs - Mix handles this automatically
+    import Config
+
+    config :logger, level: :warning
+    ```
 
 #### Testing Environment Detection
 
@@ -80,9 +77,9 @@ When writing tests that need to verify environment detection:
 
 ```elixir
 test "environment detection works correctly" do
-  # ✅ This assertion will pass
+  #  This assertion will pass
   assert Mix.env() == :test
-  
+
   # ❌ This assertion would fail
   # assert System.get_env("MIX_ENV") == "test"
 end
@@ -104,10 +101,10 @@ When implementing logger filters to reduce test noise:
 ```elixir
 def filter_function(%{level: level, msg: {:string, message}} = log_event) do
   # Multiple safety layers
-  filter_enabled = 
+  filter_enabled =
     Mix.env() == :test and                                    # Only in test
     System.get_env("FILTER_ENABLED", "true") in ["true", "1"] # Configurable
-    
+
   if filter_enabled and very_specific_pattern?(message) do
     :stop  # Suppress only very specific patterns
   else
@@ -119,7 +116,6 @@ end
 def filter_function(log_event), do: log_event
 ```
 
-**Safety Guidelines**:
 1. Only filter in test environment
 2. Make filters configurable via environment variables
 3. Use very specific pattern matching
@@ -137,6 +133,7 @@ During test runs, especially concurrent performance tests, SQLite connection err
 ```
 
 These errors occur due to:
+
 - Concurrent test execution putting pressure on SQLite
 - Connection pooling and cleanup during test isolation
 - Expected SQLite "busy" states during concurrent operations
@@ -148,6 +145,7 @@ We implement a **surgical logger filter** that suppresses only these specific in
 #### What Gets Suppressed
 
 Only error messages that contain **ALL** of these terms:
+
 - `"Exqlite.Connection"`
 - `"disconnected:"`
 - `"DBConnection.ConnectionError"`
@@ -175,15 +173,16 @@ ASHFOLIO_FILTER_SQLITE_ERRORS=false mix test
 
 #### Why This Is Safe
 
-1. **Environment Restricted**: Only works in `Mix.env() == :test`
-2. **Configurable**: Can be disabled via environment variable
-3. **Highly Specific**: Very narrow pattern matching
-4. **Comprehensive Testing**: Full test coverage of filter behavior
-5. **Non-Breaking**: Legitimate errors still appear
+1.  Only works in `Mix.env() == :test`
+2.  Can be disabled via environment variable
+3.  Very narrow pattern matching
+4.  Full test coverage of filter behavior
+5.  Legitimate errors still appear
 
 #### When to Disable
 
 Disable the filter when:
+
 - Debugging SQLite connection issues
 - Investigating test database problems
 - Analyzing test concurrency behavior

@@ -6,10 +6,10 @@ This document provides comprehensive guidance for testing the Ashfolio applicati
 
 ## Project Status
 
-- **Total Test Files**: 38 test files
-- **Test Categories**: Unit tests, Integration tests, LiveView tests
-- **SQLite Concurrency**: Advanced handling with retry patterns
-- **Test Organization**: Structured with consistent patterns and helpers
+- 38 test files
+- Unit tests, Integration tests, LiveView tests
+- Advanced handling with retry patterns
+- Structured with consistent patterns and helpers
 
 ## Test Suite Structure
 
@@ -17,45 +17,45 @@ This document provides comprehensive guidance for testing the Ashfolio applicati
 
 #### 1. Unit Tests (`test/ashfolio/`)
 
-- **Ash Resources**: `user_test.exs`, `account_test.exs`, `symbol_test.exs`, `transaction_test.exs`
-- **Business Logic**: `calculator_test.exs`, `holdings_calculator_test.exs`, `calculator_edge_cases_test.exs`
-- **Market Data**: `yahoo_finance_test.exs`, `price_manager_test.exs`
-- **Infrastructure**: `cache_test.exs`, `validation_test.exs`, `error_handler_test.exs`
+- `user_test.exs`, `account_test.exs`, `symbol_test.exs`, `transaction_test.exs`
+- `calculator_test.exs`, `holdings_calculator_test.exs`, `calculator_edge_cases_test.exs`
+- `yahoo_finance_test.exs`, `price_manager_test.exs`
+- `cache_test.exs`, `validation_test.exs`, `error_handler_test.exs`
 
 #### 2. LiveView Tests (`test/ashfolio_web/live/`)
 
-- **Dashboard**: `dashboard_live_test.exs`, `dashboard_pubsub_test.exs`
-- **Account Management**: `account_live/index_test.exs`, `account_live/show_test.exs`, `account_live/form_component_test.exs`
-- **Transaction Management**: `transaction_live/index_test.exs`
-- **Helpers**: `format_helpers_test.exs`, `error_helpers_test.exs`
+- `dashboard_live_test.exs`, `dashboard_pubsub_test.exs`
+- `account_live/index_test.exs`, `account_live/show_test.exs`, `account_live/form_component_test.exs`
+- `transaction_live/index_test.exs`
+- `format_helpers_test.exs`, `error_helpers_test.exs`
 
 #### 3. Integration Tests (`test/integration/`)
 
-- **Workflow Tests**: `account_management_flow_test.exs`, `transaction_flow_test.exs`
-- **Performance**: `performance_benchmarks_test.exs`
-- **Critical Points**: `critical_integration_points_test.exs`
-- **PubSub Integration**: `transaction_pubsub_test.exs`
+- `account_management_flow_test.exs`, `transaction_flow_test.exs`
+- `performance_benchmarks_test.exs`
+- `critical_integration_points_test.exs`
+- `transaction_pubsub_test.exs`
 
 #### 4. Web Tests (`test/ashfolio_web/`)
 
-- **Controllers**: `page_controller_test.exs`, `error_html_test.exs`, `error_json_test.exs`
-- **Infrastructure**: `router_test.exs`, `accessibility_test.exs`, `responsive_design_test.exs`
+- `page_controller_test.exs`, `error_html_test.exs`, `error_json_test.exs`
+- `router_test.exs`, `accessibility_test.exs`, `responsive_design_test.exs`
 
 ### Special Test Categories
 
 #### Edge Case Tests
 
-- **File**: `test/ashfolio/portfolio/calculator_edge_cases_test.exs`
-- **Purpose**: Comprehensive edge case testing for portfolio calculations
-- **Coverage**: Zero values, extreme precision, complex transaction sequences, error handling
-- **Integration**: Uses SQLiteHelpers patterns for robust database operations
+- `test/ashfolio/portfolio/calculator_edge_cases_test.exs`
+- Comprehensive edge case testing for portfolio calculations
+- Zero values, extreme precision, complex transaction sequences, error handling
+- Uses SQLiteHelpers patterns for robust database operations
 
 #### Seeding Tests
 
-- **File**: `test/ashfolio/seeding_test.exs`
-- **Tag**: `@moduletag :seeding`
-- **Exclusion**: Excluded by default in `test_helper.exs` with `exclude_tags: [:seeding]`
-- **Purpose**: Tests database seeding functionality (slow, separated for performance)
+- `test/ashfolio/seeding_test.exs`
+- `@moduletag :seeding`
+- Excluded by default in `test_helper.exs` with `exclude_tags: [:seeding]`
+- Tests database seeding functionality (slow, separated for performance)
 
 ## SQLite Concurrency Architecture
 
@@ -70,10 +70,10 @@ Ashfolio.SQLiteHelpers.setup_global_test_data!()
 
 This creates:
 
-- **Default User**: Created once, used by all tests
-- **Default Account**: Created once, available globally
-- **Common Symbols**: AAPL, MSFT, GOOGL, TSLA created once
-- **Baseline Data**: All essential test data committed permanently
+- Created once, used by all tests
+- Created once, available globally
+- AAPL, MSFT, GOOGL, TSLA created once
+- All essential test data committed permanently
 
 ### SQLite Helpers Module
 
@@ -116,8 +116,6 @@ def setup_sandbox(_tags) do
   on_exit(fn -> Ecto.Adapters.SQL.Sandbox.checkin(Ashfolio.Repo) end)
 end
 ```
-
-**Key Features**:
 
 - Uses checkout/checkin pattern for SQLite
 - No `allow/3` calls needed for single-threaded SQLite
@@ -390,7 +388,7 @@ ExUnit.configure(
 #### 1. Always Use Global Data First
 
 ```elixir
-# ✅ CORRECT - Use global data when possible
+#  CORRECT - Use global data when possible
 
 account = get_default_account()
 symbol = get_common_symbol("AAPL")
@@ -402,11 +400,11 @@ symbol = get_common_symbol("AAPL")
 #### 1.5. Handle Global Data Conflicts Properly
 
 ```elixir
-# ✅ CORRECT - Use unique identifiers for test resources
+#  CORRECT - Use unique identifiers for test resources
 unique_symbol = "TEST#{System.unique_integer([:positive])}"
 {:ok, symbol} = Symbol.create(%{symbol: unique_symbol, ...})
 
-# ✅ CORRECT - Assert membership, not exact counts
+#  CORRECT - Assert membership, not exact counts
 {:ok, accounts} = Account.list()
 account_ids = Enum.map(accounts, & &1.id)
 assert test_account.id in account_ids
@@ -421,9 +419,9 @@ assert Enum.empty?(accounts)  # Fails when global accounts exist
 
 #### 2. Understand SQLite Limitations
 
-- **No Async Tests**: Always use `async: false`
-- **Use Retry Logic**: When creating custom resources
-- **Leverage Global Data**: Minimizes concurrency conflicts
+- Always use `async: false`
+- When creating custom resources
+- Minimizes concurrency conflicts
 
 #### 3. Test File Patterns
 
@@ -473,10 +471,10 @@ just compile
 
 #### Step 1: Determine Test Type
 
-- **Unit Test**: Single module/function
-- **Integration Test**: Multiple modules/workflows
-- **LiveView Test**: UI interactions
-- **Flow Test**: End-to-end scenarios
+- Single module/function
+- Multiple modules/workflows
+- UI interactions
+- End-to-end scenarios
 
 #### Step 2: Use Appropriate Template
 
@@ -586,7 +584,7 @@ just test-coverage
 
 ## Best Practices Summary
 
-### ✅ DO
+### DO
 
 - Use `async: false` for all SQLite tests
 - Leverage global test data whenever possible

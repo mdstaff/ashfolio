@@ -6,12 +6,12 @@ This design document outlines the technical architecture for implementing compre
 
 ### Core Design Principles
 
-- **Leverage Existing Foundation**: Build upon the well-implemented Account Ash resource
-- **Consistent UI Patterns**: Follow established patterns from DashboardLive and existing components
-- **Form-Centric Design**: Use Phoenix LiveView forms with real-time validation
-- **Responsive Layout**: Mobile-first design with desktop optimization
-- **Accessibility First**: WCAG AA compliance with proper ARIA labels and keyboard navigation
-- **Error Resilience**: Comprehensive error handling with user-friendly messages
+- Build upon the well-implemented Account Ash resource
+- Follow established patterns from DashboardLive and existing components
+- Use Phoenix LiveView forms with real-time validation
+- Mobile-first design with desktop optimization
+- WCAG AA compliance with proper ARIA labels and keyboard navigation
+- Comprehensive error handling with user-friendly messages
 
 ## Architecture
 
@@ -701,10 +701,10 @@ end
 
 ### Error Recovery Patterns
 
-1. **Network Errors**: Retry with exponential backoff
-2. **Validation Errors**: Highlight fields with specific messages
-3. **System Errors**: Graceful degradation with user-friendly messages
-4. **Concurrent Updates**: Optimistic locking with conflict resolution
+1.  Retry with exponential backoff
+2.  Highlight fields with specific messages
+3.  Graceful degradation with user-friendly messages
+4.  Optimistic locking with conflict resolution
 
 ## Testing Strategy
 
@@ -786,10 +786,10 @@ end
 
 ### Optimization Strategies
 
-1. **Lazy Loading**: Load transaction details only when needed
-2. **Caching**: Cache account lists with ETS for frequent access
-3. **Pagination**: Implement pagination for large account lists
-4. **Debounced Validation**: Debounce form validation to reduce server load
+1.  Load transaction details only when needed
+2.  Cache account lists with ETS for frequent access
+3.  Implement pagination for large account lists
+4.  Debounce form validation to reduce server load
 
 ### Memory Management
 
@@ -805,11 +805,11 @@ end
 
 ### WCAG AA Compliance
 
-1. **Keyboard Navigation**: All actions accessible via keyboard
-2. **Screen Reader Support**: Proper ARIA labels and semantic markup
-3. **Color Contrast**: Minimum 4.5:1 contrast ratio for all text
-4. **Focus Management**: Clear focus indicators and logical tab order
-5. **Error Announcements**: Screen reader announcements for validation errors
+1.  All actions accessible via keyboard
+2.  Proper ARIA labels and semantic markup
+3.  Minimum 4.5:1 contrast ratio for all text
+4.  Clear focus indicators and logical tab order
+5.  Screen reader announcements for validation errors
 
 ### Responsive Design
 
@@ -895,19 +895,19 @@ end
 
 ### Definition of Done
 
-- ✅ All 10 requirements implemented with acceptance criteria met
-- ✅ Comprehensive form validation with user-friendly error messages
-- ✅ Responsive design working on desktop, tablet, and mobile
-- ✅ WCAG AA accessibility compliance verified
-- ✅ Integration with existing portfolio system confirmed
-- ✅ Unit and integration tests passing with >90% coverage
-- ✅ Error handling covers all failure scenarios
-- ✅ Performance benchmarks met (page load <500ms, form submission <200ms)
+- All 10 requirements implemented with acceptance criteria met
+- Comprehensive form validation with user-friendly error messages
+- Responsive design working on desktop, tablet, and mobile
+- WCAG AA accessibility compliance verified
+- Integration with existing portfolio system confirmed
+- Unit and integration tests passing with >90% coverage
+- Error handling covers all failure scenarios
+- Performance benchmarks met (page load <500ms, form submission <200ms)
 
 ### Success Metrics
 
-1. **Functionality**: All CRUD operations working correctly
-2. **Usability**: Users can complete account management tasks without confusion
-3. **Performance**: Fast response times and smooth interactions
-4. **Reliability**: Error-free operation under normal usage patterns
-5. **Accessibility**: Usable by users with assistive technologies
+1.  All CRUD operations working correctly
+2.  Users can complete account management tasks without confusion
+3.  Fast response times and smooth interactions
+4.  Error-free operation under normal usage patterns
+5.  Usable by users with assistive technologies

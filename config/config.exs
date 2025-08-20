@@ -11,6 +11,26 @@ config :ashfolio,
   ecto_repos: [Ashfolio.Repo],
   generators: [timestamp_type: :utc_datetime]
 
+# Configure Oban for background jobs
+config :ashfolio, Oban,
+  repo: Ashfolio.Repo,
+  # Disable notifier for SQLite compatibility (manual job management)
+  notifier: false,
+  plugins: [
+    Oban.Plugins.Pruner
+    # Future: Add cron jobs when needed
+    # {Oban.Plugins.Cron, 
+    #  crontab: [
+    #    # Monthly net worth snapshots on the 1st at 6 AM
+    #    {"0 6 1 * *", Ashfolio.Workers.NetWorthSnapshotWorker}
+    #  ]}
+  ],
+  queues: [
+    default: 10,
+    snapshots: 1,
+    analytics: 2
+  ]
+
 # Configures the endpoint
 config :ashfolio, AshfolioWeb.Endpoint,
   url: [host: "localhost"],

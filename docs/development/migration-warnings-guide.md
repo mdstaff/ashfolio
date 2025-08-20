@@ -12,9 +12,9 @@ When running `mix ash_sqlite.generate_migrations`, it's common to see warnings w
 Domain Ashfolio.FinancialManagement is not present in config :ashfolio, ash_domains: [Ashfolio.Portfolio].
 ```
 
-**Status**: ✅ **Expected during development**
-**Fix**: Add new domain to `config/config.exs`
-**Impact**: Migration still generates successfully
+**Expected during development**
+Add new domain to `config/config.exs`
+Migration still generates successfully
 
 ### 2. Missing Relationship Field Warnings
 
@@ -22,9 +22,9 @@ Domain Ashfolio.FinancialManagement is not present in config :ashfolio, ash_doma
 invalid association `transactions` in schema: associated schema does not have field `category_id`
 ```
 
-**Status**: ✅ **Expected during incremental development**
-**Reason**: Forward references to fields that will be added in subsequent tasks
-**Impact**: Migration generates for current resource, relationship will be completed later
+**Expected during incremental development**
+Forward references to fields that will be added in subsequent tasks
+Migration generates for current resource, relationship will be completed later
 
 ### 3. Atomic Action Warnings
 
@@ -32,9 +32,9 @@ invalid association `transactions` in schema: associated schema does not have fi
 `destroy_if_not_system` cannot be done atomically, because the changes cannot be done atomically
 ```
 
-**Status**: ✅ **Expected for custom validations**
-**Fix**: Add `require_atomic?(false)` to the action
-**Impact**: Migration generates, action works correctly
+**Expected for custom validations**
+Add `require_atomic?(false)` to the action
+Migration generates, action works correctly
 
 ## Pre-existing Warnings (Safe to Ignore)
 
@@ -58,7 +58,7 @@ Generated ashfolio app
 
 ## Key Principle
 
-**Warnings ≠ Failure**: Elixir/Phoenix development commonly shows warnings during incremental development. The migration system is designed to handle forward references and incomplete relationships during the development process.
+Elixir/Phoenix development commonly shows warnings during incremental development. The migration system is designed to handle forward references and incomplete relationships during the development process.
 
 ## When to Be Concerned
 

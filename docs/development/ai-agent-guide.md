@@ -55,11 +55,11 @@ This project uses `just` as the task runner. Key commands:
 - `just test-edge-cases` - Boundary condition and unusual scenario tests
 - `just test-error-handling` - Error condition and fault tolerance tests
 
-**Note**: All test commands support `-verbose` variants for detailed output (e.g., `just test-fast-verbose`)
+All test commands support `-verbose` variants for detailed output (e.g., `just test-fast-verbose`)
 
 ## 🛡️ **NEW: Test Database Safeguards**
 
-**IMPORTANT**: We've implemented comprehensive safeguards after experiencing mass test failures (253 → 0). These tools prevent database issues and provide instant recovery.
+We've implemented comprehensive safeguards after experiencing mass test failures (253 → 0). These tools prevent database issues and provide instant recovery.
 
 ### **🚀 Quick Start - Use These First!**
 
@@ -84,9 +84,9 @@ These safeguards **prevent this from happening again** and provide **instant rec
 
 #### Understanding Test Database Architecture
 
-- **Separation**: Test database (`data/ashfolio_test.db`) is completely separate from development database (`data/ashfolio_dev.db`)
-- **Global Test Data Pattern**: Uses a global setup pattern where baseline test data is created once in `test_helper.exs`
-- **Required Baseline Data**: All tests expect a default user, default account, and common symbols to exist
+- Test database (`data/ashfolio_test.db`) is completely separate from development database (`data/ashfolio_dev.db`)
+- Uses a global setup pattern where baseline test data is created once in `test_helper.exs`
+- All tests expect a default user, default account, and common symbols to exist
 
 #### Test Database Reset Procedures
 
@@ -114,30 +114,30 @@ MIX_ENV=test mix ecto.reset
 
 **Error: "Default user not found"**
 
-- **Cause**: Global test data missing from database
-- **Solution**: Run `MIX_ENV=test mix run -e "Ashfolio.SQLiteHelpers.setup_global_test_data!()"`
+- Global test data missing from database
+- Run `MIX_ENV=test mix run -e "Ashfolio.SQLiteHelpers.setup_global_test_data!()"`
 
 **Error: Expected X accounts, got Y accounts**
 
-- **Cause**: Stale test data contamination from previous runs
-- **Solution**: Complete test database reset (see procedures above)
+- Stale test data contamination from previous runs
+- Complete test database reset (see procedures above)
 
 **Error: "Database busy" or "database is locked"**
 
-- **Cause**: SQLite concurrency issues, test processes accessing database simultaneously
-- **Solution**: Tests use `async: false` and retry logic, but reset database if persistent
+- SQLite concurrency issues, test processes accessing database simultaneously
+- Tests use `async: false` and retry logic, but reset database if persistent
 
 **Mass Test Failures (200+ failures)**
 
-- **Cause**: Usually test database contamination or missing global test data
-- **Solution**: Complete test database reset procedure above
+- Usually test database contamination or missing global test data
+- Complete test database reset procedure above
 
 #### Test Data Isolation Strategy
 
-- **Per-Test Setup**: Each test creates its own specific data in setup blocks
-- **Global Baseline**: Common data (default user, default account, common symbols) created once
-- **Database Sandbox**: Uses Ecto SQL Sandbox for test isolation
-- **SQLite Constraints**: All tests run with `async: false` due to SQLite limitations
+- Each test creates its own specific data in setup blocks
+- Common data (default user, default account, common symbols) created once
+- Uses Ecto SQL Sandbox for test isolation
+- All tests run with `async: false` due to SQLite limitations
 
 ### Database Management
 
@@ -162,12 +162,12 @@ MIX_ENV=test mix ecto.reset
 
 ### Core Technologies
 
-- **Backend**: Elixir 1.14+, Phoenix 1.7+, Ash Framework 3.0+
-- **Database**: SQLite with AshSqlite adapter
-- **Frontend**: Phoenix LiveView with Tailwind CSS
-- **Market Data**: Yahoo Finance API via HTTPoison
-- **Caching**: ETS for price data
-- **Testing**: ExUnit with Mox for mocking
+- Elixir 1.14+, Phoenix 1.7+, Ash Framework 3.0+
+- SQLite with AshSqlite adapter
+- Phoenix LiveView with Tailwind CSS
+- Yahoo Finance API via HTTPoison
+- ETS for price data
+- ExUnit with Mox for mocking
 
 ### Key Modules
 
@@ -198,10 +198,10 @@ MIX_ENV=test mix ecto.reset
 
 ### Data Flow Patterns
 
-1. **LiveView → Ash Resource → Database**: Standard CRUD operations
-2. **PriceManager → YahooFinance → ETS Cache**: Price fetching and caching
-3. **Calculator modules**: Read from Ash Resources, perform calculations, return results
-4. **Dual Calculator Architecture**: Main Calculator orchestrates, HoldingsCalculator handles per-symbol logic
+1.  Standard CRUD operations
+2.  Price fetching and caching
+3.  Read from Ash Resources, perform calculations, return results
+4.  Main Calculator orchestrates, HoldingsCalculator handles per-symbol logic
 
 ## Troubleshooting & Debugging
 
@@ -221,9 +221,9 @@ just test-file path/to/failing_test.exs
 
 #### 2. **Identify the Pattern**
 
-- **Single test failure**: Likely code logic or test-specific issue
-- **Mass failures (50+)**: Usually infrastructure issue (database, setup, dependencies)
-- **Consistent failure location**: Focus on that specific assertion or setup
+- Likely code logic or test-specific issue
+- Usually infrastructure issue (database, setup, dependencies)
+- Focus on that specific assertion or setup
 
 #### 3. **Check Test Database State**
 
@@ -247,9 +247,9 @@ MIX_ENV=test mix run -e "
 
 #### 5. **Apply Targeted Fixes**
 
-- **Database issues**: Use test database reset procedures (see Test Database Management section)
-- **Logic issues**: Focus on the failing assertion and surrounding code
-- **Setup issues**: Check test setup blocks and global test data
+- Use test database reset procedures (see Test Database Management section)
+- Focus on the failing assertion and surrounding code
+- Check test setup blocks and global test data
 
 #### 6. **Verify the Fix**
 
@@ -266,14 +266,12 @@ just test
 
 ### Integration Test Debugging Example
 
-**Case Study**: Integration test `account_management_flow_test.exs` failing with account count mismatch
+Integration test `account_management_flow_test.exs` failing with account count mismatch
 
-**Problem**: Expected 5 accounts, got 4 - account creation appeared to fail
-**Root Cause**: Stale test database data from previous runs contaminated the baseline
-**Solution**: Complete test database reset + global test data restoration
-**Result**: Test passed consistently, 253 → 0 test failures across entire suite
-
-**Key Learnings**:
+Expected 5 accounts, got 4 - account creation appeared to fail
+Stale test database data from previous runs contaminated the baseline
+Complete test database reset + global test data restoration
+Test passed consistently, 253 → 0 test failures across entire suite
 
 - Integration tests are more sensitive to database state than unit tests
 - Always verify test database baseline when debugging integration tests
@@ -319,19 +317,19 @@ just reseed                         # Re-seed development database
 
 After experiencing mass test failures (253 → 0), we've implemented several safeguards:
 
-**Automatic Health Checks**: Built into `just test-safe`
+Built into `just test-safe`
 
 - Database connectivity validation
 - Baseline data verification (users, accounts, symbols)
 - Clear error messages with fix instructions
 
-**Emergency Recovery**: `just test-db-emergency-reset`
+`just test-db-emergency-reset`
 
 - Complete test database rebuild procedure
 - Implements the exact fix that resolved our 253-failure crisis
 - Includes confirmation prompts for safety
 
-**Validation Functions**: `just test-db-validate`
+`just test-db-validate`
 
 - Validates global test data integrity
 - Checks for expected baseline records
@@ -343,39 +341,39 @@ After experiencing mass test failures (253 → 0), we've implemented several saf
 
 #### Comprehensive Modular Testing Framework
 
-- **Architecture-Aligned Organization**: Tests organized by architectural layers using ExUnit filters
-- **Performance-Optimized Execution**: Separate fast/slow test categories for optimal development workflow
-- **Dependency-Based Categorization**: Clear separation of tests requiring external services, mocks, or GenServers
-- **Development Workflow Integration**: Specialized test suites for smoke tests, regression testing, and error handling
+- Tests organized by architectural layers using ExUnit filters
+- Separate fast/slow test categories for optimal development workflow
+- Clear separation of tests requiring external services, mocks, or GenServers
+- Specialized test suites for smoke tests, regression testing, and error handling
 
 #### ExUnit Filter Categories
 
-- **Architectural Layers**: `:ash_resources`, `:liveview`, `:market_data`, `:calculations`, `:ui`, `:pubsub`
-- **Performance Groups**: `:fast`, `:slow`, `:unit`, `:integration`
-- **Dependency Types**: `:external_deps`, `:genserver`, `:ets_cache`, `:mocked`
-- **Workflow Categories**: `:smoke`, `:regression`, `:edge_cases`, `:error_handling`
+- `:ash_resources`, `:liveview`, `:market_data`, `:calculations`, `:ui`, `:pubsub`
+- `:fast`, `:slow`, `:unit`, `:integration`
+- `:external_deps`, `:genserver`, `:ets_cache`, `:mocked`
+- `:smoke`, `:regression`, `:edge_cases`, `:error_handling`
 
 #### Test Execution Strategy
 
-- **Development Loop**: `just test-fast` for quick feedback (< 100ms tests)
-- **Layer-Specific**: `just test-ash`, `just test-liveview`, `just test-calculations` for focused development
-- **Integration Testing**: `just test-integration` for end-to-end workflow validation
-- **Comprehensive**: `just test-all` includes all categories including slow seeding tests
+- `just test-fast` for quick feedback (< 100ms tests)
+- `just test-ash`, `just test-liveview`, `just test-calculations` for focused development
+- `just test-integration` for end-to-end workflow validation
+- `just test-all` includes all categories including slow seeding tests
 
 #### SQLite Testing Architecture
 
-- **Concurrency Safety**: All tests use `async: false` for SQLite compatibility
-- **Global Test Data Pattern**: Pre-created default user, accounts, and symbols reduce database contention
-- **Retry Logic**: Built-in retry patterns for handling SQLite "Database busy" errors
-- **Test Sandbox**: Proper database isolation using `DataCase.setup_sandbox/1`
-- **GenServer Integration**: Special handling for PriceManager and other GenServer database access
+- All tests use `async: false` for SQLite compatibility
+- Pre-created default user, accounts, and symbols reduce database contention
+- Built-in retry patterns for handling SQLite "Database busy" errors
+- Proper database isolation using `DataCase.setup_sandbox/1`
+- Special handling for PriceManager and other GenServer database access
 
 #### Testing Documentation
 
-- **Comprehensive Guides**: Complete documentation in `docs/` covering all testing patterns
-- **AI Agent Support**: Specialized guides and templates for AI-assisted development
-- **Migration Strategies**: Step-by-step guides for adopting modular testing patterns
-- **Best Practices**: SQLite-specific patterns and performance optimization techniques
+- Complete documentation in `docs/` covering all testing patterns
+- Specialized guides and templates for AI-assisted development
+- Step-by-step guides for adopting modular testing patterns
+- SQLite-specific patterns and performance optimization techniques
 
 ### Database Management
 

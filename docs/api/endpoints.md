@@ -4,22 +4,20 @@ This document provides detailed technical specifications for all Ashfolio REST A
 
 ## Base Configuration
 
-- **Base URL**: `http://localhost:4000/api/v1`
-- **Content-Type**: `application/json`
-- **Authentication**: None (localhost-only)
-- **Rate Limiting**: None (except price refresh: 1 request/minute)
+- `http://localhost:4000/api/v1`
+- `application/json`
+- None (localhost-only)
+- None (except price refresh: 1 request/minute)
 
 ## Endpoint Specifications
 
 ### 1. Portfolio Summary
 
-**Endpoint**: `GET /api/v1/portfolio/summary`
+`GET /api/v1/portfolio/summary`
 
-**Description**: Returns comprehensive portfolio performance metrics and summary data.
+Returns comprehensive portfolio performance metrics and summary data.
 
-**Parameters**: None
-
-**Response Schema**:
+None
 
 ```json
 {
@@ -65,8 +63,6 @@ This document provides detailed technical specifications for all Ashfolio REST A
 }
 ```
 
-**Example Response**:
-
 ```json
 {
   "total_value": "25000.00",
@@ -78,21 +74,17 @@ This document provides detailed technical specifications for all Ashfolio REST A
 }
 ```
 
-**Error Responses**:
-
 - `500 Internal Server Error`: Portfolio calculation failed
 
 ---
 
 ### 2. Holdings List
 
-**Endpoint**: `GET /api/v1/holdings`
+`GET /api/v1/holdings`
 
-**Description**: Returns detailed information about all current portfolio holdings.
+Returns detailed information about all current portfolio holdings.
 
-**Parameters**: None
-
-**Response Schema**:
+None
 
 ```json
 {
@@ -162,8 +154,6 @@ This document provides detailed technical specifications for all Ashfolio REST A
 }
 ```
 
-**Example Response**:
-
 ```json
 {
   "holdings": [
@@ -182,21 +172,17 @@ This document provides detailed technical specifications for all Ashfolio REST A
 }
 ```
 
-**Error Responses**:
-
 - `500 Internal Server Error`: Holdings calculation failed
 
 ---
 
 ### 3. Accounts List
 
-**Endpoint**: `GET /api/v1/accounts`
+`GET /api/v1/accounts`
 
-**Description**: Returns information about all investment accounts.
+Returns information about all investment accounts.
 
-**Parameters**: None
-
-**Response Schema**:
+None
 
 ```json
 {
@@ -260,8 +246,6 @@ This document provides detailed technical specifications for all Ashfolio REST A
 }
 ```
 
-**Example Response**:
-
 ```json
 {
   "accounts": [
@@ -279,19 +263,15 @@ This document provides detailed technical specifications for all Ashfolio REST A
 }
 ```
 
-**Error Responses**:
-
 - `500 Internal Server Error`: Account retrieval failed
 
 ---
 
 ### 4. Transactions List
 
-**Endpoint**: `GET /api/v1/transactions`
+`GET /api/v1/transactions`
 
-**Description**: Returns transaction history with optional filtering and pagination.
-
-**Query Parameters**:
+Returns transaction history with optional filtering and pagination.
 
 - `account_id` (optional): UUID of account to filter by
 - `start_date` (optional): Start date filter (YYYY-MM-DD format)
@@ -300,8 +280,6 @@ This document provides detailed technical specifications for all Ashfolio REST A
 - `symbol` (optional): Symbol filter (e.g., "AAPL")
 - `limit` (optional): Maximum results to return (default: 100, max: 1000)
 - `offset` (optional): Number of results to skip (default: 0)
-
-**Response Schema**:
 
 ```json
 {
@@ -402,13 +380,9 @@ This document provides detailed technical specifications for all Ashfolio REST A
 }
 ```
 
-**Example Request**:
-
 ```
 GET /api/v1/transactions?account_id=550e8400-e29b-41d4-a716-446655440000&limit=50
 ```
-
-**Example Response**:
 
 ```json
 {
@@ -437,8 +411,6 @@ GET /api/v1/transactions?account_id=550e8400-e29b-41d4-a716-446655440000&limit=5
 }
 ```
 
-**Error Responses**:
-
 - `400 Bad Request`: Invalid query parameters
 - `404 Not Found`: Account not found (when account_id specified)
 - `500 Internal Server Error`: Transaction retrieval failed
@@ -447,15 +419,13 @@ GET /api/v1/transactions?account_id=550e8400-e29b-41d4-a716-446655440000&limit=5
 
 ### 5. Price Refresh
 
-**Endpoint**: `POST /api/v1/prices/refresh`
+`POST /api/v1/prices/refresh`
 
-**Description**: Triggers manual refresh of current market prices for all holdings.
+Triggers manual refresh of current market prices for all holdings.
 
-**Parameters**: None
+None
 
-**Rate Limiting**: 1 request per minute
-
-**Response Schema**:
+1 request per minute
 
 ```json
 {
@@ -496,8 +466,6 @@ GET /api/v1/transactions?account_id=550e8400-e29b-41d4-a716-446655440000&limit=5
 }
 ```
 
-**Example Response (Success)**:
-
 ```json
 {
   "status": "success",
@@ -508,8 +476,6 @@ GET /api/v1/transactions?account_id=550e8400-e29b-41d4-a716-446655440000&limit=5
 }
 ```
 
-**Example Response (Partial Success)**:
-
 ```json
 {
   "status": "partial",
@@ -519,8 +485,6 @@ GET /api/v1/transactions?account_id=550e8400-e29b-41d4-a716-446655440000&limit=5
   "refresh_timestamp": "2025-08-06T10:35:00Z"
 }
 ```
-
-**Error Responses**:
 
 - `429 Too Many Requests`: Rate limit exceeded (1 request/minute)
 - `503 Service Unavailable`: External market data service unavailable

@@ -13,5 +13,7 @@ defmodule Ashfolio.FinancialManagement do
 
   resources do
     resource(Ashfolio.FinancialManagement.TransactionCategory)
+    resource(Ashfolio.FinancialManagement.Expense)
+    resource(Ashfolio.FinancialManagement.NetWorthSnapshot)
   end
 end

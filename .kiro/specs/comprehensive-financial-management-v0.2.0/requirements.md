@@ -4,9 +4,9 @@
 
 This document outlines the requirements for Ashfolio v0.2.0, which expands from portfolio-only investment tracking to comprehensive personal financial management. This addresses user needs for replacing spreadsheet-based financial workflows while maintaining our local-first, SQLite-based architecture.
 
-**Strategic Evolution**: Portfolio-only investment tracking → Comprehensive financial management (investments + cash + net worth)
+Portfolio-only investment tracking → Comprehensive financial management (investments + cash + net worth)
 
-**User Context**: Individual currently using spreadsheet-based approach requiring 45+ minutes monthly for financial updates. Focus on practical net worth tracking without complex cash transaction management or tax-irrelevant transfer tracking.
+Individual currently using spreadsheet-based approach requiring 45+ minutes monthly for financial updates. Focus on practical net worth tracking without complex cash transaction management or tax-irrelevant transfer tracking.
 
 ## Requirements
 

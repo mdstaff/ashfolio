@@ -83,17 +83,17 @@ Based on this assessment, my primary recommendations focus on enhancing the **Op
   - Alternatively, configure the `Fetcher` module in the application environment (`config.exs`) and retrieve it within `PriceManager`.
 - **Benefits:** Makes `PriceManager` more flexible and testable, as different `Fetcher` implementations (including mocks) can be injected easily.
 
-#### 3. ✅ IMPLEMENTED: PubSub for Transaction Changes (Medium Impact - OCP, DIP)
+#### 3. IMPLEMENTED: PubSub for Transaction Changes (Medium Impact - OCP, DIP)
 
 - **Problem:** `DashboardLive` previously relied on implicit updates when transactions changed.
 - **Implementation Completed (v0.26.2):**
-  - ✅ `TransactionLive.Index` now broadcasts PubSub messages (`:transaction_saved`, `:transaction_deleted`) when transactions are modified
-  - ✅ `DashboardLive` subscribes to "transactions" PubSub topic and handles both event types
-  - ✅ Dashboard automatically triggers `load_portfolio_data()` in response to transaction events
+  - `TransactionLive.Index` now broadcasts PubSub messages (`:transaction_saved`, `:transaction_deleted`) when transactions are modified
+  - `DashboardLive` subscribes to "transactions" PubSub topic and handles both event types
+  - Dashboard automatically triggers `load_portfolio_data()` in response to transaction events
 - **Benefits Achieved:**
-  - ✅ Decoupled `DashboardLive` from the internal workings of `TransactionLive.Index`, improving **OCP** and **DIP**
-  - ✅ Dashboard updates reliably and explicitly when transaction data changes
-  - ✅ Real-time portfolio updates without manual refresh required
+  - Decoupled `DashboardLive` from the internal workings of `TransactionLive.Index`, improving **OCP** and **DIP**
+  - Dashboard updates reliably and explicitly when transaction data changes
+  - Real-time portfolio updates without manual refresh required
 
 #### 4. Consistent Loading States for CRUD Actions (Low Impact - UX Polish)
 

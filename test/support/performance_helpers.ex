@@ -35,7 +35,7 @@ defmodule Ashfolio.PerformanceHelpers do
   ## Examples
 
       measure_performance "Net worth calculation", fn ->
-        NetWorthCalculator.calculate_net_worth()
+        NetWorthCalculator.calculate_current_net_worth()
       end
   """
   def measure_performance(label, fun) do

@@ -2,19 +2,22 @@
 
 ## Formatting Principles
 
-### ✅ **Professional & Concise**
+### **Professional & Concise**
+
 - **Scannable structure** with clear section headers
 - **Bullet points** for easy reading
 - **Focused sections** - 4-6 maximum
 - **Professional tone** without excessive detail
 
-### ✅ **Value-Focused Content**
+### **Value-Focused Content**
+
 - Emphasize **user benefits** over implementation details
 - Highlight **architectural alignment** with local-first design
 - Focus on **what changed** and **why it matters**
 - Include **testing/quality** considerations
 
 ### ❌ **What to Avoid**
+
 - Verbose explanations or technical deep-dives
 - More than 5-7 bullet points per section
 - Repetitive information across sections
@@ -23,69 +26,70 @@
 ## Template Structure
 
 ### **Standard Flow**
-1. **Title**: Clear, descriptive feature/version name
-2. **Documentation**: Changes to docs, guides, specs
-3. **Architecture**: Alignment with ADR-001, design decisions
-4. **Features**: User-facing functionality changes
-5. **Developer Experience**: Tooling, setup, development changes
-6. **Testing & Quality**: Test coverage, performance, stability
+
+1.  Clear, descriptive feature/version name
+2.  Changes to docs, guides, specs
+3.  Alignment with ADR-001, design decisions
+4.  User-facing functionality changes
+5.  Tooling, setup, development changes
+6.  Test coverage, performance, stability
 
 ### **Section Guidelines**
 
-**Documentation Section**:
 - Focus on documentation improvements and consistency
 - Mention version reference updates
 - Note removal of outdated content
 
-**Architecture Section**:
 - Reference ADR-001 compliance
 - Document trade-offs or design decisions
 - Mention local-first alignment
 
-**Features Section**:
 - Brief, user-focused descriptions
 - Group related functionality
 - Avoid technical implementation details
 
-**Developer Experience Section**:
 - Justfile/tooling changes
 - New documentation or guides
 - Setup or workflow improvements
 
-**Testing & Quality Section**:
 - Test coverage improvements
 - Performance considerations
 - Quality assurance measures
 
 ### **Specific Templates Available**
 
-- **General**: `.github/pull_request_template.md` (default)
-- **Release**: `.github/PULL_REQUEST_TEMPLATE/release.md`
-- **Feature**: `.github/PULL_REQUEST_TEMPLATE/feature.md`
-- **Bug Fix**: `.github/PULL_REQUEST_TEMPLATE/bugfix.md`
-- **Documentation**: `.github/PULL_REQUEST_TEMPLATE/docs.md`
+- `.github/pull_request_template.md` (default)
+- `.github/PULL_REQUEST_TEMPLATE/release.md`
+- `.github/PULL_REQUEST_TEMPLATE/feature.md`
+- `.github/PULL_REQUEST_TEMPLATE/bugfix.md`
+- `.github/PULL_REQUEST_TEMPLATE/docs.md`
 
 ## Example: Good vs. Poor Formatting
 
-### ✅ **Good Example**
+### **Good Example**
+
 ```markdown
 # Symbol Autocomplete Feature
 
 ## Features
+
 - Autocomplete: Intelligent symbol search in transaction forms
 - Performance: Sub-second search with ETS caching
 - UX: Dropdown interface with keyboard navigation
 
 ## Developer Experience
+
 - Tests: Added unit and integration tests for search functionality
 - Documentation: Updated user guide with autocomplete usage
 ```
 
-### ❌ **Poor Example**  
+### ❌ **Poor Example**
+
 ```markdown
 # This PR implements the symbol autocomplete feature that we discussed
 
 ## Changes
+
 - I added a new GenServer called SymbolSearchServer that handles the autocomplete functionality by querying the symbols table and caching results in ETS for performance
 - The frontend now has a dropdown component that shows search results
 - There's a new endpoint for the search API that returns JSON
@@ -111,6 +115,7 @@ Before submitting a PR, verify:
 ## Future Evolution
 
 This style guide will evolve based on:
+
 - Team feedback on template usage
 - PR review efficiency improvements
 - Community contribution patterns

@@ -10,16 +10,16 @@ Ashfolio aims to meet WCAG 2.1 AA accessibility standards to ensure the applicat
 
 ### Automated Testing Tools
 
-- **axe-core browser extension**: Primary automated accessibility scanner
-- **WAVE Web Accessibility Evaluator**: Secondary validation tool
-- **Lighthouse accessibility audit**: Built into Chrome DevTools
-- **Pa11y command line tool**: For CI/CD integration
+- Primary automated accessibility scanner
+- Secondary validation tool
+- Built into Chrome DevTools
+- For CI/CD integration
 
 ### Manual Testing Tools
 
-- **Screen readers**: NVDA (Windows), JAWS (Windows), VoiceOver (macOS)
-- **Keyboard navigation**: Standard keyboard testing
-- **Color contrast analyzers**: WebAIM Contrast Checker, Colour Contrast Analyser
+- NVDA (Windows), JAWS (Windows), VoiceOver (macOS)
+- Standard keyboard testing
+- WebAIM Contrast Checker, Colour Contrast Analyser
 
 ## WCAG AA Compliance Checklist
 
@@ -33,18 +33,18 @@ Ashfolio aims to meet WCAG 2.1 AA accessibility standards to ensure the applicat
 
 #### Manual Checks
 
-- [ ] **Normal text**: Minimum 4.5:1 contrast ratio
+- [ ] Minimum 4.5:1 contrast ratio
   - [ ] Body text against background
   - [ ] Link text against background
   - [ ] Button text against button background
   - [ ] Form labels against background
-- [ ] **Large text (18pt+ or 14pt+ bold)**: Minimum 3:1 contrast ratio
+- [ ] Minimum 3:1 contrast ratio
 
   - [ ] Headings against background
   - [ ] Large button text
   - [ ] Large navigation text
 
-- [ ] **Interactive elements**: Sufficient contrast for all states
+- [ ] Sufficient contrast for all states
   - [ ] Default state
   - [ ] Hover state
   - [ ] Focus state
@@ -103,9 +103,9 @@ Ashfolio aims to meet WCAG 2.1 AA accessibility standards to ensure the applicat
 
 #### Screen Reader Setup
 
-- **macOS**: VoiceOver (Cmd+F5 to enable)
-- **Windows**: NVDA (free) or JAWS (commercial)
-- **Testing approach**: Test with at least one screen reader
+- VoiceOver (Cmd+F5 to enable)
+- NVDA (free) or JAWS (commercial)
+- Test with at least one screen reader
 
 #### Content Structure
 
@@ -255,27 +255,27 @@ Ashfolio aims to meet WCAG 2.1 AA accessibility standards to ensure the applicat
 
 ### Dashboard Page
 
-1. **Automated scan**: Run axe-core and Lighthouse
-2. **Keyboard navigation**: Tab through all interactive elements
-3. **Screen reader**: Test portfolio summary announcements
-4. **Color contrast**: Verify gain/loss color coding meets standards
-5. **Focus management**: Test price refresh button interaction
+1.  Run axe-core and Lighthouse
+2.  Tab through all interactive elements
+3.  Test portfolio summary announcements
+4.  Verify gain/loss color coding meets standards
+5.  Test price refresh button interaction
 
 ### Accounts Page
 
-1. **Table accessibility**: Test account list table structure
-2. **Form accessibility**: Test account creation/edit forms
-3. **Modal accessibility**: Test form modal behavior
-4. **Action buttons**: Test edit/delete button accessibility
-5. **Empty state**: Test empty state messaging
+1.  Test account list table structure
+2.  Test account creation/edit forms
+3.  Test form modal behavior
+4.  Test edit/delete button accessibility
+5.  Test empty state messaging
 
 ### Transactions Page
 
-1. **Complex table**: Test transaction table with multiple columns
-2. **Form validation**: Test transaction form error handling
-3. **Date inputs**: Test date picker accessibility
-4. **Select inputs**: Test dropdown accessibility
-5. **Filtering**: Test transaction filtering controls
+1.  Test transaction table with multiple columns
+2.  Test transaction form error handling
+3.  Test date picker accessibility
+4.  Test dropdown accessibility
+5.  Test transaction filtering controls
 
 ## Automated Testing Integration
 
@@ -283,12 +283,12 @@ Ashfolio aims to meet WCAG 2.1 AA accessibility standards to ensure the applicat
 
 Ashfolio's accessibility tests are designed to be resilient and work in various environments:
 
-- **Database State Management**: Tests create default user in setup to prevent LiveView mounting failures
-- **Consistent Behavior**: Tests work reliably across all environments with proper database handling
-- **Root Cause Resolution**: Addresses database concurrency issues at the source rather than with fallbacks
-- **Enhanced Error Reporting**: Uses `inspect(error, limit: :infinity)` for comprehensive error diagnostics
-- **Clear Failure Messages**: Provides detailed LiveView mounting error messages for debugging
-- **Simplified Structure**: Clean test implementation with robust error handling
+- Tests create default user in setup to prevent LiveView mounting failures
+- Tests work reliably across all environments with proper database handling
+- Addresses database concurrency issues at the source rather than with fallbacks
+- Uses `inspect(error, limit: :infinity)` for comprehensive error diagnostics
+- Provides detailed LiveView mounting error messages for debugging
+- Clean test implementation with robust error handling
 
 ### CI/CD Integration
 
@@ -328,33 +328,33 @@ jobs:
 
 #### Color Contrast Failures
 
-- **Issue**: Text doesn't meet 4.5:1 contrast ratio
-- **Solution**: Adjust text or background colors
-- **Tools**: Use WebAIM contrast checker to find compliant colors
+- Text doesn't meet 4.5:1 contrast ratio
+- Adjust text or background colors
+- Use WebAIM contrast checker to find compliant colors
 
 #### Missing Alt Text
 
-- **Issue**: Images without alt attributes
-- **Solution**: Add descriptive alt text or alt="" for decorative images
-- **Example**: `<img src="chart.png" alt="Portfolio performance chart showing 15% growth">`
+- Images without alt attributes
+- Add descriptive alt text or alt="" for decorative images
+- `<img src="chart.png" alt="Portfolio performance chart showing 15% growth">`
 
 #### Keyboard Navigation Issues
 
-- **Issue**: Elements not reachable by keyboard
-- **Solution**: Ensure tabindex is appropriate, add keyboard event handlers
-- **Example**: Add `tabindex="0"` and `onKeyDown` handlers for custom controls
+- Elements not reachable by keyboard
+- Ensure tabindex is appropriate, add keyboard event handlers
+- Add `tabindex="0"` and `onKeyDown` handlers for custom controls
 
 #### Form Label Issues
 
-- **Issue**: Form inputs without proper labels
-- **Solution**: Use explicit labels with for/id association
-- **Example**: `<label for="account-name">Account Name</label><input id="account-name">`
+- Form inputs without proper labels
+- Use explicit labels with for/id association
+- `<label for="account-name">Account Name</label><input id="account-name">`
 
 #### Focus Management Problems
 
-- **Issue**: Focus not visible or poorly managed
-- **Solution**: Ensure focus indicators are visible, manage focus in dynamic content
-- **CSS**: Never use `outline: none` without providing alternative focus indicator
+- Focus not visible or poorly managed
+- Ensure focus indicators are visible, manage focus in dynamic content
+- Never use `outline: none` without providing alternative focus indicator
 
 ## Documentation and Reporting
 
