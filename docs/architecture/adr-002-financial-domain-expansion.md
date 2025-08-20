@@ -33,21 +33,18 @@ We will implement domain separation using Ash Framework's domain structure:
 ```elixir
 # Existing domain - focused on investments
 Ashfolio.Portfolio
-├── User
-├── Account (investment accounts)
+├── UserSettings (application preferences, database-as-user)
+├── Account (investment and cash accounts)
 ├── Symbol
 └── Transaction (investment transactions)
 
 # New domain - comprehensive financial management
 Ashfolio.FinancialManagement
-├── Asset (non-investment assets)
-├── CashAccount (specialized cash accounts)
-├── ExpenseCategory
-├── Expense
-├── NetWorthSnapshot
-├── FinancialGoal
-├── TaxEvent
-└── PortfolioAnalytics
+├── TransactionCategory
+├── NetWorthCalculator
+├── BalanceManager
+├── SymbolSearch
+└── Future: Asset, Expense, FinancialGoal, TaxEvent
 ```
 
 ### Data Relationship Strategy

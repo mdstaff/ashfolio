@@ -23,13 +23,9 @@ just restore <file>   # Restore from backup file
 
 ### Current Migration Status
 
-The application has the following core migrations:
+The application uses a database-as-user architecture with a single comprehensive migration:
 
-1. **20250729155430_create_users.exs** - Users table with single default user support
-2. **20250729222139_add_accounts.exs** - Accounts table with user relationships
-3. **20250729225054_add_symbols_table.exs** - Symbols table for financial instruments
-4. **20250730030039_add_transactions.exs** - Transactions table with account/symbol relationships
-5. **20250730031646_add_performance_indexes.exs** - Performance indexes for common queries
+1. **20250818052238_create_database_as_user_schema.exs** - Complete schema with all tables and relationships
 
 ### Running Migrations
 
@@ -44,35 +40,24 @@ mix ecto.migrations
 mix ecto.gen.migration migration_name
 ```
 
-### Performance Indexes
+### Database Architecture
 
-The following indexes have been added for optimal query performance:
+The database-as-user architecture eliminates traditional user tables in favor of user settings:
 
-**Transactions Table:**
+**Core Tables:**
 
-- `idx_transactions_account_id` - Queries by account
-- `idx_transactions_symbol_id` - Queries by symbol
-- `idx_transactions_date` - Date-based queries
-- `idx_transactions_type` - Transaction type filtering
-- `idx_transactions_date_type` - Combined date and type queries
-- `idx_transactions_account_symbol` - Account-symbol combinations
+- `user_settings` - Single-user configuration (currency, locale, preferences)
+- `accounts` - Investment accounts with balances and metadata
+- `symbols` - Financial instruments (stocks, ETFs, crypto)
+- `transactions` - Transaction history with account/symbol relationships
+- `transaction_categories` - Categorization system for transactions
 
-**Symbols Table:**
+**Key Relationships:**
 
-- `idx_symbols_symbol_unique` - Unique symbol lookup
-- `idx_symbols_asset_class` - Asset class filtering
-- `idx_symbols_data_source` - Data source queries
-- `idx_symbols_price_updated_at` - Stale price detection
-
-**Accounts Table:**
-
-- `idx_accounts_user_id` - User-specific accounts
-- `idx_accounts_is_excluded` - Active account filtering
-- `idx_accounts_user_active` - Combined user and active status
-
-**Users Table:**
-
-- `idx_users_currency` - Currency-based queries (future-proofing)
+- Transactions → Accounts (required foreign key)
+- Transactions → Symbols (required foreign key)
+- Transactions → Transaction Categories (optional foreign key)
+- Transaction Categories → Parent Categories (hierarchical structure)
 
 ## Database Seeding
 
@@ -80,7 +65,7 @@ The following indexes have been added for optimal query performance:
 
 The application includes comprehensive sample data for development:
 
-**Default User:**
+**Default User Settings:**
 
 - Name: "Local User"
 - Currency: "USD"
@@ -266,33 +251,37 @@ just sanitize-data        # Remove PII from copied data
 ### Current Tables
 
 ```sql
--- Users (single default user)
-users (id, name, currency, locale, timestamps)
+-- User settings (single user configuration)
+user_settings (id, name, currency, locale, timestamps)
 
 -- Investment accounts
-accounts (id, name, platform, currency, is_excluded, balance, timestamps)
+accounts (id, name, platform, currency, account_type, is_excluded, balance, 
+          balance_updated_at, interest_rate, minimum_balance, timestamps)
 
 -- Financial symbols
 symbols (id, symbol, name, asset_class, currency, isin, sectors, countries,
          data_source, current_price, price_updated_at, timestamps)
 
+-- Transaction categories
+transaction_categories (id, name, color, is_system, parent_category_id, timestamps)
+
 -- Transactions
-transactions (id, account_id, symbol_id, type, quantity, price, total_amount,
-              fee, date, notes, timestamps)
+transactions (id, account_id, symbol_id, category_id, type, quantity, price, 
+              total_amount, fee, date, notes, timestamps)
 ```
 
 ### Relationships
 
-- User → Accounts (1:many)
-- Account → Transactions (1:many)
-- Symbol → Transactions (1:many)
-- User → Transactions (through Account)
+- Accounts → Transactions (1:many)
+- Symbols → Transactions (1:many)
+- Transaction Categories → Transactions (1:many, optional)
+- Transaction Categories → Parent Categories (self-referencing hierarchy)
 
 ## Testing and Validation
 
 ### Test Suite Status
 
-The project maintains a **100% passing test suite** (118/118 tests) to ensure stability during development.
+The project maintains a **100% passing test suite** (383/383 tests) to ensure stability during development.
 
 ### Enhanced Test Commands
 

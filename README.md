@@ -72,8 +72,8 @@ Ashfolio manages financial data locally on your computer. Track investments, cas
 
 ## Project Status
 
-Current Version: v0.2.0-dev
-Next Release: v0.2.0 (Cash Management & Net Worth)
+Current Version: v0.2.2-dev
+Next Release: v0.3.0 (TBD)
 
 ### Currently Available (v0.1.0 + v0.2.0 Features)
 
