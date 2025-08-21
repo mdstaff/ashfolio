@@ -46,3 +46,6 @@ phoenix.log
 
 # Playwright MCP generated files
 .playwright-mcp/
+
+# Code GPS usage tracking (operational data)
+.code-gps-usage.log
