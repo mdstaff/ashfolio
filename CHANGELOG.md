@@ -5,6 +5,30 @@ All notable changes to the Ashfolio project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - v0.3.1 Development
+
+### Added
+
+- ExpenseLive.Analytics: Interactive expense analytics with Contex pie charts
+- Dashboard Expense Widget: Real-time expense tracking display on main dashboard
+- Date Range Filtering: Analytics with current month, last month, 3/6 months, all time
+- Category Breakdown: Visual expense categorization with percentages and amounts
+- Contex Integration: Professional chart library integration with error handling
+- PubSub Expense Updates: Real-time expense data synchronization across components
+
+### Enhanced
+
+- Dashboard Layout: Expanded grid to accommodate new expense widget
+- Test Coverage: Comprehensive LiveView tests for expense widget functionality
+- Router: Added analytics routes for expense visualization
+- Error Handling: Robust fallback SVG generation for chart resilience
+
+### Technical Improvements
+
+- Code GPS v2.0: Enhanced codebase analysis with route detection and dependency tracking
+- ADR-003 Updated: Documented successful Wallaby removal and LiveView-first testing strategy
+- TDD Implementation: Test-driven development approach for chart components
+
 ## [Unreleased] - v0.2.0 Development
 
 ## [0.2.2] - 2025-01-20
