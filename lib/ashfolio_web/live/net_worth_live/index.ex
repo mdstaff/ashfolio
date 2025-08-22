@@ -38,23 +38,24 @@ defmodule AshfolioWeb.NetWorthLive.Index do
     try do
       # Calculate current net worth from all accounts
       current_net_worth = calculate_current_net_worth()
-      
+
       # Create new snapshot  
       total_assets = current_net_worth
       total_liabilities = Decimal.new("0.00")
       net_worth = Decimal.sub(total_assets, total_liabilities)
-      
-      {:ok, _snapshot} = NetWorthSnapshot.create(%{
-        snapshot_date: Date.utc_today(),
-        total_assets: total_assets,
-        total_liabilities: total_liabilities,
-        net_worth: net_worth,
-        cash_value: calculate_total_cash(),
-        investment_value: calculate_total_investments(),
-        is_automated: false
-      })
 
-      socket = 
+      {:ok, _snapshot} =
+        NetWorthSnapshot.create(%{
+          snapshot_date: Date.utc_today(),
+          total_assets: total_assets,
+          total_liabilities: total_liabilities,
+          net_worth: net_worth,
+          cash_value: calculate_total_cash(),
+          investment_value: calculate_total_investments(),
+          is_automated: false
+        })
+
+      socket =
         socket
         |> put_flash(:info, "Net worth snapshot created successfully!")
         |> load_net_worth_data()
@@ -82,7 +83,12 @@ defmodule AshfolioWeb.NetWorthLive.Index do
             class="btn-primary inline-flex items-center"
           >
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              />
             </svg>
             Create Snapshot
           </button>
@@ -91,14 +97,19 @@ defmodule AshfolioWeb.NetWorthLive.Index do
             class="btn-secondary inline-flex items-center"
           >
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
             </svg>
             Back to Dashboard
           </.link>
         </div>
       </div>
-
-      <!-- Date Range Controls -->
+      
+    <!-- Date Range Controls -->
       <div class="bg-white shadow rounded-lg">
         <div class="px-6 py-4">
           <h3 class="text-lg font-medium text-gray-900 mb-4">Time Period</h3>
@@ -171,8 +182,8 @@ defmodule AshfolioWeb.NetWorthLive.Index do
           </div>
         </div>
       </div>
-
-      <!-- Summary Stats -->
+      
+    <!-- Summary Stats -->
       <div class="bg-white shadow rounded-lg">
         <div class="px-6 py-4 bg-gray-50">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -194,8 +205,8 @@ defmodule AshfolioWeb.NetWorthLive.Index do
           </div>
         </div>
       </div>
-
-      <!-- Chart Section -->
+      
+    <!-- Chart Section -->
       <%= if @loading do %>
         <div class="bg-white shadow rounded-lg">
           <div class="text-center py-16 px-6">
@@ -210,7 +221,12 @@ defmodule AshfolioWeb.NetWorthLive.Index do
             <div class="text-center py-16 px-6">
               <div class="mx-auto h-16 w-16 text-gray-400 mb-4">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-full h-full">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                  />
                 </svg>
               </div>
               <h3 class="text-lg font-medium text-gray-900 mb-2">No net worth data to display</h3>
@@ -222,7 +238,12 @@ defmodule AshfolioWeb.NetWorthLive.Index do
                 class="btn-primary inline-flex items-center"
               >
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4v16m8-8H4"
+                  />
                 </svg>
                 Create First Snapshot
               </button>
@@ -266,7 +287,7 @@ defmodule AshfolioWeb.NetWorthLive.Index do
 
       # Prepare chart data
       chart_data = prepare_chart_data(filtered_snapshots)
-      
+
       # Generate chart
       chart_svg = generate_trend_chart(chart_data)
 
@@ -347,14 +368,18 @@ defmodule AshfolioWeb.NetWorthLive.Index do
   defp calculate_current_net_worth do
     # This would calculate from current account balances
     # For now, return the latest snapshot or zero
-    case NetWorthSnapshot |> Ash.Query.for_read(:read) |> Ash.Query.sort(snapshot_date: :desc) |> Ash.Query.limit(1) |> Ash.read!() do
+    case NetWorthSnapshot
+         |> Ash.Query.for_read(:read)
+         |> Ash.Query.sort(snapshot_date: :desc)
+         |> Ash.Query.limit(1)
+         |> Ash.read!() do
       [latest_snapshot] -> latest_snapshot.net_worth
       [] -> Decimal.new(0)
     end
   end
 
   defp calculate_net_worth_change(snapshots) when length(snapshots) < 2, do: Decimal.new(0)
-  
+
   defp calculate_net_worth_change(snapshots) do
     first_snapshot = List.first(snapshots)
     last_snapshot = List.last(snapshots)

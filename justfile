@@ -302,6 +302,12 @@ clean:
     rm -rf _build deps
     @echo "✅ Clean complete"
 
+# 🧭 Generate Code GPS manifest for codebase navigation
+gps:
+    @echo "🧭 Analyzing codebase structure..."
+    @mix code_gps
+    @echo "📍 Code GPS manifest generated: .code-gps.yaml"
+
 # ❓ Show help for a specific topic
 help topic="":
     #!/usr/bin/env bash

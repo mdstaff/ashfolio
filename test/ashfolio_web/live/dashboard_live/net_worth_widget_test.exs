@@ -6,7 +6,7 @@ defmodule AshfolioWeb.DashboardLive.NetWorthWidgetTest do
     setup do
       # Reset account balances
       require Ash.Query
-      
+
       Ashfolio.Portfolio.Account
       |> Ash.Query.for_read(:read)
       |> Ash.read!()
@@ -15,17 +15,19 @@ defmodule AshfolioWeb.DashboardLive.NetWorthWidgetTest do
       end)
 
       # Create accounts with balances
-      {:ok, investment_account} = Ashfolio.Portfolio.Account.create(%{
-        name: "Test Investment",
-        account_type: :investment,
-        balance: Decimal.new("75000.00")
-      })
+      {:ok, investment_account} =
+        Ashfolio.Portfolio.Account.create(%{
+          name: "Test Investment",
+          account_type: :investment,
+          balance: Decimal.new("75000.00")
+        })
 
-      {:ok, checking_account} = Ashfolio.Portfolio.Account.create(%{
-        name: "Test Checking",
-        account_type: :checking,
-        balance: Decimal.new("5000.00")
-      })
+      {:ok, checking_account} =
+        Ashfolio.Portfolio.Account.create(%{
+          name: "Test Checking",
+          account_type: :checking,
+          balance: Decimal.new("5000.00")
+        })
 
       # Create net worth snapshots for trend
       snapshots_data = [
@@ -34,18 +36,21 @@ defmodule AshfolioWeb.DashboardLive.NetWorthWidgetTest do
         {Date.utc_today(), "80000.00"}
       ]
 
-      snapshots = for {date, value} <- snapshots_data do
-        {:ok, snapshot} = Ashfolio.FinancialManagement.NetWorthSnapshot.create(%{
-          snapshot_date: date,
-          total_assets: Decimal.new(value),
-          total_liabilities: Decimal.new("0.00"),
-          net_worth: Decimal.new(value),
-          investment_value: Decimal.new(value),
-          cash_value: Decimal.new("0.00"),
-          other_assets_value: Decimal.new("0.00")
-        })
-        snapshot
-      end
+      snapshots =
+        for {date, value} <- snapshots_data do
+          {:ok, snapshot} =
+            Ashfolio.FinancialManagement.NetWorthSnapshot.create(%{
+              snapshot_date: date,
+              total_assets: Decimal.new(value),
+              total_liabilities: Decimal.new("0.00"),
+              net_worth: Decimal.new(value),
+              investment_value: Decimal.new(value),
+              cash_value: Decimal.new("0.00"),
+              other_assets_value: Decimal.new("0.00")
+            })
+
+          snapshot
+        end
 
       %{
         investment_account: investment_account,
@@ -76,15 +81,16 @@ defmodule AshfolioWeb.DashboardLive.NetWorthWidgetTest do
 
       # Should have create snapshot button
       assert has_element?(view, "button[phx-click='create_snapshot']", "Snapshot Now")
-      
+
       # Click create snapshot  
       initial_count = length(elem(Ashfolio.FinancialManagement.NetWorthSnapshot.list(), 1))
       view |> element("button[phx-click='create_snapshot']") |> render_click()
 
       # Should still have same count (today's snapshot gets updated, not created new)
       {:ok, snapshots_after} = Ashfolio.FinancialManagement.NetWorthSnapshot.list()
-      assert length(snapshots_after) == initial_count # Same count, but updated values
-      
+      # Same count, but updated values
+      assert length(snapshots_after) == initial_count
+
       # Flash message might be available in Phoenix.LiveView context
       # This test passes if the functionality works (snapshot created)
       rendered_html = render(view)
@@ -95,6 +101,7 @@ defmodule AshfolioWeb.DashboardLive.NetWorthWidgetTest do
     test "handles missing snapshot data gracefully", %{conn: conn} do
       # Delete all snapshots
       {:ok, snapshots} = Ashfolio.FinancialManagement.NetWorthSnapshot.list()
+
       snapshots
       |> Enum.each(fn snapshot ->
         Ashfolio.FinancialManagement.NetWorthSnapshot.destroy(snapshot)
@@ -104,7 +111,7 @@ defmodule AshfolioWeb.DashboardLive.NetWorthWidgetTest do
 
       # Should still show current calculated net worth
       assert html =~ "$80,000"
-      
+
       # Should show net worth data
       assert html =~ "Net Worth"
     end

@@ -1,4 +1,4 @@
-# Code GPS v2.0 - 244ms | 2 LiveViews | 19 Components
+# Code GPS v2.0 - 263ms | 2 LiveViews | 19 Components
 
 # === ROUTES ===
 /: DashboardLive ✅
@@ -19,8 +19,8 @@
 # === LIVE VIEWS ===
 Dashboard:
   file: lib/ashfolio_web/live/dashboard_live.ex
-  mount: 12 | render: 121
-  events: ["refresh_prices", "sort"]
+  mount: 12 | render: 191
+  events: ["refresh_prices", "sort", "create_snapshot"]
   subscriptions: [accounts, transactions, net_worth...4]
   missing: []
 Example:
@@ -42,16 +42,16 @@ label: lib/ashfolio_web/components/core_components.ex:397 (3x) | attrs: ["for"]
 error: lib/ashfolio_web/components/core_components.ex:410 (9x)
 
 # === DEPENDENCIES ===
-ash: ✅ (967)
+ash: ✅ (985)
 contex: ✅ (123)
-decimal: ✅ (495)
+decimal: ✅ (506)
 mox: ✅ (1)
 wallaby: ❌ (1)
 
 # === FRESHNESS ===
-recent: ["test/ashfolio_web/live/dashboard_live/expense_widget_test.exs", "lib/ashfolio_web/components/core_components.ex", "lib/ashfolio_web/live/dashboard_live.ex", "lib/ashfolio_web/live/expense_live/analytics.ex", "lib/ashfolio_web/router.ex"]
-uncommitted: 0 files
-commits_ahead: 9
+recent: ["lib/ashfolio_web/components/core_components.ex", "lib/ashfolio_web/live/dashboard_live.ex", "test/ashfolio_web/live/dashboard_live/net_worth_widget_test.exs", "lib/ashfolio_web/live/net_worth_live/index.ex", "test/ashfolio_web/live/dashboard_live/expense_widget_test.exs"]
+uncommitted: 12 files
+commits_ahead: 11
 
 # === TEST GAPS ===
 missing_tests:
@@ -71,8 +71,4 @@ currency_format: "Decimal formatting"
 test_setup: "Standard ExUnit setup"
 
 # === INTEGRATION OPPORTUNITIES ===
-add_manual_snapshot:
-  desc: Add manual net worth snapshot button
-  priority: medium
-  load_data: lib/ashfolio_web/live/dashboard_live.ex:handle_event
 

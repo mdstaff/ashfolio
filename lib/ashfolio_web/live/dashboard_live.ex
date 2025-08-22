@@ -91,13 +91,13 @@ defmodule AshfolioWeb.DashboardLive do
     try do
       # Calculate current net worth from all accounts
       current_net_worth = calculate_current_net_worth()
-      
+
       # Prepare snapshot data
       today = Date.utc_today()
       total_assets = current_net_worth
       total_liabilities = Decimal.new("0.00")
       net_worth = Decimal.sub(total_assets, total_liabilities)
-      
+
       snapshot_data = %{
         snapshot_date: today,
         total_assets: total_assets,
@@ -107,33 +107,45 @@ defmodule AshfolioWeb.DashboardLive do
         investment_value: calculate_total_investments(),
         is_automated: false
       }
-      
+
       # Try to create new snapshot, or update existing one for today
       case Ashfolio.FinancialManagement.NetWorthSnapshot.create(snapshot_data) do
         {:ok, _snapshot} ->
-          socket = 
+          socket =
             socket
             |> put_flash(:info, "Net worth snapshot created successfully!")
             |> load_portfolio_data()
+
           {:noreply, socket}
-            
+
         {:error, _error} ->
           # If creation failed (likely due to date uniqueness), try to find existing snapshot for today
           case Ashfolio.FinancialManagement.NetWorthSnapshot.list!()
-               |> Enum.filter(fn snapshot -> Date.compare(snapshot.snapshot_date, today) == :eq end) do
+               |> Enum.filter(fn snapshot ->
+                 Date.compare(snapshot.snapshot_date, today) == :eq
+               end) do
             [existing_snapshot] ->
-              case Ashfolio.FinancialManagement.NetWorthSnapshot.update(existing_snapshot, snapshot_data) do
+              case Ashfolio.FinancialManagement.NetWorthSnapshot.update(
+                     existing_snapshot,
+                     snapshot_data
+                   ) do
                 {:ok, _updated_snapshot} ->
-                  socket = 
+                  socket =
                     socket
                     |> put_flash(:info, "Net worth snapshot updated for today!")
                     |> load_portfolio_data()
+
                   {:noreply, socket}
-                    
+
                 {:error, update_error} ->
-                  {:noreply, put_flash(socket, :error, "Failed to update snapshot: #{inspect(update_error)}")}
+                  {:noreply,
+                   put_flash(
+                     socket,
+                     :error,
+                     "Failed to update snapshot: #{inspect(update_error)}"
+                   )}
               end
-              
+
             [] ->
               {:noreply, put_flash(socket, :error, "Failed to create snapshot: date conflict")}
           end
@@ -730,7 +742,7 @@ defmodule AshfolioWeb.DashboardLive do
   defp get_transaction_price(_), do: Decimal.new("0.00")
 
   # Expense functions
-  
+
   defp assign_default_expense_values(socket) do
     socket
     |> assign(:total_expenses, FormatHelpers.format_currency(Decimal.new("0.00")))
@@ -741,7 +753,7 @@ defmodule AshfolioWeb.DashboardLive do
   defp load_expense_data(socket) do
     try do
       # Load all expenses
-      expenses = 
+      expenses =
         Expense
         |> Ash.Query.for_read(:read)
         |> Ash.read!()
@@ -771,8 +783,10 @@ defmodule AshfolioWeb.DashboardLive do
   defp calculate_current_net_worth do
     # Calculate from current account balances
     case Ashfolio.Portfolio.Account |> Ash.Query.for_read(:read) |> Ash.read!() do
-      [] -> Decimal.new(0)
-      accounts -> 
+      [] ->
+        Decimal.new(0)
+
+      accounts ->
         accounts
         |> Enum.reduce(Decimal.new(0), fn account, acc ->
           Decimal.add(acc, account.balance)
@@ -783,8 +797,10 @@ defmodule AshfolioWeb.DashboardLive do
   defp calculate_total_cash do
     # Sum cash account balances
     case Ashfolio.Portfolio.Account.cash_accounts!() do
-      [] -> Decimal.new(0)
-      accounts -> 
+      [] ->
+        Decimal.new(0)
+
+      accounts ->
         accounts
         |> Enum.reduce(Decimal.new(0), fn account, acc ->
           Decimal.add(acc, account.balance)
@@ -795,8 +811,10 @@ defmodule AshfolioWeb.DashboardLive do
   defp calculate_total_investments do
     # Sum investment account balances
     case Ashfolio.Portfolio.Account.investment_accounts!() do
-      [] -> Decimal.new(0)
-      accounts -> 
+      [] ->
+        Decimal.new(0)
+
+      accounts ->
         accounts
         |> Enum.reduce(Decimal.new(0), fn account, acc ->
           Decimal.add(acc, account.balance)

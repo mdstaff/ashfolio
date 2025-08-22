@@ -7,7 +7,7 @@ defmodule AshfolioWeb.NetWorthLive.IndexTest do
     setup do
       # Reset account balances for clean test state
       require Ash.Query
-      
+
       Ashfolio.Portfolio.Account
       |> Ash.Query.for_read(:read)
       |> Ash.read!()
@@ -16,17 +16,19 @@ defmodule AshfolioWeb.NetWorthLive.IndexTest do
       end)
 
       # Create test accounts with known balances
-      {:ok, investment_account} = Ashfolio.Portfolio.Account.create(%{
-        name: "Test Investment",
-        account_type: :investment,
-        balance: Decimal.new("10000.00")
-      })
+      {:ok, investment_account} =
+        Ashfolio.Portfolio.Account.create(%{
+          name: "Test Investment",
+          account_type: :investment,
+          balance: Decimal.new("10000.00")
+        })
 
-      {:ok, checking_account} = Ashfolio.Portfolio.Account.create(%{
-        name: "Test Checking",
-        account_type: :checking,
-        balance: Decimal.new("5000.00")
-      })
+      {:ok, checking_account} =
+        Ashfolio.Portfolio.Account.create(%{
+          name: "Test Checking",
+          account_type: :checking,
+          balance: Decimal.new("5000.00")
+        })
 
       # Create test net worth snapshots
       snapshots_data = [
@@ -36,21 +38,24 @@ defmodule AshfolioWeb.NetWorthLive.IndexTest do
         {Date.add(Date.utc_today(), -1), "15000.00"}
       ]
 
-      snapshots = for {date, value} <- snapshots_data do
-        total_assets = Decimal.new(value)
-        total_liabilities = Decimal.new("0.00")
-        net_worth = Decimal.sub(total_assets, total_liabilities)
-        
-        {:ok, snapshot} = Ashfolio.FinancialManagement.NetWorthSnapshot.create(%{
-          snapshot_date: date,
-          total_assets: total_assets,
-          total_liabilities: total_liabilities,
-          net_worth: net_worth,
-          cash_value: Decimal.new("5000.00"),
-          investment_value: Decimal.sub(total_assets, Decimal.new("5000.00"))
-        })
-        snapshot
-      end
+      snapshots =
+        for {date, value} <- snapshots_data do
+          total_assets = Decimal.new(value)
+          total_liabilities = Decimal.new("0.00")
+          net_worth = Decimal.sub(total_assets, total_liabilities)
+
+          {:ok, snapshot} =
+            Ashfolio.FinancialManagement.NetWorthSnapshot.create(%{
+              snapshot_date: date,
+              total_assets: total_assets,
+              total_liabilities: total_liabilities,
+              net_worth: net_worth,
+              cash_value: Decimal.new("5000.00"),
+              investment_value: Decimal.sub(total_assets, Decimal.new("5000.00"))
+            })
+
+          snapshot
+        end
 
       %{
         investment_account: investment_account,
@@ -72,13 +77,14 @@ defmodule AshfolioWeb.NetWorthLive.IndexTest do
 
       # Should show current net worth
       assert html =~ "$15,000.00"
-      
+
       # Should show net worth change
-      assert html =~ "$3,000.00"  # 15000 - 12000 = 3000 increase
+      # 15000 - 12000 = 3000 increase
+      assert html =~ "$3,000.00"
 
       # Should display trend chart section
       assert has_element?(view, "h3", "Net Worth Trend")
-      
+
       # Should not show empty state
       refute html =~ "No net worth data to display"
     end
@@ -114,6 +120,7 @@ defmodule AshfolioWeb.NetWorthLive.IndexTest do
     test "empty snapshots shows create snapshot prompt", %{conn: conn} do
       # Delete all snapshots
       {:ok, snapshots} = Ashfolio.FinancialManagement.NetWorthSnapshot.list()
+
       snapshots
       |> Enum.each(fn snapshot ->
         Ashfolio.FinancialManagement.NetWorthSnapshot.destroy(snapshot)
@@ -125,7 +132,7 @@ defmodule AshfolioWeb.NetWorthLive.IndexTest do
       assert html =~ "No net worth data to display"
       assert html =~ "Create your first net worth snapshot"
       assert has_element?(view, "button", "Create First Snapshot")
-      
+
       # Should not show chart
       refute html =~ "Net Worth Trend"
     end
@@ -133,6 +140,7 @@ defmodule AshfolioWeb.NetWorthLive.IndexTest do
     test "handles missing account data gracefully", %{conn: conn} do
       # Delete all accounts to simulate edge case
       {:ok, accounts} = Ashfolio.Portfolio.Account.list()
+
       accounts
       |> Enum.each(fn account ->
         Ashfolio.Portfolio.Account.destroy(account)
@@ -153,7 +161,7 @@ defmodule AshfolioWeb.NetWorthLive.IndexTest do
 
       # Test back to dashboard link
       assert has_element?(view, "a[href='/']", "Back to Dashboard")
-      
+
       # Date range buttons should be present
       assert has_element?(view, "button", "Last Month")
       assert has_element?(view, "button", "Last 3 Months")

@@ -48,13 +48,18 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
           class="btn-secondary inline-flex items-center"
         >
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
           </svg>
           Back to Expenses
         </.link>
       </div>
-
-      <!-- Date Range Controls -->
+      
+    <!-- Date Range Controls -->
       <div class="bg-white shadow rounded-lg">
         <div class="px-6 py-4">
           <h3 class="text-lg font-medium text-gray-900 mb-4">Time Period</h3>
@@ -127,8 +132,8 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
           </div>
         </div>
       </div>
-
-      <!-- Summary Stats -->
+      
+    <!-- Summary Stats -->
       <div class="bg-white shadow rounded-lg">
         <div class="px-6 py-4 bg-gray-50">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -147,8 +152,8 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
           </div>
         </div>
       </div>
-
-      <!-- Chart Section -->
+      
+    <!-- Chart Section -->
       <%= if @loading do %>
         <div class="bg-white shadow rounded-lg">
           <div class="text-center py-16 px-6">
@@ -163,7 +168,12 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
             <div class="text-center py-16 px-6">
               <div class="mx-auto h-16 w-16 text-gray-400 mb-4">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-full h-full">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
                 </svg>
               </div>
               <h3 class="text-lg font-medium text-gray-900 mb-2">No expenses to display</h3>
@@ -175,7 +185,12 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
                 class="btn-primary inline-flex items-center"
               >
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4v16m8-8H4"
+                  />
                 </svg>
                 Add Your First Expense
               </.link>
@@ -198,7 +213,7 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
                   <% end %>
                 </div>
                 
-                <!-- Legend -->
+    <!-- Legend -->
                 <div class="lg:w-80">
                   <h4 class="text-sm font-medium text-gray-900 mb-3">Category Breakdown</h4>
                   <div class="space-y-3">
@@ -283,7 +298,7 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
     today = Date.utc_today()
     start_date = today |> Date.beginning_of_month() |> Date.add(-1) |> Date.beginning_of_month()
     end_date = Date.end_of_month(start_date)
-    
+
     Enum.filter(expenses, fn expense ->
       Date.compare(expense.date, start_date) != :lt && Date.compare(expense.date, end_date) != :gt
     end)
@@ -325,7 +340,7 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
       |> Enum.sort_by(fn {_, total, _} -> Decimal.to_float(total) end, :desc)
 
     # Calculate total for percentages
-    grand_total = 
+    grand_total =
       category_totals
       |> Enum.reduce(Decimal.new(0), fn {_, total, _}, acc -> Decimal.add(acc, total) end)
 
@@ -344,14 +359,16 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
 
   defp generate_pie_chart(category_data) do
     # Convert data for Contex Dataset
-    chart_data = Enum.map(category_data, fn {name, amount, _percentage, _color} ->
-      [name, Decimal.to_float(amount)]
-    end)
+    chart_data =
+      Enum.map(category_data, fn {name, amount, _percentage, _color} ->
+        [name, Decimal.to_float(amount)]
+      end)
 
     # Extract colors in the same order (remove # prefix for Contex)
-    colors = Enum.map(category_data, fn {_name, _amount, _percentage, color} -> 
-      String.replace(color, "#", "") 
-    end)
+    colors =
+      Enum.map(category_data, fn {_name, _amount, _percentage, color} ->
+        String.replace(color, "#", "")
+      end)
 
     try do
       # Create chart using Contex official API
@@ -363,6 +380,7 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
       _error ->
         # Fallback to manual SVG if Contex fails
         total = Enum.reduce(chart_data, 0, fn [_, value], acc -> acc + value end)
+
         if total > 0 do
           generate_simple_pie_svg(chart_data, colors, total)
         else
@@ -375,32 +393,34 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
     radius = 150
     center_x = 200
     center_y = 150
-    
+
     data_with_colors = Enum.zip(data, colors)
-    
-    {svg_slices, _} = Enum.reduce(data_with_colors, {"", 0}, fn {[_name, value], color}, {acc, current_angle} ->
-      angle = (value / total) * 360
-      end_angle = current_angle + angle
-      
-      # Simple pie slice path calculation
-      start_x = center_x + radius * :math.cos(current_angle * :math.pi() / 180)
-      start_y = center_y + radius * :math.sin(current_angle * :math.pi() / 180)
-      end_x = center_x + radius * :math.cos(end_angle * :math.pi() / 180)
-      end_y = center_y + radius * :math.sin(end_angle * :math.pi() / 180)
-      
-      large_arc = if angle > 180, do: 1, else: 0
-      
-      path = "M #{center_x} #{center_y} L #{start_x} #{start_y} A #{radius} #{radius} 0 #{large_arc} 1 #{end_x} #{end_y} Z"
-      
-      color_with_hash = if String.starts_with?(color, "#"), do: color, else: "##{color}"
-      
-      slice_svg = """
-      <path d="#{path}" fill="#{color_with_hash}" stroke="white" stroke-width="2" />
-      """
-      
-      {acc <> slice_svg, end_angle}
-    end)
-    
+
+    {svg_slices, _} =
+      Enum.reduce(data_with_colors, {"", 0}, fn {[_name, value], color}, {acc, current_angle} ->
+        angle = value / total * 360
+        end_angle = current_angle + angle
+
+        # Simple pie slice path calculation
+        start_x = center_x + radius * :math.cos(current_angle * :math.pi() / 180)
+        start_y = center_y + radius * :math.sin(current_angle * :math.pi() / 180)
+        end_x = center_x + radius * :math.cos(end_angle * :math.pi() / 180)
+        end_y = center_y + radius * :math.sin(end_angle * :math.pi() / 180)
+
+        large_arc = if angle > 180, do: 1, else: 0
+
+        path =
+          "M #{center_x} #{center_y} L #{start_x} #{start_y} A #{radius} #{radius} 0 #{large_arc} 1 #{end_x} #{end_y} Z"
+
+        color_with_hash = if String.starts_with?(color, "#"), do: color, else: "##{color}"
+
+        slice_svg = """
+        <path d="#{path}" fill="#{color_with_hash}" stroke="white" stroke-width="2" />
+        """
+
+        {acc <> slice_svg, end_angle}
+      end)
+
     """
     <svg class="contex-pie-chart" width="400" height="300" viewBox="0 0 400 300">
       #{svg_slices}
