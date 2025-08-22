@@ -1,4 +1,4 @@
-# Code GPS v2.0 - 257ms | 2 LiveViews | 19 Components
+# Code GPS v2.0 - 244ms | 2 LiveViews | 19 Components
 
 # === ROUTES ===
 /: DashboardLive ✅
@@ -13,6 +13,8 @@
 /expenses: ExpenseLive ✅
 /expenses/new: ExpenseLive ✅
 /expenses/:id/edit: ExpenseLive ✅
+/expenses/analytics: ExpenseLive ✅
+/net_worth: NetWorthLive ✅
 
 # === LIVE VIEWS ===
 Dashboard:
@@ -40,16 +42,16 @@ label: lib/ashfolio_web/components/core_components.ex:397 (3x) | attrs: ["for"]
 error: lib/ashfolio_web/components/core_components.ex:410 (9x)
 
 # === DEPENDENCIES ===
-ash: ✅ (938)
-contex: ✅ (115)
-decimal: ✅ (470)
+ash: ✅ (967)
+contex: ✅ (123)
+decimal: ✅ (495)
 mox: ✅ (1)
 wallaby: ❌ (1)
 
 # === FRESHNESS ===
-recent: ["lib/mix/tasks/code_gps.ex", "test/mix/tasks/code_gps_test.exs", "test/integration/claude_agent_workflow_test.exs", "test/integration/claude_code_hooks_test.exs", "test/integration/code_gps_integration_test.exs"]
-uncommitted: 2 files
-commits_ahead: 6
+recent: ["test/ashfolio_web/live/dashboard_live/expense_widget_test.exs", "lib/ashfolio_web/components/core_components.ex", "lib/ashfolio_web/live/dashboard_live.ex", "lib/ashfolio_web/live/expense_live/analytics.ex", "lib/ashfolio_web/router.ex"]
+uncommitted: 0 files
+commits_ahead: 9
 
 # === TEST GAPS ===
 missing_tests:

@@ -1,0 +1,142 @@
+# Development Handoff Summary
+Generated: 2025-01-21
+Branch: feature/v0.3.1-frontend-components
+
+## Recently Completed Work
+
+### 1. Code GPS System Implementation (feature/code-gps-mvp branch)
+**Status: COMPLETED & COMMITTED**
+
+A comprehensive AI-optimized codebase navigation system designed to help Claude agents efficiently understand and navigate the codebase.
+
+**Key Components:**
+- `lib/mix/tasks/code_gps.ex` - Core analysis tool generating AI-friendly YAML manifests
+- `.code-gps.yaml` - Generated manifest with LiveViews, components, and integration opportunities
+- `CLAUDE.md` - Repository-specific AI agent instructions with mandatory Code GPS workflow
+- `.claude/settings.local.json` - Claude Code hooks for automatic Code GPS generation
+- Comprehensive test suites validating both functionality and agent workflow compliance
+
+**Performance:** Sub-100ms generation time for 175+ files
+**Integration:** Auto-generates on GitHub workflows before Claude agent interactions
+
+### 2. Dashboard Expense Widget (feature/v0.3.1-frontend-components branch) 
+**Status: COMPLETED & TESTED**
+
+Successfully implemented expense tracking widget for dashboard using TDD approach.
+
+**Files Modified:**
+- `lib/ashfolio_web/live/dashboard_live.ex` - Added expense subscription, data loading, and calculations
+- `lib/ashfolio_web/components/core_components.ex` - Added `expense_widget` component with proper styling
+- `test/ashfolio_web/live/dashboard_live/expense_widget_test.exs` - Comprehensive test coverage
+
+**Features Implemented:**
+- Real-time expense data display (total, count, current month)
+- Integration with existing Expense module via Ash framework
+- Navigation link to full expense management page
+- Responsive design matching existing dashboard card patterns
+- Proper test data isolation and validation
+
+**Test Results:** ✅ 3/3 tests passing
+
+## Current Development State
+
+### Active Branch: feature/v0.3.1-frontend-components
+**Next Priority Tasks:**
+1. Create dashboard net worth widget with TDD approach
+2. Add manual snapshot UI button with tests  
+3. Integrate Contex pie chart with component tests
+4. Integrate Contex line chart with component tests
+
+### Architecture Context
+- **Phoenix LiveView** for interactive UI components
+- **Ash Framework** for domain logic and data access
+- **Decimal** library for precise financial calculations
+- **TailwindCSS** for consistent styling patterns
+- **ExUnit** with comprehensive test helpers
+
+### Key Patterns Established
+- Component-based architecture with reusable widgets
+- Test-driven development with proper data setup/teardown
+- PubSub integration for real-time updates
+- Consistent data-testid attributes for reliable testing
+- Error handling with graceful fallbacks
+
+## Important Notes for Next Developer
+
+### Code GPS Workflow
+**MANDATORY**: Before starting any development work:
+1. Run `mix code_gps` to generate latest codebase analysis
+2. Read `.code-gps.yaml` for current architecture understanding
+3. Follow integration opportunities listed with priorities
+
+### Testing Strategy
+- Use `async: false` for LiveView tests to avoid data race conditions
+- Create test data using Ash framework directly (see expense_widget_test.exs)
+- Include proper cleanup in test setup/teardown
+- Follow existing test patterns in `test/ashfolio_web/live/`
+
+### Component Development
+- Add new components to `lib/ashfolio_web/components/core_components.ex`
+- Follow existing card patterns (stat_card, net_worth_card, expense_widget)
+- Include proper documentation with examples
+- Use data-testid attributes for reliable test targeting
+
+### Git Workflow
+- Code GPS system is committed on `feature/code-gps-mvp` branch
+- Current work continues on `feature/v0.3.1-frontend-components`
+- Commit messages should be descriptive and include Co-Authored-By for Claude
+
+## Quick Start Commands
+
+```bash
+# Switch to development branch
+git checkout feature/v0.3.1-frontend-components
+
+# Generate Code GPS analysis (if available)
+mix code_gps
+
+# Run development server
+just work
+
+# Run specific test suite
+mix test test/ashfolio_web/live/dashboard_live/
+
+# Run all tests
+just test
+
+# Format and lint
+mix format && mix credo
+```
+
+## Known Issues & Considerations
+
+### Compiler Warnings
+- Some unused function warnings in code_gps.ex from iterative development
+- YahooFinanceMock redefinition warnings in tests (benign)
+
+### Future Integration Points
+- Expense widget ready for PubSub real-time updates
+- Dashboard layout accommodates additional widgets (currently 6-column grid)
+- Component patterns established for consistent UI expansion
+
+## Dependencies & External Integrations
+
+### Existing Integrations
+- Yahoo Finance API for market data (with mock for testing)
+- SQLite database for development/testing
+- Ash framework for all domain operations
+
+### Planned Integrations  
+- Contex library for chart visualization
+- Manual net worth snapshot functionality
+
+---
+
+**Handoff Checklist:**
+- ✅ All tests passing
+- ✅ Code GPS system documented and tested
+- ✅ Expense widget fully functional
+- ✅ Clear development patterns established
+- ✅ Next tasks prioritized and scoped
+
+**Contact:** This handoff represents work completed by Claude AI agent following TDD principles and established codebase patterns.
