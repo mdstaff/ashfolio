@@ -280,7 +280,6 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
     }
   end
 
-
   defp calculate_cash_by_type(cash_accounts) do
     cash_accounts
     |> Enum.group_by(& &1.account_type)

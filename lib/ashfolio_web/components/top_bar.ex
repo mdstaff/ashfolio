@@ -39,6 +39,9 @@ defmodule AshfolioWeb.Components.TopBar do
             <.nav_link navigate={~p"/transactions"} current={@current_page == :transactions}>
               <.icon name="hero-arrow-right-left" class="w-4 h-4 mr-2" /> Transactions
             </.nav_link>
+            <.nav_link navigate={~p"/expenses"} current={@current_page == :expenses}>
+              <.icon name="hero-currency-dollar" class="w-4 h-4 mr-2" /> Expenses
+            </.nav_link>
           </nav>
           
     <!-- Mobile menu button -->
@@ -73,6 +76,9 @@ defmodule AshfolioWeb.Components.TopBar do
             </.mobile_nav_link>
             <.mobile_nav_link navigate={~p"/transactions"} current={@current_page == :transactions}>
               <.icon name="hero-arrow-right-left" class="w-4 h-4 mr-3" /> Transactions
+            </.mobile_nav_link>
+            <.mobile_nav_link navigate={~p"/expenses"} current={@current_page == :expenses}>
+              <.icon name="hero-currency-dollar" class="w-4 h-4 mr-3" /> Expenses
             </.mobile_nav_link>
           </div>
         </div>

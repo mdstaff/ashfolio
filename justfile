@@ -10,10 +10,26 @@ default:
 # ============================================================================
 
 # 🚀 Start development server
-dev:
-    @echo "🚀 Starting Phoenix server..."
-    @echo "📱 Open http://localhost:4000"
-    mix setup && mix phx.server
+dev mode="":
+    #!/usr/bin/env bash
+    case "{{mode}}" in
+        "")
+            echo "🚀 Starting Phoenix server..."
+            echo "📱 Open http://localhost:4000"
+            mix setup && mix phx.server
+            ;;
+        bg|background)
+            echo "🚀 Starting Phoenix server in background..."
+            mix setup
+            nohup mix phx.server > phoenix.log 2>&1 &
+            echo "✅ Server started (logs in phoenix.log)"
+            echo "💡 Use 'just server stop' to stop"
+            ;;
+        *)
+            echo "Unknown mode: {{mode}}"
+            echo "Available modes: (default), bg/background"
+            ;;
+    esac
 
 # 🧪 Run tests (smart detection based on changes)
 test filter="":
@@ -285,6 +301,12 @@ clean:
     mix clean
     rm -rf _build deps
     @echo "✅ Clean complete"
+
+# 🧭 Generate Code GPS manifest for codebase navigation
+gps:
+    @echo "🧭 Analyzing codebase structure..."
+    @mix code_gps
+    @echo "📍 Code GPS manifest generated: .code-gps.yaml"
 
 # ❓ Show help for a specific topic
 help topic="":

@@ -885,6 +885,65 @@ defmodule AshfolioWeb.CoreComponents do
             </span>
           </div>
         </div>
+        
+    <!-- Snapshot Button -->
+        <button
+          phx-click="create_snapshot"
+          class="mt-4 w-full btn-secondary text-sm"
+          type="button"
+        >
+          Snapshot Now
+        </button>
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders an expense widget card showing expense summary and navigation.
+
+  ## Examples
+
+      <.expense_widget
+        total_expenses="$1,250.00"
+        expense_count={15}
+        current_month_expenses="$450.00" />
+  """
+  attr :total_expenses, :string, required: true
+  attr :expense_count, :integer, required: true
+  attr :current_month_expenses, :string, required: true
+  attr :class, :string, default: nil
+
+  def expense_widget(assigns) do
+    ~H"""
+    <div class={["bg-white rounded-lg shadow p-6", @class]}>
+      <div class="expense-widget">
+        <div class="expense-header">
+          <p class="text-sm font-medium text-gray-600">Expenses</p>
+          <p class="text-2xl font-semibold text-gray-900" data-testid="expense-widget-total">
+            {@total_expenses}
+          </p>
+        </div>
+        <div class="expense-stats">
+          <div class="stat-item">
+            <span class="stat-label">Count</span>
+            <span class="stat-value" data-testid="expense-widget-count">
+              {@expense_count}
+            </span>
+          </div>
+          <span class="separator">•</span>
+          <div class="stat-item">
+            <span class="stat-label">This Month</span>
+            <span class="stat-value" data-testid="expense-widget-month">
+              {@current_month_expenses}
+            </span>
+          </div>
+        </div>
+        <div class="expense-actions mt-4">
+          <a href="/expenses" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+            View All Expenses
+          </a>
+        </div>
       </div>
     </div>
     """

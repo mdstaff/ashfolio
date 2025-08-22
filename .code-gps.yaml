@@ -1,0 +1,74 @@
+# Code GPS v2.0 - 263ms | 2 LiveViews | 19 Components
+
+# === ROUTES ===
+/: DashboardLive ✅
+/accounts: AccountLive ✅
+/accounts/new: AccountLive ✅
+/accounts/:id: AccountLive ✅
+/accounts/:id/edit: AccountLive ✅
+/transactions: TransactionLive ✅
+/categories: CategoryLive ✅
+/categories/new: CategoryLive ✅
+/categories/:id/edit: CategoryLive ✅
+/expenses: ExpenseLive ✅
+/expenses/new: ExpenseLive ✅
+/expenses/:id/edit: ExpenseLive ✅
+/expenses/analytics: ExpenseLive ✅
+/net_worth: NetWorthLive ✅
+
+# === LIVE VIEWS ===
+Dashboard:
+  file: lib/ashfolio_web/live/dashboard_live.ex
+  mount: 12 | render: 191
+  events: ["refresh_prices", "sort", "create_snapshot"]
+  subscriptions: [accounts, transactions, net_worth...4]
+  missing: []
+Example:
+  file: lib/ashfolio_web/live/example_live.ex
+  mount: 13 | render: 41
+  events: ["simulate_error", "simulate_success", "clear_flash"]
+  subscriptions: []
+  missing: [expenses, net_worth, accounts...4]
+
+
+# === KEY COMPONENTS ===
+modal: lib/ashfolio_web/components/core_components.ex:44 (2x) | attrs: ["id", "show", "on_cancel"]
+flash: lib/ashfolio_web/components/core_components.ex:108 (7x) | attrs: [id, flash, title...5]
+flash_group: lib/ashfolio_web/components/core_components.ex:147 (1x) | attrs: ["flash", "id"]
+simple_form: lib/ashfolio_web/components/core_components.ex:202 (6x) | attrs: ["for", "as", "rest"]
+button: lib/ashfolio_web/components/core_components.ex:229 (20x) | attrs: ["type", "class", "rest"]
+input: lib/ashfolio_web/components/core_components.ex:294 (30x) | attrs: [errors, checked, prompt...6]
+label: lib/ashfolio_web/components/core_components.ex:397 (3x) | attrs: ["for"]
+error: lib/ashfolio_web/components/core_components.ex:410 (9x)
+
+# === DEPENDENCIES ===
+ash: ✅ (985)
+contex: ✅ (123)
+decimal: ✅ (506)
+mox: ✅ (1)
+wallaby: ❌ (1)
+
+# === FRESHNESS ===
+recent: ["lib/ashfolio_web/components/core_components.ex", "lib/ashfolio_web/live/dashboard_live.ex", "test/ashfolio_web/live/dashboard_live/net_worth_widget_test.exs", "lib/ashfolio_web/live/net_worth_live/index.ex", "test/ashfolio_web/live/dashboard_live/expense_widget_test.exs"]
+uncommitted: 12 files
+commits_ahead: 11
+
+# === TEST GAPS ===
+missing_tests:
+lib/ashfolio_web/live/example_live.ex ❌
+lib/ashfolio_web/components/core_components.ex ❌
+lib/ashfolio_web/components/layouts.ex ❌
+lib/ashfolio_web/components/top_bar.ex ❌
+lib/ashfolio_web/components/transaction_group.ex ❌
+orphaned_tests:
+test/ashfolio/financial_management/category_migration_test.exs ⚠️
+test/ashfolio/financial_management/symbol_search_cache_test.exs ⚠️
+test/ashfolio/financial_management/symbol_search_external_api_test.exs ⚠️
+
+# === PATTERNS ===
+error_handling: "put_flash/3"
+currency_format: "Decimal formatting"
+test_setup: "Standard ExUnit setup"
+
+# === INTEGRATION OPPORTUNITIES ===
+

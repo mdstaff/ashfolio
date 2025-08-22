@@ -5,6 +5,37 @@ All notable changes to the Ashfolio project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2025-08-22
+
+### Added
+
+- ExpenseLive.Analytics: Interactive expense analytics with Contex pie charts
+- Dashboard Expense Widget: Real-time expense tracking display on main dashboard (5 tests)
+- Dashboard Net Worth Enhancement: Manual snapshot creation button with update-or-create logic (4 tests)
+- Contex Chart Integration: Pie charts for expenses, line charts for net worth trends (9 tests)
+- Date Range Filtering: Analytics with current month, last month, 3/6 months, all time
+- Category Breakdown: Visual expense categorization with percentages and amounts
+- Empty State Handling: User-friendly messages when no data available
+- PubSub Expense Updates: Real-time expense data synchronization across components
+- Manual Net Worth Snapshots: One-click snapshot creation from dashboard
+- Code GPS Command: Added `just gps` command for codebase navigation
+
+### Enhanced
+
+- Dashboard Layout: Expanded grid to accommodate new expense widget
+- Test Coverage: 18 new comprehensive LiveView tests, all passing
+- Router: Added analytics routes for expense visualization
+- Error Handling: Robust fallback SVG generation for chart resilience
+- Net Worth Widget: Added growth trend indicators and snapshot button
+
+### Technical Improvements
+
+- Code GPS v2.0: Enhanced codebase analysis with route detection and dependency tracking
+- ADR-003 Updated: Documented successful Wallaby removal and LiveView-first testing strategy
+- TDD Implementation: Test-driven development approach with RED-GREEN-REFACTOR cycle
+- Ash Framework Integration: Proper resource usage for financial data operations
+- Decimal Precision: All financial calculations use Decimal for accuracy
+
 ## [Unreleased] - v0.2.0 Development
 
 ## [0.2.2] - 2025-01-20
