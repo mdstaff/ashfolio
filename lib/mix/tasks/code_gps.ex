@@ -24,6 +24,10 @@ defmodule Mix.Tasks.CodeGps do
     tests = analyze_tests()
     patterns = extract_patterns()
     suggestions = generate_integration_hints(live_views, components)
+    routes = analyze_routes()
+    dependencies = analyze_dependencies()
+    freshness = analyze_git_freshness()
+    test_gaps = analyze_test_gaps()
     
     end_time = System.monotonic_time(:millisecond)
     generation_time = end_time - start_time
@@ -31,7 +35,7 @@ defmodule Mix.Tasks.CodeGps do
     # Build manifest data
     manifest_data = %{
       metadata: %{
-        version: "1.0",
+        version: "2.0",
         generated_at: DateTime.utc_now(),
         files_analyzed: count_analyzed_files(),
         generation_time_ms: generation_time
@@ -40,7 +44,11 @@ defmodule Mix.Tasks.CodeGps do
       components: components,
       tests: tests,
       patterns: patterns,
-      suggestions: suggestions
+      suggestions: suggestions,
+      routes: routes,
+      dependencies: dependencies,
+      freshness: freshness,
+      test_gaps: test_gaps
     }
     
     # Generate YAML content
@@ -405,19 +413,31 @@ defmodule Mix.Tasks.CodeGps do
   
   defp generate_yaml_manifest(data) do
     """
-    # Code GPS - #{data.metadata.generation_time_ms}ms | #{length(data.live_views)} LiveViews | #{length(data.components)} Components
-    
+    # Code GPS v#{data.metadata.version} - #{data.metadata.generation_time_ms}ms | #{length(data.live_views)} LiveViews | #{length(data.components)} Components
+
+    # === ROUTES ===
+    #{encode_routes(data.routes)}
+
     # === LIVE VIEWS ===
     #{encode_live_views_structured(data.live_views)}
-    
+
     # === KEY COMPONENTS ===
     #{encode_components_with_attrs(data.components)}
-    
+
+    # === DEPENDENCIES ===
+    #{encode_dependencies(data.dependencies)}
+
+    # === FRESHNESS ===
+    #{encode_freshness(data.freshness)}
+
+    # === TEST GAPS ===
+    #{encode_test_gaps(data.test_gaps)}
+
     # === PATTERNS ===
     error_handling: "#{data.patterns.error_handling}"
     currency_format: "#{data.patterns.currency_formatting}"
     test_setup: "#{data.patterns.test_setup}"
-    
+
     # === INTEGRATION OPPORTUNITIES ===
     #{encode_suggestions_structured(data.suggestions)}
     """
@@ -507,6 +527,72 @@ defmodule Mix.Tasks.CodeGps do
   defp format_list([]), do: "[]"
   defp format_list(list) when length(list) <= 3, do: inspect(list)
   defp format_list(list), do: "[#{Enum.take(list, 3) |> Enum.join(", ")}...#{length(list)}]"
+
+  # === NEW v2.0 ENCODERS ===
+
+  defp encode_routes(%{live_routes: routes}) do
+    if length(routes) == 0 do
+      "no routes found"
+    else
+      routes
+      |> Enum.map(fn {path, module, exists?} ->
+        status = if exists?, do: "✅", else: "❌"
+        "#{path}: #{module} #{status}"
+      end)
+      |> Enum.join("\n")
+    end
+  end
+
+  defp encode_dependencies(%{key_deps: deps}) do
+    deps
+    |> Enum.map(fn {dep, info} ->
+      usage_info = if info.usage_count > 0, do: " (#{info.usage_count})", else: ""
+      "#{dep}: #{info.status}#{usage_info}"
+    end)
+    |> Enum.join("\n")
+  end
+
+  defp encode_freshness(%{recent_files: recent, uncommitted_count: uncommitted, commits_ahead: ahead}) do
+    recent_str = if length(recent) > 0 do
+      "recent: #{inspect(Enum.take(recent, 5))}"
+    else
+      "recent: []"
+    end
+    
+    """
+    #{recent_str}
+    uncommitted: #{uncommitted} files
+    commits_ahead: #{ahead}
+    """ |> String.trim()
+  end
+
+  defp encode_test_gaps(%{missing_tests: missing, orphaned_tests: orphaned}) do
+    missing_str = if length(missing) > 0 do
+      missing
+      |> Enum.take(5)
+      |> Enum.map(&"#{&1} ❌")
+      |> Enum.join("\n")
+    else
+      "all implementations have tests ✅"
+    end
+    
+    orphaned_str = if length(orphaned) > 0 do
+      orphaned
+      |> Enum.take(3)
+      |> Enum.map(&"#{&1} ⚠️")
+      |> Enum.join("\n")
+    else
+      ""
+    end
+    
+    result = "missing_tests:\n#{missing_str}"
+    
+    if String.length(orphaned_str) > 0 do
+      result <> "\norphaned_tests:\n#{orphaned_str}"
+    else
+      result
+    end
+  end
 
   # === LEGACY CONCISE ENCODERS ===
   
@@ -630,5 +716,167 @@ defmodule Mix.Tasks.CodeGps do
     |> to_string()
     |> String.replace(~r/[^a-zA-Z0-9]/, "_")
     |> String.downcase()
+  end
+
+  # === NEW v2.0 ANALYSIS FUNCTIONS ===
+
+  defp analyze_routes do
+    router_file = "lib/ashfolio_web/router.ex"
+    
+    if File.exists?(router_file) do
+      content = File.read!(router_file)
+      
+      # Extract live routes
+      live_routes = Regex.scan(~r/live\s+"([^"]+)",\s*(\w+)/, content)
+      |> Enum.map(fn [_, path, module] -> 
+        {path, module, check_live_view_exists(module)}
+      end)
+      
+      %{
+        live_routes: live_routes,
+        total_routes: length(live_routes)
+      }
+    else
+      %{live_routes: [], total_routes: 0}
+    end
+  end
+
+  defp check_live_view_exists(module_name) do
+    # Check if the LiveView file actually exists
+    # Handle different naming patterns:
+    # ExpenseLive.Index -> expense_live/index.ex
+    # DashboardLive -> dashboard_live.ex  
+    # AccountLive.Show -> account_live/show.ex
+    
+    base_name = module_name
+    |> String.replace(~r/Live.*$/, "")  # Remove "Live" suffix and anything after
+    |> Macro.underscore()
+    
+    possible_paths = [
+      # Single file pattern: dashboard_live.ex
+      "lib/ashfolio_web/live/#{base_name}_live.ex",
+      # Directory pattern: expense_live/index.ex
+      "lib/ashfolio_web/live/#{base_name}_live/index.ex",
+      # Directory pattern: account_live/show.ex, form_component.ex
+      "lib/ashfolio_web/live/#{base_name}_live/",
+      # Legacy patterns
+      "lib/ashfolio_web/live/#{String.downcase(module_name)}.ex",
+      "lib/ashfolio_web/live/#{Macro.underscore(module_name)}.ex"
+    ]
+    
+    Enum.any?(possible_paths, fn path ->
+      if String.ends_with?(path, "/") do
+        # Check if directory exists and has files
+        File.exists?(path) and length(Path.wildcard("#{path}*.ex")) > 0
+      else
+        File.exists?(path)
+      end
+    end)
+  end
+
+  defp analyze_dependencies do
+    mix_file = "mix.exs"
+    
+    if File.exists?(mix_file) do
+      content = File.read!(mix_file)
+      
+      # Extract dependencies
+      deps = Regex.scan(~r/\{:([^,]+),/, content)
+      |> Enum.map(&List.last/1)
+      |> Enum.uniq()
+      
+      # Check usage for key dependencies
+      key_deps = ["contex", "wallaby", "mox", "decimal", "ash"]
+      
+      usage_analysis = key_deps
+      |> Enum.map(fn dep ->
+        usage_count = count_dependency_usage(dep)
+        installed = dep in deps
+        
+        status = cond do
+          not installed and usage_count > 0 -> "❌"
+          installed and usage_count == 0 -> "⚠️"
+          installed and usage_count > 0 -> "✅"
+          true -> "➖"
+        end
+        
+        {dep, %{status: status, usage_count: usage_count, installed: installed}}
+      end)
+      |> Map.new()
+      
+      %{
+        total_deps: length(deps),
+        key_deps: usage_analysis
+      }
+    else
+      %{total_deps: 0, key_deps: %{}}
+    end
+  end
+
+  defp count_dependency_usage(dep_name) do
+    Path.wildcard("lib/**/*.ex")
+    |> Enum.map(&File.read!/1)
+    |> Enum.map(&length(Regex.scan(~r/#{dep_name}/i, &1)))
+    |> Enum.sum()
+  end
+
+  defp analyze_git_freshness do
+    # Get recent file changes
+    {recent_output, 0} = System.cmd("git", ["log", "--name-only", "--since=7 days ago", "--pretty=format:"])
+    recent_files = recent_output
+    |> String.split("\n")
+    |> Enum.filter(&(String.contains?(&1, ".ex") and String.length(&1) > 0))
+    |> Enum.uniq()
+    |> Enum.take(10)
+    
+    # Get git status
+    {status_output, _} = System.cmd("git", ["status", "--porcelain"])
+    uncommitted = status_output
+    |> String.split("\n")
+    |> Enum.filter(&String.contains?(&1, ".ex"))
+    |> length()
+    
+    # Get commits ahead of main
+    {ahead_output, _} = System.cmd("git", ["rev-list", "--count", "HEAD", "^main"], stderr_to_stdout: true)
+    commits_ahead = case Integer.parse(String.trim(ahead_output)) do
+      {num, _} -> num
+      _ -> 0
+    end
+    
+    %{
+      recent_files: recent_files,
+      uncommitted_count: uncommitted,
+      commits_ahead: commits_ahead
+    }
+  end
+
+  defp analyze_test_gaps do
+    # Find implementation files without tests
+    impl_files = Path.wildcard("lib/**/*_live*.ex") ++ Path.wildcard("lib/**/components/*.ex")
+    test_files = Path.wildcard("test/**/*_test.exs")
+    
+    missing_tests = impl_files
+    |> Enum.filter(fn impl_file ->
+      test_pattern = impl_file
+      |> String.replace("lib/", "test/")
+      |> String.replace(".ex", "_test.exs")
+      
+      not File.exists?(test_pattern)
+    end)
+    
+    # Find test files without implementations
+    orphaned_tests = test_files
+    |> Enum.filter(fn test_file ->
+      impl_pattern = test_file
+      |> String.replace("test/", "lib/")
+      |> String.replace("_test.exs", ".ex")
+      
+      not File.exists?(impl_pattern)
+    end)
+    
+    %{
+      missing_tests: missing_tests,
+      orphaned_tests: orphaned_tests
+    }
   end
 end

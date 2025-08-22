@@ -1,4 +1,18 @@
-# Code GPS - 95ms | 2 LiveViews | 19 Components
+# Code GPS v2.0 - 257ms | 2 LiveViews | 19 Components
+
+# === ROUTES ===
+/: DashboardLive ✅
+/accounts: AccountLive ✅
+/accounts/new: AccountLive ✅
+/accounts/:id: AccountLive ✅
+/accounts/:id/edit: AccountLive ✅
+/transactions: TransactionLive ✅
+/categories: CategoryLive ✅
+/categories/new: CategoryLive ✅
+/categories/:id/edit: CategoryLive ✅
+/expenses: ExpenseLive ✅
+/expenses/new: ExpenseLive ✅
+/expenses/:id/edit: ExpenseLive ✅
 
 # === LIVE VIEWS ===
 Dashboard:
@@ -24,6 +38,30 @@ button: lib/ashfolio_web/components/core_components.ex:229 (20x) | attrs: ["type
 input: lib/ashfolio_web/components/core_components.ex:294 (30x) | attrs: [errors, checked, prompt...6]
 label: lib/ashfolio_web/components/core_components.ex:397 (3x) | attrs: ["for"]
 error: lib/ashfolio_web/components/core_components.ex:410 (9x)
+
+# === DEPENDENCIES ===
+ash: ✅ (938)
+contex: ✅ (115)
+decimal: ✅ (470)
+mox: ✅ (1)
+wallaby: ❌ (1)
+
+# === FRESHNESS ===
+recent: ["lib/mix/tasks/code_gps.ex", "test/mix/tasks/code_gps_test.exs", "test/integration/claude_agent_workflow_test.exs", "test/integration/claude_code_hooks_test.exs", "test/integration/code_gps_integration_test.exs"]
+uncommitted: 2 files
+commits_ahead: 6
+
+# === TEST GAPS ===
+missing_tests:
+lib/ashfolio_web/live/example_live.ex ❌
+lib/ashfolio_web/components/core_components.ex ❌
+lib/ashfolio_web/components/layouts.ex ❌
+lib/ashfolio_web/components/top_bar.ex ❌
+lib/ashfolio_web/components/transaction_group.ex ❌
+orphaned_tests:
+test/ashfolio/financial_management/category_migration_test.exs ⚠️
+test/ashfolio/financial_management/symbol_search_cache_test.exs ⚠️
+test/ashfolio/financial_management/symbol_search_external_api_test.exs ⚠️
 
 # === PATTERNS ===
 error_handling: "put_flash/3"

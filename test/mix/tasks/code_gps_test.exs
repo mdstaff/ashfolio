@@ -77,5 +77,37 @@ defmodule Mix.Tasks.CodeGpsTest do
       # Clean up
       File.rm(".code-gps.yaml")
     end
+
+    test "route detection finds existing LiveView files correctly" do
+      manifest = Mix.Tasks.CodeGps.run([])
+      
+      # Test that routes find their corresponding LiveView implementations
+      routes = manifest.routes.live_routes
+      
+      # ExpenseLive routes should show as existing (✅) since files exist at:
+      # - lib/ashfolio_web/live/expense_live/index.ex
+      # - lib/ashfolio_web/live/expense_live/form_component.ex
+      expense_routes = Enum.filter(routes, fn {path, _module, _exists} -> 
+        String.contains?(path, "expense") 
+      end)
+      
+      assert length(expense_routes) > 0, "Should find expense routes in router"
+      
+      # At least one expense route should be marked as existing
+      {_, _, expense_exists} = List.first(expense_routes)
+      assert expense_exists == true, "ExpenseLive files exist but route detection shows ❌"
+      
+      # Dashboard route should definitely exist
+      dashboard_route = Enum.find(routes, fn {path, _module, _exists} -> 
+        path == "/" 
+      end)
+      
+      assert dashboard_route != nil, "Should find dashboard route"
+      {_, _, dashboard_exists} = dashboard_route
+      assert dashboard_exists == true, "DashboardLive should be found"
+      
+      # Clean up
+      File.rm(".code-gps.yaml")
+    end
   end
 end
