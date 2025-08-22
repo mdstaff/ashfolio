@@ -885,6 +885,15 @@ defmodule AshfolioWeb.CoreComponents do
             </span>
           </div>
         </div>
+        
+        <!-- Snapshot Button -->
+        <button
+          phx-click="create_snapshot"
+          class="mt-4 w-full btn-secondary text-sm"
+          type="button"
+        >
+          Snapshot Now
+        </button>
       </div>
     </div>
     """
