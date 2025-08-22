@@ -3,6 +3,7 @@ defmodule AshfolioWeb.DashboardLive do
 
   alias Ashfolio.Portfolio.HoldingsCalculator
   alias Ashfolio.MarketData.PriceManager
+  alias Ashfolio.FinancialManagement.Expense
   alias Ashfolio.Context
   alias AshfolioWeb.Live.{ErrorHelpers, FormatHelpers}
   require Logger
@@ -13,6 +14,7 @@ defmodule AshfolioWeb.DashboardLive do
       Ashfolio.PubSub.subscribe("accounts")
       Ashfolio.PubSub.subscribe("transactions")
       Ashfolio.PubSub.subscribe("net_worth")
+      Ashfolio.PubSub.subscribe("expenses")
     end
 
     socket =
@@ -154,7 +156,7 @@ defmodule AshfolioWeb.DashboardLive do
       
     <!-- Portfolio Summary Cards -->
       <div
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6"
         data-testid="portfolio-summary"
       >
         <.stat_card
@@ -184,6 +186,11 @@ defmodule AshfolioWeb.DashboardLive do
           investment_value={@net_worth_investment_value}
           cash_balance={@net_worth_cash_balance}
           data_testid="net-worth-total"
+        />
+        <.expense_widget
+          total_expenses={@total_expenses}
+          expense_count={@expense_count}
+          current_month_expenses={@current_month_expenses}
         />
       </div>
       
@@ -466,6 +473,7 @@ defmodule AshfolioWeb.DashboardLive do
     |> assign(:error, "Unable to load portfolio data")
     |> assign(:recent_transactions, [])
     |> assign_default_net_worth_values()
+    |> assign_default_expense_values()
   end
 
   # This function is now handled in load_holdings_and_net_worth
@@ -514,6 +522,7 @@ defmodule AshfolioWeb.DashboardLive do
     |> assign(:recent_transactions, transactions)
     |> assign(:account_summary, summary)
     |> load_holdings_and_net_worth()
+    |> load_expense_data()
   end
 
   defp load_holdings_and_net_worth(socket) do
@@ -661,4 +670,55 @@ defmodule AshfolioWeb.DashboardLive do
   defp get_transaction_price(%{price: price}) when not is_nil(price), do: price
   defp get_transaction_price(%{symbol: %{current_price: price}}) when not is_nil(price), do: price
   defp get_transaction_price(_), do: Decimal.new("0.00")
+
+  # Expense functions
+  
+  defp assign_default_expense_values(socket) do
+    socket
+    |> assign(:total_expenses, FormatHelpers.format_currency(Decimal.new("0.00")))
+    |> assign(:expense_count, 0)
+    |> assign(:current_month_expenses, FormatHelpers.format_currency(Decimal.new("0.00")))
+  end
+
+  defp load_expense_data(socket) do
+    try do
+      # Load all expenses
+      expenses = 
+        Expense
+        |> Ash.Query.for_read(:read)
+        |> Ash.read!()
+
+      # Calculate totals
+      total_expenses = calculate_total_expenses(expenses)
+      expense_count = length(expenses)
+      current_month_total = calculate_current_month_expenses(expenses)
+
+      socket
+      |> assign(:total_expenses, FormatHelpers.format_currency(total_expenses))
+      |> assign(:expense_count, expense_count)
+      |> assign(:current_month_expenses, FormatHelpers.format_currency(current_month_total))
+    rescue
+      _error ->
+        assign_default_expense_values(socket)
+    end
+  end
+
+  defp calculate_total_expenses(expenses) do
+    expenses
+    |> Enum.reduce(Decimal.new(0), fn expense, acc ->
+      Decimal.add(acc, expense.amount)
+    end)
+  end
+
+  defp calculate_current_month_expenses(expenses) do
+    current_month = Date.beginning_of_month(Date.utc_today())
+
+    expenses
+    |> Enum.filter(fn expense ->
+      Date.compare(expense.date, current_month) != :lt
+    end)
+    |> Enum.reduce(Decimal.new(0), fn expense, acc ->
+      Decimal.add(acc, expense.amount)
+    end)
+  end
 end
