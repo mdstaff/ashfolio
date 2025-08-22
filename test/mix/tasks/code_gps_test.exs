@@ -1,6 +1,5 @@
 defmodule Mix.Tasks.CodeGpsTest do
   use ExUnit.Case
-  import Mix.Tasks.CodeGps
   
   @moduledoc """
   Tests for the Code GPS MVP - AI-optimized codebase manifest generator.
@@ -19,11 +18,11 @@ defmodule Mix.Tasks.CodeGpsTest do
       
       # Verify it's valid YAML-like content
       content = File.read!(".code-gps.yaml")
-      assert content =~ "# Code GPS Manifest"
-      assert content =~ "metadata:"
-      assert content =~ "live_views:"
-      assert content =~ "components:"
-      assert content =~ "suggestions:"
+      assert content =~ "# Code GPS"
+      assert content =~ "LIVE VIEWS"
+      assert content =~ "KEY COMPONENTS"
+      assert content =~ "PATTERNS"
+      assert content =~ "INTEGRATION OPPORTUNITIES"
       
       # Clean up
       File.rm(".code-gps.yaml")
@@ -40,7 +39,8 @@ defmodule Mix.Tasks.CodeGpsTest do
       assert dashboard_lv.mount_line != nil
       assert dashboard_lv.render_line != nil
       assert "accounts" in dashboard_lv.subscriptions
-      assert "expenses" in dashboard_lv.missing_subscriptions
+      # Dashboard now has expenses subscription added in v0.3.1
+      assert "expenses" in dashboard_lv.subscriptions
       
       # Clean up
       File.rm(".code-gps.yaml")
@@ -51,12 +51,13 @@ defmodule Mix.Tasks.CodeGpsTest do
       
       assert length(manifest.suggestions) > 0
       
-      expense_suggestion = 
-        Enum.find(manifest.suggestions, fn s -> s.name == "add_expense_to_dashboard" end)
+      # Now that dashboard has expenses, it suggests net worth snapshot instead
+      snapshot_suggestion = 
+        Enum.find(manifest.suggestions, fn s -> s.name == "add_manual_snapshot" end)
       
-      assert expense_suggestion != nil
-      assert expense_suggestion.description =~ "expense"
-      assert length(expense_suggestion.steps) > 0
+      assert snapshot_suggestion != nil
+      assert snapshot_suggestion.description =~ "snapshot"
+      assert length(snapshot_suggestion.steps) > 0
       
       # Clean up
       File.rm(".code-gps.yaml")

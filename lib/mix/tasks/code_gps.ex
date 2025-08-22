@@ -473,19 +473,25 @@ defmodule Mix.Tasks.CodeGps do
       
       steps_summary = []
       
-      if length(subscribe_steps) > 0 do
+      steps_summary = if length(subscribe_steps) > 0 do
         step = List.first(subscribe_steps)
-        steps_summary = steps_summary ++ ["  subscribe: #{step.file}:#{step[:line] || "mount+2"}"]
+        steps_summary ++ ["  subscribe: #{step.file}:#{step[:line] || "mount+2"}"]
+      else
+        steps_summary
       end
       
-      if length(load_steps) > 0 do
+      steps_summary = if length(load_steps) > 0 do
         step = List.first(load_steps)
-        steps_summary = steps_summary ++ ["  load_data: #{step.file}:#{step[:after_function] || "?"}"]
+        steps_summary ++ ["  load_data: #{step.file}:#{step[:after_function] || "?"}"]
+      else
+        steps_summary
       end
       
-      if length(render_steps) > 0 do
+      steps_summary = if length(render_steps) > 0 do
         step = List.first(render_steps)
-        steps_summary = steps_summary ++ ["  render: #{step.file}:#{step[:after_line] || "?"}"]
+        steps_summary ++ ["  render: #{step.file}:#{step[:after_line] || "?"}"]
+      else
+        steps_summary
       end
       
       """
@@ -504,7 +510,7 @@ defmodule Mix.Tasks.CodeGps do
 
   # === LEGACY CONCISE ENCODERS ===
   
-  defp encode_live_views_concise(live_views) do
+  defp _encode_live_views_concise(live_views) do
     live_views
     |> Enum.map(fn lv ->
       name = lv.name |> String.replace("AshfolioWeb.", "") |> String.replace("Live", "")
@@ -516,7 +522,7 @@ defmodule Mix.Tasks.CodeGps do
     |> Enum.join("\n")
   end
   
-  defp encode_key_components(components) do
+  defp _encode_key_components(components) do
     # Only show components with high usage or important names
     components
     |> Enum.filter(fn comp -> 
@@ -531,7 +537,7 @@ defmodule Mix.Tasks.CodeGps do
     |> Enum.join("\n")
   end
   
-  defp encode_suggestions_concise(suggestions) do
+  defp _encode_suggestions_concise(suggestions) do
     suggestions
     |> Enum.map(fn sugg ->
       steps_summary = sugg.steps
@@ -543,7 +549,7 @@ defmodule Mix.Tasks.CodeGps do
     |> Enum.join("\n\n")
   end
 
-  defp encode_live_views(live_views) do
+  defp _encode_live_views(live_views) do
     live_views
     |> Enum.map(fn lv ->
       """
@@ -561,7 +567,7 @@ defmodule Mix.Tasks.CodeGps do
     |> Enum.join("\n")
   end
   
-  defp encode_components(components) do
+  defp _encode_components(components) do
     components
     |> Enum.map(fn comp ->
       """
@@ -575,7 +581,7 @@ defmodule Mix.Tasks.CodeGps do
     |> Enum.join("\n")
   end
   
-  defp encode_tests(tests) do
+  defp _encode_tests(tests) do
     tests
     |> Enum.map(fn test ->
       """
@@ -590,7 +596,7 @@ defmodule Mix.Tasks.CodeGps do
     |> Enum.join("\n")
   end
   
-  defp encode_suggestions(suggestions) when is_list(suggestions) do
+  defp _encode_suggestions(suggestions) when is_list(suggestions) do
     if length(suggestions) == 0 do
       "    # No suggestions generated"
     else
