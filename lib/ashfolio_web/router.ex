@@ -29,6 +29,7 @@ defmodule AshfolioWeb.Router do
     live "/expenses", ExpenseLive.Index, :index
     live "/expenses/new", ExpenseLive.Index, :new
     live "/expenses/:id/edit", ExpenseLive.Index, :edit
+    live "/expenses/import", ExpenseLive.Import, :index
     live "/expenses/analytics", ExpenseLive.Analytics, :index
     live "/net_worth", NetWorthLive.Index, :index
   end

@@ -1,4 +1,4 @@
-# Code GPS v2.0 - 263ms | 2 LiveViews | 19 Components
+# Code GPS v2.0 - 260ms | 2 LiveViews | 19 Components
 
 # === ROUTES ===
 /: DashboardLive ✅
@@ -49,9 +49,9 @@ mox: ✅ (1)
 wallaby: ❌ (1)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio_web/components/core_components.ex", "lib/ashfolio_web/live/dashboard_live.ex", "test/ashfolio_web/live/dashboard_live/net_worth_widget_test.exs", "lib/ashfolio_web/live/net_worth_live/index.ex", "test/ashfolio_web/live/dashboard_live/expense_widget_test.exs"]
-uncommitted: 12 files
-commits_ahead: 11
+recent: ["lib/ashfolio/financial_management/net_worth_calculator_optimized.ex", "lib/ashfolio_web/components/core_components.ex", "lib/ashfolio_web/components/top_bar.ex", "lib/ashfolio_web/live/dashboard_live.ex", "lib/ashfolio_web/live/expense_live/analytics.ex"]
+uncommitted: 0 files
+commits_ahead: 0
 
 # === TEST GAPS ===
 missing_tests:

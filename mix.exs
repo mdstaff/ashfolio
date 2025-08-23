@@ -77,6 +77,9 @@ defmodule Ashfolio.MixProject do
       {:oban, "~> 2.17"},
       {:contex, "~> 0.5.0"},
 
+      # v0.3.2 Data Import/Export dependencies
+      {:csv, "~> 3.2"},
+
       # Test dependencies
       {:meck, "~> 0.9", only: :test},
       {:mox, "~> 1.0", only: :test},
