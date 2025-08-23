@@ -1,4 +1,4 @@
-# Code GPS v2.0 - 260ms | 2 LiveViews | 19 Components
+# Code GPS v2.0 - 236ms | 2 LiveViews | 19 Components
 
 # === ROUTES ===
 /: DashboardLive ✅
@@ -13,6 +13,7 @@
 /expenses: ExpenseLive ✅
 /expenses/new: ExpenseLive ✅
 /expenses/:id/edit: ExpenseLive ✅
+/expenses/import: ExpenseLive ✅
 /expenses/analytics: ExpenseLive ✅
 /net_worth: NetWorthLive ✅
 
@@ -42,16 +43,16 @@ label: lib/ashfolio_web/components/core_components.ex:397 (3x) | attrs: ["for"]
 error: lib/ashfolio_web/components/core_components.ex:410 (9x)
 
 # === DEPENDENCIES ===
-ash: ✅ (985)
+ash: ✅ (987)
 contex: ✅ (123)
 decimal: ✅ (506)
 mox: ✅ (1)
 wallaby: ❌ (1)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio/financial_management/net_worth_calculator_optimized.ex", "lib/ashfolio_web/components/core_components.ex", "lib/ashfolio_web/components/top_bar.ex", "lib/ashfolio_web/live/dashboard_live.ex", "lib/ashfolio_web/live/expense_live/analytics.ex"]
+recent: ["lib/ashfolio_web/live/expense_live/import.ex", "lib/ashfolio_web/router.ex", "mix.exs", "test/ashfolio_web/live/expense_live/import_test.exs", "lib/ashfolio/financial_management/net_worth_calculator_optimized.ex"]
 uncommitted: 0 files
-commits_ahead: 0
+commits_ahead: 1
 
 # === TEST GAPS ===
 missing_tests:

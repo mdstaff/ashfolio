@@ -76,10 +76,15 @@ defmodule AshfolioWeb.ExpenseLive.ImportTest do
       ])
       |> render_upload("expenses.csv")
 
+      # Submit the form to trigger the upload event
+      view
+      |> form("#upload-form")
+      |> render_submit()
+
       html = render(view)
 
       # Should show preview section
-      assert html =~ "Preview & Map Columns"
+      assert html =~ "Preview &amp; Map Columns"
       assert html =~ "3 expenses found"
 
       # Should show data preview
@@ -107,6 +112,11 @@ defmodule AshfolioWeb.ExpenseLive.ImportTest do
         %{name: "expenses.csv", content: csv_content, type: "text/csv"}
       ])
       |> render_upload("expenses.csv")
+
+      # Submit the form to trigger the upload event
+      view
+      |> form("#upload-form")
+      |> render_submit()
 
       html = render(view)
 
@@ -136,6 +146,11 @@ defmodule AshfolioWeb.ExpenseLive.ImportTest do
         %{name: "expenses.csv", content: csv_content, type: "text/csv"}
       ])
       |> render_upload("expenses.csv")
+
+      # Submit the form to trigger the upload event
+      view
+      |> form("#upload-form")
+      |> render_submit()
 
       # Map categories and set account
       view
@@ -184,6 +199,11 @@ defmodule AshfolioWeb.ExpenseLive.ImportTest do
       ])
       |> render_upload("expenses.csv")
 
+      # Submit the form to trigger the upload event
+      view
+      |> form("#upload-form")
+      |> render_submit()
+
       html = render(view)
 
       # Should show validation errors
@@ -222,6 +242,11 @@ defmodule AshfolioWeb.ExpenseLive.ImportTest do
         %{name: "expenses.csv", content: csv_content, type: "text/csv"}
       ])
       |> render_upload("expenses.csv")
+
+      # Submit the form to trigger the upload event
+      view
+      |> form("#upload-form")
+      |> render_submit()
 
       html = render(view)
 
