@@ -4,7 +4,7 @@ defmodule Ashfolio.MixProject do
   def project do
     [
       app: :ashfolio,
-      version: "0.2.2",
+      version: "0.3.4",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -76,6 +76,9 @@ defmodule Ashfolio.MixProject do
       # v0.3.0 Financial Analytics dependencies
       {:oban, "~> 2.17"},
       {:contex, "~> 0.5.0"},
+
+      # v0.3.2 Data Import/Export dependencies
+      {:csv, "~> 3.2"},
 
       # Test dependencies
       {:meck, "~> 0.9", only: :test},

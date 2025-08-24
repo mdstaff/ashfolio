@@ -4,7 +4,7 @@ defmodule AshfolioWeb.ExpenseLive.FormComponentTest do
 
   describe "expense form component" do
     setup do
-      # Reset account balances for clean test state  
+      # Reset account balances for clean test state
       require Ash.Query
 
       Ashfolio.Portfolio.Account
@@ -50,7 +50,7 @@ defmodule AshfolioWeb.ExpenseLive.FormComponentTest do
     end
 
     test "form validates required fields", %{conn: conn} do
-      {:ok, view, html} = live(conn, ~p"/expenses/new")
+      {:ok, view, _html} = live(conn, ~p"/expenses/new")
 
       # Submit form without required fields
       view
@@ -66,7 +66,7 @@ defmodule AshfolioWeb.ExpenseLive.FormComponentTest do
     end
 
     test "form validates amount is positive", %{conn: conn, checking_account: account} do
-      {:ok, view, html} = live(conn, ~p"/expenses/new")
+      {:ok, view, _html} = live(conn, ~p"/expenses/new")
 
       view
       |> form("#expense-form", %{
@@ -86,7 +86,7 @@ defmodule AshfolioWeb.ExpenseLive.FormComponentTest do
       checking_account: account,
       category: category
     } do
-      {:ok, view, html} = live(conn, ~p"/expenses/new")
+      {:ok, view, _html} = live(conn, ~p"/expenses/new")
 
       view
       |> form("#expense-form", %{
@@ -114,21 +114,21 @@ defmodule AshfolioWeb.ExpenseLive.FormComponentTest do
     end
 
     test "category dropdown shows available categories", %{conn: conn, category: category} do
-      {:ok, view, html} = live(conn, ~p"/expenses/new")
+      {:ok, _view, html} = live(conn, ~p"/expenses/new")
 
       # Should show category in dropdown
       assert html =~ ~r/<option[^>]*value="#{category.id}"[^>]*>Groceries<\/option>/
     end
 
     test "account dropdown shows available accounts", %{conn: conn, checking_account: account} do
-      {:ok, view, html} = live(conn, ~p"/expenses/new")
+      {:ok, _view, html} = live(conn, ~p"/expenses/new")
 
-      # Should show account in dropdown  
+      # Should show account in dropdown
       assert html =~ ~r/<option[^>]*value="#{account.id}"[^>]*>Test Checking<\/option>/
     end
 
     test "date field defaults to today", %{conn: conn} do
-      {:ok, view, html} = live(conn, ~p"/expenses/new")
+      {:ok, _view, html} = live(conn, ~p"/expenses/new")
 
       today = Date.utc_today() |> Date.to_iso8601()
       assert html =~ ~r/<input[^>]*name="date"[^>]*value="#{today}"[^>]*>/
@@ -174,7 +174,7 @@ defmodule AshfolioWeb.ExpenseLive.FormComponentTest do
     end
 
     test "edit form pre-populates with expense data", %{conn: conn, expense: expense} do
-      {:ok, view, html} = live(conn, ~p"/expenses/#{expense.id}/edit")
+      {:ok, _view, html} = live(conn, ~p"/expenses/#{expense.id}/edit")
 
       # Should show edit form title
       assert html =~ "Edit Expense"
@@ -192,7 +192,7 @@ defmodule AshfolioWeb.ExpenseLive.FormComponentTest do
       category: category,
       checking_account: account
     } do
-      {:ok, view, html} = live(conn, ~p"/expenses/#{expense.id}/edit")
+      {:ok, view, _html} = live(conn, ~p"/expenses/#{expense.id}/edit")
 
       view
       |> form("#expense-form", %{

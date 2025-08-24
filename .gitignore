@@ -35,9 +35,10 @@ ashfolio-*.tar
 npm-debug.log
 /assets/node_modules/
 
-# SQLite database files
+# database files
 /data/*.db
 /data/*.db-*
+*.csv
 
 # Logs directory and log files
 /logs/

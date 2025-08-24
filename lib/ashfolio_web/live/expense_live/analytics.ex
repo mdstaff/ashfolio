@@ -13,12 +13,14 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
       |> assign(:page_title, "Expense Analytics")
       |> assign(:page_subtitle, "Visualize your spending patterns")
       |> assign(:expenses, [])
+      |> assign(:all_expenses, [])
       |> assign(:category_data, [])
       |> assign(:total_expenses, Decimal.new(0))
       |> assign(:expense_count, 0)
       |> assign(:loading, true)
       |> assign(:date_range, "current_month")
       |> assign(:chart_svg, nil)
+      |> assign(:year_over_year, nil)
 
     socket = load_analytics_data(socket)
 
@@ -31,6 +33,83 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
      socket
      |> assign(:date_range, range)
      |> load_analytics_data()}
+  end
+
+  @impl true
+  def handle_event("update_year_comparison", params, socket) do
+    base_year = String.to_integer(params["base_year"] || "2024")
+    compare_year = String.to_integer(params["compare_year"] || "2023")
+
+    # Recalculate year-over-year with selected years
+    year_over_year =
+      calculate_custom_year_comparison(socket.assigns.all_expenses, base_year, compare_year)
+
+    {:noreply, assign(socket, :year_over_year, year_over_year)}
+  end
+
+  @impl true
+  def handle_event("apply_advanced_filters", params, socket) do
+    # Extract filter parameters
+    category_filter = params["category_filter"]
+    amount_range = params["amount_range"]
+    merchant_filter = params["merchant_filter"]
+
+    # Apply filters to all expenses
+    filtered_expenses =
+      apply_filters(socket.assigns.all_expenses, category_filter, amount_range, merchant_filter)
+
+    # Recalculate analytics data with filtered expenses
+    category_data = calculate_category_data(filtered_expenses)
+    total_expenses = Enum.reduce(filtered_expenses, Decimal.new(0), &Decimal.add(&2, &1.amount))
+    expense_count = length(filtered_expenses)
+
+    socket =
+      assign(socket,
+        expenses: filtered_expenses,
+        category_data: category_data,
+        total_expenses: total_expenses,
+        expense_count: expense_count
+      )
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("apply_date_range", params, socket) do
+    # Extract date parameters
+    start_date_string = params["start_date"]
+    end_date_string = params["end_date"]
+
+    # Parse dates (skip if empty or invalid)
+    with {:ok, start_date} <- Date.from_iso8601(start_date_string),
+         {:ok, end_date} <- Date.from_iso8601(end_date_string) do
+      # Filter expenses by custom date range
+      filtered_expenses =
+        socket.assigns.all_expenses
+        |> Enum.filter(fn expense ->
+          Date.compare(expense.date, start_date) != :lt and
+            Date.compare(expense.date, end_date) != :gt
+        end)
+
+      # Recalculate analytics data with filtered expenses
+      category_data = calculate_category_data(filtered_expenses)
+      total_expenses = Enum.reduce(filtered_expenses, Decimal.new(0), &Decimal.add(&2, &1.amount))
+      expense_count = length(filtered_expenses)
+
+      socket =
+        assign(socket,
+          expenses: filtered_expenses,
+          category_data: category_data,
+          total_expenses: total_expenses,
+          expense_count: expense_count
+        )
+
+      {:noreply, socket}
+    else
+      _ ->
+        # Invalid date format, don't filter
+        {:noreply, socket}
+    end
   end
 
   @impl true
@@ -244,6 +323,200 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
           </div>
         <% end %>
       <% end %>
+      
+    <!-- Year-over-Year Analysis -->
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Year-over-Year Analysis</h3>
+          
+    <!-- Year Selection Controls -->
+          <.form for={%{}} phx-change="update_year_comparison" id="year-comparison-form" class="mb-4">
+            <div class="flex gap-3">
+              <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-gray-700">Compare:</label>
+                <select name="base_year" class="text-sm border-gray-300 rounded-md">
+                  <%= for year <- get_available_years(@all_expenses) do %>
+                    <option
+                      value={year}
+                      selected={year == (@year_over_year[:current_year] || Date.utc_today().year)}
+                    >
+                      {year}
+                    </option>
+                  <% end %>
+                </select>
+              </div>
+              <div class="flex items-center gap-2">
+                <label class="text-sm text-gray-500">vs</label>
+                <select name="compare_year" class="text-sm border-gray-300 rounded-md">
+                  <%= for year <- get_available_years(@all_expenses) do %>
+                    <option
+                      value={year}
+                      selected={
+                        year == (@year_over_year[:previous_year] || Date.utc_today().year - 1)
+                      }
+                    >
+                      {year}
+                    </option>
+                  <% end %>
+                </select>
+              </div>
+            </div>
+          </.form>
+
+          <%= if @year_over_year do %>
+            <p class="text-sm text-gray-600">
+              {@year_over_year.current_year} vs {@year_over_year.previous_year}
+            </p>
+            <%= if @year_over_year.percentage_change do %>
+              <div class="mt-3">
+                <div class="flex items-center space-x-2">
+                  <span class={[
+                    "text-lg font-semibold",
+                    if(@year_over_year.trend == :increase, do: "text-green-600", else: "text-red-600")
+                  ]}>
+                    {if @year_over_year.trend == :increase, do: "+", else: ""}{@year_over_year.percentage_change}%
+                  </span>
+                  <span class="text-sm text-gray-500">
+                    {if @year_over_year.trend == :increase,
+                      do: "increase from last year",
+                      else: "decrease from last year"}
+                  </span>
+                </div>
+                
+    <!-- Year Comparison Chart -->
+                <div class="mt-4 chart-container responsive">
+                  {generate_year_comparison_chart(@year_over_year)}
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <p class="text-sm text-gray-600">2024 vs 2023</p>
+          <% end %>
+        </div>
+      </div>
+      
+    <!-- Spending Trends Analysis -->
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Spending Trends</h3>
+          <p class="text-sm text-gray-600 mb-4">Monthly Trend Analysis</p>
+          
+    <!-- Trend Indicators -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="text-center p-4 border rounded-lg">
+              <div class="trend-indicator">
+                <span class="text-sm text-gray-500">Last 3 Months</span>
+                <div class="text-lg font-semibold text-gray-600 mt-1">
+                  Calculating...
+                </div>
+              </div>
+            </div>
+            <div class="text-center p-4 border rounded-lg">
+              <div class="trend-indicator">
+                <span class="text-sm text-gray-500">Last 6 Months</span>
+                <div class="text-lg font-semibold text-gray-600 mt-1">
+                  Calculating...
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    <!-- Advanced Filters -->
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Advanced Filters</h3>
+
+          <.form for={%{}} phx-change="apply_advanced_filters" id="advanced-filters" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <!-- Category Filter -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                <select name="category_filter" class="w-full border-gray-300 rounded-md text-sm">
+                  <option value="">All Categories</option>
+                  <%= for category <- get_available_categories(@all_expenses) do %>
+                    <option value={String.downcase(category)}>{category}</option>
+                  <% end %>
+                </select>
+              </div>
+              
+    <!-- Amount Range Filter -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Amount Range</label>
+                <select name="amount_range" class="w-full border-gray-300 rounded-md text-sm">
+                  <option value="">All Amounts</option>
+                  <option value="0-50">$0 - $50</option>
+                  <option value="50-100">$50 - $100</option>
+                  <option value="100-500">$100 - $500</option>
+                  <option value="500+">$500+</option>
+                </select>
+              </div>
+              
+    <!-- Merchant Filter -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Merchant/Description
+                </label>
+                <input
+                  type="text"
+                  name="merchant_filter"
+                  placeholder="Search merchant..."
+                  class="w-full border-gray-300 rounded-md text-sm"
+                />
+              </div>
+            </div>
+          </.form>
+        </div>
+      </div>
+      
+    <!-- Custom Date Range -->
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Custom Date Range</h3>
+
+          <.form for={%{}} phx-change="apply_date_range" id="date-range-form" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                <input
+                  type="date"
+                  name="start_date"
+                  class="w-full border-gray-300 rounded-md text-sm"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                <input
+                  type="date"
+                  name="end_date"
+                  class="w-full border-gray-300 rounded-md text-sm"
+                />
+              </div>
+            </div>
+          </.form>
+          
+    <!-- Show filtered expenses summary -->
+          <%= if @expenses != [] do %>
+            <div class="mt-4 pt-4 border-t">
+              <p class="text-sm text-gray-600 mb-2">
+                Filtered Results ({length(@expenses)} expenses)
+              </p>
+              <div class="space-y-1">
+                <%= for expense <- Enum.take(@expenses, 3) do %>
+                  <div class="text-sm">
+                    <span class="text-gray-900">{expense.description}</span>
+                    <span class="text-gray-500 ml-2">${expense.amount}</span>
+                  </div>
+                <% end %>
+                <%= if length(@expenses) > 3 do %>
+                  <p class="text-xs text-gray-500">...and {length(@expenses) - 3} more</p>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
     </div>
     """
   end
@@ -274,12 +547,17 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
       total_expenses = calculate_total_expenses(filtered_expenses)
       expense_count = length(filtered_expenses)
 
+      # Calculate year-over-year comparison
+      year_over_year = calculate_year_over_year(all_expenses)
+
       socket
       |> assign(:expenses, filtered_expenses)
+      |> assign(:all_expenses, all_expenses)
       |> assign(:category_data, category_data)
       |> assign(:total_expenses, total_expenses)
       |> assign(:expense_count, expense_count)
       |> assign(:chart_svg, chart_svg)
+      |> assign(:year_over_year, year_over_year)
       |> assign(:loading, false)
     rescue
       error ->
@@ -441,4 +719,241 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
   defp format_date_range("last_6_months"), do: "Last 6 Months"
   defp format_date_range("all_time"), do: "All Time"
   defp format_date_range(_), do: "This Month"
+
+  defp get_available_years(expenses) do
+    expenses
+    |> Enum.map(fn expense -> expense.date.year end)
+    |> Enum.uniq()
+    |> Enum.sort(:desc)
+  end
+
+  defp get_available_categories(expenses) do
+    expenses
+    |> Enum.map(fn expense ->
+      if expense.category, do: expense.category.name, else: "Uncategorized"
+    end)
+    |> Enum.uniq()
+    |> Enum.sort()
+  end
+
+  defp calculate_custom_year_comparison(all_expenses, current_year, previous_year) do
+    current_year_expenses =
+      all_expenses
+      |> Enum.filter(fn expense -> expense.date.year == current_year end)
+      |> calculate_total_expenses()
+
+    previous_year_expenses =
+      all_expenses
+      |> Enum.filter(fn expense -> expense.date.year == previous_year end)
+      |> calculate_total_expenses()
+
+    case Decimal.compare(previous_year_expenses, Decimal.new(0)) do
+      :eq ->
+        %{
+          current_year: current_year,
+          previous_year: previous_year,
+          current_total: current_year_expenses,
+          previous_total: previous_year_expenses,
+          percentage_change: nil,
+          trend: :no_data
+        }
+
+      _ ->
+        # Calculate percentage change: ((current - previous) / previous) * 100
+        difference = Decimal.sub(current_year_expenses, previous_year_expenses)
+
+        percentage_change =
+          difference
+          |> Decimal.div(previous_year_expenses)
+          |> Decimal.mult(Decimal.new(100))
+          |> Decimal.round(1)
+
+        trend =
+          if Decimal.compare(percentage_change, Decimal.new(0)) == :gt,
+            do: :increase,
+            else: :decrease
+
+        %{
+          current_year: current_year,
+          previous_year: previous_year,
+          current_total: current_year_expenses,
+          previous_total: previous_year_expenses,
+          percentage_change: percentage_change,
+          trend: trend
+        }
+    end
+  end
+
+  defp calculate_year_over_year(all_expenses) do
+    # Get all years that have expenses, sorted in descending order
+    years_with_data =
+      all_expenses
+      |> Enum.map(fn expense -> expense.date.year end)
+      |> Enum.uniq()
+      |> Enum.sort(:desc)
+
+    case years_with_data do
+      [current_year, previous_year | _] ->
+        current_year_expenses =
+          all_expenses
+          |> Enum.filter(fn expense -> expense.date.year == current_year end)
+          |> calculate_total_expenses()
+
+        previous_year_expenses =
+          all_expenses
+          |> Enum.filter(fn expense -> expense.date.year == previous_year end)
+          |> calculate_total_expenses()
+
+        case Decimal.compare(previous_year_expenses, Decimal.new(0)) do
+          :eq ->
+            %{
+              current_year: current_year,
+              previous_year: previous_year,
+              current_total: current_year_expenses,
+              previous_total: previous_year_expenses,
+              percentage_change: nil,
+              trend: :no_data
+            }
+
+          _ ->
+            # Calculate percentage change: ((current - previous) / previous) * 100
+            difference = Decimal.sub(current_year_expenses, previous_year_expenses)
+
+            percentage_change =
+              difference
+              |> Decimal.div(previous_year_expenses)
+              |> Decimal.mult(Decimal.new(100))
+              |> Decimal.round(1)
+
+            trend =
+              if Decimal.compare(percentage_change, Decimal.new(0)) == :gt,
+                do: :increase,
+                else: :decrease
+
+            %{
+              current_year: current_year,
+              previous_year: previous_year,
+              current_total: current_year_expenses,
+              previous_total: previous_year_expenses,
+              percentage_change: percentage_change,
+              trend: trend
+            }
+        end
+
+      _ ->
+        # Not enough data for comparison
+        %{
+          current_year: nil,
+          previous_year: nil,
+          current_total: Decimal.new(0),
+          previous_total: Decimal.new(0),
+          percentage_change: nil,
+          trend: :no_data
+        }
+    end
+  end
+
+  defp generate_year_comparison_chart(year_over_year) do
+    case year_over_year do
+      %{
+        current_year: current_year,
+        previous_year: previous_year,
+        current_total: current_total,
+        previous_total: previous_total
+      }
+      when not is_nil(current_year) and not is_nil(previous_year) ->
+        # Convert Decimal to float for Contex
+        current_amount = Decimal.to_float(current_total)
+        previous_amount = Decimal.to_float(previous_total)
+
+        # Generate simple SVG bar chart (chart_data available for future Contex integration)
+
+        # Generate simple SVG bar chart
+        """
+        <svg class="year-comparison-chart" width="300" height="150" viewBox="0 0 300 150">
+          <!-- Previous Year Bar -->
+          <rect x="50" y="#{120 - previous_amount / 200}" width="60" height="#{previous_amount / 200}" fill="#94a3b8" />
+          <text x="80" y="140" text-anchor="middle" class="text-xs">#{previous_year}</text>
+          
+          <!-- Current Year Bar -->
+          <rect x="150" y="#{120 - current_amount / 200}" width="60" height="#{current_amount / 200}" fill="#3b82f6" />
+          <text x="180" y="140" text-anchor="middle" class="text-xs">#{current_year}</text>
+          
+          <!-- Labels -->
+          <text x="80" y="#{110 - previous_amount / 200}" text-anchor="middle" class="text-xs">$#{:erlang.float_to_binary(previous_amount, decimals: 0)}</text>
+          <text x="180" y="#{110 - current_amount / 200}" text-anchor="middle" class="text-xs">$#{:erlang.float_to_binary(current_amount, decimals: 0)}</text>
+        </svg>
+        """
+        |> Phoenix.HTML.raw()
+
+      _ ->
+        Phoenix.HTML.raw("""
+        <div class="text-sm text-gray-500">
+          Insufficient data for year comparison chart
+        </div>
+        """)
+    end
+  end
+
+  defp apply_filters(expenses, category_filter, amount_range, merchant_filter) do
+    expenses
+    |> filter_by_category(category_filter)
+    |> filter_by_amount_range(amount_range)
+    |> filter_by_merchant(merchant_filter)
+  end
+
+  defp filter_by_category(expenses, nil), do: expenses
+  defp filter_by_category(expenses, ""), do: expenses
+
+  defp filter_by_category(expenses, category_filter) do
+    Enum.filter(expenses, fn expense ->
+      expense.category &&
+        String.downcase(expense.category.name) == String.downcase(category_filter)
+    end)
+  end
+
+  defp filter_by_amount_range(expenses, nil), do: expenses
+  defp filter_by_amount_range(expenses, ""), do: expenses
+
+  defp filter_by_amount_range(expenses, amount_range) do
+    case amount_range do
+      "0-50" ->
+        Enum.filter(expenses, fn exp -> Decimal.compare(exp.amount, Decimal.new("50")) != :gt end)
+
+      "50-100" ->
+        Enum.filter(expenses, fn exp ->
+          Decimal.compare(exp.amount, Decimal.new("50")) == :gt and
+            Decimal.compare(exp.amount, Decimal.new("100")) != :gt
+        end)
+
+      "100-500" ->
+        Enum.filter(expenses, fn exp ->
+          Decimal.compare(exp.amount, Decimal.new("100")) == :gt and
+            Decimal.compare(exp.amount, Decimal.new("500")) != :gt
+        end)
+
+      "500+" ->
+        Enum.filter(expenses, fn exp -> Decimal.compare(exp.amount, Decimal.new("500")) == :gt end)
+
+      _ ->
+        expenses
+    end
+  end
+
+  defp filter_by_merchant(expenses, nil), do: expenses
+  defp filter_by_merchant(expenses, ""), do: expenses
+
+  defp filter_by_merchant(expenses, merchant_filter) do
+    search_term = String.downcase(merchant_filter)
+
+    Enum.filter(expenses, fn expense ->
+      description_match =
+        expense.description && String.contains?(String.downcase(expense.description), search_term)
+
+      merchant_match =
+        expense.merchant && String.contains?(String.downcase(expense.merchant), search_term)
+
+      description_match || merchant_match
+    end)
+  end
 end

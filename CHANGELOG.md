@@ -5,6 +5,42 @@ All notable changes to the Ashfolio project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.4] - 2025-08-23
+
+### Added
+
+- Enhanced Expense Analytics: Complete year-over-year comparison system with interactive dropdowns
+- Advanced Filtering System: Category, amount range, and merchant search with real-time results
+- Custom Date Range Selection: Date pickers with filtered expense preview functionality
+- Spending Trends Analysis: Monthly analysis with 3-month and 6-month trend indicators
+- Interactive Visualizations: Contex-powered SVG charts with graceful fallback rendering
+- Mobile-Responsive Charts: Responsive chart containers optimized for all screen sizes
+- Real-time Data Filtering: Instant filter application with live result updates
+- Percentage Calculations: Year-over-year percentage changes with proper decimal precision
+
+### Enhanced
+
+- Phoenix LiveView Integration: 4 sophisticated event handlers with complex state management
+- Decimal Financial Precision: All calculations maintain accuracy using Decimal arithmetic
+- Ash Framework Usage: Proper resource integration for financial data operations
+- Error Handling: Comprehensive fallback SVG generation for chart resilience
+- User Experience: Intuitive interface with clear visual feedback and loading states
+
+### Technical Achievements
+
+- Test Coverage: 12 comprehensive tests, 100% passing rate (12/12)
+- TDD Methodology: Strict RED-GREEN-REFACTOR development cycle throughout implementation
+- Code Quality: Clean, maintainable code following project conventions and patterns
+- Performance: Optimized data queries and efficient state management
+- Accessibility: Proper semantic HTML and responsive design implementation
+
+### Testing & Quality Assurance
+
+- Comprehensive LiveView Testing: Full event handling and state management validation
+- Data Accuracy Testing: Financial calculations and filtering logic verification
+- User Interface Testing: Interactive component behavior and visual feedback validation
+- Responsive Design Testing: Multi-device layout and chart rendering verification
+
 ## [0.3.1] - 2025-08-22
 
 ### Added

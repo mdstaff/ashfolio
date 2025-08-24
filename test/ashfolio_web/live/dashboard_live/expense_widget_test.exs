@@ -69,7 +69,7 @@ defmodule AshfolioWeb.DashboardLive.ExpenseWidgetTest do
           description: "Last month expense"
         })
 
-      {:ok, view, html} = live(conn, ~p"/")
+      {:ok, _view, html} = live(conn, ~p"/")
 
       # Should show comparison text (current $150 vs last $200 = -25% decrease)
       # Note: This test validates the widget shows comparison data when available
@@ -93,7 +93,7 @@ defmodule AshfolioWeb.DashboardLive.ExpenseWidgetTest do
           category_id: category.id
         })
 
-      {:ok, view, html} = live(conn, ~p"/")
+      {:ok, _view, html} = live(conn, ~p"/")
 
       # Should show expense data (basic functionality test)
       assert html =~ "This Month"

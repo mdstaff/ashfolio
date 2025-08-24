@@ -148,7 +148,7 @@ defmodule Ashfolio.SQLiteHelpers do
     user_settings = get_default_user_settings()
 
     if user_settings.name in ["Test User", "Local User"] do
-      IO.puts("✅ Test database settings validated: #{user_settings.name}")
+      IO.puts(".")
     else
       IO.puts("⚠️  WARNING: Test database settings has unexpected name: #{user_settings.name}")
     end
@@ -158,8 +158,8 @@ defmodule Ashfolio.SQLiteHelpers do
       {:ok, nil} ->
         raise "❌ SAFEGUARD FAILURE: Default account not found after setup"
 
-      {:ok, account} ->
-        IO.puts("✅ Test account validated: #{account.name}")
+      {:ok, _account} ->
+        IO.puts(".")
 
       {:error, error} ->
         raise "❌ SAFEGUARD FAILURE: Could not query default account: #{inspect(error)}"
@@ -180,10 +180,8 @@ defmodule Ashfolio.SQLiteHelpers do
     if missing_symbols != [] do
       raise "❌ SAFEGUARD FAILURE: Missing common symbols: #{inspect(missing_symbols)}"
     else
-      IO.puts("✅ Test symbols validated: #{length(common_tickers)} common symbols found")
+      IO.puts(".")
     end
-
-    IO.puts("🛡️  Global test data validation: ALL CHECKS PASSED")
   end
 
   @doc """
@@ -260,7 +258,7 @@ defmodule Ashfolio.SQLiteHelpers do
   @doc """
   DEPRECATED: Backward compatibility for database-as-user architecture.
 
-  This version accepts a user parameter but ignores it since 
+  This version accepts a user parameter but ignores it since
   accounts no longer have user_id in database-as-user architecture.
   """
   def get_or_create_account(_user, attrs) when is_map(attrs) do

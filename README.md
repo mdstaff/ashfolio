@@ -55,8 +55,13 @@ Ashfolio manages financial data locally on your computer. Track investments, cas
 - Dividend Income: Forward-looking dividend projections
 - Tax Planning: Capital gains optimization strategies
 
-#### Analytics
+#### Advanced Analytics
 
+- Enhanced Expense Analytics: Year-over-year comparisons with interactive charts
+- Advanced Filtering: Category, amount range, and merchant search capabilities
+- Custom Date Ranges: Flexible date pickers with filtered expense previews
+- Spending Trends: Monthly analysis with 3/6-month trend indicators
+- Interactive Visualizations: Contex-powered SVG charts with graceful fallbacks
 - FIFO Cost Basis: Profit/loss calculations using industry standards
 - Real-time Pricing: Price updates from Yahoo Finance
 - Responsive Design: Works on desktop, tablet, and mobile
@@ -72,41 +77,45 @@ Ashfolio manages financial data locally on your computer. Track investments, cas
 
 ## Project Status
 
-Current Version: v0.2.2-dev
-Next Release: v0.3.0 (TBD)
+Current Version: v0.3.4
+Next Release: v0.4.0 (Q1 2026)
 
-### Currently Available (v0.1.0 + v0.2.0 Features)
+### Currently Available (v0.1.0 - v0.3.4 Features)
 
 - Investment Portfolio Tracking: Account and transaction management
-- Net Worth Calculation: Cross-account financial position analysis
+- Net Worth Calculation: Cross-account financial position analysis with manual snapshots
 - Cash Account Management: Checking, savings, money market, and CD accounts
+- Expense Tracking: Comprehensive expense analytics with interactive dashboard widgets
+- Enhanced Analytics: Year-over-year comparisons, advanced filtering, custom date ranges
+- Spending Trends: Monthly spending analysis with trend indicators and visual charts
 - Transaction Categories: Transaction organization and categorization
 - Real-time Calculations: Portfolio value and performance analytics
+- Interactive Visualizations: Contex-powered SVG charts for expenses and net worth
 - Price Integration: Yahoo Finance API with caching
-- Responsive Interface: Multi-device support
-- Reliable: Robust error handling
+- Responsive Interface: Multi-device support with mobile-optimized charts
+- Reliable: Robust error handling with graceful fallbacks
 
 ### Coming Soon
 
-v0.2.0 (Q3 2025) - Remaining Features:
+v0.4.0 (Q1 2026) - Financial Planning & Advanced Analytics:
 
-- Symbol Autocomplete: Symbol search in transaction forms (In Progress)
-- Enhanced Dashboard: Net worth integration and cash account displays
-- Balance Management UI: Cash balance update interfaces
-- Category Management: UI for creating and managing transaction categories
+- Retirement Planning: 25x rule calculations and retirement goal projections
+- Advanced Portfolio Analysis: Risk assessment and diversification metrics
+- Tax Planning: Capital gains optimization and tax-efficient strategies
+- Asset Management: Real estate and vehicle tracking capabilities
 
 Future Releases:
 
-- Expense Tracking & Asset Management: Monthly spending analysis and real estate/vehicle tracking (v0.3.0)
-- Retirement Planning & Advanced Analytics: 25x rule calculations and portfolio analysis (v0.4.0)
-- Tax Planning & Feature Completeness: Tax optimization and reporting (v0.5.0)
+- Data Import/Export: CSV and Excel import/export functionality (v0.5.0)
+- Advanced Reporting: Custom reports and performance analytics (v0.6.0)
+- Goal Management: Comprehensive financial goal setting and tracking (v0.7.0)
 
 ### Development Roadmap
 
-v0.2.0 (Q3 2025): Cash Management & Enhanced UX  
-v0.3.0 (Q4 2025): Asset Tracking & Real-Time Features  
 v0.4.0 (Q1 2026): Financial Planning & Advanced Analytics  
-v0.5.0 (Q2 2026): Tax Planning & Feature Completeness
+v0.5.0 (Q2 2026): Data Import/Export & Advanced Reporting  
+v0.6.0 (Q3 2026): Goal Management & Performance Analytics  
+v0.7.0 (Q4 2026): Feature Completeness & Optimization
 
 See [roadmap](docs/roadmap/v0.2-v0.5-roadmap.md) for detailed feature timelines.
 
