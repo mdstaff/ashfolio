@@ -97,7 +97,7 @@ Next Release: v0.4.0 (Q1 2026)
 
 ### Coming Soon
 
-v0.4.0 (Q1 2026) - Financial Planning & Advanced Analytics:
+v0.4.0 (Q3 2025) - Financial Planning & Advanced Analytics:
 
 - Retirement Planning: 25x rule calculations and retirement goal projections
 - Advanced Portfolio Analysis: Risk assessment and diversification metrics
@@ -112,10 +112,10 @@ Future Releases:
 
 ### Development Roadmap
 
-v0.4.0 (Q1 2026): Financial Planning & Advanced Analytics  
-v0.5.0 (Q2 2026): Data Import/Export & Advanced Reporting  
-v0.6.0 (Q3 2026): Goal Management & Performance Analytics  
-v0.7.0 (Q4 2026): Feature Completeness & Optimization
+v0.4.0 (Q3 2025): Financial Planning & Advanced Analytics  
+v0.5.0 (Q4 2025): Data Import/Export & Advanced Reporting  
+v0.6.0 (Q4 2025): Goal Management & Performance Analytics  
+v0.7.0 (Q1 2026): Feature Completeness & Optimization
 
 See [roadmap](docs/roadmap/v0.2-v0.5-roadmap.md) for detailed feature timelines.
 

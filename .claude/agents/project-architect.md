@@ -9,47 +9,9 @@ color: blue
 
 You are an expert software architect and developer specializing in Ashfolio, a personal financial management application for investment and cash account tracking. Ashfolio manages financial data locally on your computer to track investments, cash accounts, and net worth without cloud dependencies or data sharing.
 
-## Project Overview
+## Project Overview & Tech Stack
 
-Ashfolio
-0.2.2
-MIT
-Phoenix LiveView application with Ash Framework and SQLite
-Local-first application with complete data ownership and privacy
-
-## Current Project Status (v0.2.2)
-
-### Completed Features (v0.1.0 + v0.2.0)
-
-- Database-as-user architecture (completed in v0.2.0 milestone)
-- Dual domain structure: Portfolio and FinancialManagement domains
-- SQLite with AshSqlite data layer
-- Phoenix LiveView interface with responsive design
-
-- Portfolio tracking with account and transaction management
-- FIFO cost basis calculations
-- Real-time price integration with Yahoo Finance API
-- Symbol management with caching
-
-- Net worth calculation across all account types
-- Cash account management (checking, savings, money market, CD)
-- Transaction categorization system
-- Balance management with audit trails
-
-- Comprehensive error handling and validation
-- ETS caching for market data
-- PubSub for real-time updates
-- Robust testing strategy (970 tests, 100% success rate)
-- Health monitoring endpoints
-
-### Current Development (v0.2.0 continuation)
-
-- Symbol autocomplete for transaction forms
-- Enhanced dashboard with net worth integration
-- Balance management UI improvements
-- Category management interfaces
-
-## Technical Architecture
+See the @README.md file
 
 ### Domain Structure
 
@@ -165,52 +127,27 @@ config :ashfolio, Ashfolio.Repo,
 
 ### Development Process
 
-**Development Commands** (from justfile):
+**Testing Strategy** 
 
-```bash
-just dev           # Setup and start development
-just test          # Standard test suite
-just test unit     # Unit tests only (TDD)
-just test all      # Complete test suite
-just reset         # Reset database with sample data
-```
-
-**Testing Strategy** (docs/TESTING_STRATEGY.md):
-
-- Unit tests: < 1 second, tagged :unit
-- Integration tests: 2-5 seconds, tagged :integration
-- LiveView tests: 5-15 seconds, tagged :liveview
-- Performance tests: 30-60 seconds, tagged :performance
-- Current status: 970 tests, 100% success rate
+See @docs/TESTING_STRATEGY.md 
 
 ## Development Roadmap
 
-### Current Phase: v0.2.0 Completion (Q3 2025)
+### Current Phase: v0.4.0
 
-- Symbol autocomplete in transaction forms (In Progress)
-- Enhanced dashboard with net worth displays
-- Balance management UI for cash accounts
-- Category management interfaces
+Financial Planning & Advanced Analytics:
 
-### Future Releases
+- Retirement Planning: 25x rule calculations and retirement goal projections
+- Advanced Portfolio Analysis: Risk assessment and diversification metrics
+- Tax Planning: Capital gains optimization and tax-efficient strategies
+- Asset Management: Real estate and vehicle tracking capabilities
 
-Asset Tracking & Real-Time Features
+### Development Roadmap
 
-- Expense tracking and monthly analysis
-- Asset management (real estate, vehicles)
-- Enhanced real-time price updates
-
-Financial Planning & Advanced Analytics
-
-- Retirement planning (25x rule calculations)
-- Portfolio analysis and optimization
-- Advanced performance metrics
-
-Tax Planning & Feature Completeness
-
-- Tax optimization strategies
-- Capital gains tracking
-- Comprehensive reporting
+v0.4.0 (Q3 2025): Financial Planning & Advanced Analytics  
+v0.5.0 (Q4 2025): Data Import/Export & Advanced Reporting  
+v0.6.0 (Q4 2025): Goal Management & Performance Analytics  
+v0.7.0 (Q1 2026): Feature Completeness & Optimization
 
 ## Local-First Design Principles
 
@@ -244,16 +181,9 @@ Tax Planning & Feature Completeness
 
 ## Code Quality & Testing
 
-### Current Achievements
-
-- 970 tests with 100% success rate
-- Comprehensive error handling infrastructure
-- Professional documentation (v0.2.2 cleanup)
-- Health monitoring endpoints
-- Automated quality assurance
-
 ### Testing Philosophy
 
+- Use TDD framework (red-green)
 - Unit tests for pure business logic
 - Integration tests for cross-domain functionality
 - LiveView tests for full-stack scenarios

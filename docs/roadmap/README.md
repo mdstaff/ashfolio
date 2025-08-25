@@ -87,17 +87,20 @@ graph TD
 - Impact on existing features
 - How difficult to undo if problems arise
 
-## 🎯 Current Focus: v0.2.0
+## 🎯 Current Focus: v0.4.0
 
-Enhanced User Experience
+**Financial Planning & Advanced Analytics**
 
-1. Symbol Autocomplete (.kiro spec exists)
-2. Real-Time Price Lookup (.kiro spec exists)
-3. Transaction Categories and Tagging
-4. Enhanced Dashboard Charts
-5. Bulk Export Improvements
+Ready for development following successful v0.3.X completion (90% delivered):
 
-Q4 2025
+1. **Retirement Planning Tools** - 25x expenses rule, 4% withdrawal calculations
+2. **Financial Goal Setting** - Emergency fund, retirement, custom savings goals  
+3. **Long-term Forecasting** - Growth projections with configurable assumptions
+4. **Advanced Portfolio Analytics** - TWR, MWR, benchmark comparisons, rolling returns
+
+**Target**: Q1 2026 (8-10 weeks)
+
+> **Recent Achievement**: v0.3.X series delivered comprehensive financial analytics platform with expense tracking, net worth snapshots, CSV import, automated background jobs, and professional charting - transforming Ashfolio from basic portfolio tracking into a complete financial analytics solution.
 
 ## 🔮 Long-Term Vision
 
