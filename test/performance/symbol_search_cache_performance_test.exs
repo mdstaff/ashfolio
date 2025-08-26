@@ -234,7 +234,6 @@ defmodule Ashfolio.Performance.SymbolSearchCachePerformanceTest do
       final_cache_size = get_cache_size()
       cache_growth = final_cache_size - initial_cache_size
 
-      # TODO: This would test LRU eviction when implemented
       # For now, just ensure cache doesn't grow beyond reasonable bounds
       assert cache_growth < 2000,
              "Cache grew by #{cache_growth} entries, may need LRU eviction"

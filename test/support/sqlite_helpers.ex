@@ -524,7 +524,7 @@ defmodule Ashfolio.SQLiteHelpers do
         {:error, error} -> raise "❌ Database connection failed: #{inspect(error)}"
       end
     rescue
-      error -> raise "❌ Database connection failed: #{inspect(error)}"
+      error -> reraise "❌ Database connection failed: #{inspect(error)}", __STACKTRACE__
     end
 
     # Check if we have the expected baseline data by counting records
@@ -581,7 +581,7 @@ defmodule Ashfolio.SQLiteHelpers do
       Ecto.Migrator.run(Ashfolio.Repo, :up, all: true)
       IO.puts("✅ Migrations completed")
     rescue
-      error -> raise "❌ Migration failed: #{inspect(error)}"
+      error -> reraise "❌ Migration failed: #{inspect(error)}", __STACKTRACE__
     end
 
     IO.puts("Step 4: Setting up global test data...")

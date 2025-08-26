@@ -76,7 +76,7 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
       assert results.failure_count == 0
       assert results.duration_ms >= 0
       assert length(results.successes) == 2
-      assert length(results.failures) == 0
+      assert Enum.empty?(results.failures)
 
       # Verify cache was updated
       assert {:ok, %{price: price}} = Cache.get_price("AAPL")

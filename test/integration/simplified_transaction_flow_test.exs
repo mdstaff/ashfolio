@@ -82,7 +82,7 @@ defmodule AshfolioWeb.Integration.SimplifiedTransactionFlowTest do
 
       # Verify deletion
       {:ok, final_transactions} = Transaction.by_account(account.id)
-      assert length(final_transactions) == 0
+      assert Enum.empty?(final_transactions)
     end
 
     test "transaction validation works correctly", %{account: account, symbol: symbol} do

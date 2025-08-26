@@ -554,7 +554,7 @@ defmodule Mix.Tasks.CodeGps do
   # === NEW v2.0 ENCODERS ===
 
   defp encode_routes(%{live_routes: routes}) do
-    if length(routes) == 0 do
+    if Enum.empty?(routes) do
       "no routes found"
     else
       routes

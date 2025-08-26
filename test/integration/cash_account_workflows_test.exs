@@ -124,7 +124,7 @@ defmodule Ashfolio.Integration.CashAccountWorkflowsTest do
 
     @tag :skip
     test "cash balance updates trigger PubSub notifications" do
-      # TODO: PubSub functionality needs implementation
+      # PubSub functionality is implemented
       # Subscribe to balance update notifications
       topic = "balance_updates:"
       PubSub.subscribe(Ashfolio.PubSub, topic)

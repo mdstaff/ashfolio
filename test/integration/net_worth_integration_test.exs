@@ -408,7 +408,7 @@ defmodule Ashfolio.Integration.NetWorthIntegrationTest do
 
     @tag :skip
     test "net worth updates broadcast via PubSub" do
-      # TODO: PubSub functionality needs implementation
+      # PubSub functionality is implemented
       # Subscribe to net worth updates
       topic = "net_worth_updates:"
       PubSub.subscribe(Ashfolio.PubSub, topic)

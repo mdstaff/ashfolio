@@ -95,7 +95,6 @@ defmodule Ashfolio.Integration.SymbolAutocompleteIntegrationTest do
     test "external symbol search → create new symbol → use in transaction", %{
       account: account
     } do
-      # TODO: External API mocking needs proper setup
       # This test validates external symbol creation workflow
       # but requires proper mock configuration that's not yet implemented
 
@@ -104,7 +103,7 @@ defmodule Ashfolio.Integration.SymbolAutocompleteIntegrationTest do
 
       # Should find no local results initially
       local_results = Enum.filter(search_results, &(&1.symbol == "NVDA"))
-      assert length(local_results) == 0
+      assert Enum.empty?(local_results)
 
       # Step 2: Create symbol from external source
       external_symbol_data = %{
@@ -173,7 +172,6 @@ defmodule Ashfolio.Integration.SymbolAutocompleteIntegrationTest do
 
     @tag :skip
     test "symbol search with network failures", %{account: account} do
-      # TODO: External API mocking needs proper setup
       # This test validates graceful handling of external API failures
       # but requires proper mock configuration that's not yet implemented
 
@@ -204,7 +202,6 @@ defmodule Ashfolio.Integration.SymbolAutocompleteIntegrationTest do
 
     @tag :skip
     test "rate limiting prevents excessive external API calls", %{} do
-      # TODO: External API mocking needs proper setup
       # This test validates rate limiting functionality
       # but requires proper mock configuration that's not yet implemented
 

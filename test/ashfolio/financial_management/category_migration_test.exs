@@ -23,7 +23,7 @@ defmodule Ashfolio.FinancialManagement.CategoryMigrationTest do
       # Database-as-user architecture: test database state
       # Verify database has no categories initially
       {:ok, initial_categories} = TransactionCategory.list()
-      assert length(initial_categories) == 0
+      assert Enum.empty?(initial_categories)
 
       # Simulate the migration logic
       simulate_migration_for_user()
@@ -76,7 +76,7 @@ defmodule Ashfolio.FinancialManagement.CategoryMigrationTest do
       # Database-as-user architecture: test database state, not multiple users
       # Ensure database starts empty
       {:ok, initial_categories} = TransactionCategory.list()
-      assert length(initial_categories) == 0
+      assert Enum.empty?(initial_categories)
 
       # Simulate the migration process
       simulate_migration_for_user()

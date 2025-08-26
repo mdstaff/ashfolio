@@ -112,7 +112,7 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       {:ok, holdings} = HoldingsCalculator.calculate_holding_values()
 
       # Should have no holdings since quantity is zero
-      assert length(holdings) == 0
+      assert Enum.empty?(holdings)
     end
 
     test "returns empty list for empty portfolio" do

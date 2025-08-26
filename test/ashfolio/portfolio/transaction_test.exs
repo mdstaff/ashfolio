@@ -270,7 +270,7 @@ defmodule Ashfolio.Portfolio.TransactionTest do
       future_start = Date.add(today, 2)
       future_end = Date.add(today, 3)
       {:ok, future_transactions} = Transaction.by_date_range(future_start, future_end)
-      assert length(future_transactions) == 0
+      assert Enum.empty?(future_transactions)
     end
 
     test "queries recent transactions", %{account: account, symbol: symbol} do
@@ -356,7 +356,7 @@ defmodule Ashfolio.Portfolio.TransactionTest do
 
       # Verify transaction is deleted
       {:ok, transactions} = Transaction.list()
-      assert length(transactions) == 0
+      assert Enum.empty?(transactions)
     end
   end
 

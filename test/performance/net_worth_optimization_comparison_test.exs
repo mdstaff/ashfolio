@@ -268,8 +268,8 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
       # Should handle empty case gracefully
       assert Decimal.equal?(result.net_worth, Decimal.new(0))
       assert Decimal.equal?(result.cash_value, Decimal.new(0))
-      assert length(result.breakdown.investment_accounts) == 0
-      assert length(result.breakdown.cash_accounts) == 0
+      assert Enum.empty?(result.breakdown.investment_accounts)
+      assert Enum.empty?(result.breakdown.cash_accounts)
     end
 
     test "optimized version handles large datasets efficiently" do

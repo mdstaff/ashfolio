@@ -126,7 +126,7 @@ defmodule Ashfolio.FinancialManagement.TransactionFilteringTest do
 
       {:ok, filtered_transactions} = TransactionFiltering.apply_filters(filter_criteria)
 
-      assert length(filtered_transactions) == 0
+      assert Enum.empty?(filtered_transactions)
     end
   end
 
@@ -223,7 +223,7 @@ defmodule Ashfolio.FinancialManagement.TransactionFilteringTest do
       {:ok, filtered_transactions} = TransactionFiltering.apply_filters(filter_criteria)
 
       # Should return empty list for invalid UUID format
-      assert length(filtered_transactions) == 0
+      assert Enum.empty?(filtered_transactions)
     end
   end
 

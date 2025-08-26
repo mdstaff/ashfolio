@@ -246,7 +246,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
       {:ok, positions} = Calculator.calculate_position_returns()
 
       # Should have no positions since quantity is zero
-      assert length(positions) == 0
+      assert Enum.empty?(positions)
     end
   end
 
