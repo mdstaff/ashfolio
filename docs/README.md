@@ -14,6 +14,9 @@ Welcome to Ashfolio's comprehensive documentation. Choose your path:
 - **Database Management** → [Database Guide](development/database-management.md)
 - **Elixir & Mix Insights** → [Environment Detection, Logger Filters](development/elixir-mix-insights.md)
 - **AI Agent Development** → [AI Guide](development/ai-agent-guide.md)
+- **Code GPS Guide** → [Codebase Analysis](development/code-gps-guide.md)
+- **Phoenix LiveView** → [Layout Architecture](development/phoenix-liveview-layouts.md)
+- **SQLite Optimizations** → [Performance Tuning](development/sqlite-optimizations.md)
 
 ## Testing
 
@@ -31,7 +34,9 @@ Welcome to Ashfolio's comprehensive documentation. Choose your path:
 ## Roadmap & Planning
 
 - **Project Roadmap** → [v0.2-v0.5 Roadmap](roadmap/v0.2-v0.5-roadmap.md)
+- **v0.4.x Specification** → [Current Development](roadmap/v0.4.x-specification.md)
 - **Financial Expansion** → [Future Features](roadmap/financial-expansion-roadmap.md)
+- **UI/UX Improvements** → [Future Enhancements](roadmap/ui-ux-improvements.md)
 - **Architecture Decisions** → [ADRs](architecture/)
 
 ## Archive
