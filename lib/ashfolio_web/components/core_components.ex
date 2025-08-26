@@ -948,4 +948,84 @@ defmodule AshfolioWeb.CoreComponents do
     </div>
     """
   end
+
+  @doc """
+  Renders a financial goals widget card showing goals summary and navigation.
+
+  ## Examples
+
+      <.goals_widget
+        active_goals_count={3}
+        total_saved="$15,750.00"
+        total_target="$50,000.00"
+        emergency_fund_status={:partial} />
+  """
+  attr :active_goals_count, :integer, required: true
+  attr :total_saved, :string, required: true
+  attr :total_target, :string, required: true
+  attr :emergency_fund_status, :atom, required: true
+  attr :class, :string, default: nil
+
+  def goals_widget(assigns) do
+    ~H"""
+    <div class={["bg-white rounded-lg shadow p-6", @class]}>
+      <div class="goals-widget">
+        <div class="goals-header">
+          <p class="text-sm font-medium text-gray-600">Financial Goals</p>
+          <p class="text-2xl font-semibold text-gray-900" data-testid="goals-widget-total">
+            {@total_saved}
+          </p>
+        </div>
+        <div class="goals-stats">
+          <div class="stat-item">
+            <span class="stat-label">Active Goals</span>
+            <span class="stat-value" data-testid="goals-widget-count">
+              {@active_goals_count}
+            </span>
+          </div>
+          <span class="separator">•</span>
+          <div class="stat-item">
+            <span class="stat-label">Target</span>
+            <span class="stat-value" data-testid="goals-widget-target">
+              {@total_target}
+            </span>
+          </div>
+        </div>
+        <div class="emergency-fund-status mt-3">
+          <div class={[
+            "flex items-center text-sm",
+            emergency_fund_status_color(@emergency_fund_status)
+          ]}>
+            <div
+              class="w-2 h-2 rounded-full mr-2 flex-shrink-0"
+              class={emergency_fund_dot_color(@emergency_fund_status)}
+            >
+            </div>
+            <span>Emergency Fund: {emergency_fund_status_text(@emergency_fund_status)}</span>
+          </div>
+        </div>
+        <div class="goals-actions mt-4">
+          <a href="/goals" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+            Manage Goals
+          </a>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp emergency_fund_status_color(:adequate), do: "text-green-600"
+  defp emergency_fund_status_color(:partial), do: "text-yellow-600"
+  defp emergency_fund_status_color(:insufficient), do: "text-red-600"
+  defp emergency_fund_status_color(:no_goal), do: "text-gray-600"
+
+  defp emergency_fund_dot_color(:adequate), do: "bg-green-500"
+  defp emergency_fund_dot_color(:partial), do: "bg-yellow-500"
+  defp emergency_fund_dot_color(:insufficient), do: "bg-red-500"
+  defp emergency_fund_dot_color(:no_goal), do: "bg-gray-400"
+
+  defp emergency_fund_status_text(:adequate), do: "Ready"
+  defp emergency_fund_status_text(:partial), do: "Building"
+  defp emergency_fund_status_text(:insufficient), do: "At Risk"
+  defp emergency_fund_status_text(:no_goal), do: "Not Started"
 end

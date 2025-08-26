@@ -3,7 +3,7 @@ defmodule AshfolioWeb.DashboardLive do
 
   alias Ashfolio.Portfolio.HoldingsCalculator
   alias Ashfolio.MarketData.PriceManager
-  alias Ashfolio.FinancialManagement.Expense
+  alias Ashfolio.FinancialManagement.{Expense, FinancialGoal, EmergencyFundCalculator}
   alias Ashfolio.Context
   alias AshfolioWeb.Live.{ErrorHelpers, FormatHelpers}
   require Logger
@@ -15,6 +15,7 @@ defmodule AshfolioWeb.DashboardLive do
       Ashfolio.PubSub.subscribe("transactions")
       Ashfolio.PubSub.subscribe("net_worth")
       Ashfolio.PubSub.subscribe("expenses")
+      Ashfolio.PubSub.subscribe("financial_goals")
     end
 
     socket =
@@ -188,6 +189,18 @@ defmodule AshfolioWeb.DashboardLive do
   end
 
   @impl true
+  def handle_info({:financial_goal_saved, _goal}, socket) do
+    Logger.debug("Received financial goal update via PubSub")
+    {:noreply, load_goals_data(socket)}
+  end
+
+  @impl true
+  def handle_info({:financial_goal_deleted, _goal_id}, socket) do
+    Logger.debug("Received financial goal deletion via PubSub")
+    {:noreply, load_goals_data(socket)}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="space-y-6">
@@ -262,6 +275,17 @@ defmodule AshfolioWeb.DashboardLive do
           expense_count={@expense_count}
           current_month_expenses={@current_month_expenses}
         />
+      </div>
+      
+    <!-- Financial Goals Summary -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <.goals_widget
+          active_goals_count={@goals_active_count}
+          total_saved={@goals_total_saved}
+          total_target={@goals_total_target}
+          emergency_fund_status={@goals_emergency_fund_status}
+        />
+        <!-- Space for future goal-related widgets -->
       </div>
       
     <!-- Investment vs Cash Breakdown -->
@@ -544,6 +568,7 @@ defmodule AshfolioWeb.DashboardLive do
     |> assign(:recent_transactions, [])
     |> assign_default_net_worth_values()
     |> assign_default_expense_values()
+    |> assign_default_goals_values()
   end
 
   # This function is now handled in load_holdings_and_net_worth
@@ -593,6 +618,7 @@ defmodule AshfolioWeb.DashboardLive do
     |> assign(:account_summary, summary)
     |> load_holdings_and_net_worth()
     |> load_expense_data()
+    |> load_goals_data()
   end
 
   defp load_holdings_and_net_worth(socket) do
@@ -750,6 +776,14 @@ defmodule AshfolioWeb.DashboardLive do
     |> assign(:current_month_expenses, FormatHelpers.format_currency(Decimal.new("0.00")))
   end
 
+  defp assign_default_goals_values(socket) do
+    socket
+    |> assign(:goals_active_count, 0)
+    |> assign(:goals_total_saved, FormatHelpers.format_currency(Decimal.new("0.00")))
+    |> assign(:goals_total_target, FormatHelpers.format_currency(Decimal.new("0.00")))
+    |> assign(:goals_emergency_fund_status, :no_goal)
+  end
+
   defp load_expense_data(socket) do
     try do
       # Load all expenses
@@ -769,7 +803,51 @@ defmodule AshfolioWeb.DashboardLive do
       |> assign(:current_month_expenses, FormatHelpers.format_currency(current_month_total))
     rescue
       _error ->
-        assign_default_expense_values(socket)
+        socket
+        |> assign_default_expense_values()
+        |> assign_default_goals_values()
+    end
+  end
+
+  defp load_goals_data(socket) do
+    try do
+      # Load all goals
+      goals =
+        FinancialGoal
+        |> Ash.Query.for_read(:read)
+        |> Ash.read!()
+
+      # Calculate goals statistics
+      active_goals = Enum.filter(goals, fn goal -> goal.is_active end)
+      active_count = length(active_goals)
+
+      total_saved =
+        goals
+        |> Enum.reduce(Decimal.new(0), fn goal, acc ->
+          Decimal.add(acc, goal.current_amount)
+        end)
+
+      total_target =
+        goals
+        |> Enum.reduce(Decimal.new(0), fn goal, acc ->
+          Decimal.add(acc, goal.target_amount)
+        end)
+
+      # Get emergency fund status
+      emergency_fund_status =
+        case EmergencyFundCalculator.analyze_readiness() do
+          {:ok, analysis} -> analysis.status
+          {:error, _} -> :no_goal
+        end
+
+      socket
+      |> assign(:goals_active_count, active_count)
+      |> assign(:goals_total_saved, FormatHelpers.format_currency(total_saved))
+      |> assign(:goals_total_target, FormatHelpers.format_currency(total_target))
+      |> assign(:goals_emergency_fund_status, emergency_fund_status)
+    rescue
+      _error ->
+        assign_default_goals_values(socket)
     end
   end
 

@@ -125,9 +125,10 @@ defmodule AshfolioWeb.ClaudeCodeHooksTest do
       timestamp = DateTime.utc_now() |> DateTime.to_iso8601()
       initial_entry = "#{timestamp}: Agent session started\n"
 
-      action_entries = Enum.map(agent_actions, fn action ->
-        "#{timestamp}: #{action}\n"
-      end)
+      action_entries =
+        Enum.map(agent_actions, fn action ->
+          "#{timestamp}: #{action}\n"
+        end)
 
       log_entry = initial_entry <> Enum.join(action_entries, "")
 

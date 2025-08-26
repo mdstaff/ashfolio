@@ -68,6 +68,29 @@ Tags: `@tag :smoke`
 - Core user workflows
 - Regression prevention
 
+## Code Quality
+
+### 🎯 Credo Static Analysis
+
+Purpose: Enforce code quality standards and best practices  
+Command: `just credo`  
+Configuration: `.credo.exs` (if present)
+
+Credo checks for:
+- Code consistency and readability
+- Refactoring opportunities  
+- Code complexity issues
+- Security vulnerabilities
+- Performance anti-patterns
+
+Integration with workflow:
+```bash
+just check      # Runs format, compile, credo, and smoke tests
+just commit     # Pre-commit validation includes credo
+```
+
+The `just credo` command runs with `--strict` flag but continues on warnings (non-blocking) to allow incremental improvements.
+
 ## Development Workflow
 
 ### Daily Development

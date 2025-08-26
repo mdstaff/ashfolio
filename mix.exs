@@ -4,7 +4,7 @@ defmodule Ashfolio.MixProject do
   def project do
     [
       app: :ashfolio,
-      version: "0.3.4",
+      version: "0.4.1",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,

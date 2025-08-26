@@ -32,6 +32,9 @@ defmodule AshfolioWeb.Router do
     live "/expenses/import", ExpenseLive.Import, :index
     live "/expenses/analytics", ExpenseLive.Analytics, :index
     live "/net_worth", NetWorthLive.Index, :index
+    live "/goals", FinancialGoalLive.Index, :index
+    live "/goals/new", FinancialGoalLive.Index, :new
+    live "/goals/:id/edit", FinancialGoalLive.Index, :edit
   end
 
   # Health check endpoints - accessible without authentication

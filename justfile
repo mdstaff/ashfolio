@@ -66,11 +66,12 @@ test filter="":
         mix test --only {{filter}} --no-color
     fi
 
-# ✅ Run all checks (format, compile, test)
+# ✅ Run all checks (format, compile, credo, test)
 check:
     @echo "✅ Running all checks..."
     @just format
-    @just compile  
+    @just compile
+    @just credo
     @just test smoke
     @echo "✅ All checks passed!"
 
@@ -87,11 +88,18 @@ fix:
     @MIX_ENV=test mix run -e "Ashfolio.SQLiteHelpers.test_database_health_check!()" || just db test-reset
     @echo "✅ Issues fixed!"
 
+# 🎯 Run Credo code quality checks
+credo:
+    @echo "🎯 Running Credo code quality analysis..."
+    @mix credo --strict || true
+    @echo "✅ Credo analysis complete"
+
 # 📦 Pre-commit validation
 commit:
     @echo "📦 Pre-commit validation..."
     @just format
     @just compile
+    @just credo
     @just test unit
     @just test smoke
     @echo "✅ Ready to commit!"
