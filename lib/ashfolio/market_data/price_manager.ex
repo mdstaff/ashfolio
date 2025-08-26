@@ -34,13 +34,14 @@ defmodule Ashfolio.MarketData.PriceManager do
 
   alias Ashfolio.Portfolio.Symbol
   alias Ashfolio.Cache
+  alias Ashfolio.MarketData.{YahooFinance, RateLimiter}
 
   import Ash.Query, only: [filter: 2, select: 2]
 
   @yahoo_finance_module Application.compile_env(
                           :ashfolio,
                           :yahoo_finance_module,
-                          Ashfolio.MarketData.YahooFinance
+                          YahooFinance
                         )
 
   # Client API
@@ -231,7 +232,7 @@ defmodule Ashfolio.MarketData.PriceManager do
     Logger.debug("Refreshing prices for symbols: #{inspect(symbols)}")
 
     # Check rate limit before making API calls
-    case Ashfolio.MarketData.RateLimiter.check_rate_limit(:batch_fetch, length(symbols)) do
+    case RateLimiter.check_rate_limit(:batch_fetch, length(symbols)) do
       :ok ->
         # Try batch fetch first (hybrid approach from research)
         case @yahoo_finance_module.fetch_prices(symbols) do
@@ -263,7 +264,7 @@ defmodule Ashfolio.MarketData.PriceManager do
   defp fetch_individually_with_rate_limit(symbols) do
     results =
       Enum.map(symbols, fn symbol ->
-        case Ashfolio.MarketData.RateLimiter.check_rate_limit(:individual_fetch, 1) do
+        case RateLimiter.check_rate_limit(:individual_fetch, 1) do
           :ok ->
             case @yahoo_finance_module.fetch_price(symbol) do
               {:ok, price} ->

@@ -1,7 +1,7 @@
 defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
   use AshfolioWeb, :live_component
 
-  alias Ashfolio.FinancialManagement.{FinancialGoal, EmergencyFundCalculator}
+  alias Ashfolio.FinancialManagement.FinancialGoal
   alias AshfolioWeb.Live.{ErrorHelpers, FormatHelpers}
 
   @impl true
@@ -298,8 +298,9 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
     # Load emergency fund analysis if creating new goal
     socket =
       if action == :new do
-        case EmergencyFundCalculator.analyze_readiness() do
-          {:ok, analysis} -> assign(socket, :emergency_fund_suggestion, analysis)
+        case FinancialGoal.analyze_emergency_fund_readiness!() do
+          {:analysis, analysis} -> assign(socket, :emergency_fund_suggestion, analysis)
+          {:no_goal, recommendation} -> assign(socket, :emergency_fund_suggestion, recommendation)
           {:error, _} -> assign(socket, :emergency_fund_suggestion, nil)
         end
       else

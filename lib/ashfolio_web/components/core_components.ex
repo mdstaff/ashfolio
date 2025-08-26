@@ -1014,18 +1014,9 @@ defmodule AshfolioWeb.CoreComponents do
     """
   end
 
-  defp emergency_fund_status_color(:adequate), do: "text-green-600"
-  defp emergency_fund_status_color(:partial), do: "text-yellow-600"
-  defp emergency_fund_status_color(:insufficient), do: "text-red-600"
-  defp emergency_fund_status_color(:no_goal), do: "text-gray-600"
+  alias Ashfolio.FinancialManagement.EmergencyFundStatus
 
-  defp emergency_fund_dot_color(:adequate), do: "bg-green-500"
-  defp emergency_fund_dot_color(:partial), do: "bg-yellow-500"
-  defp emergency_fund_dot_color(:insufficient), do: "bg-red-500"
-  defp emergency_fund_dot_color(:no_goal), do: "bg-gray-400"
-
-  defp emergency_fund_status_text(:adequate), do: "Ready"
-  defp emergency_fund_status_text(:partial), do: "Building"
-  defp emergency_fund_status_text(:insufficient), do: "At Risk"
-  defp emergency_fund_status_text(:no_goal), do: "Not Started"
+  defp emergency_fund_status_color(status), do: EmergencyFundStatus.status_color(status)
+  defp emergency_fund_dot_color(status), do: EmergencyFundStatus.dot_color(status)
+  defp emergency_fund_status_text(status), do: EmergencyFundStatus.status_label(status)
 end

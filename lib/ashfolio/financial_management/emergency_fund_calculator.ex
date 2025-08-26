@@ -1,295 +1,290 @@
 defmodule Ashfolio.FinancialManagement.EmergencyFundCalculator do
   @moduledoc """
-  Emergency fund calculations for financial planning.
+  Emergency Fund Calculator for calculating emergency fund targets and tracking progress.
 
-  Provides calculations for emergency fund targets based on monthly expenses,
-  progress tracking, and timeline projections. Integrates with existing
-  expense data to automatically calculate monthly spending averages.
+  Provides functions for:
+  - Calculating emergency fund targets based on monthly expenses
+  - Analyzing average monthly expenses from historical data  
+  - Tracking emergency fund goal progress and timeline
+  - Auto-creating emergency fund goals based on expense history
 
-  Key calculations:
-  - Target emergency fund (3-12 months of expenses)
-  - Current progress percentage
-  - Monthly contribution needed to reach goal
-  - Time to reach emergency fund target
+  Follows patterns from Expense.ex aggregation and Calculator.ex error handling.
   """
 
-  alias Ashfolio.FinancialManagement.{Expense, FinancialGoal}
   require Logger
-
-  @default_months_coverage 6
-  @min_months_coverage 3
-  @max_months_coverage 12
+  alias Ashfolio.FinancialManagement.{Expense, FinancialGoal}
 
   @doc """
-  Calculate average monthly expenses from the last N months of data.
+  Calculates emergency fund target amount.
 
-  Returns the average monthly expense amount based on historical data.
-  Defaults to last 12 months for accurate averaging.
-
-  ## Examples
-
-      iex> EmergencyFundCalculator.calculate_monthly_expenses()
-      {:ok, Decimal.new("3500.00")}
-  """
-  def calculate_monthly_expenses(months_back \\ 12) do
-    Logger.debug("Calculating average monthly expenses for last #{months_back} months")
-
-    end_date = Date.utc_today()
-    start_date = Date.add(end_date, -(months_back * 30))
-
-    try do
-      expenses = Expense.by_date_range!(start_date, end_date)
-
-      case expenses do
-        [] ->
-          Logger.info("No expenses found for emergency fund calculation")
-          {:ok, Decimal.new("0")}
-
-        expenses ->
-          # Group by month and calculate average
-          monthly_totals =
-            expenses
-            |> Enum.group_by(fn expense ->
-              {expense.date.year, expense.date.month}
-            end)
-            |> Enum.map(fn {_month, month_expenses} ->
-              month_expenses
-              |> Enum.map(& &1.amount)
-              |> Enum.reduce(Decimal.new("0"), &Decimal.add/2)
-            end)
-
-          months_with_data = length(monthly_totals)
-
-          if months_with_data > 0 do
-            total = Enum.reduce(monthly_totals, Decimal.new("0"), &Decimal.add/2)
-            average = Decimal.div(total, Decimal.new(to_string(months_with_data)))
-
-            Logger.debug(
-              "Average monthly expenses: #{average} (#{months_with_data} months of data)"
-            )
-
-            {:ok, Decimal.round(average, 2)}
-          else
-            {:ok, Decimal.new("0")}
-          end
-      end
-    rescue
-      error ->
-        Logger.error("Failed to calculate monthly expenses: #{inspect(error)}")
-        {:error, "Failed to calculate monthly expenses"}
-    end
-  end
-
-  @doc """
-  Calculate emergency fund target based on monthly expenses.
+  Follows the emergency fund best practice of 3-12 months of expenses,
+  defaulting to 6 months as recommended by most financial advisors.
 
   ## Parameters
-  - monthly_expenses: Average monthly expense amount
-  - months: Number of months to cover (default 6, range 3-12)
+  - monthly_expenses: Decimal amount of monthly expenses
+  - months: Number of months to cover (default: 6, range: 1-12)
 
   ## Examples
 
-      iex> EmergencyFundCalculator.calculate_target(Decimal.new("3500"), 6)
-      {:ok, Decimal.new("21000.00")}
+      iex> EmergencyFundCalculator.calculate_emergency_fund_target(Decimal.new("4000.00"))
+      {:ok, #Decimal<24000.00>}
+
+      iex> EmergencyFundCalculator.calculate_emergency_fund_target(Decimal.new("3500.00"), 3)
+      {:ok, #Decimal<10500.00>}
+
   """
-  def calculate_target(monthly_expenses, months \\ @default_months_coverage) do
-    cond do
-      months < @min_months_coverage ->
-        {:error, "Months coverage must be at least #{@min_months_coverage}"}
+  def calculate_emergency_fund_target(monthly_expenses, months \\ 6) do
+    Logger.debug("Calculating emergency fund target for #{monthly_expenses}, #{months} months")
 
-      months > @max_months_coverage ->
-        {:error, "Months coverage cannot exceed #{@max_months_coverage}"}
+    with :ok <- validate_monthly_expenses(monthly_expenses),
+         :ok <- validate_months(months) do
+      target = Decimal.mult(monthly_expenses, Decimal.new(to_string(months)))
+      Logger.debug("Emergency fund target calculated: #{target}")
 
-      true ->
-        target = Decimal.mult(monthly_expenses, Decimal.new(to_string(months)))
-        {:ok, Decimal.round(target, 2)}
+      {:ok, target}
+    else
+      {:error, reason} ->
+        Logger.warning("Emergency fund target calculation failed: #{inspect(reason)}")
+        {:error, reason}
     end
   end
 
   @doc """
-  Calculate or update emergency fund goal based on current expenses.
+  Calculates average monthly expenses from historical expense data.
 
-  Creates a new emergency fund goal or updates existing one with
-  calculated target based on average monthly expenses.
-
-  ## Options
-  - months_coverage: Number of months to cover (default 6)
-  - months_history: Number of months to analyze for average (default 12)
-  """
-  def setup_emergency_fund_goal(opts \\ []) do
-    months_coverage = Keyword.get(opts, :months_coverage, @default_months_coverage)
-    months_history = Keyword.get(opts, :months_history, 12)
-
-    with {:ok, monthly_expenses} <- calculate_monthly_expenses(months_history),
-         {:ok, target_amount} <- calculate_target(monthly_expenses, months_coverage) do
-      # Check for existing emergency fund goal
-      existing_goals = FinancialGoal.by_type!(:emergency_fund)
-
-      case existing_goals do
-        [] ->
-          # Create new emergency fund goal
-          Logger.info("Creating new emergency fund goal with target: #{target_amount}")
-
-          FinancialGoal.create(%{
-            name: "Emergency Fund (#{months_coverage} months)",
-            target_amount: target_amount,
-            goal_type: :emergency_fund,
-            is_active: true
-          })
-
-        [goal | _] ->
-          # Update existing goal
-          Logger.info("Updating emergency fund goal target to: #{target_amount}")
-
-          FinancialGoal.update(goal, %{
-            target_amount: target_amount,
-            name: "Emergency Fund (#{months_coverage} months)"
-          })
-      end
-    end
-  end
-
-  @doc """
-  Calculate monthly contribution needed to reach emergency fund goal by target date.
+  Uses expense aggregation patterns to analyze spending over a specified period
+  and calculate monthly averages for emergency fund planning.
 
   ## Parameters
-  - goal: Emergency fund goal with target_amount, current_amount, and target_date
+  - period_months: Number of months to analyze (default: 12)
+  - end_date: End date for analysis (default: today)
 
   ## Examples
 
-      iex> EmergencyFundCalculator.calculate_monthly_contribution_needed(goal)
-      {:ok, Decimal.new("500.00")}
+      iex> EmergencyFundCalculator.calculate_monthly_expenses_from_period(12)
+      {:ok, #Decimal<3850.00>}
+
   """
-  def calculate_monthly_contribution_needed(goal) do
-    remaining = Decimal.sub(goal.target_amount, goal.current_amount)
+  def calculate_monthly_expenses_from_period(period_months, end_date \\ Date.utc_today()) do
+    Logger.debug(
+      "Calculating monthly expenses from #{period_months} month period ending #{end_date}"
+    )
 
-    cond do
-      Decimal.lte?(remaining, Decimal.new("0")) ->
-        {:ok, Decimal.new("0")}
+    with :ok <- validate_period_months(period_months) do
+      start_date = Date.add(end_date, -period_months * 30)
 
-      is_nil(goal.target_date) ->
-        {:error, "No target date set for goal"}
+      expenses = get_expenses_for_period(start_date, end_date)
+      total_amount = calculate_total_expenses(expenses)
 
-      true ->
-        days_until = Date.diff(goal.target_date, Date.utc_today())
-
-        if days_until <= 0 do
-          {:error, "Target date has passed"}
+      # Calculate monthly average 
+      monthly_average =
+        if Decimal.equal?(total_amount, Decimal.new("0.00")) do
+          Decimal.new("0.00")
         else
-          months_until = max(1, div(days_until, 30))
-          monthly_needed = Decimal.div(remaining, Decimal.new(to_string(months_until)))
-
-          {:ok, Decimal.round(monthly_needed, 2)}
+          # Simple average: divide total by requested period months
+          Decimal.div(total_amount, Decimal.new(to_string(period_months)))
         end
+
+      Logger.debug(
+        "Monthly expense average: #{monthly_average} from #{length(expenses)} expenses over #{period_months} months"
+      )
+
+      {:ok, monthly_average}
+    else
+      {:error, reason} ->
+        Logger.warning("Monthly expense calculation failed: #{inspect(reason)}")
+        {:error, reason}
     end
   end
 
   @doc """
-  Analyze emergency fund readiness and provide recommendations.
+  Calculates emergency fund status and progress tracking information.
 
-  Returns a comprehensive analysis of emergency fund status including:
-  - Current coverage in months
-  - Progress percentage
-  - Readiness status
-  - Recommendations
+  Returns comprehensive status including progress percentage, amount remaining,
+  and timeline to goal completion based on monthly contributions.
+
+  ## Parameters
+  - target_amount: Target emergency fund amount
+  - current_amount: Current saved amount toward goal
+  - monthly_contribution: Planned monthly savings amount
+
+  ## Returns
+  Map containing:
+  - target_amount: Target amount
+  - current_amount: Current progress amount  
+  - amount_remaining: Amount still needed
+  - progress_percentage: Completion percentage
+  - months_to_goal: Months to reach target (nil if no contribution)
+  - goal_achieved: Boolean if goal is complete
+
   """
-  def analyze_readiness do
-    with {:ok, monthly_expenses} <- calculate_monthly_expenses() do
-      goals = FinancialGoal.by_type!(:emergency_fund)
+  def emergency_fund_status(target_amount, current_amount, monthly_contribution) do
+    Logger.debug(
+      "Calculating emergency fund status: target=#{target_amount}, current=#{current_amount}, contribution=#{monthly_contribution}"
+    )
 
-      case goals do
-        [] ->
-          {:ok,
-           %{
-             status: :no_goal,
-             monthly_expenses: monthly_expenses,
-             recommended_target: Decimal.mult(monthly_expenses, Decimal.new("6")),
-             current_coverage_months: Decimal.new("0"),
-             recommendation: "Create an emergency fund goal to get started"
-           }}
+    amount_remaining = calculate_amount_remaining(target_amount, current_amount)
+    progress_percentage = calculate_progress_percentage(target_amount, current_amount)
+    {months_to_goal, goal_achieved} = calculate_timeline(amount_remaining, monthly_contribution)
 
-        [goal | _] ->
-          current_coverage =
-            if Decimal.gt?(monthly_expenses, Decimal.new("0")) do
-              Decimal.div(goal.current_amount, monthly_expenses)
-            else
-              Decimal.new("0")
-            end
+    status = %{
+      target_amount: target_amount,
+      current_amount: current_amount,
+      amount_remaining: amount_remaining,
+      progress_percentage: progress_percentage,
+      months_to_goal: months_to_goal,
+      goal_achieved: goal_achieved
+    }
 
-          progress_percentage =
-            if Decimal.gt?(goal.target_amount, Decimal.new("0")) do
-              Decimal.div(goal.current_amount, goal.target_amount)
-              |> Decimal.mult(Decimal.new("100"))
-            else
-              Decimal.new("0")
-            end
+    Logger.debug("Emergency fund status calculated: #{inspect(status)}")
+    {:ok, status}
+  end
 
-          {status, recommendation} =
-            cond do
-              Decimal.gte?(current_coverage, Decimal.new("6")) ->
-                {:adequate, "Your emergency fund is fully funded!"}
+  @doc """
+  Auto-creates an emergency fund goal based on recent expense history.
 
-              Decimal.gte?(current_coverage, Decimal.new("3")) ->
-                {:partial, "Good progress! Continue building to 6 months coverage."}
+  Analyzes the last 12 months of expenses to determine a target amount,
+  then creates a FinancialGoal resource with appropriate defaults.
 
-              true ->
-                {:insufficient, "Priority: Build emergency fund to at least 3 months expenses."}
-            end
+  ## Parameters
+  - months: Number of months of expenses to target (default: 6)
 
-          {:ok,
-           %{
-             status: status,
-             monthly_expenses: monthly_expenses,
-             current_amount: goal.current_amount,
-             target_amount: goal.target_amount,
-             current_coverage_months: Decimal.round(current_coverage, 1),
-             progress_percentage: Decimal.round(progress_percentage, 2),
-             recommendation: recommendation,
-             goal: goal
-           }}
+  ## Examples
+
+      iex> EmergencyFundCalculator.auto_create_emergency_fund_goal(6)
+      {:ok, %FinancialGoal{name: "Emergency Fund", goal_type: :emergency_fund, ...}}
+
+  """
+  def auto_create_emergency_fund_goal(months \\ 6) do
+    Logger.debug("Auto-creating emergency fund goal for #{months} months")
+
+    with :ok <- validate_months(months),
+         {:ok, monthly_expenses} <- calculate_monthly_expenses_from_period(12),
+         {:ok, target_amount} <- calculate_emergency_fund_target(monthly_expenses, months) do
+      goal_attrs = %{
+        name: "Emergency Fund",
+        target_amount: target_amount,
+        current_amount: Decimal.new("0.00"),
+        goal_type: :emergency_fund,
+        monthly_contribution: calculate_suggested_contribution(target_amount),
+        is_active: true
+      }
+
+      case FinancialGoal.create(goal_attrs) do
+        {:ok, goal} ->
+          Logger.info("Auto-created emergency fund goal: #{goal.id} with target #{target_amount}")
+          {:ok, goal}
+
+        {:error, reason} ->
+          Logger.error("Failed to create emergency fund goal: #{inspect(reason)}")
+          {:error, reason}
+      end
+    else
+      {:error, reason} ->
+        Logger.warning("Auto-create emergency fund goal failed: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  # Private helper functions
+
+  defp validate_monthly_expenses(monthly_expenses) do
+    if Decimal.negative?(monthly_expenses) do
+      {:error, :negative_expenses}
+    else
+      :ok
+    end
+  end
+
+  defp validate_months(months) when is_integer(months) and months > 0 and months <= 12 do
+    :ok
+  end
+
+  defp validate_months(_months) do
+    {:error, :invalid_months}
+  end
+
+  defp validate_period_months(period_months)
+       when is_integer(period_months) and period_months > 0 do
+    :ok
+  end
+
+  defp validate_period_months(_period_months) do
+    {:error, :invalid_period}
+  end
+
+  defp get_expenses_for_period(start_date, end_date) do
+    require Ash.Query
+
+    Expense
+    |> Ash.Query.filter(date >= ^start_date and date <= ^end_date)
+    |> Ash.read!()
+  end
+
+  defp calculate_total_expenses(expenses) do
+    expenses
+    |> Enum.map(& &1.amount)
+    |> Enum.reduce(Decimal.new("0.00"), &Decimal.add/2)
+  end
+
+  defp calculate_amount_remaining(target_amount, current_amount) do
+    remaining = Decimal.sub(target_amount, current_amount)
+
+    if Decimal.negative?(remaining) do
+      Decimal.new("0.00")
+    else
+      remaining
+    end
+  end
+
+  defp calculate_progress_percentage(target_amount, current_amount) do
+    if Decimal.equal?(target_amount, Decimal.new("0.00")) do
+      Decimal.new("100.00")
+    else
+      # Calculate percentage with 2 decimal places
+      percentage =
+        current_amount
+        |> Decimal.div(target_amount)
+        |> Decimal.mult(Decimal.new("100"))
+        |> Decimal.round(2)
+
+      # Cap at 100%
+      if Decimal.gt?(percentage, Decimal.new("100.00")) do
+        Decimal.new("100.00")
+      else
+        percentage
       end
     end
   end
 
-  @doc """
-  Project emergency fund growth based on monthly contributions.
+  defp calculate_timeline(amount_remaining, monthly_contribution) do
+    cond do
+      Decimal.equal?(amount_remaining, Decimal.new("0.00")) ->
+        # Goal already achieved
+        {0, true}
 
-  ## Parameters
-  - goal: Current emergency fund goal
-  - monthly_contribution: Planned monthly contribution amount
-  - months_ahead: Number of months to project (default 12)
+      Decimal.equal?(monthly_contribution, Decimal.new("0.00")) ->
+        # No contribution, timeline unknown
+        {nil, false}
 
-  Returns list of projections showing expected balance over time.
-  """
-  def project_growth(goal, monthly_contribution, months_ahead \\ 12) do
-    current_amount = goal.current_amount
+      true ->
+        # Calculate months needed
+        months =
+          amount_remaining
+          |> Decimal.div(monthly_contribution)
+          |> Decimal.round(0, :up)
+          |> Decimal.to_integer()
 
-    projections =
-      Enum.map(1..months_ahead, fn month ->
-        projected_amount =
-          Decimal.add(
-            current_amount,
-            Decimal.mult(monthly_contribution, Decimal.new(to_string(month)))
-          )
+        {months, false}
+    end
+  end
 
-        is_complete = Decimal.gte?(projected_amount, goal.target_amount)
+  defp calculate_suggested_contribution(target_amount) do
+    # Suggest contribution to reach goal in 24 months
+    suggested_months = 24
 
-        %{
-          month: month,
-          projected_amount: Decimal.min(projected_amount, goal.target_amount),
-          progress_percentage:
-            if Decimal.gt?(goal.target_amount, Decimal.new("0")) do
-              Decimal.div(projected_amount, goal.target_amount)
-              |> Decimal.mult(Decimal.new("100"))
-              |> Decimal.min(Decimal.new("100"))
-              |> Decimal.round(2)
-            else
-              Decimal.new("0")
-            end,
-          is_complete: is_complete
-        }
-      end)
-
-    {:ok, projections}
+    target_amount
+    |> Decimal.div(Decimal.new(to_string(suggested_months)))
+    |> Decimal.round(2)
   end
 end

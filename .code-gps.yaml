@@ -1,4 +1,4 @@
-# Code GPS v2.0 - 258ms | 2 LiveViews | 20 Components
+# Code GPS v2.0 - 269ms | 2 LiveViews | 20 Components
 
 # === ROUTES ===
 /: DashboardLive ✅
@@ -23,7 +23,7 @@
 # === LIVE VIEWS ===
 Dashboard:
   file: lib/ashfolio_web/live/dashboard_live.ex
-  mount: 12 | render: 204
+  mount: 18 | render: 210
   events: ["refresh_prices", "sort", "create_snapshot"]
   subscriptions: [accounts, transactions, net_worth...5]
   missing: []
@@ -46,15 +46,15 @@ label: lib/ashfolio_web/components/core_components.ex:397 (3x) | attrs: ["for"]
 error: lib/ashfolio_web/components/core_components.ex:410 (9x)
 
 # === DEPENDENCIES ===
-ash: ✅ (1052)
+ash: ✅ (1040)
 contex: ✅ (125)
-decimal: ✅ (870)
+decimal: ✅ (867)
 mox: ✅ (1)
 wallaby: ❌ (1)
 
 # === FRESHNESS ===
 recent: ["mix.exs", "lib/ashfolio/financial_management/retirement_calculator.ex", "test/ashfolio/financial_management/retirement_calculator_test.exs", "lib/mix/tasks/code_gps.ex", "test/ashfolio/financial_management/category_migration_test.exs"]
-uncommitted: 0 files
+uncommitted: 19 files
 commits_ahead: 0
 
 # === TEST GAPS ===

@@ -1,10 +1,13 @@
 defmodule AshfolioWeb.ExpenseLive.Import do
   use AshfolioWeb, :live_view
 
+  alias Ashfolio.FinancialManagement.{TransactionCategory, Expense}
+  alias Ashfolio.Portfolio.{Account, Transaction, Symbol}
+
   @impl true
   def mount(_params, _session, socket) do
-    categories = Ashfolio.FinancialManagement.TransactionCategory.list!()
-    accounts = Ashfolio.Portfolio.Account.list!()
+    categories = TransactionCategory.list!()
+    accounts = Account.list!()
 
     {:ok,
      socket
@@ -493,7 +496,7 @@ defmodule AshfolioWeb.ExpenseLive.Import do
       notes: "Imported from CSV"
     }
 
-    Ashfolio.FinancialManagement.Expense.create(expense_params)
+    Expense.create(expense_params)
   end
 
   defp parse_date(date_str) do
@@ -527,13 +530,13 @@ defmodule AshfolioWeb.ExpenseLive.Import do
   end
 
   defp find_or_create_category_by_name(name) do
-    case Ashfolio.FinancialManagement.TransactionCategory.get_by_name(name) do
+    case TransactionCategory.get_by_name(name) do
       {:ok, category} ->
         category.id
 
       {:error, _} ->
         # Create new category
-        case Ashfolio.FinancialManagement.TransactionCategory.create(%{
+        case TransactionCategory.create(%{
                name: name,
                color: "#6B7280"
              }) do
@@ -591,11 +594,11 @@ defmodule AshfolioWeb.ExpenseLive.Import do
       notes: "Imported from CSV: #{description}"
     }
 
-    Ashfolio.Portfolio.Transaction.create(transaction_params)
+    Transaction.create(transaction_params)
   end
 
   defp find_or_create_symbol(ticker, description) do
-    case Ashfolio.Portfolio.Symbol.find_by_symbol(ticker) do
+    case Symbol.find_by_symbol(ticker) do
       {:ok, symbol} ->
         symbol.id
 
@@ -609,7 +612,7 @@ defmodule AshfolioWeb.ExpenseLive.Import do
           data_source: :manual
         }
 
-        case Ashfolio.Portfolio.Symbol.create(symbol_params) do
+        case Symbol.create(symbol_params) do
           {:ok, symbol} -> symbol.id
           {:error, _} -> nil
         end

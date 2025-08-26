@@ -3,6 +3,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
 
   alias Ashfolio.Portfolio.Transaction
   alias Ashfolio.FinancialManagement.{TransactionCategory, TransactionFiltering}
+  alias Ashfolio.PubSub
   alias AshfolioWeb.TransactionLive.FormComponent
   alias AshfolioWeb.Live.{ErrorHelpers, FormatHelpers}
 
@@ -50,8 +51,8 @@ defmodule AshfolioWeb.TransactionLive.Index do
       |> assign(:filter_timer, nil)
 
     # Subscribe to transaction and category updates
-    Ashfolio.PubSub.subscribe("transactions")
-    Ashfolio.PubSub.subscribe("categories")
+    PubSub.subscribe("transactions")
+    PubSub.subscribe("categories")
 
     {:ok, socket}
   end
@@ -93,7 +94,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
 
   @impl true
   def handle_event("edit_transaction", %{"id" => id}, socket) do
-    transaction = Ashfolio.Portfolio.Transaction.get_by_id!(id)
+    transaction = Transaction.get_by_id!(id)
 
     {:noreply,
      socket
@@ -188,10 +189,10 @@ defmodule AshfolioWeb.TransactionLive.Index do
   def handle_event("delete_transaction", %{"id" => id}, socket) do
     socket = assign(socket, :deleting_transaction_id, id)
 
-    case Ashfolio.Portfolio.Transaction.destroy(id) do
+    case Transaction.destroy(id) do
       :ok ->
         # Broadcast transaction deleted event
-        Ashfolio.PubSub.broadcast!("transactions", {:transaction_deleted, id})
+        PubSub.broadcast!("transactions", {:transaction_deleted, id})
 
         transactions = list_transactions()
 
@@ -216,7 +217,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
   @impl true
   def handle_info({FormComponent, {:saved, transaction, message}}, socket) do
     # Broadcast transaction saved event
-    Ashfolio.PubSub.broadcast!("transactions", {:transaction_saved, transaction})
+    PubSub.broadcast!("transactions", {:transaction_saved, transaction})
 
     transactions = list_transactions()
 
@@ -312,7 +313,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
   end
 
   defp list_transactions() do
-    case Ashfolio.Portfolio.Transaction.list() do
+    case Transaction.list() do
       {:ok, transactions} ->
         transactions |> Ash.load!([:account, :symbol, :category])
 

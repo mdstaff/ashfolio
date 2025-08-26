@@ -1,7 +1,7 @@
 defmodule AshfolioWeb.FinancialGoalLive.Index do
   use AshfolioWeb, :live_view
 
-  alias Ashfolio.FinancialManagement.{FinancialGoal, EmergencyFundCalculator}
+  alias Ashfolio.FinancialManagement.{FinancialGoal, EmergencyFundStatus}
   alias AshfolioWeb.Live.{FormatHelpers, ErrorHelpers}
   alias AshfolioWeb.FinancialGoalLive.FormComponent
 
@@ -105,12 +105,18 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
 
   @impl true
   def handle_event("setup_emergency_fund", _params, socket) do
-    case EmergencyFundCalculator.setup_emergency_fund_goal(months_coverage: 6, months_history: 12) do
-      {:ok, _goal} ->
+    case FinancialGoal.setup_emergency_fund_goal!(6) do
+      {:created, _goal} ->
         {:noreply,
          socket
          |> load_goals_and_analysis()
          |> ErrorHelpers.put_success_flash("Emergency fund goal created successfully")}
+
+      {:updated, _goal} ->
+        {:noreply,
+         socket
+         |> load_goals_and_analysis()
+         |> ErrorHelpers.put_success_flash("Emergency fund goal updated successfully")}
 
       {:error, _error} ->
         {:noreply, ErrorHelpers.put_error_flash(socket, "Failed to create emergency fund goal")}
@@ -418,9 +424,6 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
                         <div class="flex items-center">
                           <div>
                             <div class="text-sm font-medium text-gray-900">{goal.name}</div>
-                            <%= if goal.description do %>
-                              <div class="text-sm text-gray-500">{goal.description}</div>
-                            <% end %>
                           </div>
                         </div>
                       </td>
@@ -636,9 +639,28 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
 
       # Load emergency fund analysis
       emergency_analysis =
-        case EmergencyFundCalculator.analyze_readiness() do
-          {:ok, analysis} -> analysis
-          {:error, _} -> nil
+        case FinancialGoal.analyze_emergency_fund_readiness!() do
+          {:analysis, analysis} ->
+            # Ensure consistent field names for template
+            Map.merge(analysis, %{
+              status: analysis.readiness_level,
+              current_coverage_months: analysis.months_coverage,
+              recommendation: "Emergency fund analysis complete."
+            })
+
+          {:no_goal, recommendation} ->
+            # Normalize structure to match template expectations
+            Map.merge(recommendation, %{
+              goal: nil,
+              current_amount: Decimal.new("0.00"),
+              current_coverage_months: Decimal.new("0.00"),
+              recommendation: recommendation.message,
+              # Template expects :status field
+              status: recommendation.status
+            })
+
+          {:error, _} ->
+            nil
         end
 
       socket
@@ -813,15 +835,8 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
     """
   end
 
-  defp status_color(:adequate), do: "text-green-600"
-  defp status_color(:partial), do: "text-yellow-600"
-  defp status_color(:insufficient), do: "text-red-600"
-  defp status_color(:no_goal), do: "text-gray-600"
-
-  defp status_label(:adequate), do: "Ready"
-  defp status_label(:partial), do: "Building"
-  defp status_label(:insufficient), do: "At Risk"
-  defp status_label(:no_goal), do: "Not Started"
+  defp status_color(status), do: EmergencyFundStatus.status_color(status)
+  defp status_label(status), do: EmergencyFundStatus.status_label(status)
 
   defp format_months_to_goal(nil), do: "No timeline"
 

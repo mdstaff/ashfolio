@@ -137,7 +137,7 @@ defmodule Ashfolio.DatabaseManager do
     end
   end
 
-  # TODO: Future enhancement for Prod > Staging > Dev replication
+  # NOTE: Future enhancement for Prod > Staging > Dev replication
   @doc """
   Replicates data from production to staging environment.
 

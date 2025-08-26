@@ -1,9 +1,15 @@
 defmodule AshfolioWeb.DashboardLive do
   use AshfolioWeb, :live_view
 
-  alias Ashfolio.Portfolio.HoldingsCalculator
+  alias Ashfolio.Portfolio.{HoldingsCalculator, Account}
   alias Ashfolio.MarketData.PriceManager
-  alias Ashfolio.FinancialManagement.{Expense, FinancialGoal, EmergencyFundCalculator}
+
+  alias Ashfolio.FinancialManagement.{
+    Expense,
+    FinancialGoal,
+    NetWorthSnapshot
+  }
+
   alias Ashfolio.Context
   alias AshfolioWeb.Live.{ErrorHelpers, FormatHelpers}
   require Logger
@@ -110,7 +116,7 @@ defmodule AshfolioWeb.DashboardLive do
       }
 
       # Try to create new snapshot, or update existing one for today
-      case Ashfolio.FinancialManagement.NetWorthSnapshot.create(snapshot_data) do
+      case NetWorthSnapshot.create(snapshot_data) do
         {:ok, _snapshot} ->
           socket =
             socket
@@ -121,12 +127,12 @@ defmodule AshfolioWeb.DashboardLive do
 
         {:error, _error} ->
           # If creation failed (likely due to date uniqueness), try to find existing snapshot for today
-          case Ashfolio.FinancialManagement.NetWorthSnapshot.list!()
+          case NetWorthSnapshot.list!()
                |> Enum.filter(fn snapshot ->
                  Date.compare(snapshot.snapshot_date, today) == :eq
                end) do
             [existing_snapshot] ->
-              case Ashfolio.FinancialManagement.NetWorthSnapshot.update(
+              case NetWorthSnapshot.update(
                      existing_snapshot,
                      snapshot_data
                    ) do
@@ -835,8 +841,9 @@ defmodule AshfolioWeb.DashboardLive do
 
       # Get emergency fund status
       emergency_fund_status =
-        case EmergencyFundCalculator.analyze_readiness() do
-          {:ok, analysis} -> analysis.status
+        case FinancialGoal.analyze_emergency_fund_readiness!() do
+          {:analysis, analysis} -> analysis.readiness_level
+          {:no_goal, _recommendation} -> :no_goal
           {:error, _} -> :no_goal
         end
 
@@ -860,7 +867,7 @@ defmodule AshfolioWeb.DashboardLive do
 
   defp calculate_current_net_worth do
     # Calculate from current account balances
-    case Ashfolio.Portfolio.Account |> Ash.Query.for_read(:read) |> Ash.read!() do
+    case Account |> Ash.Query.for_read(:read) |> Ash.read!() do
       [] ->
         Decimal.new(0)
 
@@ -874,7 +881,7 @@ defmodule AshfolioWeb.DashboardLive do
 
   defp calculate_total_cash do
     # Sum cash account balances
-    case Ashfolio.Portfolio.Account.cash_accounts!() do
+    case Account.cash_accounts!() do
       [] ->
         Decimal.new(0)
 
@@ -888,7 +895,7 @@ defmodule AshfolioWeb.DashboardLive do
 
   defp calculate_total_investments do
     # Sum investment account balances
-    case Ashfolio.Portfolio.Account.investment_accounts!() do
+    case Account.investment_accounts!() do
       [] ->
         Decimal.new(0)
 

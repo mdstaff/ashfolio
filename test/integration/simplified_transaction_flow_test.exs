@@ -10,7 +10,7 @@ defmodule AshfolioWeb.Integration.SimplifiedTransactionFlowTest do
   @moduletag :integration
   @moduletag :fast
 
-  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
+  alias Ashfolio.Portfolio.{Account, Symbol, Transaction, Calculator}
   alias Ashfolio.SQLiteHelpers
 
   setup do
@@ -177,7 +177,7 @@ defmodule AshfolioWeb.Integration.SimplifiedTransactionFlowTest do
       end)
 
       # Verify portfolio calculation integration
-      case Ashfolio.Portfolio.Calculator.calculate_position_returns() do
+      case Calculator.calculate_position_returns() do
         {:ok, positions} ->
           aapl_position = Enum.find(positions, fn pos -> pos.symbol == "AAPL" end)
           assert aapl_position != nil

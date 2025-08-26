@@ -260,5 +260,118 @@ defmodule Ashfolio.FinancialManagement.FinancialGoal do
           end
       end
     end
+
+    @doc """
+    Creates or updates an emergency fund goal using EmergencyFundCalculator.
+
+    Integrates with expense history to automatically calculate target amount
+    and suggested monthly contribution for emergency fund planning.
+    """
+    def setup_emergency_fund_goal!(months \\ 6) do
+      alias Ashfolio.FinancialManagement.EmergencyFundCalculator
+
+      existing_goals = by_type!(:emergency_fund)
+
+      case existing_goals do
+        [] ->
+          # No existing emergency fund goal, create one
+          case EmergencyFundCalculator.auto_create_emergency_fund_goal(months) do
+            {:ok, goal} -> {:created, goal}
+            {:error, reason} -> {:error, reason}
+          end
+
+        [goal | _] ->
+          # Update existing goal with current expense data
+          case EmergencyFundCalculator.calculate_monthly_expenses_from_period(12) do
+            {:ok, monthly_expenses} ->
+              case EmergencyFundCalculator.calculate_emergency_fund_target(
+                     monthly_expenses,
+                     months
+                   ) do
+                {:ok, new_target} ->
+                  case update(goal, %{target_amount: new_target}) do
+                    {:ok, updated_goal} -> {:updated, updated_goal}
+                    {:error, reason} -> {:error, reason}
+                  end
+
+                {:error, reason} ->
+                  {:error, reason}
+              end
+
+            {:error, reason} ->
+              {:error, reason}
+          end
+      end
+    end
+
+    @doc """
+    Gets comprehensive emergency fund analysis using EmergencyFundCalculator.
+
+    Returns detailed status including progress, timeline, and recommendations
+    for emergency fund planning integrated with current expense patterns.
+    """
+    def analyze_emergency_fund_readiness!() do
+      alias Ashfolio.FinancialManagement.EmergencyFundCalculator
+
+      emergency_goals = by_type!(:emergency_fund)
+
+      with {:ok, monthly_expenses} <-
+             EmergencyFundCalculator.calculate_monthly_expenses_from_period(12) do
+        case emergency_goals do
+          [] ->
+            # No goal exists, provide recommendation to create one
+            {:ok, target_amount} =
+              EmergencyFundCalculator.calculate_emergency_fund_target(monthly_expenses, 6)
+
+            {:no_goal,
+             %{
+               recommended_target: target_amount,
+               monthly_expenses: monthly_expenses,
+               months_coverage: 6,
+               status: :no_goal,
+               message: "No emergency fund goal set. Consider creating one."
+             }}
+
+          [goal | _] ->
+            # Analyze existing goal
+            # Emergency fund status calculation (always returns {:ok, status})
+            {:ok, status} =
+              EmergencyFundCalculator.emergency_fund_status(
+                goal.target_amount,
+                goal.current_amount,
+                goal.monthly_contribution || Decimal.new("0.00")
+              )
+
+            readiness_level =
+              cond do
+                status.goal_achieved ->
+                  :fully_funded
+
+                Decimal.gte?(status.progress_percentage, Decimal.new("75.00")) ->
+                  :mostly_funded
+
+                Decimal.gte?(status.progress_percentage, Decimal.new("25.00")) ->
+                  :partially_funded
+
+                true ->
+                  :underfunded
+              end
+
+            {:analysis,
+             Map.merge(status, %{
+               goal: goal,
+               monthly_expenses: monthly_expenses,
+               readiness_level: readiness_level,
+               months_coverage:
+                 if(Decimal.gt?(monthly_expenses, Decimal.new("0.00")),
+                   do: Decimal.div(goal.target_amount, monthly_expenses) |> Decimal.round(1),
+                   else: Decimal.new("0.00")
+                 )
+             })}
+        end
+      else
+        {:error, reason} -> {:error, reason}
+      end
+    end
   end
 end

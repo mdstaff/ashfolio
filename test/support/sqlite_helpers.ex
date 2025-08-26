@@ -7,6 +7,9 @@ defmodule Ashfolio.SQLiteHelpers do
   Database-as-user architecture: Each database represents one user, eliminating user_id dependencies.
   """
 
+  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
+  alias Ashfolio.MarketData.PriceManager
+
   # Note: UserSettings removed - using simplified approach for database-as-user architecture testing
 
   @doc """
@@ -40,8 +43,6 @@ defmodule Ashfolio.SQLiteHelpers do
   In database-as-user architecture, accounts exist without user_id references.
   """
   def create_default_account! do
-    alias Ashfolio.Portfolio.Account
-
     # Check if default account already exists
     case Account.get_by_name("Default Test Account") do
       {:ok, account} when not is_nil(account) ->
@@ -82,8 +83,6 @@ defmodule Ashfolio.SQLiteHelpers do
   It's idempotent - safe to call multiple times.
   """
   def create_common_symbols! do
-    alias Ashfolio.Portfolio.Symbol
-
     common_tickers = ["AAPL", "MSFT", "GOOGL", "TSLA"]
 
     Enum.map(common_tickers, fn ticker ->
@@ -154,7 +153,7 @@ defmodule Ashfolio.SQLiteHelpers do
     end
 
     # Check default account exists
-    case Ashfolio.Portfolio.Account.get_by_name("Default Test Account") do
+    case Account.get_by_name("Default Test Account") do
       {:ok, nil} ->
         raise "❌ SAFEGUARD FAILURE: Default account not found after setup"
 
@@ -170,7 +169,7 @@ defmodule Ashfolio.SQLiteHelpers do
 
     missing_symbols =
       Enum.filter(common_tickers, fn ticker ->
-        case Ashfolio.Portfolio.Symbol.find_by_symbol(ticker) do
+        case Symbol.find_by_symbol(ticker) do
           {:ok, []} -> true
           {:ok, [_symbol]} -> false
           {:error, _} -> true
@@ -219,8 +218,6 @@ defmodule Ashfolio.SQLiteHelpers do
   Database-as-user architecture: No user_id needed.
   """
   def get_default_account do
-    alias Ashfolio.Portfolio.Account
-
     case Account.get_by_name("Default Test Account") do
       {:ok, account} when not is_nil(account) ->
         account
@@ -237,8 +234,6 @@ defmodule Ashfolio.SQLiteHelpers do
   Gets a common test symbol by ticker, assumes it already exists.
   """
   def get_common_symbol(ticker) do
-    alias Ashfolio.Portfolio.Symbol
-
     case Symbol.find_by_symbol(ticker) do
       {:ok, [symbol]} ->
         symbol
@@ -272,8 +267,6 @@ defmodule Ashfolio.SQLiteHelpers do
   accounts with specific requirements that differ from the default.
   """
   def get_or_create_account(attrs \\ %{}) do
-    alias Ashfolio.Portfolio.Account
-
     # For the default case, use the global account
     default_attrs = %{
       name: "Default Test Account",
@@ -324,8 +317,6 @@ defmodule Ashfolio.SQLiteHelpers do
   creating custom symbols with retry logic for SQLite concurrency.
   """
   def get_or_create_symbol(ticker, attrs \\ %{}) do
-    alias Ashfolio.Portfolio.Symbol
-
     common_tickers = ["AAPL", "MSFT", "GOOGL", "TSLA"]
 
     # Check if we need to update an existing symbol's price
@@ -412,8 +403,6 @@ defmodule Ashfolio.SQLiteHelpers do
   Note: Transaction resource doesn't have user_id field - user is tracked through account relationship
   """
   def create_test_transaction(account \\ nil, symbol \\ nil, attrs \\ %{}) do
-    alias Ashfolio.Portfolio.Transaction
-
     account = account || get_default_account()
     symbol = symbol || get_common_symbol("AAPL")
 
@@ -492,7 +481,7 @@ defmodule Ashfolio.SQLiteHelpers do
   def allow_price_manager_db_access do
     try do
       # Get the PriceManager GenServer pid
-      price_manager_pid = Process.whereis(Ashfolio.MarketData.PriceManager)
+      price_manager_pid = Process.whereis(PriceManager)
 
       if price_manager_pid do
         # Allow the PriceManager process to access the database
@@ -529,8 +518,8 @@ defmodule Ashfolio.SQLiteHelpers do
 
     # Check if we have the expected baseline data by counting records
     # Database-as-user architecture: No User model to count
-    account_count = Ashfolio.Repo.aggregate(Ashfolio.Portfolio.Account, :count)
-    symbol_count = Ashfolio.Repo.aggregate(Ashfolio.Portfolio.Symbol, :count)
+    account_count = Ashfolio.Repo.aggregate(Account, :count)
+    symbol_count = Ashfolio.Repo.aggregate(Symbol, :count)
 
     IO.puts("📊 Database state:")
     IO.puts("   Accounts: #{account_count}")
