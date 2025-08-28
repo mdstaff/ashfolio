@@ -226,5 +226,5 @@ See [Contributing Guide](CONTRIBUTING.md) and [First Contribution Guide](docs/ge
 
 ---
 
-License: MIT  
+License: MIT
 Privacy: Financial data stays on your computer.

@@ -1,8 +1,8 @@
 # Monthly Financial Management Workflow
 
-Planning Document (Implementation in v0.2.0+)  
- 30-45 minutes per month  
- Ashfolio v0.2.0+ with cash accounts and expense tracking enabled
+Planning Document (Implementation in v0.2.0+)
+30-45 minutes per month
+Ashfolio v0.2.0+ with cash accounts and expense tracking enabled
 
 ## Overview
 
@@ -18,9 +18,9 @@ Monthly Workflow Goals:
 
 ## 📅 Monthly Schedule Recommendation
 
-First weekend of each month  
- Monthly (with optional mid-month check-ins)  
- 30-45 minutes for comprehensive update
+First weekend of each month
+Monthly (with optional mid-month check-ins)
+30-45 minutes for comprehensive update
 
 ---
 
@@ -279,15 +279,15 @@ After following this monthly workflow consistently:
 
 ### For Different User Types
 
-Focus more time on transaction entry and market price understanding  
- Emphasize performance analysis and tactical rebalancing  
- Prioritize goal tracking and long-term projections  
- Focus on savings rate optimization and expense minimization
+Focus more time on transaction entry and market price understanding
+Emphasize performance analysis and tactical rebalancing
+Prioritize goal tracking and long-term projections
+Focus on savings rate optimization and expense minimization
 
 ### For Different Account Complexity
 
-Simple Portfolio (1-3 accounts): 20-25 minute workflow  
-Moderate Complexity (4-7 accounts): 30-35 minute workflow  
+Simple Portfolio (1-3 accounts): 20-25 minute workflow
+Moderate Complexity (4-7 accounts): 30-35 minute workflow
 High Complexity (8+ accounts): 40-45 minute workflow with possible bi-weekly updates
 
 ---

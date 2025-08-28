@@ -1,9 +1,11 @@
 defmodule AshfolioWeb.CategoryLive.Index do
+  @moduledoc false
   use AshfolioWeb, :live_view
 
   alias Ashfolio.FinancialManagement.TransactionCategory
-  alias AshfolioWeb.Live.{FormatHelpers, ErrorHelpers}
   alias AshfolioWeb.CategoryLive.FormComponent
+  alias AshfolioWeb.Live.ErrorHelpers
+  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def mount(_params, _session, socket) do

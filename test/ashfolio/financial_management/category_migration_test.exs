@@ -9,15 +9,15 @@ defmodule Ashfolio.FinancialManagement.CategoryMigrationTest do
 
   use Ashfolio.DataCase, async: false
 
+  import Ecto.Query
+
+  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.Repo
+
   @moduletag :migration
   @moduletag :integration
 
   # Database-as-user architecture: No User entity needed
-  alias Ashfolio.FinancialManagement.TransactionCategory
-  alias Ashfolio.Repo
-
-  import Ecto.Query
-
   describe "category seeding migration" do
     test "seeds categories for users without categories" do
       # Database-as-user architecture: test database state
@@ -34,7 +34,7 @@ defmodule Ashfolio.FinancialManagement.CategoryMigrationTest do
 
       # Verify correct categories were created
       expected_names = ["Growth", "Income", "Speculative", "Index", "Cash", "Bonds"]
-      actual_names = Enum.map(final_categories, & &1.name) |> Enum.sort()
+      actual_names = final_categories |> Enum.map(& &1.name) |> Enum.sort()
       assert actual_names == Enum.sort(expected_names)
 
       # Verify all categories are system categories
@@ -63,7 +63,7 @@ defmodule Ashfolio.FinancialManagement.CategoryMigrationTest do
       categories_exist = length(existing_categories) > 0
 
       # Don't run migration if categories exist
-      unless categories_exist do
+      if !categories_exist do
         simulate_migration_for_user()
       end
 
@@ -135,7 +135,7 @@ defmodule Ashfolio.FinancialManagement.CategoryMigrationTest do
   # Private helper functions that simulate the migration logic
   # Database-as-user architecture: No user-based queries needed
 
-  defp simulate_migration_for_user() do
+  defp simulate_migration_for_user do
     # Only seed if database has no categories (migration logic)
     {:ok, existing_categories} = TransactionCategory.list()
 
@@ -165,11 +165,10 @@ defmodule Ashfolio.FinancialManagement.CategoryMigrationTest do
   defp simulate_migration_rollback do
     # Get all system categories and destroy them via direct SQL
     # This simulates the migration rollback behavior
-    from(tc in "transaction_categories",
-      where:
-        tc.is_system == true and
-          tc.name in ["Growth", "Income", "Speculative", "Index", "Cash", "Bonds"]
+    Repo.delete_all(
+      from(tc in "transaction_categories",
+        where: tc.is_system == true and tc.name in ["Growth", "Income", "Speculative", "Index", "Cash", "Bonds"]
+      )
     )
-    |> Repo.delete_all()
   end
 end

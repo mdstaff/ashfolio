@@ -1,14 +1,14 @@
 defmodule Ashfolio.Portfolio.CalculatorTest do
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.Portfolio.Calculator
+  alias Ashfolio.Portfolio.Transaction
+  alias Ashfolio.SQLiteHelpers
+
   @moduletag :calculations
   @moduletag :unit
   @moduletag :fast
   @moduletag :smoke
-
-  alias Ashfolio.Portfolio.Calculator
-  alias Ashfolio.Portfolio.Transaction
-  alias Ashfolio.SQLiteHelpers
 
   describe "calculate_portfolio_value/1" do
     test "calculates total portfolio value correctly" do
@@ -193,7 +193,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
 
       # Find AAPL position
       aapl_position = Enum.find(positions, fn p -> p.symbol == "AAPL" end)
-      assert aapl_position != nil
+      assert aapl_position
       assert Decimal.equal?(aapl_position.quantity, Decimal.new("10"))
       # 10 * $150
       assert Decimal.equal?(aapl_position.current_value, Decimal.new("1500.00"))
@@ -203,7 +203,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
 
       # Find MSFT position
       msft_position = Enum.find(positions, fn p -> p.symbol == "MSFT" end)
-      assert msft_position != nil
+      assert msft_position
       assert Decimal.equal?(msft_position.quantity, Decimal.new("5"))
       # 5 * $200
       assert Decimal.equal?(msft_position.current_value, Decimal.new("1000.00"))
@@ -571,7 +571,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
       assert length(position_returns) > 0
 
       zero_cost_position = Enum.find(position_returns, fn p -> p.symbol == "ZERO" end)
-      assert zero_cost_position != nil
+      assert zero_cost_position
       assert Decimal.equal?(zero_cost_position.cost_basis, Decimal.new(0))
       assert Decimal.equal?(zero_cost_position.current_value, Decimal.new("1000.00"))
     end
@@ -598,7 +598,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
 
       {:ok, position_returns} = Calculator.calculate_position_returns()
       micro_position = Enum.find(position_returns, fn p -> p.symbol == "MICRO" end)
-      assert micro_position != nil
+      assert micro_position
       assert Decimal.equal?(micro_position.quantity, Decimal.new("0.000001"))
     end
 
@@ -624,7 +624,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
 
       {:ok, position_returns} = Calculator.calculate_position_returns()
       whale_position = Enum.find(position_returns, fn p -> p.symbol == "WHALE" end)
-      assert whale_position != nil
+      assert whale_position
       assert Decimal.equal?(whale_position.current_value, Decimal.new("1000000000.00"))
     end
 
@@ -688,7 +688,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
 
       {:ok, position_returns} = Calculator.calculate_position_returns()
       short_position = Enum.find(position_returns, fn p -> p.symbol == "SHORT" end)
-      assert short_position != nil
+      assert short_position
       assert Decimal.equal?(short_position.quantity, Decimal.new("-50"))
       # Negative current value for short position
       assert Decimal.equal?(short_position.current_value, Decimal.new("-5000.00"))
@@ -749,7 +749,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
 
       {:ok, position_returns} = Calculator.calculate_position_returns()
       complex_position = Enum.find(position_returns, fn p -> p.symbol == "COMPLEX2" end)
-      assert complex_position != nil
+      assert complex_position
       assert Decimal.equal?(complex_position.quantity, Decimal.new("50"))
 
       # Should handle multiple partial sells correctly
@@ -777,8 +777,7 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
             type: :buy,
             quantity: Decimal.new(symbol_data.qty),
             price: Decimal.new(symbol_data.buy_price),
-            total_amount:
-              Decimal.mult(Decimal.new(symbol_data.qty), Decimal.new(symbol_data.buy_price)),
+            total_amount: Decimal.mult(Decimal.new(symbol_data.qty), Decimal.new(symbol_data.buy_price)),
             date: ~D[2024-01-01],
             account_id: account.id,
             symbol_id: symbol.id
@@ -786,8 +785,8 @@ defmodule Ashfolio.Portfolio.CalculatorTest do
       end
 
       {:ok, total_returns} = Calculator.calculate_total_return()
-      assert total_returns.dollar_return != nil
-      assert total_returns.return_percentage != nil
+      assert total_returns.dollar_return
+      assert total_returns.return_percentage
 
       # Should have mixed P&L from winners and losers
       {:ok, portfolio_value} = Calculator.calculate_portfolio_value()

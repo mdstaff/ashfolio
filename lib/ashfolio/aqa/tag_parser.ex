@@ -30,7 +30,7 @@ defmodule Ashfolio.AQA.TagParser do
      %{
        distribution: tag_counts,
        untagged: untagged_count,
-       total_tags: Map.values(tag_counts) |> Enum.sum(),
+       total_tags: tag_counts |> Map.values() |> Enum.sum(),
        most_common: :unit,
        least_common: :performance
      }}

@@ -1,8 +1,8 @@
 defmodule AshfolioWeb.CategoryLive.IndexTest do
   use AshfolioWeb.LiveViewCase, async: false
 
-  import Phoenix.LiveViewTest
   import Ashfolio.SQLiteHelpers
+  import Phoenix.LiveViewTest
 
   alias Ashfolio.FinancialManagement.TransactionCategory
 
@@ -171,7 +171,7 @@ defmodule AshfolioWeb.CategoryLive.IndexTest do
       refute has_element?(view, "button[phx-value-id='#{system_category.id}']", "Delete")
 
       # If somehow triggered by clicking the delete event directly, should show error
-      view |> render_click("delete_category", %{"id" => system_category.id})
+      render_click(view, "delete_category", %{"id" => system_category.id})
 
       # System category deletion prevented (skip flash message check)
 

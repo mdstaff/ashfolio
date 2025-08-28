@@ -1,15 +1,15 @@
 defmodule AshfolioWeb.Components.TransactionFilterTest do
   use AshfolioWeb.LiveViewCase, async: false
 
+  import Phoenix.LiveViewTest
+
+  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.SQLiteHelpers
+  alias AshfolioWeb.Components.TransactionFilter
+
   @moduletag :liveview
   @moduletag :components
   @moduletag :transaction_filter
-
-  import Phoenix.LiveViewTest
-
-  alias AshfolioWeb.Components.TransactionFilter
-  alias Ashfolio.FinancialManagement.TransactionCategory
-  alias Ashfolio.SQLiteHelpers
 
   describe "TransactionFilter component" do
     setup do

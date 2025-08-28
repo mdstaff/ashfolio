@@ -2,6 +2,7 @@ defmodule Ashfolio.ValidationTest do
   use ExUnit.Case, async: true
 
   import Ecto.Changeset
+
   alias Ashfolio.Validation
 
   # Helper function to create a basic changeset for testing
@@ -21,14 +22,14 @@ defmodule Ashfolio.ValidationTest do
       unit_price: :decimal
     }
 
-    {%{}, types}
-    |> cast(attrs, Map.keys(types))
+    cast({%{}, types}, attrs, Map.keys(types))
   end
 
   describe "validate_positive_decimal/2" do
     test "accepts positive decimal values" do
       changeset =
-        test_changeset(%{price: Decimal.new("10.50")})
+        %{price: Decimal.new("10.50")}
+        |> test_changeset()
         |> Validation.validate_positive_decimal(:price)
 
       assert changeset.valid?
@@ -36,7 +37,8 @@ defmodule Ashfolio.ValidationTest do
 
     test "rejects zero values" do
       changeset =
-        test_changeset(%{price: Decimal.new("0")})
+        %{price: Decimal.new("0")}
+        |> test_changeset()
         |> Validation.validate_positive_decimal(:price)
 
       refute changeset.valid?
@@ -45,7 +47,8 @@ defmodule Ashfolio.ValidationTest do
 
     test "rejects negative values" do
       changeset =
-        test_changeset(%{price: Decimal.new("-5.00")})
+        %{price: Decimal.new("-5.00")}
+        |> test_changeset()
         |> Validation.validate_positive_decimal(:price)
 
       refute changeset.valid?
@@ -56,7 +59,8 @@ defmodule Ashfolio.ValidationTest do
   describe "validate_non_negative_decimal/2" do
     test "accepts positive decimal values" do
       changeset =
-        test_changeset(%{fee: Decimal.new("1.50")})
+        %{fee: Decimal.new("1.50")}
+        |> test_changeset()
         |> Validation.validate_non_negative_decimal(:fee)
 
       assert changeset.valid?
@@ -64,7 +68,8 @@ defmodule Ashfolio.ValidationTest do
 
     test "accepts zero values" do
       changeset =
-        test_changeset(%{fee: Decimal.new("0")})
+        %{fee: Decimal.new("0")}
+        |> test_changeset()
         |> Validation.validate_non_negative_decimal(:fee)
 
       assert changeset.valid?
@@ -72,7 +77,8 @@ defmodule Ashfolio.ValidationTest do
 
     test "rejects negative values" do
       changeset =
-        test_changeset(%{fee: Decimal.new("-1.00")})
+        %{fee: Decimal.new("-1.00")}
+        |> test_changeset()
         |> Validation.validate_non_negative_decimal(:fee)
 
       refute changeset.valid?
@@ -83,7 +89,8 @@ defmodule Ashfolio.ValidationTest do
   describe "validate_not_future_date/2" do
     test "accepts today's date" do
       changeset =
-        test_changeset(%{date: Date.utc_today()})
+        %{date: Date.utc_today()}
+        |> test_changeset()
         |> Validation.validate_not_future_date(:date)
 
       assert changeset.valid?
@@ -93,7 +100,8 @@ defmodule Ashfolio.ValidationTest do
       past_date = Date.add(Date.utc_today(), -30)
 
       changeset =
-        test_changeset(%{date: past_date})
+        %{date: past_date}
+        |> test_changeset()
         |> Validation.validate_not_future_date(:date)
 
       assert changeset.valid?
@@ -103,7 +111,8 @@ defmodule Ashfolio.ValidationTest do
       future_date = Date.add(Date.utc_today(), 1)
 
       changeset =
-        test_changeset(%{date: future_date})
+        %{date: future_date}
+        |> test_changeset()
         |> Validation.validate_not_future_date(:date)
 
       refute changeset.valid?
@@ -117,7 +126,8 @@ defmodule Ashfolio.ValidationTest do
 
       for symbol <- valid_symbols do
         changeset =
-          test_changeset(%{symbol: symbol})
+          %{symbol: symbol}
+          |> test_changeset()
           |> Validation.validate_symbol_format(:symbol)
 
         assert changeset.valid?, "Expected #{symbol} to be valid"
@@ -126,7 +136,8 @@ defmodule Ashfolio.ValidationTest do
 
     test "rejects symbols that are too long" do
       changeset =
-        test_changeset(%{symbol: "VERYLONGSYMBOL"})
+        %{symbol: "VERYLONGSYMBOL"}
+        |> test_changeset()
         |> Validation.validate_symbol_format(:symbol)
 
       refute changeset.valid?
@@ -137,7 +148,8 @@ defmodule Ashfolio.ValidationTest do
   describe "validate_supported_currency/2" do
     test "accepts USD currency" do
       changeset =
-        test_changeset(%{currency: "USD"})
+        %{currency: "USD"}
+        |> test_changeset()
         |> Validation.validate_supported_currency(:currency)
 
       assert changeset.valid?
@@ -145,7 +157,8 @@ defmodule Ashfolio.ValidationTest do
 
     test "rejects non-USD currencies" do
       changeset =
-        test_changeset(%{currency: "EUR"})
+        %{currency: "EUR"}
+        |> test_changeset()
         |> Validation.validate_supported_currency(:currency)
 
       refute changeset.valid?
@@ -165,7 +178,8 @@ defmodule Ashfolio.ValidationTest do
       }
 
       changeset =
-        test_changeset(attrs)
+        attrs
+        |> test_changeset()
         |> Validation.validate_transaction_data()
 
       assert changeset.valid?
@@ -180,7 +194,8 @@ defmodule Ashfolio.ValidationTest do
       }
 
       changeset =
-        test_changeset(attrs)
+        attrs
+        |> test_changeset()
         |> Validation.validate_account_data()
 
       assert changeset.valid?

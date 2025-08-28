@@ -81,7 +81,8 @@ defmodule AshfolioWeb.Live.ErrorHelpers do
   """
   def handle_form_errors(socket, %Ecto.Changeset{valid?: false} = changeset) do
     error_message =
-      Ashfolio.ErrorHandler.format_changeset_errors(changeset)
+      changeset
+      |> Ashfolio.ErrorHandler.format_changeset_errors()
       |> format_validation_errors()
 
     put_error_flash(socket, error_message, gettext("Validation Error"))
@@ -252,8 +253,7 @@ defmodule AshfolioWeb.Live.ErrorHelpers do
   # Private helper functions
 
   defp format_validation_errors(errors) when is_map(errors) do
-    errors
-    |> Enum.map_join("; ", fn {field, messages} ->
+    Enum.map_join(errors, "; ", fn {field, messages} ->
       field_name = humanize_field(field)
       message_list = Enum.join(messages, ", ")
       "#{field_name}: #{message_list}"

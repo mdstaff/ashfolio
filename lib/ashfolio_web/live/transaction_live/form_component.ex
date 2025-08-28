@@ -1,8 +1,12 @@
 defmodule AshfolioWeb.TransactionLive.FormComponent do
+  @moduledoc false
   use AshfolioWeb, :live_component
 
-  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
+  alias Ash.Error.Invalid
   alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
   alias AshfolioWeb.Components.SymbolAutocomplete
 
   @impl true
@@ -265,7 +269,7 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
       {:error, %Ash.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
 
-      {:error, %Ash.Error.Invalid{} = error} ->
+      {:error, %Invalid{} = error} ->
         # Handle validation errors by creating a changeset from the error
         changeset = AshPhoenix.Form.for_create(Transaction, :create, as: "transaction")
         changeset = %{changeset | errors: error.errors}
@@ -300,7 +304,7 @@ defmodule AshfolioWeb.TransactionLive.FormComponent do
       {:error, %Ash.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
 
-      {:error, %Ash.Error.Invalid{} = error} ->
+      {:error, %Invalid{} = error} ->
         # Handle validation errors by creating a changeset from the error
         changeset =
           AshPhoenix.Form.for_update(socket.assigns.transaction, :update, as: "transaction")

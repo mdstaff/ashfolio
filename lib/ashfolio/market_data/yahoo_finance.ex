@@ -66,21 +66,18 @@ defmodule Ashfolio.MarketData.YahooFinance do
 
     # For now, make individual requests. Could be optimized later.
     results =
-      symbols
-      |> Enum.map(fn symbol ->
+      Map.new(symbols, fn symbol ->
         case fetch_price(symbol) do
           {:ok, price} -> {symbol, {:ok, price}}
           {:error, reason} -> {symbol, {:error, reason}}
         end
       end)
-      |> Enum.into(%{})
 
     # Check if we have any successful results
     successful_results =
       results
       |> Enum.filter(fn {_symbol, result} -> match?({:ok, _}, result) end)
-      |> Enum.map(fn {symbol, {:ok, price}} -> {symbol, price} end)
-      |> Enum.into(%{})
+      |> Map.new(fn {symbol, {:ok, price}} -> {symbol, price} end)
 
     if map_size(successful_results) > 0 do
       {:ok, successful_results}

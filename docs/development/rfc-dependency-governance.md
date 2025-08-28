@@ -1,8 +1,8 @@
 # RFC: Dependency Governance Process
 
 Proposed
-2025-08-11  
- Claude (Architect)
+2025-08-11
+Claude (Architect)
 RFC-001
 
 ## Summary

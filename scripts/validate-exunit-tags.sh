@@ -19,7 +19,7 @@ else
 fi
 echo
 
-# Test 2: Check LiveView tests  
+# Test 2: Check LiveView tests 
 echo "2. Testing LiveView tests..."
 result=$(mix test --only liveview 2>&1)
 if echo "$result" | grep -q "tests,"; then

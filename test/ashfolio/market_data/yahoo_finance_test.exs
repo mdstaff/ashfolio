@@ -1,13 +1,13 @@
 defmodule Ashfolio.MarketData.YahooFinanceTest do
   use ExUnit.Case, async: false
 
-  @moduletag :market_data
-  @moduletag :unit
-  @moduletag :external_deps
+  import ExUnit.CaptureLog
 
   alias Ashfolio.MarketData.YahooFinance
 
-  import ExUnit.CaptureLog
+  @moduletag :market_data
+  @moduletag :unit
+  @moduletag :external_deps
 
   describe "fetch_price/1" do
     test "returns error for invalid symbol format" do
@@ -75,10 +75,10 @@ defmodule Ashfolio.MarketData.YahooFinanceTest do
   describe "URL building and request structure" do
     test "module implements required behaviour functions" do
       # Test that the module implements the YahooFinanceBehaviour
-      assert Code.ensure_loaded?(Ashfolio.MarketData.YahooFinance)
+      assert Code.ensure_loaded?(YahooFinance)
 
       # Check that the module has the required functions from the behaviour
-      behaviours = Ashfolio.MarketData.YahooFinance.__info__(:attributes)[:behaviour] || []
+      behaviours = YahooFinance.__info__(:attributes)[:behaviour] || []
       assert Ashfolio.MarketData.YahooFinanceBehaviour in behaviours
     end
   end

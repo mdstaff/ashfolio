@@ -27,7 +27,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculatorTest do
                )
 
       # Allow for small rounding differences (within $1)
-      difference = Decimal.sub(result, expected) |> Decimal.abs()
+      difference = result |> Decimal.sub(expected) |> Decimal.abs()
 
       assert Decimal.compare(difference, Decimal.new("1.00")) != :gt,
              "Expected ~#{expected}, got #{result} (difference: #{difference})"
@@ -181,7 +181,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculatorTest do
       assert %Decimal{} = result
       # Should have reasonable precision (not excessive decimal places)
       rounded = Decimal.round(result, 2)
-      difference = Decimal.sub(result, rounded) |> Decimal.abs()
+      difference = result |> Decimal.sub(rounded) |> Decimal.abs()
       assert Decimal.compare(difference, Decimal.new("0.01")) != :gt
     end
 
@@ -340,7 +340,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculatorTest do
       # 8% as percentage
       expected_cagr = Decimal.new("8.00")
 
-      difference = Decimal.sub(cagr_10_year, expected_cagr) |> Decimal.abs()
+      difference = cagr_10_year |> Decimal.sub(expected_cagr) |> Decimal.abs()
 
       assert Decimal.compare(difference, Decimal.new("0.5")) != :gt,
              "CAGR #{cagr_10_year}% should be close to expected #{expected_cagr}%"
@@ -1059,7 +1059,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculatorTest do
       # Annual should be 12x monthly
       expected_annual = Decimal.mult(monthly_required, Decimal.new("12"))
       # Allow small rounding differences
-      difference = Decimal.sub(annual_required, expected_annual) |> Decimal.abs()
+      difference = annual_required |> Decimal.sub(expected_annual) |> Decimal.abs()
       assert Decimal.compare(difference, Decimal.new("1")) != :gt
 
       # Probability should be between 0 and 100
@@ -1241,7 +1241,8 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculatorTest do
 
       # Allow for small rounding differences
       monthly_diff =
-        Decimal.sub(optimization.required_monthly_contribution, expected_monthly)
+        optimization.required_monthly_contribution
+        |> Decimal.sub(expected_monthly)
         |> Decimal.abs()
 
       assert Decimal.compare(monthly_diff, Decimal.new("1")) != :gt

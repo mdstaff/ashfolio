@@ -9,9 +9,12 @@ defmodule AshfolioWeb.ClaudeCodeHooksTest do
   """
 
   use ExUnit.Case, async: false
-  @moduletag :skip
+
   import ExUnit.CaptureIO
 
+  alias Mix.Tasks.CodeGps
+
+  @moduletag :skip
   @settings_path ".claude/settings.local.json"
   @code_gps_path ".code-gps.yaml"
   @claude_md_path "CLAUDE.md"
@@ -33,8 +36,7 @@ defmodule AshfolioWeb.ClaudeCodeHooksTest do
       hook_commands =
         session_hooks
         |> Enum.flat_map(fn hook -> hook["hooks"] end)
-        |> Enum.map(fn cmd -> cmd["command"] end)
-        |> Enum.join(" ")
+        |> Enum.map_join(" ", fn cmd -> cmd["command"] end)
 
       assert hook_commands =~ "mix code_gps", "Should contain mix code_gps command"
       assert hook_commands =~ ".code-gps.yaml", "Should reference Code GPS output file"
@@ -85,7 +87,7 @@ defmodule AshfolioWeb.ClaudeCodeHooksTest do
 
       # Step 1: SessionStart hook runs (simulated)
       capture_io(fn ->
-        Mix.Tasks.CodeGps.run([])
+        CodeGps.run([])
       end)
 
       # Simulate agent reading the file (what we want to happen)
@@ -108,7 +110,7 @@ defmodule AshfolioWeb.ClaudeCodeHooksTest do
 
       # Generate fresh Code GPS
       capture_io(fn ->
-        Mix.Tasks.CodeGps.run([])
+        CodeGps.run([])
       end)
 
       # Create a simple usage tracking mechanism
@@ -122,7 +124,7 @@ defmodule AshfolioWeb.ClaudeCodeHooksTest do
       ]
 
       # Log simulated agent behavior
-      timestamp = DateTime.utc_now() |> DateTime.to_iso8601()
+      timestamp = DateTime.to_iso8601(DateTime.utc_now())
       initial_entry = "#{timestamp}: Agent session started\n"
 
       action_entries =
@@ -153,7 +155,7 @@ defmodule AshfolioWeb.ClaudeCodeHooksTest do
       # === Agent Session Start ===
       # 1. SessionStart hook auto-generates Code GPS
       capture_io(fn ->
-        Mix.Tasks.CodeGps.run([])
+        CodeGps.run([])
       end)
 
       # 2. Agent should read CLAUDE.md

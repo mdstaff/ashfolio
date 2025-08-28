@@ -8,6 +8,8 @@ defmodule Ashfolio.SQLiteConcurrencyHelpers do
   - Concurrent test execution management
   """
 
+  alias Ecto.Adapters.SQL.Sandbox
+
   require Logger
 
   @max_retries 3
@@ -26,20 +28,18 @@ defmodule Ashfolio.SQLiteConcurrencyHelpers do
       end)
   """
   def with_retry(operation, retries \\ @max_retries) do
-    try do
-      operation.()
-    rescue
-      error ->
-        if retries > 0 and sqlite_busy_error?(error) do
-          # Temporarily suppress error logging during retries by capturing logs
-          # Only log debug message if we're going to retry
-          Logger.debug("SQLite busy, retrying... (#{retries} attempts left)")
-          Process.sleep(@retry_delay_ms)
-          with_retry(operation, retries - 1)
-        else
-          reraise error, __STACKTRACE__
-        end
-    end
+    operation.()
+  rescue
+    error ->
+      if retries > 0 and sqlite_busy_error?(error) do
+        # Temporarily suppress error logging during retries by capturing logs
+        # Only log debug message if we're going to retry
+        Logger.debug("SQLite busy, retrying... (#{retries} attempts left)")
+        Process.sleep(@retry_delay_ms)
+        with_retry(operation, retries - 1)
+      else
+        reraise error, __STACKTRACE__
+      end
   end
 
   @doc """
@@ -79,7 +79,8 @@ defmodule Ashfolio.SQLiteConcurrencyHelpers do
   Useful for test setup that requires multiple related database operations.
   """
   def sequential_operations(operations) when is_list(operations) do
-    Enum.reduce_while(operations, [], fn operation, acc ->
+    operations
+    |> Enum.reduce_while([], fn operation, acc ->
       case with_retry(operation) do
         {:ok, result} -> {:cont, [result | acc]}
         {:error, reason} -> {:halt, {:error, reason}}
@@ -171,12 +172,12 @@ defmodule Ashfolio.SQLiteConcurrencyHelpers do
   Ensures proper database checkout and cleanup for the test.
   """
   def with_isolation(test_fun) do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Ashfolio.Repo)
+    :ok = Sandbox.checkout(Ashfolio.Repo)
 
     try do
       test_fun.()
     after
-      Ecto.Adapters.SQL.Sandbox.checkin(Ashfolio.Repo)
+      Sandbox.checkin(Ashfolio.Repo)
     end
   end
 end

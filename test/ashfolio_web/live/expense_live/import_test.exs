@@ -1,35 +1,40 @@
 defmodule AshfolioWeb.ExpenseLive.ImportTest do
   use AshfolioWeb.ConnCase, async: false
+
   import Phoenix.LiveViewTest
+
+  alias Ashfolio.FinancialManagement.Expense
+  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.Portfolio.Account
 
   describe "expense import wizard" do
     setup do
       # Reset account balances for clean test state
       require Ash.Query
 
-      Ashfolio.Portfolio.Account
+      Account
       |> Ash.Query.for_read(:read)
       |> Ash.read!()
       |> Enum.each(fn account ->
-        Ashfolio.Portfolio.Account.update(account, %{balance: Decimal.new("0.00")})
+        Account.update(account, %{balance: Decimal.new("0.00")})
       end)
 
       # Create test account and category
       {:ok, checking_account} =
-        Ashfolio.Portfolio.Account.create(%{
+        Account.create(%{
           name: "Test Checking",
           account_type: :checking,
           balance: Decimal.new("5000.00")
         })
 
       {:ok, groceries_category} =
-        Ashfolio.FinancialManagement.TransactionCategory.create(%{
+        TransactionCategory.create(%{
           name: "Groceries",
           color: "#4CAF50"
         })
 
       {:ok, gas_category} =
-        Ashfolio.FinancialManagement.TransactionCategory.create(%{
+        TransactionCategory.create(%{
           name: "Gas",
           color: "#FF9800"
         })
@@ -182,7 +187,7 @@ defmodule AshfolioWeb.ExpenseLive.ImportTest do
         |> render_submit()
 
       # Check if expenses were created in database
-      expenses = Ashfolio.FinancialManagement.Expense |> Ash.Query.for_read(:read) |> Ash.read!()
+      expenses = Expense |> Ash.Query.for_read(:read) |> Ash.read!()
 
       assert length(expenses) == 2
 
@@ -237,7 +242,7 @@ defmodule AshfolioWeb.ExpenseLive.ImportTest do
     } do
       # Create existing expense
       {:ok, _existing_expense} =
-        Ashfolio.FinancialManagement.Expense.create(%{
+        Expense.create(%{
           description: "Weekly Groceries",
           amount: Decimal.new("125.50"),
           date: ~D[2024-08-15],

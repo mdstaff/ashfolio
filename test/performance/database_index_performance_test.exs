@@ -16,13 +16,14 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
 
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Transaction
+  alias Ashfolio.SQLiteHelpers
+
   @moduletag :performance
   @moduletag :slow
   @moduletag :database_indexes
-
-  alias Ashfolio.Portfolio.{Account, Transaction}
-  alias Ashfolio.FinancialManagement.TransactionCategory
-  alias Ashfolio.SQLiteHelpers
 
   @performance_account_count 100
   @performance_transaction_count 1000
@@ -81,13 +82,7 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
       # Test balance filtering within account types
       {time_us, _accounts} =
         :timer.tc(fn ->
-          from(a in Account,
-            where:
-              a.account_type == :checking and
-                a.balance > 0,
-            select: a
-          )
-          |> Ashfolio.Repo.all()
+          Ashfolio.Repo.all(from(a in Account, where: a.account_type == :checking and a.balance > 0, select: a))
         end)
 
       time_ms = time_us / 1000
@@ -135,11 +130,7 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
     test "transaction category filtering under 20ms", %{categories: [category | _]} do
       {time_us, transactions} =
         :timer.tc(fn ->
-          from(t in Transaction,
-            where: t.category_id == ^category.id,
-            select: t
-          )
-          |> Ashfolio.Repo.all()
+          Ashfolio.Repo.all(from(t in Transaction, where: t.category_id == ^category.id, select: t))
         end)
 
       time_ms = time_us / 1000
@@ -153,11 +144,7 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
     test "uncategorized transaction filtering under 15ms" do
       {time_us, _transactions} =
         :timer.tc(fn ->
-          from(t in Transaction,
-            where: is_nil(t.category_id),
-            select: t
-          )
-          |> Ashfolio.Repo.all()
+          Ashfolio.Repo.all(from(t in Transaction, where: is_nil(t.category_id), select: t))
         end)
 
       time_ms = time_us / 1000
@@ -171,14 +158,13 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
 
       {time_us, _transactions} =
         :timer.tc(fn ->
-          from(t in Transaction,
-            where:
-              t.category_id == ^category.id and
-                t.date >= ^start_date,
-            order_by: [desc: t.date],
-            select: t
+          Ashfolio.Repo.all(
+            from(t in Transaction,
+              where: t.category_id == ^category.id and t.date >= ^start_date,
+              order_by: [desc: t.date],
+              select: t
+            )
           )
-          |> Ashfolio.Repo.all()
         end)
 
       time_ms = time_us / 1000
@@ -191,14 +177,15 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
       # Test joining transactions with categories (common display pattern)
       {time_us, results} =
         :timer.tc(fn ->
-          from(t in Transaction,
-            left_join: c in TransactionCategory,
-            on: t.category_id == c.id,
-            where: t.account_id == ^account.id,
-            select: {t, c.name, c.color},
-            limit: 100
+          Ashfolio.Repo.all(
+            from(t in Transaction,
+              left_join: c in TransactionCategory,
+              on: t.category_id == c.id,
+              where: t.account_id == ^account.id,
+              select: {t, c.name, c.color},
+              limit: 100
+            )
           )
-          |> Ashfolio.Repo.all()
         end)
 
       time_ms = time_us / 1000
@@ -268,8 +255,7 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
         for _ <- 1..5 do
           {time_us, _} =
             :timer.tc(fn ->
-              from(t in Transaction, where: t.category_id == ^category.id)
-              |> Ashfolio.Repo.all()
+              Ashfolio.Repo.all(from(t in Transaction, where: t.category_id == ^category.id))
             end)
 
           time_us / 1000
@@ -305,7 +291,7 @@ defmodule Ashfolio.Performance.DatabaseIndexPerformanceTest do
     end
   end
 
-  defp create_performance_categories() do
+  defp create_performance_categories do
     categories = [
       {"Growth", "#10B981"},
       {"Income", "#3B82F6"},

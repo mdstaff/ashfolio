@@ -1,13 +1,15 @@
 defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.HoldingsCalculator
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
+  alias Ashfolio.SQLiteHelpers
+
   @moduletag :calculations
   @moduletag :unit
   @moduletag :fast
-
-  alias Ashfolio.Portfolio.HoldingsCalculator
-  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
-  alias Ashfolio.SQLiteHelpers
 
   describe "calculate_holding_values/0" do
     test "calculates holding values for multiple positions" do
@@ -54,7 +56,7 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
 
       # Find AAPL holding
       aapl_holding = Enum.find(holdings, fn h -> h.symbol == "AAPL" end)
-      assert aapl_holding != nil
+      assert aapl_holding
       assert Decimal.equal?(aapl_holding.quantity, Decimal.new("10"))
       # 10 * $150
       assert Decimal.equal?(aapl_holding.current_value, Decimal.new("1500.00"))
@@ -66,7 +68,7 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
 
       # Find MSFT holding
       msft_holding = Enum.find(holdings, fn h -> h.symbol == "MSFT" end)
-      assert msft_holding != nil
+      assert msft_holding
       assert Decimal.equal?(msft_holding.quantity, Decimal.new("5"))
       # 5 * $300
       assert Decimal.equal?(msft_holding.current_value, Decimal.new("1500.00"))

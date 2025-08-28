@@ -1,17 +1,17 @@
 defmodule AshfolioWeb.DashboardLive do
+  @moduledoc false
   use AshfolioWeb, :live_view
 
-  alias Ashfolio.Portfolio.{HoldingsCalculator, Account}
-  alias Ashfolio.MarketData.PriceManager
-
-  alias Ashfolio.FinancialManagement.{
-    Expense,
-    FinancialGoal,
-    NetWorthSnapshot
-  }
-
   alias Ashfolio.Context
-  alias AshfolioWeb.Live.{ErrorHelpers, FormatHelpers}
+  alias Ashfolio.FinancialManagement.Expense
+  alias Ashfolio.FinancialManagement.FinancialGoal
+  alias Ashfolio.FinancialManagement.NetWorthSnapshot
+  alias Ashfolio.MarketData.PriceManager
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.HoldingsCalculator
+  alias AshfolioWeb.Live.ErrorHelpers
+  alias AshfolioWeb.Live.FormatHelpers
+
   require Logger
 
   @impl true
@@ -95,72 +95,69 @@ defmodule AshfolioWeb.DashboardLive do
 
   @impl true
   def handle_event("create_snapshot", _params, socket) do
-    try do
-      # Calculate current net worth from all accounts
-      current_net_worth = calculate_current_net_worth()
+    # Calculate current net worth from all accounts
+    current_net_worth = calculate_current_net_worth()
 
-      # Prepare snapshot data
-      today = Date.utc_today()
-      total_assets = current_net_worth
-      total_liabilities = Decimal.new("0.00")
-      net_worth = Decimal.sub(total_assets, total_liabilities)
+    # Prepare snapshot data
+    today = Date.utc_today()
+    total_assets = current_net_worth
+    total_liabilities = Decimal.new("0.00")
+    net_worth = Decimal.sub(total_assets, total_liabilities)
 
-      snapshot_data = %{
-        snapshot_date: today,
-        total_assets: total_assets,
-        total_liabilities: total_liabilities,
-        net_worth: net_worth,
-        cash_value: calculate_total_cash(),
-        investment_value: calculate_total_investments(),
-        is_automated: false
-      }
+    snapshot_data = %{
+      snapshot_date: today,
+      total_assets: total_assets,
+      total_liabilities: total_liabilities,
+      net_worth: net_worth,
+      cash_value: calculate_total_cash(),
+      investment_value: calculate_total_investments(),
+      is_automated: false
+    }
 
-      # Try to create new snapshot, or update existing one for today
-      case NetWorthSnapshot.create(snapshot_data) do
-        {:ok, _snapshot} ->
-          socket =
-            socket
-            |> put_flash(:info, "Net worth snapshot created successfully!")
-            |> load_portfolio_data()
+    # Try to create new snapshot, or update existing one for today
+    case NetWorthSnapshot.create(snapshot_data) do
+      {:ok, _snapshot} ->
+        socket =
+          socket
+          |> put_flash(:info, "Net worth snapshot created successfully!")
+          |> load_portfolio_data()
 
-          {:noreply, socket}
+        {:noreply, socket}
 
-        {:error, _error} ->
-          # If creation failed (likely due to date uniqueness), try to find existing snapshot for today
-          case NetWorthSnapshot.list!()
-               |> Enum.filter(fn snapshot ->
-                 Date.compare(snapshot.snapshot_date, today) == :eq
-               end) do
-            [existing_snapshot] ->
-              case NetWorthSnapshot.update(
-                     existing_snapshot,
-                     snapshot_data
-                   ) do
-                {:ok, _updated_snapshot} ->
-                  socket =
-                    socket
-                    |> put_flash(:info, "Net worth snapshot updated for today!")
-                    |> load_portfolio_data()
+      {:error, _error} ->
+        # If creation failed (likely due to date uniqueness), try to find existing snapshot for today
+        case Enum.filter(NetWorthSnapshot.list!(), fn snapshot ->
+               Date.compare(snapshot.snapshot_date, today) == :eq
+             end) do
+          [existing_snapshot] ->
+            case NetWorthSnapshot.update(
+                   existing_snapshot,
+                   snapshot_data
+                 ) do
+              {:ok, _updated_snapshot} ->
+                socket =
+                  socket
+                  |> put_flash(:info, "Net worth snapshot updated for today!")
+                  |> load_portfolio_data()
 
-                  {:noreply, socket}
+                {:noreply, socket}
 
-                {:error, update_error} ->
-                  {:noreply,
-                   put_flash(
-                     socket,
-                     :error,
-                     "Failed to update snapshot: #{inspect(update_error)}"
-                   )}
-              end
+              {:error, update_error} ->
+                {:noreply,
+                 put_flash(
+                   socket,
+                   :error,
+                   "Failed to update snapshot: #{inspect(update_error)}"
+                 )}
+            end
 
-            [] ->
-              {:noreply, put_flash(socket, :error, "Failed to create snapshot: date conflict")}
-          end
-      end
-    rescue
-      error ->
-        {:noreply, put_flash(socket, :error, "Failed to create snapshot: #{inspect(error)}")}
+          [] ->
+            {:noreply, put_flash(socket, :error, "Failed to create snapshot: date conflict")}
+        end
     end
+  rescue
+    error ->
+      {:noreply, put_flash(socket, :error, "Failed to create snapshot: #{inspect(error)}")}
   end
 
   @impl true
@@ -252,7 +249,7 @@ defmodule AshfolioWeb.DashboardLive do
           title="Total Value"
           value={@portfolio_value}
           change={@total_return_percent}
-          positive={FormatHelpers.is_positive?(@total_return_amount)}
+          positive={FormatHelpers.positive?(@total_return_amount)}
           data_testid="total-value"
         />
         <.stat_card title="Daily Change" value="N/A" change="Phase 2" positive={true} />
@@ -260,7 +257,7 @@ defmodule AshfolioWeb.DashboardLive do
           title="Total Return"
           value={@total_return_amount}
           change={@total_return_percent}
-          positive={FormatHelpers.is_positive?(@total_return_amount)}
+          positive={FormatHelpers.positive?(@total_return_amount)}
           data_testid="total-return"
         />
         <.stat_card
@@ -582,7 +579,8 @@ defmodule AshfolioWeb.DashboardLive do
   # This function is now handled in load_dashboard_data via Context.get_dashboard_data
 
   defp assign_net_worth_data(socket, net_worth_data) do
-    # Handle both Context.get_net_worth (returns :total_net_worth) and NetWorthCalculator.calculate_net_worth (returns :net_worth)
+    # Handle both Context.get_net_worth (returns :total_net_worth) and
+    # NetWorthCalculator.calculate_net_worth (returns :net_worth)
     net_worth_value = net_worth_data[:total_net_worth] || net_worth_data[:net_worth]
 
     socket
@@ -638,8 +636,7 @@ defmodule AshfolioWeb.DashboardLive do
       {:error, reason} ->
         Logger.warning("Failed to load net worth: #{inspect(reason)}")
 
-        socket
-        |> assign_default_values()
+        assign_default_values(socket)
     end
   end
 
@@ -678,22 +675,20 @@ defmodule AshfolioWeb.DashboardLive do
   end
 
   defp get_last_price_update do
-    try do
-      # Get the most recent price update from cache
-      case Ashfolio.Cache.get_all_prices() do
-        [] ->
-          nil
-
-        prices ->
-          prices
-          |> Enum.map(fn {_symbol, price_data} -> price_data.updated_at end)
-          |> Enum.max(DateTime)
-      end
-    rescue
-      error ->
-        Logger.warning("Failed to get last price update: #{inspect(error)}")
+    # Get the most recent price update from cache
+    case Ashfolio.Cache.get_all_prices() do
+      [] ->
         nil
+
+      prices ->
+        prices
+        |> Enum.map(fn {_symbol, price_data} -> price_data.updated_at end)
+        |> Enum.max(DateTime)
     end
+  rescue
+    error ->
+      Logger.warning("Failed to get last price update: #{inspect(error)}")
+      nil
   end
 
   # Helper functions for holdings table
@@ -706,8 +701,7 @@ defmodule AshfolioWeb.DashboardLive do
   end
 
   defp sort_holdings(holdings, sort_by, sort_order) do
-    holdings
-    |> Enum.sort_by(&Map.get(&1, sort_by), sort_order)
+    Enum.sort_by(holdings, &Map.get(&1, sort_by), sort_order)
   end
 
   defp toggle_sort(current_sort, current_order, new_column) do
@@ -791,76 +785,69 @@ defmodule AshfolioWeb.DashboardLive do
   end
 
   defp load_expense_data(socket) do
-    try do
-      # Load all expenses
-      expenses =
-        Expense
-        |> Ash.Query.for_read(:read)
-        |> Ash.read!()
+    # Load all expenses
+    expenses =
+      Expense
+      |> Ash.Query.for_read(:read)
+      |> Ash.read!()
 
-      # Calculate totals
-      total_expenses = calculate_total_expenses(expenses)
-      expense_count = length(expenses)
-      current_month_total = calculate_current_month_expenses(expenses)
+    # Calculate totals
+    total_expenses = calculate_total_expenses(expenses)
+    expense_count = length(expenses)
+    current_month_total = calculate_current_month_expenses(expenses)
 
+    socket
+    |> assign(:total_expenses, FormatHelpers.format_currency(total_expenses))
+    |> assign(:expense_count, expense_count)
+    |> assign(:current_month_expenses, FormatHelpers.format_currency(current_month_total))
+  rescue
+    _error ->
       socket
-      |> assign(:total_expenses, FormatHelpers.format_currency(total_expenses))
-      |> assign(:expense_count, expense_count)
-      |> assign(:current_month_expenses, FormatHelpers.format_currency(current_month_total))
-    rescue
-      _error ->
-        socket
-        |> assign_default_expense_values()
-        |> assign_default_goals_values()
-    end
+      |> assign_default_expense_values()
+      |> assign_default_goals_values()
   end
 
   defp load_goals_data(socket) do
-    try do
-      # Load all goals
-      goals =
-        FinancialGoal
-        |> Ash.Query.for_read(:read)
-        |> Ash.read!()
+    # Load all goals
+    goals =
+      FinancialGoal
+      |> Ash.Query.for_read(:read)
+      |> Ash.read!()
 
-      # Calculate goals statistics
-      active_goals = Enum.filter(goals, fn goal -> goal.is_active end)
-      active_count = length(active_goals)
+    # Calculate goals statistics
+    active_goals = Enum.filter(goals, fn goal -> goal.is_active end)
+    active_count = length(active_goals)
 
-      total_saved =
-        goals
-        |> Enum.reduce(Decimal.new(0), fn goal, acc ->
-          Decimal.add(acc, goal.current_amount)
-        end)
+    total_saved =
+      Enum.reduce(goals, Decimal.new(0), fn goal, acc ->
+        Decimal.add(acc, goal.current_amount)
+      end)
 
-      total_target =
-        goals
-        |> Enum.reduce(Decimal.new(0), fn goal, acc ->
-          Decimal.add(acc, goal.target_amount)
-        end)
+    total_target =
+      Enum.reduce(goals, Decimal.new(0), fn goal, acc ->
+        Decimal.add(acc, goal.target_amount)
+      end)
 
-      # Get emergency fund status
-      emergency_fund_status =
-        case FinancialGoal.analyze_emergency_fund_readiness!() do
-          {:analysis, analysis} -> analysis.readiness_level
-          {:no_goal, _recommendation} -> :no_goal
-          {:error, _} -> :no_goal
-        end
+    # Get emergency fund status
+    emergency_fund_status =
+      case FinancialGoal.analyze_emergency_fund_readiness!() do
+        {:analysis, analysis} -> analysis.readiness_level
+        {:no_goal, _recommendation} -> :no_goal
+        {:error, _} -> :no_goal
+      end
 
-      socket
-      |> assign(:goals_active_count, active_count)
-      |> assign(:goals_total_saved, FormatHelpers.format_currency(total_saved))
-      |> assign(:goals_total_target, FormatHelpers.format_currency(total_target))
-      |> assign(:goals_emergency_fund_status, emergency_fund_status)
-    rescue
-      _error ->
-        assign_default_goals_values(socket)
-    end
+    socket
+    |> assign(:goals_active_count, active_count)
+    |> assign(:goals_total_saved, FormatHelpers.format_currency(total_saved))
+    |> assign(:goals_total_target, FormatHelpers.format_currency(total_target))
+    |> assign(:goals_emergency_fund_status, emergency_fund_status)
+  rescue
+    _error ->
+      assign_default_goals_values(socket)
   end
 
   defp calculate_total_expenses(expenses) do
-    expenses
-    |> Enum.reduce(Decimal.new(0), fn expense, acc ->
+    Enum.reduce(expenses, Decimal.new(0), fn expense, acc ->
       Decimal.add(acc, expense.amount)
     end)
   end
@@ -872,8 +859,7 @@ defmodule AshfolioWeb.DashboardLive do
         Decimal.new(0)
 
       accounts ->
-        accounts
-        |> Enum.reduce(Decimal.new(0), fn account, acc ->
+        Enum.reduce(accounts, Decimal.new(0), fn account, acc ->
           Decimal.add(acc, account.balance)
         end)
     end
@@ -886,8 +872,7 @@ defmodule AshfolioWeb.DashboardLive do
         Decimal.new(0)
 
       accounts ->
-        accounts
-        |> Enum.reduce(Decimal.new(0), fn account, acc ->
+        Enum.reduce(accounts, Decimal.new(0), fn account, acc ->
           Decimal.add(acc, account.balance)
         end)
     end
@@ -900,8 +885,7 @@ defmodule AshfolioWeb.DashboardLive do
         Decimal.new(0)
 
       accounts ->
-        accounts
-        |> Enum.reduce(Decimal.new(0), fn account, acc ->
+        Enum.reduce(accounts, Decimal.new(0), fn account, acc ->
           Decimal.add(acc, account.balance)
         end)
     end

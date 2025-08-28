@@ -168,10 +168,11 @@ defmodule AshfolioWeb.Components.CategoryTag do
   end
 
   defp normalize_color(color) when is_binary(color) do
-    case Regex.match?(~r/^#[0-9A-Fa-f]{6}$/, color) do
-      true -> color
+    if Regex.match?(~r/^#[0-9A-Fa-f]{6}$/, color) do
+      color
+    else
       # Default gray
-      false -> "#6B7280"
+      "#6B7280"
     end
   end
 
@@ -187,9 +188,9 @@ defmodule AshfolioWeb.Components.CategoryTag do
         light_b = round(b + (255 - b) * opacity)
 
         "#" <>
-          (Integer.to_string(light_r, 16) |> String.pad_leading(2, "0")) <>
-          (Integer.to_string(light_g, 16) |> String.pad_leading(2, "0")) <>
-          (Integer.to_string(light_b, 16) |> String.pad_leading(2, "0"))
+          (light_r |> Integer.to_string(16) |> String.pad_leading(2, "0")) <>
+          (light_g |> Integer.to_string(16) |> String.pad_leading(2, "0")) <>
+          (light_b |> Integer.to_string(16) |> String.pad_leading(2, "0"))
 
       _ ->
         # Light gray fallback

@@ -1,12 +1,12 @@
 defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.SQLiteHelpers
+
   @moduletag :ash_resources
   @moduletag :unit
   @moduletag :fast
-
-  alias Ashfolio.FinancialManagement.TransactionCategory
-  alias Ashfolio.SQLiteHelpers
 
   setup do
     # Database-as-user architecture: No user needed
@@ -24,7 +24,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
       assert category.is_system == false
       assert category.color == nil
       assert category.parent_category_id == nil
-      assert category.id != nil
+      assert category.id
     end
 
     test "can create category with all attributes" do
@@ -96,7 +96,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
         })
 
       {:error, error} = Ash.destroy(system_category)
-      assert error != nil
+      assert error
     end
 
     test "can create hierarchical categories" do
@@ -200,9 +200,9 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
       child_in_results =
         Enum.find(categories_with_children, fn cat -> cat.id == child_category.id end)
 
-      assert parent_in_results != nil
-      assert child_in_results != nil
-      assert child_in_results.parent_category != nil
+      assert parent_in_results
+      assert child_in_results
+      assert child_in_results.parent_category
       assert child_in_results.parent_category.id == parent_category.id
     end
   end

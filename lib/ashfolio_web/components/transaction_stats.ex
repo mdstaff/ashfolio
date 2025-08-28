@@ -292,8 +292,7 @@ defmodule AshfolioWeb.Components.TransactionStats do
   end
 
   defp calculate_total_volume(transactions) do
-    transactions
-    |> Enum.reduce(Decimal.new(0), fn tx, acc ->
+    Enum.reduce(transactions, Decimal.new(0), fn tx, acc ->
       amount = get_transaction_amount(tx)
       Decimal.add(acc, Decimal.abs(amount))
     end)
@@ -319,8 +318,7 @@ defmodule AshfolioWeb.Components.TransactionStats do
       count = length(txs)
 
       total_amount =
-        txs
-        |> Enum.reduce(Decimal.new(0), fn tx, acc ->
+        Enum.reduce(txs, Decimal.new(0), fn tx, acc ->
           amount = get_transaction_amount(tx)
           Decimal.add(acc, Decimal.abs(amount))
         end)
@@ -375,7 +373,7 @@ defmodule AshfolioWeb.Components.TransactionStats do
         _ -> 0.0
       end
 
-    ("$" <> :erlang.float_to_binary(float_amount, decimals: 2)) |> add_commas()
+    add_commas("$" <> :erlang.float_to_binary(float_amount, decimals: 2))
   end
 
   defp add_commas(number_string) do
@@ -396,8 +394,7 @@ defmodule AshfolioWeb.Components.TransactionStats do
     |> String.reverse()
     |> String.graphemes()
     |> Enum.chunk_every(3)
-    |> Enum.map(&Enum.join/1)
-    |> Enum.join(",")
+    |> Enum.map_join(",", &Enum.join/1)
     |> String.reverse()
   end
 

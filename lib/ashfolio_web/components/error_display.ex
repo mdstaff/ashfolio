@@ -5,7 +5,7 @@ defmodule AshfolioWeb.Components.ErrorDisplay do
   Provides consistent error display across all v0.2.0 features:
   - Cash balance management errors
   - Symbol search errors
-  - Category management errors  
+  - Category management errors
   - Net worth calculation errors
   - Context API errors
   """
@@ -14,6 +14,7 @@ defmodule AshfolioWeb.Components.ErrorDisplay do
   use Phoenix.LiveView
 
   import AshfolioWeb.CoreComponents, only: [icon: 1]
+
   alias Ashfolio.ErrorHandler
 
   @doc """

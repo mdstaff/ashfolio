@@ -1,29 +1,33 @@
 defmodule AshfolioWeb.DashboardLive.NetWorthWidgetTest do
   use AshfolioWeb.ConnCase, async: false
+
   import Phoenix.LiveViewTest
+
+  alias Ashfolio.FinancialManagement.NetWorthSnapshot
+  alias Ashfolio.Portfolio.Account
 
   describe "dashboard net worth widget" do
     setup do
       # Reset account balances
       require Ash.Query
 
-      Ashfolio.Portfolio.Account
+      Account
       |> Ash.Query.for_read(:read)
       |> Ash.read!()
       |> Enum.each(fn account ->
-        Ashfolio.Portfolio.Account.update(account, %{balance: Decimal.new("0.00")})
+        Account.update(account, %{balance: Decimal.new("0.00")})
       end)
 
       # Create accounts with balances
       {:ok, investment_account} =
-        Ashfolio.Portfolio.Account.create(%{
+        Account.create(%{
           name: "Test Investment",
           account_type: :investment,
           balance: Decimal.new("75000.00")
         })
 
       {:ok, checking_account} =
-        Ashfolio.Portfolio.Account.create(%{
+        Account.create(%{
           name: "Test Checking",
           account_type: :checking,
           balance: Decimal.new("5000.00")
@@ -39,7 +43,7 @@ defmodule AshfolioWeb.DashboardLive.NetWorthWidgetTest do
       snapshots =
         for {date, value} <- snapshots_data do
           {:ok, snapshot} =
-            Ashfolio.FinancialManagement.NetWorthSnapshot.create(%{
+            NetWorthSnapshot.create(%{
               snapshot_date: date,
               total_assets: Decimal.new(value),
               total_liabilities: Decimal.new("0.00"),
@@ -82,12 +86,12 @@ defmodule AshfolioWeb.DashboardLive.NetWorthWidgetTest do
       # Should have create snapshot button
       assert has_element?(view, "button[phx-click='create_snapshot']", "Snapshot Now")
 
-      # Click create snapshot  
-      initial_count = length(elem(Ashfolio.FinancialManagement.NetWorthSnapshot.list(), 1))
+      # Click create snapshot
+      initial_count = length(elem(NetWorthSnapshot.list(), 1))
       view |> element("button[phx-click='create_snapshot']") |> render_click()
 
       # Should still have same count (today's snapshot gets updated, not created new)
-      {:ok, snapshots_after} = Ashfolio.FinancialManagement.NetWorthSnapshot.list()
+      {:ok, snapshots_after} = NetWorthSnapshot.list()
       # Same count, but updated values
       assert length(snapshots_after) == initial_count
 
@@ -100,11 +104,10 @@ defmodule AshfolioWeb.DashboardLive.NetWorthWidgetTest do
 
     test "handles missing snapshot data gracefully", %{conn: conn} do
       # Delete all snapshots
-      {:ok, snapshots} = Ashfolio.FinancialManagement.NetWorthSnapshot.list()
+      {:ok, snapshots} = NetWorthSnapshot.list()
 
-      snapshots
-      |> Enum.each(fn snapshot ->
-        Ashfolio.FinancialManagement.NetWorthSnapshot.destroy(snapshot)
+      Enum.each(snapshots, fn snapshot ->
+        NetWorthSnapshot.destroy(snapshot)
       end)
 
       {:ok, _view, html} = live(conn, ~p"/")

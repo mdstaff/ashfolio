@@ -44,7 +44,7 @@ fi
 if ! command -v brew &> /dev/null; then
     print_status "Homebrew not found. Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    
+   
     # Add Homebrew to PATH for Apple Silicon Macs (zsh is default shell on macOS)
     if [[ $(uname -m) == "arm64" ]]; then
         echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zshrc
@@ -67,7 +67,7 @@ if command -v erl &> /dev/null && command -v elixir &> /dev/null; then
 else
     print_status "Installing Erlang and Elixir..."
     brew install erlang elixir
-    
+   
     # Verify installation
     if command -v erl &> /dev/null; then
         ERLANG_VERSION=$(erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell)
@@ -93,7 +93,7 @@ if mix hex.info &> /dev/null; then
 else
     print_status "Installing Hex package manager..."
     mix local.hex --force
-    
+   
     # Verify installation
     if mix hex.info &> /dev/null; then
         HEX_VERSION=$(mix hex.info | grep "Hex version" | awk '{print $3}')
@@ -111,7 +111,7 @@ if mix phx.new --version &> /dev/null; then
 else
     print_status "Installing Phoenix framework..."
     mix archive.install hex phx_new --force
-    
+   
     # Verify installation
     if mix phx.new --version &> /dev/null; then
         PHOENIX_VERSION=$(mix phx.new --version)
@@ -171,43 +171,43 @@ print_status "Running final verification..."
 # Function to verify all tools are working
 verify_installation() {
     local all_good=true
-    
+   
     # Test Erlang
     if ! erl -eval 'halt().' -noshell &> /dev/null; then
         print_error "Erlang verification failed"
         all_good=false
     fi
-    
+   
     # Test Elixir
     if ! elixir -e "System.version()" &> /dev/null; then
         print_error "Elixir verification failed"
         all_good=false
     fi
-    
+   
     # Test Hex
     if ! mix hex.info &> /dev/null; then
         print_error "Hex verification failed"
         all_good=false
     fi
-    
+   
     # Test Phoenix
     if ! mix phx.new --version &> /dev/null; then
         print_error "Phoenix verification failed"
         all_good=false
     fi
-    
+   
     # Test Node.js
     if ! node --version &> /dev/null; then
         print_error "Node.js verification failed"
         all_good=false
     fi
-    
+   
     # Test SQLite
     if ! sqlite3 --version &> /dev/null; then
         print_error "SQLite verification failed"
         all_good=false
     fi
-    
+   
     if [ "$all_good" = true ]; then
         print_success "All tools verified successfully!"
         return 0

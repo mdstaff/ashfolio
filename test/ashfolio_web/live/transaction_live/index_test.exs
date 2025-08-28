@@ -1,13 +1,16 @@
 defmodule AshfolioWeb.TransactionLive.IndexTest do
   use AshfolioWeb.ConnCase
 
+  import Phoenix.LiveViewTest
+
+  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
+
   @moduletag :liveview
   @moduletag :unit
   @moduletag :fast
-  import Phoenix.LiveViewTest
-  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
-  alias Ashfolio.FinancialManagement.TransactionCategory
-
   setup do
     # Database-as-user architecture: No user entity needed
     # Create test account

@@ -18,13 +18,14 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
 
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Transaction
+  alias Ashfolio.SQLiteHelpers
+
   @moduletag :performance
   @moduletag :slow
   @moduletag :transaction_filtering
-
-  alias Ashfolio.Portfolio.{Transaction, Account}
-  alias Ashfolio.FinancialManagement.TransactionCategory
-  alias Ashfolio.SQLiteHelpers
 
   @performance_transaction_count 1500
   @performance_categories_count 15
@@ -251,8 +252,7 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
 
            results
          end},
-        {:category_filtering,
-         fn -> {:ok, _} = Transaction.by_category(Enum.at(categories, 0).id) end}
+        {:category_filtering, fn -> {:ok, _} = Transaction.by_category(Enum.at(categories, 0).id) end}
       ]
 
       for {filter_name, filter_fn} <- common_filters do
@@ -308,7 +308,7 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
 
   # Helper functions for test data creation
 
-  defp create_test_accounts_and_categories() do
+  defp create_test_accounts_and_categories do
     # Create mix of investment and cash accounts
     accounts =
       for i <- 1..5 do
@@ -331,8 +331,7 @@ defmodule Ashfolio.Performance.TransactionFilteringPerformanceTest do
         {:ok, category} =
           TransactionCategory.create(%{
             name: "Test Category #{i}",
-            color:
-              "##{:rand.uniform(16_777_215) |> Integer.to_string(16) |> String.pad_leading(6, "0")}"
+            color: "##{16_777_215 |> :rand.uniform() |> Integer.to_string(16) |> String.pad_leading(6, "0")}"
           })
 
         category

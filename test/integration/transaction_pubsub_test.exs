@@ -9,6 +9,7 @@ defmodule AshfolioWeb.Integration.TransactionPubSubTest do
   use AshfolioWeb.LiveViewCase
 
   import Phoenix.LiveViewTest
+
   alias Ashfolio.SQLiteHelpers
 
   @moduletag :integration

@@ -1,9 +1,12 @@
 defmodule AshfolioWeb.ExpenseLive.Analytics do
+  @moduledoc false
   use AshfolioWeb, :live_view
 
   alias Ashfolio.FinancialManagement.Expense
   alias AshfolioWeb.Live.FormatHelpers
-  alias Contex.{Dataset, Plot, PieChart}
+  alias Contex.Dataset
+  alias Contex.PieChart
+  alias Contex.Plot
 
   @impl true
   def mount(_params, _session, socket) do
@@ -85,8 +88,7 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
          {:ok, end_date} <- Date.from_iso8601(end_date_string) do
       # Filter expenses by custom date range
       filtered_expenses =
-        socket.assigns.all_expenses
-        |> Enum.filter(fn expense ->
+        Enum.filter(socket.assigns.all_expenses, fn expense ->
           Date.compare(expense.date, start_date) != :lt and
             Date.compare(expense.date, end_date) != :gt
         end)
@@ -583,12 +585,12 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
   end
 
   defp filter_by_date_range(expenses, "last_3_months") do
-    start_date = Date.utc_today() |> Date.add(-90)
+    start_date = Date.add(Date.utc_today(), -90)
     Enum.filter(expenses, &(Date.compare(&1.date, start_date) != :lt))
   end
 
   defp filter_by_date_range(expenses, "last_6_months") do
-    start_date = Date.utc_today() |> Date.add(-180)
+    start_date = Date.add(Date.utc_today(), -180)
     Enum.filter(expenses, &(Date.compare(&1.date, start_date) != :lt))
   end
 
@@ -619,13 +621,12 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
 
     # Calculate total for percentages
     grand_total =
-      category_totals
-      |> Enum.reduce(Decimal.new(0), fn {_, total, _}, acc -> Decimal.add(acc, total) end)
+      Enum.reduce(category_totals, Decimal.new(0), fn {_, total, _}, acc -> Decimal.add(acc, total) end)
 
     # Add percentages
     if Decimal.gt?(grand_total, 0) do
       Enum.map(category_totals, fn {name, amount, color} ->
-        percentage = Decimal.div(amount, grand_total) |> Decimal.mult(100) |> Decimal.to_float()
+        percentage = amount |> Decimal.div(grand_total) |> Decimal.mult(100) |> Decimal.to_float()
         {name, amount, percentage, color}
       end)
     else
@@ -661,8 +662,6 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
 
         if total > 0 do
           generate_simple_pie_svg(chart_data, colors, total)
-        else
-          nil
         end
     end
   end
@@ -707,8 +706,7 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
   end
 
   defp calculate_total_expenses(expenses) do
-    expenses
-    |> Enum.reduce(Decimal.new(0), fn expense, acc ->
+    Enum.reduce(expenses, Decimal.new(0), fn expense, acc ->
       Decimal.add(acc, expense.amount)
     end)
   end
@@ -869,22 +867,21 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
         # Generate simple SVG bar chart (chart_data available for future Contex integration)
 
         # Generate simple SVG bar chart
-        """
+        Phoenix.HTML.raw("""
         <svg class="year-comparison-chart" width="300" height="150" viewBox="0 0 300 150">
           <!-- Previous Year Bar -->
           <rect x="50" y="#{120 - previous_amount / 200}" width="60" height="#{previous_amount / 200}" fill="#94a3b8" />
           <text x="80" y="140" text-anchor="middle" class="text-xs">#{previous_year}</text>
-          
+
           <!-- Current Year Bar -->
           <rect x="150" y="#{120 - current_amount / 200}" width="60" height="#{current_amount / 200}" fill="#3b82f6" />
           <text x="180" y="140" text-anchor="middle" class="text-xs">#{current_year}</text>
-          
+
           <!-- Labels -->
           <text x="80" y="#{110 - previous_amount / 200}" text-anchor="middle" class="text-xs">$#{:erlang.float_to_binary(previous_amount, decimals: 0)}</text>
           <text x="180" y="#{110 - current_amount / 200}" text-anchor="middle" class="text-xs">$#{:erlang.float_to_binary(current_amount, decimals: 0)}</text>
         </svg>
-        """
-        |> Phoenix.HTML.raw()
+        """)
 
       _ ->
         Phoenix.HTML.raw("""

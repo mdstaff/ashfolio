@@ -257,7 +257,7 @@ defmodule Ashfolio.MarketData.EnhancedPriceManager do
     GenServer.call(__MODULE__, {:fetch_symbol_price, symbol})
   end
 
-  def get_market_status() do
+  def get_market_status do
     GenServer.call(__MODULE__, :get_market_status)
   end
 
@@ -1002,7 +1002,7 @@ defmodule Ashfolio.UX.PerformanceOptimizer do
   end
 
   # Preload chart data in background
-  def preload_chart_data() do
+  def preload_chart_data do
     Task.start(fn ->
       ChartDataService.get_portfolio_performance_data()
       ChartDataService.get_allocation_data()
@@ -1010,7 +1010,7 @@ defmodule Ashfolio.UX.PerformanceOptimizer do
   end
 
   # Cache frequently accessed data
-  def cache_user_preferences() do
+  def cache_user_preferences do
     case UserPreferences.for_user() do
       {:ok, preferences} ->
         :ets.insert(:user_preferences_cache, {preferences})

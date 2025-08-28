@@ -7,7 +7,7 @@ defmodule AshfolioWeb.LayoutRegressionDemoTest do
 
   To test the regression detection:
   1. Temporarily change ashfolio_web.ex to use :root layout
-  2. Run this test - it should fail  
+  2. Run this test - it should fail
   3. Change back to :app layout
   4. Run this test - it should pass
 

@@ -8,12 +8,12 @@ defmodule AshfolioWeb.AccountLive.ContextApiIntegrationTest do
 
   use AshfolioWeb.LiveViewCase
 
+  alias Ashfolio.Portfolio.Account
+
   @moduletag :liveview
   @moduletag :integration
   @moduletag :fast
   @moduletag :context_api
-
-  alias Ashfolio.Portfolio.Account
 
   setup do
     # Database-as-user architecture: No user needed

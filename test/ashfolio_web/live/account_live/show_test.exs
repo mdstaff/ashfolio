@@ -1,13 +1,14 @@
 defmodule AshfolioWeb.AccountLive.ShowTest do
   use AshfolioWeb.ConnCase
 
+  import Phoenix.LiveViewTest
+
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Transaction
+
   @moduletag :liveview
   @moduletag :unit
   @moduletag :fast
-
-  import Phoenix.LiveViewTest
-
-  alias Ashfolio.Portfolio.{Account, Transaction}
 
   setup do
     # Database-as-user architecture: No user needed

@@ -1,11 +1,11 @@
 defmodule AshfolioWeb.Live.FormatHelpersTest do
   use ExUnit.Case, async: true
 
+  alias AshfolioWeb.Live.FormatHelpers
+
   @moduletag :liveview
   @moduletag :unit
   @moduletag :fast
-
-  alias AshfolioWeb.Live.FormatHelpers
 
   describe "format_currency/2" do
     test "formats positive decimal values correctly" do
@@ -116,7 +116,7 @@ defmodule AshfolioWeb.Live.FormatHelpersTest do
       # This test is a bit tricky since we can't control DateTime.utc_now()
       # We'll just verify it doesn't crash and returns a reasonable string
       # 5 minutes ago
-      past_time = DateTime.utc_now() |> DateTime.add(-300, :second)
+      past_time = DateTime.add(DateTime.utc_now(), -300, :second)
       result = FormatHelpers.format_relative_time(past_time)
 
       assert String.contains?(result, "ago")
@@ -129,35 +129,35 @@ defmodule AshfolioWeb.Live.FormatHelpersTest do
     end
   end
 
-  describe "is_positive?/1" do
+  describe "positive?/1" do
     test "correctly identifies positive decimal values" do
-      assert FormatHelpers.is_positive?(Decimal.new("15.25")) == true
-      assert FormatHelpers.is_positive?(Decimal.new("0.01")) == true
-      assert FormatHelpers.is_positive?(Decimal.new("1000")) == true
+      assert FormatHelpers.positive?(Decimal.new("15.25")) == true
+      assert FormatHelpers.positive?(Decimal.new("0.01")) == true
+      assert FormatHelpers.positive?(Decimal.new("1000")) == true
     end
 
     test "correctly identifies negative decimal values" do
-      assert FormatHelpers.is_positive?(Decimal.new("-15.25")) == false
-      assert FormatHelpers.is_positive?(Decimal.new("-0.01")) == false
-      assert FormatHelpers.is_positive?(Decimal.new("-1000")) == false
+      assert FormatHelpers.positive?(Decimal.new("-15.25")) == false
+      assert FormatHelpers.positive?(Decimal.new("-0.01")) == false
+      assert FormatHelpers.positive?(Decimal.new("-1000")) == false
     end
 
     test "correctly identifies zero as not positive" do
-      assert FormatHelpers.is_positive?(Decimal.new("0")) == false
-      assert FormatHelpers.is_positive?(Decimal.new("0.00")) == false
+      assert FormatHelpers.positive?(Decimal.new("0")) == false
+      assert FormatHelpers.positive?(Decimal.new("0.00")) == false
     end
 
     test "handles numeric values" do
-      assert FormatHelpers.is_positive?(15.25) == true
-      assert FormatHelpers.is_positive?(-15.25) == false
-      assert FormatHelpers.is_positive?(0) == false
-      assert FormatHelpers.is_positive?(0.0) == false
+      assert FormatHelpers.positive?(15.25) == true
+      assert FormatHelpers.positive?(-15.25) == false
+      assert FormatHelpers.positive?(0) == false
+      assert FormatHelpers.positive?(0.0) == false
     end
 
     test "handles nil and invalid values" do
-      assert FormatHelpers.is_positive?(nil) == false
-      assert FormatHelpers.is_positive?("invalid") == false
-      assert FormatHelpers.is_positive?(%{}) == false
+      assert FormatHelpers.positive?(nil) == false
+      assert FormatHelpers.positive?("invalid") == false
+      assert FormatHelpers.positive?(%{}) == false
     end
   end
 

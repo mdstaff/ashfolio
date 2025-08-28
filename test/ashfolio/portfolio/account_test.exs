@@ -1,12 +1,12 @@
 defmodule Ashfolio.Portfolio.AccountTest do
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.Portfolio.Account
+
   @moduletag :ash_resources
   @moduletag :unit
   @moduletag :fast
   @moduletag :smoke
-
-  alias Ashfolio.Portfolio.Account
 
   setup do
     # Database-as-user architecture: No user entity needed
@@ -32,7 +32,7 @@ defmodule Ashfolio.Portfolio.AccountTest do
       # Default value
       assert account.account_type == :investment
       # Database-as-user architecture: No user_id field needed
-      assert account.id != nil
+      assert account.id
     end
 
     test "can create account with all attributes" do

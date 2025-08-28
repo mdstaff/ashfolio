@@ -13,8 +13,9 @@ defmodule Ashfolio.FinancialManagement.TransactionFiltering do
   and supports caching for frequently used filter combinations.
   """
 
-  alias Ashfolio.Portfolio.Transaction
   import Ecto.Query
+
+  alias Ashfolio.Portfolio.Transaction
 
   @doc """
   Apply filters to transactions based on provided criteria.
@@ -31,10 +32,10 @@ defmodule Ashfolio.FinancialManagement.TransactionFiltering do
 
       # Single category filter
       apply_filters(%{category: "category-id"})
-      
+
       # Multiple categories
       apply_filters(%{category: ["id1", "id2"]})
-      
+
       # Composite filter
       apply_filters(%{
         category: "category-id",
@@ -54,8 +55,6 @@ defmodule Ashfolio.FinancialManagement.TransactionFiltering do
          {:ok, filtered_query} <- apply_transaction_type_filter(filtered_query, filter_criteria),
          {:ok, filtered_query} <- apply_amount_range_filter(filtered_query, filter_criteria) do
       execute_filtered_query(filtered_query)
-    else
-      {:error, reason} -> {:error, reason}
     end
   end
 
@@ -124,8 +123,7 @@ defmodule Ashfolio.FinancialManagement.TransactionFiltering do
         {:ok, query}
 
       _invalid ->
-        {:error,
-         "Invalid category filter format: must be :all, :uncategorized, string, or list of strings"}
+        {:error, "Invalid category filter format: must be :all, :uncategorized, string, or list of strings"}
     end
   end
 
@@ -223,22 +221,20 @@ defmodule Ashfolio.FinancialManagement.TransactionFiltering do
   end
 
   defp execute_filtered_query(query) do
-    try do
-      # Execute query with optimized preloaded associations for efficient data loading
-      # Use join preloading for better performance with large datasets
-      transactions =
-        query
-        |> join(:left, [t], a in assoc(t, :account))
-        |> join(:left, [t], s in assoc(t, :symbol))
-        |> join(:left, [t], c in assoc(t, :category))
-        |> preload([t, a, s, c], account: a, symbol: s, category: c)
-        |> Ashfolio.Repo.all()
+    # Execute query with optimized preloaded associations for efficient data loading
+    # Use join preloading for better performance with large datasets
+    transactions =
+      query
+      |> join(:left, [t], a in assoc(t, :account))
+      |> join(:left, [t], s in assoc(t, :symbol))
+      |> join(:left, [t], c in assoc(t, :category))
+      |> preload([t, a, s, c], account: a, symbol: s, category: c)
+      |> Ashfolio.Repo.all()
 
-      {:ok, transactions}
-    rescue
-      error ->
-        {:error, "Database query failed: #{inspect(error)}"}
-    end
+    {:ok, transactions}
+  rescue
+    error ->
+      {:error, "Database query failed: #{inspect(error)}"}
   end
 
   @doc """
@@ -266,25 +262,23 @@ defmodule Ashfolio.FinancialManagement.TransactionFiltering do
   """
   @spec get_filter_options() :: {:ok, map()} | {:error, String.t()}
   def get_filter_options do
-    try do
-      options = %{
-        transaction_types: [:all, :buy, :sell, :dividend, :fee, :interest, :liability],
-        # Will be extended with actual categories
-        category_options: [:all, :uncategorized],
-        date_range_presets: [
-          {:last_7_days, "Last 7 days"},
-          {:last_30_days, "Last 30 days"},
-          {:last_90_days, "Last 90 days"},
-          {:this_year, "This year"},
-          {:last_year, "Last year"},
-          {:all, "All time"}
-        ]
-      }
+    options = %{
+      transaction_types: [:all, :buy, :sell, :dividend, :fee, :interest, :liability],
+      # Will be extended with actual categories
+      category_options: [:all, :uncategorized],
+      date_range_presets: [
+        {:last_7_days, "Last 7 days"},
+        {:last_30_days, "Last 30 days"},
+        {:last_90_days, "Last 90 days"},
+        {:this_year, "This year"},
+        {:last_year, "Last year"},
+        {:all, "All time"}
+      ]
+    }
 
-      {:ok, options}
-    rescue
-      error ->
-        {:error, "Failed to get filter options: #{inspect(error)}"}
-    end
+    {:ok, options}
+  rescue
+    error ->
+      {:error, "Failed to get filter options: #{inspect(error)}"}
   end
 end

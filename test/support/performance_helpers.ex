@@ -132,9 +132,9 @@ defmodule Ashfolio.PerformanceHelpers do
             System.monotonic_time(:microsecond) - start
           end
 
-        avg = Enum.sum(times) |> div(5) |> div(1000)
-        min = Enum.min(times) |> div(1000)
-        max = Enum.max(times) |> div(1000)
+        avg = times |> Enum.sum() |> div(5) |> div(1000)
+        min = times |> Enum.min() |> div(1000)
+        max = times |> Enum.max() |> div(1000)
 
         IO.puts("#{String.pad_leading("#{avg}ms", 6)} (min: #{min}ms, max: #{max}ms)")
 

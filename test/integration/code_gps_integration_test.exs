@@ -7,9 +7,12 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
   """
 
   use ExUnit.Case, async: false
-  @moduletag :skip
+
   import ExUnit.CaptureIO
 
+  alias Mix.Tasks.CodeGps
+
+  @moduletag :skip
   @code_gps_path ".code-gps.yaml"
 
   setup do
@@ -20,7 +23,7 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
 
     on_exit(fn ->
       # Keep the file for manual inspection if test fails
-      unless ExUnit.configuration()[:trace] do
+      if !ExUnit.configuration()[:trace] do
         if File.exists?(@code_gps_path) do
           File.rm!(@code_gps_path)
         end
@@ -33,7 +36,7 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
   describe "Code GPS generation" do
     test "generates .code-gps.yaml file" do
       capture_io(fn ->
-        Mix.Tasks.CodeGps.run([])
+        CodeGps.run([])
       end)
 
       assert File.exists?(@code_gps_path), "Code GPS should generate .code-gps.yaml file"
@@ -43,7 +46,7 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
       start_time = System.monotonic_time(:millisecond)
 
       capture_io(fn ->
-        Mix.Tasks.CodeGps.run([])
+        CodeGps.run([])
       end)
 
       end_time = System.monotonic_time(:millisecond)
@@ -54,7 +57,7 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
 
     test "output contains expected structure and content" do
       capture_io(fn ->
-        Mix.Tasks.CodeGps.run([])
+        CodeGps.run([])
       end)
 
       content = File.read!(@code_gps_path)
@@ -83,7 +86,7 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
 
     test "detects actual LiveView events and subscriptions" do
       capture_io(fn ->
-        Mix.Tasks.CodeGps.run([])
+        CodeGps.run([])
       end)
 
       content = File.read!(@code_gps_path)
@@ -103,7 +106,7 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
 
     test "provides accurate file paths and line numbers" do
       capture_io(fn ->
-        Mix.Tasks.CodeGps.run([])
+        CodeGps.run([])
       end)
 
       content = File.read!(@code_gps_path)
@@ -122,7 +125,7 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
 
     test "identifies missing integrations accurately" do
       capture_io(fn ->
-        Mix.Tasks.CodeGps.run([])
+        CodeGps.run([])
       end)
 
       content = File.read!(@code_gps_path)
@@ -134,7 +137,7 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
 
     test "counts components usage correctly" do
       capture_io(fn ->
-        Mix.Tasks.CodeGps.run([])
+        CodeGps.run([])
       end)
 
       content = File.read!(@code_gps_path)
@@ -148,7 +151,7 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
 
     test "generates actionable integration opportunities" do
       capture_io(fn ->
-        Mix.Tasks.CodeGps.run([])
+        CodeGps.run([])
       end)
 
       content = File.read!(@code_gps_path)
@@ -179,7 +182,7 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
 
     test "Code GPS manifest provides all information needed for development" do
       capture_io(fn ->
-        Mix.Tasks.CodeGps.run([])
+        CodeGps.run([])
       end)
 
       content = File.read!(@code_gps_path)
@@ -201,7 +204,7 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
 
     test "Code GPS identifies specific next actions for agents" do
       capture_io(fn ->
-        Mix.Tasks.CodeGps.run([])
+        CodeGps.run([])
       end)
 
       content = File.read!(@code_gps_path)
@@ -223,7 +226,7 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
 
       # Step 1: Agent should run Code GPS first
       capture_io(fn ->
-        Mix.Tasks.CodeGps.run([])
+        CodeGps.run([])
       end)
 
       assert File.exists?(@code_gps_path), "Code GPS should generate manifest"
@@ -259,7 +262,7 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
   describe "Code GPS data accuracy" do
     test "LiveView analysis matches actual implementation" do
       capture_io(fn ->
-        Mix.Tasks.CodeGps.run([])
+        CodeGps.run([])
       end)
 
       # Read actual Dashboard LiveView
@@ -280,7 +283,7 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
 
     test "component analysis matches core_components.ex" do
       capture_io(fn ->
-        Mix.Tasks.CodeGps.run([])
+        CodeGps.run([])
       end)
 
       # Read actual core components

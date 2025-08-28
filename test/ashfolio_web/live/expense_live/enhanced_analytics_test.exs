@@ -3,6 +3,9 @@ defmodule AshfolioWeb.ExpenseLive.EnhancedAnalyticsTest do
 
   import Phoenix.LiveViewTest
 
+  alias Ashfolio.FinancialManagement.Expense
+  alias Ashfolio.FinancialManagement.TransactionCategory
+
   setup do
     # Create test data - following existing patterns from other tests
     {:ok, checking_account} =
@@ -13,20 +16,20 @@ defmodule AshfolioWeb.ExpenseLive.EnhancedAnalyticsTest do
       })
 
     {:ok, groceries_category} =
-      Ashfolio.FinancialManagement.TransactionCategory.create(%{
+      TransactionCategory.create(%{
         name: "Groceries",
         color: "#4CAF50"
       })
 
     {:ok, gas_category} =
-      Ashfolio.FinancialManagement.TransactionCategory.create(%{
+      TransactionCategory.create(%{
         name: "Gas",
         color: "#FF9800"
       })
 
     # Create test expenses for different years to test year-over-year
     {:ok, expense_2023} =
-      Ashfolio.FinancialManagement.Expense.create(%{
+      Expense.create(%{
         description: "Groceries 2023",
         amount: Decimal.new("125.50"),
         date: ~D[2023-08-15],
@@ -35,7 +38,7 @@ defmodule AshfolioWeb.ExpenseLive.EnhancedAnalyticsTest do
       })
 
     {:ok, expense_2024} =
-      Ashfolio.FinancialManagement.Expense.create(%{
+      Expense.create(%{
         description: "Groceries 2024",
         amount: Decimal.new("135.75"),
         date: ~D[2024-08-15],

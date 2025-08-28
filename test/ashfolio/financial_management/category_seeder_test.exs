@@ -1,10 +1,11 @@
 defmodule Ashfolio.FinancialManagement.CategorySeederTest do
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.FinancialManagement.CategorySeeder
+  alias Ashfolio.FinancialManagement.TransactionCategory
+
   @moduletag :ash_resources
   @moduletag :financial_management
-
-  alias Ashfolio.FinancialManagement.{CategorySeeder, TransactionCategory}
 
   describe "seed_system_categories/0" do
     setup do
@@ -122,9 +123,9 @@ defmodule Ashfolio.FinancialManagement.CategorySeederTest do
       {:ok, third_run} = CategorySeeder.seed_system_categories()
 
       # All runs should return same categories (by name)
-      first_names = Enum.map(first_run, & &1.name) |> Enum.sort()
-      second_names = Enum.map(second_run, & &1.name) |> Enum.sort()
-      third_names = Enum.map(third_run, & &1.name) |> Enum.sort()
+      first_names = first_run |> Enum.map(& &1.name) |> Enum.sort()
+      second_names = second_run |> Enum.map(& &1.name) |> Enum.sort()
+      third_names = third_run |> Enum.map(& &1.name) |> Enum.sort()
 
       assert first_names == second_names
       assert second_names == third_names
@@ -234,7 +235,7 @@ defmodule Ashfolio.FinancialManagement.CategorySeederTest do
 
       {:ok, categories} = CategorySeeder.seed_system_categories()
 
-      created_names = Enum.map(categories, & &1.name) |> Enum.sort()
+      created_names = categories |> Enum.map(& &1.name) |> Enum.sort()
       assert created_names == Enum.sort(expected_categories)
     end
 

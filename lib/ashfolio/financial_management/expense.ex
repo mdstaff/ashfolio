@@ -196,11 +196,10 @@ defmodule Ashfolio.FinancialManagement.Expense do
       |> Ash.Query.load(:month_year)
       |> Ash.read!()
       |> Enum.group_by(& &1.month_year)
-      |> Enum.map(fn {month, expenses} ->
+      |> Map.new(fn {month, expenses} ->
         total = expenses |> Enum.map(& &1.amount) |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
         {month, total}
       end)
-      |> Enum.into(%{})
     end
 
     def category_totals!(start_date, end_date) do
@@ -210,11 +209,10 @@ defmodule Ashfolio.FinancialManagement.Expense do
       |> Ash.Query.filter(date >= ^start_date and date <= ^end_date)
       |> Ash.read!()
       |> Enum.group_by(& &1.category_id)
-      |> Enum.map(fn {category_id, expenses} ->
+      |> Map.new(fn {category_id, expenses} ->
         total = expenses |> Enum.map(& &1.amount) |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
         {category_id, total}
       end)
-      |> Enum.into(%{})
     end
   end
 end

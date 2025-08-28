@@ -1,6 +1,4 @@
 defmodule Ashfolio.Context do
-  @behaviour Ashfolio.ContextBehaviour
-
   @moduledoc """
   High-level API for all financial operations - local-first design.
 
@@ -24,9 +22,14 @@ defmodule Ashfolio.Context do
   - `{:error, :service_unavailable}` - External service unavailable
   """
 
-  alias Ashfolio.Portfolio.{Account, Transaction, UserSettings}
+  @behaviour Ashfolio.ContextBehaviour
+
+  alias Ashfolio.FinancialManagement.BalanceManager
+  alias Ashfolio.FinancialManagement.SymbolSearch
+  alias Ashfolio.Portfolio.Account
   alias Ashfolio.Portfolio.Calculator
-  alias Ashfolio.FinancialManagement.{SymbolSearch, BalanceManager}
+  alias Ashfolio.Portfolio.Transaction
+  alias Ashfolio.Portfolio.UserSettings
 
   require Logger
 
@@ -40,7 +43,7 @@ defmodule Ashfolio.Context do
   Get user settings for the database-as-user architecture.
   """
   @spec get_user_settings() :: {:ok, map()} | {:error, term()}
-  def get_user_settings() do
+  def get_user_settings do
     case UserSettings.Api.get_settings() do
       {:ok, settings} -> {:ok, settings}
       {:error, reason} -> {:error, reason}
@@ -73,7 +76,7 @@ defmodule Ashfolio.Context do
         last_updated: ~U[2025-08-10 12:00:00Z]
       }}
   """
-  def get_dashboard_data() do
+  def get_dashboard_data do
     track_performance(:get_dashboard_data, fn ->
       with {:ok, user_settings} <- get_user_settings(),
            {:ok, accounts} <- Account.list(),
@@ -96,7 +99,7 @@ defmodule Ashfolio.Context do
   end
 
   # Backward compatibility function - redirects to get_dashboard_data
-  def get_user_dashboard_data() do
+  def get_user_dashboard_data do
     get_dashboard_data()
   end
 
@@ -155,7 +158,7 @@ defmodule Ashfolio.Context do
         last_updated: ~U[2025-08-10 12:00:00Z]
       }}
   """
-  def get_portfolio_summary() do
+  def get_portfolio_summary do
     track_performance(:get_portfolio_summary, fn ->
       with {:ok, _user_settings} <- get_user_settings(),
            {:ok, accounts} <- Account.list(),
@@ -192,27 +195,29 @@ defmodule Ashfolio.Context do
   """
   def get_recent_transactions(limit \\ 10) do
     track_performance(:get_recent_transactions, fn ->
-      with {:ok, accounts} <- Account.list() do
-        account_ids = Enum.map(accounts, & &1.id)
+      case Account.list() do
+        {:ok, accounts} ->
+          account_ids = Enum.map(accounts, & &1.id)
 
-        # Use batch query to prevent N+1 queries, loading symbol and category relationships
-        case Transaction.by_accounts(account_ids) do
-          {:ok, transactions} ->
-            # Load relationships for recent transactions
-            loaded_transactions = Ash.load!(transactions, [:symbol, :category])
+          # Use batch query to prevent N+1 queries, loading symbol and category relationships
+          case Transaction.by_accounts(account_ids) do
+            {:ok, transactions} ->
+              # Load relationships for recent transactions
+              loaded_transactions = Ash.load!(transactions, [:symbol, :category])
 
-            recent_transactions =
-              loaded_transactions
-              |> Enum.sort_by(& &1.date, {:desc, Date})
-              |> Enum.take(limit)
+              recent_transactions =
+                loaded_transactions
+                |> Enum.sort_by(& &1.date, {:desc, Date})
+                |> Enum.take(limit)
 
-            {:ok, recent_transactions}
+              {:ok, recent_transactions}
 
-          error ->
-            normalize_error(error)
-        end
-      else
-        error -> normalize_error(error)
+            error ->
+              normalize_error(error)
+          end
+
+        error ->
+          normalize_error(error)
       end
     end)
   end
@@ -230,7 +235,7 @@ defmodule Ashfolio.Context do
         breakdown: %{...}
       }}
   """
-  def get_net_worth() do
+  def get_net_worth do
     track_performance(:get_net_worth, fn ->
       with {:ok, _user_settings} <- get_user_settings(),
            {:ok, accounts} <- Account.list(),
@@ -401,8 +406,7 @@ defmodule Ashfolio.Context do
     %{
       all: accounts,
       investment: Enum.filter(accounts, &(&1.account_type == :investment)),
-      cash:
-        Enum.filter(accounts, &(&1.account_type in [:checking, :savings, :money_market, :cd])),
+      cash: Enum.filter(accounts, &(&1.account_type in [:checking, :savings, :money_market, :cd])),
       active: Enum.filter(accounts, &(!&1.is_excluded)),
       excluded: Enum.filter(accounts, & &1.is_excluded)
     }
@@ -423,8 +427,7 @@ defmodule Ashfolio.Context do
       active_count: Enum.count(accounts, &(!&1.is_excluded)),
       cash_balance: cash_balance,
       investment_balance: investment_balance,
-      cash_accounts:
-        Enum.count(accounts, &(&1.account_type in [:checking, :savings, :money_market, :cd])),
+      cash_accounts: Enum.count(accounts, &(&1.account_type in [:checking, :savings, :money_market, :cd])),
       investment_accounts: Enum.count(accounts, &(&1.account_type == :investment))
     }
   end
@@ -548,10 +551,10 @@ defmodule Ashfolio.Context do
     if name do
       case Account.get_by_name(name) do
         {:ok, existing_account} when not is_nil(existing_account) ->
-          if existing_account.id != current_account_id do
-            {:error, :validation_failed}
-          else
+          if existing_account.id == current_account_id do
             {:ok, %{}}
+          else
+            {:error, :validation_failed}
           end
 
         {:ok, nil} ->

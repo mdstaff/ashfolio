@@ -6,8 +6,8 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
   total net worth and creates historical snapshots for tracking progress.
   """
 
-  alias Ashfolio.Portfolio.Account
   alias Ashfolio.FinancialManagement.NetWorthSnapshot
+  alias Ashfolio.Portfolio.Account
 
   @doc """
   Calculates current net worth from all accounts.
@@ -117,7 +117,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
     cash_by_type =
       cash_accounts
       |> Enum.group_by(& &1.account_type)
-      |> Enum.map(fn {type, accts} ->
+      |> Map.new(fn {type, accts} ->
         total =
           accts
           |> Enum.map(& &1.balance)
@@ -125,7 +125,6 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
 
         {type, total}
       end)
-      |> Enum.into(%{})
 
     breakdown = %{
       investment_accounts: investment_accounts,

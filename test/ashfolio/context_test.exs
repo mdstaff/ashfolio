@@ -8,12 +8,14 @@ defmodule Ashfolio.ContextTest do
 
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.Context
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
+
   @moduletag :context_api
   @moduletag :unit
   @moduletag :fast
-
-  alias Ashfolio.Context
-  alias Ashfolio.Portfolio.{Account, Transaction, Symbol}
 
   describe "get_dashboard_data/0" do
     test "returns comprehensive dashboard data for database-as-user architecture" do
@@ -56,7 +58,7 @@ defmodule Ashfolio.ContextTest do
 
       assert {:ok, dashboard_data} = Context.get_dashboard_data()
       # Verify user settings are returned
-      assert dashboard_data.user != nil
+      assert dashboard_data.user
     end
 
     test "handles accounts with different types" do
@@ -336,7 +338,7 @@ defmodule Ashfolio.ContextTest do
 
   defp create_symbol(attrs \\ %{}) do
     # Generate unique symbol to avoid conflicts
-    unique_suffix = :crypto.strong_rand_bytes(4) |> Base.encode16()
+    unique_suffix = 4 |> :crypto.strong_rand_bytes() |> Base.encode16()
 
     default_attrs = %{
       symbol: "AAPL#{unique_suffix}",
@@ -368,7 +370,6 @@ defmodule Ashfolio.ContextTest do
   end
 
   defp days_ago(days) do
-    Date.utc_today()
-    |> Date.add(-days)
+    Date.add(Date.utc_today(), -days)
   end
 end

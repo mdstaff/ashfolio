@@ -16,6 +16,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
 
   # Mock Context module for testing
   defmodule MockContext do
+    @moduledoc false
     def search_symbols(_query, _opts) do
       {:ok,
        [
@@ -43,6 +44,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
 
   # Test LiveView that includes the SymbolAutocomplete component
   defmodule TestLive do
+    @moduledoc false
     use Phoenix.LiveView
 
     import Phoenix.Component
@@ -307,8 +309,6 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteUITest do
       |> Plug.Test.init_test_session(%{})
       |> Plug.Conn.put_session(:_csrf_token, "test_token")
 
-    Phoenix.LiveViewTest.live_isolated(conn_with_session, TestLive,
-      session: %{"_csrf_token" => "test_token"}
-    )
+    Phoenix.LiveViewTest.live_isolated(conn_with_session, TestLive, session: %{"_csrf_token" => "test_token"})
   end
 end

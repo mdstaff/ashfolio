@@ -5,12 +5,12 @@ defmodule AshfolioWeb.LayoutConfigurationTest do
 
   This test ensures that:
   1. Router uses :root layout (correct)
-  2. LiveView uses :app layout (correct) 
+  2. LiveView uses :app layout (correct)
   3. No duplication occurs in testing
 
   Background: We discovered that configuring LiveViews to use :root layout
   while the router also applies :root layout causes the entire root layout
-  to render twice, creating duplicate IDs that Phoenix LiveView 1.1 
+  to render twice, creating duplicate IDs that Phoenix LiveView 1.1
   correctly flags as errors.
   """
   use ExUnit.Case, async: true
@@ -107,7 +107,7 @@ defmodule AshfolioWeb.LayoutConfigurationTest do
 
       # For now, we document what this test should verify:
       # - No duplicate flash-group IDs
-      # - No duplicate topbar-mobile-menu IDs  
+      # - No duplicate topbar-mobile-menu IDs
       # - No duplicate client-error/server-error IDs
 
       # This test passes if the layout configuration is correct

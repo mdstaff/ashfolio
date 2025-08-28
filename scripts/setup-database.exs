@@ -3,7 +3,7 @@
 # Database Setup Script for Ashfolio
 # Creates a clean database-as-user architecture
 # Each SQLite database represents a single user's complete portfolio
-# 
+#
 # Run with: mix run scripts/setup-database.exs
 # Options:  mix run scripts/setup-database.exs -- --force  (overwrites existing database)
 #           mix run scripts/setup-database.exs -- data/custom.db --force
@@ -14,13 +14,13 @@ defmodule DatabaseSetup do
 
   This script creates a clean database schema following the database-as-user
   architecture where each SQLite database represents a single user's portfolio.
-  
+
   Benefits of running with Mix:
   - Automatic access to all project dependencies (Exqlite, Ecto, etc.)
   - Consistent with project configuration
   - Can use project modules if needed
   - Proper dependency resolution
-  
+
   Safety features:
   - Checks for existing database before overwriting
   - Requires --force flag to overwrite existing data
@@ -52,7 +52,7 @@ defmodule DatabaseSetup do
         backup_path = "#{database_path}.backup.#{System.system_time(:second)}"
         File.copy!(database_path, backup_path)
         IO.puts("✅ Backup created at: #{backup_path}")
-        
+
         # Remove existing database and related files
         IO.puts("🗑️  Removing existing database...")
         File.rm_rf(database_path)
@@ -260,29 +260,29 @@ defmodule DatabaseSetup do
       ["--" | rest] -> rest
       other -> other
     end
-    
-    {opts, positional_args, _} = OptionParser.parse(clean_args, 
+
+    {opts, positional_args, _} = OptionParser.parse(clean_args,
       switches: [force: :boolean, help: :boolean],
       aliases: [f: :force, h: :help]
     )
-    
+
     options = Enum.into(opts, %{})
-    
-    # Filter out flag arguments from positional args  
+
+    # Filter out flag arguments from positional args
     paths = Enum.filter(positional_args, fn arg ->
       not String.starts_with?(arg, "-")
     end)
-    
+
     cond do
       options[:help] ->
         print_help()
         System.halt(0)
-        
+
       length(paths) > 1 ->
         IO.puts("❌ Too many database paths provided")
         print_help()
         System.halt(1)
-        
+
       true ->
         database_path = List.first(paths) || "data/ashfolio_dev.db"
         {database_path, options}
@@ -291,24 +291,24 @@ defmodule DatabaseSetup do
 
   defp print_help do
     IO.puts("""
-    
+
     Database Setup Script for Ashfolio
     ===================================
-    
+
     Usage: mix run scripts/setup-database.exs -- [options] [database_path]
-    
+
     Options:
       --force, -f     Force overwrite of existing database (creates backup)
       --help, -h      Show this help message
-    
+
     Examples:
       mix run scripts/setup-database.exs                    # Setup default dev database
       mix run scripts/setup-database.exs -- --force         # Overwrite existing database
       mix run scripts/setup-database.exs -- data/test.db    # Use custom database path
       mix run scripts/setup-database.exs -- data/test.db --force  # Force with custom path
-    
+
     Default database path: data/ashfolio_dev.db
-    
+
     ⚠️  Warning: Using --force will backup and then delete the existing database!
     """)
   end

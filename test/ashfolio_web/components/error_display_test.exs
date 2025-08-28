@@ -1,13 +1,14 @@
 defmodule AshfolioWeb.Components.ErrorDisplayTest do
   use AshfolioWeb.ConnCase, async: true
-  import Phoenix.LiveViewTest
+
   import Phoenix.Component
+  import Phoenix.LiveViewTest
+
+  alias AshfolioWeb.Components.ErrorDisplay
 
   @moduletag :liveview
   @moduletag :unit
   @moduletag :fast
-
-  alias AshfolioWeb.Components.ErrorDisplay
 
   describe "error_message/1" do
     test "renders basic error message" do
@@ -34,9 +35,7 @@ defmodule AshfolioWeb.Components.ErrorDisplayTest do
       assigns = %{error: "Test error", dismissible: true}
 
       html =
-        rendered_to_string(
-          ~H"<ErrorDisplay.error_message error={@error} dismissible={@dismissible} />"
-        )
+        rendered_to_string(~H"<ErrorDisplay.error_message error={@error} dismissible={@dismissible} />")
 
       assert html =~ "Test error"
       assert html =~ "phx-click=\"dismiss_error\""
@@ -69,9 +68,7 @@ defmodule AshfolioWeb.Components.ErrorDisplayTest do
       assigns = %{message: "Warning message", dismissible: true}
 
       html =
-        rendered_to_string(
-          ~H"<ErrorDisplay.warning_message message={@message} dismissible={@dismissible} />"
-        )
+        rendered_to_string(~H"<ErrorDisplay.warning_message message={@message} dismissible={@dismissible} />")
 
       assert html =~ "phx-click=\"dismiss_warning\""
     end
@@ -187,7 +184,7 @@ defmodule AshfolioWeb.Components.ErrorDisplayTest do
       assert error_html =~ "role=\"alert\""
       assert error_html =~ "aria-live=\"polite\""
 
-      # Test warning_message  
+      # Test warning_message
       warning_html = rendered_to_string(~H"<ErrorDisplay.warning_message message={@message} />")
       assert warning_html =~ "role=\"alert\""
       assert warning_html =~ "aria-live=\"polite\""
@@ -211,16 +208,12 @@ defmodule AshfolioWeb.Components.ErrorDisplayTest do
       assert error_html =~ "aria-label=\"Dismiss error\""
 
       warning_html =
-        rendered_to_string(
-          ~H"<ErrorDisplay.warning_message message={@message} dismissible={true} />"
-        )
+        rendered_to_string(~H"<ErrorDisplay.warning_message message={@message} dismissible={true} />")
 
       assert warning_html =~ "aria-label=\"Dismiss warning\""
 
       success_html =
-        rendered_to_string(
-          ~H"<ErrorDisplay.success_message message={@message} dismissible={true} />"
-        )
+        rendered_to_string(~H"<ErrorDisplay.success_message message={@message} dismissible={true} />")
 
       assert success_html =~ "aria-label=\"Dismiss success message\""
     end

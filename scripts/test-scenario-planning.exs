@@ -23,14 +23,14 @@ IO.puts("\n🎯 Test 1: Standard Scenario Analysis")
 IO.puts("Portfolio: $100,000 | Contributions: $12,000/year | Timeline: 30 years")
 
 {:ok, scenarios} = ForecastCalculator.calculate_scenario_projections(
-  Decimal.new("100000"), 
-  Decimal.new("12000"), 
+  Decimal.new("100000"),
+  Decimal.new("12000"),
   30
 )
 
 IO.puts("Results after 30 years:")
 IO.puts("  Pessimistic (5%):  #{format_currency.(scenarios.pessimistic.portfolio_value)}")
-IO.puts("  Realistic (7%):    #{format_currency.(scenarios.realistic.portfolio_value)}")  
+IO.puts("  Realistic (7%):    #{format_currency.(scenarios.realistic.portfolio_value)}")
 IO.puts("  Optimistic (10%):  #{format_currency.(scenarios.optimistic.portfolio_value)}")
 IO.puts("  Weighted Average:  #{format_currency.(scenarios.weighted_average.portfolio_value)}")
 
@@ -70,7 +70,7 @@ IO.puts("Portfolio: $200,000 | Contributions: $30,000/year | Expenses: $60,000/y
 
 {:ok, fi_analysis} = ForecastCalculator.calculate_fi_timeline(
   Decimal.new("200000"),
-  Decimal.new("30000"), 
+  Decimal.new("30000"),
   Decimal.new("60000"),
   Decimal.new("0.07")
 )
@@ -84,7 +84,7 @@ IO.puts("  Safe Withdrawal (4%):  #{Decimal.mult(fi_analysis.safe_withdrawal_rat
 IO.puts("\nScenario Analysis for FI Timeline:")
 scenarios = fi_analysis.scenario_analysis
 IO.puts("  Pessimistic (5%):   #{scenarios.pessimistic.years_to_fi} years")
-IO.puts("  Realistic (7%):     #{scenarios.realistic.years_to_fi} years")  
+IO.puts("  Realistic (7%):     #{scenarios.realistic.years_to_fi} years")
 IO.puts("  Optimistic (10%):   #{scenarios.optimistic.years_to_fi} years")
 
 years_saved = scenarios.pessimistic.years_to_fi - scenarios.optimistic.years_to_fi
@@ -96,7 +96,7 @@ IO.puts("Portfolio: $1,500,000 | Expenses: $50,000/year")
 
 {:ok, already_fi} = ForecastCalculator.calculate_fi_timeline(
   Decimal.new("1500000"),
-  Decimal.new("20000"), 
+  Decimal.new("20000"),
   Decimal.new("50000"),
   Decimal.new("0.07")
 )
@@ -114,8 +114,8 @@ IO.puts("\n⚡ Test 5: Performance Benchmark")
 
 {time_us, {:ok, _}} = :timer.tc(fn ->
   ForecastCalculator.calculate_scenario_projections(
-    Decimal.new("500000"), 
-    Decimal.new("50000"), 
+    Decimal.new("500000"),
+    Decimal.new("50000"),
     30
   )
 end)
@@ -125,7 +125,7 @@ IO.puts("Standard scenario calculation time: #{time_us}μs (#{Float.round(time_u
 {time_us, {:ok, _}} = :timer.tc(fn ->
   ForecastCalculator.calculate_fi_timeline(
     Decimal.new("300000"),
-    Decimal.new("40000"), 
+    Decimal.new("40000"),
     Decimal.new("70000"),
     Decimal.new("0.07")
   )
@@ -143,7 +143,7 @@ IO.puts("✅ All scenario planning tests completed successfully!")
 IO.puts("")
 IO.puts("🚀 Stage 3 Implementation Summary:")
 IO.puts("   • Standard scenarios (5%, 7%, 10% growth rates)")
-IO.puts("   • Custom scenario planning with user-defined rates") 
+IO.puts("   • Custom scenario planning with user-defined rates")
 IO.puts("   • Financial Independence timeline with 25x rule")
 IO.puts("   • Scenario analysis for FI planning")
 IO.puts("   • Performance optimized (all benchmarks met)")

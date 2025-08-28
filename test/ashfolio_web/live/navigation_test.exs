@@ -1,11 +1,11 @@
 defmodule AshfolioWeb.NavigationTest do
   use AshfolioWeb.ConnCase
 
+  import Phoenix.LiveViewTest
+
   @moduletag :liveview
   @moduletag :unit
   @moduletag :fast
-
-  import Phoenix.LiveViewTest
 
   describe "navigation routing" do
     test "dashboard route works", %{conn: conn} do
@@ -33,17 +33,32 @@ defmodule AshfolioWeb.NavigationTest do
       assert html =~ ~s(href="/")
       assert html =~ ~s(href="/accounts")
       assert html =~ ~s(href="/transactions")
+      assert html =~ ~s(href="/expenses")
 
       # Check navigation text
       assert html =~ "Dashboard"
       assert html =~ "Accounts"
       assert html =~ "Transactions"
+      assert html =~ "Expenses"
+    end
+
+    @tag :failing
+    test "financial planning navigation links are present", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/")
+
+      # These navigation links should be present but are currently missing
+      assert html =~ ~s(href="/goals"), "Goals navigation link is missing"
+      assert html =~ ~s(href="/forecast"), "Forecast navigation link is missing"
+
+      # Check navigation text
+      assert html =~ "Goals", "Goals text is missing from navigation"
+      assert html =~ "Forecast", "Forecast text is missing from navigation"
     end
 
     test "current page is highlighted in navigation", %{conn: conn} do
       # Test dashboard page - should have active styling
       {:ok, _view, html} = live(conn, "/")
-      assert html =~ "text-blue-700 bg-blue-50 border-b-2 border-blue-700"
+      assert html =~ "text-blue-700 bg-blue-50 border-l-4 border-blue-700"
 
       # Test accounts page - should have active styling
       {:ok, _view, html} = live(conn, "/accounts")
@@ -63,7 +78,7 @@ defmodule AshfolioWeb.NavigationTest do
       {:ok, _view, html} = live(conn, "/accounts")
       assert html =~ "Accounts"
 
-      # Navigate to transactions  
+      # Navigate to transactions
       {:ok, _view, html} = live(conn, "/transactions")
       assert html =~ "Transactions"
 

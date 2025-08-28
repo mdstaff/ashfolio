@@ -1,10 +1,13 @@
 defmodule AshfolioWeb.AccountLive.Index do
+  @moduledoc false
   use AshfolioWeb, :live_view
 
-  alias Ashfolio.Portfolio.{Account, Transaction}
   alias Ashfolio.Context
-  alias AshfolioWeb.Live.{FormatHelpers, ErrorHelpers}
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Transaction
   alias AshfolioWeb.AccountLive.FormComponent
+  alias AshfolioWeb.Live.ErrorHelpers
+  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -125,18 +128,14 @@ defmodule AshfolioWeb.AccountLive.Index do
 
       case account_index do
         nil ->
-          {:noreply,
-           socket
-           |> ErrorHelpers.put_error_flash(:not_found, "Account not found")}
+          {:noreply, ErrorHelpers.put_error_flash(socket, :not_found, "Account not found")}
 
         _ ->
           account = Enum.at(accounts_list, account_index)
 
           # Since we're using Context API, we'll just mark the toggling state
           # and let the Context API reload handle the actual update
-          socket =
-            socket
-            |> assign(:toggling_account_id, id)
+          socket = assign(socket, :toggling_account_id, id)
 
           case Account.toggle_exclusion(account, %{is_excluded: !account.is_excluded}) do
             {:ok, updated_account_from_db} ->

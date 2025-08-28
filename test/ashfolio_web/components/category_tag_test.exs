@@ -1,12 +1,12 @@
 defmodule AshfolioWeb.Components.CategoryTagTest do
   use AshfolioWeb.ConnCase, async: true
 
-  @moduletag :components
-  @moduletag :category_tag
-
   import Phoenix.LiveViewTest
 
   alias AshfolioWeb.Components.CategoryTag
+
+  @moduletag :components
+  @moduletag :category_tag
 
   describe "CategoryTag component" do
     test "renders category with correct color and name" do
@@ -180,7 +180,7 @@ defmodule AshfolioWeb.Components.CategoryTagTest do
       # Should use dark text for light background (inline style, not CSS class)
       assert light_html =~ "color: #" or light_html =~ "style="
 
-      # Test dark background color  
+      # Test dark background color
       dark_category = %{name: "Dark", color: "#1E293B"}
 
       dark_html =

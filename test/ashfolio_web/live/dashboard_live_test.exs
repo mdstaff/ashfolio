@@ -2,13 +2,15 @@ defmodule AshfolioWeb.DashboardLiveTest do
   # Manual price refresh tests need async: false
   use AshfolioWeb.LiveViewCase, async: false
 
+  import Mox
+
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
+
   @moduletag :liveview
   @moduletag :integration
   @moduletag :slow
-  import Mox
-
-  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
-
   setup :verify_on_exit!
   setup :set_mox_from_context
 
@@ -481,7 +483,7 @@ defmodule AshfolioWeb.DashboardLiveTest do
       # Should show color-coded transaction type indicators
       # buy transactions
       assert html =~ "bg-green-500"
-      # sell transactions  
+      # sell transactions
       assert html =~ "bg-red-500"
       # dividend transactions
       assert html =~ "bg-blue-500"
@@ -506,8 +508,7 @@ defmodule AshfolioWeb.DashboardLiveTest do
 
     test "displays empty state when no transactions exist", %{conn: conn} do
       # Clear all transactions for empty state test
-      Transaction.list!() |> Enum.each(&Transaction.destroy!/1)
-
+      Enum.each(Transaction.list!(), &Transaction.destroy!/1)
       {:ok, _view, html} = live(conn, "/")
 
       # Should show empty state

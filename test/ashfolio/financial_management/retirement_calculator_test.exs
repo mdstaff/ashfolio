@@ -1,8 +1,8 @@
 defmodule Ashfolio.FinancialManagement.RetirementCalculatorTest do
   use Ashfolio.DataCase
 
-  alias Ashfolio.FinancialManagement.RetirementCalculator
   alias Ashfolio.FinancialManagement.Expense
+  alias Ashfolio.FinancialManagement.RetirementCalculator
 
   @moduletag :unit
 
@@ -402,7 +402,7 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculatorTest do
 
       # Need $1,000,000 more in 10 years (120 months) = $8,333.33/month
       expected_monthly = Decimal.new("8333.33")
-      diff = Decimal.sub(savings_needed, expected_monthly) |> Decimal.abs()
+      diff = savings_needed |> Decimal.sub(expected_monthly) |> Decimal.abs()
       # Within $1 tolerance
       assert Decimal.compare(diff, Decimal.new("1")) != :gt
     end
@@ -429,9 +429,7 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculatorTest do
       current_portfolio_value = Decimal.new("600000")
 
       assert {:ok, progress} =
-               RetirementCalculator.calculate_retirement_progress_from_history(
-                 current_portfolio_value
-               )
+               RetirementCalculator.calculate_retirement_progress_from_history(current_portfolio_value)
 
       # Annual expenses ~$48,000, target ~$1,200,000, current $600,000 = 50% progress
       assert Decimal.compare(progress.progress_percentage, Decimal.new("40")) == :gt
@@ -635,7 +633,7 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculatorTest do
                RetirementCalculator.calculate_current_dividend_income(holdings)
 
       # AAPL: 100 shares * $150 * 0.5% = $75
-      # MSFT: 50 shares * $300 * 0.7% = $105  
+      # MSFT: 50 shares * $300 * 0.7% = $105
       # Total: $180 annually
       expected = Decimal.new("180.00")
       assert Decimal.equal?(annual_dividend, expected)

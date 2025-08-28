@@ -39,7 +39,7 @@ defmodule Ashfolio.FinancialManagement.BalanceManagerTest do
                BalanceManager.update_cash_balance(account.id, new_balance, notes)
 
       assert Decimal.equal?(updated_account.balance, new_balance)
-      assert updated_account.balance_updated_at != nil
+      assert updated_account.balance_updated_at
       assert updated_account.id == account.id
     end
 
@@ -49,7 +49,7 @@ defmodule Ashfolio.FinancialManagement.BalanceManagerTest do
       assert {:ok, updated_account} = BalanceManager.update_cash_balance(account.id, new_balance)
 
       assert Decimal.equal?(updated_account.balance, new_balance)
-      assert updated_account.balance_updated_at != nil
+      assert updated_account.balance_updated_at
     end
 
     test "returns error for non-existent account" do
@@ -111,7 +111,7 @@ defmodule Ashfolio.FinancialManagement.BalanceManagerTest do
       assert Decimal.equal?(latest_record.old_balance, old_balance)
       assert Decimal.equal?(latest_record.new_balance, new_balance)
       assert latest_record.notes == notes
-      assert latest_record.timestamp != nil
+      assert latest_record.timestamp
     end
   end
 
@@ -246,7 +246,7 @@ defmodule Ashfolio.FinancialManagement.BalanceManagerTest do
       assert Decimal.equal?(message.old_balance, old_balance)
       assert Decimal.equal?(message.new_balance, new_balance)
       assert message.notes == notes
-      assert message.timestamp != nil
+      assert message.timestamp
     end
 
     test "broadcasts balance change event without notes", %{cash_account: account} do

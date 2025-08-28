@@ -144,9 +144,9 @@ Financial Planning & Advanced Analytics:
 
 ### Development Roadmap
 
-v0.4.0 (Q3 2025): Financial Planning & Advanced Analytics  
-v0.5.0 (Q4 2025): Data Import/Export & Advanced Reporting  
-v0.6.0 (Q4 2025): Goal Management & Performance Analytics  
+v0.4.0 (Q3 2025): Financial Planning & Advanced Analytics
+v0.5.0 (Q4 2025): Data Import/Export & Advanced Reporting
+v0.6.0 (Q4 2025): Goal Management & Performance Analytics
 v0.7.0 (Q1 2026): Feature Completeness & Optimization
 
 ## Local-First Design Principles

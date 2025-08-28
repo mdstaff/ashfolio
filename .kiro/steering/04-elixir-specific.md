@@ -1,6 +1,6 @@
 ---
 inclusion: fileMatch
-fileMatchPattern: '*.ex'
+fileMatchPattern: "*.ex"
 ---
 
 # Elixir-Specific Development Guidelines
@@ -8,6 +8,7 @@ fileMatchPattern: '*.ex'
 ## Ash Framework Patterns
 
 ### Resource Definition
+
 ```elixir
 defmodule Ashfolio.Portfolio.ResourceName do
   use Ash.Resource, data_layer: AshSqlite.DataLayer
@@ -30,14 +31,16 @@ end
 ```
 
 ### Financial Calculations
+
 - Always use `Decimal` for monetary values
 - Example: `Decimal.mult(quantity, price)` not `quantity * price`
 - Round to appropriate precision: `Decimal.round(value, 2)` for currency
 
 ### Error Handling Patterns
+
 ```elixir
 case SomeModule.operation() do
-  {:ok, result} -> 
+  {:ok, result} ->
     # Handle success
   {:error, reason} ->
     Logger.error("Operation failed", error: reason)
@@ -46,12 +49,14 @@ end
 ```
 
 ### GenServer Usage (Minimal)
+
 - Only use for simple coordination (like PriceManager)
 - Keep state minimal and focused
 - Use `GenServer.call/2` for synchronous operations
 - Use `GenServer.cast/2` for fire-and-forget operations
 
 ### ETS Cache Patterns
+
 ```elixir
 # Simple cache operations
 :ets.insert(:cache_table, {key, value, timestamp})
@@ -61,6 +66,7 @@ end
 ## LiveView Patterns
 
 ### Mount Function
+
 ```elixir
 def mount(_params, _session, socket) do
   # Load initial data
@@ -70,6 +76,7 @@ end
 ```
 
 ### Handle Events
+
 ```elixir
 def handle_event("event_name", params, socket) do
   # Process event
@@ -81,6 +88,7 @@ end
 ## Testing Patterns
 
 ### Ash Resource Tests
+
 ```elixir
 test "creates resource with valid attributes" do
   assert {:ok, resource} = ResourceName.create(valid_attrs)
@@ -89,6 +97,7 @@ end
 ```
 
 ### Mock External APIs
+
 ```elixir
 # Use Mox or similar for consistent API mocking
 # Never make real API calls in tests

@@ -354,7 +354,7 @@ defmodule AshfolioWeb.Components.ForecastChart do
       |> assign(:y_pos, y_pos)
       |> assign(
         :year_labels,
-        Enum.with_index(years) |> Enum.filter(fn {_year, index} -> rem(index, step) == 0 end)
+        years |> Enum.with_index() |> Enum.filter(fn {_year, index} -> rem(index, step) == 0 end)
       )
 
     ~H"""
@@ -394,7 +394,7 @@ defmodule AshfolioWeb.Components.ForecastChart do
     max_value = get_max_value(assigns.chart_data)
     num_labels = 5
 
-    label_values = 0..(num_labels - 1) |> Enum.map(fn i -> max_value * i / (num_labels - 1) end)
+    label_values = Enum.map(0..(num_labels - 1), fn i -> max_value * i / (num_labels - 1) end)
 
     assigns =
       assigns
@@ -458,8 +458,7 @@ defmodule AshfolioWeb.Components.ForecastChart do
     """
   end
 
-  defp render_fi_markers(%{fi_target: fi_target, fi_year: fi_year} = assigns)
-       when not is_nil(fi_year) do
+  defp render_fi_markers(%{fi_target: fi_target, fi_year: fi_year} = assigns) when not is_nil(fi_year) do
     assigns =
       assigns
       |> assign(:fi_target, fi_target)
@@ -667,7 +666,8 @@ defmodule AshfolioWeb.Components.ForecastChart do
 
   defp build_line_path(years, values) do
     points =
-      Enum.zip(years, values)
+      years
+      |> Enum.zip(values)
       |> Enum.map(fn {year, value} ->
         x = scale_x(year, %{years: years})
         y = scale_y(value, %{values: values})
@@ -676,7 +676,7 @@ defmodule AshfolioWeb.Components.ForecastChart do
 
     case points do
       [first | rest] ->
-        "M #{first} " <> Enum.join(Enum.map(rest, &"L #{&1}"), " ")
+        "M #{first} " <> Enum.map_join(rest, " ", &"L #{&1}")
 
       [] ->
         ""
@@ -688,7 +688,8 @@ defmodule AshfolioWeb.Components.ForecastChart do
   defp build_area_path(years, lower, upper) do
     # Build path that goes along lower bound, then back along upper bound
     lower_points =
-      Enum.zip(years, lower)
+      years
+      |> Enum.zip(lower)
       |> Enum.map(fn {year, value} ->
         x = scale_x(year, %{years: years})
         y = scale_y(value, %{values: lower ++ upper})
@@ -696,7 +697,8 @@ defmodule AshfolioWeb.Components.ForecastChart do
       end)
 
     upper_points =
-      Enum.zip(years, upper)
+      years
+      |> Enum.zip(upper)
       |> Enum.reverse()
       |> Enum.map(fn {year, value} ->
         x = scale_x(year, %{years: years})
@@ -706,8 +708,8 @@ defmodule AshfolioWeb.Components.ForecastChart do
 
     case {lower_points, upper_points} do
       {[first | rest_lower], upper_points} ->
-        lower_path = "M #{first} " <> Enum.join(Enum.map(rest_lower, &"L #{&1}"), " ")
-        upper_path = Enum.join(Enum.map(upper_points, &"L #{&1}"), " ")
+        lower_path = "M #{first} " <> Enum.map_join(rest_lower, " ", &"L #{&1}")
+        upper_path = Enum.map_join(upper_points, " ", &"L #{&1}")
         lower_path <> " " <> upper_path <> " Z"
 
       _ ->
@@ -719,7 +721,7 @@ defmodule AshfolioWeb.Components.ForecastChart do
     # Build area from base_values to base_values + values
     combined_values =
       if is_list(base_values) and length(base_values) == length(values) do
-        Enum.zip(base_values, values) |> Enum.map(fn {base, val} -> base + val end)
+        base_values |> Enum.zip(values) |> Enum.map(fn {base, val} -> base + val end)
       else
         values
       end
@@ -825,8 +827,7 @@ defmodule AshfolioWeb.Components.ForecastChart do
     format_axis_value(numeric_value, format)
   end
 
-  defp axis_label_class(%{mobile: true}),
-    do: "text-xs fill-current text-gray-600 axis-label-mobile"
+  defp axis_label_class(%{mobile: true}), do: "text-xs fill-current text-gray-600 axis-label-mobile"
 
   defp axis_label_class(_), do: "text-xs fill-current text-gray-600"
 
@@ -836,7 +837,7 @@ defmodule AshfolioWeb.Components.ForecastChart do
   defp format_scenario_name(name), do: to_string(name)
 
   defp add_arrays(list1, list2) when is_list(list1) and is_list(list2) do
-    Enum.zip(list1, list2) |> Enum.map(fn {a, b} -> a + b end)
+    list1 |> Enum.zip(list2) |> Enum.map(fn {a, b} -> a + b end)
   end
 
   defp add_arrays(list, _) when is_list(list), do: list

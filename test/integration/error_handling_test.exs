@@ -12,12 +12,12 @@ defmodule Ashfolio.Integration.ErrorHandlingTest do
 
   use Ashfolio.DataCase, async: false
 
-  @moduletag :integration
-  @moduletag :error_handling
-
   alias Ashfolio.ErrorHandler
   alias Ashfolio.FinancialManagement.BalanceManager
   alias Ashfolio.Portfolio.Account
+
+  @moduletag :integration
+  @moduletag :error_handling
 
   describe "cash balance management error scenarios" do
     setup do

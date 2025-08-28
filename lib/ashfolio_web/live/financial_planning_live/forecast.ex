@@ -1,9 +1,13 @@
 defmodule AshfolioWeb.FinancialPlanningLive.Forecast do
+  @moduledoc false
   use AshfolioWeb, :live_view
 
-  alias Ashfolio.FinancialManagement.{ForecastCalculator, ContributionAnalyzer, FinancialGoal}
-  alias AshfolioWeb.Live.{FormatHelpers, ErrorHelpers}
+  alias Ashfolio.FinancialManagement.ContributionAnalyzer
+  alias Ashfolio.FinancialManagement.FinancialGoal
+  alias Ashfolio.FinancialManagement.ForecastCalculator
   alias AshfolioWeb.Components.ForecastChart
+  alias AshfolioWeb.Live.ErrorHelpers
+  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -115,9 +119,7 @@ defmodule AshfolioWeb.FinancialPlanningLive.Forecast do
               socket
               |> assign(:loading, false)
               |> assign(:optimization_result, optimization)
-              |> ErrorHelpers.put_success_flash(
-                "Optimized contribution strategy for #{goal.name}"
-              )
+              |> ErrorHelpers.put_success_flash("Optimized contribution strategy for #{goal.name}")
 
             {:noreply, socket}
 
@@ -632,15 +634,13 @@ defmodule AshfolioWeb.FinancialPlanningLive.Forecast do
   # Private helper functions
 
   defp apply_action(socket, :index, _params) do
-    socket
-    |> reload_goals()
+    reload_goals(socket)
   end
 
   defp assign_default_form_values(socket) do
     current_portfolio_value = get_current_portfolio_value()
 
-    socket
-    |> assign(:form_data, %{
+    assign(socket, :form_data, %{
       current_portfolio_value: Decimal.to_string(current_portfolio_value),
       monthly_contribution: "1000",
       annual_return: "7.0",
@@ -719,8 +719,7 @@ defmodule AshfolioWeb.FinancialPlanningLive.Forecast do
         |> assign(:calculation_error, nil)
 
       {:error, reason} ->
-        socket
-        |> assign(:calculation_error, "Calculation failed: #{reason}")
+        assign(socket, :calculation_error, "Calculation failed: #{reason}")
     end
   end
 
@@ -739,8 +738,7 @@ defmodule AshfolioWeb.FinancialPlanningLive.Forecast do
         |> assign(:calculation_error, nil)
 
       {:error, reason} ->
-        socket
-        |> assign(:calculation_error, "Contribution analysis failed: #{reason}")
+        assign(socket, :calculation_error, "Contribution analysis failed: #{reason}")
     end
   end
 
@@ -749,15 +747,13 @@ defmodule AshfolioWeb.FinancialPlanningLive.Forecast do
     years = Enum.to_list(0..forecast_result.years_to_fi)
 
     data_points =
-      years
-      |> Enum.map(fn year ->
+      Enum.map(years, fn year ->
         portfolio_value = calculate_portfolio_value_at_year(forecast_result, year)
 
         %{
           year: year,
           portfolio_value: portfolio_value,
-          contributions:
-            Decimal.mult(forecast_result.monthly_contribution, Decimal.new(12 * year)),
+          contributions: Decimal.mult(forecast_result.monthly_contribution, Decimal.new(12 * year)),
           fi_target: forecast_result.fi_amount
         }
       end)
@@ -811,20 +807,18 @@ defmodule AshfolioWeb.FinancialPlanningLive.Forecast do
   end
 
   defp reload_goals(socket) do
-    try do
-      require Ash.Query
+    require Ash.Query
 
-      goals =
-        FinancialGoal
-        |> Ash.Query.for_read(:read)
-        |> Ash.Query.filter(is_active == true)
-        |> Ash.read!()
+    goals =
+      FinancialGoal
+      |> Ash.Query.for_read(:read)
+      |> Ash.Query.filter(is_active == true)
+      |> Ash.read!()
 
-      assign(socket, :available_goals, goals)
-    rescue
-      _error ->
-        assign(socket, :available_goals, [])
-    end
+    assign(socket, :available_goals, goals)
+  rescue
+    _error ->
+      assign(socket, :available_goals, [])
   end
 
   defp get_current_portfolio_value do
@@ -888,8 +882,7 @@ defmodule AshfolioWeb.FinancialPlanningLive.Forecast do
   end
 
   defp format_validation_errors(errors) do
-    errors
-    |> Enum.map_join("; ", fn {field, messages} ->
+    Enum.map_join(errors, "; ", fn {field, messages} ->
       "#{field}: #{Enum.join(messages, ", ")}"
     end)
   end

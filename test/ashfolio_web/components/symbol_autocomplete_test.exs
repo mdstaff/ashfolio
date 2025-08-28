@@ -1,6 +1,8 @@
 defmodule AshfolioWeb.Components.SymbolAutocompleteTest do
   use AshfolioWeb.ConnCase, async: false
 
+  alias AshfolioWeb.Components.SymbolAutocomplete
+
   @moduletag :liveview
   @moduletag :unit
   @moduletag :fast
@@ -15,19 +17,19 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteTest do
   describe "SymbolAutocomplete component structure" do
     test "component module exists and has required functions" do
       # Verify the component module exists
-      assert Code.ensure_loaded?(AshfolioWeb.Components.SymbolAutocomplete)
+      assert Code.ensure_loaded?(SymbolAutocomplete)
 
       # Verify required LiveComponent functions exist
-      assert function_exported?(AshfolioWeb.Components.SymbolAutocomplete, :render, 1)
-      assert function_exported?(AshfolioWeb.Components.SymbolAutocomplete, :update, 2)
-      assert function_exported?(AshfolioWeb.Components.SymbolAutocomplete, :handle_event, 3)
+      assert function_exported?(SymbolAutocomplete, :render, 1)
+      assert function_exported?(SymbolAutocomplete, :update, 2)
+      assert function_exported?(SymbolAutocomplete, :handle_event, 3)
     end
 
     test "component has correct configuration constants" do
       # These constants should be accessible through the module
       # We can't test them directly due to module privacy, but we can verify
       # the component compiles without errors
-      assert Code.ensure_compiled!(AshfolioWeb.Components.SymbolAutocomplete)
+      assert Code.ensure_compiled!(SymbolAutocomplete)
     end
 
     test "component uses Context API integration" do
@@ -83,7 +85,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteTest do
       assert hook_content =~ "setupClickOutside", "Should have click outside setup"
       assert hook_content =~ "clickOutsideHandler", "Should have click outside handler"
 
-      # Verify mobile-friendly touch interactions  
+      # Verify mobile-friendly touch interactions
       assert hook_content =~ "setupTouchHandlers", "Should have touch handlers"
       assert hook_content =~ "touchstart", "Should handle touch start"
       assert hook_content =~ "touchmove", "Should handle touch move"
@@ -148,7 +150,7 @@ defmodule AshfolioWeb.Components.SymbolAutocompleteTest do
   # Integration tests will be added in Task 10 when the component is integrated
   # into TransactionLive.FormComponent. At that point, we can test:
   # - Full user interaction flows with LiveView
-  # - Context API integration in realistic scenarios  
+  # - Context API integration in realistic scenarios
   # - Real-time search functionality end-to-end
   # - Error handling in realistic scenarios
   # - Accessibility features with actual screen readers

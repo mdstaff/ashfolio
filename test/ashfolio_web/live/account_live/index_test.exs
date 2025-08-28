@@ -1,12 +1,14 @@
 defmodule AshfolioWeb.AccountLive.IndexTest do
   use AshfolioWeb.LiveViewCase, async: false
 
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
+  alias Ashfolio.SQLiteHelpers
+
   @moduletag :liveview
   @moduletag :unit
   @moduletag :fast
-
-  alias Ashfolio.Portfolio.{Account, Transaction, Symbol}
-  alias Ashfolio.SQLiteHelpers
 
   setup do
     # Database-as-user architecture: No user needed
@@ -46,8 +48,7 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
 
     test "shows empty state when no accounts exist", %{conn: conn} do
       # Delete all accounts
-      Account.list!() |> Enum.each(&Account.destroy/1)
-
+      Enum.each(Account.list!(), &Account.destroy/1)
       {:ok, _index_live, html} = live(conn, ~p"/accounts")
 
       assert html =~ "No accounts"

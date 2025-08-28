@@ -16,9 +16,9 @@ Each major feature idea gets its own markdown file with:
 
 ### 🏦 [Multi-Portfolio Workspace System](./multi-portfolio-workspaces.md)
 
-Designed but not prioritized  
- High  
- High for power users
+Designed but not prioritized
+High
+High for power users
 
 Transform Ashfolio into a workspace-based system where users can create, manage, and switch between multiple portfolios (databases), similar to how code editors handle workspaces/projects.
 

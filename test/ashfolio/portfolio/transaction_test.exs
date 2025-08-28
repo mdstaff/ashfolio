@@ -1,14 +1,14 @@
 defmodule Ashfolio.Portfolio.TransactionTest do
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.Portfolio.Transaction
+  alias Ashfolio.SQLiteHelpers
+
   @moduletag :ash_resources
   @moduletag :unit
   @moduletag :fast
   @moduletag :smoke
-
-  alias Ashfolio.Portfolio.Transaction
-  alias Ashfolio.FinancialManagement.TransactionCategory
-  alias Ashfolio.SQLiteHelpers
 
   describe "Transaction resource" do
     setup do
@@ -163,7 +163,7 @@ defmodule Ashfolio.Portfolio.TransactionTest do
     end
 
     test "validates future date" do
-      future_date = Date.utc_today() |> Date.add(1)
+      future_date = Date.add(Date.utc_today(), 1)
 
       {:error, changeset} =
         Transaction.create(%{

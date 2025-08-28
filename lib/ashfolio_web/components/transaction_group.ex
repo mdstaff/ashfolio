@@ -18,6 +18,7 @@ defmodule AshfolioWeb.Components.TransactionGroup do
   """
 
   use Phoenix.Component
+
   import AshfolioWeb.Components.CategoryTag
 
   @doc """
@@ -25,11 +26,11 @@ defmodule AshfolioWeb.Components.TransactionGroup do
 
   ## Examples
 
-      <.transaction_group 
+      <.transaction_group
         transactions={@filtered_transactions}
         group_by={:category} />
-      
-      <.transaction_group 
+
+      <.transaction_group
         transactions={@transactions}
         group_by={:date}
         date_grouping={:monthly}
@@ -367,8 +368,7 @@ defmodule AshfolioWeb.Components.TransactionGroup do
   end
 
   defp calculate_group_total(transactions) do
-    transactions
-    |> Enum.reduce(Decimal.new(0), fn tx, acc ->
+    Enum.reduce(transactions, Decimal.new(0), fn tx, acc ->
       amount = get_transaction_amount(tx)
       Decimal.add(acc, Decimal.abs(amount))
     end)
@@ -401,12 +401,10 @@ defmodule AshfolioWeb.Components.TransactionGroup do
   defp transaction_type_color(_), do: "bg-gray-500"
 
   defp format_currency_simple(amount) do
-    try do
-      float_amount = Decimal.to_float(amount)
-      "$" <> :erlang.float_to_binary(float_amount, decimals: 2)
-    rescue
-      _ -> "$0.00"
-    end
+    float_amount = Decimal.to_float(amount)
+    "$" <> :erlang.float_to_binary(float_amount, decimals: 2)
+  rescue
+    _ -> "$0.00"
   end
 
   # Transaction data extraction helpers
@@ -431,14 +429,14 @@ defmodule AshfolioWeb.Components.TransactionGroup do
   defp get_category_display_name(_), do: "Unknown Category"
 
   defp format_transaction_date(transaction) do
-    get_transaction_date(transaction) |> Date.to_iso8601()
+    transaction |> get_transaction_date() |> Date.to_iso8601()
   end
 
   defp format_transaction_type(transaction) do
-    get_transaction_type(transaction) |> Atom.to_string() |> String.capitalize()
+    transaction |> get_transaction_type() |> Atom.to_string() |> String.capitalize()
   end
 
   defp format_transaction_amount(transaction) do
-    get_transaction_amount(transaction) |> format_currency_simple()
+    transaction |> get_transaction_amount() |> format_currency_simple()
   end
 end

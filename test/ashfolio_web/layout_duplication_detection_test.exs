@@ -13,6 +13,7 @@ defmodule AshfolioWeb.LayoutDuplicationDetectionTest do
   If any of these appear twice, it indicates the layout configuration is wrong.
   """
   use AshfolioWeb.ConnCase
+
   import Phoenix.LiveViewTest
 
   @moduletag :integration
@@ -52,7 +53,7 @@ defmodule AshfolioWeb.LayoutDuplicationDetectionTest do
       # Test a more complex page that had issues
       {:ok, _view, html} = live(conn, ~p"/transactions")
 
-      # Count occurrences of key layout elements  
+      # Count occurrences of key layout elements
       # Look for the actual topbar component structure
       topbar_count =
         count_element_occurrences(html, ~r/bg-white shadow-sm border-b border-gray-200/)
@@ -97,10 +98,10 @@ defmodule AshfolioWeb.LayoutDuplicationDetectionTest do
   defp count_id_occurrences(html, id) do
     # Count how many times an ID appears in the HTML
     regex = ~r/id="#{Regex.escape(id)}"/i
-    Regex.scan(regex, html) |> length()
+    regex |> Regex.scan(html) |> length()
   end
 
   defp count_element_occurrences(html, regex) do
-    Regex.scan(regex, html) |> length()
+    regex |> Regex.scan(html) |> length()
   end
 end

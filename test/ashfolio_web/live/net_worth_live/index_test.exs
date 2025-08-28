@@ -3,8 +3,8 @@ defmodule AshfolioWeb.NetWorthLive.IndexTest do
 
   import Phoenix.LiveViewTest
 
-  alias Ashfolio.Portfolio.Account
   alias Ashfolio.FinancialManagement.NetWorthSnapshot
+  alias Ashfolio.Portfolio.Account
 
   describe "net worth trends" do
     setup do
@@ -126,8 +126,7 @@ defmodule AshfolioWeb.NetWorthLive.IndexTest do
       # Delete all snapshots
       {:ok, snapshots} = NetWorthSnapshot.list()
 
-      snapshots
-      |> Enum.each(fn snapshot ->
+      Enum.each(snapshots, fn snapshot ->
         NetWorthSnapshot.destroy(snapshot)
       end)
 
@@ -147,8 +146,7 @@ defmodule AshfolioWeb.NetWorthLive.IndexTest do
       # Delete all accounts to simulate edge case
       {:ok, accounts} = Account.list()
 
-      accounts
-      |> Enum.each(fn account ->
+      Enum.each(accounts, fn account ->
         Account.destroy(account)
       end)
 

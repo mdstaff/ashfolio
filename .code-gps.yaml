@@ -1,4 +1,4 @@
-# Code GPS v2.0 - 222ms | 2 LiveViews | 20 Components
+# Code GPS v2.0 - 260ms | 3 LiveViews | 21 Components
 
 # === ROUTES ===
 /: DashboardLive ✅
@@ -19,43 +19,49 @@
 /goals: FinancialGoalLive ✅
 /goals/new: FinancialGoalLive ✅
 /goals/:id/edit: FinancialGoalLive ✅
+/forecast: ForecastLive ✅
 
 # === LIVE VIEWS ===
 Dashboard:
   file: lib/ashfolio_web/live/dashboard_live.ex
-  mount: 18 | render: 210
+  mount: 18 | render: 207
   events: ["refresh_prices", "sort", "create_snapshot"]
   subscriptions: [accounts, transactions, net_worth...5]
   missing: []
 Example:
   file: lib/ashfolio_web/live/example_live.ex
-  mount: 13 | render: 41
+  mount: 14 | render: 42
   events: ["simulate_error", "simulate_success", "clear_flash"]
   subscriptions: []
   missing: [expenses, net_worth, accounts...4]
+Forecast.Index:
+  file: lib/ashfolio_web/live/forecast_live.ex
+  mount: 22 | render: 261
+  events: [update_form, calculate_projection, calculate_scenarios...5]
+  subscriptions: ["accounts", "transactions"]
+  missing: ["expenses", "net_worth"]
 
 
 # === KEY COMPONENTS ===
-modal: lib/ashfolio_web/components/core_components.ex:44 (2x) | attrs: ["id", "show", "on_cancel"]
-flash: lib/ashfolio_web/components/core_components.ex:108 (7x) | attrs: [id, flash, title...5]
-flash_group: lib/ashfolio_web/components/core_components.ex:147 (1x) | attrs: ["flash", "id"]
-simple_form: lib/ashfolio_web/components/core_components.ex:202 (7x) | attrs: ["for", "as", "rest"]
-button: lib/ashfolio_web/components/core_components.ex:229 (20x) | attrs: ["type", "class", "rest"]
+modal: lib/ashfolio_web/components/core_components.ex:46 (2x) | attrs: ["id", "show", "on_cancel"]
+flash: lib/ashfolio_web/components/core_components.ex:110 (7x) | attrs: [id, flash, title...5]
+flash_group: lib/ashfolio_web/components/core_components.ex:149 (1x) | attrs: ["flash", "id"]
+simple_form: lib/ashfolio_web/components/core_components.ex:204 (7x) | attrs: ["for", "as", "rest"]
+button: lib/ashfolio_web/components/core_components.ex:231 (20x) | attrs: ["type", "class", "rest"]
 input: lib/ashfolio_web/components/core_components.ex:294 (45x) | attrs: [errors, checked, prompt...6]
 label: lib/ashfolio_web/components/core_components.ex:397 (3x) | attrs: ["for"]
 error: lib/ashfolio_web/components/core_components.ex:410 (9x)
 
 # === DEPENDENCIES ===
-ash: ✅ (1063)
-contex: ✅ (126)
-decimal: ✅ (1266)
+ash: ✅ (1113)
+contex: ✅ (130)
+decimal: ✅ (1393)
 mox: ✅ (1)
-wallaby: ❌ (1)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio/financial_management/contribution_analyzer.ex", "lib/ashfolio/portfolio.ex", "lib/ashfolio_web/components/forecast_chart.ex", "lib/ashfolio_web/components/top_bar.ex", "lib/ashfolio_web/live/error_helpers.ex"]
-uncommitted: 0 files
-commits_ahead: 5
+recent: ["lib/ashfolio/cache.ex", "lib/ashfolio/error_handler.ex", "lib/ashfolio_web/components/core_components.ex", "lib/ashfolio_web/components/forecast_chart.ex", "lib/ashfolio_web/components/top_bar.ex"]
+uncommitted: 177 files
+commits_ahead: 2
 
 # === TEST GAPS ===
 missing_tests:

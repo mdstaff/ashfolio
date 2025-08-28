@@ -10,6 +10,8 @@ defmodule Ashfolio.Portfolio.Account do
     domain: Ashfolio.Portfolio,
     data_layer: AshSqlite.DataLayer
 
+  alias Ashfolio.Portfolio.Account
+
   sqlite do
     table("accounts")
     repo(Ashfolio.Repo)
@@ -57,9 +59,7 @@ defmodule Ashfolio.Portfolio.Account do
     end
 
     attribute :interest_rate, :decimal do
-      description(
-        "Annual interest rate for savings/CD accounts (as decimal, e.g., 0.025 for 2.5%)"
-      )
+      description("Annual interest rate for savings/CD accounts (as decimal, e.g., 0.025 for 2.5%)")
     end
 
     attribute :minimum_balance, :decimal do
@@ -122,8 +122,7 @@ defmodule Ashfolio.Portfolio.Account do
 
       if interest_rate && account_type not in [:savings, :money_market, :cd] do
         {:error,
-         field: :interest_rate,
-         message: "Interest rate can only be set for savings, money market, or CD accounts"}
+         field: :interest_rate, message: "Interest rate can only be set for savings, money market, or CD accounts"}
       else
         :ok
       end
@@ -243,7 +242,7 @@ defmodule Ashfolio.Portfolio.Account do
     def get_by_name(name) do
       require Ash.Query
 
-      Ashfolio.Portfolio.Account
+      Account
       |> Ash.Query.filter(name: name)
       |> Ash.read_first()
     end
@@ -254,9 +253,9 @@ defmodule Ashfolio.Portfolio.Account do
     In database-as-user architecture, returns all accounts since each database
     represents one user's data.
     """
-    def list_all_accounts() do
+    def list_all_accounts do
       # In database-as-user architecture, get all accounts
-      Ash.read(Ashfolio.Portfolio.Account, action: :active)
+      Ash.read(Account, action: :active)
     end
 
     @doc """

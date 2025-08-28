@@ -6,6 +6,7 @@ defmodule Ashfolio.MarketData.RateLimiter do
   """
 
   use GenServer
+
   require Logger
 
   # requests per minute

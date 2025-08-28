@@ -7,8 +7,10 @@ defmodule Ashfolio.SQLiteHelpers do
   Database-as-user architecture: Each database represents one user, eliminating user_id dependencies.
   """
 
-  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
   alias Ashfolio.MarketData.PriceManager
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
 
   # Note: UserSettings removed - using simplified approach for database-as-user architecture testing
 
@@ -176,10 +178,10 @@ defmodule Ashfolio.SQLiteHelpers do
         end
       end)
 
-    if missing_symbols != [] do
-      raise "❌ SAFEGUARD FAILURE: Missing common symbols: #{inspect(missing_symbols)}"
-    else
+    if missing_symbols == [] do
       IO.puts(".")
+    else
+      raise "❌ SAFEGUARD FAILURE: Missing common symbols: #{inspect(missing_symbols)}"
     end
   end
 
@@ -449,19 +451,17 @@ defmodule Ashfolio.SQLiteHelpers do
   end
 
   defp do_with_retry(fun, max_attempts, delay_ms, attempt) do
-    try do
-      fun.()
-    rescue
-      error ->
-        if sqlite_busy_error?(error) and attempt < max_attempts do
-          # Exponential backoff with jitter
-          sleep_time = delay_ms * attempt + :rand.uniform(50)
-          Process.sleep(sleep_time)
-          do_with_retry(fun, max_attempts, delay_ms, attempt + 1)
-        else
-          reraise error, __STACKTRACE__
-        end
-    end
+    fun.()
+  rescue
+    error ->
+      if sqlite_busy_error?(error) and attempt < max_attempts do
+        # Exponential backoff with jitter
+        sleep_time = delay_ms * attempt + :rand.uniform(50)
+        Process.sleep(sleep_time)
+        do_with_retry(fun, max_attempts, delay_ms, attempt + 1)
+      else
+        reraise error, __STACKTRACE__
+      end
   end
 
   defp sqlite_busy_error?(%Ash.Error.Unknown{}), do: true
@@ -479,22 +479,20 @@ defmodule Ashfolio.SQLiteHelpers do
   This should be called in test setup when testing price refresh functionality.
   """
   def allow_price_manager_db_access do
-    try do
-      # Get the PriceManager GenServer pid
-      price_manager_pid = Process.whereis(PriceManager)
+    # Get the PriceManager GenServer pid
+    price_manager_pid = Process.whereis(PriceManager)
 
-      if price_manager_pid do
-        # Allow the PriceManager process to access the database
-        Ecto.Adapters.SQL.Sandbox.allow(Ashfolio.Repo, self(), price_manager_pid)
+    if price_manager_pid do
+      # Allow the PriceManager process to access the database
+      Ecto.Adapters.SQL.Sandbox.allow(Ashfolio.Repo, self(), price_manager_pid)
 
-        # Allow the PriceManager process to use Mox expectations
-        Mox.allow(YahooFinanceMock, self(), price_manager_pid)
-      end
-    rescue
-      # If PriceManager isn't running or there's an error, that's OK
-      # Tests will handle the database access failure gracefully
-      _ -> :ok
+      # Allow the PriceManager process to use Mox expectations
+      Mox.allow(YahooFinanceMock, self(), price_manager_pid)
     end
+  rescue
+    # If PriceManager isn't running or there's an error, that's OK
+    # Tests will handle the database access failure gracefully
+    _ -> :ok
   end
 
   @doc """

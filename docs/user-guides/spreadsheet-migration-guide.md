@@ -1,8 +1,8 @@
 # Migrating from Spreadsheet-Based Financial Management
 
-Implementation Guide (Ready for v0.2.0+)  
- Users currently managing finances with spreadsheets  
- Gradual adoption over 3-6 months as features become available
+Implementation Guide (Ready for v0.2.0+)
+Users currently managing finances with spreadsheets
+Gradual adoption over 3-6 months as features become available
 
 ## Overview
 

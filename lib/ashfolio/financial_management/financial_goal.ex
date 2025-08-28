@@ -202,7 +202,7 @@ defmodule Ashfolio.FinancialManagement.FinancialGoal do
     define(:by_target_date_range, action: :by_target_date_range, args: [:start_date, :end_date])
 
     # Helper functions for aggregations - following expense.ex pattern
-    def goal_progress_summary!() do
+    def goal_progress_summary! do
       require Ash.Query
 
       __MODULE__
@@ -210,14 +210,14 @@ defmodule Ashfolio.FinancialManagement.FinancialGoal do
       |> Ash.Query.load([:progress_percentage, :amount_remaining, :months_to_goal, :is_complete])
       |> Ash.read!()
       |> Enum.group_by(& &1.goal_type)
-      |> Enum.map(fn {goal_type, goals} ->
+      |> Map.new(fn {goal_type, goals} ->
         total_target =
           goals |> Enum.map(& &1.target_amount) |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
 
         total_current =
           goals |> Enum.map(& &1.current_amount) |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
 
-        completed_count = goals |> Enum.count(& &1.is_complete)
+        completed_count = Enum.count(goals, & &1.is_complete)
 
         {goal_type,
          %{
@@ -228,14 +228,14 @@ defmodule Ashfolio.FinancialManagement.FinancialGoal do
            overall_progress:
              if(Decimal.gt?(total_target, Decimal.new(0)),
                do:
-                 Decimal.div(total_current, total_target)
+                 total_current
+                 |> Decimal.div(total_target)
                  |> Decimal.mult(Decimal.new(100))
                  |> Decimal.round(2),
                else: Decimal.new(0)
              )
          }}
       end)
-      |> Enum.into(%{})
     end
 
     def emergency_fund_status!(monthly_expenses) do
@@ -248,7 +248,7 @@ defmodule Ashfolio.FinancialManagement.FinancialGoal do
         [goal | _] ->
           current_months =
             if Decimal.gt?(monthly_expenses, Decimal.new(0)) do
-              Decimal.div(goal.current_amount, monthly_expenses) |> Decimal.round(1)
+              goal.current_amount |> Decimal.div(monthly_expenses) |> Decimal.round(1)
             else
               Decimal.new(0)
             end
@@ -310,67 +310,68 @@ defmodule Ashfolio.FinancialManagement.FinancialGoal do
     Returns detailed status including progress, timeline, and recommendations
     for emergency fund planning integrated with current expense patterns.
     """
-    def analyze_emergency_fund_readiness!() do
+    def analyze_emergency_fund_readiness! do
       alias Ashfolio.FinancialManagement.EmergencyFundCalculator
 
       emergency_goals = by_type!(:emergency_fund)
 
-      with {:ok, monthly_expenses} <-
-             EmergencyFundCalculator.calculate_monthly_expenses_from_period(12) do
-        case emergency_goals do
-          [] ->
-            # No goal exists, provide recommendation to create one
-            {:ok, target_amount} =
-              EmergencyFundCalculator.calculate_emergency_fund_target(monthly_expenses, 6)
+      case EmergencyFundCalculator.calculate_monthly_expenses_from_period(12) do
+        {:ok, monthly_expenses} ->
+          case emergency_goals do
+            [] ->
+              # No goal exists, provide recommendation to create one
+              {:ok, target_amount} =
+                EmergencyFundCalculator.calculate_emergency_fund_target(monthly_expenses, 6)
 
-            {:no_goal,
-             %{
-               recommended_target: target_amount,
-               monthly_expenses: monthly_expenses,
-               months_coverage: 6,
-               status: :no_goal,
-               message: "No emergency fund goal set. Consider creating one."
-             }}
+              {:no_goal,
+               %{
+                 recommended_target: target_amount,
+                 monthly_expenses: monthly_expenses,
+                 months_coverage: 6,
+                 status: :no_goal,
+                 message: "No emergency fund goal set. Consider creating one."
+               }}
 
-          [goal | _] ->
-            # Analyze existing goal
-            # Emergency fund status calculation (always returns {:ok, status})
-            {:ok, status} =
-              EmergencyFundCalculator.emergency_fund_status(
-                goal.target_amount,
-                goal.current_amount,
-                goal.monthly_contribution || Decimal.new("0.00")
-              )
+            [goal | _] ->
+              # Analyze existing goal
+              # Emergency fund status calculation (always returns {:ok, status})
+              {:ok, status} =
+                EmergencyFundCalculator.emergency_fund_status(
+                  goal.target_amount,
+                  goal.current_amount,
+                  goal.monthly_contribution || Decimal.new("0.00")
+                )
 
-            readiness_level =
-              cond do
-                status.goal_achieved ->
-                  :fully_funded
+              readiness_level =
+                cond do
+                  status.goal_achieved ->
+                    :fully_funded
 
-                Decimal.gte?(status.progress_percentage, Decimal.new("75.00")) ->
-                  :mostly_funded
+                  Decimal.gte?(status.progress_percentage, Decimal.new("75.00")) ->
+                    :mostly_funded
 
-                Decimal.gte?(status.progress_percentage, Decimal.new("25.00")) ->
-                  :partially_funded
+                  Decimal.gte?(status.progress_percentage, Decimal.new("25.00")) ->
+                    :partially_funded
 
-                true ->
-                  :underfunded
-              end
+                  true ->
+                    :underfunded
+                end
 
-            {:analysis,
-             Map.merge(status, %{
-               goal: goal,
-               monthly_expenses: monthly_expenses,
-               readiness_level: readiness_level,
-               months_coverage:
-                 if(Decimal.gt?(monthly_expenses, Decimal.new("0.00")),
-                   do: Decimal.div(goal.target_amount, monthly_expenses) |> Decimal.round(1),
-                   else: Decimal.new("0.00")
-                 )
-             })}
-        end
-      else
-        {:error, reason} -> {:error, reason}
+              {:analysis,
+               Map.merge(status, %{
+                 goal: goal,
+                 monthly_expenses: monthly_expenses,
+                 readiness_level: readiness_level,
+                 months_coverage:
+                   if(Decimal.gt?(monthly_expenses, Decimal.new("0.00")),
+                     do: goal.target_amount |> Decimal.div(monthly_expenses) |> Decimal.round(1),
+                     else: Decimal.new("0.00")
+                   )
+               })}
+          end
+
+        {:error, reason} ->
+          {:error, reason}
       end
     end
   end

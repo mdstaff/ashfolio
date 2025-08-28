@@ -303,7 +303,7 @@ defmodule Ashfolio.Portfolio.Calculator do
   position gains/losses using simple formulas suitable for Phase 1 scope.
   """
 
-  def calculate_portfolio_value() do
+  def calculate_portfolio_value do
     # Calculate total portfolio value as sum of all holdings
     case get_all_holdings() do
       {:ok, holdings} ->
@@ -330,7 +330,7 @@ defmodule Ashfolio.Portfolio.Calculator do
     end
   end
 
-  def calculate_position_returns() do
+  def calculate_position_returns do
     # Calculate individual position gains/losses for all holdings
     case get_all_holdings() do
       {:ok, holdings} ->
@@ -343,7 +343,7 @@ defmodule Ashfolio.Portfolio.Calculator do
     end
   end
 
-  def calculate_total_return() do
+  def calculate_total_return do
     # Get total return tracking data for the portfolio
     with {:ok, portfolio_value} <- calculate_portfolio_value(),
          {:ok, total_cost_basis} <- calculate_total_cost_basis(),
@@ -372,7 +372,7 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
   and profit/loss calculations with FIFO cost basis method.
   """
 
-  def calculate_holding_values() do
+  def calculate_holding_values do
     # Calculate current holding values for all positions
     with {:ok, holdings_data} <- get_holdings_data() do
       holdings_with_values =
@@ -422,7 +422,7 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
     end
   end
 
-  def get_holdings_summary() do
+  def get_holdings_summary do
     # Get comprehensive holdings summary with all calculations
     with {:ok, holdings} <- calculate_holding_values(),
          {:ok, total_value} <- aggregate_portfolio_value() do
@@ -501,7 +501,7 @@ defmodule Ashfolio.Portfolio.CalculatorOptimized do
   - Reduced database round trips
   """
 
-  def get_all_holdings_optimized() do
+  def get_all_holdings_optimized do
     # Batch fetch all symbols in single query - eliminates N+1
     case Symbol.get_by_ids(symbol_ids) do
       {:ok, symbols} ->

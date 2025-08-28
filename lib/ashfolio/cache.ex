@@ -83,7 +83,7 @@ defmodule Ashfolio.Cache do
   def get_price(symbol, max_age_seconds \\ @default_ttl_seconds) do
     case :ets.lookup(@cache_table, symbol) do
       [{^symbol, cache_entry}] ->
-        if is_fresh?(cache_entry.cached_at, max_age_seconds) do
+        if fresh?(cache_entry.cached_at, max_age_seconds) do
           {:ok, %{price: cache_entry.price, updated_at: cache_entry.updated_at}}
         else
           Logger.debug("Stale cache entry for #{symbol}")
@@ -103,7 +103,8 @@ defmodule Ashfolio.Cache do
   List of {symbol, price_data} tuples for all cached symbols.
   """
   def get_all_prices do
-    :ets.tab2list(@cache_table)
+    @cache_table
+    |> :ets.tab2list()
     |> Enum.map(fn {symbol, cache_entry} ->
       {symbol, %{price: cache_entry.price, updated_at: cache_entry.updated_at}}
     end)
@@ -140,9 +141,10 @@ defmodule Ashfolio.Cache do
     current_time = DateTime.utc_now()
 
     stale_keys =
-      :ets.tab2list(@cache_table)
+      @cache_table
+      |> :ets.tab2list()
       |> Enum.filter(fn {_symbol, cache_entry} ->
-        not is_fresh?(cache_entry.cached_at, max_age_seconds, current_time)
+        not fresh?(cache_entry.cached_at, max_age_seconds, current_time)
       end)
       |> Enum.map(fn {symbol, _cache_entry} -> symbol end)
 
@@ -171,9 +173,7 @@ defmodule Ashfolio.Cache do
 
     cleanup_count = cleanup_stale_entries(trunc(max_age))
 
-    Logger.debug(
-      "Memory-aware cleanup: #{cleanup_count} entries removed, #{memory_mb}MB cache size"
-    )
+    Logger.debug("Memory-aware cleanup: #{cleanup_count} entries removed, #{memory_mb}MB cache size")
 
     %{
       entries_removed: cleanup_count,
@@ -197,7 +197,7 @@ defmodule Ashfolio.Cache do
 
   # Private helper functions
 
-  defp is_fresh?(cached_at, max_age_seconds, current_time \\ DateTime.utc_now()) do
+  defp fresh?(cached_at, max_age_seconds, current_time \\ DateTime.utc_now()) do
     age_seconds = DateTime.diff(current_time, cached_at, :second)
     age_seconds <= max_age_seconds
   end

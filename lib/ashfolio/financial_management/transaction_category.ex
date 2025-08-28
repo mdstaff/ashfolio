@@ -61,8 +61,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategory do
 
     # Validate name format
     validate(match(:name, ~r/^[a-zA-Z0-9\s\-_&]+$/),
-      message:
-        "Category name can only contain letters, numbers, spaces, hyphens, underscores, and ampersands"
+      message: "Category name can only contain letters, numbers, spaces, hyphens, underscores, and ampersands"
     )
 
     # Validate color format (hex color)
@@ -80,9 +79,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategory do
         require Ash.Query
 
         # Database-as-user architecture: Check for unique names within the database instance
-        existing_query =
-          __MODULE__
-          |> Ash.Query.filter(name: name)
+        existing_query = Ash.Query.filter(__MODULE__, name: name)
 
         # Exclude current record if updating
         existing_query =

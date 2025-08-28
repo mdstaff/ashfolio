@@ -1,31 +1,36 @@
 defmodule AshfolioWeb.ExpenseLive.AnalyticsTest do
   use AshfolioWeb.ConnCase, async: false
+
   import Phoenix.LiveViewTest
+
+  alias Ashfolio.FinancialManagement.Expense
+  alias Ashfolio.FinancialManagement.NetWorthSnapshot
+  alias Ashfolio.FinancialManagement.TransactionCategory
 
   describe "expense analytics charts" do
     setup do
       # Create test categories
       {:ok, food_category} =
-        Ashfolio.FinancialManagement.TransactionCategory.create(%{
+        TransactionCategory.create(%{
           name: "Food",
           color: "#4CAF50"
         })
 
       {:ok, transport_category} =
-        Ashfolio.FinancialManagement.TransactionCategory.create(%{
+        TransactionCategory.create(%{
           name: "Transport",
           color: "#2196F3"
         })
 
       {:ok, entertainment_category} =
-        Ashfolio.FinancialManagement.TransactionCategory.create(%{
+        TransactionCategory.create(%{
           name: "Entertainment",
           color: "#FF9800"
         })
 
       # Create test expenses with categories
       {:ok, _expense1} =
-        Ashfolio.FinancialManagement.Expense.create(%{
+        Expense.create(%{
           description: "Groceries",
           amount: Decimal.new("500.00"),
           date: Date.utc_today(),
@@ -33,7 +38,7 @@ defmodule AshfolioWeb.ExpenseLive.AnalyticsTest do
         })
 
       {:ok, _expense2} =
-        Ashfolio.FinancialManagement.Expense.create(%{
+        Expense.create(%{
           description: "Gas",
           amount: Decimal.new("200.00"),
           date: Date.utc_today(),
@@ -41,7 +46,7 @@ defmodule AshfolioWeb.ExpenseLive.AnalyticsTest do
         })
 
       {:ok, _expense3} =
-        Ashfolio.FinancialManagement.Expense.create(%{
+        Expense.create(%{
           description: "Movie tickets",
           amount: Decimal.new("300.00"),
           date: Date.utc_today(),
@@ -85,10 +90,10 @@ defmodule AshfolioWeb.ExpenseLive.AnalyticsTest do
 
     test "handles empty state gracefully", %{conn: conn} do
       # Clear all expenses
-      Ashfolio.FinancialManagement.Expense
+      Expense
       |> Ash.Query.for_read(:read)
       |> Ash.read!()
-      |> Enum.each(&Ashfolio.FinancialManagement.Expense.destroy/1)
+      |> Enum.each(&Expense.destroy/1)
 
       {:ok, _view, html} = live(conn, ~p"/expenses/analytics")
 
@@ -148,7 +153,7 @@ defmodule AshfolioWeb.ExpenseLive.AnalyticsTest do
       snapshots =
         for {date, value} <- snapshots_data do
           {:ok, snapshot} =
-            Ashfolio.FinancialManagement.NetWorthSnapshot.create(%{
+            NetWorthSnapshot.create(%{
               snapshot_date: date,
               total_assets: Decimal.new(value),
               total_liabilities: Decimal.new("0.00"),
@@ -185,9 +190,8 @@ defmodule AshfolioWeb.ExpenseLive.AnalyticsTest do
 
     test "chart empty state when no snapshots", %{conn: conn} do
       # Clear all snapshots
-      {:ok, snapshots} = Ashfolio.FinancialManagement.NetWorthSnapshot.list()
-      snapshots |> Enum.each(&Ashfolio.FinancialManagement.NetWorthSnapshot.destroy/1)
-
+      {:ok, snapshots} = NetWorthSnapshot.list()
+      Enum.each(snapshots, &NetWorthSnapshot.destroy/1)
       {:ok, _view, html} = live(conn, ~p"/net_worth")
 
       # Should show empty state

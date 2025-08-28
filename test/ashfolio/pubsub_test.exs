@@ -1,11 +1,11 @@
 defmodule Ashfolio.PubSubTest do
   use ExUnit.Case, async: false
 
+  alias Ashfolio.PubSub
+
   @moduletag :pubsub
   @moduletag :unit
   @moduletag :fast
-
-  alias Ashfolio.PubSub
 
   describe "PubSub functionality" do
     test "subscribe and broadcast work correctly" do

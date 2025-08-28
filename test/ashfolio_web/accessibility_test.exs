@@ -1,5 +1,6 @@
 defmodule AshfolioWeb.AccessibilityTest do
   use AshfolioWeb.ConnCase
+
   import Phoenix.LiveViewTest
 
   describe "WCAG AA accessibility compliance" do
@@ -16,7 +17,7 @@ defmodule AshfolioWeb.AccessibilityTest do
 
       # Check for specific accessibility attributes that we know exist
       assert html =~ "Toggle mobile menu"
-      assert html =~ "Main navigation"
+      assert html =~ "Mobile navigation"
     end
 
     test "loading states use standardized spinner", %{conn: conn} do

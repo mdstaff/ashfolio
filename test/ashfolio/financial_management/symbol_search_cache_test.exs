@@ -1,12 +1,12 @@
 defmodule Ashfolio.FinancialManagement.SymbolSearchCacheTest do
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.FinancialManagement.SymbolSearch
+  alias Ashfolio.Portfolio.Symbol
+
   @moduletag :ash_resources
   @moduletag :unit
   @moduletag :fast
-
-  alias Ashfolio.Portfolio.Symbol
-  alias Ashfolio.FinancialManagement.SymbolSearch
 
   describe "SymbolSearch ETS caching" do
     setup do

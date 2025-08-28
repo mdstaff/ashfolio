@@ -2,16 +2,17 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
   # GenServer tests need async: false
   use Ashfolio.DataCase, async: false
 
+  import Mox
+
+  alias Ashfolio.Cache
+  alias Ashfolio.MarketData.PriceManager
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
+
   @moduletag :market_data
   @moduletag :genserver
   @moduletag :mocked
   @moduletag :slow
-
-  alias Ashfolio.MarketData.PriceManager
-  alias Ashfolio.Portfolio.{Symbol, Transaction}
-  alias Ashfolio.Cache
-
-  import Mox
 
   # Mock setup for YahooFinance
   setup :verify_on_exit!
@@ -85,7 +86,7 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
       # Verify database was updated
       {:ok, [updated_aapl]} = Symbol.find_by_symbol("AAPL")
       assert Decimal.equal?(updated_aapl.current_price, Decimal.new("155.50"))
-      assert updated_aapl.price_updated_at != nil
+      assert updated_aapl.price_updated_at
     end
 
     test "handles batch fetch failure with individual fallback", %{active_symbols: _symbols} do
@@ -280,7 +281,7 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
 
       last_refresh = PriceManager.last_refresh()
 
-      assert last_refresh != nil
+      assert last_refresh
       assert %DateTime{} = last_refresh.timestamp
       assert is_map(last_refresh.results)
       assert last_refresh.results.success_count == 1
@@ -308,7 +309,7 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
       second_refresh = PriceManager.last_refresh()
 
       # Timestamps should be different
-      assert DateTime.compare(second_refresh.timestamp, first_refresh.timestamp) == :gt
+      assert DateTime.after?(second_refresh.timestamp, first_refresh.timestamp)
     end
   end
 
@@ -356,7 +357,7 @@ defmodule Ashfolio.MarketData.PriceManagerTest do
       # Verify database was updated
       {:ok, [updated_symbol]} = Symbol.find_by_symbol("AAPL")
       assert updated_symbol.current_price != initial_symbol.current_price
-      assert updated_symbol.price_updated_at != nil
+      assert updated_symbol.price_updated_at
     end
   end
 end

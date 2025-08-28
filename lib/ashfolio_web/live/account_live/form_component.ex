@@ -1,9 +1,11 @@
 defmodule AshfolioWeb.AccountLive.FormComponent do
+  @moduledoc false
   use AshfolioWeb, :live_component
 
-  alias Ashfolio.Portfolio.Account
   alias Ashfolio.Context
-  alias AshfolioWeb.Live.{FormatHelpers, ErrorHelpers}
+  alias Ashfolio.Portfolio.Account
+  alias AshfolioWeb.Live.ErrorHelpers
+  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def render(assigns) do
@@ -260,7 +262,7 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
       |> assign(:form_errors, [])
 
     current_account_id =
-      if socket.assigns.action == :edit, do: socket.assigns.account.id, else: nil
+      if socket.assigns.action == :edit, do: socket.assigns.account.id
 
     case Context.validate_account_constraints(
            form_params,
@@ -550,8 +552,6 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
          Enum.any?(network_indicators, &String.contains?(String.downcase(msg), &1))
        end) do
       "Unable to save due to a connection issue. Please check your internet connection and try again."
-    else
-      nil
     end
   end
 

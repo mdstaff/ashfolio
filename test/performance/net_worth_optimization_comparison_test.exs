@@ -16,12 +16,13 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
 
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.FinancialManagement.NetWorthCalculator
+  alias Ashfolio.FinancialManagement.NetWorthCalculatorOptimized
+  alias Ashfolio.Portfolio.Account
+
   @moduletag :performance
   @moduletag :slow
   @moduletag :optimization_comparison
-
-  alias Ashfolio.FinancialManagement.{NetWorthCalculator, NetWorthCalculatorOptimized}
-  alias Ashfolio.Portfolio.Account
 
   @performance_account_count 25
   @performance_transactions_per_account 30
@@ -321,8 +322,8 @@ defmodule Ashfolio.Performance.NetWorthOptimizationComparisonTest do
           platform: "Bank #{rem(i, 2) + 1}",
           account_type: account_type,
           balance: Decimal.new("#{2000 + i * 500}"),
-          interest_rate: if(account_type in [:savings, :cd], do: Decimal.new("2.5"), else: nil),
-          minimum_balance: if(account_type == :checking, do: Decimal.new("100"), else: nil)
+          interest_rate: if(account_type in [:savings, :cd], do: Decimal.new("2.5")),
+          minimum_balance: if(account_type == :checking, do: Decimal.new("100"))
         })
     end
   end

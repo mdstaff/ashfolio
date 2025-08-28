@@ -12,8 +12,8 @@ Run `just help testing` for more details on specific commands
 
 ### 🏃‍♂️ Unit Tests (< 1 second)
 
-Purpose: Fast feedback during development  
-Command: `just test unit`  
+Purpose: Fast feedback during development
+Command: `just test unit`
 Tags: `@tag :unit`
 
 - Pure function tests
@@ -25,8 +25,8 @@ Use global test data when possible. See [Global Test Data Requirements](testing/
 
 ### 🔗 Integration Tests (2-5 seconds)
 
-Purpose: Cross-module interactions  
-Command: `just test integration`  
+Purpose: Cross-module interactions
+Command: `just test integration`
 Tags: `@tag :integration`
 
 - Database operations
@@ -38,8 +38,8 @@ Integration tests must reset global account balances in setup. See [Global Test 
 
 ### 🌐 LiveView Tests (5-15 seconds)
 
-Purpose: Full-stack UI testing  
-Command: `just test live`  
+Purpose: Full-stack UI testing
+Command: `just test live`
 Tags: `@tag :liveview`
 
 - LiveView component tests
@@ -49,8 +49,8 @@ Tags: `@tag :liveview`
 
 ### ⚡ Performance Tests (30-60 seconds)
 
-Purpose: Performance benchmarking  
-Command: `just test perf`  
+Purpose: Performance benchmarking
+Command: `just test perf`
 Tags: `@tag :performance`
 
 - Large dataset operations
@@ -60,8 +60,8 @@ Tags: `@tag :performance`
 
 ### 💨 Smoke Tests (< 2 seconds)
 
-Purpose: Critical path validation  
-Command: `just test smoke`  
+Purpose: Critical path validation
+Command: `just test smoke`
 Tags: `@tag :smoke`
 
 - Essential functionality
@@ -72,8 +72,8 @@ Tags: `@tag :smoke`
 
 ### 🎯 Credo Static Analysis
 
-Purpose: Enforce code quality standards and best practices  
-Command: `just credo`  
+Purpose: Enforce code quality standards and best practices
+Command: `just credo`
 Configuration: `.credo.exs` (if present)
 
 Credo checks for:

@@ -6,6 +6,8 @@ defmodule Ashfolio.ErrorHandler do
   following the simplified Phase 1 approach with basic error handling.
   """
 
+  alias Ash.Error.Invalid
+
   require Logger
 
   @doc """
@@ -74,8 +76,8 @@ defmodule Ashfolio.ErrorHandler do
   defp categorize_error({:error, :not_found}), do: :not_found
   defp categorize_error({:error, :stale}), do: :stale_data
   defp categorize_error(%Ecto.Changeset{valid?: false}), do: :validation
-  defp categorize_error(%Ash.Error.Invalid{}), do: :validation
-  defp categorize_error({:error, %Ash.Error.Invalid{}}), do: :validation
+  defp categorize_error(%Invalid{}), do: :validation
+  defp categorize_error({:error, %Invalid{}}), do: :validation
 
   # v0.2.0 Cash Balance Management errors
   defp categorize_error({:error, :insufficient_balance}), do: :balance_management
@@ -161,7 +163,7 @@ defmodule Ashfolio.ErrorHandler do
         |> Enum.map(fn {field, messages} ->
           "#{humanize_field(field)}: #{Enum.join(messages, ", ")}"
         end)
-        |> Enum.join("; ")
+        |> Enum.map_join("; ", & &1)
     end
   end
 

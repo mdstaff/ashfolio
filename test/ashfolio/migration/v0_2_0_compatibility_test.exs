@@ -9,20 +9,21 @@ defmodule Ashfolio.Migration.V020CompatibilityTest do
   - Data integrity and performance
   - Feature compatibility across components
 
-  Note: In v0.2.0, we use database-as-user architecture where each SQLite 
+  Note: In v0.2.0, we use database-as-user architecture where each SQLite
   database represents one complete user portfolio.
   """
 
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.Context
+  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Transaction
+  alias Ashfolio.SQLiteHelpers
+
   @moduletag :migration
   @moduletag :compatibility
   @moduletag :v0_2_0
-
-  alias Ashfolio.Portfolio.{Account, Transaction}
-  alias Ashfolio.FinancialManagement.TransactionCategory
-  alias Ashfolio.Context
-  alias Ashfolio.SQLiteHelpers
 
   describe "account type compatibility" do
     test "default investment accounts work correctly" do
@@ -307,7 +308,8 @@ defmodule Ashfolio.Migration.V020CompatibilityTest do
         end)
 
       # Verify balances preserved
-      Enum.zip(created_accounts, accounts_data)
+      created_accounts
+      |> Enum.zip(accounts_data)
       |> Enum.each(fn {account, original_data} ->
         assert Decimal.equal?(account.balance, original_data.balance)
       end)
@@ -372,7 +374,8 @@ defmodule Ashfolio.Migration.V020CompatibilityTest do
         end)
 
       # Verify transaction integrity
-      Enum.zip(created_txs, transactions_data)
+      created_txs
+      |> Enum.zip(transactions_data)
       |> Enum.each(fn {tx, original_data} ->
         assert tx.type == original_data.type
         assert Decimal.equal?(tx.quantity, original_data.quantity)

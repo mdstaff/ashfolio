@@ -13,11 +13,11 @@ defmodule AshfolioWeb.HealthController do
   def check(conn, _params) do
     health_data = %{
       status: "healthy",
-      timestamp: DateTime.utc_now() |> DateTime.to_iso8601(),
+      timestamp: DateTime.to_iso8601(DateTime.utc_now()),
       application: %{
         name: "ashfolio",
-        version: Application.spec(:ashfolio, :vsn) |> to_string(),
-        environment: Application.get_env(:ashfolio, :environment, Mix.env()) |> to_string()
+        version: :ashfolio |> Application.spec(:vsn) |> to_string(),
+        environment: :ashfolio |> Application.get_env(:environment, Mix.env()) |> to_string()
       },
       system: get_system_info(),
       database: check_database_health(),
@@ -41,7 +41,7 @@ defmodule AshfolioWeb.HealthController do
   Simple health check endpoint that returns minimal response for load balancers.
   """
   def ping(conn, _params) do
-    json(conn, %{status: "ok", timestamp: DateTime.utc_now() |> DateTime.to_iso8601()})
+    json(conn, %{status: "ok", timestamp: DateTime.to_iso8601(DateTime.utc_now())})
   end
 
   # Private helper functions
@@ -58,46 +58,44 @@ defmodule AshfolioWeb.HealthController do
         system_mb: div(memory_info[:system], 1024 * 1024)
       },
       node: Node.self(),
-      otp_release: :erlang.system_info(:otp_release) |> to_string(),
-      beam_version: :erlang.system_info(:version) |> to_string()
+      otp_release: :otp_release |> :erlang.system_info() |> to_string(),
+      beam_version: :version |> :erlang.system_info() |> to_string()
     }
   end
 
   defp check_database_health do
-    try do
-      # Test database connectivity with a simple query
-      case Ashfolio.Repo.query("SELECT 1 as test", []) do
-        {:ok, %{rows: [[1]]}} ->
-          # Get basic stats about the database - handle missing tables gracefully
-          user_count = safe_count_query("users")
-          account_count = safe_count_query("accounts")
-          transaction_count = safe_count_query("transactions")
+    # Test database connectivity with a simple query
+    case Ashfolio.Repo.query("SELECT 1 as test", []) do
+      {:ok, %{rows: [[1]]}} ->
+        # Get basic stats about the database - handle missing tables gracefully
+        user_count = safe_count_query("users")
+        account_count = safe_count_query("accounts")
+        transaction_count = safe_count_query("transactions")
 
-          %{
-            status: "healthy",
-            connection: "ok",
-            stats: %{
-              users: user_count,
-              accounts: account_count,
-              transactions: transaction_count
-            }
+        %{
+          status: "healthy",
+          connection: "ok",
+          stats: %{
+            users: user_count,
+            accounts: account_count,
+            transactions: transaction_count
           }
+        }
 
-        {:error, reason} ->
-          %{
-            status: "unhealthy",
-            connection: "failed",
-            error: inspect(reason)
-          }
-      end
-    rescue
-      exception ->
+      {:error, reason} ->
         %{
           status: "unhealthy",
           connection: "failed",
-          error: Exception.message(exception)
+          error: inspect(reason)
         }
     end
+  rescue
+    exception ->
+      %{
+        status: "unhealthy",
+        connection: "failed",
+        error: Exception.message(exception)
+      }
   end
 
   defp check_services_health do
@@ -109,52 +107,46 @@ defmodule AshfolioWeb.HealthController do
   end
 
   defp check_cache_health do
-    try do
-      # Test ETS cache table availability and get basic stats
-      stats = Ashfolio.Cache.stats()
+    # Test ETS cache table availability and get basic stats
+    stats = Ashfolio.Cache.stats()
 
-      %{
-        status: "healthy",
-        table_exists: true,
-        entries: stats.size,
-        memory_mb: Float.round(stats.memory_bytes / (1024 * 1024), 2)
-      }
-    rescue
-      _exception ->
-        %{status: "unhealthy", table_exists: false, error: "cache_unavailable"}
-    end
+    %{
+      status: "healthy",
+      table_exists: true,
+      entries: stats.size,
+      memory_mb: Float.round(stats.memory_bytes / (1024 * 1024), 2)
+    }
+  rescue
+    _exception ->
+      %{status: "unhealthy", table_exists: false, error: "cache_unavailable"}
   end
 
   defp check_market_data_health do
-    try do
-      # Check if market data service is available
-      case GenServer.whereis(Ashfolio.MarketData.PriceManager) do
-        nil ->
-          %{status: "unhealthy", reason: "price_manager_not_running"}
+    # Check if market data service is available
+    case GenServer.whereis(Ashfolio.MarketData.PriceManager) do
+      nil ->
+        %{status: "unhealthy", reason: "price_manager_not_running"}
 
-        _pid ->
-          %{status: "healthy", price_manager: "running"}
-      end
-    rescue
-      _exception ->
-        %{status: "unhealthy", reason: "check_failed"}
+      _pid ->
+        %{status: "healthy", price_manager: "running"}
     end
+  rescue
+    _exception ->
+      %{status: "unhealthy", reason: "check_failed"}
   end
 
   defp check_pubsub_health do
-    try do
-      # Test PubSub system
-      case GenServer.whereis(Ashfolio.PubSub) do
-        nil ->
-          %{status: "unhealthy", reason: "pubsub_not_running"}
+    # Test PubSub system
+    case GenServer.whereis(Ashfolio.PubSub) do
+      nil ->
+        %{status: "unhealthy", reason: "pubsub_not_running"}
 
-        _pid ->
-          %{status: "healthy", pubsub: "running"}
-      end
-    rescue
-      _exception ->
-        %{status: "unhealthy", reason: "check_failed"}
+      _pid ->
+        %{status: "healthy", pubsub: "running"}
     end
+  rescue
+    _exception ->
+      %{status: "unhealthy", reason: "check_failed"}
   end
 
   # Helper function to safely count table rows

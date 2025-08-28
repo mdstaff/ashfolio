@@ -13,7 +13,8 @@ defmodule AshfolioWeb.ForecastLive.Index do
 
   alias Ashfolio.FinancialManagement.ForecastCalculator
   alias AshfolioWeb.Components.ForecastChart
-  alias AshfolioWeb.Live.{ErrorHelpers, FormatHelpers}
+  alias AshfolioWeb.Live.ErrorHelpers
+  alias AshfolioWeb.Live.FormatHelpers
 
   require Logger
 
@@ -58,8 +59,9 @@ defmodule AshfolioWeb.ForecastLive.Index do
   end
 
   @impl true
-  def handle_event("calculate_projection", %{"form" => form_params}, socket) do
+  def handle_event("calculate_projection", _params, socket) do
     socket = assign(socket, :loading, true)
+    form_params = socket.assigns.form_data || %{}
 
     with {:ok, current_value} <- parse_decimal(form_params["current_value"]),
          {:ok, monthly_contribution} <- parse_decimal(form_params["monthly_contribution"]),
@@ -121,8 +123,9 @@ defmodule AshfolioWeb.ForecastLive.Index do
   end
 
   @impl true
-  def handle_event("calculate_scenarios", %{"form" => form_params}, socket) do
+  def handle_event("calculate_scenarios", _params, socket) do
     socket = assign(socket, :loading, true)
+    form_params = socket.assigns.form_data
 
     with {:ok, current_value} <- parse_decimal(form_params["current_value"]),
          {:ok, monthly_contribution} <- parse_decimal(form_params["monthly_contribution"]),
@@ -166,8 +169,9 @@ defmodule AshfolioWeb.ForecastLive.Index do
   end
 
   @impl true
-  def handle_event("analyze_contributions", %{"form" => form_params}, socket) do
+  def handle_event("analyze_contributions", _params, socket) do
     socket = assign(socket, :loading, true)
+    form_params = socket.assigns.form_data
 
     with {:ok, current_value} <- parse_decimal(form_params["current_value"]),
          {:ok, monthly_contribution} <- parse_decimal(form_params["monthly_contribution"]),
@@ -307,7 +311,7 @@ defmodule AshfolioWeb.ForecastLive.Index do
           <div class="bg-white shadow rounded-lg p-6">
             <h2 class="text-lg font-medium text-gray-900 mb-4">Forecast Parameters</h2>
 
-            <form phx-change="update_form">
+            <form id="forecast-form" phx-change="update_form">
               <div class="space-y-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -411,12 +415,50 @@ defmodule AshfolioWeb.ForecastLive.Index do
             {render_projection_results(assigns)}
           <% end %>
 
-          <%= if @active_tab == "scenarios" and @scenario_results do %>
-            {render_scenario_results(assigns)}
+          <%= if @active_tab == "scenarios" do %>
+            <%= if @scenario_results do %>
+              {render_scenario_results(assigns)}
+            <% else %>
+              <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Scenario Comparison</h3>
+                <p class="text-gray-600 mb-4">
+                  Compare your portfolio growth under different return scenarios:
+                </p>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg border border-red-200">
+                    <span class="font-medium text-red-800">Conservative (5%)</span>
+                    <span class="text-sm text-red-600">Lower risk, stable growth</span>
+                  </div>
+                  <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <span class="font-medium text-blue-800">Realistic (7%)</span>
+                    <span class="text-sm text-blue-600">Market average returns</span>
+                  </div>
+                  <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg border border-green-200">
+                    <span class="font-medium text-green-800">Optimistic (10%)</span>
+                    <span class="text-sm text-green-600">Higher risk, aggressive growth</span>
+                  </div>
+                </div>
+                <p class="text-sm text-gray-500 mt-4">
+                  Click "Compare Scenarios" to see projections for all three scenarios.
+                </p>
+              </div>
+            <% end %>
           <% end %>
 
-          <%= if @active_tab == "contributions" and @contribution_analysis do %>
-            {render_contribution_analysis(assigns)}
+          <%= if @active_tab == "contributions" do %>
+            <%= if @contribution_analysis do %>
+              {render_contribution_analysis(assigns)}
+            <% else %>
+              <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Contribution Analysis</h3>
+                <p class="text-gray-600 mb-4">
+                  Analyze how different contribution amounts affect your portfolio growth.
+                </p>
+                <p class="text-sm text-gray-500">
+                  Click "Analyze Impact" to see how changing your monthly contributions affects your long-term results.
+                </p>
+              </div>
+            <% end %>
           <% end %>
 
           <%= if Map.get(@chart_data, :type) do %>
@@ -465,12 +507,11 @@ defmodule AshfolioWeb.ForecastLive.Index do
 
   defp parse_integer(_), do: {:error, :invalid_input}
 
-  defp generate_chart_periods(max_years) when max_years <= 10, do: 0..max_years |> Enum.to_list()
+  defp generate_chart_periods(max_years) when max_years <= 10, do: Enum.to_list(0..max_years)
 
-  defp generate_chart_periods(max_years) when max_years <= 20,
-    do: 0..max_years |> Enum.take_every(2)
+  defp generate_chart_periods(max_years) when max_years <= 20, do: Enum.take_every(0..max_years, 2)
 
-  defp generate_chart_periods(max_years), do: 0..max_years |> Enum.take_every(5)
+  defp generate_chart_periods(max_years), do: Enum.take_every(0..max_years, 5)
 
   defp build_projection_chart_data(multi_projections, periods) do
     years = periods
@@ -496,7 +537,7 @@ defmodule AshfolioWeb.ForecastLive.Index do
   end
 
   defp build_scenario_chart_data(scenarios, years) do
-    chart_years = 0..years |> Enum.take_every(max(1, div(years, 10)))
+    chart_years = Enum.take_every(0..years, max(1, div(years, 10)))
 
     # For simplicity, create linear projections between start and end values
     pessimistic_values =
@@ -566,9 +607,7 @@ defmodule AshfolioWeb.ForecastLive.Index do
     {:noreply, socket}
   end
 
-  defp tab_class(true),
-    do:
-      "border-indigo-500 text-indigo-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+  defp tab_class(true), do: "border-indigo-500 text-indigo-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
 
   defp tab_class(false),
     do:

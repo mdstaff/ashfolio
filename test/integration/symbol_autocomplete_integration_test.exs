@@ -12,13 +12,15 @@ defmodule Ashfolio.Integration.SymbolAutocompleteIntegrationTest do
 
   use Ashfolio.DataCase, async: false
 
-  @moduletag :integration
-  @moduletag :v0_2_0
+  import Mox
 
   alias Ashfolio.Context
-  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
 
-  import Mox
+  @moduletag :integration
+  @moduletag :v0_2_0
 
   # Setup mock for external API testing
   setup :verify_on_exit!
@@ -123,7 +125,7 @@ defmodule Ashfolio.Integration.SymbolAutocompleteIntegrationTest do
       # Step 3: Now search should find the newly created symbol
       {:ok, updated_search} = Context.search_symbols("NVDA")
       nvda_result = Enum.find(updated_search, &(&1.symbol == "NVDA"))
-      assert nvda_result != nil
+      assert nvda_result
 
       # Step 4: Create transaction with new symbol
       {:ok, transaction} =
@@ -142,7 +144,7 @@ defmodule Ashfolio.Integration.SymbolAutocompleteIntegrationTest do
       # Step 5: Verify portfolio includes new holding
       {:ok, portfolio_summary} = Context.get_portfolio_summary()
       nvidia_holding = Enum.find(portfolio_summary.holdings, &(&1.symbol == "NVDA"))
-      assert nvidia_holding != nil
+      assert nvidia_holding
       assert Decimal.equal?(nvidia_holding.quantity, Decimal.new("5"))
     end
 

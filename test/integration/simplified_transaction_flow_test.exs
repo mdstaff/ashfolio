@@ -7,11 +7,14 @@ defmodule AshfolioWeb.Integration.SimplifiedTransactionFlowTest do
   """
   use AshfolioWeb.ConnCase, async: false
 
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Calculator
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
+  alias Ashfolio.SQLiteHelpers
+
   @moduletag :integration
   @moduletag :fast
-
-  alias Ashfolio.Portfolio.{Account, Symbol, Transaction, Calculator}
-  alias Ashfolio.SQLiteHelpers
 
   setup do
     # Database-as-user architecture: No user entity needed
@@ -180,7 +183,7 @@ defmodule AshfolioWeb.Integration.SimplifiedTransactionFlowTest do
       case Calculator.calculate_position_returns() do
         {:ok, positions} ->
           aapl_position = Enum.find(positions, fn pos -> pos.symbol == "AAPL" end)
-          assert aapl_position != nil
+          assert aapl_position
           # Net quantity should be 100 + 50 - 25 = 125
           assert Decimal.equal?(aapl_position.quantity, Decimal.new("125"))
 

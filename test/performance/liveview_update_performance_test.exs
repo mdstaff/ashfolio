@@ -21,13 +21,15 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
 
   import Phoenix.LiveViewTest
 
+  alias Ashfolio.FinancialManagement.NetWorthCalculator
+  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Transaction
+  alias Ashfolio.SQLiteHelpers
+
   @moduletag :performance
   @moduletag :slow
   @moduletag :liveview_performance
-
-  alias Ashfolio.Portfolio.{Account, Transaction}
-  alias Ashfolio.FinancialManagement.{NetWorthCalculator, TransactionCategory}
-  alias Ashfolio.SQLiteHelpers
 
   describe "LiveView Mount Performance" do
     setup do
@@ -383,7 +385,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
 
   # Helper functions for test data creation
 
-  defp create_dashboard_test_data() do
+  defp create_dashboard_test_data do
     # Create mix of accounts
     accounts =
       for i <- 1..3 do
@@ -411,8 +413,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
         {:ok, category} =
           TransactionCategory.create(%{
             name: "Test Category #{i}",
-            color:
-              "##{:rand.uniform(16_777_215) |> Integer.to_string(16) |> String.pad_leading(6, "0")}"
+            color: "##{16_777_215 |> :rand.uniform() |> Integer.to_string(16) |> String.pad_leading(6, "0")}"
           })
 
         category
@@ -442,8 +443,7 @@ defmodule Ashfolio.Performance.LiveViewUpdatePerformanceTest do
             account_id: account.id,
             category_id: category.id,
             symbol_id: symbol.id,
-            quantity:
-              if(rem(i, 2) == 0, do: Decimal.new("#{5 + i}"), else: Decimal.new("-#{3 + i}")),
+            quantity: if(rem(i, 2) == 0, do: Decimal.new("#{5 + i}"), else: Decimal.new("-#{3 + i}")),
             price: Decimal.new("#{100 + i * 5}.00"),
             total_amount: Decimal.new("#{500 + i * 50}.00"),
             date: Date.add(Date.utc_today(), -i)

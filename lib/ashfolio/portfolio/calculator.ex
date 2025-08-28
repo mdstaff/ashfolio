@@ -12,7 +12,10 @@ defmodule Ashfolio.Portfolio.Calculator do
   - Cost basis calculation from transaction history
   """
 
-  alias Ashfolio.Portfolio.{Transaction, Symbol, Account}
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
+
   require Logger
 
   @doc """
@@ -25,7 +28,7 @@ defmodule Ashfolio.Portfolio.Calculator do
       iex> Calculator.calculate_portfolio_value()
       {:ok, %Decimal{}}
   """
-  def calculate_portfolio_value() do
+  def calculate_portfolio_value do
     Logger.debug("Calculating portfolio value")
 
     case get_all_holdings() do
@@ -57,20 +60,18 @@ defmodule Ashfolio.Portfolio.Calculator do
       {:ok, Decimal.new(-20.0)}
   """
   def calculate_simple_return(current_value, cost_basis) do
-    cond do
-      Decimal.equal?(cost_basis, 0) ->
-        {:ok, Decimal.new(0)}
+    if Decimal.equal?(cost_basis, 0) do
+      {:ok, Decimal.new(0)}
+    else
+      # (current_value - cost_basis) / cost_basis * 100
+      difference = Decimal.sub(current_value, cost_basis)
 
-      true ->
-        # (current_value - cost_basis) / cost_basis * 100
-        difference = Decimal.sub(current_value, cost_basis)
+      percentage =
+        difference
+        |> Decimal.div(cost_basis)
+        |> Decimal.mult(100)
 
-        percentage =
-          difference
-          |> Decimal.div(cost_basis)
-          |> Decimal.mult(100)
-
-        {:ok, percentage}
+      {:ok, percentage}
     end
   end
 
@@ -84,7 +85,7 @@ defmodule Ashfolio.Portfolio.Calculator do
       iex> Calculator.calculate_position_returns()
       {:ok, [%{symbol: "AAPL", current_value: %Decimal{}, cost_basis: %Decimal{}, return_pct: %Decimal{}}]}
   """
-  def calculate_position_returns() do
+  def calculate_position_returns do
     Logger.debug("Calculating position returns")
 
     case get_all_holdings() do
@@ -140,7 +141,7 @@ defmodule Ashfolio.Portfolio.Calculator do
 
   Returns portfolio summary with total value, cost basis, and return percentage.
   """
-  def calculate_total_return() do
+  def calculate_total_return do
     Logger.debug("Calculating total return")
 
     with {:ok, portfolio_value} <- calculate_portfolio_value(),
@@ -164,40 +165,38 @@ defmodule Ashfolio.Portfolio.Calculator do
 
   # Private functions
 
-  defp get_all_holdings() do
-    try do
-      # Get all accounts (excluding excluded accounts) - database-as-user architecture
-      case Account.list() do
-        {:ok, accounts} ->
-          active_accounts =
-            Enum.filter(accounts, fn account ->
-              not account.is_excluded
-            end)
+  defp get_all_holdings do
+    # Get all accounts (excluding excluded accounts) - database-as-user architecture
+    case Account.list() do
+      {:ok, accounts} ->
+        active_accounts =
+          Enum.filter(accounts, fn account ->
+            not account.is_excluded
+          end)
 
-          if Enum.empty?(active_accounts) do
-            Logger.debug("No active accounts found")
-            {:ok, []}
-          else
-            # Get all transactions for these accounts
-            account_ids = Enum.map(active_accounts, & &1.id)
+        if Enum.empty?(active_accounts) do
+          Logger.debug("No active accounts found")
+          {:ok, []}
+        else
+          # Get all transactions for these accounts
+          account_ids = Enum.map(active_accounts, & &1.id)
 
-            holdings =
-              account_ids
-              |> Enum.flat_map(&get_holdings_for_account/1)
-              |> group_holdings_by_symbol()
+          holdings =
+            account_ids
+            |> Enum.flat_map(&get_holdings_for_account/1)
+            |> group_holdings_by_symbol()
 
-            {:ok, holdings}
-          end
+          {:ok, holdings}
+        end
 
-        {:error, reason} ->
-          Logger.warning("Failed to get accounts: #{inspect(reason)}")
-          {:error, reason}
-      end
-    rescue
-      error ->
-        Logger.error("Error getting holdings: #{inspect(error)}")
-        {:error, :calculation_error}
+      {:error, reason} ->
+        Logger.warning("Failed to get accounts: #{inspect(reason)}")
+        {:error, reason}
     end
+  rescue
+    error ->
+      Logger.error("Error getting holdings: #{inspect(error)}")
+      {:error, :calculation_error}
   end
 
   defp get_holdings_for_account(account_id) do
@@ -239,8 +238,7 @@ defmodule Ashfolio.Portfolio.Calculator do
   end
 
   defp calculate_position_summary(transactions) do
-    Enum.reduce(transactions, {Decimal.new(0), Decimal.new(0)}, fn transaction,
-                                                                   {net_qty, total_cost} ->
+    Enum.reduce(transactions, {Decimal.new(0), Decimal.new(0)}, fn transaction, {net_qty, total_cost} ->
       case transaction.type do
         :buy ->
           new_qty = Decimal.add(net_qty, transaction.quantity)
@@ -313,7 +311,7 @@ defmodule Ashfolio.Portfolio.Calculator do
     end
   end
 
-  defp calculate_total_cost_basis() do
+  defp calculate_total_cost_basis do
     case get_all_holdings() do
       {:ok, holdings} ->
         total_cost =

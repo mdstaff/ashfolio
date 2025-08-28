@@ -1,14 +1,15 @@
 defmodule Ashfolio.FinancialManagement.NetWorthSnapshotTest do
   use Ashfolio.DataCase
 
-  alias Ashfolio.FinancialManagement.NetWorthSnapshot
   alias Ashfolio.FinancialManagement.NetWorthCalculator
+  alias Ashfolio.FinancialManagement.NetWorthSnapshot
+  alias Ashfolio.Portfolio.Account
 
   describe "net worth snapshot creation" do
     setup do
       # Create test accounts with balances
       {:ok, investment_account} =
-        Ashfolio.Portfolio.Account.create(%{
+        Account.create(%{
           name: "Investment Account",
           account_type: :investment,
           currency: "USD",
@@ -16,7 +17,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthSnapshotTest do
         })
 
       {:ok, checking_account} =
-        Ashfolio.Portfolio.Account.create(%{
+        Account.create(%{
           name: "Checking Account",
           account_type: :checking,
           currency: "USD",
@@ -24,7 +25,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthSnapshotTest do
         })
 
       {:ok, savings_account} =
-        Ashfolio.Portfolio.Account.create(%{
+        Account.create(%{
           name: "Savings Account",
           account_type: :savings,
           currency: "USD",
@@ -108,16 +109,16 @@ defmodule Ashfolio.FinancialManagement.NetWorthSnapshotTest do
       # Reset all existing accounts to zero balance first
       require Ash.Query
 
-      Ashfolio.Portfolio.Account
+      Account
       |> Ash.Query.for_read(:read)
       |> Ash.read!()
       |> Enum.each(fn account ->
-        Ashfolio.Portfolio.Account.update(account, %{balance: Decimal.new("0.00")})
+        Account.update(account, %{balance: Decimal.new("0.00")})
       end)
 
       # Create accounts with different types and balances
       {:ok, investment1} =
-        Ashfolio.Portfolio.Account.create(%{
+        Account.create(%{
           name: "Test Schwab Brokerage",
           account_type: :investment,
           currency: "USD",
@@ -125,7 +126,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthSnapshotTest do
         })
 
       {:ok, investment2} =
-        Ashfolio.Portfolio.Account.create(%{
+        Account.create(%{
           name: "Test Fidelity 401k",
           account_type: :investment,
           currency: "USD",
@@ -133,7 +134,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthSnapshotTest do
         })
 
       {:ok, checking} =
-        Ashfolio.Portfolio.Account.create(%{
+        Account.create(%{
           name: "Test Main Checking",
           account_type: :checking,
           currency: "USD",
@@ -141,7 +142,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthSnapshotTest do
         })
 
       {:ok, savings} =
-        Ashfolio.Portfolio.Account.create(%{
+        Account.create(%{
           name: "Test High Yield Savings",
           account_type: :savings,
           currency: "USD",

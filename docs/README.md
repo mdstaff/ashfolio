@@ -45,5 +45,5 @@ Historical documentation and development artifacts in the [archive](archive/) di
 
 ---
 
-_For quick development setup: `just dev`_  
+_For quick development setup: `just dev`_
 _For comprehensive project guidelines: [../CONTRIBUTING.md](../CONTRIBUTING.md)_

@@ -1,6 +1,6 @@
 # Ashfolio User Experience Enhancements Requirements Document
 
-> 📋 STATUS: ROADMAP DOCUMENT  
+> 📋 STATUS: ROADMAP DOCUMENT
 > This comprehensive spec has been broken down into focused, manageable specs:
 >
 > - [Symbol Autocomplete](../symbol-autocomplete/)

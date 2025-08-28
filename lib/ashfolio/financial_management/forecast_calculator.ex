@@ -37,20 +37,20 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
   - n = Number of years
 
   ## Examples
-      
+
       iex> ForecastCalculator.project_portfolio_growth(Decimal.new("100000"), Decimal.new("0"), 10, Decimal.new("0.07"))
       {:ok, Decimal.new("196715.14")}
-      
+
       iex> ForecastCalculator.project_portfolio_growth(Decimal.new("100000"), Decimal.new("12000"), 10, Decimal.new("0.07"))
       {:ok, Decimal.new("235000.00")}
-      
+
   ## Parameters
 
     - current_value: Decimal - Current portfolio value
     - annual_contribution: Decimal - Annual contribution amount
     - years: integer - Number of years to project
     - growth_rate: Decimal - Annual growth rate (e.g., 0.07 for 7%)
-    
+
   ## Returns
 
     - {:ok, projected_value} - Decimal projected portfolio value
@@ -89,17 +89,17 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
   for the first 5 years, and provides CAGR analysis for each period.
 
   ## Examples
-      
+
       iex> ForecastCalculator.project_multi_period_growth(Decimal.new("100000"), Decimal.new("12000"), Decimal.new("0.07"), [5, 10, 20])
       {:ok, %{year_5: Decimal.new("..."), year_10: Decimal.new("..."), yearly_breakdown: %{...}, cagr: %{...}}}
-      
+
   ## Parameters
 
     - current_value: Decimal - Current portfolio value
-    - annual_contribution: Decimal - Annual contribution amount  
+    - annual_contribution: Decimal - Annual contribution amount
     - growth_rate: Decimal - Annual growth rate (e.g., 0.07 for 7%)
     - periods: List of integers - Years to project (e.g., [5, 10, 15, 20, 25, 30])
-    
+
   ## Returns
 
     - {:ok, projections_map} - Map with period projections, yearly breakdown, and CAGR
@@ -216,12 +216,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
 
   # Private calculation functions
 
-  defp calculate_compound_growth_with_contributions(
-         current_value,
-         annual_contribution,
-         years,
-         growth_rate
-       ) do
+  defp calculate_compound_growth_with_contributions(current_value, annual_contribution, years, growth_rate) do
     cond do
       years == 0 ->
         # Zero years means no growth, return original value
@@ -236,7 +231,8 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
         # Use appropriate compounding based on contributions
         if Decimal.equal?(annual_contribution, Decimal.new("0")) do
           # No contributions: use annual compounding for standard results
-          calculate_future_value_of_present(current_value, growth_rate, years)
+          current_value
+          |> calculate_future_value_of_present(growth_rate, years)
           |> Decimal.round(2)
         else
           # With contributions: use monthly compounding for accuracy
@@ -250,7 +246,8 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
           future_value_of_annuity =
             calculate_future_value_of_annuity_monthly(monthly_contribution, monthly_rate, months)
 
-          Decimal.add(future_value_of_present, future_value_of_annuity)
+          future_value_of_present
+          |> Decimal.add(future_value_of_annuity)
           |> Decimal.round(2)
         end
     end
@@ -305,8 +302,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
   defp validate_periods_list(_), do: {:error, :invalid_periods}
 
   defp calculate_all_period_projections(current_value, annual_contribution, growth_rate, periods) do
-    periods
-    |> Enum.reduce(%{}, fn years, acc ->
+    Enum.reduce(periods, %{}, fn years, acc ->
       case project_portfolio_growth(current_value, annual_contribution, years, growth_rate) do
         {:ok, projected_value} ->
           period_key = String.to_atom("year_#{years}")
@@ -321,13 +317,11 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
 
   defp calculate_yearly_breakdown(current_value, annual_contribution, growth_rate) do
     # Calculate detailed breakdown for first 5 years
-    1..5
-    |> Enum.reduce(%{}, fn year, acc ->
+    Enum.reduce(1..5, %{}, fn year, acc ->
       case project_portfolio_growth(current_value, annual_contribution, year, growth_rate) do
         {:ok, portfolio_value} ->
           # Calculate components
           total_contributions = Decimal.mult(annual_contribution, Decimal.new(to_string(year)))
-
           # Growth amount = final value - initial - contributions
           growth_amount =
             portfolio_value
@@ -352,8 +346,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
   end
 
   defp calculate_cagr_analysis(current_value, period_projections, periods) do
-    periods
-    |> Enum.reduce(%{}, fn years, acc ->
+    Enum.reduce(periods, %{}, fn years, acc ->
       period_key = String.to_atom("year_#{years}")
 
       case Map.get(period_projections, period_key) do
@@ -388,7 +381,8 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
         approximate_cagr = calculate_approximate_cagr(ratio, years)
 
         # Convert to percentage and round to 2 decimal places
-        Decimal.mult(approximate_cagr, Decimal.new("100"))
+        approximate_cagr
+        |> Decimal.mult(Decimal.new("100"))
         |> Decimal.round(2)
     end
   end
@@ -422,9 +416,9 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
   defp binary_search_nth_root(target, n, low, high, iterations_left) do
     if iterations_left <= 0 do
       # Return midpoint as final approximation
-      Decimal.add(low, high) |> Decimal.div(Decimal.new("2"))
+      low |> Decimal.add(high) |> Decimal.div(Decimal.new("2"))
     else
-      mid = Decimal.add(low, high) |> Decimal.div(Decimal.new("2"))
+      mid = low |> Decimal.add(high) |> Decimal.div(Decimal.new("2"))
       mid_power_n = calculate_power(mid, Decimal.to_integer(n))
 
       case Decimal.compare(mid_power_n, target) do
@@ -433,7 +427,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
           binary_search_nth_root(target, n, mid, high, iterations_left - 1)
 
         :gt ->
-          # mid^n > target, need lower value  
+          # mid^n > target, need lower value
           binary_search_nth_root(target, n, low, mid, iterations_left - 1)
 
         :eq ->
@@ -450,16 +444,16 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
   along with probability-weighted outcomes for comprehensive financial planning.
 
   ## Examples
-      
+
       iex> ForecastCalculator.calculate_scenario_projections(Decimal.new("100000"), Decimal.new("12000"), 30)
       {:ok, %{pessimistic: %{...}, realistic: %{...}, optimistic: %{...}, weighted_average: %{...}}}
-      
+
   ## Parameters
 
     - current_value: Decimal - Current portfolio value
     - annual_contribution: Decimal - Annual contribution amount
     - years: integer - Number of years to project
-    
+
   ## Returns
 
     - {:ok, scenarios_map} - Map with scenario projections
@@ -514,22 +508,22 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
   specialized financial planning scenarios.
 
   ## Examples
-      
+
       custom_scenarios = [
         %{name: :conservative, rate: Decimal.new("0.04")},
         %{name: :aggressive, rate: Decimal.new("0.12")}
       ]
-      
+
       iex> ForecastCalculator.calculate_custom_scenarios(Decimal.new("100000"), Decimal.new("12000"), 20, custom_scenarios)
       {:ok, %{conservative: %{...}, aggressive: %{...}}}
-      
+
   ## Parameters
 
     - current_value: Decimal - Current portfolio value
     - annual_contribution: Decimal - Annual contribution amount
     - years: integer - Number of years to project
     - scenarios: List of maps - Each with :name and :rate keys
-    
+
   ## Returns
 
     - {:ok, scenarios_map} - Map with custom scenario projections
@@ -563,17 +557,17 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
   for comprehensive FI planning.
 
   ## Examples
-      
+
       iex> ForecastCalculator.calculate_fi_timeline(Decimal.new("100000"), Decimal.new("12000"), Decimal.new("50000"), Decimal.new("0.07"))
       {:ok, %{years_to_fi: 15, fi_target_amount: Decimal.new("1250000"), scenario_analysis: %{...}}}
-      
+
   ## Parameters
 
     - current_value: Decimal - Current portfolio value
     - annual_contribution: Decimal - Annual contribution amount
     - annual_expenses: Decimal - Target annual expenses in retirement
     - growth_rate: Decimal - Expected growth rate
-    
+
   ## Returns
 
     - {:ok, fi_analysis} - Map with FI timeline analysis
@@ -607,23 +601,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
       safe_withdrawal_rate = Decimal.new("0.04")
 
       # Check if already financially independent
-      if Decimal.compare(current_value, fi_target_amount) != :lt do
-        # Already FI
-        results = %{
-          years_to_fi: 0,
-          fi_target_amount: fi_target_amount,
-          fi_portfolio_value: current_value,
-          safe_withdrawal_rate: safe_withdrawal_rate,
-          scenario_analysis: %{
-            pessimistic: %{years_to_fi: 0, fi_portfolio_value: current_value},
-            realistic: %{years_to_fi: 0, fi_portfolio_value: current_value},
-            optimistic: %{years_to_fi: 0, fi_portfolio_value: current_value}
-          }
-        }
-
-        Logger.debug("Already financially independent with #{current_value}")
-        {:ok, results}
-      else
+      if Decimal.compare(current_value, fi_target_amount) == :lt do
         # Calculate years to reach FI target
         years_to_fi =
           calculate_years_to_target(
@@ -657,9 +635,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
               scenario_analysis: scenario_analysis
             }
 
-            Logger.debug(
-              "FI timeline calculated: #{years_to_fi} years to reach #{fi_target_amount}"
-            )
+            Logger.debug("FI timeline calculated: #{years_to_fi} years to reach #{fi_target_amount}")
 
             {:ok, results}
 
@@ -667,6 +643,22 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
             Logger.warning("FI portfolio value calculation failed: #{inspect(reason)}")
             {:error, reason}
         end
+      else
+        # Already FI
+        results = %{
+          years_to_fi: 0,
+          fi_target_amount: fi_target_amount,
+          fi_portfolio_value: current_value,
+          safe_withdrawal_rate: safe_withdrawal_rate,
+          scenario_analysis: %{
+            pessimistic: %{years_to_fi: 0, fi_portfolio_value: current_value},
+            realistic: %{years_to_fi: 0, fi_portfolio_value: current_value},
+            optimistic: %{years_to_fi: 0, fi_portfolio_value: current_value}
+          }
+        }
+
+        Logger.debug("Already financially independent with #{current_value}")
+        {:ok, results}
       end
     else
       {:error, reason} ->
@@ -678,8 +670,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
   # Private scenario calculation helpers
 
   defp calculate_all_scenarios(current_value, annual_contribution, years, scenarios) do
-    scenarios
-    |> Enum.reduce(%{}, fn scenario, acc ->
+    Enum.reduce(scenarios, %{}, fn scenario, acc ->
       %{name: name, rate: rate} = scenario
 
       case project_portfolio_growth(current_value, annual_contribution, years, rate) do
@@ -750,9 +741,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
 
   defp validate_custom_scenarios(_), do: {:error, :invalid_scenario}
 
-  defp valid_custom_scenario?(%{name: name, rate: %Decimal{}} = _scenario)
-       when is_atom(name),
-       do: true
+  defp valid_custom_scenario?(%{name: name, rate: %Decimal{}} = _scenario) when is_atom(name), do: true
 
   defp valid_custom_scenario?(_), do: false
 
@@ -778,14 +767,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
     find_years_to_target(current_value, annual_contribution, target_amount, growth_rate, 0, 50)
   end
 
-  defp find_years_to_target(
-         current_value,
-         annual_contribution,
-         target_amount,
-         growth_rate,
-         min_years,
-         max_years
-       ) do
+  defp find_years_to_target(current_value, annual_contribution, target_amount, growth_rate, min_years, max_years) do
     if max_years - min_years <= 1 do
       # Close enough, return the higher bound to ensure we meet target
       max_years
@@ -831,8 +813,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
       {:optimistic, Decimal.new("0.10")}
     ]
 
-    fi_scenarios
-    |> Enum.reduce(%{}, fn {scenario_name, rate}, acc ->
+    Enum.reduce(fi_scenarios, %{}, fn {scenario_name, rate}, acc ->
       years_to_fi =
         calculate_years_to_target(current_value, annual_contribution, fi_target_amount, rate)
 
@@ -855,21 +836,21 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
   @doc """
   Analyzes the impact of different contribution levels on portfolio growth.
 
-  Shows how changing monthly contributions by various amounts affects 
+  Shows how changing monthly contributions by various amounts affects
   the final portfolio value over a specified time period.
 
   ## Examples
-      
+
       iex> ForecastCalculator.analyze_contribution_impact(Decimal.new("100000"), Decimal.new("1000"), 20, Decimal.new("0.07"))
       {:ok, %{base_projection: Decimal.new("..."), contribution_variations: [%{...}]}}
-      
+
   ## Parameters
 
     - current_value: Decimal - Current portfolio value
     - base_monthly_contribution: Decimal - Base monthly contribution amount
     - years: integer - Number of years to project
     - growth_rate: Decimal - Annual growth rate
-    
+
   ## Returns
 
     - {:ok, analysis_map} - Map with base projection and contribution variations
@@ -926,9 +907,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
             contribution_variations: contribution_variations
           }
 
-          Logger.debug(
-            "Contribution impact analysis completed with #{length(contribution_variations)} variations"
-          )
+          Logger.debug("Contribution impact analysis completed with #{length(contribution_variations)} variations")
 
           {:ok, results}
 
@@ -950,17 +929,17 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
   within a given timeframe, considering current portfolio value and growth rate.
 
   ## Examples
-      
+
       iex> ForecastCalculator.optimize_contribution_for_goal(Decimal.new("100000"), Decimal.new("1250000"), 15, Decimal.new("0.07"))
       {:ok, %{required_monthly_contribution: Decimal.new("..."), probability_of_success: Decimal.new("...")}}
-      
+
   ## Parameters
 
     - current_value: Decimal - Current portfolio value
     - target_value: Decimal - Target portfolio value to reach
     - target_years: integer - Number of years to reach the goal
     - growth_rate: Decimal - Expected annual growth rate
-    
+
   ## Returns
 
     - {:ok, optimization_map} - Map with required contribution and analysis
@@ -989,22 +968,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
          :ok <- validate_years(target_years),
          :ok <- validate_growth_rate(growth_rate) do
       # Check if already at target
-      if Decimal.compare(current_value, target_value) != :lt do
-        # Already at or above target
-        results = %{
-          required_monthly_contribution: Decimal.new("0"),
-          required_annual_contribution: Decimal.new("0"),
-          probability_of_success: Decimal.new("100.00"),
-          scenario_analysis: %{
-            pessimistic: %{required_monthly: Decimal.new("0"), achievable: true},
-            realistic: %{required_monthly: Decimal.new("0"), achievable: true},
-            optimistic: %{required_monthly: Decimal.new("0"), achievable: true}
-          }
-        }
-
-        Logger.debug("Already at target value: #{target_value}")
-        {:ok, results}
-      else
+      if Decimal.compare(current_value, target_value) == :lt do
         # Calculate required contribution for main scenario
         case calculate_required_contribution(
                current_value,
@@ -1014,7 +978,8 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
              ) do
           {:ok, required_annual_contribution} ->
             required_monthly_contribution =
-              Decimal.div(required_annual_contribution, Decimal.new("12"))
+              required_annual_contribution
+              |> Decimal.div(Decimal.new("12"))
               |> Decimal.round(2)
 
             # Calculate scenario analysis for different growth rates
@@ -1035,9 +1000,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
               scenario_analysis: scenario_analysis
             }
 
-            Logger.debug(
-              "Contribution optimization completed - required monthly: #{required_monthly_contribution}"
-            )
+            Logger.debug("Contribution optimization completed - required monthly: #{required_monthly_contribution}")
 
             {:ok, results}
 
@@ -1045,6 +1008,21 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
             Logger.warning("Required contribution calculation failed: #{inspect(reason)}")
             {:error, reason}
         end
+      else
+        # Already at or above target
+        results = %{
+          required_monthly_contribution: Decimal.new("0"),
+          required_annual_contribution: Decimal.new("0"),
+          probability_of_success: Decimal.new("100.00"),
+          scenario_analysis: %{
+            pessimistic: %{required_monthly: Decimal.new("0"), achievable: true},
+            realistic: %{required_monthly: Decimal.new("0"), achievable: true},
+            optimistic: %{required_monthly: Decimal.new("0"), achievable: true}
+          }
+        }
+
+        Logger.debug("Already at target value: #{target_value}")
+        {:ok, results}
       end
     else
       {:error, reason} ->
@@ -1067,7 +1045,8 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
     |> Enum.map(fn monthly_change ->
       # Calculate new monthly contribution (ensure non-negative)
       new_monthly_contribution =
-        Decimal.add(base_monthly_contribution, monthly_change)
+        base_monthly_contribution
+        |> Decimal.add(monthly_change)
         |> Decimal.max(Decimal.new("0"))
 
       new_annual_contribution = Decimal.mult(new_monthly_contribution, Decimal.new("12"))
@@ -1119,18 +1098,19 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
         # Amount needed from contributions
         contribution_needed = Decimal.sub(target_value, future_value_of_present)
 
-        if Decimal.compare(contribution_needed, Decimal.new("0")) != :gt do
-          # No additional contributions needed (growth alone reaches target)
-          {:ok, Decimal.new("0")}
-        else
-          # Calculate annuity factor for the required annual contribution  
+        if Decimal.compare(contribution_needed, Decimal.new("0")) == :gt do
+          # Calculate annuity factor for the required annual contribution
           {:ok, annuity_factor} = calculate_annuity_factor(growth_rate, target_years)
 
           required_annual_contribution =
-            Decimal.div(contribution_needed, annuity_factor)
+            contribution_needed
+            |> Decimal.div(annuity_factor)
             |> Decimal.round(2)
 
           {:ok, required_annual_contribution}
+        else
+          # No additional contributions needed (growth alone reaches target)
+          {:ok, Decimal.new("0")}
         end
 
       {:error, reason} ->
@@ -1169,12 +1149,12 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
       {:optimistic, Decimal.new("0.10")}
     ]
 
-    scenario_rates
-    |> Enum.reduce(%{}, fn {scenario_name, rate}, acc ->
+    Enum.reduce(scenario_rates, %{}, fn {scenario_name, rate}, acc ->
       case calculate_required_contribution(current_value, target_value, target_years, rate) do
         {:ok, required_annual} ->
           required_monthly =
-            Decimal.div(required_annual, Decimal.new("12"))
+            required_annual
+            |> Decimal.div(Decimal.new("12"))
             |> Decimal.round(2)
 
           # Consider achievable if monthly contribution is reasonable (< $10k/month)
@@ -1209,8 +1189,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
     ]
 
     probability =
-      weights
-      |> Enum.reduce(Decimal.new("0"), fn {achievable, weight}, acc ->
+      Enum.reduce(weights, Decimal.new("0"), fn {achievable, weight}, acc ->
         if achievable do
           Decimal.add(acc, weight)
         else

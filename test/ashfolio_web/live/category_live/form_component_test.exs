@@ -1,8 +1,8 @@
 defmodule AshfolioWeb.CategoryLive.FormComponentTest do
   use AshfolioWeb.LiveViewCase, async: false
 
-  import Phoenix.LiveViewTest
   import Ashfolio.SQLiteHelpers
+  import Phoenix.LiveViewTest
 
   alias Ashfolio.FinancialManagement.TransactionCategory
   alias AshfolioWeb.CategoryLive.FormComponent
@@ -258,7 +258,7 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       })
 
       # Should receive success message
-      assert_receive {AshfolioWeb.CategoryLive.FormComponent, {:saved, category}}
+      assert_receive {FormComponent, {:saved, category}}
       assert category.name == "New Growth Category"
       assert category.color == "#22C55E"
       assert category.is_system == false
@@ -285,7 +285,7 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       })
 
       # Should receive success message
-      assert_receive {AshfolioWeb.CategoryLive.FormComponent, {:saved, category}}
+      assert_receive {FormComponent, {:saved, category}}
       assert category.name == "Updated Category Name"
       assert category.color == "#EF4444"
       assert category.id == existing_category.id
@@ -331,7 +331,7 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       |> render_click()
 
       # Should receive cancel message
-      assert_receive {AshfolioWeb.CategoryLive.FormComponent, :cancelled}
+      assert_receive {FormComponent, :cancelled}
     end
 
     test "validates custom color input", %{} do
@@ -432,7 +432,7 @@ defmodule AshfolioWeb.CategoryLive.FormComponentTest do
       })
 
       # Should create category with parent
-      assert_receive {AshfolioWeb.CategoryLive.FormComponent, {:saved, category}}
+      assert_receive {FormComponent, {:saved, category}}
       assert category.parent_category_id == parent_category.id
     end
 

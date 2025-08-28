@@ -1,8 +1,8 @@
 # Ashfolio Financial Management Expansion Roadmap
 
-1.0  
- 2025-08-10  
- ⚠️ SUPERSEDED - Merged into [Unified Roadmap](v0.2-v0.5-roadmap.md)
+1.0
+2025-08-10
+⚠️ SUPERSEDED - Merged into [Unified Roadmap](v0.2-v0.5-roadmap.md)
 
 > This document has been superseded by the unified roadmap at `v0.2-v0.5-roadmap.md` which combines comprehensive financial management expansion with key portfolio improvements. Please refer to the unified roadmap for current development plans.
 >
@@ -39,9 +39,9 @@ Target User Profile: Individuals managing comprehensive wealth across multiple a
 
 ### Phase 1: Cash Management Foundation
 
-4-6 weeks (August - September 2025)  
- v0.2.0  
- "Complete Account Management"
+4-6 weeks (August - September 2025)
+v0.2.0
+"Complete Account Management"
 
 #### Core Objectives
 
@@ -105,9 +105,9 @@ attribute :interest_rate, :decimal
 
 ### Phase 2: Asset & Expense Tracking
 
-6-8 weeks (October - November 2025)  
- v0.3.0  
- "Comprehensive Financial Picture"
+6-8 weeks (October - November 2025)
+v0.3.0
+"Comprehensive Financial Picture"
 
 #### Core Objectives
 
@@ -169,9 +169,9 @@ Ashfolio.FinancialManagement.NetWorthSnapshot
 
 ### Phase 3: Planning & Forecasting
 
-8-10 weeks (December 2025 - February 2026)  
- v0.4.0  
- "Financial Planning & Retirement Readiness"
+8-10 weeks (December 2025 - February 2026)
+v0.4.0
+"Financial Planning & Retirement Readiness"
 
 #### Core Objectives
 
@@ -238,9 +238,9 @@ Implement comprehensive financial planning tools for retirement readiness and lo
 
 ### Phase 4: Advanced Analytics & Tax Planning
 
-10-12 weeks (March - May 2026)  
- v0.5.0  
- "Professional-Grade Financial Analysis"
+10-12 weeks (March - May 2026)
+v0.5.0
+"Professional-Grade Financial Analysis"
 
 #### Core Objectives
 

@@ -1,9 +1,9 @@
 # FIRE/Sabbatical Modeling Feature Specification
 
-v0.4.0  
- Draft  
- 2025-08-20  
- High Value Feature
+v0.4.0
+Draft
+2025-08-20
+High Value Feature
 
 ## Executive Summary
 

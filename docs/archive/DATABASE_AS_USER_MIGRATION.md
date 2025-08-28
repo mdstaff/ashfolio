@@ -136,7 +136,7 @@ defmodule Ashfolio.Portfolio.Calculator do
   # Before:
   # def calculate_portfolio_value()
   # After:
-  def calculate_portfolio_value() do
+  def calculate_portfolio_value do
     case get_all_holdings() do
       # No user filtering needed
     end
@@ -162,14 +162,14 @@ defmodule Ashfolio.Context do
   # Before:
   # def get_user_dashboard_data()
   # After:
-  def get_dashboard_data() do
+  def get_dashboard_data do
     # No user_id needed - all data in DB belongs to "the user"
   end
 
   # Before:
   # def get_net_worth()
   # After:
-  def get_net_worth() do
+  def get_net_worth do
     # Calculate across all accounts in this database
   end
 end

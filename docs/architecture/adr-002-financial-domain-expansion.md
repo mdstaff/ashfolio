@@ -1,9 +1,9 @@
 # ADR-002: Financial Domain Expansion Architecture
 
-Accepted  
- 2025-01-10  
- Development Team  
- Project Architect, Technical Writing Agent
+Accepted
+2025-01-10
+Development Team
+Project Architect, Technical Writing Agent
 
 ## Context
 
@@ -229,5 +229,5 @@ This ADR has been reviewed and approved by:
 - Technical Writing Agent: Approved - Documentation strategy aligns with expansion scope
 - Development Team: Approved - Implementation phases provide clear development path
 
-Accepted  
- Immediate (Phase 1: Cash Management Foundation)
+Accepted
+Immediate (Phase 1: Cash Management Foundation)

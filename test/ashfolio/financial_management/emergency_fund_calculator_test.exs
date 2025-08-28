@@ -1,7 +1,8 @@
 defmodule Ashfolio.FinancialManagement.EmergencyFundCalculatorTest do
   use Ashfolio.DataCase
 
-  alias Ashfolio.FinancialManagement.{EmergencyFundCalculator, Expense}
+  alias Ashfolio.FinancialManagement.EmergencyFundCalculator
+  alias Ashfolio.FinancialManagement.Expense
 
   @moduletag :unit
 

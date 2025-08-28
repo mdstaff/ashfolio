@@ -132,21 +132,21 @@ def calculate_portfolio_value(user_id) when is_binary(user_id) do
 def calculate_portfolio_value(_user_id \\ nil) do
 
 # After:
-def calculate_portfolio_value() do
+def calculate_portfolio_value do
 
 # Context Module
 # Before:
 def get_user_dashboard_data(user_id) do
 
 # After:
-def get_dashboard_data() do
+def get_dashboard_data do
 
 # Account Module
 # Before:
 def accounts_for_user(user_id) do
 
 # After:
-def list_all_accounts() do
+def list_all_accounts do
 ```
 
 ## Test Pattern Changes Needed

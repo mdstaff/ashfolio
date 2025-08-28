@@ -1,9 +1,10 @@
 defmodule AshfolioWeb.AccountLive.Show do
+  @moduledoc false
   use AshfolioWeb, :live_view
 
   alias Ashfolio.Context
-  alias AshfolioWeb.Live.FormatHelpers
   alias AshfolioWeb.AccountLive.BalanceUpdateComponent
+  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -545,10 +546,7 @@ defmodule AshfolioWeb.AccountLive.Show do
 
   # Balance update modal handlers
   @impl true
-  def handle_info(
-        {BalanceUpdateComponent, {:balance_updated, updated_account, new_balance, notes}},
-        socket
-      ) do
+  def handle_info({BalanceUpdateComponent, {:balance_updated, updated_account, new_balance, notes}}, socket) do
     # Reload account data to get updated balance and balance history
     socket = assign_account_data(socket, updated_account.id)
 
@@ -612,8 +610,8 @@ defmodule AshfolioWeb.AccountLive.Show do
   defp format_error_message(reason), do: "Failed to load account data: #{inspect(reason)}"
 
   defp calculate_transaction_stats(transactions) do
-    transactions
-    |> Enum.reduce(
+    Enum.reduce(
+      transactions,
       %{
         buy_count: 0,
         buy_total: Decimal.new(0),
@@ -648,8 +646,7 @@ defmodule AshfolioWeb.AccountLive.Show do
             %{
               acc
               | dividend_count: acc.dividend_count + 1,
-                dividend_total:
-                  Decimal.add(acc.dividend_total, transaction.total_amount || Decimal.new(0))
+                dividend_total: Decimal.add(acc.dividend_total, transaction.total_amount || Decimal.new(0))
             }
 
           :fee ->

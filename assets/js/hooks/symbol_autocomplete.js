@@ -1,6 +1,6 @@
 /**
  * SymbolAutocomplete JavaScript Hook
- * 
+ *
  * Provides client-side enhancements for the SymbolAutocomplete LiveView component:
  * - Keyboard navigation (arrow keys, enter, escape)
  * - Click-outside-to-close behavior
@@ -31,16 +31,16 @@ const SymbolAutocomplete = {
     this.dropdown = this.el.querySelector('[role="listbox"]')
     this.results = this.el.querySelector('[id$="-results"]')
     this.announcements = this.el.querySelector('[aria-live="polite"]')
-    
+   
     // State tracking
     this.selectedIndex = -1
     this.isOpen = false
     this.touchStartY = 0
-    
+   
     // Configuration
     this.debounceTimeout = 300
     this.animationDuration = 150
-    
+   
     // Add CSS classes for smooth transitions
     if (this.dropdown) {
       this.dropdown.style.transition = `opacity ${this.animationDuration}ms ease-in-out, transform ${this.animationDuration}ms ease-in-out`
@@ -52,11 +52,11 @@ const SymbolAutocomplete = {
 
     // Keyboard navigation
     this.input.addEventListener('keydown', (e) => this.handleKeydown(e))
-    
+   
     // Focus management
     this.input.addEventListener('focus', () => this.handleFocus())
     this.input.addEventListener('blur', (e) => this.handleBlur(e))
-    
+   
     // Input changes for real-time feedback
     this.input.addEventListener('input', () => this.handleInput())
   },
@@ -67,7 +67,7 @@ const SymbolAutocomplete = {
         this.closeDropdown()
       }
     }
-    
+   
     document.addEventListener('click', this.clickOutsideHandler)
     document.addEventListener('touchstart', this.clickOutsideHandler)
   },
@@ -83,14 +83,14 @@ const SymbolAutocomplete = {
     this.dropdown.addEventListener('touchmove', (e) => {
       const touchY = e.touches[0].clientY
       const deltaY = touchY - this.touchStartY
-      
+     
       // Allow scrolling within dropdown
       const scrollTop = this.dropdown.scrollTop
       const scrollHeight = this.dropdown.scrollHeight
       const clientHeight = this.dropdown.clientHeight
-      
+     
       // Prevent page scroll when at dropdown boundaries
-      if ((deltaY > 0 && scrollTop === 0) || 
+      if ((deltaY > 0 && scrollTop === 0) ||
           (deltaY < 0 && scrollTop >= scrollHeight - clientHeight)) {
         e.preventDefault()
       }
@@ -107,23 +107,23 @@ const SymbolAutocomplete = {
         e.preventDefault()
         this.navigateDown()
         break
-        
+       
       case 'ArrowUp':
         e.preventDefault()
         this.navigateUp()
         break
-        
+       
       case 'Enter':
         e.preventDefault()
         this.selectCurrent()
         break
-        
+       
       case 'Escape':
         e.preventDefault()
         this.closeDropdown()
         this.input.blur()
         break
-        
+       
       case 'Tab':
         // Allow tab to close dropdown and move focus
         if (this.isOpen) {
@@ -152,7 +152,7 @@ const SymbolAutocomplete = {
   handleInput() {
     // Visual feedback for loading state
     this.showLoadingState()
-    
+   
     // Update dropdown visibility based on input length
     if (this.input.value.length < 2) {
       this.closeDropdown()
@@ -181,7 +181,7 @@ const SymbolAutocomplete = {
     if (this.selectedIndex >= 0) {
       const options = this.getDropdownOptions()
       const selectedOption = options[this.selectedIndex]
-      
+     
       if (selectedOption) {
         // Trigger click event on the selected option
         selectedOption.click()
@@ -197,13 +197,13 @@ const SymbolAutocomplete = {
 
     this.isOpen = true
     this.dropdown.style.display = 'block'
-    
+   
     // Smooth entrance animation
     requestAnimationFrame(() => {
       this.dropdown.style.opacity = '1'
       this.dropdown.style.transform = 'translateY(0)'
     })
-    
+   
     this.updateDropdownPosition()
     this.updateAccessibilityState()
   },
@@ -213,27 +213,27 @@ const SymbolAutocomplete = {
 
     this.isOpen = false
     this.selectedIndex = -1
-    
+   
     // Smooth exit animation
     this.dropdown.style.opacity = '0'
     this.dropdown.style.transform = 'translateY(-8px)'
-    
+   
     setTimeout(() => {
       if (!this.isOpen) {
         this.dropdown.style.display = 'none'
       }
     }, this.animationDuration)
-    
+   
     this.updateAccessibilityState()
   },
 
   updateSelection() {
     const options = this.getDropdownOptions()
-    
+   
     options.forEach((option, index) => {
       const isSelected = index === this.selectedIndex
       option.setAttribute('aria-selected', isSelected.toString())
-      
+     
       if (isSelected) {
         option.classList.add('bg-blue-50')
         // Announce selection to screen readers
@@ -250,7 +250,7 @@ const SymbolAutocomplete = {
 
     const options = this.getDropdownOptions()
     const selectedOption = options[this.selectedIndex]
-    
+   
     if (selectedOption) {
       selectedOption.scrollIntoView({
         block: 'nearest',
@@ -265,11 +265,11 @@ const SymbolAutocomplete = {
     const inputRect = this.input.getBoundingClientRect()
     const dropdownRect = this.dropdown.getBoundingClientRect()
     const viewportHeight = window.innerHeight
-    
+   
     // Check if dropdown fits below input
     const spaceBelow = viewportHeight - inputRect.bottom
     const spaceAbove = inputRect.top
-    
+   
     if (spaceBelow < dropdownRect.height && spaceAbove > spaceBelow) {
       // Show above input
       this.dropdown.style.bottom = '100%'
@@ -283,11 +283,11 @@ const SymbolAutocomplete = {
       this.dropdown.style.marginTop = '4px'
       this.dropdown.style.marginBottom = '0'
     }
-    
+   
     // Ensure dropdown doesn't exceed viewport width on mobile
     const inputWidth = inputRect.width
     this.dropdown.style.minWidth = `${inputWidth}px`
-    
+   
     // Adjust for mobile screens
     if (window.innerWidth < 640) {
       this.dropdown.style.maxWidth = '100vw'
@@ -300,7 +300,7 @@ const SymbolAutocomplete = {
     if (!this.input) return
 
     this.input.setAttribute('aria-expanded', this.isOpen.toString())
-    
+   
     if (this.isOpen && this.hasResults()) {
       const resultCount = this.getDropdownOptions().length
       this.input.setAttribute('aria-describedby', `${this.el.id}-results`)

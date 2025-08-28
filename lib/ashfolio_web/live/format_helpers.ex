@@ -154,25 +154,25 @@ defmodule AshfolioWeb.Live.FormatHelpers do
   - Boolean indicating if value is positive
 
   ## Examples
-      iex> is_positive?(Decimal.new("15.25"))
+      iex> positive?(Decimal.new("15.25"))
       true
 
-      iex> is_positive?(Decimal.new("-5.5"))
+      iex> positive?(Decimal.new("-5.5"))
       false
   """
-  def is_positive?(value)
+  def positive?(value)
 
-  def is_positive?(nil), do: false
+  def positive?(nil), do: false
 
-  def is_positive?(value) when is_struct(value, Decimal) do
+  def positive?(value) when is_struct(value, Decimal) do
     Decimal.positive?(value)
   end
 
-  def is_positive?(value) when is_number(value) do
+  def positive?(value) when is_number(value) do
     value > 0
   end
 
-  def is_positive?(_value), do: false
+  def positive?(_value), do: false
 
   @doc """
   Gets CSS classes for positive/negative value styling.
@@ -202,8 +202,7 @@ defmodule AshfolioWeb.Live.FormatHelpers do
 
   def value_color_class(nil, _positive_class, _negative_class, neutral_class), do: neutral_class
 
-  def value_color_class(value, positive_class, negative_class, neutral_class)
-      when is_struct(value, Decimal) do
+  def value_color_class(value, positive_class, negative_class, neutral_class) when is_struct(value, Decimal) do
     cond do
       Decimal.positive?(value) -> positive_class
       Decimal.negative?(value) -> negative_class
@@ -211,8 +210,7 @@ defmodule AshfolioWeb.Live.FormatHelpers do
     end
   end
 
-  def value_color_class(value, positive_class, negative_class, neutral_class)
-      when is_number(value) do
+  def value_color_class(value, positive_class, negative_class, neutral_class) when is_number(value) do
     cond do
       value > 0 -> positive_class
       value < 0 -> negative_class
@@ -220,8 +218,7 @@ defmodule AshfolioWeb.Live.FormatHelpers do
     end
   end
 
-  def value_color_class(_value, _positive_class, _negative_class, neutral_class),
-    do: neutral_class
+  def value_color_class(_value, _positive_class, _negative_class, neutral_class), do: neutral_class
 
   # Private helper functions
 

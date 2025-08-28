@@ -1,10 +1,10 @@
 defmodule Ashfolio.CacheTest do
   use ExUnit.Case, async: false
 
+  alias Ashfolio.Cache
+
   @moduletag :unit
   @moduletag :fast
-
-  alias Ashfolio.Cache
 
   setup do
     # Ensure cache is initialized for tests

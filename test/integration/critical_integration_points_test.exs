@@ -9,14 +9,17 @@ defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
   """
   use AshfolioWeb.ConnCase, async: false
 
-  @moduletag :integration
-  @moduletag :slow
   import Mox
 
-  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
   alias Ashfolio.MarketData.PriceManager
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Calculator
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
   alias Ashfolio.SQLiteHelpers
 
+  @moduletag :integration
+  @moduletag :slow
   setup :verify_on_exit!
 
   setup do
@@ -123,7 +126,7 @@ defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
     } do
       # Get initial portfolio state
       initial_portfolio =
-        case Ashfolio.Portfolio.Calculator.calculate_total_return() do
+        case Calculator.calculate_total_return() do
           {:ok, portfolio} -> portfolio
           {:error, _} -> %{total_value: Decimal.new("0"), cost_basis: Decimal.new("0")}
         end
@@ -141,7 +144,7 @@ defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
         })
 
       # Check portfolio after transaction
-      case Ashfolio.Portfolio.Calculator.calculate_total_return() do
+      case Calculator.calculate_total_return() do
         {:ok, updated_portfolio} ->
           # Portfolio value should have increased
           assert Decimal.gt?(updated_portfolio.cost_basis, initial_portfolio.cost_basis)
@@ -183,7 +186,7 @@ defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
         })
 
       # Verify net position
-      case Ashfolio.Portfolio.Calculator.calculate_position_returns() do
+      case Calculator.calculate_position_returns() do
         {:ok, positions} ->
           test_position = Enum.find(positions, fn pos -> pos.symbol == "TEST" end)
 
@@ -304,7 +307,7 @@ defmodule AshfolioWeb.Integration.CriticalIntegrationPointsTest do
     test "portfolio calculations handle empty data gracefully" do
       # Database-as-user architecture: Test empty state directly
       # Portfolio calculations should handle empty state gracefully
-      case Ashfolio.Portfolio.Calculator.calculate_total_return() do
+      case Calculator.calculate_total_return() do
         {:ok, portfolio} ->
           # Should return valid portfolio data (may include global test data)
           assert is_struct(portfolio.total_value, Decimal)

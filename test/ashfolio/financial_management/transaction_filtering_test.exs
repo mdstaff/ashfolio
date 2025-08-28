@@ -1,11 +1,14 @@
 defmodule Ashfolio.FinancialManagement.TransactionFilteringTest do
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.FinancialManagement.TransactionFiltering
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
+
   @moduletag :financial_management
   @moduletag :filtering
-
-  alias Ashfolio.FinancialManagement.{TransactionFiltering, TransactionCategory}
-  alias Ashfolio.Portfolio.{Transaction, Account, Symbol}
 
   describe "single category filtering" do
     setup do

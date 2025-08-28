@@ -1,9 +1,12 @@
 defmodule AshfolioWeb.ExpenseLive.Index do
+  @moduledoc false
   use AshfolioWeb, :live_view
 
-  alias Ashfolio.FinancialManagement.{Expense, TransactionCategory}
-  alias AshfolioWeb.Live.{FormatHelpers, ErrorHelpers}
+  alias Ashfolio.FinancialManagement.Expense
+  alias Ashfolio.FinancialManagement.TransactionCategory
   alias AshfolioWeb.ExpenseLive.FormComponent
+  alias AshfolioWeb.Live.ErrorHelpers
+  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -579,9 +582,11 @@ defmodule AshfolioWeb.ExpenseLive.Index do
   end
 
   defp apply_search_filter(expenses, search_query) when is_binary(search_query) do
-    search_term = String.trim(search_query) |> String.downcase()
+    search_term = search_query |> String.trim() |> String.downcase()
 
-    if search_term != "" do
+    if search_term == "" do
+      expenses
+    else
       Enum.filter(expenses, fn expense ->
         description_match =
           (expense.description || "")
@@ -595,8 +600,6 @@ defmodule AshfolioWeb.ExpenseLive.Index do
 
         description_match || merchant_match
       end)
-    else
-      expenses
     end
   end
 
@@ -687,8 +690,8 @@ defmodule AshfolioWeb.ExpenseLive.Index do
   end
 
   defp apply_sorting(expenses, sort_by, sort_dir) do
-    expenses
-    |> Enum.sort_by(
+    Enum.sort_by(
+      expenses,
       fn expense ->
         case sort_by do
           :date ->
@@ -716,8 +719,7 @@ defmodule AshfolioWeb.ExpenseLive.Index do
   end
 
   defp calculate_total_expenses(expenses) do
-    expenses
-    |> Enum.reduce(Decimal.new(0), fn expense, acc ->
+    Enum.reduce(expenses, Decimal.new(0), fn expense, acc ->
       Decimal.add(acc, expense.amount)
     end)
   end
@@ -742,9 +744,7 @@ defmodule AshfolioWeb.ExpenseLive.Index do
          socket
          |> assign(:show_form, false)
          |> load_expenses()
-         |> ErrorHelpers.put_success_flash(
-           "Expense \"#{expense.description}\" created successfully"
-         )
+         |> ErrorHelpers.put_success_flash("Expense \"#{expense.description}\" created successfully")
          |> push_patch(to: ~p"/expenses")}
 
       :edit ->
@@ -752,9 +752,7 @@ defmodule AshfolioWeb.ExpenseLive.Index do
          socket
          |> assign(:show_form, false)
          |> load_expenses()
-         |> ErrorHelpers.put_success_flash(
-           "Expense \"#{expense.description}\" updated successfully"
-         )
+         |> ErrorHelpers.put_success_flash("Expense \"#{expense.description}\" updated successfully")
          |> push_patch(to: ~p"/expenses")}
     end
   end

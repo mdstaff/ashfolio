@@ -1,11 +1,11 @@
 defmodule AshfolioWeb.Live.ErrorHelpersTest do
   use ExUnit.Case, async: true
 
+  alias AshfolioWeb.Live.ErrorHelpers
+
   @moduletag :liveview
   @moduletag :unit
   @moduletag :fast
-
-  alias AshfolioWeb.Live.ErrorHelpers
 
   # Note: ErrorHelpers functions require a LiveView socket which is difficult to test in isolation.
   # These functions are tested through integration tests in the actual LiveView modules.
@@ -27,11 +27,11 @@ defmodule AshfolioWeb.Live.ErrorHelpersTest do
       functions = ErrorHelpers.__info__(:functions)
 
       # Check that component functions are defined
-      assert Enum.member?(functions, {:field_errors, 1})
-      assert Enum.member?(functions, {:error_list, 1})
-      assert Enum.member?(functions, {:success_banner, 1})
-      assert Enum.member?(functions, {:warning_banner, 1})
-      assert Enum.member?(functions, {:info_banner, 1})
+      assert {:field_errors, 1} in functions
+      assert {:error_list, 1} in functions
+      assert {:success_banner, 1} in functions
+      assert {:warning_banner, 1} in functions
+      assert {:info_banner, 1} in functions
     end
   end
 

@@ -1,6 +1,8 @@
 defmodule AshfolioWeb.ExpenseLive.FormComponent do
+  @moduledoc false
   use AshfolioWeb, :live_component
 
+  alias Ash.Error.Invalid
   alias Ashfolio.FinancialManagement.Expense
   alias Ashfolio.FinancialManagement.TransactionCategory
   alias Ashfolio.Portfolio.Account
@@ -191,7 +193,7 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
           %{
             "description" => "",
             "amount" => "",
-            "date" => Date.utc_today() |> Date.to_iso8601(),
+            "date" => Date.to_iso8601(Date.utc_today()),
             "merchant" => "",
             "notes" => "",
             "category_id" => "",
@@ -213,7 +215,7 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
           %{
             "description" => "",
             "amount" => "",
-            "date" => Date.utc_today() |> Date.to_iso8601(),
+            "date" => Date.to_iso8601(Date.utc_today()),
             "merchant" => "",
             "notes" => "",
             "category_id" => "",
@@ -315,7 +317,7 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
         notify_parent({:saved, expense})
         {:noreply, assign(socket, :saving, false)}
 
-      {:error, %Ash.Error.Invalid{} = error} ->
+      {:error, %Invalid{} = error} ->
         errors = extract_ash_errors(error)
 
         {:noreply,
@@ -339,7 +341,7 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
         notify_parent({:saved, expense})
         {:noreply, assign(socket, :saving, false)}
 
-      {:error, %Ash.Error.Invalid{} = error} ->
+      {:error, %Invalid{} = error} ->
         errors = extract_ash_errors(error)
 
         {:noreply,
@@ -389,10 +391,10 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
               ["Amount must be a valid number" | errors]
 
             amount ->
-              if Decimal.compare(amount, Decimal.new("0")) != :gt do
-                ["Amount must be greater than 0" | errors]
-              else
+              if Decimal.compare(amount, Decimal.new("0")) == :gt do
                 errors
+              else
+                ["Amount must be greater than 0" | errors]
               end
           end
       end
@@ -453,7 +455,7 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
   defp empty_to_nil(""), do: nil
   defp empty_to_nil(value), do: value
 
-  defp extract_ash_errors(%Ash.Error.Invalid{errors: errors}) do
+  defp extract_ash_errors(%Invalid{errors: errors}) do
     Enum.map(errors, fn
       %{message: message} -> message
       error -> inspect(error)

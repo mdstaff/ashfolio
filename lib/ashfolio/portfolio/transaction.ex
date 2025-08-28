@@ -21,9 +21,7 @@ defmodule Ashfolio.Portfolio.Transaction do
     uuid_primary_key(:id)
 
     attribute :type, :atom do
-      constraints(
-        one_of: [:buy, :sell, :dividend, :fee, :interest, :liability, :deposit, :withdrawal]
-      )
+      constraints(one_of: [:buy, :sell, :dividend, :fee, :interest, :liability, :deposit, :withdrawal])
 
       allow_nil?(false)
       description("Transaction type")
@@ -102,7 +100,7 @@ defmodule Ashfolio.Portfolio.Transaction do
     validate(fn changeset, _context ->
       date = Ash.Changeset.get_attribute(changeset, :date)
 
-      if date && Date.compare(date, Date.utc_today()) == :gt do
+      if date && Date.after?(date, Date.utc_today()) do
         {:error, field: :date, message: "Transaction date cannot be in the future"}
       else
         :ok
@@ -199,7 +197,7 @@ defmodule Ashfolio.Portfolio.Transaction do
       description("Get recent transactions (last 30 days)")
 
       prepare(fn query, _context ->
-        thirty_days_ago = Date.utc_today() |> Date.add(-30)
+        thirty_days_ago = Date.add(Date.utc_today(), -30)
         Ash.Query.filter(query, expr(date >= ^thirty_days_ago))
       end)
     end

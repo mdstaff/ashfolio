@@ -3,7 +3,8 @@ defmodule AshfolioWeb.DashboardLiveEmergencyFundTest do
 
   import Phoenix.LiveViewTest
 
-  alias Ashfolio.FinancialManagement.{FinancialGoal, Expense}
+  alias Ashfolio.FinancialManagement.Expense
+  alias Ashfolio.FinancialManagement.FinancialGoal
 
   @moduletag :liveview
 
@@ -83,7 +84,7 @@ defmodule AshfolioWeb.DashboardLiveEmergencyFundTest do
       assert html =~ "1"
       # Target amount should be greater than 0
       assert html =~ "$#{Decimal.to_string(goal.target_amount)}" ||
-               html =~ "$#{Decimal.round(goal.target_amount, 2) |> Decimal.to_string()}"
+               html =~ "$#{goal.target_amount |> Decimal.round(2) |> Decimal.to_string()}"
     end
 
     test "dashboard loads without errors when emergency fund functions are called", %{conn: conn} do

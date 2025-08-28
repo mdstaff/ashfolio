@@ -1,9 +1,12 @@
 defmodule AshfolioWeb.FinancialGoalLive.Index do
+  @moduledoc false
   use AshfolioWeb, :live_view
 
-  alias Ashfolio.FinancialManagement.{FinancialGoal, EmergencyFundStatus}
-  alias AshfolioWeb.Live.{FormatHelpers, ErrorHelpers}
+  alias Ashfolio.FinancialManagement.EmergencyFundStatus
+  alias Ashfolio.FinancialManagement.FinancialGoal
   alias AshfolioWeb.FinancialGoalLive.FormComponent
+  alias AshfolioWeb.Live.ErrorHelpers
+  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -709,8 +712,8 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
   end
 
   defp apply_sorting(goals, sort_by, sort_dir) do
-    goals
-    |> Enum.sort_by(
+    Enum.sort_by(
+      goals,
       fn goal ->
         case sort_by do
           :name -> goal.name || ""
@@ -728,14 +731,12 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
 
   defp calculate_goal_statistics(goals) do
     total_target =
-      goals
-      |> Enum.reduce(Decimal.new(0), fn goal, acc ->
+      Enum.reduce(goals, Decimal.new(0), fn goal, acc ->
         Decimal.add(acc, goal.target_amount)
       end)
 
     total_current =
-      goals
-      |> Enum.reduce(Decimal.new(0), fn goal, acc ->
+      Enum.reduce(goals, Decimal.new(0), fn goal, acc ->
         Decimal.add(acc, goal.current_amount)
       end)
 

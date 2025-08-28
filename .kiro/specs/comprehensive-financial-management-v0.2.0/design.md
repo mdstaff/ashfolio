@@ -188,7 +188,7 @@ Balance History Tracking:
 
 ```elixir
 defmodule Ashfolio.FinancialManagement.NetWorthCalculator do
-  def calculate_net_worth() do
+  def calculate_net_worth do
     with {:ok, investment_value} <- Portfolio.Calculator.calculate_portfolio_value(),
          {:ok, cash_balances} <- calculate_total_cash_balances() do
 
@@ -586,7 +586,7 @@ System Category Seeding:
 
 ```elixir
 defmodule Ashfolio.FinancialManagement.CategorySeeder do
-  def seed_system_categories() do
+  def seed_system_categories do
     categories = [
       %{name: "Growth", color: "#10B981", is_system: true},
       %{name: "Income", color: "#3B82F6", is_system: true},

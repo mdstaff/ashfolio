@@ -1,16 +1,19 @@
 defmodule AshfolioWeb.TransactionLive.Index do
+  @moduledoc false
   use AshfolioWeb, :live_view
-
-  alias Ashfolio.Portfolio.Transaction
-  alias Ashfolio.FinancialManagement.{TransactionCategory, TransactionFiltering}
-  alias Ashfolio.PubSub
-  alias AshfolioWeb.TransactionLive.FormComponent
-  alias AshfolioWeb.Live.{ErrorHelpers, FormatHelpers}
 
   import AshfolioWeb.Components.CategoryTag
   import AshfolioWeb.Components.TransactionFilter
-  import AshfolioWeb.Components.TransactionStats
   import AshfolioWeb.Components.TransactionGroup
+  import AshfolioWeb.Components.TransactionStats
+
+  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.FinancialManagement.TransactionFiltering
+  alias Ashfolio.Portfolio.Transaction
+  alias Ashfolio.PubSub
+  alias AshfolioWeb.Live.ErrorHelpers
+  alias AshfolioWeb.Live.FormatHelpers
+  alias AshfolioWeb.TransactionLive.FormComponent
 
   @impl true
   def mount(params, _session, socket) do
@@ -312,10 +315,10 @@ defmodule AshfolioWeb.TransactionLive.Index do
     end
   end
 
-  defp list_transactions() do
+  defp list_transactions do
     case Transaction.list() do
       {:ok, transactions} ->
-        transactions |> Ash.load!([:account, :symbol, :category])
+        Ash.load!(transactions, [:account, :symbol, :category])
 
       {:error, _error} ->
         []
@@ -353,7 +356,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
       amount_range: parse_amount_range_filter(params["amount_min"], params["amount_max"])
     }
     |> Enum.reject(fn {_key, value} -> is_nil(value) end)
-    |> Enum.into(%{})
+    |> Map.new()
   end
 
   defp parse_category_filter(nil), do: :all
@@ -373,17 +376,14 @@ defmodule AshfolioWeb.TransactionLive.Index do
   defp parse_transaction_type_filter("all"), do: nil
 
   defp parse_transaction_type_filter(type) when is_binary(type) do
-    try do
-      String.to_existing_atom(type)
-    rescue
-      ArgumentError -> nil
-    end
+    String.to_existing_atom(type)
+  rescue
+    ArgumentError -> nil
   end
 
   defp parse_date_range_filter(nil, nil), do: nil
 
-  defp parse_date_range_filter(date_from, date_to)
-       when is_binary(date_from) and is_binary(date_to) do
+  defp parse_date_range_filter(date_from, date_to) when is_binary(date_from) and is_binary(date_to) do
     with {:ok, from_date} <- Date.from_iso8601(date_from),
          {:ok, to_date} <- Date.from_iso8601(date_to) do
       {from_date, to_date}
@@ -396,8 +396,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
 
   defp parse_amount_range_filter(nil, nil), do: nil
 
-  defp parse_amount_range_filter(min_str, max_str)
-       when is_binary(min_str) and is_binary(max_str) do
+  defp parse_amount_range_filter(min_str, max_str) when is_binary(min_str) and is_binary(max_str) do
     with {min_amount, ""} <- Float.parse(min_str),
          {max_amount, ""} <- Float.parse(max_str) do
       {Decimal.new(min_amount), Decimal.new(max_amount)}
@@ -476,12 +475,11 @@ defmodule AshfolioWeb.TransactionLive.Index do
       amount_range: parse_amount_range_filter(params["amount_min"], params["amount_max"])
     }
     |> Enum.reject(fn {_key, value} -> is_nil(value) end)
-    |> Enum.into(%{})
+    |> Map.new()
   end
 
   defp build_filter_params(filters) do
-    filters
-    |> Enum.reduce(%{}, fn
+    Enum.reduce(filters, %{}, fn
       {:category, :all}, acc ->
         acc
 

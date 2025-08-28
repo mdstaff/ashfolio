@@ -1,22 +1,26 @@
 defmodule AshfolioWeb.ExpenseLive.IndexTest do
   use AshfolioWeb.ConnCase, async: false
+
   import Phoenix.LiveViewTest
+
+  alias Ashfolio.FinancialManagement.Expense
+  alias Ashfolio.Portfolio.Account
 
   describe "expense index" do
     setup do
       # Reset account balances for clean test state
       require Ash.Query
 
-      Ashfolio.Portfolio.Account
+      Account
       |> Ash.Query.for_read(:read)
       |> Ash.read!()
       |> Enum.each(fn account ->
-        Ashfolio.Portfolio.Account.update(account, %{balance: Decimal.new("0.00")})
+        Account.update(account, %{balance: Decimal.new("0.00")})
       end)
 
       # Create test expense data
       {:ok, checking_account} =
-        Ashfolio.Portfolio.Account.create(%{
+        Account.create(%{
           name: "Test Checking",
           account_type: :checking,
           balance: Decimal.new("5000.00")
@@ -29,7 +33,7 @@ defmodule AshfolioWeb.ExpenseLive.IndexTest do
         })
 
       {:ok, expense1} =
-        Ashfolio.FinancialManagement.Expense.create(%{
+        Expense.create(%{
           description: "Weekly groceries",
           amount: Decimal.new("125.50"),
           date: ~D[2024-08-15],
@@ -39,7 +43,7 @@ defmodule AshfolioWeb.ExpenseLive.IndexTest do
         })
 
       {:ok, expense2} =
-        Ashfolio.FinancialManagement.Expense.create(%{
+        Expense.create(%{
           description: "Gas station",
           amount: Decimal.new("45.20"),
           date: ~D[2024-08-10],
@@ -116,19 +120,17 @@ defmodule AshfolioWeb.ExpenseLive.IndexTest do
 
       # Debug: check if we're showing the empty state
       if html =~ "No expenses" do
-        flunk(
-          "Expected to show expenses but got empty state. HTML contains: #{String.slice(html, 0, 500)}..."
-        )
+        flunk("Expected to show expenses but got empty state. HTML contains: #{String.slice(html, 0, 500)}...")
       end
 
       # Look for expenses specifically in the table body to verify order
       # Find the table body section
-      table_start = :binary.match(html, "<tbody") |> elem(0)
+      table_start = html |> :binary.match("<tbody") |> elem(0)
       table_html = String.slice(html, table_start..-1//1)
 
       # The positions of "Weekly groceries" and "Gas station" in the table should show date order
-      groceries_pos = :binary.match(table_html, "Weekly groceries") |> elem(0)
-      gas_pos = :binary.match(table_html, "Gas station") |> elem(0)
+      groceries_pos = table_html |> :binary.match("Weekly groceries") |> elem(0)
+      gas_pos = table_html |> :binary.match("Gas station") |> elem(0)
       # Weekly groceries (Aug 15) should appear before Gas station (Aug 10) in desc order
       assert groceries_pos < gas_pos
 
@@ -137,11 +139,11 @@ defmodule AshfolioWeb.ExpenseLive.IndexTest do
 
       html = render(view)
       # Should now be sorted by amount asc (Gas station $45.20 before Weekly groceries $125.50)
-      table_start = :binary.match(html, "<tbody") |> elem(0)
+      table_start = html |> :binary.match("<tbody") |> elem(0)
       table_html = String.slice(html, table_start..-1//1)
 
-      groceries_pos = :binary.match(table_html, "Weekly groceries") |> elem(0)
-      gas_pos = :binary.match(table_html, "Gas station") |> elem(0)
+      groceries_pos = table_html |> :binary.match("Weekly groceries") |> elem(0)
+      gas_pos = table_html |> :binary.match("Gas station") |> elem(0)
       # Gas station ($45.20) should be before Weekly groceries ($125.50) in asc order
       assert gas_pos < groceries_pos
     end

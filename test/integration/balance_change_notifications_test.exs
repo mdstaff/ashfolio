@@ -137,7 +137,8 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
 
       actual_sorted = Enum.sort_by(actual_data, fn {balance, _} -> Decimal.to_float(balance) end)
 
-      Enum.zip(expected_sorted, actual_sorted)
+      expected_sorted
+      |> Enum.zip(actual_sorted)
       |> Enum.each(fn {{expected_balance, expected_notes}, {actual_balance, actual_notes}} ->
         assert Decimal.equal?(expected_balance, actual_balance)
         assert expected_notes == actual_notes
@@ -204,7 +205,7 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
         end
 
       # Verify we got notifications for all account types
-      received_types = Enum.map(messages, & &1.account_type) |> Enum.sort()
+      received_types = messages |> Enum.map(& &1.account_type) |> Enum.sort()
       expected_types = Enum.sort(account_types)
 
       assert received_types == expected_types
@@ -231,7 +232,7 @@ defmodule Ashfolio.Integration.BalanceChangeNotificationsTest do
         :timestamp
       ]
 
-      actual_keys = Map.keys(message) |> Enum.sort()
+      actual_keys = message |> Map.keys() |> Enum.sort()
       expected_keys = Enum.sort(required_keys)
 
       assert actual_keys == expected_keys

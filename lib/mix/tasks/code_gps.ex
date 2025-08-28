@@ -1,16 +1,16 @@
 defmodule Mix.Tasks.CodeGps do
+  @shortdoc "Generates AI code navigation manifest"
+
   @moduledoc """
   Generates an AI-optimized codebase manifest in YAML format.
 
   Usage:
     mix code_gps
-    
+
   Generates .code-gps.yaml with navigation hints, patterns, and integration opportunities.
   """
 
   use Mix.Task
-
-  @shortdoc "Generates AI code navigation manifest"
 
   def run(_args) do
     Mix.Task.run("compile")
@@ -68,7 +68,8 @@ defmodule Mix.Tasks.CodeGps do
   # === ANALYSIS FUNCTIONS ===
 
   defp analyze_live_views do
-    Path.wildcard("lib/**/*_live.ex")
+    "lib/**/*_live.ex"
+    |> Path.wildcard()
     |> Enum.map(&analyze_live_view_file/1)
     |> Enum.reject(&is_nil/1)
   end
@@ -95,7 +96,8 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp analyze_components do
-    Path.wildcard("lib/**/*components*.ex")
+    "lib/**/*components*.ex"
+    |> Path.wildcard()
     |> Enum.flat_map(&extract_components_from_file/1)
   end
 
@@ -103,7 +105,8 @@ defmodule Mix.Tasks.CodeGps do
     content = File.read!(file)
 
     # Find component functions (def component_name)
-    Regex.scan(~r/def (\w+)\(assigns\) do/, content)
+    ~r/def (\w+)\(assigns\) do/
+    |> Regex.scan(content)
     |> Enum.map(fn [_full, name] ->
       line_num = find_function_line(content, name)
       attrs = extract_component_attrs(content, name)
@@ -119,7 +122,8 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp analyze_tests do
-    Path.wildcard("test/**/*_test.exs")
+    "test/**/*_test.exs"
+    |> Path.wildcard()
     |> Enum.map(&analyze_test_file/1)
     |> Enum.reject(&is_nil/1)
   end
@@ -237,7 +241,7 @@ defmodule Mix.Tasks.CodeGps do
                 %{manual: true}
                 |> Ashfolio.Workers.NetWorthSnapshotWorker.new()
                 |> Oban.insert()
-                
+
                 {:noreply, put_flash(socket, :info, "Creating snapshot...")}
               end
               """
@@ -276,13 +280,15 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp extract_handle_events(content) do
-    Regex.scan(~r/def handle_event\("([^"]+)"/, content)
+    ~r/def handle_event\("([^"]+)"/
+    |> Regex.scan(content)
     |> Enum.map(&List.last/1)
     |> Enum.uniq()
   end
 
   defp extract_assigns(content) do
-    Regex.scan(~r/assign\([^,]+,\s*:([^,\)]+)/, content)
+    ~r/assign\([^,]+,\s*:([^,\)]+)/
+    |> Regex.scan(content)
     |> Enum.map(&List.last/1)
     |> Enum.uniq()
     # Limit to avoid noise
@@ -290,7 +296,8 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp extract_pubsub_subscriptions(content) do
-    Regex.scan(~r/PubSub\.subscribe\("([^"]+)"/, content)
+    ~r/PubSub\.subscribe\("([^"]+)"/
+    |> Regex.scan(content)
     |> Enum.map(&List.last/1)
     |> Enum.uniq()
   end
@@ -331,7 +338,8 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp count_component_usage(component_name) do
-    Path.wildcard("lib/**/*.ex")
+    "lib/**/*.ex"
+    |> Path.wildcard()
     |> Enum.map(&File.read!/1)
     |> Enum.map(&length(Regex.scan(~r/<\.#{component_name}/, &1)))
     |> Enum.sum()
@@ -342,7 +350,8 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp extract_describe_blocks(content) do
-    Regex.scan(~r/describe\s+"([^"]+)"/, content)
+    ~r/describe\s+"([^"]+)"/
+    |> Regex.scan(content)
     |> Enum.map(&List.last/1)
   end
 
@@ -354,13 +363,13 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp count_analyzed_files do
-    Path.wildcard("{lib,test}/**/*.{ex,exs}") |> length()
+    "{lib,test}/**/*.{ex,exs}" |> Path.wildcard() |> length()
   end
 
   # === PATTERN FINDERS ===
 
   defp find_error_pattern(files) do
-    content = files |> Enum.take(5) |> Enum.map(&File.read!/1) |> Enum.join()
+    content = files |> Enum.take(5) |> Enum.map_join("", &File.read!/1)
 
     cond do
       String.contains?(content, "ErrorHelpers.put_error_flash") ->
@@ -375,7 +384,7 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp find_currency_pattern(files) do
-    content = files |> Enum.take(5) |> Enum.map(&File.read!/1) |> Enum.join()
+    content = files |> Enum.take(5) |> Enum.map_join("", &File.read!/1)
 
     cond do
       String.contains?(content, "FormatHelpers.format_currency") ->
@@ -393,7 +402,7 @@ defmodule Mix.Tasks.CodeGps do
     test_files = Enum.filter(files, &String.contains?(&1, "test/"))
 
     if length(test_files) > 0 do
-      content = test_files |> Enum.take(3) |> Enum.map(&File.read!/1) |> Enum.join()
+      content = test_files |> Enum.take(3) |> Enum.map_join("", &File.read!/1)
 
       if String.contains?(content, "require Ash.Query") do
         "require Ash.Query; reset account balances in setup"
@@ -406,7 +415,7 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp find_component_pattern(files) do
-    content = files |> Enum.take(3) |> Enum.map(&File.read!/1) |> Enum.join()
+    content = files |> Enum.take(3) |> Enum.map_join("", &File.read!/1)
 
     if String.contains?(content, "~H\"\"\"") do
       "~H sigil with proper assigns"
@@ -416,7 +425,7 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp find_pubsub_pattern(files) do
-    content = files |> Enum.take(3) |> Enum.map(&File.read!/1) |> Enum.join()
+    content = files |> Enum.take(3) |> Enum.map_join("", &File.read!/1)
 
     if String.contains?(content, "Ashfolio.PubSub") do
       "Ashfolio.PubSub.subscribe/1"
@@ -475,7 +484,7 @@ defmodule Mix.Tasks.CodeGps do
         missing: #{format_list(lv.missing_subscriptions)}
       """
     end)
-    |> Enum.join("")
+    |> Enum.map_join("", & &1)
   end
 
   defp encode_components_with_attrs(components) do
@@ -498,7 +507,7 @@ defmodule Mix.Tasks.CodeGps do
 
       "#{comp.name}: #{comp.file}:#{comp.line} (#{comp.usage_count}x)#{attrs_str}"
     end)
-    |> Enum.join("\n")
+    |> Enum.map_join("\n", & &1)
   end
 
   defp encode_suggestions_structured(suggestions) do
@@ -544,12 +553,12 @@ defmodule Mix.Tasks.CodeGps do
       #{Enum.join(steps_summary, "\n")}
       """
     end)
-    |> Enum.join("\n")
+    |> Enum.map_join("\n", & &1)
   end
 
   defp format_list([]), do: "[]"
   defp format_list(list) when length(list) <= 3, do: inspect(list)
-  defp format_list(list), do: "[#{Enum.take(list, 3) |> Enum.join(", ")}...#{length(list)}]"
+  defp format_list(list), do: "[#{list |> Enum.take(3) |> Enum.join(", ")}...#{length(list)}]"
 
   # === NEW v2.0 ENCODERS ===
 
@@ -562,7 +571,7 @@ defmodule Mix.Tasks.CodeGps do
         status = if exists?, do: "✅", else: "❌"
         "#{path}: #{module} #{status}"
       end)
-      |> Enum.join("\n")
+      |> Enum.map_join("\n", & &1)
     end
   end
 
@@ -572,14 +581,10 @@ defmodule Mix.Tasks.CodeGps do
       usage_info = if info.usage_count > 0, do: " (#{info.usage_count})", else: ""
       "#{dep}: #{info.status}#{usage_info}"
     end)
-    |> Enum.join("\n")
+    |> Enum.map_join("\n", & &1)
   end
 
-  defp encode_freshness(%{
-         recent_files: recent,
-         uncommitted_count: uncommitted,
-         commits_ahead: ahead
-       }) do
+  defp encode_freshness(%{recent_files: recent, uncommitted_count: uncommitted, commits_ahead: ahead}) do
     recent_str =
       if length(recent) > 0 do
         "recent: #{inspect(Enum.take(recent, 5))}"
@@ -587,12 +592,11 @@ defmodule Mix.Tasks.CodeGps do
         "recent: []"
       end
 
-    """
+    String.trim("""
     #{recent_str}
     uncommitted: #{uncommitted} files
     commits_ahead: #{ahead}
-    """
-    |> String.trim()
+    """)
   end
 
   defp encode_test_gaps(%{missing_tests: missing, orphaned_tests: orphaned}) do
@@ -600,8 +604,7 @@ defmodule Mix.Tasks.CodeGps do
       if length(missing) > 0 do
         missing
         |> Enum.take(5)
-        |> Enum.map(&"#{&1} ❌")
-        |> Enum.join("\n")
+        |> Enum.map_join("\n", &"#{&1} ❌")
       else
         "all implementations have tests ✅"
       end
@@ -610,8 +613,7 @@ defmodule Mix.Tasks.CodeGps do
       if length(orphaned) > 0 do
         orphaned
         |> Enum.take(3)
-        |> Enum.map(&"#{&1} ⚠️")
-        |> Enum.join("\n")
+        |> Enum.map_join("\n", &"#{&1} ⚠️")
       else
         ""
       end
@@ -635,7 +637,8 @@ defmodule Mix.Tasks.CodeGps do
 
       # Extract live routes
       live_routes =
-        Regex.scan(~r/live\s+"([^"]+)",\s*(\w+)/, content)
+        ~r/live\s+"([^"]+)",\s*(\w+)/
+        |> Regex.scan(content)
         |> Enum.map(fn [_, path, module] ->
           {path, module, check_live_view_exists(module)}
         end)
@@ -653,7 +656,7 @@ defmodule Mix.Tasks.CodeGps do
     # Check if the LiveView file actually exists
     # Handle different naming patterns:
     # ExpenseLive.Index -> expense_live/index.ex
-    # DashboardLive -> dashboard_live.ex  
+    # DashboardLive -> dashboard_live.ex
     # AccountLive.Show -> account_live/show.ex
 
     base_name =
@@ -692,16 +695,16 @@ defmodule Mix.Tasks.CodeGps do
 
       # Extract dependencies
       deps =
-        Regex.scan(~r/\{:([^,]+),/, content)
+        ~r/\{:([^,]+),/
+        |> Regex.scan(content)
         |> Enum.map(&List.last/1)
         |> Enum.uniq()
 
       # Check usage for key dependencies
-      key_deps = ["contex", "wallaby", "mox", "decimal", "ash"]
+      key_deps = ["contex", "mox", "decimal", "ash"]
 
       usage_analysis =
-        key_deps
-        |> Enum.map(fn dep ->
+        Map.new(key_deps, fn dep ->
           usage_count = count_dependency_usage(dep)
           installed = dep in deps
 
@@ -715,7 +718,6 @@ defmodule Mix.Tasks.CodeGps do
 
           {dep, %{status: status, usage_count: usage_count, installed: installed}}
         end)
-        |> Map.new()
 
       %{
         total_deps: length(deps),
@@ -727,7 +729,8 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp count_dependency_usage(dep_name) do
-    Path.wildcard("lib/**/*.ex")
+    "lib/**/*.ex"
+    |> Path.wildcard()
     |> Enum.map(&File.read!/1)
     |> Enum.map(&length(Regex.scan(~r/#{dep_name}/i, &1)))
     |> Enum.sum()
@@ -777,8 +780,7 @@ defmodule Mix.Tasks.CodeGps do
     test_files = Path.wildcard("test/**/*_test.exs")
 
     missing_tests =
-      impl_files
-      |> Enum.filter(fn impl_file ->
+      Enum.filter(impl_files, fn impl_file ->
         test_pattern =
           impl_file
           |> String.replace("lib/", "test/")
@@ -789,8 +791,7 @@ defmodule Mix.Tasks.CodeGps do
 
     # Find test files without implementations
     orphaned_tests =
-      test_files
-      |> Enum.filter(fn test_file ->
+      Enum.filter(test_files, fn test_file ->
         impl_pattern =
           test_file
           |> String.replace("test/", "lib/")

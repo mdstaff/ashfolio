@@ -1,28 +1,33 @@
 defmodule AshfolioWeb.ExpenseLive.FormComponentTest do
   use AshfolioWeb.ConnCase, async: false
+
   import Phoenix.LiveViewTest
+
+  alias Ashfolio.FinancialManagement.Expense
+  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.Portfolio.Account
 
   describe "expense form component" do
     setup do
       # Reset account balances for clean test state
       require Ash.Query
 
-      Ashfolio.Portfolio.Account
+      Account
       |> Ash.Query.for_read(:read)
       |> Ash.read!()
       |> Enum.each(fn account ->
-        Ashfolio.Portfolio.Account.update(account, %{balance: Decimal.new("0.00")})
+        Account.update(account, %{balance: Decimal.new("0.00")})
       end)
 
       {:ok, checking_account} =
-        Ashfolio.Portfolio.Account.create(%{
+        Account.create(%{
           name: "Test Checking",
           account_type: :checking,
           balance: Decimal.new("5000.00")
         })
 
       {:ok, category} =
-        Ashfolio.FinancialManagement.TransactionCategory.create(%{
+        TransactionCategory.create(%{
           name: "Groceries",
           color: "#4CAF50"
         })
@@ -104,7 +109,7 @@ defmodule AshfolioWeb.ExpenseLive.FormComponentTest do
       assert_patch(view, ~p"/expenses")
 
       # Expense should be created in database
-      expenses = Ashfolio.FinancialManagement.Expense.list!()
+      expenses = Expense.list!()
       assert length(expenses) == 1
 
       expense = List.first(expenses)
@@ -130,7 +135,7 @@ defmodule AshfolioWeb.ExpenseLive.FormComponentTest do
     test "date field defaults to today", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/expenses/new")
 
-      today = Date.utc_today() |> Date.to_iso8601()
+      today = Date.to_iso8601(Date.utc_today())
       assert html =~ ~r/<input[^>]*name="date"[^>]*value="#{today}"[^>]*>/
     end
   end
@@ -140,28 +145,28 @@ defmodule AshfolioWeb.ExpenseLive.FormComponentTest do
       # Reset account balances
       require Ash.Query
 
-      Ashfolio.Portfolio.Account
+      Account
       |> Ash.Query.for_read(:read)
       |> Ash.read!()
       |> Enum.each(fn account ->
-        Ashfolio.Portfolio.Account.update(account, %{balance: Decimal.new("0.00")})
+        Account.update(account, %{balance: Decimal.new("0.00")})
       end)
 
       {:ok, checking_account} =
-        Ashfolio.Portfolio.Account.create(%{
+        Account.create(%{
           name: "Test Checking",
           account_type: :checking,
           balance: Decimal.new("5000.00")
         })
 
       {:ok, category} =
-        Ashfolio.FinancialManagement.TransactionCategory.create(%{
+        TransactionCategory.create(%{
           name: "Groceries",
           color: "#4CAF50"
         })
 
       {:ok, expense} =
-        Ashfolio.FinancialManagement.Expense.create(%{
+        Expense.create(%{
           description: "Original expense",
           amount: Decimal.new("100.00"),
           date: ~D[2024-08-10],
@@ -209,7 +214,7 @@ defmodule AshfolioWeb.ExpenseLive.FormComponentTest do
       assert_patch(view, ~p"/expenses")
 
       # Should update expense in database
-      {:ok, updated_expense} = Ashfolio.FinancialManagement.Expense.get_by_id(expense.id)
+      {:ok, updated_expense} = Expense.get_by_id(expense.id)
       assert updated_expense.description == "Updated expense"
       assert Decimal.equal?(updated_expense.amount, Decimal.new("150.75"))
       assert updated_expense.date == ~D[2024-08-12]

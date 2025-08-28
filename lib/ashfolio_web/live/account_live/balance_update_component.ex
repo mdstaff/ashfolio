@@ -1,8 +1,10 @@
 defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
+  @moduledoc false
   use AshfolioWeb, :live_component
 
   alias Ashfolio.Context
-  alias AshfolioWeb.Live.{FormatHelpers, ErrorHelpers}
+  alias AshfolioWeb.Live.ErrorHelpers
+  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def render(assigns) do
@@ -233,11 +235,7 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
   end
 
   @impl true
-  def handle_event(
-        "update_balance",
-        %{"new_balance" => new_balance_str, "notes" => notes},
-        socket
-      ) do
+  def handle_event("update_balance", %{"new_balance" => new_balance_str, "notes" => notes}, socket) do
     # Set updating state
     socket = assign(socket, :updating, true)
 
@@ -309,8 +307,7 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
             cond do
               # Validate non-negative for savings/checking accounts
               account.account_type in [:checking, :savings] && Decimal.negative?(new_balance) ->
-                {:error,
-                 "#{String.capitalize(to_string(account.account_type))} accounts cannot have negative balances"}
+                {:error, "#{String.capitalize(to_string(account.account_type))} accounts cannot have negative balances"}
 
               # Security: Validate maximum reasonable balance
               Decimal.gt?(new_balance, max_balance) ->

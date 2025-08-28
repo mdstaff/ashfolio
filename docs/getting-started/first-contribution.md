@@ -209,5 +209,5 @@ end
 
 ---
 
-Ready to start? Pick an issue and follow the 15-minute quick win process!  
+Ready to start? Pick an issue and follow the 15-minute quick win process!
 Need more context? Review the [Architecture Overview](../development/architecture.md) first.

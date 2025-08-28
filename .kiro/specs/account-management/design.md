@@ -795,7 +795,7 @@ end
 
 ```elixir
 # Efficient account loading with preloading
-def list_accounts_with_stats() do
+def list_accounts_with_stats do
   Account.accounts_for_user!()
   |> Ash.load([:transaction_count, :total_balance])
 end

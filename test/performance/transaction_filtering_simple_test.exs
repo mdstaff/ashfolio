@@ -10,13 +10,14 @@ defmodule Ashfolio.Performance.TransactionFilteringSimpleTest do
 
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Transaction
+  alias Ashfolio.SQLiteHelpers
+
   @moduletag :performance
   @moduletag :slow
   @moduletag :transaction_filtering
-
-  alias Ashfolio.Portfolio.{Transaction, Account}
-  alias Ashfolio.FinancialManagement.TransactionCategory
-  alias Ashfolio.SQLiteHelpers
 
   describe "Basic Transaction Filtering Performance" do
     setup do

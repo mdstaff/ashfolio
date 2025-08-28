@@ -60,7 +60,7 @@ test filter="":
         mix test --only smoke --no-color
     elif [ -f "{{filter}}" ]; then
         echo "🧪 Testing {{filter}}..."
-        mix test --no-color {{filter}} 
+        mix test --no-color {{filter}}
     else
         echo "🧪 Running tests matching '{{filter}}'..."
         mix test --only {{filter}} --no-color
@@ -257,19 +257,19 @@ server mode="":
             if pgrep -f "mix phx.server" > /dev/null; then
                 echo "✅ Phoenix server is running"
                 echo "📱 Available at: http://localhost:4000"
-                
+               
                 # Check health endpoint for detailed status
                 if health_response=$(curl -f -s http://localhost:4000/health 2>/dev/null); then
                     echo "🌐 Server is responding to requests"
                     echo "🏥 Health check endpoint: http://localhost:4000/health"
-                    
+                   
                     # Parse health status if jq is available
                     if command -v jq > /dev/null 2>&1; then
                         health_status=$(echo "$health_response" | jq -r '.status // "unknown"')
                         db_status=$(echo "$health_response" | jq -r '.database.status // "unknown"')
                         uptime=$(echo "$health_response" | jq -r '.system.uptime_seconds // "unknown"')
                         memory=$(echo "$health_response" | jq -r '.system.memory.total_mb // "unknown"')
-                        
+                       
                         echo "   Status: $health_status"
                         echo "   Database: $db_status"
                         echo "   Uptime: ${uptime}s"

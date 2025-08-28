@@ -181,7 +181,7 @@ defmodule Ashfolio.ClearFailureFormatter do
   defp format_error(_), do: "Unknown error"
 
   defp inspect_term(term) when is_map(term) do
-    keys = Map.keys(term) |> Enum.take(3)
+    keys = term |> Map.keys() |> Enum.take(3)
 
     if length(keys) > 3 do
       "%{#{Enum.join(keys, ", ")}, ...}"

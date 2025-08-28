@@ -7,9 +7,10 @@ defmodule Ashfolio.BackgroundJobs.Scheduler do
   """
 
   use GenServer
-  require Logger
 
   alias Ashfolio.FinancialManagement.NetWorthCalculator
+
+  require Logger
 
   def start_link(opts \\ []) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)

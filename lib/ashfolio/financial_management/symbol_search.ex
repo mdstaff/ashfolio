@@ -33,9 +33,10 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
       })
   """
 
-  alias Ashfolio.Portfolio.Symbol
-  alias Ashfolio.MarketData.RateLimiter
   alias Ashfolio.ErrorHandler
+  alias Ashfolio.MarketData.RateLimiter
+  alias Ashfolio.Portfolio.Symbol
+
   require Logger
 
   # HTTP client for external API calls (configurable for testing)
@@ -174,42 +175,38 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
     end
   end
 
+  # Clear cache contents without deleting the table (prevents service interruption)
   defp clear_cache_contents do
-    # Clear cache contents without deleting the table (prevents service interruption)
-    try do
-      :ets.delete_all_objects(@cache_table)
-    rescue
-      ArgumentError ->
-        # Table doesn't exist, create it
-        create_cache_table()
-    end
+    :ets.delete_all_objects(@cache_table)
+  rescue
+    ArgumentError ->
+      # Table doesn't exist, create it
+      create_cache_table()
   end
 
   defp get_from_cache(cache_key) do
-    try do
-      case :ets.lookup(@cache_table, cache_key) do
-        [{^cache_key, results, expires_at}] ->
-          if DateTime.compare(DateTime.utc_now(), expires_at) == :lt do
-            {:hit, results}
-          else
-            # Remove expired entry
-            :ets.delete(@cache_table, cache_key)
-            :miss
-          end
-
-        [] ->
+    case :ets.lookup(@cache_table, cache_key) do
+      [{^cache_key, results, expires_at}] ->
+        if DateTime.before?(DateTime.utc_now(), expires_at) do
+          {:hit, results}
+        else
+          # Remove expired entry
+          :ets.delete(@cache_table, cache_key)
           :miss
-      end
-    rescue
-      ArgumentError ->
-        # Table doesn't exist, create it
-        create_cache_table()
+        end
+
+      [] ->
         :miss
     end
+  rescue
+    ArgumentError ->
+      # Table doesn't exist, create it
+      create_cache_table()
+      :miss
   end
 
   defp cache_results(cache_key, results, ttl_seconds) do
-    expires_at = DateTime.utc_now() |> DateTime.add(ttl_seconds, :second)
+    expires_at = DateTime.add(DateTime.utc_now(), ttl_seconds, :second)
 
     try do
       :ets.insert(@cache_table, {cache_key, results, expires_at})
@@ -323,9 +320,7 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
             {:ok, symbol}
 
           {:error, changeset} ->
-            Logger.warning(
-              "Failed to create symbol from external API: #{inspect(changeset.errors)}"
-            )
+            Logger.warning("Failed to create symbol from external API: #{inspect(changeset.errors)}")
 
             {:error, :creation_failed}
         end

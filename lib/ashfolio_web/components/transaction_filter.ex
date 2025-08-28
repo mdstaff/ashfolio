@@ -279,8 +279,7 @@ defmodule AshfolioWeb.Components.TransactionFilter do
   end
 
   defp count_active_filters(filters) do
-    filters
-    |> Enum.count(fn {_key, value} ->
+    Enum.count(filters, fn {_key, value} ->
       case value do
         nil -> false
         :all -> false

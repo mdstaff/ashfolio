@@ -18,7 +18,7 @@ defmodule Ashfolio.Support.LoggerFilters do
 
   Multiple safeguards prevent suppressing legitimate errors:
   1. Only works in Mix.env() == :test
-  2. Requires explicit environment variable enabling 
+  2. Requires explicit environment variable enabling
   3. Very specific pattern matching for known SQLite concurrency errors
   4. All other errors pass through unchanged
   """
@@ -36,14 +36,13 @@ defmodule Ashfolio.Support.LoggerFilters do
       Mix.env() == :test and
         System.get_env("ASHFOLIO_FILTER_SQLITE_ERRORS", "true") in ["true", "1", "yes"]
 
-    if not filter_enabled do
-      # Filter disabled - pass through all errors
-      log_event
-    else
+    if filter_enabled do
       message_string = to_string(message)
 
-      # VERY specific filter - only suppress the exact DBConnection error pattern we see during SQLite concurrency
-      # Pattern: "Exqlite.Connection (#PID<...>) disconnected: ** (DBConnection.ConnectionError) client #PID<...> exited"
+      # VERY specific filter - only suppress the exact DBConnection error pattern we see
+      # during SQLite concurrency
+      # Pattern: "Exqlite.Connection (#PID<...>) disconnected:
+      # ** (DBConnection.ConnectionError) client #PID<...> exited"
       should_filter =
         String.contains?(message_string, "Exqlite.Connection") and
           String.contains?(message_string, "disconnected:") and
@@ -59,6 +58,9 @@ defmodule Ashfolio.Support.LoggerFilters do
         # Allow all other messages through, including other DBConnection or Exqlite errors
         log_event
       end
+    else
+      # Filter disabled - pass through all errors
+      log_event
     end
   end
 

@@ -9,14 +9,18 @@ defmodule AshfolioWeb.Integration.PerformanceBenchmarksTest do
   """
   use AshfolioWeb.ConnCase, async: false
 
+  import Phoenix.LiveViewTest
+
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Calculator
+  alias Ashfolio.Portfolio.HoldingsCalculator
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
+  alias Ashfolio.SQLiteHelpers
+
   @moduletag :integration
   @moduletag :slow
   @moduletag :performance
-  import Phoenix.LiveViewTest
-
-  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
-  alias Ashfolio.SQLiteHelpers
-
   setup do
     # Database-as-user architecture: No user entity needed
     {:ok, account} =
@@ -107,7 +111,7 @@ defmodule AshfolioWeb.Integration.PerformanceBenchmarksTest do
       # Measure portfolio calculation time
       {time_microseconds, _result} =
         :timer.tc(fn ->
-          Ashfolio.Portfolio.Calculator.calculate_total_return()
+          Calculator.calculate_total_return()
         end)
 
       time_milliseconds = time_microseconds / 1000
@@ -119,7 +123,7 @@ defmodule AshfolioWeb.Integration.PerformanceBenchmarksTest do
     test "holdings calculations under 100ms" do
       {time_microseconds, _result} =
         :timer.tc(fn ->
-          Ashfolio.Portfolio.HoldingsCalculator.get_holdings_summary()
+          HoldingsCalculator.get_holdings_summary()
         end)
 
       time_milliseconds = time_microseconds / 1000
@@ -189,8 +193,8 @@ defmodule AshfolioWeb.Integration.PerformanceBenchmarksTest do
       initial_memory = :erlang.memory(:total)
 
       # Perform calculations
-      _result = Ashfolio.Portfolio.Calculator.calculate_total_return()
-      _result = Ashfolio.Portfolio.HoldingsCalculator.get_holdings_summary()
+      _result = Calculator.calculate_total_return()
+      _result = HoldingsCalculator.get_holdings_summary()
 
       # Force garbage collection and check memory
       :erlang.garbage_collect()

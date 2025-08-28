@@ -40,8 +40,8 @@ None - dependency not functional
 
 ### 2. Remove Browser Test Directory
 
-Immediate  
- None - contains only disabled tests
+Immediate
+None - contains only disabled tests
 
 ```bash
 # Remove entire browser test directory

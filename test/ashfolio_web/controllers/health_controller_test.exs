@@ -124,8 +124,7 @@ defmodule AshfolioWeb.HealthControllerTest do
     test "health endpoint performs well under load" do
       # Simulate multiple rapid requests
       tasks =
-        1..10
-        |> Enum.map(fn _i ->
+        Enum.map(1..10, fn _i ->
           Task.async(fn ->
             conn = build_conn()
             get(conn, ~p"/health")
@@ -143,8 +142,7 @@ defmodule AshfolioWeb.HealthControllerTest do
     test "ping endpoint is consistently fast" do
       # Test multiple ping requests for consistency
       times =
-        1..5
-        |> Enum.map(fn _i ->
+        Enum.map(1..5, fn _i ->
           start_time = System.monotonic_time(:millisecond)
           conn = build_conn()
           get(conn, ~p"/ping")

@@ -12,15 +12,18 @@ defmodule Ashfolio.Integration.NetWorthIntegrationTest do
 
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.Context
+  alias Ashfolio.FinancialManagement.BalanceManager
+  alias Ashfolio.FinancialManagement.NetWorthCalculator
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
+  alias Phoenix.PubSub
+
   @moduletag :integration
   @moduletag :v0_2_0
 
-  alias Ashfolio.Context
-  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
   # alias Ashfolio.Portfolio.Calculator
-  alias Ashfolio.FinancialManagement.{NetWorthCalculator, BalanceManager}
-  alias Phoenix.PubSub
-
   describe "net worth calculation across mixed account types" do
     setup do
       # Database-as-user architecture: No user entity needed
@@ -434,7 +437,7 @@ defmodule Ashfolio.Integration.NetWorthIntegrationTest do
       assert_receive {:net_worth_updated, payload}, 5000
 
       # Database-as-user architecture: no user_id in payload
-      assert payload.total_net_worth != nil
+      assert payload.total_net_worth
       assert Decimal.equal?(payload.total_net_worth, Decimal.new("2000.00"))
       assert Decimal.equal?(payload.cash_balance, Decimal.new("2000.00"))
       assert payload.breakdown.cash_accounts == 1

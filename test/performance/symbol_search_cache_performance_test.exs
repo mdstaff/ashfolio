@@ -18,13 +18,13 @@ defmodule Ashfolio.Performance.SymbolSearchCachePerformanceTest do
 
   use Ashfolio.DataCase, async: false
 
-  @moduletag :performance
-  @moduletag :slow
-  @moduletag :symbol_search_cache
-
   alias Ashfolio.FinancialManagement.SymbolSearch
   alias Ashfolio.Portfolio.Symbol
   alias Ashfolio.SQLiteHelpers
+
+  @moduletag :performance
+  @moduletag :slow
+  @moduletag :symbol_search_cache
 
   # Test data setup
   @popular_symbols ["AAPL", "GOOGL", "MSFT", "AMZN", "TSLA", "META", "NFLX", "NVDA"]
@@ -361,8 +361,7 @@ defmodule Ashfolio.Performance.SymbolSearchCachePerformanceTest do
   # Helper functions for test setup and measurement
 
   defp setup_test_symbols do
-    @popular_symbols
-    |> Enum.map(fn symbol_name ->
+    Enum.map(@popular_symbols, fn symbol_name ->
       SQLiteHelpers.get_or_create_symbol(symbol_name, %{
         name: "#{symbol_name} Corporation",
         asset_class: :stock,
@@ -396,8 +395,7 @@ defmodule Ashfolio.Performance.SymbolSearchCachePerformanceTest do
         "RARE#{i}"
       end
 
-    (popular_searches ++ company_searches ++ unique_searches)
-    |> Enum.shuffle()
+    Enum.shuffle(popular_searches ++ company_searches ++ unique_searches)
   end
 
   defp generate_unique_queries(count) do
@@ -417,11 +415,9 @@ defmodule Ashfolio.Performance.SymbolSearchCachePerformanceTest do
   end
 
   defp get_cache_size do
-    try do
-      :ets.info(:ashfolio_symbol_search_cache, :size) || 0
-    rescue
-      _ -> 0
-    end
+    :ets.info(:ashfolio_symbol_search_cache, :size) || 0
+  rescue
+    _ -> 0
   end
 
   defp create_many_test_symbols(count) do

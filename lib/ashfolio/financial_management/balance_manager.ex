@@ -7,6 +7,7 @@ defmodule Ashfolio.FinancialManagement.BalanceManager do
   It also broadcasts balance change events via PubSub for real-time updates.
   """
 
+  alias Ash.Error.Query.NotFound
   alias Ashfolio.Portfolio.Account
   alias Ashfolio.PubSub
 
@@ -48,8 +49,6 @@ defmodule Ashfolio.FinancialManagement.BalanceManager do
       broadcast_balance_change(updated_account, old_balance, new_balance, notes)
 
       {:ok, updated_account}
-    else
-      {:error, reason} -> {:error, reason}
     end
   end
 
@@ -86,10 +85,10 @@ defmodule Ashfolio.FinancialManagement.BalanceManager do
       {:ok, account} ->
         {:ok, account}
 
-      {:error, %Ash.Error.Invalid{errors: [%Ash.Error.Query.NotFound{} | _]}} ->
+      {:error, %Ash.Error.Invalid{errors: [%NotFound{} | _]}} ->
         {:error, :account_not_found}
 
-      {:error, %Ash.Error.Query.NotFound{}} ->
+      {:error, %NotFound{}} ->
         {:error, :account_not_found}
 
       {:error, reason} ->

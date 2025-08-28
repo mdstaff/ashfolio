@@ -197,8 +197,8 @@ defmodule Ashfolio.FinancialManagement.NetWorthSnapshot do
     def year_over_year_growth!(current_year, previous_year) do
       require Ash.Query
 
-      current_snapshots = by_year!(current_year) |> List.last()
-      previous_snapshots = by_year!(previous_year) |> List.last()
+      current_snapshots = current_year |> by_year!() |> List.last()
+      previous_snapshots = previous_year |> by_year!() |> List.last()
 
       if current_snapshots && previous_snapshots do
         current_value = current_snapshots.net_worth
@@ -242,7 +242,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthSnapshot do
       end
     end
 
-    def latest!() do
+    def latest! do
       case latest() do
         {:ok, [snapshot]} -> snapshot
         {:ok, []} -> nil

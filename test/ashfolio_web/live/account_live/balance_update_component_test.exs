@@ -3,8 +3,8 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponentTest do
 
   import Phoenix.LiveViewTest
 
-  alias Ashfolio.Portfolio.Account
   alias Ashfolio.Context
+  alias Ashfolio.Portfolio.Account
   alias AshfolioWeb.AccountLive.BalanceUpdateComponent
 
   describe "Balance Update Component" do
@@ -255,8 +255,7 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponentTest do
         component_module = session["component_module"]
         component_assigns = session["component_assigns"]
 
-        {:ok,
-         assign(socket, component_module: component_module, component_assigns: component_assigns)}
+        {:ok, assign(socket, component_module: component_module, component_assigns: component_assigns)}
       end
     end
 

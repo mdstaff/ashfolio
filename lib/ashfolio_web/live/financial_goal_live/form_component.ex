@@ -1,8 +1,10 @@
 defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
+  @moduledoc false
   use AshfolioWeb, :live_component
 
   alias Ashfolio.FinancialManagement.FinancialGoal
-  alias AshfolioWeb.Live.{ErrorHelpers, FormatHelpers}
+  alias AshfolioWeb.Live.ErrorHelpers
+  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def render(assigns) do
@@ -307,23 +309,17 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
         socket
       end
 
-    # Initialize form
-    changeset =
-      if action == :new do
-        FinancialGoal
-        |> Ash.Changeset.for_create(:create, %{
-          name: "",
-          goal_type: :custom,
-          target_amount: Decimal.new("0"),
-          current_amount: Decimal.new("0"),
-          is_active: true
-        })
-      else
-        FinancialGoal
-        |> Ash.Changeset.for_update(:update, goal, %{})
+    # Initialize form using AshPhoenix.Form pattern
+    form =
+      case action do
+        :new ->
+          AshPhoenix.Form.for_create(FinancialGoal, :create)
+
+        :edit ->
+          AshPhoenix.Form.for_update(goal, :update)
       end
 
-    socket = assign_form(socket, changeset)
+    socket = assign_form(socket, form)
 
     {:ok, socket}
   end
@@ -333,21 +329,15 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
     # Parse decimal fields
     goal_params = parse_decimal_fields(goal_params)
 
-    changeset =
-      if socket.assigns.action == :new do
-        FinancialGoal
-        |> Ash.Changeset.for_create(:create, goal_params)
-      else
-        FinancialGoal
-        |> Ash.Changeset.for_update(:update, socket.assigns.goal, goal_params)
-      end
+    # Validate using AshPhoenix.Form
+    form = AshPhoenix.Form.validate(socket.assigns.form, goal_params)
 
-    form_valid = changeset.valid?
-    form_errors = if changeset.valid?, do: [], else: format_errors(changeset)
+    form_valid = form.valid?
+    form_errors = if form_valid, do: [], else: format_errors(form)
 
     socket =
       socket
-      |> assign_form(changeset)
+      |> assign_form(form)
       |> assign(:form_valid, form_valid)
       |> assign(:form_errors, form_errors)
 
@@ -363,18 +353,7 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
 
     goal_params = parse_decimal_fields(goal_params)
 
-    result =
-      if socket.assigns.action == :new do
-        FinancialGoal
-        |> Ash.Changeset.for_create(:create, goal_params)
-        |> Ash.create()
-      else
-        FinancialGoal
-        |> Ash.Changeset.for_update(:update, socket.assigns.goal, goal_params)
-        |> Ash.update()
-      end
-
-    case result do
+    case AshPhoenix.Form.submit(socket.assigns.form, params: goal_params) do
       {:ok, goal} ->
         # Notify parent component
         send(self(), {__MODULE__, {:saved, goal}})
@@ -384,14 +363,14 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
 
         {:noreply, assign(socket, :saving, false)}
 
-      {:error, changeset} ->
-        form_errors = format_errors(changeset)
+      {:error, form} ->
+        form_errors = format_errors(form)
 
         {:noreply,
          socket
          |> assign(:saving, false)
          |> assign(:form_errors, form_errors)
-         |> assign_form(changeset)}
+         |> assign_form(form)}
     end
   end
 
@@ -417,16 +396,15 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
           "is_active" => true
         }
 
-        changeset =
-          FinancialGoal
-          |> Ash.Changeset.for_create(:create, parse_decimal_fields(goal_params))
+        form = AshPhoenix.Form.for_create(FinancialGoal, :create)
+        validated_form = AshPhoenix.Form.validate(form, parse_decimal_fields(goal_params))
 
-        form_valid = changeset.valid?
-        form_errors = if changeset.valid?, do: [], else: format_errors(changeset)
+        form_valid = validated_form.valid?
+        form_errors = if form_valid, do: [], else: format_errors(validated_form)
 
         socket =
           socket
-          |> assign_form(changeset)
+          |> assign_form(validated_form)
           |> assign(:form_valid, form_valid)
           |> assign(:form_errors, form_errors)
           |> assign(:show_emergency_fund_setup, false)
@@ -438,8 +416,9 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
 
   # Private functions
 
-  defp assign_form(socket, changeset) do
-    assign(socket, :form, to_form(changeset, as: :financial_goal))
+  defp assign_form(socket, form) do
+    # Expect AshPhoenix.Form - no conversion needed
+    assign(socket, :form, to_form(form, as: :financial_goal))
   end
 
   defp parse_decimal_fields(params) do
@@ -462,8 +441,16 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
     end
   end
 
-  defp format_errors(changeset) do
-    Ash.Error.to_error_class(changeset.errors)
+  defp format_errors(form_or_changeset) do
+    errors =
+      case form_or_changeset do
+        %AshPhoenix.Form{} = form -> AshPhoenix.Form.errors(form)
+        %Ash.Changeset{} = changeset -> changeset.errors
+        _ -> []
+      end
+
+    errors
+    |> Ash.Error.to_error_class()
     |> case do
       %{errors: errors} -> Enum.map(errors, &to_string/1)
       error -> [to_string(error)]

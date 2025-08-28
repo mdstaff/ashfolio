@@ -1,18 +1,18 @@
 defmodule Ashfolio.MarketData.PriceManagerSimpleTest do
   use ExUnit.Case, async: false
 
+  alias Ashfolio.MarketData.PriceManager
+
   @moduletag :market_data
   @moduletag :genserver
   @moduletag :unit
   @moduletag :fast
 
-  alias Ashfolio.MarketData.PriceManager
-
   # No setup needed - PriceManager is started by the application
 
   describe "basic functionality" do
     test "starts successfully" do
-      assert Process.whereis(PriceManager) != nil
+      assert Process.whereis(PriceManager)
     end
 
     test "refresh_status returns :idle when not refreshing" do

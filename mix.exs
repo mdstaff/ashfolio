@@ -46,12 +46,7 @@ defmodule Ashfolio.MixProject do
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:heroicons,
-       github: "tailwindlabs/heroicons",
-       tag: "v2.1.1",
-       sparse: "optimized",
-       app: false,
-       compile: false,
-       depth: 1},
+       github: "tailwindlabs/heroicons", tag: "v2.1.1", sparse: "optimized", app: false, compile: false, depth: 1},
       {:swoosh, "~> 1.5"},
       {:finch, "~> 0.13"},
       {:telemetry_metrics, "~> 1.0"},
@@ -63,6 +58,9 @@ defmodule Ashfolio.MixProject do
 
       # Credo
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+
+      # Styler - auto-formatting plugin
+      {:styler, "~> 1.5", only: [:dev, :test], runtime: false},
 
       # Ash Framework dependencies
       {:ash, "~> 3.0"},

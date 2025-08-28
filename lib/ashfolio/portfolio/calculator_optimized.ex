@@ -8,55 +8,54 @@ defmodule Ashfolio.Portfolio.CalculatorOptimized do
   - Reduced database round trips
   """
 
-  alias Ashfolio.Portfolio.{Transaction, Symbol, Account}
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
+
   require Logger
 
   @doc """
   Optimized version of get_all_holdings that eliminates N+1 queries.
   """
-  def get_all_holdings_optimized() do
-    try do
-      case Account.list() do
-        {:ok, accounts} ->
-          active_accounts = Enum.filter(accounts, &(not &1.is_excluded))
+  def get_all_holdings_optimized do
+    case Account.list() do
+      {:ok, accounts} ->
+        active_accounts = Enum.filter(accounts, &(not &1.is_excluded))
 
-          if Enum.empty?(active_accounts) do
-            {:ok, []}
-          else
-            account_ids = Enum.map(active_accounts, & &1.id)
+        if Enum.empty?(active_accounts) do
+          {:ok, []}
+        else
+          account_ids = Enum.map(active_accounts, & &1.id)
 
-            # Get all transactions in one query
-            all_transactions =
-              account_ids
-              |> Enum.flat_map(&get_holdings_for_account/1)
+          # Get all transactions in one query
+          all_transactions = Enum.flat_map(account_ids, &get_holdings_for_account/1)
 
-            # Extract unique symbol IDs
-            symbol_ids =
-              all_transactions
-              |> Enum.map(& &1.symbol_id)
-              |> Enum.uniq()
+          # Extract unique symbol IDs
+          symbol_ids =
+            all_transactions
+            |> Enum.map(& &1.symbol_id)
+            |> Enum.uniq()
 
-            # Batch fetch all symbols in single query - eliminates N+1
-            case Symbol.get_by_ids(symbol_ids) do
-              {:ok, symbols} ->
-                symbol_map = Map.new(symbols, &{&1.id, &1})
-                holdings = group_holdings_with_preloaded_symbols(all_transactions, symbol_map)
-                {:ok, holdings}
+          # Batch fetch all symbols in single query - eliminates N+1
+          case Symbol.get_by_ids(symbol_ids) do
+            {:ok, symbols} ->
+              symbol_map = Map.new(symbols, &{&1.id, &1})
+              holdings = group_holdings_with_preloaded_symbols(all_transactions, symbol_map)
+              {:ok, holdings}
 
-              {:error, reason} ->
-                Logger.warning("Failed to batch fetch symbols: #{inspect(reason)}")
-                {:error, reason}
-            end
+            {:error, reason} ->
+              Logger.warning("Failed to batch fetch symbols: #{inspect(reason)}")
+              {:error, reason}
           end
+        end
 
-        {:error, reason} ->
-          {:error, reason}
-      end
-    rescue
-      error ->
-        Logger.error("Error getting optimized holdings: #{inspect(error)}")
-        {:error, :calculation_error}
+      {:error, reason} ->
+        {:error, reason}
     end
+  rescue
+    error ->
+      Logger.error("Error getting optimized holdings: #{inspect(error)}")
+      {:error, :calculation_error}
   end
 
   # Private helper for optimized symbol grouping
@@ -86,8 +85,7 @@ defmodule Ashfolio.Portfolio.CalculatorOptimized do
   # Reuse existing position summary calculation
   defp calculate_position_summary(transactions) do
     # Same implementation as original Calculator
-    Enum.reduce(transactions, {Decimal.new(0), Decimal.new(0)}, fn transaction,
-                                                                   {net_qty, total_cost} ->
+    Enum.reduce(transactions, {Decimal.new(0), Decimal.new(0)}, fn transaction, {net_qty, total_cost} ->
       case transaction.type do
         :buy ->
           new_qty = Decimal.add(net_qty, transaction.quantity)

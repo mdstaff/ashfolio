@@ -8,17 +8,17 @@ defmodule AshfolioWeb.LiveViewCase do
 
   using do
     quote do
+      use AshfolioWeb, :verified_routes
+
+      import Ashfolio.SQLiteHelpers
+      import AshfolioWeb.ConnCase
+      import Phoenix.ConnTest
+      import Phoenix.LiveViewTest
+      import Plug.Conn
       # The default endpoint for testing
       @endpoint AshfolioWeb.Endpoint
 
-      use AshfolioWeb, :verified_routes
-
       # Import conveniences for testing with connections
-      import Plug.Conn
-      import Phoenix.ConnTest
-      import Phoenix.LiveViewTest
-      import AshfolioWeb.ConnCase
-      import Ashfolio.SQLiteHelpers
     end
   end
 

@@ -28,6 +28,19 @@ module.exports = {
     plugin(({addVariant}) => addVariant("phx-click-loading", [".phx-click-loading&", ".phx-click-loading &"])),
     plugin(({addVariant}) => addVariant("phx-submit-loading", [".phx-submit-loading&", ".phx-submit-loading &"])),
     plugin(({addVariant}) => addVariant("phx-change-loading", [".phx-change-loading&", ".phx-change-loading &"])),
+   
+    // Add scrollbar-hide utility
+    plugin(function({addUtilities}) {
+      addUtilities({
+        '.scrollbar-hide': {
+          '-ms-overflow-style': 'none',  /* IE and Edge */
+          'scrollbar-width': 'none',     /* Firefox */
+          '&::-webkit-scrollbar': {      /* Chrome, Safari and Opera */
+            'display': 'none'
+          }
+        }
+      })
+    }),
 
     // Embeds Heroicons (https://heroicons.com) into your app.css bundle
     // See your `CoreComponents.icon/1` for more information.

@@ -1,8 +1,12 @@
 defmodule AshfolioWeb.ExpenseLive.Import do
+  @moduledoc false
   use AshfolioWeb, :live_view
 
-  alias Ashfolio.FinancialManagement.{TransactionCategory, Expense}
-  alias Ashfolio.Portfolio.{Account, Transaction, Symbol}
+  alias Ashfolio.FinancialManagement.Expense
+  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
 
   @impl true
   def mount(_params, _session, socket) do
@@ -103,14 +107,10 @@ defmodule AshfolioWeb.ExpenseLive.Import do
            |> redirect(to: redirect_path)}
 
         {:error, reason} ->
-          {:noreply,
-           socket
-           |> put_flash(:error, "Import failed: #{reason}")}
+          {:noreply, put_flash(socket, :error, "Import failed: #{reason}")}
       end
     else
-      {:noreply,
-       socket
-       |> put_flash(:error, "Please select an account for import")}
+      {:noreply, put_flash(socket, :error, "Please select an account for import")}
     end
   end
 
@@ -413,29 +413,26 @@ defmodule AshfolioWeb.ExpenseLive.Import do
   end
 
   defp parse_csv_preview(csv_content) do
-    try do
-      # Handle the specific CSV format with proper parsing
-      lines = String.split(csv_content, "\n", trim: true)
+    # Handle the specific CSV format with proper parsing
+    lines = String.split(csv_content, "\n", trim: true)
 
-      case lines do
-        [header_line | data_lines] ->
-          headers = String.split(header_line, ",")
+    case lines do
+      [header_line | data_lines] ->
+        headers = String.split(header_line, ",")
 
-          data_lines
-          |> Enum.map(fn line ->
-            values = String.split(line, ",")
-            # Pad values if row has fewer columns than headers
-            padded_values = values ++ List.duplicate("", length(headers) - length(values))
-            Enum.zip(headers, padded_values) |> Enum.into(%{})
-          end)
+        Enum.map(data_lines, fn line ->
+          values = String.split(line, ",")
+          # Pad values if row has fewer columns than headers
+          padded_values = values ++ List.duplicate("", length(headers) - length(values))
+          headers |> Enum.zip(padded_values) |> Map.new()
+        end)
 
-        _ ->
-          []
-      end
-    rescue
-      _e ->
+      _ ->
         []
     end
+  rescue
+    _e ->
+      []
   end
 
   defp get_csv_categories(preview_data) do
@@ -446,18 +443,16 @@ defmodule AshfolioWeb.ExpenseLive.Import do
   end
 
   defp import_expenses(preview_data, account_id, category_mapping) do
-    try do
-      imported_count =
-        preview_data
-        |> Enum.filter(&valid_expense_row?/1)
-        |> Enum.map(&create_expense_from_row(&1, account_id, category_mapping))
-        |> Enum.count(fn result -> match?({:ok, _}, result) end)
+    imported_count =
+      preview_data
+      |> Enum.filter(&valid_expense_row?/1)
+      |> Enum.map(&create_expense_from_row(&1, account_id, category_mapping))
+      |> Enum.count(fn result -> match?({:ok, _}, result) end)
 
-      {:ok, imported_count}
-    rescue
-      e ->
-        {:error, Exception.message(e)}
-    end
+    {:ok, imported_count}
+  rescue
+    e ->
+      {:error, Exception.message(e)}
   end
 
   defp valid_expense_row?(row) do
@@ -548,18 +543,16 @@ defmodule AshfolioWeb.ExpenseLive.Import do
 
   # Portfolio Holdings Import Functions
   defp import_portfolio_holdings(preview_data, account_id) do
-    try do
-      imported_count =
-        preview_data
-        |> Enum.filter(&valid_holding_row?/1)
-        |> Enum.map(&create_transaction_from_holding(&1, account_id))
-        |> Enum.count(fn result -> match?({:ok, _}, result) end)
+    imported_count =
+      preview_data
+      |> Enum.filter(&valid_holding_row?/1)
+      |> Enum.map(&create_transaction_from_holding(&1, account_id))
+      |> Enum.count(fn result -> match?({:ok, _}, result) end)
 
-      {:ok, imported_count}
-    rescue
-      e ->
-        {:error, Exception.message(e)}
-    end
+    {:ok, imported_count}
+  rescue
+    e ->
+      {:error, Exception.message(e)}
   end
 
   defp valid_holding_row?(row) do

@@ -24,11 +24,6 @@ if config_env() == :prod do
   database_path =
     System.get_env("DATABASE_PATH") || "data/ashfolio_prod.db"
 
-  config :ashfolio, Ashfolio.Repo,
-    adapter: Ecto.Adapters.SQLite3,
-    database: database_path,
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
-
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
   # want to use a different value for prod and you most likely don't want
@@ -44,7 +39,10 @@ if config_env() == :prod do
   host = System.get_env("PHX_HOST") || "example.com"
   port = String.to_integer(System.get_env("PORT") || "4000")
 
-  config :ashfolio, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
+  config :ashfolio, Ashfolio.Repo,
+    adapter: Ecto.Adapters.SQLite3,
+    database: database_path,
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
 
   config :ashfolio, AshfolioWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
@@ -57,6 +55,8 @@ if config_env() == :prod do
       port: port
     ],
     secret_key_base: secret_key_base
+
+  config :ashfolio, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
   # ## SSL Support
   #

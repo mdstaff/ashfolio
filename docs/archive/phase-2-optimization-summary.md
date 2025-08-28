@@ -46,8 +46,8 @@ Mathematical Redundancy & LiveView Over-Coverage Reduction
 
 ## Key Business Logic Preserved
 
-All cost basis and P&L calculation tests retained  
- Holdings aggregation and portfolio value tests maintained
+All cost basis and P&L calculation tests retained
+Holdings aggregation and portfolio value tests maintained
 Complete user journey tests through LiveView preserved
 Cross-domain and PubSub communication tests intact
 Real business error scenarios (invalid user IDs) kept
@@ -63,8 +63,8 @@ Core formatting functionality fully tested
 
 ## Architectural Compliance
 
-No cross-domain tests removed  
- All monetary calculation edge cases preserved
+No cross-domain tests removed
+All monetary calculation edge cases preserved
 Complex calculation scenarios still tested
 PubSub and Context API tests fully maintained
 

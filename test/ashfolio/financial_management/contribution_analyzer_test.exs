@@ -1,7 +1,8 @@
 defmodule Ashfolio.FinancialManagement.ContributionAnalyzerTest do
   use Ashfolio.DataCase
 
-  alias Ashfolio.FinancialManagement.{ForecastCalculator, ContributionAnalyzer}
+  alias Ashfolio.FinancialManagement.ContributionAnalyzer
+  alias Ashfolio.FinancialManagement.ForecastCalculator
 
   @moduletag :unit
 
@@ -38,7 +39,7 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzerTest do
 
       # Should include specific variation amounts
       variations_map =
-        Enum.into(analysis.contribution_variations, %{}, &{&1.monthly_contribution, &1})
+        Map.new(analysis.contribution_variations, &{&1.monthly_contribution, &1})
 
       # Check for standard variations
       # -$500
@@ -87,7 +88,8 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzerTest do
         # Percentage should be (difference / base * 100)
         if not Decimal.equal?(base_value, Decimal.new("0")) do
           expected_pct =
-            Decimal.div(variation.difference_from_base, base_value)
+            variation.difference_from_base
+            |> Decimal.div(base_value)
             |> Decimal.mult(Decimal.new("100"))
             |> Decimal.round(2)
 
@@ -147,9 +149,7 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzerTest do
                  custom_variations
                )
 
-      variations_map =
-        analysis.contribution_variations
-        |> Enum.into(%{}, &{&1.monthly_contribution, &1})
+      variations_map = Map.new(analysis.contribution_variations, &{&1.monthly_contribution, &1})
 
       # Should have our custom amounts
       # 1000 - 200

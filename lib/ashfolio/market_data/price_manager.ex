@@ -30,13 +30,15 @@ defmodule Ashfolio.MarketData.PriceManager do
   """
 
   use GenServer
-  require Logger
-
-  alias Ashfolio.Portfolio.Symbol
-  alias Ashfolio.Cache
-  alias Ashfolio.MarketData.{YahooFinance, RateLimiter}
 
   import Ash.Query, only: [filter: 2, select: 2]
+
+  alias Ashfolio.Cache
+  alias Ashfolio.MarketData.RateLimiter
+  alias Ashfolio.MarketData.YahooFinance
+  alias Ashfolio.Portfolio.Symbol
+
+  require Logger
 
   @yahoo_finance_module Application.compile_env(
                           :ashfolio,
@@ -248,9 +250,7 @@ defmodule Ashfolio.MarketData.PriceManager do
         end
 
       {:error, :rate_limited, retry_after_ms} ->
-        Logger.warning(
-          "Rate limit exceeded, cannot refresh prices. Retry after #{retry_after_ms}ms"
-        )
+        Logger.warning("Rate limit exceeded, cannot refresh prices. Retry after #{retry_after_ms}ms")
 
         %{
           success_count: 0,
@@ -367,24 +367,23 @@ defmodule Ashfolio.MarketData.PriceManager do
   end
 
   defp get_active_symbols do
-    try do
-      # Query symbols that have transactions (active holdings)
-      symbols =
-        Symbol
-        |> filter(exists(transactions, true))
-        |> select([:symbol, :id])
-        |> Ash.read!()
+    # Query symbols that have transactions (active holdings)
+    symbols =
+      Symbol
+      |> filter(exists(transactions, true))
+      |> select([:symbol, :id])
+      |> Ash.read!()
 
-      {:ok, symbols}
-    rescue
-      error ->
-        Logger.error("Failed to query active symbols: #{inspect(error)}")
-        {:error, :database_error}
-    end
+    {:ok, symbols}
+  rescue
+    error ->
+      Logger.error("Failed to query active symbols: #{inspect(error)}")
+      {:error, :database_error}
   end
 
   defp get_timeout do
-    Application.get_env(:ashfolio, __MODULE__, [])
+    :ashfolio
+    |> Application.get_env(__MODULE__, [])
     |> Keyword.get(:refresh_timeout, 30_000)
   end
 

@@ -7,17 +7,19 @@ defmodule AshfolioWeb.Integration.SimplifiedPortfolioViewFlowTest do
   """
   use AshfolioWeb.ConnCase, async: false
 
+  import Mox
+  import Phoenix.LiveViewTest
+
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
+  alias Ashfolio.SQLiteHelpers
+
   @moduletag :integration
   @moduletag :fast
   @moduletag :mocked
 
-  import Phoenix.LiveViewTest
-  import Mox
-
-  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
   # YahooFinanceMock is defined in test_helper.exs
-  alias Ashfolio.SQLiteHelpers
-
   setup :verify_on_exit!
 
   setup do

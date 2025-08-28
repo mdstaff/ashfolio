@@ -7,12 +7,12 @@ defmodule AshfolioWeb.Integration.AccountManagementFlowTest do
   """
   use AshfolioWeb.ConnCase, async: false
 
-  @moduletag :integration
-  @moduletag :slow
-
   import Phoenix.LiveViewTest
 
   alias Ashfolio.Portfolio.Account
+
+  @moduletag :integration
+  @moduletag :slow
 
   setup do
     # Database-as-user architecture: No user entity needed
@@ -90,11 +90,11 @@ defmodule AshfolioWeb.Integration.AccountManagementFlowTest do
 
       # If we don't see the account data, try refreshing the view
       {view, current_html} =
-        if not (current_html =~ "Test Investment Account") do
+        if current_html =~ "Test Investment Account" do
+          {view, current_html}
+        else
           {:ok, new_view, _html} = live(conn, "/accounts")
           {new_view, render(new_view)}
-        else
-          {view, current_html}
         end
 
       # Verify account appears in the list
@@ -108,10 +108,9 @@ defmodule AshfolioWeb.Integration.AccountManagementFlowTest do
 
       # Get the created account for further testing
       created_account =
-        updated_accounts
-        |> Enum.find(fn acc -> acc.name == "Test Investment Account" end)
+        Enum.find(updated_accounts, fn acc -> acc.name == "Test Investment Account" end)
 
-      refute is_nil(created_account)
+      assert created_account
 
       # Step 6: Edit Account - Click edit button
       view
@@ -144,11 +143,11 @@ defmodule AshfolioWeb.Integration.AccountManagementFlowTest do
       current_html = render(view)
 
       {view, current_html} =
-        if not (current_html =~ "Updated Investment Account") do
+        if current_html =~ "Updated Investment Account" do
+          {view, current_html}
+        else
           {:ok, new_view, _html} = live(conn, "/accounts")
           {new_view, render(new_view)}
-        else
-          {view, current_html}
         end
 
       # Verify changes

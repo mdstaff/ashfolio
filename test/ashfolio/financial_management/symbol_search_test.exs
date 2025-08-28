@@ -1,12 +1,12 @@
 defmodule Ashfolio.FinancialManagement.SymbolSearchTest do
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.FinancialManagement.SymbolSearch
+  alias Ashfolio.Portfolio.Symbol
+
   @moduletag :ash_resources
   @moduletag :unit
   @moduletag :fast
-
-  alias Ashfolio.Portfolio.Symbol
-  alias Ashfolio.FinancialManagement.SymbolSearch
 
   describe "SymbolSearch.search/2" do
     setup do
@@ -149,8 +149,8 @@ defmodule Ashfolio.FinancialManagement.SymbolSearchTest do
       goog_index = Enum.find_index(results, &(&1.symbol == "GOOG#{unique_id}"))
       googl_index = Enum.find_index(results, &(&1.symbol == "GOOGL#{unique_id}"))
 
-      assert goog_index != nil
-      assert googl_index != nil
+      assert goog_index
+      assert googl_index
     end
 
     test "limits results to maximum 50 symbols" do

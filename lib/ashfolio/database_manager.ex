@@ -8,9 +8,13 @@ defmodule Ashfolio.DatabaseManager do
   - Future: Prod > Staging > Dev data replication (when Prod exists)
   """
 
-  require Logger
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
+  alias Ashfolio.Portfolio.User
   alias Ashfolio.Repo
-  alias Ashfolio.Portfolio.{User, Account, Symbol, Transaction}
+
+  require Logger
 
   @doc """
   Truncates all tables and re-seeds with fresh sample data.
@@ -85,14 +89,14 @@ defmodule Ashfolio.DatabaseManager do
   Returns the path to the backup file.
   """
   def create_backup do
-    timestamp = DateTime.utc_now() |> DateTime.to_iso8601(:basic)
+    timestamp = DateTime.to_iso8601(DateTime.utc_now(), :basic)
     backup_path = "data/backups/ashfolio_backup_#{timestamp}.db"
 
     # Ensure backup directory exists
     File.mkdir_p!("data/backups")
 
     # Copy the database file
-    source_path = Application.get_env(:ashfolio, Ashfolio.Repo)[:database]
+    source_path = Application.get_env(:ashfolio, Repo)[:database]
     File.cp!(source_path, backup_path)
 
     Logger.info("💾 Database backup created: #{backup_path}")
@@ -109,11 +113,11 @@ defmodule Ashfolio.DatabaseManager do
       raise "restore_backup/1 cannot be run in production environment"
     end
 
-    unless File.exists?(backup_path) do
+    if !File.exists?(backup_path) do
       raise "Backup file not found: #{backup_path}"
     end
 
-    target_path = Application.get_env(:ashfolio, Ashfolio.Repo)[:database]
+    target_path = Application.get_env(:ashfolio, Repo)[:database]
 
     Logger.info("🔄 Restoring database from backup: #{backup_path}")
     File.cp!(backup_path, target_path)

@@ -19,6 +19,8 @@ defmodule Ashfolio.Portfolio.UserSettings do
     domain: Ashfolio.Portfolio,
     data_layer: AshSqlite.DataLayer
 
+  alias Ashfolio.Portfolio.UserSettings
+
   sqlite do
     table("user_settings")
     repo(Ashfolio.Repo)
@@ -96,7 +98,7 @@ defmodule Ashfolio.Portfolio.UserSettings do
     Get the user settings. Creates default settings if none exist.
     """
     def get_settings do
-      case Ash.read(Ashfolio.Portfolio.UserSettings, action: :get_singleton) do
+      case Ash.read(UserSettings, action: :get_singleton) do
         {:ok, [settings]} ->
           {:ok, settings}
 
@@ -153,7 +155,7 @@ defmodule Ashfolio.Portfolio.UserSettings do
     end
 
     defp create_default_settings do
-      Ash.create(Ashfolio.Portfolio.UserSettings, %{
+      Ash.create(UserSettings, %{
         name: "Local User",
         currency: "USD",
         locale: "en-US"

@@ -3,6 +3,7 @@ defmodule Ashfolio.FinancialManagement.ExpenseTest do
 
   alias Ashfolio.FinancialManagement
   alias Ashfolio.FinancialManagement.Expense
+  alias Ashfolio.Portfolio.Account
 
   describe "expense creation" do
     setup do
@@ -14,7 +15,7 @@ defmodule Ashfolio.FinancialManagement.ExpenseTest do
         })
 
       {:ok, account} =
-        Ashfolio.Portfolio.Account.create(%{
+        Account.create(%{
           name: "Checking",
           account_type: :checking,
           currency: "USD"
@@ -102,7 +103,7 @@ defmodule Ashfolio.FinancialManagement.ExpenseTest do
         })
 
       {:ok, account} =
-        Ashfolio.Portfolio.Account.create(%{
+        Account.create(%{
           name: "Main Checking",
           account_type: :checking,
           currency: "USD"
@@ -187,7 +188,7 @@ defmodule Ashfolio.FinancialManagement.ExpenseTest do
         })
 
       {:ok, account} =
-        Ashfolio.Portfolio.Account.create(%{
+        Account.create(%{
           name: "Credit Card",
           account_type: :checking,
           currency: "USD"
@@ -227,7 +228,7 @@ defmodule Ashfolio.FinancialManagement.ExpenseTest do
       totals = Expense.category_totals!(~D[2024-01-01], ~D[2024-02-28])
 
       assert length(Map.keys(totals)) == 1
-      total_sum = Map.values(totals) |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
+      total_sum = totals |> Map.values() |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
       assert Decimal.equal?(total_sum, Decimal.new("750.00"))
     end
   end
@@ -241,7 +242,7 @@ defmodule Ashfolio.FinancialManagement.ExpenseTest do
         })
 
       {:ok, account} =
-        Ashfolio.Portfolio.Account.create(%{
+        Account.create(%{
           name: "Debit Card",
           account_type: :checking,
           currency: "USD"
@@ -289,7 +290,7 @@ defmodule Ashfolio.FinancialManagement.ExpenseTest do
         })
 
       {:ok, account} =
-        Ashfolio.Portfolio.Account.create(%{
+        Account.create(%{
           name: "Bills Account",
           account_type: :checking,
           currency: "USD"

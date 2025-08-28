@@ -8,12 +8,12 @@ defmodule AshfolioWeb.DashboardPubSubTest do
 
   use AshfolioWeb.LiveViewCase
 
+  import Phoenix.LiveViewTest
+
   @moduletag :liveview
   @moduletag :unit
   @moduletag :fast
   @moduletag :pubsub
-
-  import Phoenix.LiveViewTest
 
   describe "dashboard PubSub event handling" do
     test "handles transaction_saved events", %{conn: conn} do

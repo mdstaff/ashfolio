@@ -1,13 +1,15 @@
 defmodule AshfolioWeb.TransactionLive.FilteringTest do
   use AshfolioWeb.ConnCase, async: false
 
-  @moduletag :live_view
-  @moduletag :filtering
-
   import Phoenix.LiveViewTest
 
   alias Ashfolio.FinancialManagement.TransactionCategory
-  alias Ashfolio.Portfolio.{Transaction, Account, Symbol}
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
+
+  @moduletag :live_view
+  @moduletag :filtering
 
   describe "enhanced filter state management" do
     setup %{conn: conn} do

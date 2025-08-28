@@ -1,13 +1,15 @@
 defmodule AshfolioWeb.CategoryLive.FormComponent do
+  @moduledoc false
   use AshfolioWeb, :live_component
 
+  alias Ash.Error.Invalid
   alias Ashfolio.FinancialManagement.TransactionCategory
   alias AshfolioWeb.Live.ErrorHelpers
 
   @default_colors [
     # Red
     "#EF4444",
-    # Orange  
+    # Orange
     "#F97316",
     # Amber
     "#F59E0B",
@@ -355,7 +357,7 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
 
     # Update selected color if valid
     selected_color =
-      if is_valid_hex_color?(color) do
+      if valid_hex_color?(color) do
         color
       else
         socket.assigns.selected_color
@@ -389,7 +391,7 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
   def handle_event("validate_custom_color", _params, socket) do
     color = socket.assigns.form_data["color"]
 
-    if is_valid_hex_color?(color) do
+    if valid_hex_color?(color) do
       {:noreply, assign(socket, :selected_color, color)}
     else
       validation_messages =
@@ -476,7 +478,7 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
         notify_parent({:saved, category})
         {:noreply, assign(socket, :saving, false)}
 
-      {:error, %Ash.Error.Invalid{} = error} ->
+      {:error, %Invalid{} = error} ->
         errors = extract_ash_errors(error)
 
         {:noreply,
@@ -504,7 +506,7 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
         notify_parent({:saved, category})
         {:noreply, assign(socket, :saving, false)}
 
-      {:error, %Ash.Error.Invalid{} = error} ->
+      {:error, %Invalid{} = error} ->
         errors = extract_ash_errors(error)
 
         {:noreply,
@@ -553,7 +555,7 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
           {["Category color is required" | errors], validation_messages}
 
         color ->
-          if is_valid_hex_color?(color) do
+          if valid_hex_color?(color) do
             {errors, Map.put(validation_messages, :color, "Valid color format")}
           else
             {["Color must be a valid hex color code (e.g., #3B82F6)" | errors],
@@ -579,7 +581,7 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
 
   defp name_already_exists?(_name, _assigns), do: false
 
-  defp is_valid_hex_color?(color) do
+  defp valid_hex_color?(color) do
     Regex.match?(~r/^#[0-9A-Fa-f]{6}$/, color)
   end
 
@@ -596,7 +598,7 @@ defmodule AshfolioWeb.CategoryLive.FormComponent do
     |> Enum.map(&{&1.name, &1.id})
   end
 
-  defp extract_ash_errors(%Ash.Error.Invalid{errors: errors}) do
+  defp extract_ash_errors(%Invalid{errors: errors}) do
     Enum.map(errors, fn
       %{message: message} -> message
       error -> inspect(error)

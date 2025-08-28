@@ -1,9 +1,12 @@
 defmodule AshfolioWeb.NetWorthLive.Index do
+  @moduledoc false
   use AshfolioWeb, :live_view
 
   alias Ashfolio.FinancialManagement.NetWorthSnapshot
   alias AshfolioWeb.Live.FormatHelpers
-  alias Contex.{Dataset, Plot, LineChart}
+  alias Contex.Dataset
+  alias Contex.LineChart
+  alias Contex.Plot
 
   @impl true
   def mount(_params, _session, socket) do
@@ -35,36 +38,34 @@ defmodule AshfolioWeb.NetWorthLive.Index do
 
   @impl true
   def handle_event("create_snapshot", _params, socket) do
-    try do
-      # Calculate current net worth from all accounts
-      current_net_worth = calculate_current_net_worth()
+    # Calculate current net worth from all accounts
+    current_net_worth = calculate_current_net_worth()
 
-      # Create new snapshot  
-      total_assets = current_net_worth
-      total_liabilities = Decimal.new("0.00")
-      net_worth = Decimal.sub(total_assets, total_liabilities)
+    # Create new snapshot
+    total_assets = current_net_worth
+    total_liabilities = Decimal.new("0.00")
+    net_worth = Decimal.sub(total_assets, total_liabilities)
 
-      {:ok, _snapshot} =
-        NetWorthSnapshot.create(%{
-          snapshot_date: Date.utc_today(),
-          total_assets: total_assets,
-          total_liabilities: total_liabilities,
-          net_worth: net_worth,
-          cash_value: calculate_total_cash(),
-          investment_value: calculate_total_investments(),
-          is_automated: false
-        })
+    {:ok, _snapshot} =
+      NetWorthSnapshot.create(%{
+        snapshot_date: Date.utc_today(),
+        total_assets: total_assets,
+        total_liabilities: total_liabilities,
+        net_worth: net_worth,
+        cash_value: calculate_total_cash(),
+        investment_value: calculate_total_investments(),
+        is_automated: false
+      })
 
-      socket =
-        socket
-        |> put_flash(:info, "Net worth snapshot created successfully!")
-        |> load_net_worth_data()
+    socket =
+      socket
+      |> put_flash(:info, "Net worth snapshot created successfully!")
+      |> load_net_worth_data()
 
-      {:noreply, socket}
-    rescue
-      error ->
-        {:noreply, put_flash(socket, :error, "Failed to create snapshot: #{inspect(error)}")}
-    end
+    {:noreply, socket}
+  rescue
+    error ->
+      {:noreply, put_flash(socket, :error, "Failed to create snapshot: #{inspect(error)}")}
   end
 
   @impl true
@@ -311,22 +312,22 @@ defmodule AshfolioWeb.NetWorthLive.Index do
   end
 
   defp filter_by_date_range(snapshots, "last_month") do
-    cutoff_date = Date.utc_today() |> Date.add(-30)
+    cutoff_date = Date.add(Date.utc_today(), -30)
     Enum.filter(snapshots, &(Date.compare(&1.snapshot_date, cutoff_date) != :lt))
   end
 
   defp filter_by_date_range(snapshots, "last_3_months") do
-    cutoff_date = Date.utc_today() |> Date.add(-90)
+    cutoff_date = Date.add(Date.utc_today(), -90)
     Enum.filter(snapshots, &(Date.compare(&1.snapshot_date, cutoff_date) != :lt))
   end
 
   defp filter_by_date_range(snapshots, "last_6_months") do
-    cutoff_date = Date.utc_today() |> Date.add(-180)
+    cutoff_date = Date.add(Date.utc_today(), -180)
     Enum.filter(snapshots, &(Date.compare(&1.snapshot_date, cutoff_date) != :lt))
   end
 
   defp filter_by_date_range(snapshots, "last_year") do
-    cutoff_date = Date.utc_today() |> Date.add(-365)
+    cutoff_date = Date.add(Date.utc_today(), -365)
     Enum.filter(snapshots, &(Date.compare(&1.snapshot_date, cutoff_date) != :lt))
   end
 
@@ -347,22 +348,20 @@ defmodule AshfolioWeb.NetWorthLive.Index do
   defp generate_trend_chart([]), do: nil
 
   defp generate_trend_chart(chart_data) do
-    try do
-      # Create chart using Contex official API
-      chart_data
-      |> Dataset.new()
-      |> Plot.new(LineChart, 800, 400)
-      |> Plot.to_svg()
-    rescue
-      _error ->
-        # Fallback to simple message if chart generation fails
-        """
-        <div class="text-center py-8 text-gray-500">
-          <p>Chart visualization temporarily unavailable</p>
-          <p class="text-sm mt-2">#{length(chart_data)} data points available</p>
-        </div>
-        """
-    end
+    # Create chart using Contex official API
+    chart_data
+    |> Dataset.new()
+    |> Plot.new(LineChart, 800, 400)
+    |> Plot.to_svg()
+  rescue
+    _error ->
+      # Fallback to simple message if chart generation fails
+      """
+      <div class="text-center py-8 text-gray-500">
+        <p>Chart visualization temporarily unavailable</p>
+        <p class="text-sm mt-2">#{length(chart_data)} data points available</p>
+      </div>
+      """
   end
 
   defp calculate_current_net_worth do
@@ -392,7 +391,7 @@ defmodule AshfolioWeb.NetWorthLive.Index do
   end
 
   defp calculate_total_investments do
-    # Placeholder - would sum investment account balances  
+    # Placeholder - would sum investment account balances
     Decimal.new("5000.00")
   end
 

@@ -13,7 +13,10 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
   - Portfolio total value aggregation
   """
 
-  alias Ashfolio.Portfolio.{Transaction, Symbol, Account}
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
+
   require Logger
 
   @doc """
@@ -27,18 +30,19 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
       iex> HoldingsCalculator.calculate_holding_values()
       {:ok, [%{symbol: "AAPL", quantity: %Decimal{}, current_value: %Decimal{}, cost_basis: %Decimal{}}]}
   """
-  def calculate_holding_values() do
+  def calculate_holding_values do
     Logger.debug("Calculating holding values")
 
-    with {:ok, holdings_data} <- get_holdings_data() do
-      holdings_with_values =
-        holdings_data
-        |> Enum.map(&calculate_individual_holding_value/1)
-        |> Enum.filter(fn holding -> not Decimal.equal?(holding.quantity, 0) end)
+    case get_holdings_data() do
+      {:ok, holdings_data} ->
+        holdings_with_values =
+          holdings_data
+          |> Enum.map(&calculate_individual_holding_value/1)
+          |> Enum.filter(fn holding -> not Decimal.equal?(holding.quantity, 0) end)
 
-      Logger.debug("Calculated #{length(holdings_with_values)} holdings with values")
-      {:ok, holdings_with_values}
-    else
+        Logger.debug("Calculated #{length(holdings_with_values)} holdings with values")
+        {:ok, holdings_with_values}
+
       {:error, reason} ->
         Logger.warning("Failed to calculate holding values: #{inspect(reason)}")
         {:error, reason}
@@ -135,7 +139,7 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
       iex> HoldingsCalculator.aggregate_portfolio_value()
       {:ok, %Decimal{}}
   """
-  def aggregate_portfolio_value() do
+  def aggregate_portfolio_value do
     Logger.debug("Aggregating portfolio value")
 
     case calculate_holding_values() do
@@ -159,7 +163,7 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
 
   Returns comprehensive holdings data including values, cost basis, and P&L.
   """
-  def get_holdings_summary() do
+  def get_holdings_summary do
     Logger.debug("Getting holdings summary")
 
     with {:ok, holdings} <- calculate_holding_values(),
@@ -189,9 +193,7 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
         holdings_count: length(holdings)
       }
 
-      Logger.debug(
-        "Holdings summary calculated: #{summary.holdings_count} holdings, total value: #{total_value}"
-      )
+      Logger.debug("Holdings summary calculated: #{summary.holdings_count} holdings, total value: #{total_value}")
 
       {:ok, summary}
     else
@@ -203,36 +205,34 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
 
   # Private functions
 
-  defp get_holdings_data() do
-    try do
-      case Account.list() do
-        {:ok, accounts} ->
-          active_accounts =
-            Enum.filter(accounts, fn account ->
-              not account.is_excluded
-            end)
+  defp get_holdings_data do
+    case Account.list() do
+      {:ok, accounts} ->
+        active_accounts =
+          Enum.filter(accounts, fn account ->
+            not account.is_excluded
+          end)
 
-          if Enum.empty?(active_accounts) do
-            {:ok, []}
-          else
-            account_ids = Enum.map(active_accounts, & &1.id)
+        if Enum.empty?(active_accounts) do
+          {:ok, []}
+        else
+          account_ids = Enum.map(active_accounts, & &1.id)
 
-            holdings =
-              account_ids
-              |> Enum.flat_map(&get_account_transactions/1)
-              |> group_by_symbol()
+          holdings =
+            account_ids
+            |> Enum.flat_map(&get_account_transactions/1)
+            |> group_by_symbol()
 
-            {:ok, holdings}
-          end
+          {:ok, holdings}
+        end
 
-        {:error, reason} ->
-          {:error, reason}
-      end
-    rescue
-      error ->
-        Logger.error("Error getting holdings data: #{inspect(error)}")
-        {:error, :calculation_error}
+      {:error, reason} ->
+        {:error, reason}
     end
+  rescue
+    error ->
+      Logger.error("Error getting holdings data: #{inspect(error)}")
+      {:error, :calculation_error}
   end
 
   defp get_account_transactions(account_id) do
@@ -305,8 +305,7 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
   defp calculate_cost_basis_from_transactions(transactions) do
     # Simple FIFO cost basis calculation
     {total_quantity, total_cost, _} =
-      Enum.reduce(transactions, {Decimal.new(0), Decimal.new(0), []}, fn transaction,
-                                                                         {qty, cost, lots} ->
+      Enum.reduce(transactions, {Decimal.new(0), Decimal.new(0), []}, fn transaction, {qty, cost, lots} ->
         case transaction.type do
           :buy ->
             new_qty = Decimal.add(qty, transaction.quantity)

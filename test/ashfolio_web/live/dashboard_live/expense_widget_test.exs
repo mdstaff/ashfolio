@@ -3,18 +3,20 @@ defmodule AshfolioWeb.DashboardLive.ExpenseWidgetTest do
 
   import Phoenix.LiveViewTest
 
+  alias Ashfolio.FinancialManagement.Expense
+
   describe "expense widget" do
     setup do
       # Create test expenses using Ash directly
       {:ok, expense1} =
-        Ashfolio.FinancialManagement.Expense.create(%{
+        Expense.create(%{
           amount: Decimal.new("100.00"),
           date: Date.utc_today(),
           description: "Test expense 1"
         })
 
       {:ok, expense2} =
-        Ashfolio.FinancialManagement.Expense.create(%{
+        Expense.create(%{
           amount: Decimal.new("50.00"),
           date: Date.add(Date.utc_today(), -5),
           description: "Test expense 2"
@@ -38,10 +40,10 @@ defmodule AshfolioWeb.DashboardLive.ExpenseWidgetTest do
 
     test "shows empty state when no expenses", %{conn: conn} do
       # Clear any existing expenses
-      Ashfolio.FinancialManagement.Expense
+      Expense
       |> Ash.Query.for_read(:read)
       |> Ash.read!()
-      |> Enum.each(&Ashfolio.FinancialManagement.Expense.destroy/1)
+      |> Enum.each(&Expense.destroy/1)
 
       {:ok, view, _html} = live(conn, ~p"/")
 
@@ -63,7 +65,7 @@ defmodule AshfolioWeb.DashboardLive.ExpenseWidgetTest do
       last_month_date = Date.add(Date.beginning_of_month(Date.utc_today()), -15)
 
       {:ok, _last_month_expense} =
-        Ashfolio.FinancialManagement.Expense.create(%{
+        Expense.create(%{
           amount: Decimal.new("200.00"),
           date: last_month_date,
           description: "Last month expense"
@@ -86,7 +88,7 @@ defmodule AshfolioWeb.DashboardLive.ExpenseWidgetTest do
 
       # Create expense with category
       {:ok, _categorized_expense} =
-        Ashfolio.FinancialManagement.Expense.create(%{
+        Expense.create(%{
           amount: Decimal.new("80.00"),
           date: Date.utc_today(),
           description: "Grocery expense",

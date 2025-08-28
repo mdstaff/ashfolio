@@ -20,13 +20,16 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
 
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.FinancialManagement.NetWorthCalculator
+  alias Ashfolio.FinancialManagement.SymbolSearch
+  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Transaction
+  alias Ashfolio.SQLiteHelpers
+
   @moduletag :performance
   @moduletag :slow
   @moduletag :critical_path_benchmarks
-
-  alias Ashfolio.Portfolio.{Account, Transaction}
-  alias Ashfolio.FinancialManagement.{NetWorthCalculator, TransactionCategory, SymbolSearch}
-  alias Ashfolio.SQLiteHelpers
 
   # Performance baseline targets (from previous stages)
   @database_index_target_ms 10
@@ -64,8 +67,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
         operation: "database_index_account_filtering",
         time_ms: time_ms,
         target_ms: @database_index_target_ms,
-        regression_check:
-          time_ms <= @database_index_target_ms * (1 + @regression_threshold_percent / 100),
+        regression_check: time_ms <= @database_index_target_ms * (1 + @regression_threshold_percent / 100),
         result_count: length(results),
         timestamp: DateTime.utc_now()
       }
@@ -89,8 +91,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
         operation: "net_worth_calculation",
         time_ms: time_ms,
         target_ms: @net_worth_calculation_target_ms,
-        regression_check:
-          time_ms <= @net_worth_calculation_target_ms * (1 + @regression_threshold_percent / 100),
+        regression_check: time_ms <= @net_worth_calculation_target_ms * (1 + @regression_threshold_percent / 100),
         net_worth: result.net_worth,
         timestamp: DateTime.utc_now()
       }
@@ -114,8 +115,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
         operation: "account_breakdown_calculation",
         time_ms: time_ms,
         target_ms: @account_breakdown_target_ms,
-        regression_check:
-          time_ms <= @account_breakdown_target_ms * (1 + @regression_threshold_percent / 100),
+        regression_check: time_ms <= @account_breakdown_target_ms * (1 + @regression_threshold_percent / 100),
         account_count: length(result.investment_accounts) + length(result.cash_accounts),
         timestamp: DateTime.utc_now()
       }
@@ -145,8 +145,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
         operation: "symbol_search_cache_hit",
         time_ms: time_ms,
         target_ms: @symbol_cache_hit_target_ms,
-        regression_check:
-          time_ms <= @symbol_cache_hit_target_ms * (1 + @regression_threshold_percent / 100),
+        regression_check: time_ms <= @symbol_cache_hit_target_ms * (1 + @regression_threshold_percent / 100),
         result_count: length(results),
         cache_hit: SymbolSearch.cache_hit?(query),
         timestamp: DateTime.utc_now()
@@ -173,8 +172,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
         operation: "transaction_filtering_by_category",
         time_ms: time_ms,
         target_ms: @transaction_filtering_target_ms,
-        regression_check:
-          time_ms <= @transaction_filtering_target_ms * (1 + @regression_threshold_percent / 100),
+        regression_check: time_ms <= @transaction_filtering_target_ms * (1 + @regression_threshold_percent / 100),
         result_count: length(results),
         timestamp: DateTime.utc_now()
       }
@@ -208,8 +206,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
         operation: "pubsub_broadcast",
         time_ms: time_ms,
         target_ms: @pubsub_broadcast_target_ms,
-        regression_check:
-          time_ms <= @pubsub_broadcast_target_ms * (1 + @regression_threshold_percent / 100),
+        regression_check: time_ms <= @pubsub_broadcast_target_ms * (1 + @regression_threshold_percent / 100),
         timestamp: DateTime.utc_now()
       }
 
@@ -242,8 +239,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
             operation: "pubsub_delivery_latency",
             time_ms: latency_ms,
             target_ms: @pubsub_delivery_target_ms,
-            regression_check:
-              latency_ms <= @pubsub_delivery_target_ms * (1 + @regression_threshold_percent / 100),
+            regression_check: latency_ms <= @pubsub_delivery_target_ms * (1 + @regression_threshold_percent / 100),
             timestamp: DateTime.utc_now()
           }
 
@@ -360,8 +356,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
             operation: "realtime_update_workflow",
             time_ms: total_time_ms,
             target_ms: target_ms,
-            regression_check:
-              total_time_ms <= target_ms * (1 + @regression_threshold_percent / 100),
+            regression_check: total_time_ms <= target_ms * (1 + @regression_threshold_percent / 100),
             calculation_time_ms: calc_time_ms,
             timestamp: DateTime.utc_now()
           }
@@ -471,7 +466,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
 
   # Helper functions
 
-  defp create_comprehensive_test_data() do
+  defp create_comprehensive_test_data do
     # Create accounts
     accounts =
       for i <- 1..5 do
@@ -487,7 +482,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
             name: "Benchmark Account #{i}",
             platform: "Benchmark Platform #{i}",
             account_type: account_type,
-            balance: Decimal.new("#{10000 + i * 5000}")
+            balance: Decimal.new("#{10_000 + i * 5000}")
           })
 
         account
@@ -499,8 +494,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
         {:ok, category} =
           TransactionCategory.create(%{
             name: "Benchmark Category #{i}",
-            color:
-              "##{:rand.uniform(16_777_215) |> Integer.to_string(16) |> String.pad_leading(6, "0")}"
+            color: "##{16_777_215 |> :rand.uniform() |> Integer.to_string(16) |> String.pad_leading(6, "0")}"
           })
 
         category
@@ -535,8 +529,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
             account_id: account.id,
             category_id: category.id,
             symbol_id: symbol.id,
-            quantity:
-              if(rem(i, 2) == 0, do: Decimal.new("#{5 + i}"), else: Decimal.new("-#{3 + i}")),
+            quantity: if(rem(i, 2) == 0, do: Decimal.new("#{5 + i}"), else: Decimal.new("-#{3 + i}")),
             price: Decimal.new("#{100 + i * 2}.00"),
             total_amount: Decimal.new("#{500 + i * 25}.00"),
             date: Date.add(Date.utc_today(), -rem(i, 60))
@@ -556,7 +549,7 @@ defmodule Ashfolio.Performance.CriticalPathBenchmarksTest do
     # For testing, we verify the result has basic structure but don't spam the console
 
     # Verify result has required basic structure for monitoring
-    unless is_map(result) && Map.has_key?(result, :timestamp) do
+    if !(is_map(result) && Map.has_key?(result, :timestamp)) do
       raise "Benchmark result must be a map with :timestamp key"
     end
 

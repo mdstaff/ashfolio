@@ -3,8 +3,8 @@ defmodule AshfolioWeb.AccountLive.ShowBalanceUpdateTest do
 
   import Phoenix.LiveViewTest
 
-  alias Ashfolio.Portfolio.Account
   alias Ashfolio.Context
+  alias Ashfolio.Portfolio.Account
 
   describe "AccountLive.Show Balance Update Integration" do
     setup do
@@ -172,7 +172,7 @@ defmodule AshfolioWeb.AccountLive.ShowBalanceUpdateTest do
       |> form("#balance-update-form", %{"new_balance" => "2500.00", "notes" => "Test update"})
       |> render_submit()
 
-      # Verify new balance is displayed by checking the account name is still there 
+      # Verify new balance is displayed by checking the account name is still there
       # and that the form is dismissed (modal closed)
       assert render(view) =~ "Test Savings Account"
       refute render(view) =~ "balance-update-form"

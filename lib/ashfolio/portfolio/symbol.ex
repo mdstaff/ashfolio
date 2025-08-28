@@ -173,7 +173,7 @@ defmodule Ashfolio.Portfolio.Symbol do
         threshold =
           case Ash.Query.get_argument(query, :stale_threshold) do
             # 1 hour ago
-            nil -> DateTime.utc_now() |> DateTime.add(-3600, :second)
+            nil -> DateTime.add(DateTime.utc_now(), -3600, :second)
             datetime -> datetime
           end
 

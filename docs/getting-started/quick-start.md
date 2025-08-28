@@ -116,5 +116,5 @@ just test-db-emergency-reset
 
 ---
 
-Having issues? Check the [Troubleshooting Guide](troubleshooting.md)  
+Having issues? Check the [Troubleshooting Guide](troubleshooting.md)
 Ready to contribute? See [First Contribution Guide](first-contribution.md)

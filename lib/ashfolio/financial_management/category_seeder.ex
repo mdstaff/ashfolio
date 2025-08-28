@@ -11,7 +11,7 @@ defmodule Ashfolio.FinancialManagement.CategorySeeder do
   The seeded categories are designed for investment portfolio management:
 
   - **Growth** (#10B981): Growth-oriented investments
-  - **Income** (#3B82F6): Income-producing investments  
+  - **Income** (#3B82F6): Income-producing investments
   - **Speculative** (#F59E0B): High-risk/high-reward investments
   - **Index** (#8B5CF6): Index funds and ETFs
   - **Cash** (#6B7280): Cash and cash equivalents
@@ -21,15 +21,15 @@ defmodule Ashfolio.FinancialManagement.CategorySeeder do
 
       # Seed categories for the database-as-user architecture
       {:ok, categories} = CategorySeeder.seed_system_categories()
-      
+
       # Safe to run multiple times - idempotent behavior
       {:ok, categories} = CategorySeeder.seed_system_categories()
 
   """
 
-  require Ash.Query
-
   alias Ashfolio.FinancialManagement.TransactionCategory
+
+  require Ash.Query
 
   @doc """
   Seeds investment system categories for the database-as-user architecture.
@@ -47,14 +47,14 @@ defmodule Ashfolio.FinancialManagement.CategorySeeder do
 
       {:ok, categories} = CategorySeeder.seed_system_categories()
       assert length(categories) == 6
-      
+
       # Running again returns same categories
       {:ok, same_categories} = CategorySeeder.seed_system_categories()
       assert length(same_categories) == 6
 
   """
   @spec seed_system_categories() :: {:ok, [TransactionCategory.t()]} | {:error, term()}
-  def seed_system_categories() do
+  def seed_system_categories do
     # Create or find categories (no user validation needed for database-as-user architecture)
     create_or_find_categories()
   end
@@ -70,7 +70,7 @@ defmodule Ashfolio.FinancialManagement.CategorySeeder do
     {"Bonds", "#059669"}
   ]
 
-  defp create_or_find_categories() do
+  defp create_or_find_categories do
     # Get existing categories (database-as-user architecture)
     existing_categories = get_existing_categories()
     existing_names = MapSet.new(existing_categories, & &1.name)
@@ -107,7 +107,7 @@ defmodule Ashfolio.FinancialManagement.CategorySeeder do
     end
   end
 
-  defp get_existing_categories() do
+  defp get_existing_categories do
     case TransactionCategory.list() do
       {:ok, categories} -> categories
       {:error, _} -> []

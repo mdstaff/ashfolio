@@ -9,11 +9,11 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
       # Reset all existing accounts to zero balance to ensure clean test state
       require Ash.Query
 
-      Ashfolio.Portfolio.Account
+      Account
       |> Ash.Query.for_read(:read)
       |> Ash.read!()
       |> Enum.each(fn account ->
-        Ashfolio.Portfolio.Account.update(account, %{balance: Decimal.new("0.00")})
+        Account.update(account, %{balance: Decimal.new("0.00")})
       end)
 
       :ok
@@ -169,11 +169,11 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
       # Reset all existing accounts to zero balance to ensure clean test state
       require Ash.Query
 
-      Ashfolio.Portfolio.Account
+      Account
       |> Ash.Query.for_read(:read)
       |> Ash.read!()
       |> Enum.each(fn account ->
-        Ashfolio.Portfolio.Account.update(account, %{balance: Decimal.new("0.00")})
+        Account.update(account, %{balance: Decimal.new("0.00")})
       end)
 
       :ok
@@ -286,11 +286,11 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
       # Reset all existing accounts to zero balance to ensure clean test state
       require Ash.Query
 
-      Ashfolio.Portfolio.Account
+      Account
       |> Ash.Query.for_read(:read)
       |> Ash.read!()
       |> Enum.each(fn account ->
-        Ashfolio.Portfolio.Account.update(account, %{balance: Decimal.new("0.00")})
+        Account.update(account, %{balance: Decimal.new("0.00")})
       end)
 
       :ok
@@ -420,11 +420,11 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
       # Reset all existing accounts to zero balance to ensure clean test state
       require Ash.Query
 
-      Ashfolio.Portfolio.Account
+      Account
       |> Ash.Query.for_read(:read)
       |> Ash.read!()
       |> Enum.each(fn account ->
-        Ashfolio.Portfolio.Account.update(account, %{balance: Decimal.new("0.00")})
+        Account.update(account, %{balance: Decimal.new("0.00")})
       end)
 
       :ok

@@ -8,6 +8,7 @@ defmodule AshfolioWeb.ExampleLive do
   """
 
   use AshfolioWeb, :live_view
+
   alias AshfolioWeb.Live.ErrorHelpers
 
   def mount(_params, _session, socket) do

@@ -4,8 +4,12 @@
 #
 # This script creates sample data for the database-as-user architecture.
 
-alias Ashfolio.Portfolio.{UserSettings, Account, Symbol}
-alias Ashfolio.FinancialManagement.{CategorySeeder, TransactionCategory}
+alias Ashfolio.FinancialManagement.CategorySeeder
+alias Ashfolio.FinancialManagement.TransactionCategory
+alias Ashfolio.Portfolio.Account
+alias Ashfolio.Portfolio.Symbol
+alias Ashfolio.Portfolio.Transaction
+alias Ashfolio.Portfolio.UserSettings
 
 # Create user settings if they don't exist (database-as-user architecture)
 # Temporarily disabled during migration to database-as-user architecture
@@ -37,9 +41,7 @@ if Enum.empty?(existing_categories) do
       IO.puts("  ❌ Error creating categories: #{inspect(error)}")
   end
 else
-  IO.puts(
-    "ℹ️  Investment categories already exist (#{length(existing_categories)} categories found)"
-  )
+  IO.puts("ℹ️  Investment categories already exist (#{length(existing_categories)} categories found)")
 end
 
 # Create sample accounts if they don't exist
@@ -74,9 +76,7 @@ if Enum.empty?(existing_accounts) do
   Enum.each(sample_accounts, fn account_attrs ->
     case Account.create(account_attrs) do
       {:ok, account} ->
-        IO.puts(
-          "  ✅ Created account: #{account.name} (#{account.platform}) - $#{account.balance}"
-        )
+        IO.puts("  ✅ Created account: #{account.name} (#{account.platform}) - $#{account.balance}")
 
       {:error, error} ->
         IO.puts("  ❌ Error creating account #{account_attrs.name}: #{inspect(error)}")
@@ -180,9 +180,7 @@ if Enum.empty?(existing_symbols) do
   Enum.each(sample_symbols, fn symbol_attrs ->
     case Symbol.create(symbol_attrs) do
       {:ok, symbol} ->
-        IO.puts(
-          "  ✅ Created symbol: #{symbol.symbol} (#{symbol.name}) - $#{symbol.current_price}"
-        )
+        IO.puts("  ✅ Created symbol: #{symbol.symbol} (#{symbol.name}) - $#{symbol.current_price}")
 
       {:error, error} ->
         IO.puts("  ❌ Error creating symbol #{symbol_attrs.symbol}: #{inspect(error)}")
@@ -193,8 +191,6 @@ else
 end
 
 # Create sample transactions if they don't exist
-alias Ashfolio.Portfolio.Transaction
-
 {:ok, existing_transactions} = Transaction.list()
 
 if Enum.empty?(existing_transactions) do
@@ -346,9 +342,7 @@ if Enum.empty?(existing_transactions) do
     end
   end)
 else
-  IO.puts(
-    "ℹ️  Sample transactions already exist (#{length(existing_transactions)} transactions found)"
-  )
+  IO.puts("ℹ️  Sample transactions already exist (#{length(existing_transactions)} transactions found)")
 end
 
 IO.puts("\n✅ Database seeding completed!")

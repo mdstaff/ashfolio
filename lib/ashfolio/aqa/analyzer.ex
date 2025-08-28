@@ -6,13 +6,16 @@ defmodule Ashfolio.AQA.Analyzer do
   This module provides comprehensive test suite analysis including:
   - Test structure and organization analysis
   - Tag distribution and usage patterns
-  - Architecture compliance checking  
+  - Architecture compliance checking
   - Quality metrics calculation
   - Performance bottleneck identification
   - Recommendation generation
   """
 
-  alias Ashfolio.AQA.{Metrics, TestParser, TagParser, QualityChecker}
+  alias Ashfolio.AQA.Metrics
+  alias Ashfolio.AQA.QualityChecker
+  alias Ashfolio.AQA.TagParser
+  alias Ashfolio.AQA.TestParser
 
   @doc """
   Performs comprehensive static analysis of the test suite.
@@ -45,8 +48,6 @@ defmodule Ashfolio.AQA.Analyzer do
       }
 
       {:ok, metrics}
-    else
-      {:error, reason} -> {:error, reason}
     end
   end
 
@@ -105,8 +106,7 @@ defmodule Ashfolio.AQA.Analyzer do
   """
   def analyze_trends(current_metrics, historical_data \\ []) do
     if length(historical_data) < 2 do
-      {:ok,
-       %{trend: :insufficient_data, message: "Need at least 2 data points for trend analysis"}}
+      {:ok, %{trend: :insufficient_data, message: "Need at least 2 data points for trend analysis"}}
     else
       previous_metrics = List.last(historical_data)
 
@@ -197,7 +197,7 @@ defmodule Ashfolio.AQA.Analyzer do
   end
 
   defp tag_coverage_below_threshold?(tag_distribution) do
-    total_tags = Map.values(tag_distribution) |> Enum.sum()
+    total_tags = tag_distribution |> Map.values() |> Enum.sum()
     # Threshold for adequate tag coverage
     total_tags < 50
   end

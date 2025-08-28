@@ -14,10 +14,12 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
   - Better memory efficiency through streaming
   """
 
+  import Ecto.Query
+
   alias Ashfolio.Portfolio.Account
   alias Ashfolio.Repo
+
   require Logger
-  import Ecto.Query
 
   @doc """
   Calculate total net worth for a user with optimized batch loading.
@@ -61,7 +63,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
       iex> NetWorthCalculatorOptimized.calculate_net_worth("invalid-id")
       {:error, :batch_load_failed}
   """
-  def calculate_net_worth() do
+  def calculate_net_worth do
     Logger.debug("Calculating net worth (optimized) - database-as-user architecture")
 
     start_time = System.monotonic_time(:millisecond)
@@ -90,7 +92,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
 
   Performance: <20ms for 100+ cash accounts
   """
-  def calculate_total_cash_balances() do
+  def calculate_total_cash_balances do
     Logger.debug("Calculating total cash balances (optimized) - database-as-user architecture")
 
     try do
@@ -125,7 +127,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
 
   Performance: <50ms for 50+ accounts with full breakdown
   """
-  def calculate_account_breakdown() do
+  def calculate_account_breakdown do
     Logger.debug("Calculating account breakdown (optimized) - database-as-user architecture")
 
     try do
@@ -147,38 +149,30 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
   # Single query to load all account data needed for net worth calculation.
   # This replaces multiple individual queries with one efficient batch query
   # that includes all necessary data and preloads.
-  defp batch_load_account_data() do
-    try do
-      accounts =
-        from(a in Account,
-          where: a.is_excluded == false,
-          # Efficient ordering for processing
-          order_by: [a.account_type, a.name],
-          select: a
-        )
-        |> Repo.all()
+  defp batch_load_account_data do
+    accounts = Repo.all(from(a in Account, where: a.is_excluded == false, order_by: [a.account_type, a.name], select: a))
+    # Efficient ordering for processing
 
-      # Group accounts by type for efficient processing
-      {investment_accounts, cash_accounts} =
-        Enum.split_with(accounts, fn account ->
-          account.account_type == :investment
-        end)
+    # Group accounts by type for efficient processing
+    {investment_accounts, cash_accounts} =
+      Enum.split_with(accounts, fn account ->
+        account.account_type == :investment
+      end)
 
-      accounts_data = %{
-        all_accounts: accounts,
-        investment_accounts: investment_accounts,
-        cash_accounts: cash_accounts,
-        investment_total: calculate_investment_total_from_accounts(investment_accounts),
-        cash_total: calculate_cash_total_from_accounts(cash_accounts),
-        account_count: length(accounts)
-      }
+    accounts_data = %{
+      all_accounts: accounts,
+      investment_accounts: investment_accounts,
+      cash_accounts: cash_accounts,
+      investment_total: calculate_investment_total_from_accounts(investment_accounts),
+      cash_total: calculate_cash_total_from_accounts(cash_accounts),
+      account_count: length(accounts)
+    }
 
-      {:ok, accounts_data}
-    rescue
-      error ->
-        Logger.error("Error batch loading account data: #{inspect(error)}")
-        {:error, :batch_load_failed}
-    end
+    {:ok, accounts_data}
+  rescue
+    error ->
+      Logger.error("Error batch loading account data: #{inspect(error)}")
+      {:error, :batch_load_failed}
   end
 
   # Calculate net worth from pre-loaded batch data.
@@ -283,7 +277,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
   defp calculate_cash_by_type(cash_accounts) do
     cash_accounts
     |> Enum.group_by(& &1.account_type)
-    |> Enum.map(fn {type, accounts} ->
+    |> Map.new(fn {type, accounts} ->
       total =
         accounts
         |> Enum.map(& &1.balance)
@@ -291,23 +285,20 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
 
       {type, total}
     end)
-    |> Enum.into(%{})
   end
 
   # Broadcast net worth update via PubSub (unchanged from original).
   defp broadcast_net_worth_update(net_worth_data) do
-    try do
-      # Database-as-user architecture: only broadcast to general topic
-      Phoenix.PubSub.broadcast(
-        Ashfolio.PubSub,
-        "net_worth",
-        {:net_worth_updated, net_worth_data}
-      )
+    # Database-as-user architecture: only broadcast to general topic
+    Phoenix.PubSub.broadcast(
+      Ashfolio.PubSub,
+      "net_worth",
+      {:net_worth_updated, net_worth_data}
+    )
 
-      Logger.debug("Net worth update broadcasted (optimized)")
-    rescue
-      error ->
-        Logger.warning("Failed to broadcast net worth update (optimized): #{inspect(error)}")
-    end
+    Logger.debug("Net worth update broadcasted (optimized)")
+  rescue
+    error ->
+      Logger.warning("Failed to broadcast net worth update (optimized): #{inspect(error)}")
   end
 end

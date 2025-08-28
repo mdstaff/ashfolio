@@ -4,15 +4,17 @@ defmodule Ashfolio.FinancialManagement.EmergencyFundCalculator do
 
   Provides functions for:
   - Calculating emergency fund targets based on monthly expenses
-  - Analyzing average monthly expenses from historical data  
+  - Analyzing average monthly expenses from historical data
   - Tracking emergency fund goal progress and timeline
   - Auto-creating emergency fund goals based on expense history
 
   Follows patterns from Expense.ex aggregation and Calculator.ex error handling.
   """
 
+  alias Ashfolio.FinancialManagement.Expense
+  alias Ashfolio.FinancialManagement.FinancialGoal
+
   require Logger
-  alias Ashfolio.FinancialManagement.{Expense, FinancialGoal}
 
   @doc """
   Calculates emergency fund target amount.
@@ -66,31 +68,30 @@ defmodule Ashfolio.FinancialManagement.EmergencyFundCalculator do
 
   """
   def calculate_monthly_expenses_from_period(period_months, end_date \\ Date.utc_today()) do
-    Logger.debug(
-      "Calculating monthly expenses from #{period_months} month period ending #{end_date}"
-    )
+    Logger.debug("Calculating monthly expenses from #{period_months} month period ending #{end_date}")
 
-    with :ok <- validate_period_months(period_months) do
-      start_date = Date.add(end_date, -period_months * 30)
+    case validate_period_months(period_months) do
+      :ok ->
+        start_date = Date.add(end_date, -period_months * 30)
 
-      expenses = get_expenses_for_period(start_date, end_date)
-      total_amount = calculate_total_expenses(expenses)
+        expenses = get_expenses_for_period(start_date, end_date)
+        total_amount = calculate_total_expenses(expenses)
 
-      # Calculate monthly average 
-      monthly_average =
-        if Decimal.equal?(total_amount, Decimal.new("0.00")) do
-          Decimal.new("0.00")
-        else
-          # Simple average: divide total by requested period months
-          Decimal.div(total_amount, Decimal.new(to_string(period_months)))
-        end
+        # Calculate monthly average
+        monthly_average =
+          if Decimal.equal?(total_amount, Decimal.new("0.00")) do
+            Decimal.new("0.00")
+          else
+            # Simple average: divide total by requested period months
+            Decimal.div(total_amount, Decimal.new(to_string(period_months)))
+          end
 
-      Logger.debug(
-        "Monthly expense average: #{monthly_average} from #{length(expenses)} expenses over #{period_months} months"
-      )
+        Logger.debug(
+          "Monthly expense average: #{monthly_average} from #{length(expenses)} expenses over #{period_months} months"
+        )
 
-      {:ok, monthly_average}
-    else
+        {:ok, monthly_average}
+
       {:error, reason} ->
         Logger.warning("Monthly expense calculation failed: #{inspect(reason)}")
         {:error, reason}
@@ -111,7 +112,7 @@ defmodule Ashfolio.FinancialManagement.EmergencyFundCalculator do
   ## Returns
   Map containing:
   - target_amount: Target amount
-  - current_amount: Current progress amount  
+  - current_amount: Current progress amount
   - amount_remaining: Amount still needed
   - progress_percentage: Completion percentage
   - months_to_goal: Months to reach target (nil if no contribution)
@@ -204,8 +205,7 @@ defmodule Ashfolio.FinancialManagement.EmergencyFundCalculator do
     {:error, :invalid_months}
   end
 
-  defp validate_period_months(period_months)
-       when is_integer(period_months) and period_months > 0 do
+  defp validate_period_months(period_months) when is_integer(period_months) and period_months > 0 do
     :ok
   end
 

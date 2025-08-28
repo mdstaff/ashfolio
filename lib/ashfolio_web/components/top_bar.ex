@@ -34,22 +34,8 @@ defmodule AshfolioWeb.Components.TopBar do
             </.link>
           </div>
           
-    <!-- Navigation -->
-          <nav class="hidden md:flex space-x-8" role="navigation" aria-label="Main navigation">
-            <.nav_link navigate={~p"/"} current={@current_page == :dashboard}>
-              <.icon name="hero-chart-bar" class="w-4 h-4 mr-2" /> Dashboard
-            </.nav_link>
-            <.nav_link navigate={~p"/accounts"} current={@current_page == :accounts}>
-              <.icon name="hero-building-library" class="w-4 h-4 mr-2" /> Accounts
-            </.nav_link>
-            <.nav_link navigate={~p"/transactions"} current={@current_page == :transactions}>
-              <.icon name="hero-arrow-right-left" class="w-4 h-4 mr-2" /> Transactions
-            </.nav_link>
-            <.nav_link navigate={~p"/expenses"} current={@current_page == :expenses}>
-              <.icon name="hero-currency-dollar" class="w-4 h-4 mr-2" /> Expenses
-            </.nav_link>
-          </nav>
-          
+    <!-- Navigation moved to subheader -->
+
     <!-- Mobile menu button -->
           <div class="md:hidden">
             <button
@@ -86,12 +72,37 @@ defmodule AshfolioWeb.Components.TopBar do
             <.mobile_nav_link navigate={~p"/expenses"} current={@current_page == :expenses}>
               <.icon name="hero-currency-dollar" class="w-4 h-4 mr-3" /> Expenses
             </.mobile_nav_link>
+            <.mobile_nav_link navigate={~p"/goals"} current={@current_page == :goals}>
+              <.icon name="hero-flag" class="w-4 h-4 mr-3" /> Goals
+            </.mobile_nav_link>
+            <.mobile_nav_link navigate={~p"/forecast"} current={@current_page == :forecast}>
+              <.icon name="hero-chart-line" class="w-4 h-4 mr-3" /> Forecast
+            </.mobile_nav_link>
           </div>
         </div>
       </div>
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 border-t border-gray-200">
-        <h2 class="text-2xl font-bold text-gray-900">{@page_title}</h2>
-        <p class="text-sm text-gray-500">{@page_subtitle}</p>
+      <!-- Main Navigation Subheader -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-gray-200 bg-white">
+        <nav class="flex -mb-px overflow-x-auto scrollbar-hide min-h-[52px]">
+          <.subheader_nav_link navigate={~p"/"} current={@current_page == :dashboard}>
+            <.icon name="hero-chart-bar" class="w-4 h-4 mr-1.5" /> Dashboard
+          </.subheader_nav_link>
+          <.subheader_nav_link navigate={~p"/accounts"} current={@current_page == :accounts}>
+            <.icon name="hero-building-library" class="w-4 h-4 mr-1.5" /> Accounts
+          </.subheader_nav_link>
+          <.subheader_nav_link navigate={~p"/transactions"} current={@current_page == :transactions}>
+            <.icon name="hero-arrow-right-left" class="w-4 h-4 mr-1.5" /> Transactions
+          </.subheader_nav_link>
+          <.subheader_nav_link navigate={~p"/expenses"} current={@current_page == :expenses}>
+            <.icon name="hero-currency-dollar" class="w-4 h-4 mr-1.5" /> Expenses
+          </.subheader_nav_link>
+          <.subheader_nav_link navigate={~p"/goals"} current={@current_page == :goals}>
+            <.icon name="hero-flag" class="w-4 h-4 mr-1.5" /> Goals
+          </.subheader_nav_link>
+          <.subheader_nav_link navigate={~p"/forecast"} current={@current_page == :forecast}>
+            <.icon name="hero-chart-line" class="w-4 h-4 mr-1.5" /> Forecast
+          </.subheader_nav_link>
+        </nav>
       </div>
     </header>
     """

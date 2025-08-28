@@ -13,11 +13,14 @@ defmodule Ashfolio.Integration.CategoryWorkflowIntegrationTest do
 
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.FinancialManagement.CategorySeeder
+  alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
+
   @moduletag :integration
   @moduletag :v0_2_0
-
-  alias Ashfolio.Portfolio.{Account, Symbol, Transaction}
-  alias Ashfolio.FinancialManagement.{TransactionCategory, CategorySeeder}
 
   describe "investment category assignment workflows" do
     setup do
@@ -52,7 +55,7 @@ defmodule Ashfolio.Integration.CategoryWorkflowIntegrationTest do
       # Get available categories
       {:ok, categories} = TransactionCategory.list()
       growth_category = Enum.find(categories, &(&1.name == "Growth"))
-      assert growth_category != nil
+      assert growth_category
 
       # Create transaction with category assignment
       {:ok, transaction} =
@@ -102,7 +105,7 @@ defmodule Ashfolio.Integration.CategoryWorkflowIntegrationTest do
       income_category = Enum.find(categories, &(&1.name == "Income"))
 
       # Bulk assign category to first 3 transactions
-      transaction_ids = Enum.take(transactions, 3) |> Enum.map(& &1.id)
+      transaction_ids = transactions |> Enum.take(3) |> Enum.map(& &1.id)
 
       updated_count =
         Enum.reduce(transaction_ids, 0, fn transaction_id, acc ->
@@ -187,8 +190,8 @@ defmodule Ashfolio.Integration.CategoryWorkflowIntegrationTest do
 
       # Filter by Growth category
       {:ok, growth_transactions} = Transaction.by_category(growth_category.id)
-      growth_ids = Enum.map(growth_transactions, & &1.id) |> Enum.sort()
-      expected_growth_ids = [growth_tx1.id, growth_tx2.id] |> Enum.sort()
+      growth_ids = growth_transactions |> Enum.map(& &1.id) |> Enum.sort()
+      expected_growth_ids = Enum.sort([growth_tx1.id, growth_tx2.id])
       assert growth_ids == expected_growth_ids
 
       # Filter by Income category
@@ -274,7 +277,7 @@ defmodule Ashfolio.Integration.CategoryWorkflowIntegrationTest do
     test "system categories cannot be deleted" do
       {:ok, categories} = TransactionCategory.list()
       system_category = Enum.find(categories, &(&1.is_system == true))
-      assert system_category != nil
+      assert system_category
 
       # Attempt to delete system category should fail
       result = TransactionCategory.destroy(system_category)
@@ -292,7 +295,7 @@ defmodule Ashfolio.Integration.CategoryWorkflowIntegrationTest do
       # Verify category still exists
       {:ok, updated_categories} = TransactionCategory.list()
       still_exists = Enum.find(updated_categories, &(&1.id == system_category.id))
-      assert still_exists != nil
+      assert still_exists
     end
 
     test "system categories cannot be edited" do

@@ -1,12 +1,12 @@
 defmodule Ashfolio.Portfolio.SymbolTest do
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.Portfolio.Symbol
+
   @moduletag :ash_resources
   @moduletag :unit
   @moduletag :fast
   @moduletag :smoke
-
-  alias Ashfolio.Portfolio.Symbol
 
   describe "Symbol resource" do
     test "can create symbol with required attributes" do
@@ -29,7 +29,7 @@ defmodule Ashfolio.Portfolio.SymbolTest do
       assert symbol.sectors == []
       # Default value
       assert symbol.countries == []
-      assert symbol.id != nil
+      assert symbol.id
     end
 
     test "can create symbol with all attributes" do
@@ -60,7 +60,7 @@ defmodule Ashfolio.Portfolio.SymbolTest do
       assert symbol.data_source == :yahoo_finance
       assert Decimal.equal?(symbol.current_price, Decimal.new("150.25"))
       # Allow for small time differences due to processing
-      assert DateTime.diff(symbol.price_updated_at, current_time, :millisecond) |> abs() < 1000
+      assert symbol.price_updated_at |> DateTime.diff(current_time, :millisecond) |> abs() < 1000
     end
 
     test "requires symbol attribute" do
@@ -145,7 +145,7 @@ defmodule Ashfolio.Portfolio.SymbolTest do
           data_source: :coingecko,
           current_price: Decimal.new("45000.00"),
           # 2 hours ago
-          price_updated_at: DateTime.utc_now() |> DateTime.add(-7200, :second)
+          price_updated_at: DateTime.add(DateTime.utc_now(), -7200, :second)
         })
 
       {:ok, spy} =
@@ -188,7 +188,7 @@ defmodule Ashfolio.Portfolio.SymbolTest do
 
     test "can find symbols with stale prices", %{btc: btc} do
       # BTC was updated 2 hours ago, so it should be stale with 1 hour threshold
-      one_hour_ago = DateTime.utc_now() |> DateTime.add(-3600, :second)
+      one_hour_ago = DateTime.add(DateTime.utc_now(), -3600, :second)
       {:ok, symbols} = Symbol.stale_prices(one_hour_ago)
 
       symbol_ids = Enum.map(symbols, & &1.id)
@@ -211,7 +211,7 @@ defmodule Ashfolio.Portfolio.SymbolTest do
 
       assert Decimal.equal?(updated_symbol.current_price, new_price)
       # Allow for small time differences due to processing
-      assert DateTime.diff(updated_symbol.price_updated_at, new_time, :millisecond) |> abs() <
+      assert updated_symbol.price_updated_at |> DateTime.diff(new_time, :millisecond) |> abs() <
                1000
     end
 

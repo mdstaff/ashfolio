@@ -3,212 +3,6 @@
     "by_category": [
       {
         "category": "refactor",
-        "count": 15
-      }
-    ],
-    "by_priority": [
-      {
-        "count": 1,
-        "priority": 2
-      },
-      {
-        "count": 2,
-        "priority": 3
-      },
-      {
-        "count": 12,
-        "priority": 13
-      }
-    ],
-    "file": "lib/mix/tasks/code_gps.ex",
-    "issues": [
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.MapJoin",
-        "column": 21,
-        "column_end": 23,
-        "filename": "lib/mix/tasks/code_gps.ex",
-        "line_no": 363,
-        "message": "`Enum.map_join/3` is more efficient than `Enum.map/2 |> Enum.join/2`.",
-        "priority": 13,
-        "scope": "Mix.Tasks.CodeGps.find_error_pattern",
-        "trigger": "|>"
-      },
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.MapJoin",
-        "column": 21,
-        "column_end": 23,
-        "filename": "lib/mix/tasks/code_gps.ex",
-        "line_no": 378,
-        "message": "`Enum.map_join/3` is more efficient than `Enum.map/2 |> Enum.join/2`.",
-        "priority": 13,
-        "scope": "Mix.Tasks.CodeGps.find_currency_pattern",
-        "trigger": "|>"
-      },
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.MapJoin",
-        "column": 28,
-        "column_end": 30,
-        "filename": "lib/mix/tasks/code_gps.ex",
-        "line_no": 396,
-        "message": "`Enum.map_join/3` is more efficient than `Enum.map/2 |> Enum.join/2`.",
-        "priority": 13,
-        "scope": "Mix.Tasks.CodeGps.find_test_setup_pattern",
-        "trigger": "|>"
-      },
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.MapJoin",
-        "column": 21,
-        "column_end": 23,
-        "filename": "lib/mix/tasks/code_gps.ex",
-        "line_no": 409,
-        "message": "`Enum.map_join/3` is more efficient than `Enum.map/2 |> Enum.join/2`.",
-        "priority": 13,
-        "scope": "Mix.Tasks.CodeGps.find_component_pattern",
-        "trigger": "|>"
-      },
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.MapJoin",
-        "column": 21,
-        "column_end": 23,
-        "filename": "lib/mix/tasks/code_gps.ex",
-        "line_no": 419,
-        "message": "`Enum.map_join/3` is more efficient than `Enum.map/2 |> Enum.join/2`.",
-        "priority": 13,
-        "scope": "Mix.Tasks.CodeGps.find_pubsub_pattern",
-        "trigger": "|>"
-      },
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.MapJoin",
-        "column": 5,
-        "column_end": 7,
-        "filename": "lib/mix/tasks/code_gps.ex",
-        "line_no": 478,
-        "message": "`Enum.map_join/3` is more efficient than `Enum.map/2 |> Enum.join/2`.",
-        "priority": 13,
-        "scope": "Mix.Tasks.CodeGps.encode_live_views_structured",
-        "trigger": "|>"
-      },
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.MapJoin",
-        "column": 5,
-        "column_end": 7,
-        "filename": "lib/mix/tasks/code_gps.ex",
-        "line_no": 501,
-        "message": "`Enum.map_join/3` is more efficient than `Enum.map/2 |> Enum.join/2`.",
-        "priority": 13,
-        "scope": "Mix.Tasks.CodeGps.encode_components_with_attrs",
-        "trigger": "|>"
-      },
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.MapJoin",
-        "column": 5,
-        "column_end": 7,
-        "filename": "lib/mix/tasks/code_gps.ex",
-        "line_no": 547,
-        "message": "`Enum.map_join/3` is more efficient than `Enum.map/2 |> Enum.join/2`.",
-        "priority": 13,
-        "scope": "Mix.Tasks.CodeGps.encode_suggestions_structured",
-        "trigger": "|>"
-      },
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.MapJoin",
-        "column": 7,
-        "column_end": 9,
-        "filename": "lib/mix/tasks/code_gps.ex",
-        "line_no": 565,
-        "message": "`Enum.map_join/3` is more efficient than `Enum.map/2 |> Enum.join/2`.",
-        "priority": 13,
-        "scope": "Mix.Tasks.CodeGps.encode_routes",
-        "trigger": "|>"
-      },
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.MapJoin",
-        "column": 5,
-        "column_end": 7,
-        "filename": "lib/mix/tasks/code_gps.ex",
-        "line_no": 575,
-        "message": "`Enum.map_join/3` is more efficient than `Enum.map/2 |> Enum.join/2`.",
-        "priority": 13,
-        "scope": "Mix.Tasks.CodeGps.encode_dependencies",
-        "trigger": "|>"
-      },
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.MapJoin",
-        "column": 9,
-        "column_end": 11,
-        "filename": "lib/mix/tasks/code_gps.ex",
-        "line_no": 604,
-        "message": "`Enum.map_join/3` is more efficient than `Enum.map/2 |> Enum.join/2`.",
-        "priority": 13,
-        "scope": "Mix.Tasks.CodeGps.encode_test_gaps",
-        "trigger": "|>"
-      },
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.MapJoin",
-        "column": 9,
-        "column_end": 11,
-        "filename": "lib/mix/tasks/code_gps.ex",
-        "line_no": 614,
-        "message": "`Enum.map_join/3` is more efficient than `Enum.map/2 |> Enum.join/2`.",
-        "priority": 13,
-        "scope": "Mix.Tasks.CodeGps.encode_test_gaps",
-        "trigger": "|>"
-      },
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.Nesting",
-        "column": 9,
-        "column_end": 13,
-        "filename": "lib/mix/tasks/code_gps.ex",
-        "line_no": 322,
-        "message": "Function body is nested too deep (max depth is 2, was 3).",
-        "priority": 3,
-        "scope": "Mix.Tasks.CodeGps.extract_component_attrs",
-        "trigger": "case"
-      },
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.Nesting",
-        "column": 18,
-        "column_end": 20,
-        "filename": "lib/mix/tasks/code_gps.ex",
-        "line_no": 562,
-        "message": "Function body is nested too deep (max depth is 2, was 3).",
-        "priority": 3,
-        "scope": "Mix.Tasks.CodeGps.encode_routes",
-        "trigger": "if"
-      },
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.Nesting",
-        "column": 13,
-        "column_end": 17,
-        "filename": "lib/mix/tasks/code_gps.ex",
-        "line_no": 709,
-        "message": "Function body is nested too deep (max depth is 2, was 3).",
-        "priority": 2,
-        "scope": "Mix.Tasks.CodeGps.analyze_dependencies",
-        "trigger": "cond"
-      }
-    ],
-    "total_issues": 15
-  },
-  {
-    "by_category": [
-      {
-        "category": "refactor",
         "count": 6
       }
     ],
@@ -234,7 +28,7 @@
         "column": 8,
         "column_end": 35,
         "filename": "lib/ashfolio/financial_management/contribution_analyzer.ex",
-        "line_no": 976,
+        "line_no": 948,
         "message": "Function is too complex (cyclomatic complexity is 10, max is 9).",
         "priority": 4,
         "scope": "Ashfolio.FinancialManagement.ContributionAnalyzer.build_timing_recommendation",
@@ -246,7 +40,7 @@
         "column": 19,
         "column_end": 21,
         "filename": "lib/ashfolio/financial_management/contribution_analyzer.ex",
-        "line_no": 226,
+        "line_no": 207,
         "message": "Function body is nested too deep (max depth is 2, was 4).",
         "priority": 4,
         "scope": "Ashfolio.FinancialManagement.ContributionAnalyzer.optimize_contribution_for_goal",
@@ -258,7 +52,7 @@
         "column": 13,
         "column_end": 15,
         "filename": "lib/ashfolio/financial_management/contribution_analyzer.ex",
-        "line_no": 513,
+        "line_no": 488,
         "message": "Function body is nested too deep (max depth is 2, was 3).",
         "priority": 5,
         "scope": "Ashfolio.FinancialManagement.ContributionAnalyzer.calculate_contribution_variations",
@@ -270,7 +64,7 @@
         "column": 13,
         "column_end": 17,
         "filename": "lib/ashfolio/financial_management/contribution_analyzer.ex",
-        "line_no": 586,
+        "line_no": 559,
         "message": "Function body is nested too deep (max depth is 2, was 4).",
         "priority": 5,
         "scope": "Ashfolio.FinancialManagement.ContributionAnalyzer.binary_search_contribution",
@@ -282,7 +76,7 @@
         "column": 29,
         "column_end": 31,
         "filename": "lib/ashfolio/financial_management/contribution_analyzer.ex",
-        "line_no": 684,
+        "line_no": 660,
         "message": "Function body is nested too deep (max depth is 2, was 3).",
         "priority": 3,
         "scope": "Ashfolio.FinancialManagement.ContributionAnalyzer.calculate_success_probability",
@@ -294,7 +88,7 @@
         "column": 11,
         "column_end": 13,
         "filename": "lib/ashfolio/financial_management/contribution_analyzer.ex",
-        "line_no": 774,
+        "line_no": 744,
         "message": "Function body is nested too deep (max depth is 2, was 3).",
         "priority": 5,
         "scope": "Ashfolio.FinancialManagement.ContributionAnalyzer.find_required_years",
@@ -302,88 +96,6 @@
       }
     ],
     "total_issues": 6
-  },
-  {
-    "by_category": [
-      {
-        "category": "readability",
-        "count": 5
-      }
-    ],
-    "by_priority": [
-      {
-        "count": 2,
-        "priority": 3
-      },
-      {
-        "count": 3,
-        "priority": 4
-      }
-    ],
-    "file": "lib/ashfolio/financial_management/retirement_calculator.ex",
-    "issues": [
-      {
-        "category": "readability",
-        "check": "Credo.Check.Readability.WithSingleClause",
-        "column": 5,
-        "column_end": 9,
-        "filename": "lib/ashfolio/financial_management/retirement_calculator.ex",
-        "line_no": 223,
-        "message": "`with` contains only one <- clause and an `else` branch, consider using `case` instead",
-        "priority": 4,
-        "scope": "Ashfolio.FinancialManagement.RetirementCalculator.estimate_time_to_goal",
-        "trigger": "with"
-      },
-      {
-        "category": "readability",
-        "check": "Credo.Check.Readability.WithSingleClause",
-        "column": 5,
-        "column_end": 9,
-        "filename": "lib/ashfolio/financial_management/retirement_calculator.ex",
-        "line_no": 268,
-        "message": "`with` contains only one <- clause and an `else` branch, consider using `case` instead",
-        "priority": 4,
-        "scope": "Ashfolio.FinancialManagement.RetirementCalculator.calculate_required_monthly_savings",
-        "trigger": "with"
-      },
-      {
-        "category": "readability",
-        "check": "Credo.Check.Readability.WithSingleClause",
-        "column": 5,
-        "column_end": 9,
-        "filename": "lib/ashfolio/financial_management/retirement_calculator.ex",
-        "line_no": 433,
-        "message": "`with` contains only one <- clause and an `else` branch, consider using `case` instead",
-        "priority": 3,
-        "scope": "Ashfolio.FinancialManagement.RetirementCalculator.calculate_safe_withdrawal_amount",
-        "trigger": "with"
-      },
-      {
-        "category": "readability",
-        "check": "Credo.Check.Readability.WithSingleClause",
-        "column": 5,
-        "column_end": 9,
-        "filename": "lib/ashfolio/financial_management/retirement_calculator.ex",
-        "line_no": 529,
-        "message": "`with` contains only one <- clause and an `else` branch, consider using `case` instead",
-        "priority": 3,
-        "scope": "Ashfolio.FinancialManagement.RetirementCalculator.calculate_monthly_withdrawal_budget",
-        "trigger": "with"
-      },
-      {
-        "category": "readability",
-        "check": "Credo.Check.Readability.WithSingleClause",
-        "column": 5,
-        "column_end": 9,
-        "filename": "lib/ashfolio/financial_management/retirement_calculator.ex",
-        "line_no": 622,
-        "message": "`with` contains only one <- clause and an `else` branch, consider using `case` instead",
-        "priority": 4,
-        "scope": "Ashfolio.FinancialManagement.RetirementCalculator.project_dividend_growth",
-        "trigger": "with"
-      }
-    ],
-    "total_issues": 5
   },
   {
     "by_category": [
@@ -410,7 +122,7 @@
         "column": 7,
         "column_end": 13,
         "filename": "lib/ashfolio_web/live/expense_live/form_component.ex",
-        "line_no": 186,
+        "line_no": 188,
         "message": "Function is too complex (cyclomatic complexity is 11, max is 9).",
         "priority": 3,
         "scope": "AshfolioWeb.ExpenseLive.FormComponent.update",
@@ -422,7 +134,7 @@
         "column": 7,
         "column_end": 19,
         "filename": "lib/ashfolio_web/live/expense_live/form_component.ex",
-        "line_no": 270,
+        "line_no": 272,
         "message": "Function is too complex (cyclomatic complexity is 11, max is 9).",
         "priority": 4,
         "scope": "AshfolioWeb.ExpenseLive.FormComponent.handle_event",
@@ -434,7 +146,7 @@
         "column": 8,
         "column_end": 29,
         "filename": "lib/ashfolio_web/live/expense_live/form_component.ex",
-        "line_no": 370,
+        "line_no": 372,
         "message": "Function is too complex (cyclomatic complexity is 12, max is 9).",
         "priority": 3,
         "scope": "AshfolioWeb.ExpenseLive.FormComponent.validate_expense_form",
@@ -446,85 +158,11 @@
         "column": 15,
         "column_end": 17,
         "filename": "lib/ashfolio_web/live/expense_live/form_component.ex",
-        "line_no": 392,
+        "line_no": 394,
         "message": "Function body is nested too deep (max depth is 2, was 3).",
         "priority": 3,
         "scope": "AshfolioWeb.ExpenseLive.FormComponent.validate_expense_form",
         "trigger": "if"
-      }
-    ],
-    "total_issues": 4
-  },
-  {
-    "by_category": [
-      {
-        "category": "refactor",
-        "count": 4
-      }
-    ],
-    "by_priority": [
-      {
-        "count": 1,
-        "priority": 3
-      },
-      {
-        "count": 1,
-        "priority": 13
-      },
-      {
-        "count": 2,
-        "priority": 14
-      }
-    ],
-    "file": "lib/ashfolio_web/components/forecast_chart.ex",
-    "issues": [
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.CyclomaticComplexity",
-        "column": 8,
-        "column_end": 26,
-        "filename": "lib/ashfolio_web/components/forecast_chart.ex",
-        "line_no": 617,
-        "message": "Function is too complex (cyclomatic complexity is 20, max is 9).",
-        "priority": 3,
-        "scope": "AshfolioWeb.Components.ForecastChart.process_chart_data",
-        "trigger": "process_chart_data"
-      },
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.MapJoin",
-        "column": 26,
-        "column_end": 35,
-        "filename": "lib/ashfolio_web/components/forecast_chart.ex",
-        "line_no": 679,
-        "message": "`Enum.map_join/3` is more efficient than `Enum.map/2 |> Enum.join/2`.",
-        "priority": 13,
-        "scope": "AshfolioWeb.Components.ForecastChart.build_line_path",
-        "trigger": "Enum.join"
-      },
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.MapJoin",
-        "column": 39,
-        "column_end": 48,
-        "filename": "lib/ashfolio_web/components/forecast_chart.ex",
-        "line_no": 709,
-        "message": "`Enum.map_join/3` is more efficient than `Enum.map/2 |> Enum.join/2`.",
-        "priority": 14,
-        "scope": "AshfolioWeb.Components.ForecastChart.build_area_path",
-        "trigger": "Enum.join"
-      },
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.MapJoin",
-        "column": 22,
-        "column_end": 31,
-        "filename": "lib/ashfolio_web/components/forecast_chart.ex",
-        "line_no": 710,
-        "message": "`Enum.map_join/3` is more efficient than `Enum.map/2 |> Enum.join/2`.",
-        "priority": 14,
-        "scope": "AshfolioWeb.Components.ForecastChart.build_area_path",
-        "trigger": "Enum.join"
       }
     ],
     "total_issues": 4
@@ -554,7 +192,7 @@
         "column": 7,
         "column_end": 27,
         "filename": "test/support/sqlite_helpers.ex",
-        "line_no": 319,
+        "line_no": 321,
         "message": "Function is too complex (cyclomatic complexity is 16, max is 9).",
         "priority": 3,
         "scope": "Ashfolio.SQLiteHelpers.get_or_create_symbol",
@@ -566,7 +204,7 @@
         "column": 11,
         "column_end": 15,
         "filename": "test/support/sqlite_helpers.ex",
-        "line_no": 105,
+        "line_no": 107,
         "message": "Function body is nested too deep (max depth is 2, was 3).",
         "priority": 2,
         "scope": "Ashfolio.SQLiteHelpers.create_common_symbols!",
@@ -578,7 +216,7 @@
         "column": 13,
         "column_end": 17,
         "filename": "test/support/sqlite_helpers.ex",
-        "line_no": 301,
+        "line_no": 303,
         "message": "Function body is nested too deep (max depth is 2, was 4).",
         "priority": 3,
         "scope": "Ashfolio.SQLiteHelpers.get_or_create_account",
@@ -590,7 +228,7 @@
         "column": 17,
         "column_end": 21,
         "filename": "test/support/sqlite_helpers.ex",
-        "line_no": 348,
+        "line_no": 350,
         "message": "Function body is nested too deep (max depth is 2, was 6).",
         "priority": 3,
         "scope": "Ashfolio.SQLiteHelpers.get_or_create_symbol",
@@ -602,75 +240,13 @@
   {
     "by_category": [
       {
-        "category": "readability",
-        "count": 3
+        "category": "refactor",
+        "count": 4
       }
     ],
     "by_priority": [
-      {
-        "count": 1,
-        "priority": 12
-      },
       {
         "count": 2,
-        "priority": 13
-      }
-    ],
-    "file": "lib/ashfolio_web/live/format_helpers.ex",
-    "issues": [
-      {
-        "category": "readability",
-        "check": "Credo.Check.Readability.PredicateFunctionNames",
-        "column": 7,
-        "column_end": 19,
-        "filename": "lib/ashfolio_web/live/format_helpers.ex",
-        "line_no": 163,
-        "message": "Predicate function names should not start with 'is', and should end in a question mark.",
-        "priority": 12,
-        "scope": "AshfolioWeb.Live.FormatHelpers",
-        "trigger": "is_positive?"
-      },
-      {
-        "category": "readability",
-        "check": "Credo.Check.Readability.PredicateFunctionNames",
-        "column": 7,
-        "column_end": 19,
-        "filename": "lib/ashfolio_web/live/format_helpers.ex",
-        "line_no": 165,
-        "message": "Predicate function names should not start with 'is', and should end in a question mark.",
-        "priority": 13,
-        "scope": "AshfolioWeb.Live.FormatHelpers.is_positive?",
-        "trigger": "is_positive?"
-      },
-      {
-        "category": "readability",
-        "check": "Credo.Check.Readability.PredicateFunctionNames",
-        "column": 7,
-        "column_end": 19,
-        "filename": "lib/ashfolio_web/live/format_helpers.ex",
-        "line_no": 175,
-        "message": "Predicate function names should not start with 'is', and should end in a question mark.",
-        "priority": 13,
-        "scope": "AshfolioWeb.Live.FormatHelpers.is_positive?",
-        "trigger": "is_positive?"
-      }
-    ],
-    "total_issues": 3
-  },
-  {
-    "by_category": [
-      {
-        "category": "readability",
-        "count": 1
-      },
-      {
-        "category": "refactor",
-        "count": 2
-      }
-    ],
-    "by_priority": [
-      {
-        "count": 1,
         "priority": 1
       },
       {
@@ -680,18 +256,6 @@
     ],
     "file": "lib/ashfolio/financial_management/financial_goal.ex",
     "issues": [
-      {
-        "category": "readability",
-        "check": "Credo.Check.Readability.WithSingleClause",
-        "column": 7,
-        "column_end": 11,
-        "filename": "lib/ashfolio/financial_management/financial_goal.ex",
-        "line_no": 318,
-        "message": "`with` contains only one <- clause and an `else` branch, consider using `case` instead",
-        "priority": 1,
-        "scope": "Ashfolio.FinancialManagement.FinancialGoal.analyze_emergency_fund_readiness!",
-        "trigger": "with"
-      },
       {
         "category": "refactor",
         "check": "Credo.Check.Refactor.CyclomaticComplexity",
@@ -706,6 +270,18 @@
       },
       {
         "category": "refactor",
+        "check": "Credo.Check.Refactor.CyclomaticComplexity",
+        "column": 9,
+        "column_end": 42,
+        "filename": "lib/ashfolio/financial_management/financial_goal.ex",
+        "line_no": 313,
+        "message": "Function is too complex (cyclomatic complexity is 11, max is 9).",
+        "priority": 1,
+        "scope": "Ashfolio.FinancialManagement.FinancialGoal.analyze_emergency_fund_readiness!",
+        "trigger": "analyze_emergency_fund_readiness!"
+      },
+      {
+        "category": "refactor",
         "check": "Credo.Check.Refactor.Nesting",
         "column": 19,
         "column_end": 23,
@@ -715,19 +291,27 @@
         "priority": 2,
         "scope": "Ashfolio.FinancialManagement.FinancialGoal.setup_emergency_fund_goal!",
         "trigger": "case"
+      },
+      {
+        "category": "refactor",
+        "check": "Credo.Check.Refactor.Nesting",
+        "column": 17,
+        "column_end": 21,
+        "filename": "lib/ashfolio/financial_management/financial_goal.ex",
+        "line_no": 346,
+        "message": "Function body is nested too deep (max depth is 2, was 3).",
+        "priority": 1,
+        "scope": "Ashfolio.FinancialManagement.FinancialGoal.analyze_emergency_fund_readiness!",
+        "trigger": "cond"
       }
     ],
-    "total_issues": 3
+    "total_issues": 4
   },
   {
     "by_category": [
       {
-        "category": "readability",
-        "count": 1
-      },
-      {
         "category": "refactor",
-        "count": 2
+        "count": 3
       }
     ],
     "by_priority": [
@@ -740,43 +324,43 @@
         "priority": 3
       }
     ],
-    "file": "lib/ashfolio/portfolio/holdings_calculator.ex",
+    "file": "lib/mix/tasks/code_gps.ex",
     "issues": [
       {
-        "category": "readability",
-        "check": "Credo.Check.Readability.WithSingleClause",
-        "column": 5,
-        "column_end": 9,
-        "filename": "lib/ashfolio/portfolio/holdings_calculator.ex",
-        "line_no": 33,
-        "message": "`with` contains only one <- clause and an `else` branch, consider using `case` instead",
-        "priority": 2,
-        "scope": "Ashfolio.Portfolio.HoldingsCalculator.calculate_holding_values",
-        "trigger": "with"
+        "category": "refactor",
+        "check": "Credo.Check.Refactor.Nesting",
+        "column": 9,
+        "column_end": 13,
+        "filename": "lib/mix/tasks/code_gps.ex",
+        "line_no": 329,
+        "message": "Function body is nested too deep (max depth is 2, was 3).",
+        "priority": 3,
+        "scope": "Mix.Tasks.CodeGps.extract_component_attrs",
+        "trigger": "case"
       },
       {
         "category": "refactor",
         "check": "Credo.Check.Refactor.Nesting",
-        "column": 13,
-        "column_end": 15,
-        "filename": "lib/ashfolio/portfolio/holdings_calculator.ex",
-        "line_no": 327,
+        "column": 18,
+        "column_end": 20,
+        "filename": "lib/mix/tasks/code_gps.ex",
+        "line_no": 571,
         "message": "Function body is nested too deep (max depth is 2, was 3).",
         "priority": 3,
-        "scope": "Ashfolio.Portfolio.HoldingsCalculator.calculate_cost_basis_from_transactions",
+        "scope": "Mix.Tasks.CodeGps.encode_routes",
         "trigger": "if"
       },
       {
         "category": "refactor",
         "check": "Credo.Check.Refactor.Nesting",
-        "column": 43,
-        "column_end": 45,
-        "filename": "lib/ashfolio/portfolio/holdings_calculator.ex",
-        "line_no": 366,
-        "message": "Function body is nested too deep (max depth is 2, was 4).",
-        "priority": 3,
-        "scope": "Ashfolio.Portfolio.HoldingsCalculator.get_symbol_transactions",
-        "trigger": "fn"
+        "column": 13,
+        "column_end": 17,
+        "filename": "lib/mix/tasks/code_gps.ex",
+        "line_no": 712,
+        "message": "Function body is nested too deep (max depth is 2, was 3).",
+        "priority": 2,
+        "scope": "Mix.Tasks.CodeGps.analyze_dependencies",
+        "trigger": "cond"
       }
     ],
     "total_issues": 3
@@ -802,7 +386,7 @@
         "column": 7,
         "column_end": 19,
         "filename": "lib/ashfolio_web/live/expense_live/import.ex",
-        "line_no": 77,
+        "line_no": 81,
         "message": "Function is too complex (cyclomatic complexity is 10, max is 9).",
         "priority": 4,
         "scope": "AshfolioWeb.ExpenseLive.Import.handle_event",
@@ -814,52 +398,10 @@
         "column": 13,
         "column_end": 15,
         "filename": "lib/ashfolio_web/live/expense_live/import.ex",
-        "line_no": 96,
+        "line_no": 100,
         "message": "Function body is nested too deep (max depth is 2, was 3).",
         "priority": 4,
         "scope": "AshfolioWeb.ExpenseLive.Import.handle_event",
-        "trigger": "if"
-      }
-    ],
-    "total_issues": 2
-  },
-  {
-    "by_category": [
-      {
-        "category": "refactor",
-        "count": 2
-      }
-    ],
-    "by_priority": [
-      {
-        "count": 2,
-        "priority": 3
-      }
-    ],
-    "file": "lib/ashfolio/portfolio/calculator.ex",
-    "issues": [
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.CondStatements",
-        "column": 5,
-        "column_end": 9,
-        "filename": "lib/ashfolio/portfolio/calculator.ex",
-        "line_no": 60,
-        "message": "Cond statements should contain at least two conditions besides `true`, consider using `if` instead.",
-        "priority": 3,
-        "scope": "Ashfolio.Portfolio.Calculator.calculate_simple_return",
-        "trigger": "cond"
-      },
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.Nesting",
-        "column": 11,
-        "column_end": 13,
-        "filename": "lib/ashfolio/portfolio/calculator.ex",
-        "line_no": 255,
-        "message": "Function body is nested too deep (max depth is 2, was 3).",
-        "priority": 3,
-        "scope": "Ashfolio.Portfolio.Calculator.calculate_position_summary",
         "trigger": "if"
       }
     ],
@@ -890,7 +432,7 @@
         "column": 8,
         "column_end": 21,
         "filename": "lib/ashfolio_web/live/financial_goal_live/index.ex",
-        "line_no": 711,
+        "line_no": 714,
         "message": "Function is too complex (cyclomatic complexity is 11, max is 9).",
         "priority": 4,
         "scope": "AshfolioWeb.FinancialGoalLive.Index.apply_sorting",
@@ -902,7 +444,7 @@
         "column": 27,
         "column_end": 29,
         "filename": "lib/ashfolio_web/live/financial_goal_live/index.ex",
-        "line_no": 861,
+        "line_no": 862,
         "message": "Function body is nested too deep (max depth is 2, was 3).",
         "priority": 3,
         "scope": "AshfolioWeb.FinancialGoalLive.Index.format_months_to_goal",
@@ -932,7 +474,7 @@
         "column": 8,
         "column_end": 34,
         "filename": "lib/ashfolio_web/live/account_live/balance_update_component.ex",
-        "line_no": 295,
+        "line_no": 293,
         "message": "Function is too complex (cyclomatic complexity is 10, max is 9).",
         "priority": 3,
         "scope": "AshfolioWeb.AccountLive.BalanceUpdateComponent.parse_and_validate_balance",
@@ -944,7 +486,7 @@
         "column": 13,
         "column_end": 17,
         "filename": "lib/ashfolio_web/live/account_live/balance_update_component.ex",
-        "line_no": 309,
+        "line_no": 307,
         "message": "Function body is nested too deep (max depth is 2, was 3).",
         "priority": 3,
         "scope": "AshfolioWeb.AccountLive.BalanceUpdateComponent.parse_and_validate_balance",
@@ -974,7 +516,7 @@
         "column": 8,
         "column_end": 29,
         "filename": "lib/ashfolio/financial_management/transaction_filtering.ex",
-        "line_no": 80,
+        "line_no": 79,
         "message": "Function is too complex (cyclomatic complexity is 13, max is 9).",
         "priority": 3,
         "scope": "Ashfolio.FinancialManagement.TransactionFiltering.apply_category_filter",
@@ -986,7 +528,7 @@
         "column": 15,
         "column_end": 19,
         "filename": "lib/ashfolio/financial_management/transaction_filtering.ex",
-        "line_no": 106,
+        "line_no": 105,
         "message": "Function body is nested too deep (max depth is 2, was 4).",
         "priority": 3,
         "scope": "Ashfolio.FinancialManagement.TransactionFiltering.apply_category_filter",
@@ -998,44 +540,44 @@
   {
     "by_category": [
       {
-        "category": "readability",
-        "count": 1
-      },
-      {
         "category": "refactor",
-        "count": 1
+        "count": 2
       }
     ],
     "by_priority": [
       {
-        "count": 2,
-        "priority": 3
+        "count": 1,
+        "priority": 1
+      },
+      {
+        "count": 1,
+        "priority": 2
       }
     ],
-    "file": "lib/ashfolio/context.ex",
+    "file": "lib/ashfolio/portfolio/calculator_optimized.ex",
     "issues": [
       {
-        "category": "readability",
-        "check": "Credo.Check.Readability.WithSingleClause",
-        "column": 7,
-        "column_end": 11,
-        "filename": "lib/ashfolio/context.ex",
-        "line_no": 195,
-        "message": "`with` contains only one <- clause and an `else` branch, consider using `case` instead",
-        "priority": 3,
-        "scope": "Ashfolio.Context.get_recent_transactions",
-        "trigger": "with"
+        "category": "refactor",
+        "check": "Credo.Check.Refactor.Nesting",
+        "column": 11,
+        "column_end": 15,
+        "filename": "lib/ashfolio/portfolio/calculator_optimized.ex",
+        "line_no": 40,
+        "message": "Function body is nested too deep (max depth is 2, was 3).",
+        "priority": 1,
+        "scope": "Ashfolio.Portfolio.CalculatorOptimized.get_all_holdings_optimized",
+        "trigger": "case"
       },
       {
         "category": "refactor",
         "check": "Credo.Check.Refactor.Nesting",
         "column": 11,
         "column_end": 13,
-        "filename": "lib/ashfolio/context.ex",
-        "line_no": 551,
+        "filename": "lib/ashfolio/portfolio/calculator_optimized.ex",
+        "line_no": 98,
         "message": "Function body is nested too deep (max depth is 2, was 3).",
-        "priority": 3,
-        "scope": "Ashfolio.Context.validate_account_name_uniqueness",
+        "priority": 2,
+        "scope": "Ashfolio.Portfolio.CalculatorOptimized.calculate_position_summary",
         "trigger": "if"
       }
     ],
@@ -1051,34 +593,34 @@
     "by_priority": [
       {
         "count": 2,
-        "priority": 11
+        "priority": 3
       }
     ],
-    "file": "test/integration/account_management_flow_test.exs",
+    "file": "lib/ashfolio/context.ex",
     "issues": [
       {
         "category": "refactor",
-        "check": "Credo.Check.Refactor.NegatedConditionsWithElse",
-        "column": 12,
+        "check": "Credo.Check.Refactor.Nesting",
+        "column": 11,
         "column_end": 15,
-        "filename": "test/integration/account_management_flow_test.exs",
-        "line_no": 93,
-        "message": "Avoid negated conditions in if-else blocks.",
-        "priority": 11,
-        "scope": "AshfolioWeb.Integration.AccountManagementFlowTest",
-        "trigger": "not"
+        "filename": "lib/ashfolio/context.ex",
+        "line_no": 203,
+        "message": "Function body is nested too deep (max depth is 2, was 3).",
+        "priority": 3,
+        "scope": "Ashfolio.Context.get_recent_transactions",
+        "trigger": "case"
       },
       {
         "category": "refactor",
-        "check": "Credo.Check.Refactor.NegatedConditionsWithElse",
-        "column": 12,
-        "column_end": 15,
-        "filename": "test/integration/account_management_flow_test.exs",
-        "line_no": 147,
-        "message": "Avoid negated conditions in if-else blocks.",
-        "priority": 11,
-        "scope": "AshfolioWeb.Integration.AccountManagementFlowTest",
-        "trigger": "not"
+        "check": "Credo.Check.Refactor.Nesting",
+        "column": 11,
+        "column_end": 13,
+        "filename": "lib/ashfolio/context.ex",
+        "line_no": 554,
+        "message": "Function body is nested too deep (max depth is 2, was 3).",
+        "priority": 3,
+        "scope": "Ashfolio.Context.validate_account_name_uniqueness",
+        "trigger": "if"
       }
     ],
     "total_issues": 2
@@ -1108,7 +650,7 @@
         "column": 11,
         "column_end": 15,
         "filename": "lib/ashfolio/financial_management/forecast_calculator.ex",
-        "line_no": 735,
+        "line_no": 726,
         "message": "Function body is nested too deep (max depth is 2, was 3).",
         "priority": 3,
         "scope": "Ashfolio.FinancialManagement.ForecastCalculator.validate_custom_scenarios",
@@ -1120,11 +662,53 @@
         "column": 11,
         "column_end": 13,
         "filename": "lib/ashfolio/financial_management/forecast_calculator.ex",
-        "line_no": 797,
+        "line_no": 779,
         "message": "Function body is nested too deep (max depth is 2, was 3).",
         "priority": 5,
         "scope": "Ashfolio.FinancialManagement.ForecastCalculator.find_years_to_target",
         "trigger": "if"
+      }
+    ],
+    "total_issues": 2
+  },
+  {
+    "by_category": [
+      {
+        "category": "refactor",
+        "count": 2
+      }
+    ],
+    "by_priority": [
+      {
+        "count": 2,
+        "priority": 3
+      }
+    ],
+    "file": "lib/ashfolio/portfolio/holdings_calculator.ex",
+    "issues": [
+      {
+        "category": "refactor",
+        "check": "Credo.Check.Refactor.Nesting",
+        "column": 13,
+        "column_end": 15,
+        "filename": "lib/ashfolio/portfolio/holdings_calculator.ex",
+        "line_no": 326,
+        "message": "Function body is nested too deep (max depth is 2, was 3).",
+        "priority": 3,
+        "scope": "Ashfolio.Portfolio.HoldingsCalculator.calculate_cost_basis_from_transactions",
+        "trigger": "if"
+      },
+      {
+        "category": "refactor",
+        "check": "Credo.Check.Refactor.Nesting",
+        "column": 43,
+        "column_end": 45,
+        "filename": "lib/ashfolio/portfolio/holdings_calculator.ex",
+        "line_no": 365,
+        "message": "Function body is nested too deep (max depth is 2, was 4).",
+        "priority": 3,
+        "scope": "Ashfolio.Portfolio.HoldingsCalculator.get_symbol_transactions",
+        "trigger": "fn"
       }
     ],
     "total_issues": 2
@@ -1150,7 +734,7 @@
         "column": 11,
         "column_end": 15,
         "filename": "lib/ashfolio_web/live/account_live/index.ex",
-        "line_no": 141,
+        "line_no": 140,
         "message": "Function body is nested too deep (max depth is 2, was 3).",
         "priority": 4,
         "scope": "AshfolioWeb.AccountLive.Index.handle_event",
@@ -1180,11 +764,71 @@
         "column": 15,
         "column_end": 17,
         "filename": "lib/ashfolio_web/live/expense_live/analytics.ex",
-        "line_no": 829,
+        "line_no": 827,
         "message": "Function body is nested too deep (max depth is 2, was 3).",
         "priority": 3,
         "scope": "AshfolioWeb.ExpenseLive.Analytics.calculate_year_over_year",
         "trigger": "if"
+      }
+    ],
+    "total_issues": 1
+  },
+  {
+    "by_category": [
+      {
+        "category": "refactor",
+        "count": 1
+      }
+    ],
+    "by_priority": [
+      {
+        "count": 1,
+        "priority": 3
+      }
+    ],
+    "file": "lib/ashfolio/portfolio/calculator.ex",
+    "issues": [
+      {
+        "category": "refactor",
+        "check": "Credo.Check.Refactor.Nesting",
+        "column": 11,
+        "column_end": 13,
+        "filename": "lib/ashfolio/portfolio/calculator.ex",
+        "line_no": 253,
+        "message": "Function body is nested too deep (max depth is 2, was 3).",
+        "priority": 3,
+        "scope": "Ashfolio.Portfolio.Calculator.calculate_position_summary",
+        "trigger": "if"
+      }
+    ],
+    "total_issues": 1
+  },
+  {
+    "by_category": [
+      {
+        "category": "refactor",
+        "count": 1
+      }
+    ],
+    "by_priority": [
+      {
+        "count": 1,
+        "priority": 3
+      }
+    ],
+    "file": "lib/ashfolio_web/components/forecast_chart.ex",
+    "issues": [
+      {
+        "category": "refactor",
+        "check": "Credo.Check.Refactor.CyclomaticComplexity",
+        "column": 8,
+        "column_end": 26,
+        "filename": "lib/ashfolio_web/components/forecast_chart.ex",
+        "line_no": 616,
+        "message": "Function is too complex (cyclomatic complexity is 20, max is 9).",
+        "priority": 3,
+        "scope": "AshfolioWeb.Components.ForecastChart.process_chart_data",
+        "trigger": "process_chart_data"
       }
     ],
     "total_issues": 1
@@ -1210,7 +854,7 @@
         "column": 11,
         "column_end": 15,
         "filename": "lib/ashfolio_web/live/category_live/index.ex",
-        "line_no": 87,
+        "line_no": 89,
         "message": "Function body is nested too deep (max depth is 2, was 3).",
         "priority": 4,
         "scope": "AshfolioWeb.CategoryLive.Index.handle_event",
@@ -1240,7 +884,7 @@
         "column": 8,
         "column_end": 38,
         "filename": "test/performance/critical_path_benchmarks_test.exs",
-        "line_no": 474,
+        "line_no": 469,
         "message": "Function is too complex (cyclomatic complexity is 10, max is 9).",
         "priority": 1,
         "scope": "Ashfolio.Performance.CriticalPathBenchmarksTest.create_comprehensive_test_data",
@@ -1270,7 +914,7 @@
         "column": 13,
         "column_end": 15,
         "filename": "lib/ashfolio_web/live/expense_live/index.ex",
-        "line_no": 704,
+        "line_no": 707,
         "message": "Function body is nested too deep (max depth is 2, was 3).",
         "priority": 4,
         "scope": "AshfolioWeb.ExpenseLive.Index.apply_sorting",
@@ -1300,11 +944,41 @@
         "column": 8,
         "column_end": 34,
         "filename": "lib/ashfolio_web/live/transaction_live/index.ex",
-        "line_no": 509,
+        "line_no": 507,
         "message": "Function is too complex (cyclomatic complexity is 15, max is 9).",
         "priority": 3,
         "scope": "AshfolioWeb.TransactionLive.Index.build_filter_active_string",
         "trigger": "build_filter_active_string"
+      }
+    ],
+    "total_issues": 1
+  },
+  {
+    "by_category": [
+      {
+        "category": "design",
+        "count": 1
+      }
+    ],
+    "by_priority": [
+      {
+        "count": 1,
+        "priority": 2
+      }
+    ],
+    "file": "lib/ashfolio_web/live/forecast_live.ex",
+    "issues": [
+      {
+        "category": "design",
+        "check": "Credo.Check.Design.TagTODO",
+        "column": 5,
+        "column_end": 71,
+        "filename": "lib/ashfolio_web/live/forecast_live.ex",
+        "line_no": 488,
+        "message": "Found a TODO tag in a comment: # TODO: Integrate with actual portfolio calculation when available",
+        "priority": 2,
+        "scope": "AshfolioWeb.ForecastLive.Index.get_current_portfolio_value",
+        "trigger": "# TODO: Integrate with actual portfolio calculation when available"
       }
     ],
     "total_issues": 1
@@ -1349,36 +1023,6 @@
     "by_priority": [
       {
         "count": 1,
-        "priority": 13
-      }
-    ],
-    "file": "lib/ashfolio/error_handler.ex",
-    "issues": [
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.MapJoin",
-        "column": 9,
-        "column_end": 11,
-        "filename": "lib/ashfolio/error_handler.ex",
-        "line_no": 164,
-        "message": "`Enum.map_join/3` is more efficient than `Enum.map/2 |> Enum.join/2`.",
-        "priority": 13,
-        "scope": "Ashfolio.ErrorHandler.format_user_message",
-        "trigger": "|>"
-      }
-    ],
-    "total_issues": 1
-  },
-  {
-    "by_category": [
-      {
-        "category": "refactor",
-        "count": 1
-      }
-    ],
-    "by_priority": [
-      {
-        "count": 1,
         "priority": 3
       }
     ],
@@ -1390,7 +1034,7 @@
         "column": 13,
         "column_end": 17,
         "filename": "lib/ashfolio_web/live/account_live/show.ex",
-        "line_no": 587,
+        "line_no": 585,
         "message": "Function body is nested too deep (max depth is 2, was 3).",
         "priority": 3,
         "scope": "AshfolioWeb.AccountLive.Show.assign_account_data",
@@ -1450,41 +1094,11 @@
         "column": 13,
         "column_end": 17,
         "filename": "lib/ashfolio_web/live/financial_goal_live/form_component.ex",
-        "line_no": 526,
+        "line_no": 513,
         "message": "Function body is nested too deep (max depth is 2, was 3).",
         "priority": 3,
         "scope": "AshfolioWeb.FinancialGoalLive.FormComponent.calculate_months_to_goal",
         "trigger": "case"
-      }
-    ],
-    "total_issues": 1
-  },
-  {
-    "by_category": [
-      {
-        "category": "refactor",
-        "count": 1
-      }
-    ],
-    "by_priority": [
-      {
-        "count": 1,
-        "priority": 2
-      }
-    ],
-    "file": "lib/ashfolio/portfolio/calculator_optimized.ex",
-    "issues": [
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.Nesting",
-        "column": 11,
-        "column_end": 13,
-        "filename": "lib/ashfolio/portfolio/calculator_optimized.ex",
-        "line_no": 100,
-        "message": "Function body is nested too deep (max depth is 2, was 3).",
-        "priority": 2,
-        "scope": "Ashfolio.Portfolio.CalculatorOptimized.calculate_position_summary",
-        "trigger": "if"
       }
     ],
     "total_issues": 1
@@ -1540,41 +1154,11 @@
         "column": 8,
         "column_end": 36,
         "filename": "lib/ashfolio_web/live/account_live/form_component.ex",
-        "line_no": 406,
+        "line_no": 408,
         "message": "Function is too complex (cyclomatic complexity is 22, max is 9).",
         "priority": 3,
         "scope": "AshfolioWeb.AccountLive.FormComponent.generate_validation_messages",
         "trigger": "generate_validation_messages"
-      }
-    ],
-    "total_issues": 1
-  },
-  {
-    "by_category": [
-      {
-        "category": "readability",
-        "count": 1
-      }
-    ],
-    "by_priority": [
-      {
-        "count": 1,
-        "priority": 14
-      }
-    ],
-    "file": "lib/ashfolio/cache.ex",
-    "issues": [
-      {
-        "category": "readability",
-        "check": "Credo.Check.Readability.PredicateFunctionNames",
-        "column": 8,
-        "column_end": 17,
-        "filename": "lib/ashfolio/cache.ex",
-        "line_no": 200,
-        "message": "Predicate function names should not start with 'is', and should end in a question mark.",
-        "priority": 14,
-        "scope": "Ashfolio.Cache.is_fresh?",
-        "trigger": "is_fresh?"
       }
     ],
     "total_issues": 1
@@ -1600,7 +1184,7 @@
         "column": 8,
         "column_end": 40,
         "filename": "test/performance/transaction_filtering_performance_test.exs",
-        "line_no": 344,
+        "line_no": 343,
         "message": "Function is too complex (cyclomatic complexity is 10, max is 9).",
         "priority": 3,
         "scope": "Ashfolio.Performance.TransactionFilteringPerformanceTest.create_large_transaction_dataset",
@@ -1630,7 +1214,7 @@
         "column": 34,
         "column_end": 36,
         "filename": "test/support/sqlite_concurrency_helpers.ex",
-        "line_no": 132,
+        "line_no": 133,
         "message": "Function body is nested too deep (max depth is 2, was 5).",
         "priority": 3,
         "scope": "Ashfolio.SQLiteConcurrencyHelpers.cleanup_test_data",
@@ -1649,52 +1233,22 @@
     "by_priority": [
       {
         "count": 1,
-        "priority": 13
+        "priority": 4
       }
     ],
-    "file": "lib/ashfolio_web/components/transaction_stats.ex",
+    "file": "lib/ashfolio_web/live/dashboard_live.ex",
     "issues": [
       {
         "category": "refactor",
-        "check": "Credo.Check.Refactor.MapJoin",
-        "column": 5,
-        "column_end": 7,
-        "filename": "lib/ashfolio_web/components/transaction_stats.ex",
-        "line_no": 400,
-        "message": "`Enum.map_join/3` is more efficient than `Enum.map/2 |> Enum.join/2`.",
-        "priority": 13,
-        "scope": "AshfolioWeb.Components.TransactionStats.format_whole_number",
-        "trigger": "|>"
-      }
-    ],
-    "total_issues": 1
-  },
-  {
-    "by_category": [
-      {
-        "category": "readability",
-        "count": 1
-      }
-    ],
-    "by_priority": [
-      {
-        "count": 1,
-        "priority": 3
-      }
-    ],
-    "file": "lib/ashfolio/financial_management/emergency_fund_calculator.ex",
-    "issues": [
-      {
-        "category": "readability",
-        "check": "Credo.Check.Readability.WithSingleClause",
-        "column": 5,
-        "column_end": 9,
-        "filename": "lib/ashfolio/financial_management/emergency_fund_calculator.ex",
-        "line_no": 73,
-        "message": "`with` contains only one <- clause and an `else` branch, consider using `case` instead",
-        "priority": 3,
-        "scope": "Ashfolio.FinancialManagement.EmergencyFundCalculator.calculate_monthly_expenses_from_period",
-        "trigger": "with"
+        "check": "Credo.Check.Refactor.Nesting",
+        "column": 13,
+        "column_end": 17,
+        "filename": "lib/ashfolio_web/live/dashboard_live.ex",
+        "line_no": 133,
+        "message": "Function body is nested too deep (max depth is 2, was 3).",
+        "priority": 4,
+        "scope": "AshfolioWeb.DashboardLive.handle_event",
+        "trigger": "case"
       }
     ],
     "total_issues": 1
@@ -1720,41 +1274,11 @@
         "column": 8,
         "column_end": 34,
         "filename": "lib/ashfolio/portfolio/transaction.ex",
-        "line_no": 409,
+        "line_no": 407,
         "message": "Function is too complex (cyclomatic complexity is 26, max is 9).",
         "priority": 3,
         "scope": "Ashfolio.Portfolio.Transaction.validate_quantity_for_type",
         "trigger": "validate_quantity_for_type"
-      }
-    ],
-    "total_issues": 1
-  },
-  {
-    "by_category": [
-      {
-        "category": "refactor",
-        "count": 1
-      }
-    ],
-    "by_priority": [
-      {
-        "count": 1,
-        "priority": 11
-      }
-    ],
-    "file": "test/integration/claude_code_hooks_test.exs",
-    "issues": [
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.MapJoin",
-        "column": 9,
-        "column_end": 11,
-        "filename": "test/integration/claude_code_hooks_test.exs",
-        "line_no": 37,
-        "message": "`Enum.map_join/3` is more efficient than `Enum.map/2 |> Enum.join/2`.",
-        "priority": 11,
-        "scope": "AshfolioWeb.ClaudeCodeHooksTest",
-        "trigger": "|>"
       }
     ],
     "total_issues": 1
@@ -1780,7 +1304,7 @@
         "column": 8,
         "column_end": 34,
         "filename": "test/performance/liveview_update_performance_test.exs",
-        "line_no": 386,
+        "line_no": 388,
         "message": "Function is too complex (cyclomatic complexity is 10, max is 9).",
         "priority": 1,
         "scope": "Ashfolio.Performance.LiveViewUpdatePerformanceTest.create_dashboard_test_data",
@@ -1815,66 +1339,6 @@
         "priority": 3,
         "scope": "Ashfolio.MarketData.PriceManager.fetch_individually_with_rate_limit",
         "trigger": "case"
-      }
-    ],
-    "total_issues": 1
-  },
-  {
-    "by_category": [
-      {
-        "category": "refactor",
-        "count": 1
-      }
-    ],
-    "by_priority": [
-      {
-        "count": 1,
-        "priority": 12
-      }
-    ],
-    "file": "lib/ashfolio/support/logger_filters.ex",
-    "issues": [
-      {
-        "category": "refactor",
-        "check": "Credo.Check.Refactor.NegatedConditionsWithElse",
-        "column": 8,
-        "column_end": 11,
-        "filename": "lib/ashfolio/support/logger_filters.ex",
-        "line_no": 39,
-        "message": "Avoid negated conditions in if-else blocks.",
-        "priority": 12,
-        "scope": "Ashfolio.Support.LoggerFilters.filter_sqlite_connection_errors",
-        "trigger": "not"
-      }
-    ],
-    "total_issues": 1
-  },
-  {
-    "by_category": [
-      {
-        "category": "readability",
-        "count": 1
-      }
-    ],
-    "by_priority": [
-      {
-        "count": 1,
-        "priority": 13
-      }
-    ],
-    "file": "lib/ashfolio_web/live/category_live/form_component.ex",
-    "issues": [
-      {
-        "category": "readability",
-        "check": "Credo.Check.Readability.PredicateFunctionNames",
-        "column": 8,
-        "column_end": 27,
-        "filename": "lib/ashfolio_web/live/category_live/form_component.ex",
-        "line_no": 582,
-        "message": "Predicate function names should not start with 'is', and should end in a question mark.",
-        "priority": 13,
-        "scope": "AshfolioWeb.CategoryLive.FormComponent.is_valid_hex_color?",
-        "trigger": "is_valid_hex_color?"
       }
     ],
     "total_issues": 1

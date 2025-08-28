@@ -10,12 +10,12 @@ defmodule Ashfolio.Performance.SymbolCacheSimpleTest do
 
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.FinancialManagement.SymbolSearch
+  alias Ashfolio.SQLiteHelpers
+
   @moduletag :performance
   @moduletag :slow
   @moduletag :symbol_cache
-
-  alias Ashfolio.FinancialManagement.SymbolSearch
-  alias Ashfolio.SQLiteHelpers
 
   describe "Basic Cache Performance" do
     setup do

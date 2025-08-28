@@ -12,13 +12,13 @@ defmodule Ashfolio.Integration.CashAccountWorkflowsTest do
 
   use Ashfolio.DataCase, async: false
 
+  alias Ashfolio.Context
+  alias Ashfolio.FinancialManagement.BalanceManager
+  alias Ashfolio.Portfolio.Account
+  alias Phoenix.PubSub
+
   @moduletag :integration
   @moduletag :v0_2_0
-
-  alias Ashfolio.Context
-  alias Ashfolio.Portfolio.Account
-  alias Ashfolio.FinancialManagement.BalanceManager
-  alias Phoenix.PubSub
 
   describe "complete cash account lifecycle" do
     setup do

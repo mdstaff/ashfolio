@@ -10,9 +10,12 @@ defmodule AshfolioWeb.ClaudeAgentWorkflowTest do
   """
 
   use ExUnit.Case, async: false
-  @moduletag :skip
+
   import ExUnit.CaptureIO
 
+  alias Mix.Tasks.CodeGps
+
+  @moduletag :skip
   @code_gps_path ".code-gps.yaml"
 
   setup do
@@ -37,7 +40,7 @@ defmodule AshfolioWeb.ClaudeAgentWorkflowTest do
 
     # Complete workflow simulation
     capture_io(fn ->
-      Mix.Tasks.CodeGps.run([])
+      CodeGps.run([])
     end)
 
     # Read step
@@ -52,7 +55,7 @@ defmodule AshfolioWeb.ClaudeAgentWorkflowTest do
 
   test "manifest provides enough context to avoid reading multiple files" do
     capture_io(fn ->
-      Mix.Tasks.CodeGps.run([])
+      CodeGps.run([])
     end)
 
     manifest = File.read!(@code_gps_path)

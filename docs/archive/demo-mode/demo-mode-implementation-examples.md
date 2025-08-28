@@ -1476,7 +1476,7 @@ defmodule Ashfolio.DemoMode.Analytics do
   end
 
   # Get analytics summary
-  def get_summary() do
+  def get_summary do
     GenServer.call(__MODULE__, :get_summary)
   end
 

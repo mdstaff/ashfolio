@@ -33,7 +33,7 @@ From Mix source code (`Mix.State`):
 
 ```elixir
 defmodule Mix.State do
-  def init() do
+  def init do
     %{
       shell: Mix.Shell.IO,
       env: String.to_atom(System.get_env("MIX_ENV") || "dev"),  # Converts to atom and stores

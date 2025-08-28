@@ -1,7 +1,15 @@
 import Config
 
-# Disable Oban in test environment
-config :ashfolio, Oban, testing: :manual
+# In test we don't send emails
+config :ashfolio, Ashfolio.Mailer, adapter: Swoosh.Adapters.Test
+
+# PriceManager test configuration
+config :ashfolio, Ashfolio.MarketData.PriceManager,
+  # Fast tests
+  refresh_timeout: 5_000,
+  batch_size: 5,
+  # Don't retry in tests
+  max_retries: 1
 
 # Configure your database
 #
@@ -33,14 +41,11 @@ config :ashfolio, AshfolioWeb.Endpoint,
   secret_key_base: "rH1VB8pW+sXdD2khpNfLs4VqO+N+IMLTUPOcDRgWAnxU8+1//6Dk7k7RVSYYNgqe",
   server: false
 
-# In test we don't send emails
-config :ashfolio, Ashfolio.Mailer, adapter: Swoosh.Adapters.Test
+# Disable Oban in test environment
+config :ashfolio, Oban, testing: :manual
 
-# Disable swoosh api client as it is only required for production adapters
-config :swoosh, :api_client, false
-
-# Print only warnings and errors during test
-config :logger, level: :warning
+# Use mock for Yahoo Finance in tests
+config :ashfolio, :yahoo_finance_module, YahooFinanceMock
 
 # Filter out expected SQLite connection errors during concurrent tests
 config :logger, :console,
@@ -55,6 +60,9 @@ config :logger,
     [level_lower_than: :warning]
   ]
 
+# Print only warnings and errors during test
+config :logger, level: :warning
+
 # Note: Logger filters are configured in application.ex for runtime filtering
 
 # Initialize plugs at runtime for faster test compilation
@@ -64,16 +72,7 @@ config :phoenix, :plug_init_mode, :runtime
 config :phoenix_live_view,
   enable_expensive_runtime_checks: true
 
-# PriceManager test configuration
-config :ashfolio, Ashfolio.MarketData.PriceManager,
-  # Fast tests
-  refresh_timeout: 5_000,
-  batch_size: 5,
-  # Don't retry in tests
-  max_retries: 1
-
-# Use mock for Yahoo Finance in tests
-config :ashfolio, :yahoo_finance_module, YahooFinanceMock
-
 # Browser testing removed per ADR-003: Browser Testing Strategy
 # Using LiveView-First Testing Strategy instead
+# Disable swoosh api client as it is only required for production adapters
+config :swoosh, :api_client, false

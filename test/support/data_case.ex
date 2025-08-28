@@ -16,15 +16,17 @@ defmodule Ashfolio.DataCase do
 
   use ExUnit.CaseTemplate
 
+  alias Ecto.Adapters.SQL.Sandbox
+
   using do
     quote do
-      alias Ashfolio.Repo
-
+      import Ashfolio.DataCase
+      import Ashfolio.SQLiteHelpers
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
-      import Ashfolio.DataCase
-      import Ashfolio.SQLiteHelpers
+
+      alias Ashfolio.Repo
     end
   end
 
@@ -40,9 +42,9 @@ defmodule Ashfolio.DataCase do
     # Use shared mode for tests that need GenServer access
     # but still provide proper isolation
     pid =
-      Ecto.Adapters.SQL.Sandbox.start_owner!(Ashfolio.Repo, shared: not (tags[:async] || false))
+      Sandbox.start_owner!(Ashfolio.Repo, shared: not (tags[:async] || false))
 
-    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+    on_exit(fn -> Sandbox.stop_owner(pid) end)
   end
 
   @doc """
@@ -63,8 +65,7 @@ defmodule Ashfolio.DataCase do
 
   # Handle Ash errors
   def errors_on(%Ash.Error.Invalid{errors: errors}) do
-    errors
-    |> Enum.reduce(%{}, fn error, acc ->
+    Enum.reduce(errors, %{}, fn error, acc ->
       field = Map.get(error, :field, :base)
       message = Map.get(error, :message, "is invalid")
       Map.update(acc, field, [message], &[message | &1])

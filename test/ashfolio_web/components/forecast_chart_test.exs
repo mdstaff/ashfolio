@@ -1,7 +1,8 @@
 defmodule AshfolioWeb.Components.ForecastChartTest do
   use AshfolioWeb.ConnCase, async: true
-  import Phoenix.LiveViewTest
+
   import Phoenix.Component
+  import Phoenix.LiveViewTest
 
   alias AshfolioWeb.Components.ForecastChart
 
@@ -15,7 +16,9 @@ defmodule AshfolioWeb.Components.ForecastChartTest do
         years: Enum.to_list(0..30),
         values:
           Enum.map(0..30, fn year ->
-            Decimal.mult(Decimal.new("100000"), Decimal.new(:math.pow(1.07, year)))
+            "100000"
+            |> Decimal.new()
+            |> Decimal.mult(Decimal.new(:math.pow(1.07, year)))
             |> Decimal.round(2)
           end)
       }
@@ -140,7 +143,8 @@ defmodule AshfolioWeb.Components.ForecastChartTest do
             total = Decimal.mult(Decimal.new("100000"), Decimal.new(:math.pow(1.07, year)))
             contributions = Decimal.mult(Decimal.new("12000"), Decimal.new(year))
 
-            Decimal.sub(total, Decimal.add(Decimal.new("100000"), contributions))
+            total
+            |> Decimal.sub(Decimal.add(Decimal.new("100000"), contributions))
             |> Decimal.round(2)
           end)
       }
@@ -468,7 +472,7 @@ defmodule AshfolioWeb.Components.ForecastChartTest do
         id: "milestone-chart",
         data: %{
           years: Enum.to_list(0..30),
-          values: Enum.to_list(0..30) |> Enum.map(&Decimal.new("#{&1 * 10000}"))
+          values: 0..30 |> Enum.to_list() |> Enum.map(&Decimal.new("#{&1 * 10_000}"))
         },
         type: :single_projection,
         height: 400,
@@ -507,8 +511,7 @@ defmodule AshfolioWeb.Components.ForecastChartTest do
         id: "fi-chart",
         data: %{
           years: Enum.to_list(0..30),
-          values:
-            Enum.to_list(0..30) |> Enum.map(&Decimal.mult(Decimal.new("50000"), Decimal.new(&1)))
+          values: 0..30 |> Enum.to_list() |> Enum.map(&Decimal.mult(Decimal.new("50000"), Decimal.new(&1)))
         },
         type: :single_projection,
         height: 400,
@@ -544,7 +547,7 @@ defmodule AshfolioWeb.Components.ForecastChartTest do
         id: "today-chart",
         data: %{
           years: Enum.to_list(-5..30),
-          values: Enum.to_list(-5..30) |> Enum.map(&Decimal.new("#{(&1 + 5) * 10000}"))
+          values: -5..30 |> Enum.to_list() |> Enum.map(&Decimal.new("#{(&1 + 5) * 10_000}"))
         },
         type: :single_projection,
         height: 400,
@@ -714,7 +717,8 @@ defmodule AshfolioWeb.Components.ForecastChartTest do
     Enum.map(0..years, fn year ->
       growth_factor = :math.pow(1 + Decimal.to_float(rate), year)
 
-      Decimal.mult(initial, Decimal.new(growth_factor))
+      initial
+      |> Decimal.mult(Decimal.new(growth_factor))
       |> Decimal.round(2)
     end)
   end

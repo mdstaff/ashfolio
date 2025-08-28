@@ -1,15 +1,15 @@
 defmodule AshfolioWeb.Components.TransactionStatsTest do
   use AshfolioWeb.ConnCase, async: false
 
-  @moduletag :components
-  @moduletag :transaction_stats
-
   import Phoenix.LiveViewTest
 
-  alias AshfolioWeb.Components.TransactionStats
   alias Ashfolio.FinancialManagement.TransactionCategory
   alias Ashfolio.Portfolio.Transaction
   alias Ashfolio.SQLiteHelpers
+  alias AshfolioWeb.Components.TransactionStats
+
+  @moduletag :components
+  @moduletag :transaction_stats
 
   describe "TransactionStats component" do
     setup do
@@ -317,7 +317,7 @@ defmodule AshfolioWeb.Components.TransactionStatsTest do
       end)
 
     # Load category association for component testing (using Ash)
-    {:ok, loaded_transaction} = transaction |> Ash.load([:category])
+    {:ok, loaded_transaction} = Ash.load(transaction, [:category])
     loaded_transaction
   end
 end
