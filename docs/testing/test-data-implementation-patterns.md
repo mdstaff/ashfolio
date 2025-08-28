@@ -6,7 +6,7 @@ This document provides concrete implementation patterns based on the architectur
 
 ## Infrastructure vs State Separation
 
-### **Test Infrastructure Pattern**
+### Test Infrastructure Pattern
 
 _(Global, Immutable, Performance-Optimized)_
 
@@ -60,7 +60,7 @@ defmodule Ashfolio.TestInfrastructure do
 end
 ```
 
-### **Per-Test Account Management Pattern**
+### Per-Test Account Management Pattern
 
 _(Isolated, Clean, Predictable)_
 
@@ -117,7 +117,7 @@ end
 
 ## Test Category Patterns
 
-### **Unit Tests: Pure, Fast, No Database**
+### Unit Tests: Pure, Fast, No Database
 
 ```elixir
 defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
@@ -149,7 +149,7 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
 end
 ```
 
-### **Integration Tests: Database, Isolated, Realistic**
+### Integration Tests: Database, Isolated, Realistic
 
 ```elixir
 defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
@@ -197,7 +197,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorTest do
 end
 ```
 
-### **Performance Tests: Large Scale, Measured**
+### Performance Tests: Large Scale, Measured
 
 ```elixir
 defmodule Ashfolio.Performance.NetWorthCalculationPerformanceTest do
@@ -232,7 +232,7 @@ end
 
 ## Financial Domain Test Scenarios
 
-### **Complex Portfolio Scenario**
+### Complex Portfolio Scenario
 
 ```elixir
 # /test/support/test_scenarios.ex
@@ -294,7 +294,7 @@ end
 
 ## SQLite-Specific Patterns
 
-### **Transaction Management**
+### Transaction Management
 
 ```elixir
 # Use transactions for multi-step test setup
@@ -315,7 +315,7 @@ test "complex portfolio calculation maintains consistency" do
 end
 ```
 
-### **Retry Pattern for Concurrency**
+### Retry Pattern for Concurrency
 
 ```elixir
 defp create_test_data_with_retry(attempts \\ 3) do
@@ -335,7 +335,7 @@ end
 
 ## Success Validation
 
-### **Test Health Checks**
+### Test Health Checks
 
 ```elixir
 # Add to test_helper.exs
@@ -367,14 +367,14 @@ TestHealthCheck.validate_test_environment!()
 
 ## Documentation Maintenance
 
-### **Regular Reviews**
+### Regular Reviews
 
 1.  Update test scenarios
 2.  Review global infrastructure
 3.  Check SQLite patterns
 4.  Validate all patterns still work
 
-### **Success Metrics**
+### Success Metrics
 
 - Zero test failures from global data interference
 - Consistent test execution times (< 2s for full suite)

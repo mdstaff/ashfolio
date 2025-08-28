@@ -215,7 +215,7 @@ thing = create_test_transaction()
 
 ### Priority Order for Test Data
 
-1. **Global Data (Highest Priority)**
+1. Global Data (Highest Priority)
 
    ```elixir
 
@@ -223,7 +223,7 @@ thing = create_test_transaction()
    symbol = get_common_symbol("AAPL")  # AAPL, MSFT, GOOGL, TSLA
    ```
 
-2. **Helper Functions (Medium Priority)**
+2. Helper Functions (Medium Priority)
 
    ```elixir
    custom_account = get_or_create_account(%{balance: Decimal.new("50000.00")})
@@ -231,7 +231,7 @@ thing = create_test_transaction()
    transaction = create_test_transaction(user, account, symbol, %{type: :sell})
    ```
 
-3. **Direct Creation (Lowest Priority)**
+3. Direct Creation (Lowest Priority)
    ```elixir
    # Only when absolutely necessary and with retry logic
    result = with_retry(fn ->

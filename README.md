@@ -77,10 +77,10 @@ Ashfolio manages financial data locally on your computer. Track investments, cas
 
 ## Project Status
 
-Current Version: v0.3.4
-Next Release: v0.4.0 (Q1 2026)
+Current Version: v0.4.3 (In Development)
+Previous Release: v0.3.4
 
-### Currently Available (v0.1.0 - v0.3.4 Features)
+### Currently Available (v0.1.0 - v0.4.3 Features)
 
 - Investment Portfolio Tracking: Account and transaction management
 - Net Worth Calculation: Cross-account financial position analysis with manual snapshots
@@ -95,27 +95,47 @@ Next Release: v0.4.0 (Q1 2026)
 - Responsive Interface: Multi-device support with mobile-optimized charts
 - Reliable: Robust error handling with graceful fallbacks
 
+### New in v0.4.x Development
+
+- v0.4.1: Emergency Fund Calculator with expense-based targets
+- v0.4.2: Retirement Planning with 25x rule and 4% safe withdrawal calculations
+- v0.4.3: Portfolio Forecasting with scenario planning (5%/7%/10% growth rates)
+- v0.4.3: Financial Independence timeline calculations with multi-scenario analysis
+- v0.4.3: Custom scenario planning for specialized financial modeling
+
 ### Coming Soon
 
-v0.4.0 (Q3 2025) - Financial Planning & Advanced Analytics:
+v0.4.3 Remaining (Current Sprint):
 
-- Retirement Planning: 25x rule calculations and retirement goal projections
-- Advanced Portfolio Analysis: Risk assessment and diversification metrics
-- Tax Planning: Capital gains optimization and tax-efficient strategies
-- Asset Management: Real estate and vehicle tracking capabilities
+- Stage 4: Contribution Impact Analysis - Analyze portfolio growth with different contribution levels
+- Stage 5: UI Integration - LiveView components with interactive Contex charts
 
-Future Releases:
+v0.4.4: Advanced Portfolio Analytics
 
-- Data Import/Export: CSV and Excel import/export functionality (v0.5.0)
-- Advanced Reporting: Custom reports and performance analytics (v0.6.0)
-- Goal Management: Comprehensive financial goal setting and tracking (v0.7.0)
+- Time-Weighted Return (TWR) calculations
+- Money-Weighted Return (MWR) with IRR methodology
+- Rolling returns analysis and volatility metrics
+
+v0.4.5: Benchmark System
+
+- S&P 500 and market index comparisons
+- Performance tracking against benchmarks
+- Asset allocation analysis
+
+v0.5.0: Full Integration & AER Standardization
+
+- Dashboard widget integration for all v0.4.x features
+- Standardized Annual Equivalent Rate (AER) methodology
+- Data import/export functionality
 
 ### Development Roadmap
 
-v0.4.0 (Q3 2025): Financial Planning & Advanced Analytics  
-v0.5.0 (Q4 2025): Data Import/Export & Advanced Reporting  
-v0.6.0 (Q4 2025): Goal Management & Performance Analytics  
-v0.7.0 (Q1 2026): Feature Completeness & Optimization
+- v0.4.3: Forecasting Engine (In Progress - Stage 3/5 Complete)
+- v0.4.4: Advanced Analytics (Next Sprint)
+- v0.4.5: Benchmark System
+- v0.5.0: Integration & Import/Export
+- v0.6.0: Performance Optimization
+- v0.7.0: Feature Completeness
 
 See [roadmap](docs/roadmap/v0.2-v0.5-roadmap.md) for detailed feature timelines.
 

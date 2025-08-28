@@ -8,7 +8,7 @@ This document explains the correct layout configuration for Phoenix LiveView app
 
 ### Problem Discovered
 
-When upgrading to Phoenix LiveView 1.1, we encountered widespread test failures due to **duplicate ID errors**. Phoenix LiveView 1.1 introduced stricter duplicate ID validation that exposed a fundamental architectural misconfiguration.
+When upgrading to Phoenix LiveView 1.1, we encountered widespread test failures due to duplicate ID errors. Phoenix LiveView 1.1 introduced stricter duplicate ID validation that exposed a fundamental architectural misconfiguration.
 
 60+ test failures due to duplicate IDs in layout components (topbar, flash messages, navigation).
 
@@ -180,7 +180,7 @@ Verifies:
 
 ## Key Insight
 
-**Phoenix LiveView 1.1's stricter duplicate ID validation is a feature, not a bug.**
+Phoenix LiveView 1.1's stricter duplicate ID validation is a feature, not a bug.
 
 It helped us identify a fundamental architectural problem that was:
 

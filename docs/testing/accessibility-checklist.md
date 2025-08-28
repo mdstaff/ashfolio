@@ -62,14 +62,14 @@ Ashfolio aims to meet WCAG 2.1 AA accessibility standards to ensure the applicat
 
 #### Navigation Flow
 
-- [ ] **Tab order is logical and intuitive**
+- [ ] Tab order is logical and intuitive
 
   - [ ] Dashboard: Logo → Navigation → Main content → Footer
   - [ ] Accounts: Navigation → New Account button → Account list → Actions
   - [ ] Transactions: Navigation → New Transaction → Transaction list → Actions
   - [ ] Forms: Form fields in logical order → Submit → Cancel
 
-- [ ] **All interactive elements are keyboard accessible**
+- [ ] All interactive elements are keyboard accessible
 
   - [ ] Navigation links
   - [ ] Buttons (New Account, Edit, Delete, etc.)
@@ -77,14 +77,14 @@ Ashfolio aims to meet WCAG 2.1 AA accessibility standards to ensure the applicat
   - [ ] Modal close buttons
   - [ ] Table sorting controls
 
-- [ ] **Focus indicators are clearly visible**
+- [ ] Focus indicators are clearly visible
   - [ ] Focus outline is visible on all interactive elements
   - [ ] Focus outline has sufficient contrast (3:1 minimum)
   - [ ] Focus outline is not removed by CSS
 
 #### Keyboard Shortcuts
 
-- [ ] **Standard shortcuts work correctly**
+- [ ] Standard shortcuts work correctly
   - [ ] Tab: Move to next focusable element
   - [ ] Shift+Tab: Move to previous focusable element
   - [ ] Enter: Activate buttons and links
@@ -109,20 +109,20 @@ Ashfolio aims to meet WCAG 2.1 AA accessibility standards to ensure the applicat
 
 #### Content Structure
 
-- [ ] **Page structure is semantic and logical**
+- [ ] Page structure is semantic and logical
 
   - [ ] Proper heading hierarchy (h1 → h2 → h3)
   - [ ] Main content areas use landmarks (main, nav, aside)
   - [ ] Lists use proper list markup (ul, ol, li)
   - [ ] Tables use proper table markup with headers
 
-- [ ] **All images have appropriate alt text**
+- [ ] All images have appropriate alt text
 
   - [ ] Informative images have descriptive alt text
   - [ ] Decorative images have empty alt text (alt="")
   - [ ] Complex images have detailed descriptions
 
-- [ ] **Form fields have proper labels**
+- [ ] Form fields have proper labels
   - [ ] All inputs have associated labels
   - [ ] Labels are programmatically associated (for/id)
   - [ ] Required fields are clearly indicated
@@ -130,14 +130,14 @@ Ashfolio aims to meet WCAG 2.1 AA accessibility standards to ensure the applicat
 
 #### ARIA Labels and Descriptions
 
-- [ ] **Interactive elements have appropriate ARIA labels**
+- [ ] Interactive elements have appropriate ARIA labels
 
   - [ ] Buttons have descriptive labels
   - [ ] Links have meaningful text or aria-label
   - [ ] Form controls have labels or aria-labelledby
   - [ ] Complex widgets have appropriate ARIA roles
 
-- [ ] **Dynamic content updates are announced**
+- [ ] Dynamic content updates are announced
   - [ ] Success/error messages use aria-live regions
   - [ ] Loading states are announced
   - [ ] Content changes are communicated
@@ -154,19 +154,19 @@ Ashfolio aims to meet WCAG 2.1 AA accessibility standards to ensure the applicat
 
 #### Form Structure
 
-- [ ] **All form fields have labels**
+- [ ] All form fields have labels
 
   - [ ] Labels are visible and descriptive
   - [ ] Labels are programmatically associated with inputs
   - [ ] Placeholder text is not used as the only label
 
-- [ ] **Required fields are clearly indicated**
+- [ ] Required fields are clearly indicated
 
   - [ ] Visual indicators (asterisk, "required" text)
   - [ ] Programmatic indicators (required attribute, aria-required)
   - [ ] Screen reader announcements include "required"
 
-- [ ] **Error handling is accessible**
+- [ ] Error handling is accessible
   - [ ] Error messages are clearly visible
   - [ ] Error messages are programmatically associated with fields
   - [ ] Error messages provide clear guidance for correction
@@ -174,13 +174,13 @@ Ashfolio aims to meet WCAG 2.1 AA accessibility standards to ensure the applicat
 
 #### Form Validation
 
-- [ ] **Client-side validation is accessible**
+- [ ] Client-side validation is accessible
 
   - [ ] Validation messages are announced by screen readers
   - [ ] Invalid fields are clearly marked
   - [ ] Validation doesn't interfere with screen reader navigation
 
-- [ ] **Form submission feedback**
+- [ ] Form submission feedback
   - [ ] Success messages are announced
   - [ ] Loading states during submission are communicated
   - [ ] Form remains usable if JavaScript fails
@@ -189,20 +189,20 @@ Ashfolio aims to meet WCAG 2.1 AA accessibility standards to ensure the applicat
 
 #### Table Structure
 
-- [ ] **Data tables have proper headers**
+- [ ] Data tables have proper headers
 
   - [ ] Column headers use `<th>` elements
   - [ ] Headers have `scope` attributes where needed
   - [ ] Complex tables use `headers` attribute
 
-- [ ] **Table captions and summaries**
+- [ ] Table captions and summaries
   - [ ] Tables have descriptive captions
   - [ ] Complex tables have summary information
   - [ ] Screen readers can navigate table structure
 
 #### Holdings Table Specific Tests
 
-- [ ] **Portfolio holdings table**
+- [ ] Portfolio holdings table
   - [ ] Column headers are properly marked
   - [ ] Sortable columns are announced as sortable
   - [ ] Current sort order is communicated
@@ -212,19 +212,19 @@ Ashfolio aims to meet WCAG 2.1 AA accessibility standards to ensure the applicat
 
 #### Modal Accessibility
 
-- [ ] **Focus management**
+- [ ] Focus management
 
   - [ ] Focus moves to modal when opened
   - [ ] Focus is trapped within modal
   - [ ] Focus returns to trigger element when closed
 
-- [ ] **Keyboard interaction**
+- [ ] Keyboard interaction
 
   - [ ] Escape key closes modal
   - [ ] Tab navigation works within modal
   - [ ] Background content is not accessible
 
-- [ ] **Screen reader support**
+- [ ] Screen reader support
   - [ ] Modal has appropriate role (dialog)
   - [ ] Modal has accessible name (aria-labelledby)
   - [ ] Modal opening is announced
@@ -233,20 +233,20 @@ Ashfolio aims to meet WCAG 2.1 AA accessibility standards to ensure the applicat
 
 #### Main Navigation
 
-- [ ] **Navigation structure**
+- [ ] Navigation structure
 
   - [ ] Navigation uses semantic nav element
   - [ ] Current page is indicated (aria-current)
   - [ ] Navigation is consistent across pages
 
-- [ ] **Mobile navigation**
+- [ ] Mobile navigation
   - [ ] Hamburger menu is keyboard accessible
   - [ ] Menu state changes are announced
   - [ ] Mobile menu can be closed with Escape
 
 #### Breadcrumb Navigation
 
-- [ ] **Breadcrumb accessibility**
+- [ ] Breadcrumb accessibility
   - [ ] Breadcrumbs use nav element with aria-label
   - [ ] Current page is marked with aria-current
   - [ ] Breadcrumb separators are handled properly

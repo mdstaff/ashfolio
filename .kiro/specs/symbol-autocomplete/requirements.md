@@ -10,7 +10,7 @@ Built on v0.1.0's production-ready architecture with 383 passing tests and compr
 
 ### Requirement 1: Local Symbol Search
 
-**User Story:** As an investor entering transactions, I want to search my existing symbols so that I can quickly select securities I've previously traded.
+User Story: As an investor entering transactions, I want to search my existing symbols so that I can quickly select securities I've previously traded.
 
 #### Acceptance Criteria
 
@@ -22,7 +22,7 @@ Built on v0.1.0's production-ready architecture with 383 passing tests and compr
 
 ### Requirement 2: External API Integration (Optional Enhancement)
 
-**User Story:** As an investor, I want to search for new symbols I haven't traded before so that I can easily add new securities to my portfolio.
+User Story: As an investor, I want to search for new symbols I haven't traded before so that I can easily add new securities to my portfolio.
 
 #### Acceptance Criteria
 
@@ -34,7 +34,7 @@ Built on v0.1.0's production-ready architecture with 383 passing tests and compr
 
 ### Requirement 3: Performance and Caching
 
-**User Story:** As a user, I want fast autocomplete responses so that I can efficiently enter transactions without delays.
+User Story: As a user, I want fast autocomplete responses so that I can efficiently enter transactions without delays.
 
 #### Acceptance Criteria
 

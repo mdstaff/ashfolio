@@ -2,7 +2,7 @@
 
 ## Status
 
-**Accepted** - 2025-08-09
+Accepted - 2025-08-09
 
 ## Metadata
 
@@ -24,7 +24,7 @@ Personal portfolio management applications face competing pressures between feat
 
 ## Decision Summary
 
-Ashfolio adopts a **local-first, single-user architecture** using SQLite as the primary database, explicitly avoiding the complexity and external dependencies common in modern web applications.
+Ashfolio adopts a local-first, single-user architecture using SQLite as the primary database, explicitly avoiding the complexity and external dependencies common in modern web applications.
 
 Local-first architecture prioritizes user data ownership, privacy, and offline reliability by storing data locally rather than in external cloud services.
 
@@ -35,21 +35,21 @@ Local-first architecture prioritizes user data ownership, privacy, and offline r
 - PostgreSQL database, user authentication, cloud deployment, real-time integrations
 - Industry standard, scalable, comprehensive feature integrations possible, familiar to developers
 - Complex setup, external dependencies, privacy concerns, GDPR compliance burden, ongoing operational costs
-- **Rejected** - Overengineering for target use case of personal portfolio management
+- Rejected - Overengineering for target use case of personal portfolio management
 
 ### Option 2: Local-First SQLite Architecture (Selected)
 
 - SQLite database, single-user application, no authentication layer, minimal external dependencies
 - Simple setup, complete privacy, offline capability, zero operational dependencies, fast development cycle
 - Limited to single user, manual data entry required, no real-time integrations
-- **Selected** - Aligns with project philosophy and user privacy requirements
+- Selected - Aligns with project philosophy and user privacy requirements
 
 ### Option 3: Hybrid Cloud-Local Architecture
 
 - Local SQLite with optional cloud sync, user choice between local and cloud storage
 - Flexibility for users, potential for device synchronization
 - Significantly increases complexity, doubles maintenance burden, unclear value proposition
-- **Rejected** - Violates simplicity principle and doubles architectural complexity
+- Rejected - Violates simplicity principle and doubles architectural complexity
 
 ## Decision Rationale
 
@@ -74,28 +74,28 @@ Local-first architecture prioritizes user data ownership, privacy, and offline r
 
 ### Positive Consequences
 
-**Operational Simplicity**
+Operational Simplicity
 
 - Zero-dependency installation (`just dev` starts entire application)
 - Single-file backups (copy SQLite database file)
 - No external service monitoring, maintenance, or operational costs
 - Simplified deployment (single Elixir application)
 
-**User Privacy & Control**
+User Privacy & Control
 
 - Complete data ownership and privacy protection
 - No cloud accounts or external data sharing required
 - Offline capability for all core portfolio management functions
 - No external APIs required for basic functionality
 
-**Development Velocity**
+Development Velocity
 
 - Faster test execution using in-memory SQLite database
 - Reduced complexity by eliminating authentication/authorization layer
 - Clear architectural boundaries with Ash Framework resources
 - Simplified debugging with local data storage
 
-**Performance Characteristics**
+Performance Characteristics
 
 - Sub-millisecond query performance for typical portfolio sizes
 - Real-time UI updates through Phoenix LiveView
@@ -103,28 +103,28 @@ Local-first architecture prioritizes user data ownership, privacy, and offline r
 
 ### Negative Consequences
 
-**Scalability Limitations**
+Scalability Limitations
 
 - Cannot serve multiple users without fundamental rearchitecture
 - Portfolio size practically limited to approximately 1000 positions
 - No built-in data synchronization across multiple devices
 - Manual scaling only (user manages their own data)
 
-**Feature Constraints**
+Feature Constraints
 
 - Manual data entry increases user workload compared to automated integrations
 - No real-time market data streaming (manual refresh only)
 - Limited to basic asset types initially (stocks, ETFs)
 - Single currency support (USD) to avoid forex complexity
 
-**Maintenance Trade-offs**
+Maintenance Trade-offs
 
 - Users responsible for their own data backups
 - Application updates require user action
 - No centralized monitoring of user issues or usage patterns
 - Limited ability to provide user support without access to user data
 
-**Integration Limitations**
+Integration Limitations
 
 - No brokerage API integrations (manual transaction entry)
 - No external service integrations for enhanced features
@@ -165,11 +165,11 @@ No user authentication reduces external attack surface; users maintain responsib
 
 ## Reversibility Assessment
 
-**High** - Moving from SQLite single-user to multi-user architecture would require fundamental application redesign including authentication, data isolation, and external database migration.
+High - Moving from SQLite single-user to multi-user architecture would require fundamental application redesign including authentication, data isolation, and external database migration.
 
-**High** - SQLite data is easily exportable to CSV, JSON, or other standard formats, ensuring user data is never locked in proprietary formats.
+High - SQLite data is easily exportable to CSV, JSON, or other standard formats, ensuring user data is never locked in proprietary formats.
 
-**Not Applicable** - Architectural decisions are foundational design choices that cannot be easily reversed without complete application rewrite.
+Not Applicable - Architectural decisions are foundational design choices that cannot be easily reversed without complete application rewrite.
 
 ## Decision Review Process
 

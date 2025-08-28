@@ -2,8 +2,8 @@
 
 ## Critical Blocking Issue - Immediate Action Required
 
-**Time to Fix:** 2 minutes  
-**Impact:** Prevents application startup and all FinancialManagement testing
+Time to Fix: 2 minutes  
+Impact: Prevents application startup and all FinancialManagement testing
 
 ## One-Line Summary
 
@@ -13,9 +13,9 @@ The `FinancialManagement` domain needs to register the `TransactionCategory` res
 
 ### Step 1: Edit Domain File (30 seconds)
 
-**File:** `/Users/matthewstaff/Projects/github.com/mdstaff/ashfolio/lib/ashfolio/financial_management.ex`
+File: `/Users/matthewstaff/Projects/github.com/mdstaff/ashfolio/lib/ashfolio/financial_management.ex`
 
-**Replace this:**
+Replace this:
 
 ```elixir
   resources do
@@ -23,7 +23,7 @@ The `FinancialManagement` domain needs to register the `TransactionCategory` res
   end
 ```
 
-**With this:**
+With this:
 
 ```elixir
   resources do
@@ -69,4 +69,4 @@ Ashfolio.FinancialManagement.Info.resources()
 2. Notify team that FinancialManagement work can resume
 3. Continue with BalanceManager testing as planned
 
-**For detailed analysis and additional issues, see:** `/Users/matthewstaff/Projects/github.com/mdstaff/ashfolio/docs/CRITICAL_ISSUES_RESOLUTION.md`
+For detailed analysis and additional issues, see: `/Users/matthewstaff/Projects/github.com/mdstaff/ashfolio/docs/CRITICAL_ISSUES_RESOLUTION.md`

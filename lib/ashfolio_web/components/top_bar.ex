@@ -1,4 +1,10 @@
 defmodule AshfolioWeb.Components.TopBar do
+  @moduledoc """
+  Navigation top bar component for the Ashfolio web application.
+
+  Provides consistent top navigation with current page highlighting
+  and page title display functionality.
+  """
   use AshfolioWeb, :html
 
   attr :current_page, :atom, required: true

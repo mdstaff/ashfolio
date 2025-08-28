@@ -2,16 +2,16 @@
 
 ## Overview
 
-**Global test data management** is critical to Ashfolio's testing architecture due to our **database-as-user pattern** and **SQLite concurrency limitations**. During v0.3.0 development, we identified critical issues with global test data management that caused test failures and inconsistent behavior.
+Global test data management is critical to Ashfolio's testing architecture due to our database-as-user pattern and SQLite concurrency limitations. During v0.3.0 development, we identified critical issues with global test data management that caused test failures and inconsistent behavior.
 
 This document establishes requirements and standards for managing global test data to ensure:
 
-- **Reliable test execution** across all environments
-- **Predictable test behavior** for developers and AI agents
-- **Efficient SQLite usage** within concurrency constraints
-- **Clear separation** between unit and integration test concerns
+- Reliable test execution across all environments
+- Predictable test behavior for developers and AI agents
+- Efficient SQLite usage within concurrency constraints
+- Clear separation between unit and integration test concerns
 
-### **Architecture Context**
+### Architecture Context
 
 Ashfolio implements a single-user local application where the database itself represents the user's portfolio. This eliminates traditional user management complexity but requires careful test data coordination.
 
@@ -23,19 +23,19 @@ Unlike traditional multi-tenant applications with user isolation, our tests must
 
 ## Issues Identified
 
-### 1. **Account Balance Interference**
+### 1. Account Balance Interference
 
 - Global test account with $10,000 balance affected net worth calculations
 - Tests expected specific values but got inflated amounts due to global data
 - Example: Test expected $1,500 investment value, got $11,500 (including global account)
 
-### 2. **Inconsistent Data Isolation**
+### 2. Inconsistent Data Isolation
 
 - Tests marked `async: false` but still interfered with each other
 - No systematic reset of global account balances between tests
 - Mix of transaction-based calculations vs. account balance calculations
 
-### 3. **Unclear Test Dependencies**
+### 3. Unclear Test Dependencies
 
 - Tests assumed clean slate but inherited global test data
 - Some tests relied on global data, others were hindered by it
@@ -43,23 +43,23 @@ Unlike traditional multi-tenant applications with user isolation, our tests must
 
 ## Requirements
 
-### 1. **Global Test Data Must Be Predictable**
+### 1. Global Test Data Must Be Predictable
 
-**Essential Global Data:**
+Essential Global Data:
 
 - One test user account (for database-as-user architecture)
 - Standard symbols (AAPL, GOOGL, MSFT, TSLA) with current prices
 - One "Default Test Account" for basic functionality
 
-**Global Data Constraints:**
+Global Data Constraints:
 
 - 🚫 Global accounts MUST have zero balances by default
 - 🚫 Global accounts MUST NOT contain transactions unless explicitly needed
 - Global data MUST be documented and visible in test output
 
-### 2. **Test Isolation Requirements**
+### 2. Test Isolation Requirements
 
-**Per-Test Setup:**
+Per-Test Setup:
 
 ```elixir
 setup do
@@ -73,15 +73,15 @@ setup do
 end
 ```
 
-**Test Categories:**
+Test Categories:
 
 - Should not depend on global data
 - May use global data but must reset state
 - Should use dedicated test accounts
 
-### 3. **Account Balance Management**
+### 3. Account Balance Management
 
-**Current Issue:**
+Current Issue:
 
 ```elixir
 # NetWorthCalculator mixes two calculation methods:
@@ -89,22 +89,22 @@ end
 # 2. Account balance summation (balance-based)
 ```
 
-**Required Fix:**
+Required Fix:
 
 - Use transaction-based calculations (HoldingsCalculator)
 - Use account balance summation
-- **Clear separation** between the two approaches
+- Clear separation between the two approaches
 
-### 4. **Test Data Visibility**
+### 4. Test Data Visibility
 
-**Current Global Test Data:**
+Current Global Test Data:
 
 - User: "Test User"
 - Account: "Default Test Account" (investment, $10,000 balance)
 - Symbols: 4 symbols with market prices
 - Categories: Standard transaction categories
 
-**Required Documentation:**
+Required Documentation:
 
 ```elixir
 # In each test file that uses global data:
@@ -158,7 +158,7 @@ Global Test Data Dependencies:
 
 ## Template Examples
 
-### **Template 1: Unit Test with Global Data**
+### Template 1: Unit Test with Global Data
 
 ```elixir
 defmodule Ashfolio.Calculator.MyCalculatorTest do
@@ -197,7 +197,7 @@ defmodule Ashfolio.Calculator.MyCalculatorTest do
 end
 ```
 
-### **Template 2: Integration Test with Account Reset**
+### Template 2: Integration Test with Account Reset
 
 ```elixir
 defmodule Ashfolio.Integration.PortfolioWorkflowTest do
@@ -245,7 +245,7 @@ defmodule Ashfolio.Integration.PortfolioWorkflowTest do
 end
 ```
 
-### **Template 3: LiveView Test with Custom Data**
+### Template 3: LiveView Test with Custom Data
 
 ```elixir
 defmodule AshfolioWeb.AccountLive.FormTest do
@@ -290,7 +290,7 @@ defmodule AshfolioWeb.AccountLive.FormTest do
 end
 ```
 
-### **Template 4: Complex Scenario with Multiple Resources**
+### Template 4: Complex Scenario with Multiple Resources
 
 ```elixir
 defmodule Ashfolio.Portfolio.ComplexScenarioTest do
@@ -368,23 +368,23 @@ end
 
 ## Integration with Testing Framework
 
-### **Related Documentation**
+### Related Documentation
 
 This document works in conjunction with:
 
-- **[Framework Guide](framework.md)** - Technical implementation details and SQLiteHelpers usage
-- **[SQLite Patterns](patterns.md)** - Concurrency handling and retry logic patterns
-- **[Testing Standards](standards.md)** - Code quality standards and test organization
-- **[Testing Strategy](../TESTING_STRATEGY.md)** - Overall testing approach and categories
+- [Framework Guide](framework.md) - Technical implementation details and SQLiteHelpers usage
+- [SQLite Patterns](patterns.md) - Concurrency handling and retry logic patterns
+- [Testing Standards](standards.md) - Code quality standards and test organization
+- [Testing Strategy](../TESTING_STRATEGY.md) - Overall testing approach and categories
 
-### **For New Developers**
+### For New Developers
 
-1. **Read this document first** to understand global test data strategy
-2. **Review [Framework Guide](framework.md)** for implementation patterns
-3. **Check [Standards](standards.md)** for code organization requirements
-4. **Use [SQLite Patterns](patterns.md)** when encountering concurrency issues
+1. Read this document first to understand global test data strategy
+2. Review [Framework Guide](framework.md) for implementation patterns
+3. Check [Standards](standards.md) for code organization requirements
+4. Use [SQLite Patterns](patterns.md) when encountering concurrency issues
 
-### **For AI Agents**
+### For AI Agents
 
 - `get_default_user()`, `get_default_account()`, `get_common_symbol(ticker)`
 - `get_or_create_account()`, `create_test_transaction()` with built-in retry logic
@@ -393,32 +393,32 @@ This document works in conjunction with:
 
 ## Maintenance & Evolution
 
-### **When to Update This Document**
+### When to Update This Document
 
 This document should be updated when:
 
-- **Global test data structure changes** (new default accounts, symbols, etc.)
-- **SQLiteHelpers module functionality changes** (new helper functions, changed retry logic)
-- **Testing patterns evolve** (new requirements discovered through development)
-- **Architecture changes affect testing** (database schema changes, domain model updates)
+- Global test data structure changes (new default accounts, symbols, etc.)
+- SQLiteHelpers module functionality changes (new helper functions, changed retry logic)
+- Testing patterns evolve (new requirements discovered through development)
+- Architecture changes affect testing (database schema changes, domain model updates)
 
-### **Documentation Review Process**
+### Documentation Review Process
 
 1.  Developers should verify testing patterns still apply
 2.  Update patterns if new SQLite concurrency issues are discovered
 3.  Ensure global test data requirements remain valid
 4.  Review if database-as-user pattern affects testing
 
-### **Keeping Global Test Data Current**
+### Keeping Global Test Data Current
 
 Global test data in `test/support/sqlite_helpers.ex` should be reviewed:
 
-- **When adding new domain entities** that should be globally available
-- **When changing default account structures** that tests depend on
-- **When symbol data requirements change** (new asset classes, price structures)
-- **When database schema migrations affect** core test entities
+- When adding new domain entities that should be globally available
+- When changing default account structures that tests depend on
+- When symbol data requirements change (new asset classes, price structures)
+- When database schema migrations affect core test entities
 
-### **Success Metrics for This Approach**
+### Success Metrics for This Approach
 
 Track these metrics to validate the global test data strategy:
 
@@ -431,9 +431,9 @@ Track these metrics to validate the global test data strategy:
 
 Proper global test data management is critical for:
 
-- **Reliable test suite** with predictable outcomes across SQLite's concurrency constraints
-- **Developer productivity** with clear test requirements and helper patterns
-- **Maintainable codebase** with isolated test concerns and architectural consistency
-- **AI agent effectiveness** with well-defined patterns and global data expectations
+- Reliable test suite with predictable outcomes across SQLite's concurrency constraints
+- Developer productivity with clear test requirements and helper patterns
+- Maintainable codebase with isolated test concerns and architectural consistency
+- AI agent effectiveness with well-defined patterns and global data expectations
 
 This systematic approach established during v0.3.0 development ensures test reliability as the application scales toward v1.0, supporting both human developers and AI agents working on the codebase.

@@ -1,9 +1,9 @@
 # Ashfolio Implementation Plan - Simplified Phase 1
 
-> **🎯 PROJECT STATUS SUMMARY - UPDATED AUGUST 7, 2025**
+> 🎯 PROJECT STATUS SUMMARY - UPDATED AUGUST 7, 2025
 >
-> 🔄 **v0.1.0 RELEASE IN PROGRESS** - Core functionality complete, addressing test stability issues (28/29 tasks complete - 97% overall progress)
-> ⚠️ **CRITICAL ISSUE** - 93 test failures due to database state pollution and symbol uniqueness constraints (290/383 tests passing - 76% pass rate)
+> 🔄 v0.1.0 RELEASE IN PROGRESS - Core functionality complete, addressing test stability issues (28/29 tasks complete - 97% overall progress)
+> ⚠️ CRITICAL ISSUE - 93 test failures due to database state pollution and symbol uniqueness constraints (290/383 tests passing - 76% pass rate)
 > High - Test suite reliability must be restored before v0.1.0 completion
 > Account deletion test improved for multi-account scenarios
 >
@@ -155,7 +155,7 @@ This implementation plan focuses on delivering core portfolio management functio
   - Ensured proper module function visibility and exports
   - Verified all 7 Yahoo Finance tests pass reliably
   - _Requirements: Test suite stability for Yahoo Finance module_
-  - **Completed: 2025-08-02**
+  - Completed: 2025-08-02
 
 - [x] 12. Create simple price manager
 
@@ -177,9 +177,9 @@ This implementation plan focuses on delivering core portfolio management functio
   - Resolved GenServer singleton testing challenges with shared state
   - All 18 PriceManager tests now pass with proper mocking
   - _Requirements: Test suite stability for PriceManager functionality_
-  - **Completed: 2025-08-02**
+  - Completed: 2025-08-02
 
-  **Key Learnings:**
+  Key Learnings:
 
   - Singleton GenServers require special handling in tests
   - Tests must handle persistent state between runs gracefully
@@ -194,11 +194,11 @@ This implementation plan focuses on delivering core portfolio management functio
   - Cache cleanup integrated with test setup
   - Tests for cache operations passing
   - _Requirements: 16.1_
-  - **Completed: Previously completed, verified in Task 12.1**
+  - Completed: Previously completed, verified in Task 12.1
 
 ## Phase 5: Simple Portfolio Calculations (85% confidence) COMPLETED
 
-> **🚨 HANDOFF NOTE FOR NEXT AGENT**
+> 🚨 HANDOFF NOTE FOR NEXT AGENT
 >
 > Phase 5 is now COMPLETE. Before starting Phase 6, please review the completion status:
 >
@@ -219,7 +219,7 @@ This implementation plan focuses on delivering core portfolio management functio
 > - Comprehensive error handling and logging
 > - 23 new test cases added (Calculator: 11, HoldingsCalculator: 12)
 >
-> This project uses **Just** (modern task runner) instead of raw mix commands. Always use the trusted Just commands:
+> This project uses Just (modern task runner) instead of raw mix commands. Always use the trusted Just commands:
 >
 > - `just test` (full suite), `just test-file <path>` (specific file), `just test-coverage`, `just test-watch`
 > - `just dev` (setup + start server), `just compile`, `just format`, `just check` (format + compile + test)
@@ -244,7 +244,7 @@ This implementation plan focuses on delivering core portfolio management functio
   - Integrated with Account, Symbol, and Cache modules for data access
   - Implemented proper error handling with logging and graceful degradation
   - _Requirements: 5.1, 5.2_
-  - **Completed: 2025-08-02**
+  - Completed: 2025-08-02
 
 - [x] 15. Create holdings value calculator
   - Created `Ashfolio.Portfolio.HoldingsCalculator` as specialized holdings analysis module
@@ -256,7 +256,7 @@ This implementation plan focuses on delivering core portfolio management functio
   - Implemented comprehensive test suite with 12 test cases
   - Fixed test data pollution issues to ensure reliable test execution
   - _Requirements: 5.3_
-  - **Completed: 2025-08-02**
+  - Completed: 2025-08-02
 
 ## Phase 6: Basic LiveView Setup (80% confidence)
 
@@ -270,7 +270,7 @@ This implementation plan focuses on delivering core portfolio management functio
   - Integrated with existing error handling and flash message system
   - Enhanced core components with navigation, mobile navigation, and utility components
   - _Requirements: 12.1, 15.1_
-  - **Completed: 2025-08-02**
+  - Completed: 2025-08-02
 
 - [x] 17. Configure simple routing
   - Set up Phoenix router for basic pages (dashboard, accounts, transactions)
@@ -278,13 +278,13 @@ This implementation plan focuses on delivering core portfolio management functio
   - Add simple route helpers
   - Test basic navigation works
   - _Requirements: 1.1, 1.2_
-  - **Completed: 2025-08-02**
+  - Completed: 2025-08-02
 
 ## Phase 7: Portfolio Dashboard (85% confidence)
 
-> **🔬 RESEARCH COMPLETE - IMPLEMENTATION READY**
+> 🔬 RESEARCH COMPLETE - IMPLEMENTATION READY
 >
-> **Key Technical Findings:**
+> Key Technical Findings:
 >
 > - HoldingsCalculator returns well-defined holding objects with all needed fields
 > - Phoenix core_components.ex provides production-ready table with sorting support
@@ -292,7 +292,7 @@ This implementation plan focuses on delivering core portfolio management functio
 > - Currency and percentage formatting patterns identified
 > - Simple LiveView handle_event pattern for client-side sorting
 >
-> **Holdings Data Structure Available:**
+> Holdings Data Structure Available:
 >
 > ```elixir
 > %{
@@ -319,7 +319,7 @@ This implementation plan focuses on delivering core portfolio management functio
   - Verified integration with Calculator and HoldingsCalculator modules
   - Ensured all dashboard functionality works correctly with real portfolio data
   - _Requirements: 13.1_
-  - **Completed: 2025-08-02**
+  - Completed: 2025-08-02
 
 - [x] 19. Add portfolio value display
 
@@ -347,7 +347,7 @@ This implementation plan focuses on delivering core portfolio management functio
   - Used proper CSS classes for text alignment and color coding
   - _Requirements: 13.3, 15.1_
   - _Technical: Phoenix table component, FormatHelpers integration, responsive design_
-  - **Completed: 2025-08-03**
+  - Completed: 2025-08-03
 
 - [x] 21. Add manual price refresh
 
@@ -368,7 +368,7 @@ This implementation plan focuses on delivering core portfolio management functio
   - Success/error flash messages shown using ErrorHelpers
   - _Requirements: 6.1, 6.2_
   - _Technical: PriceManager GenServer, flash system, LiveView assigns_
-  - **Completed: 2025-08-03**
+  - Completed: 2025-08-03
 
 - [x] 21.5. Optimize test suite output and organization
 
@@ -383,11 +383,11 @@ This implementation plan focuses on delivering core portfolio management functio
   - All 201 tests now passing (196 main + 5 seeding) with clean, focused output
   - _Requirements: Developer Experience, Test Organization_
   - _Technical: ExUnit configuration, justfile commands, LiveView test setup_
-  - **Completed: 2025-08-03**
+  - Completed: 2025-08-03
 
 ## Phase 8: Account Management (85% confidence)
 
-> **🎯 PHASE 8 STATUS UPDATE**
+> 🎯 PHASE 8 STATUS UPDATE
 >
 > 6/16 tasks completed (37.5% complete)
 > 210/210 tests passing (100% pass rate)
@@ -420,7 +420,7 @@ This implementation plan focuses on delivering core portfolio management functio
   - Added default user creation if none exists for single-user application design
   - AccountLive.Show module for account details (Phase 8 Tasks 1-6)
   - _Requirements: 2.1, 2.2, 2.3_
-  - **Completed: 2025-08-03**
+  - Completed: 2025-08-03
 
 - [-] 23. Add account CRUD operations
   - Phase 8 detailed implementation in progress (see account-management/tasks.md)
@@ -457,7 +457,7 @@ This implementation plan focuses on delivering core portfolio management functio
 
 ## Phase 10: Basic Testing and Polish (85% confidence)
 
-> **🎯 PHASE 10 STATUS UPDATE - August 7, 2025**
+> 🎯 PHASE 10 STATUS UPDATE - August 7, 2025
 >
 > Phase 10 nearly complete - 28/29 tasks finished (97% overall progress)
 > Comprehensive test suite complete with enhanced portfolio calculation coverage, all critical issues resolved
@@ -469,7 +469,7 @@ This implementation plan focuses on delivering core portfolio management functio
 > - PubSub for transaction events implemented (COMPLETE)
 > - Enhanced loading states for transaction CRUD (COMPLETE)
 
-- [x] 26.5 Fix Critical Compilation Issues **COMPLETE** (August 6, 2025)
+- [x] 26.5 Fix Critical Compilation Issues COMPLETE (August 6, 2025)
 
   - [x] 26.5.1 Fix PubSub Implementation Issues
     - Fixed `Ashfolio.PubSub.broadcast!/2` undefined function calls in AccountLive.Index
@@ -498,32 +498,32 @@ This implementation plan focuses on delivering core portfolio management functio
     - All 192+ tests continue passing - functionality preserved during cleanup
     - Codebase now meets production-ready quality standards
 
-- [x] 27. Add basic responsive styling **COMPLETE** (August 6, 2025)
+- [x] 27. Add basic responsive styling COMPLETE (August 6, 2025)
 
-  - [x] 27.1 Implement Comprehensive Responsive Layouts **VERIFIED**
+  - [x] 27.1 Implement Comprehensive Responsive Layouts VERIFIED
     - All main application views (Dashboard, Accounts, Transactions) adapt gracefully across desktop, tablet, and basic mobile screen sizes, leveraging existing Tailwind CSS patterns.
     - Mobile-first approach with proper breakpoints and responsive navigation
     - Enhanced responsive design testing with robust database handling
     - _Requirements: 15.1, 15.2_
-    - **Status: Already implemented and working correctly**
-  - [x] 27.2 Enhance Accessibility (WCAG AA) **VERIFIED**
+    - Status: Already implemented and working correctly
+  - [x] 27.2 Enhance Accessibility (WCAG AA) VERIFIED
     - WCAG AA color contrast compliance implemented for all text and UI elements.
     - Proper ARIA labels and semantic markup for screen readers across all views.
     - Full keyboard navigation support for all interactive elements (buttons, links, form fields).
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
-    - **Status: Already implemented with comprehensive accessibility features**
-  - [x] 27.3 Standardize Loading States & Error Messages **VERIFIED**
+    - Status: Already implemented with comprehensive accessibility features
+  - [x] 27.3 Standardize Loading States & Error Messages VERIFIED
     - Consistent visual feedback for loading states (spinners, disabled controls) and clear, consistent display of error messages across all forms and actions.
     - Standardized `phx-disable-with` usage and loading spinner components
     - _Requirements: 8.3, 8.5, 12.3_
-    - **Status: Already implemented with consistent patterns**
-  - [x] 27.4 Apply Consistent Color Coding **VERIFIED**
+    - Status: Already implemented with consistent patterns
+  - [x] 27.4 Apply Consistent Color Coding VERIFIED
     - Consistent green/red color coding for gains/losses applied across all relevant displays (dashboard, holdings table, transaction details).
     - `FormatHelpers.value_color_class/1` function for standardized colors
     - _Requirements: 12.4, 15.2_
-    - **Status: Already implemented with comprehensive color system**
+    - Status: Already implemented with comprehensive color system
 
-- [x] 28. Create comprehensive test suite **COMPLETE** (August 7, 2025)
+- [x] 28. Create comprehensive test suite COMPLETE (August 7, 2025)
 
   - [x] 28.1 Complete Ash Resource Test Coverage
     - 100% test coverage achieved for all Ash resource actions, validations, and relationships for `User`, `Account`, `Symbol`, and `Transaction` resources
@@ -554,44 +554,44 @@ This implementation plan focuses on delivering core portfolio management functio
     - Calculator module now includes comprehensive edge case testing for production-ready financial calculations
     - _Requirements: 19.5_
 
-- [x] 29. Final integration and testing **COMPLETE** (August 7, 2025)
+- [x] 29. Final integration and testing COMPLETE (August 7, 2025)
 
-  **🎯 v0.1.0 MILESTONE ACHIEVED - ALL CORE FUNCTIONALITY COMPLETE**
+  🎯 v0.1.0 MILESTONE ACHIEVED - ALL CORE FUNCTIONALITY COMPLETE
 
   - [x] 29.1 Execute Core Workflow Integration Tests
-    - **Account Management Flow:** Comprehensive end-to-end testing covering Create Account → Validate Fields → View in List → Edit → Delete workflows
-    - **Transaction Flow:** Complete CRUD operations testing with validation, portfolio impact, and error handling
-    - **Portfolio View Flow:** Dashboard functionality, portfolio calculations, and responsive design verification
+    - Account Management Flow: Comprehensive end-to-end testing covering Create Account → Validate Fields → View in List → Edit → Delete workflows
+    - Transaction Flow: Complete CRUD operations testing with validation, portfolio impact, and error handling
+    - Portfolio View Flow: Dashboard functionality, portfolio calculations, and responsive design verification
     - _Requirements: All core requirements_
   - [x] 29.2 Test Critical Integration Points
-    - **Price Refresh Functionality:** Manual refresh, cache updates, API failure handling, and timeout scenarios
-    - **Transaction Impact Testing:** Portfolio recalculation, holdings updates, cost basis calculations, and multi-transaction scenarios
-    - **Error Handling Scenarios:** Comprehensive testing of API failures, validation errors, network timeouts, invalid data, and database connection issues
+    - Price Refresh Functionality: Manual refresh, cache updates, API failure handling, and timeout scenarios
+    - Transaction Impact Testing: Portfolio recalculation, holdings updates, cost basis calculations, and multi-transaction scenarios
+    - Error Handling Scenarios: Comprehensive testing of API failures, validation errors, network timeouts, invalid data, and database connection issues
     - _Requirements: All core requirements_
   - [x] 29.3 Verify Performance Benchmarks
-    - **Page Load Performance:** All pages (Dashboard, Accounts, Transactions) load under 500ms
-    - **Portfolio Calculations:** Holdings and portfolio calculations complete under 100ms
-    - **Database Performance:** Query operations complete under 50ms
-    - **Memory Usage:** Reasonable memory consumption during calculations
+    - Page Load Performance: All pages (Dashboard, Accounts, Transactions) load under 500ms
+    - Portfolio Calculations: Holdings and portfolio calculations complete under 100ms
+    - Database Performance: Query operations complete under 50ms
+    - Memory Usage: Reasonable memory consumption during calculations
     - _Requirements: 11.1_
 
-- [x] 29.5 Implement PubSub for Transaction Events **COMPLETE** (August 6, 2025)
+- [x] 29.5 Implement PubSub for Transaction Events COMPLETE (August 6, 2025)
 
   - Implemented explicit PubSub broadcasting for transaction events (`:transaction_saved`, `:transaction_deleted`) from `TransactionLive.Index` when transactions are created, updated, or deleted.
   - Subscribed `DashboardLive` to these events to trigger portfolio data recalculation, ensuring the dashboard is always in sync.
   - Added comprehensive integration test coverage for PubSub functionality
   - _Requirements: 10.2, 12.2_
-  - **Completed: 2025-08-06**
+  - Completed: 2025-08-06
 
-- [x] 29.6 Enhance Loading States for Transaction CRUD **COMPLETE** (August 6, 2025)
+- [x] 29.6 Enhance Loading States for Transaction CRUD COMPLETE (August 6, 2025)
 
   - Implemented `phx-disable-with` and loading state assigns for "Edit" and "Delete" buttons in the `TransactionLive.Index` table to provide clear visual feedback during asynchronous operations, mirroring the existing implementation in `AccountLive.Index`.
   - Added loading state management with `:editing_transaction_id` and `:deleting_transaction_id` assigns
   - Enhanced user experience with spinners and disabled states during async operations
   - _Requirements: 12.3_
-  - **Completed: 2025-08-06**
+  - Completed: 2025-08-06
 
-- [x] 29.7 Review and Refine User-Facing Error Messages **COMPLETE** (August 7, 2025)
+- [x] 29.7 Review and Refine User-Facing Error Messages COMPLETE (August 7, 2025)
   - Conducted comprehensive review of all user-facing error messages across Dashboard, Account, and Transaction interfaces
   - Verified ErrorHelpers module provides consistent, clear, and actionable error messages
   - Confirmed flash messages use proper formatting and user-friendly language

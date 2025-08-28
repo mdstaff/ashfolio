@@ -13,7 +13,7 @@ The current architecture uses Phoenix LiveView with the Ash Framework and SQLite
 
 ## Decision
 
-**We will expand Ashfolio's architecture from portfolio-only management to comprehensive personal financial management.**
+We will expand Ashfolio's architecture from portfolio-only management to comprehensive personal financial management.
 
 This expansion includes:
 
@@ -142,7 +142,7 @@ Strategic indexing for time-series queries:
 
 Create a new application for comprehensive financial management.
 
-**Rejected because:**
+Rejected because:
 
 - Duplicates existing infrastructure and authentication
 - Forces users to manage multiple applications
@@ -153,7 +153,7 @@ Create a new application for comprehensive financial management.
 
 Build financial management as optional plugins/modules.
 
-**Rejected because:**
+Rejected because:
 
 - Adds architectural complexity without clear benefit
 - Financial data relationships are too integrated for plugin isolation
@@ -164,7 +164,7 @@ Build financial management as optional plugins/modules.
 
 Integrate with existing personal finance services.
 
-**Rejected because:**
+Rejected because:
 
 - Violates local-first architectural commitment
 - Introduces external dependencies and privacy risks

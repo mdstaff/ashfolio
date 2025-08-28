@@ -245,11 +245,11 @@ defmodule Ashfolio.ContextTest do
     test "calculates net worth combining investment and cash balances" do
       # Create investment account with balance
       _investment =
-        create_account(:investment, "Investment", %{balance: Decimal.new(10000)})
+        create_account(:investment, "Investment", %{balance: Decimal.new(10_000)})
 
       # Create cash accounts with balances
       _checking = create_account(:checking, "Checking", %{balance: Decimal.new(5000)})
-      _savings = create_account(:savings, "Savings", %{balance: Decimal.new(15000)})
+      _savings = create_account(:savings, "Savings", %{balance: Decimal.new(15_000)})
 
       assert {:ok, net_worth} = Context.get_net_worth()
 
@@ -258,7 +258,7 @@ defmodule Ashfolio.ContextTest do
       assert is_struct(net_worth.cash_balance, Decimal)
 
       # Cash balance includes test data: 5000 + 15000 + global test account
-      assert Decimal.compare(net_worth.cash_balance, Decimal.new(20000)) != :lt
+      assert Decimal.compare(net_worth.cash_balance, Decimal.new(20_000)) != :lt
 
       # Check breakdown (account for global test data)
       assert net_worth.breakdown.cash_accounts >= 2

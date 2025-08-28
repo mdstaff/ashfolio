@@ -130,13 +130,13 @@ end
 
 #### Account Resource Extensions
 
-**Enhanced Actions:**
+Enhanced Actions:
 
 - `create_cash_account` - Creates cash accounts with type-specific validation
 - `list_by_type` - Filters accounts by investment vs cash types
 - `calculate_cash_balance` - Real-time balance calculation from transactions
 
-**Validation Rules:**
+Validation Rules:
 
 - Cash accounts require `account_type` in [:checking, :savings, :money_market, :cd]
 - Investment accounts maintain existing validation (default :investment type)
@@ -144,7 +144,7 @@ end
 
 #### LiveView Integration
 
-**Enhanced AccountLive.Index:**
+Enhanced AccountLive.Index:
 
 ```elixir
 # Tabbed interface: "Investment Accounts" | "Cash Accounts"
@@ -152,7 +152,7 @@ end
 # Account-specific metadata display (interest rate)
 ```
 
-**Enhanced AccountLive.FormComponent:**
+Enhanced AccountLive.FormComponent:
 
 ```elixir
 # Dynamic form fields based on account_type selection
@@ -164,7 +164,7 @@ end
 
 #### Manual Balance Adjustments
 
-**Balance Update System:**
+Balance Update System:
 
 ```elixir
 defmodule Ashfolio.FinancialManagement.BalanceManager do
@@ -176,7 +176,7 @@ defmodule Ashfolio.FinancialManagement.BalanceManager do
 end
 ```
 
-**Balance History Tracking:**
+Balance History Tracking:
 
 - Simple audit log of balance changes
 - Timestamp and optional notes for each adjustment
@@ -207,7 +207,7 @@ end
 
 #### Real-time Updates
 
-**PubSub Integration:**
+PubSub Integration:
 
 - Account balance changes trigger net worth recalculation
 - Investment value changes trigger net worth recalculation
@@ -215,7 +215,7 @@ end
 
 #### Dashboard Integration
 
-**Enhanced DashboardLive:**
+Enhanced DashboardLive:
 
 ```elixir
 # New net worth summary card
@@ -256,7 +256,7 @@ end
 
 #### Performance Optimization
 
-**Caching Strategy:**
+Caching Strategy:
 
 - Local symbol search results cached in ETS
 - External API results cached for 1 hour
@@ -267,14 +267,14 @@ end
 
 #### TransactionCategory Resource
 
-**System Categories (Pre-seeded):**
+System Categories (Pre-seeded):
 
 - Growth (green)
 - Income (blue)
 - Speculative (orange)
 - Index (purple)
 
-**Custom Categories:**
+Custom Categories:
 
 - User-created categories with custom colors
 - Optional parent-child relationships
@@ -282,7 +282,7 @@ end
 
 #### Category Integration
 
-**Enhanced Transaction Forms:**
+Enhanced Transaction Forms:
 
 ```elixir
 # Optional category dropdown in transaction forms
@@ -290,7 +290,7 @@ end
 # Quick category creation from transaction form
 ```
 
-**Enhanced Transaction Lists:**
+Enhanced Transaction Lists:
 
 ```elixir
 # Category filter dropdown
@@ -399,27 +399,27 @@ end
 
 ### Enhanced Error Categories
 
-**Cash Account Errors:**
+Cash Account Errors:
 
 - Invalid account type for operation
 - Insufficient balance for withdrawal/transfer
 - Negative interest rate
 
-**Transfer Errors:**
+Transfer Errors:
 
 - Source and destination accounts are the same
 - Insufficient balance in source account
 - Failed to create linked transaction
 - Transfer amount validation errors
 
-**Symbol Search Errors:**
+Symbol Search Errors:
 
 - External API timeout/failure
 - Invalid symbol format
 - Symbol not found in any source
 - Rate limiting exceeded
 
-**Category Errors:**
+Category Errors:
 
 - Duplicate category name for user
 - Invalid color format
@@ -428,13 +428,13 @@ end
 
 ### Error Handling Strategy
 
-**Graceful Degradation:**
+Graceful Degradation:
 
 - Symbol autocomplete falls back to manual entry if API fails
 - Net worth calculation continues with available data if some accounts fail
 - Category features remain optional - transactions work without categories
 
-**User-Friendly Messages:**
+User-Friendly Messages:
 
 ```elixir
 defmodule Ashfolio.FinancialManagement.ErrorHandler do
@@ -456,7 +456,7 @@ end
 
 ### Unit Testing
 
-**Enhanced Resource Tests:**
+Enhanced Resource Tests:
 
 - Account resource with new cash account types
 - Transaction resource with new transaction types and categories
@@ -464,7 +464,7 @@ end
 - NetWorthCalculator with mixed account types
 - SymbolSearch with local and external sources
 
-**New Module Tests:**
+New Module Tests:
 
 - `FinancialManagement.NetWorthCalculator`
 - `FinancialManagement.SymbolSearch`
@@ -473,14 +473,14 @@ end
 
 ### Integration Testing
 
-**Cross-Domain Integration:**
+Cross-Domain Integration:
 
 - Net worth calculation across Portfolio and FinancialManagement domains
 - Transfer transactions creating linked records
 - Symbol autocomplete creating new Symbol resources
 - Category assignment to existing transactions
 
-**LiveView Integration:**
+LiveView Integration:
 
 - Enhanced dashboard with net worth display
 - Symbol autocomplete component in transaction forms
@@ -489,14 +489,14 @@ end
 
 ### Performance Testing
 
-**Symbol Autocomplete:**
+Symbol Autocomplete:
 
 - Local search response time < 50ms
 - External API search response time < 200ms
 - Concurrent search request handling
 - Cache hit rate optimization
 
-**Net Worth Calculation:**
+Net Worth Calculation:
 
 - Large portfolio calculation performance
 - Real-time update responsiveness
@@ -504,7 +504,7 @@ end
 
 ### Backward Compatibility Testing
 
-**Existing Functionality:**
+Existing Functionality:
 
 - All v0.1.0 investment features work unchanged
 - Existing data migrations work correctly
@@ -515,41 +515,41 @@ end
 
 ### Phase 1: Foundation (Tasks 1-5)
 
-1. **Enhanced Account Resource** - Add cash account support
-2. **Enhanced Transaction Resource** - Add cash transaction types
-3. **TransactionCategory Resource** - Create category system
-4. **Database Migrations** - Schema extensions
-5. **Basic Tests** - Unit tests for enhanced resources
+1. Enhanced Account Resource - Add cash account support
+2. Enhanced Transaction Resource - Add cash transaction types
+3. TransactionCategory Resource - Create category system
+4. Database Migrations - Schema extensions
+5. Basic Tests - Unit tests for enhanced resources
 
 ### Phase 2: Core Features (Tasks 6-10)
 
-6. **Cash Transaction Management** - Forms and validation
-7. **Transfer System** - Linked transaction creation
-8. **NetWorthCalculator** - Cross-account calculations
-9. **SymbolSearch Module** - Local + external search
-10. **Enhanced Dashboard** - Net worth integration
+6. Cash Transaction Management - Forms and validation
+7. Transfer System - Linked transaction creation
+8. NetWorthCalculator - Cross-account calculations
+9. SymbolSearch Module - Local + external search
+10. Enhanced Dashboard - Net worth integration
 
 ### Phase 3: UI Integration (Tasks 11-15)
 
-11. **Enhanced Account Management** - Cash account UI
-12. **Symbol Autocomplete Component** - Reusable component
-13. **Category Management UI** - Category CRUD interface
-14. **Enhanced Transaction Forms** - Categories + autocomplete
-15. **Transaction Filtering** - Category-based filtering
+11. Enhanced Account Management - Cash account UI
+12. Symbol Autocomplete Component - Reusable component
+13. Category Management UI - Category CRUD interface
+14. Enhanced Transaction Forms - Categories + autocomplete
+15. Transaction Filtering - Category-based filtering
 
 ### Phase 4: Polish & Testing (Tasks 16-20)
 
-16. **Performance Optimization** - Caching and query optimization
-17. **Error Handling Enhancement** - User-friendly error messages
-18. **Integration Testing** - Cross-domain test coverage
-19. **Documentation Updates** - API and user documentation
-20. **Backward Compatibility Validation** - Ensure v0.1.0 compatibility
+16. Performance Optimization - Caching and query optimization
+17. Error Handling Enhancement - User-friendly error messages
+18. Integration Testing - Cross-domain test coverage
+19. Documentation Updates - API and user documentation
+20. Backward Compatibility Validation - Ensure v0.1.0 compatibility
 
 ## Migration Strategy
 
 ### Database Migrations
 
-**Account Table Extensions:**
+Account Table Extensions:
 
 ```sql
 ALTER TABLE accounts ADD COLUMN account_type TEXT DEFAULT 'investment';
@@ -557,7 +557,7 @@ ALTER TABLE accounts ADD COLUMN interest_rate DECIMAL;
 ALTER TABLE accounts ADD COLUMN minimum_balance DECIMAL;
 ```
 
-**Transaction Table Extensions:**
+Transaction Table Extensions:
 
 ```sql
 ALTER TABLE transactions ADD COLUMN linked_transaction_id UUID;
@@ -565,7 +565,7 @@ ALTER TABLE transactions ADD COLUMN category_id UUID;
 -- Add foreign key constraints
 ```
 
-**New TransactionCategory Table:**
+New TransactionCategory Table:
 
 ```sql
 CREATE TABLE transaction_categories (
@@ -582,7 +582,7 @@ CREATE TABLE transaction_categories (
 
 ### Data Migration
 
-**System Category Seeding:**
+System Category Seeding:
 
 ```elixir
 defmodule Ashfolio.FinancialManagement.CategorySeeder do
@@ -599,7 +599,7 @@ defmodule Ashfolio.FinancialManagement.CategorySeeder do
 end
 ```
 
-**Existing Account Migration:**
+Existing Account Migration:
 
 ```elixir
 # All existing accounts default to :investment type

@@ -132,12 +132,12 @@ defmodule AshfolioWeb.Live.FormatHelpers do
         minutes = div(diff_seconds, 60)
         "#{minutes} minute#{if minutes == 1, do: "", else: "s"} ago"
 
-      diff_seconds < 86400 ->
+      diff_seconds < 86_400 ->
         hours = div(diff_seconds, 3600)
         "#{hours} hour#{if hours == 1, do: "", else: "s"} ago"
 
       true ->
-        days = div(diff_seconds, 86400)
+        days = div(diff_seconds, 86_400)
         "#{days} day#{if days == 1, do: "", else: "s"} ago"
     end
   end
@@ -241,8 +241,7 @@ defmodule AshfolioWeb.Live.FormatHelpers do
     |> String.reverse()
     |> String.graphemes()
     |> Enum.chunk_every(3)
-    |> Enum.map(&Enum.join/1)
-    |> Enum.join(",")
+    |> Enum.map_join(",", &Enum.join/1)
     |> String.reverse()
   end
 

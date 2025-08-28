@@ -6,7 +6,7 @@ This guide documents proven patterns for resolving test failures systematically,
 
 ## Core Philosophy
 
-**Fix patterns, not instances.** When you encounter a test failure, identify if it's part of a broader pattern that affects multiple tests, then apply the solution consistently across all similar cases.
+Fix patterns, not instances. When you encounter a test failure, identify if it's part of a broader pattern that affects multiple tests, then apply the solution consistently across all similar cases.
 
 ## Common Failure Patterns and Solutions
 
@@ -15,7 +15,7 @@ This guide documents proven patterns for resolving test failures systematically,
 Tests fail with `KeyError` when accessing data structures that may have different key names depending on the implementation.
 
 ```
-** (KeyError) key :cash_balance not found in: %{cash_value: #Decimal<25000.00>, ...}
+ (KeyError) key :cash_balance not found in: %{cash_value: #Decimal<25000.00>, ...}
 ```
 
 Different calculator implementations use different key names for the same data.
@@ -37,7 +37,7 @@ net_worth_value = net_worth_data[:total_net_worth] || net_worth_data[:net_worth]
 Tests fail with "database is locked" or "database is busy" errors, especially in parallel test execution.
 
 ```
-** (Sqlite.DbConnection.Error) BUSY: database is locked
+ (Sqlite.DbConnection.Error) BUSY: database is locked
 ```
 
 Shared test data creation in setup blocks causes race conditions when multiple tests run simultaneously.
@@ -90,7 +90,7 @@ assert html =~ "Growth"  # Or other expected content
 LiveView tests fail when trying to click navigation elements that exist in the layout but aren't accessible from the LiveView test context.
 
 ```
-** (ArgumentError) element with selector "nav.hidden a[href='/accounts']" was not found
+ (ArgumentError) element with selector "nav.hidden a[href='/accounts']" was not found
 ```
 
 Navigation elements are rendered in the root layout, but LiveView tests only have access to the LiveView-specific content.
@@ -157,7 +157,7 @@ assert time_ms < 500  # Was 100ms, increased to 500ms for test env
 Tests fail when SQLiteHelpers.with_retry() calls are nested, causing function clause errors.
 
 ```
-** (FunctionClauseError) no function clause matching in SQLiteHelpers.with_retry/1
+ (FunctionClauseError) no function clause matching in SQLiteHelpers.with_retry/1
 ```
 
 Calling `with_retry()` inside another `with_retry()` block creates invalid nesting.

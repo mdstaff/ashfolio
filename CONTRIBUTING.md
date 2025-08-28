@@ -63,14 +63,14 @@ This completes Phase 9 and allows users to manage their investment records.
 
 ### 5. Pull Request Process
 
-1.  **Push your branch** to your fork:
+1.  Push your branch to your fork:
     ```bash
     git push origin feature/your-feature-name
     ```
-2.  **Open a Pull Request** on the main Ashfolio repository.
-3.  **Provide a clear description** of your changes, linking to any relevant issues or tasks.
-4.  **Ensure all checks pass** (tests, linting, formatting).
-5.  **Address any feedback** from reviewers.
+2.  Open a Pull Request on the main Ashfolio repository.
+3.  Provide a clear description of your changes, linking to any relevant issues or tasks.
+4.  Ensure all checks pass (tests, linting, formatting).
+5.  Address any feedback from reviewers.
 
 ## Coding Standards
 
@@ -87,18 +87,16 @@ Maintaining a robust test suite is crucial for Ashfolio's stability. We expect a
 
 - Always run the full test suite before submitting a pull request:
 
-
-    ```bash
-    just test
-    ```
+  ```bash
+  just test
+  ```
 
 - During development, use targeted commands:
 
-
-    ```bash
-    just test-file <path/to/your_test_file.exs>
-    just test-watch
-    ```
+  ```bash
+  just test-file <path/to/your_test_file.exs>
+  just test-watch
+  ```
 
 - Aim for high test coverage for new features.
 - Never make real API calls in tests. Use Mox for mocking external services like Yahoo Finance.

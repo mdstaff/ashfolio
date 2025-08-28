@@ -4,11 +4,11 @@
 
 The Ashfolio application provides a local REST API for accessing portfolio data. The API is available only on localhost and requires no authentication, making it suitable for local development, testing, and personal automation scripts.
 
-**Base URL:** `http://localhost:4000/api/v1`
+Base URL: `http://localhost:4000/api/v1`
 
-**Authentication:** None required (localhost-only access)
+Authentication: None required (localhost-only access)
 
-**Content-Type:** `application/json`
+Content-Type: `application/json`
 
 ## API Endpoints
 
@@ -20,7 +20,7 @@ Get a comprehensive summary of the portfolio including total value, returns, and
 GET /api/v1/portfolio/summary
 ```
 
-**Response:**
+Response:
 
 ```json
 {
@@ -33,7 +33,7 @@ GET /api/v1/portfolio/summary
 }
 ```
 
-**Response Fields:**
+Response Fields:
 
 - `total_value`: Current total portfolio value in USD
 - `cost_basis`: Total amount invested (cost basis) in USD
@@ -50,7 +50,7 @@ Get detailed information about all current holdings in the portfolio.
 GET /api/v1/holdings
 ```
 
-**Response:**
+Response:
 
 ```json
 {
@@ -81,7 +81,7 @@ GET /api/v1/holdings
 }
 ```
 
-**Holdings Object Fields:**
+Holdings Object Fields:
 
 - `symbol`: Stock ticker symbol
 - `name`: Company or security name
@@ -101,7 +101,7 @@ Get information about all investment accounts.
 GET /api/v1/accounts
 ```
 
-**Response:**
+Response:
 
 ```json
 {
@@ -120,7 +120,7 @@ GET /api/v1/accounts
 }
 ```
 
-**Account Object Fields:**
+Account Object Fields:
 
 - `id`: Unique account identifier (UUID)
 - `name`: User-defined account name
@@ -141,7 +141,7 @@ GET /api/v1/transactions?account_id={account_id}
 GET /api/v1/transactions?start_date={YYYY-MM-DD}&end_date={YYYY-MM-DD}
 ```
 
-**Query Parameters:**
+Query Parameters:
 
 - `account_id` (optional): Filter transactions by account UUID
 - `start_date` (optional): Filter transactions from this date (YYYY-MM-DD format)
@@ -149,7 +149,7 @@ GET /api/v1/transactions?start_date={YYYY-MM-DD}&end_date={YYYY-MM-DD}
 - `limit` (optional): Maximum number of transactions to return (default: 100)
 - `offset` (optional): Number of transactions to skip for pagination (default: 0)
 
-**Response:**
+Response:
 
 ```json
 {
@@ -178,7 +178,7 @@ GET /api/v1/transactions?start_date={YYYY-MM-DD}&end_date={YYYY-MM-DD}
 }
 ```
 
-**Transaction Object Fields:**
+Transaction Object Fields:
 
 - `id`: Unique transaction identifier (UUID)
 - `type`: Transaction type (BUY, SELL, DIVIDEND, FEE, INTEREST)
@@ -201,7 +201,7 @@ Trigger a manual refresh of current market prices for all holdings.
 POST /api/v1/prices/refresh
 ```
 
-**Response:**
+Response:
 
 ```json
 {
@@ -213,7 +213,7 @@ POST /api/v1/prices/refresh
 }
 ```
 
-**Response Fields:**
+Response Fields:
 
 - `status`: "success" or "error"
 - `message`: Human-readable status message
@@ -235,14 +235,14 @@ All endpoints may return error responses in the following format:
 }
 ```
 
-**Common Error Codes:**
+Common Error Codes:
 
 - `INVALID_REQUEST`: Malformed request or invalid parameters
 - `NOT_FOUND`: Requested resource does not exist
 - `SERVER_ERROR`: Internal server error
 - `SERVICE_UNAVAILABLE`: External service (e.g., Yahoo Finance) unavailable
 
-**HTTP Status Codes:**
+HTTP Status Codes:
 
 - `200 OK`: Request successful
 - `400 Bad Request`: Invalid request parameters

@@ -12,7 +12,7 @@
 
 Transform Ashfolio from a focused portfolio tracker into a comprehensive personal financial management system while maintaining local-first, privacy-focused architecture. This expansion addresses real user needs for replacing spreadsheet-based wealth management workflows with a unified, secure application.
 
-**Target User Profile:** Individuals managing comprehensive wealth across multiple account types, planning for retirement, and seeking to eliminate manual spreadsheet maintenance while maintaining complete data ownership.
+Target User Profile: Individuals managing comprehensive wealth across multiple account types, planning for retirement, and seeking to eliminate manual spreadsheet maintenance while maintaining complete data ownership.
 
 ## 📊 Current State Analysis
 
@@ -37,7 +37,7 @@ Transform Ashfolio from a focused portfolio tracker into a comprehensive persona
 
 ## 🗓️ Implementation Timeline
 
-### **Phase 1: Cash Management Foundation**
+### Phase 1: Cash Management Foundation
 
 4-6 weeks (August - September 2025)  
  v0.2.0  
@@ -49,28 +49,28 @@ Extend the current portfolio-focused architecture to support cash accounts and b
 
 #### Feature Deliverables
 
-**1.1 Extended Account Types** (Week 1-2)
+1.1 Extended Account Types (Week 1-2)
 
 - Extend `Ashfolio.Portfolio.Account` to support cash account types
 - Add support for checking, savings, money market, CD accounts
 - Institution tracking and account identification (last 4 digits)
 - Interest rate tracking for savings accounts
 
-**1.2 Cash Transaction Management** (Week 2-3)
+  1.2 Cash Transaction Management (Week 2-3)
 
 - Deposits, withdrawals, transfers between accounts
 - Bill payment tracking and categorization
 - Account balance reconciliation tools
 - Transaction import/export capabilities
 
-**1.3 Basic Net Worth Calculation** (Week 3-4)
+  1.3 Basic Net Worth Calculation (Week 3-4)
 
 - Aggregate balance calculation across all account types
 - Real-time net worth display on dashboard
 - Simple assets minus liabilities calculation
 - Month-over-month change indicators
 
-**1.4 Enhanced Dashboard** (Week 4-6)
+  1.4 Enhanced Dashboard (Week 4-6)
 
 - Integrated net worth display with portfolio metrics
 - Cash vs investment allocation visualizations
@@ -103,7 +103,7 @@ attribute :interest_rate, :decimal
 
 ---
 
-### **Phase 2: Asset & Expense Tracking**
+### Phase 2: Asset & Expense Tracking
 
 6-8 weeks (October - November 2025)  
  v0.3.0  
@@ -115,7 +115,7 @@ Add comprehensive asset management and expense tracking to provide complete fina
 
 #### Feature Deliverables
 
-**2.1 Non-Investment Asset Management** (Week 1-3)
+2.1 Non-Investment Asset Management (Week 1-3)
 
 - Real estate tracking with address and valuation methods
 - Vehicle management with depreciation calculations
@@ -123,7 +123,7 @@ Add comprehensive asset management and expense tracking to provide complete fina
 - Manual and market-based valuation updates
 - Asset value history and trending
 
-**2.2 Expense Tracking System** (Week 2-4)
+  2.2 Expense Tracking System (Week 2-4)
 
 - Expense categories and custom categorization
 - Monthly expense entry and bulk import
@@ -131,7 +131,7 @@ Add comprehensive asset management and expense tracking to provide complete fina
 - Budget vs actual analysis and alerts
 - Essential vs discretionary expense classification
 
-**2.3 Historical Net Worth Analytics** (Week 4-6)
+  2.3 Historical Net Worth Analytics (Week 4-6)
 
 - Monthly automated net worth snapshots
 - Historical trending with year-over-year comparisons
@@ -139,7 +139,7 @@ Add comprehensive asset management and expense tracking to provide complete fina
 - Net worth composition breakdowns
 - Export capabilities for tax preparation
 
-**2.4 Financial Reporting Suite** (Week 6-8)
+  2.4 Financial Reporting Suite (Week 6-8)
 
 - Monthly financial summary reports
 - Expense category breakdown analysis
@@ -167,7 +167,7 @@ Ashfolio.FinancialManagement.NetWorthSnapshot
 
 ---
 
-### **Phase 3: Planning & Forecasting**
+### Phase 3: Planning & Forecasting
 
 8-10 weeks (December 2025 - February 2026)  
  v0.4.0  
@@ -179,7 +179,7 @@ Implement comprehensive financial planning tools for retirement readiness and lo
 
 #### Feature Deliverables
 
-**3.1 Financial Goal Setting & Tracking** (Week 1-3)
+3.1 Financial Goal Setting & Tracking (Week 1-3)
 
 - Retirement savings targets using 25x annual expenses rule
 - Emergency fund goals (3-6 months expenses)
@@ -187,7 +187,7 @@ Implement comprehensive financial planning tools for retirement readiness and lo
 - Progress tracking with visual indicators
 - Goal adjustment recommendations based on performance
 
-**3.2 Growth Assumptions & Modeling** (Week 2-4)
+  3.2 Growth Assumptions & Modeling (Week 2-4)
 
 - Configurable growth rates by asset class
 - Inflation assumption management and scenarios
@@ -195,7 +195,7 @@ Implement comprehensive financial planning tools for retirement readiness and lo
 - Monte Carlo simulation capabilities for risk assessment
 - Sensitivity analysis for key financial assumptions
 
-**3.3 Retirement Planning Tools** (Week 4-6)
+  3.3 Retirement Planning Tools (Week 4-6)
 
 - 4% withdrawal rate calculations and scenarios
 - Social Security income integration and planning
@@ -203,7 +203,7 @@ Implement comprehensive financial planning tools for retirement readiness and lo
 - Early retirement scenario planning and feasibility
 - Healthcare cost planning and long-term care considerations
 
-**3.4 Long-term Financial Forecasting** (Week 6-8)
+  3.4 Long-term Financial Forecasting (Week 6-8)
 
 - Net worth projection charts (30+ year timelines)
 - Retirement readiness assessments and gap analysis
@@ -211,7 +211,7 @@ Implement comprehensive financial planning tools for retirement readiness and lo
 - Multiple scenario planning (optimistic/realistic/pessimistic)
 - Goal achievement probability analysis
 
-**3.5 Enhanced Dividend & Income Analysis** (Week 8-10)
+  3.5 Enhanced Dividend & Income Analysis (Week 8-10)
 
 - Forward-looking dividend income projections
 - Dividend growth rate assumptions and modeling
@@ -236,7 +236,7 @@ Implement comprehensive financial planning tools for retirement readiness and lo
 
 ---
 
-### **Phase 4: Advanced Analytics & Tax Planning**
+### Phase 4: Advanced Analytics & Tax Planning
 
 10-12 weeks (March - May 2026)  
  v0.5.0  
@@ -248,7 +248,7 @@ Implement professional-level financial analytics and tax optimization tools.
 
 #### Feature Deliverables
 
-**4.1 Tax Planning & Optimization** (Week 1-4)
+4.1 Tax Planning & Optimization (Week 1-4)
 
 - Realized capital gains and losses tracking
 - Tax-loss harvesting opportunity identification
@@ -256,7 +256,7 @@ Implement professional-level financial analytics and tax optimization tools.
 - Roth conversion planning and analysis
 - Tax bracket optimization strategies
 
-**4.2 Advanced Portfolio Analytics** (Week 2-6)
+  4.2 Advanced Portfolio Analytics (Week 2-6)
 
 - Asset class diversification analysis with pie charts
 - Correlation matrix visualization and analysis
@@ -264,7 +264,7 @@ Implement professional-level financial analytics and tax optimization tools.
 - Performance attribution analysis by asset class
 - Benchmark comparison and relative performance
 
-**4.3 Rebalancing & Optimization Tools** (Week 4-8)
+  4.3 Rebalancing & Optimization Tools (Week 4-8)
 
 - Target allocation vs current allocation analysis
 - Rebalancing recommendations with tax considerations
@@ -272,7 +272,7 @@ Implement professional-level financial analytics and tax optimization tools.
 - Asset allocation drift alerts and recommendations
 - Tax-aware rebalancing to minimize tax impact
 
-**4.4 Comprehensive Reporting Suite** (Week 6-10)
+  4.4 Comprehensive Reporting Suite (Week 6-10)
 
 - Annual tax summary reports for tax preparation
 - Performance reports with multiple benchmark comparisons
@@ -280,7 +280,7 @@ Implement professional-level financial analytics and tax optimization tools.
 - Comprehensive export capabilities (PDF, CSV, Excel)
 - Custom report builder with filtering and grouping
 
-**4.5 "Your Money Ratios" Integration** (Week 8-12)
+  4.5 "Your Money Ratios" Integration (Week 8-12)
 
 - Net Worth/Salary ratio analysis (Charles Farrell methodology)
 - Expense/Income ratio tracking and optimization
@@ -420,7 +420,7 @@ config :ashfolio, Ashfolio.Repo,
 
 ### New Documentation Requirements
 
-**User Guides** (NEW):
+User Guides (NEW):
 
 - Monthly financial management workflow
 - Cash account management guide
@@ -428,14 +428,14 @@ config :ashfolio, Ashfolio.Repo,
 - Retirement planning walkthrough
 - Tax planning and optimization
 
-**Technical Documentation** (UPDATED):
+Technical Documentation (UPDATED):
 
 - Financial domain architecture
 - Time-series data patterns
 - Calculation methodology documentation
 - Performance optimization guides
 
-**API Documentation** (EXPANDED):
+API Documentation (EXPANDED):
 
 - Comprehensive endpoint coverage
 - Financial data export formats
@@ -489,6 +489,6 @@ config :ashfolio, Ashfolio.Repo,
 
 ---
 
-**This roadmap represents a strategic evolution of Ashfolio from focused portfolio management to comprehensive financial management while preserving the core principles of privacy, local-first architecture, and user data ownership.**
+This roadmap represents a strategic evolution of Ashfolio from focused portfolio management to comprehensive financial management while preserving the core principles of privacy, local-first architecture, and user data ownership.
 
 _For detailed implementation specifications, see [ADR-002: Financial Domain Expansion Architecture](../architecture/adr-002-financial-domain-expansion.md)_

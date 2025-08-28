@@ -88,7 +88,7 @@ just test
 
 Let's walk through adding a small feature:
 
-**Step 1: Write a failing test** (`test/ashfolio/portfolio/transaction_test.exs`):
+Step 1: Write a failing test (`test/ashfolio/portfolio/transaction_test.exs`):
 
 ```elixir
 test "validates quantity is not zero for BUY transactions" do
@@ -101,7 +101,7 @@ end
 just test-file test/ashfolio/portfolio/transaction_test.exs
 ```
 
-**Step 3: Implement the feature** (`lib/ashfolio/portfolio/transaction.ex`):
+Step 3: Implement the feature (`lib/ashfolio/portfolio/transaction.ex`):
 
 ```elixir
 validations do
@@ -185,11 +185,11 @@ end
 
 ## Getting Help
 
-- **Stuck on Ash Framework?** Check [Ash Documentation](https://ash-hq.org/)
-- **Phoenix/LiveView Questions?** See [Phoenix Guides](https://hexdocs.pm/phoenix/overview.html)
-- **Testing Issues?** Review [Testing Guide](../testing/README.md)
-- **Architecture Questions?** Read [Architecture Overview](../development/architecture.md)
-- **General Help?** Ask on GitHub Discussions or open an issue
+- Stuck on Ash Framework? Check [Ash Documentation](https://ash-hq.org/)
+- Phoenix/LiveView Questions? See [Phoenix Guides](https://hexdocs.pm/phoenix/overview.html)
+- Testing Issues? Review [Testing Guide](../testing/README.md)
+- Architecture Questions? Read [Architecture Overview](../development/architecture.md)
+- General Help? Ask on GitHub Discussions or open an issue
 
 ## What Makes a Great First Contribution?
 
@@ -209,5 +209,5 @@ end
 
 ---
 
-**Ready to start?** Pick an issue and follow the 15-minute quick win process!  
-**Need more context?** Review the [Architecture Overview](../development/architecture.md) first.
+Ready to start? Pick an issue and follow the 15-minute quick win process!  
+Need more context? Review the [Architecture Overview](../development/architecture.md) first.

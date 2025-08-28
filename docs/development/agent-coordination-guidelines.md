@@ -27,13 +27,13 @@ Establish clear guidelines for AI development agents to make consistent architec
 
 ### Before Making Any Architectural Decision
 
-1. **Stop and Research**
+1. Stop and Research
 
    - Read existing ADRs and architectural documentation
    - Find 3 similar implementations in the codebase
    - Understand the problem context and constraints
 
-2. **Evaluate Against Project Principles**
+2. Evaluate Against Project Principles
 
    ```markdown
    - Does this support local-first architecture?
@@ -42,7 +42,7 @@ Establish clear guidelines for AI development agents to make consistent architec
    - Does this add unnecessary complexity?
    ```
 
-3. **Consider Alternatives**
+3. Consider Alternatives
    - Can existing dependencies solve this?
    - Is there a simpler approach?
    - What are the maintenance implications?
@@ -51,7 +51,7 @@ Establish clear guidelines for AI development agents to make consistent architec
 
 #### Green Light: Autonomous Decisions
 
-**You can proceed without approval:**
+You can proceed without approval:
 
 - Using existing dependencies already in mix.exs
 - Following established patterns from similar components
@@ -62,7 +62,7 @@ Establish clear guidelines for AI development agents to make consistent architec
 
 #### Yellow Light: Document and Proceed ⚠️
 
-**Proceed but document rationale:**
+Proceed but document rationale:
 
 - Minor dependency version updates (patch/minor)
 - New internal modules following existing patterns
@@ -81,7 +81,7 @@ Establish clear guidelines for AI development agents to make consistent architec
 
 #### Red Light: Stop and Get Approval ❌
 
-**Must request human approval:**
+Must request human approval:
 
 - Adding any new dependency to mix.exs
 - Changing database schema or data layer approach
@@ -104,38 +104,38 @@ Establish clear guidelines for AI development agents to make consistent architec
 
 ### Dependencies
 
-- **Never add** system-level dependencies (databases, browsers, native tools)
-- **Always check** if existing dependencies can solve the problem
-- **Document justification** for any new Elixir package
-- **Prefer** standard library solutions over external packages
+- Never add system-level dependencies (databases, browsers, native tools)
+- Always check if existing dependencies can solve the problem
+- Document justification for any new Elixir package
+- Prefer standard library solutions over external packages
 
 ### Testing
 
-- **Use Phoenix LiveViewTest** for UI component testing
-- **Use ExUnit** for unit testing business logic
-- **Avoid** browser automation tools (Wallaby, Hound, etc.)
-- **Write** comprehensive tests for any new functionality
+- Use Phoenix LiveViewTest for UI component testing
+- Use ExUnit for unit testing business logic
+- Avoid browser automation tools (Wallaby, Hound, etc.)
+- Write comprehensive tests for any new functionality
 
 ### Database & Data
 
-- **Stick with SQLite** - no PostgreSQL, MySQL, or external databases
-- **Use Ash Framework** patterns for all data modeling
-- **Maintain** single-file database portability
-- **Preserve** zero-configuration setup
+- Stick with SQLite - no PostgreSQL, MySQL, or external databases
+- Use Ash Framework patterns for all data modeling
+- Maintain single-file database portability
+- Preserve zero-configuration setup
 
 ### JavaScript & Frontend
 
-- **Treat JavaScript as progressive enhancement** only
-- **Ensure functionality works** without JavaScript enabled
-- **Use Phoenix LiveView** for primary interactivity
-- **Keep JavaScript minimal** and focused on UX improvements
+- Treat JavaScript as progressive enhancement only
+- Ensure functionality works without JavaScript enabled
+- Use Phoenix LiveView for primary interactivity
+- Keep JavaScript minimal and focused on UX improvements
 
 ### External Services
 
-- **No external APIs** for core functionality
-- **No cloud dependencies** or telemetry
-- **Optional external integrations** must have local fallbacks
-- **Preserve offline-first** functionality
+- No external APIs for core functionality
+- No cloud dependencies or telemetry
+- Optional external integrations must have local fallbacks
+- Preserve offline-first functionality
 
 ## Common Scenarios and Responses
 
@@ -256,21 +256,21 @@ Add new CSV processing library
 
 ### Security Issues
 
-- **Immediate action permitted** for security vulnerability fixes
-- **Document post-action** with rationale and impact assessment
-- **Follow up with ADR** if architectural changes were needed
+- Immediate action permitted for security vulnerability fixes
+- Document post-action with rationale and impact assessment
+- Follow up with ADR if architectural changes were needed
 
 ### Blocking Issues
 
-- **Temporary workarounds permitted** to unblock development
-- **Must create follow-up task** for proper architectural solution
-- **Document technical debt** and repayment plan
+- Temporary workarounds permitted to unblock development
+- Must create follow-up task for proper architectural solution
+- Document technical debt and repayment plan
 
 ### Production Issues
 
-- **Local-first architecture should prevent** most production emergencies
-- **SQLite failures** should be rare and recoverable
-- **Focus on data integrity** over feature availability
+- Local-first architecture should prevent most production emergencies
+- SQLite failures should be rare and recoverable
+- Focus on data integrity over feature availability
 
 ## Learning and Improvement
 

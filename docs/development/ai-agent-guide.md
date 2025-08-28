@@ -57,11 +57,11 @@ This project uses `just` as the task runner. Key commands:
 
 All test commands support `-verbose` variants for detailed output (e.g., `just test-fast-verbose`)
 
-## 🛡️ **NEW: Test Database Safeguards**
+## 🛡️ NEW: Test Database Safeguards
 
 We've implemented comprehensive safeguards after experiencing mass test failures (253 → 0). These tools prevent database issues and provide instant recovery.
 
-### **🚀 Quick Start - Use These First!**
+### 🚀 Quick Start - Use These First!
 
 ```bash
 # ALWAYS start with health check when debugging tests
@@ -74,11 +74,11 @@ just test-safe                  # ← Use this instead of regular 'just test'
 just test-db-emergency-reset    # ← Nuclear option that actually works
 ```
 
-### **Why These Safeguards Exist**
+### Why These Safeguards Exist
 
-During development, we experienced a catastrophic test failure where **253 tests suddenly failed** due to test database contamination. The root cause was stale data from previous test runs that corrupted the baseline state.
+During development, we experienced a catastrophic test failure where 253 tests suddenly failed due to test database contamination. The root cause was stale data from previous test runs that corrupted the baseline state.
 
-These safeguards **prevent this from happening again** and provide **instant recovery** when it does.
+These safeguards prevent this from happening again and provide instant recovery when it does.
 
 ### Test Database Management
 
@@ -90,7 +90,7 @@ These safeguards **prevent this from happening again** and provide **instant rec
 
 #### Test Database Reset Procedures
 
-**For Test Database Issues (Stale Data, Failures):**
+For Test Database Issues (Stale Data, Failures):
 
 ```bash
 # Complete test database reset (recommended approach)
@@ -103,7 +103,7 @@ MIX_ENV=test mix run -e "Ashfolio.SQLiteHelpers.setup_global_test_data!()"
 just test-fast
 ```
 
-**Alternative Reset (includes sample transactions):**
+Alternative Reset (includes sample transactions):
 
 ```bash
 # This creates more data than tests typically need
@@ -112,22 +112,22 @@ MIX_ENV=test mix ecto.reset
 
 #### Common Test Database Issues & Solutions
 
-**Error: "Default user not found"**
+Error: "Default user not found"
 
 - Global test data missing from database
 - Run `MIX_ENV=test mix run -e "Ashfolio.SQLiteHelpers.setup_global_test_data!()"`
 
-**Error: Expected X accounts, got Y accounts**
+Error: Expected X accounts, got Y accounts
 
 - Stale test data contamination from previous runs
 - Complete test database reset (see procedures above)
 
-**Error: "Database busy" or "database is locked"**
+Error: "Database busy" or "database is locked"
 
 - SQLite concurrency issues, test processes accessing database simultaneously
 - Tests use `async: false` and retry logic, but reset database if persistent
 
-**Mass Test Failures (200+ failures)**
+Mass Test Failures (200+ failures)
 
 - Usually test database contamination or missing global test data
 - Complete test database reset procedure above
@@ -209,7 +209,7 @@ MIX_ENV=test mix ecto.reset
 
 When encountering test failures, follow this systematic approach:
 
-#### 1. **Assess the Scope**
+#### 1. Assess the Scope
 
 ```bash
 # Get overall test health
@@ -219,13 +219,13 @@ just test-fast
 just test-file path/to/failing_test.exs
 ```
 
-#### 2. **Identify the Pattern**
+#### 2. Identify the Pattern
 
 - Likely code logic or test-specific issue
 - Usually infrastructure issue (database, setup, dependencies)
 - Focus on that specific assertion or setup
 
-#### 3. **Check Test Database State**
+#### 3. Check Test Database State
 
 ```bash
 # Verify test database exists and has proper setup
@@ -238,20 +238,20 @@ MIX_ENV=test mix run -e "
 "
 ```
 
-#### 4. **Analyze Error Messages**
+#### 4. Analyze Error Messages
 
-- **"Default user not found"** → Missing global test data
-- **"Expected X, got Y"** → Stale data contamination
-- **"Database busy/locked"** → SQLite concurrency issues
-- **Protocol/Module errors** → Code syntax or compilation issues
+- "Default user not found" → Missing global test data
+- "Expected X, got Y" → Stale data contamination
+- "Database busy/locked" → SQLite concurrency issues
+- Protocol/Module errors → Code syntax or compilation issues
 
-#### 5. **Apply Targeted Fixes**
+#### 5. Apply Targeted Fixes
 
 - Use test database reset procedures (see Test Database Management section)
 - Focus on the failing assertion and surrounding code
 - Check test setup blocks and global test data
 
-#### 6. **Verify the Fix**
+#### 6. Verify the Fix
 
 ```bash
 # Test the specific failing test
@@ -313,7 +313,7 @@ just reset                          # Reset development database
 just reseed                         # Re-seed development database
 ```
 
-### 🛡️ **NEW SAFEGUARDS IMPLEMENTED**
+### 🛡️ NEW SAFEGUARDS IMPLEMENTED
 
 After experiencing mass test failures (253 → 0), we've implemented several safeguards:
 

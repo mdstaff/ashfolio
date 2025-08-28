@@ -12,7 +12,7 @@ Individual currently using spreadsheet-based approach requiring 45+ minutes mont
 
 ### Requirement 1: Cash Account Management
 
-**User Story:** As someone managing comprehensive finances, I want to track cash accounts alongside my investment accounts so that I can see my complete financial picture in one application.
+User Story: As someone managing comprehensive finances, I want to track cash accounts alongside my investment accounts so that I can see my complete financial picture in one application.
 
 #### Acceptance Criteria
 
@@ -23,7 +23,7 @@ Individual currently using spreadsheet-based approach requiring 45+ minutes mont
 
 ### Requirement 2: Simple Cash Balance Management
 
-**User Story:** As someone managing cash accounts, I want to manually adjust cash balances when needed so that I can maintain accurate net worth calculations without detailed transaction tracking.
+User Story: As someone managing cash accounts, I want to manually adjust cash balances when needed so that I can maintain accurate net worth calculations without detailed transaction tracking.
 
 #### Acceptance Criteria
 
@@ -34,7 +34,7 @@ Individual currently using spreadsheet-based approach requiring 45+ minutes mont
 
 ### Requirement 3: Net Worth Calculation
 
-**User Story:** As someone tracking wealth accumulation, I want real-time net worth calculation across all my accounts so that I can monitor my financial progress.
+User Story: As someone tracking wealth accumulation, I want real-time net worth calculation across all my accounts so that I can monitor my financial progress.
 
 #### Acceptance Criteria
 
@@ -45,7 +45,7 @@ Individual currently using spreadsheet-based approach requiring 45+ minutes mont
 
 ### Requirement 4: Symbol Autocomplete
 
-**User Story:** As an investor entering transactions, I want intelligent symbol search so that I can quickly find securities without typing full symbol names.
+User Story: As an investor entering transactions, I want intelligent symbol search so that I can quickly find securities without typing full symbol names.
 
 #### Acceptance Criteria
 
@@ -56,7 +56,7 @@ Individual currently using spreadsheet-based approach requiring 45+ minutes mont
 
 ### Requirement 5: Transaction Categories (Investment Focus)
 
-**User Story:** As an investor managing transactions, I want to assign categories to my investment transactions so that I can organize and filter my investment activity.
+User Story: As an investor managing transactions, I want to assign categories to my investment transactions so that I can organize and filter my investment activity.
 
 #### Acceptance Criteria
 

@@ -48,45 +48,45 @@ Replace spreadsheet workflows incrementally without losing any existing capabili
 
 #### What's Available
 
-- **Investment portfolio management** (already in v0.1.0)
-- **Cash account management**
-- **Basic net worth calculation**
-- **Symbol autocomplete for easier transaction entry**
-- **Enhanced transaction categorization**
+- Investment portfolio management (already in v0.1.0)
+- Cash account management
+- Basic net worth calculation
+- Symbol autocomplete for easier transaction entry
+- Enhanced transaction categorization
 
 #### Migration Steps
 
-**Week 1-2: Investment Data Migration**
+Week 1-2: Investment Data Migration
 
-1. **Export Current Investment Data**
+1. Export Current Investment Data
 
    - Create CSV export from your investment tracking spreadsheet
    - Include all historical transactions with dates, symbols, quantities, prices
    - Note any custom categories or tags you use
 
-2. **Set Up Ashfolio Investment Accounts**
+2. Set Up Ashfolio Investment Accounts
 
    - Create accounts for each brokerage (Fidelity, Chase, Schwab, etc.)
    - Import or manually enter historical transactions
    - Verify portfolio values match your records
 
-3. **Validate FIFO Cost Basis**
+3. Validate FIFO Cost Basis
    - Compare Ashfolio's FIFO calculations with spreadsheet
    - Investigate and resolve any discrepancies
    - Document any differences for future reference
 
-**Week 3-4: Cash Account Setup** 4. **Add Cash Accounts**
+Week 3-4: Cash Account Setup 4. Add Cash Accounts
 
 - Create checking, savings, money market accounts
 - Enter current balances for net worth baseline
 - Set up account details (institution, interest rates)
 
-5. **Initial Net Worth Calculation**
+5. Initial Net Worth Calculation
    - Verify Ashfolio net worth matches spreadsheet calculation
    - Create first monthly net worth snapshot
    - Plan monthly update workflow
 
-**Week 5-6: Workflow Optimization** 6. **Establish Monthly Routine**
+Week 5-6: Workflow Optimization 6. Establish Monthly Routine
 
 - Follow [Monthly Workflow Guide](monthly-workflow-guide.md)
 - Time your monthly updates (target: 30 minutes)
@@ -94,46 +94,46 @@ Replace spreadsheet workflows incrementally without losing any existing capabili
 
 #### Parallel Operation
 
-- **Continue spreadsheet** for expense tracking and asset management
-- **Use Ashfolio** for investment and cash account management
-- **Cross-reference** net worth calculations between both systems
+- Continue spreadsheet for expense tracking and asset management
+- Use Ashfolio for investment and cash account management
+- Cross-reference net worth calculations between both systems
 
 ### Phase 2: Asset & Expense Management (v0.3.0 - Q4 2025)
 
 #### What's Available
 
-- **Real estate and vehicle tracking**
-- **Expense tracking and categorization**
-- **Historical net worth snapshots**
-- **Enhanced data import capabilities**
+- Real estate and vehicle tracking
+- Expense tracking and categorization
+- Historical net worth snapshots
+- Enhanced data import capabilities
 
 #### Migration Steps
 
-**Month 1: Asset Migration**
+Month 1: Asset Migration
 
-1. **Real Estate Setup**
+1. Real Estate Setup
 
    - Add primary residence with current market value
    - Include any rental or investment properties
    - Set up valuation update schedule (quarterly)
 
-2. **Vehicle and Other Assets**
+2. Vehicle and Other Assets
    - Add vehicles with current values and depreciation schedules
    - Include other valuable assets (collectibles, etc.)
    - Plan for regular valuation updates
 
-**Month 2: Expense System Setup** 3. **Expense Categories**
+Month 2: Expense System Setup 3. Expense Categories
 
 - Create expense categories matching your spreadsheet system
 - Import or manually enter recent expense history
 - Set up recurring expense tracking
 
-4. **Budget Integration**
+4. Budget Integration
    - Transfer budget targets from spreadsheet to Ashfolio
    - Set up budget vs actual reporting
    - Configure alerts for budget overruns
 
-**Month 3: Full Net Worth Integration** 5. **Complete Financial Picture**
+Month 3: Full Net Worth Integration 5. Complete Financial Picture
 
 - Verify all assets and liabilities are tracked
 - Validate comprehensive net worth calculation
@@ -141,46 +141,46 @@ Replace spreadsheet workflows incrementally without losing any existing capabili
 
 #### Transition Point
 
-- **Discontinue spreadsheet** for asset and expense tracking
-- **Use Ashfolio exclusively** for all financial data except planning
-- **Export spreadsheet data** for historical reference
+- Discontinue spreadsheet for asset and expense tracking
+- Use Ashfolio exclusively for all financial data except planning
+- Export spreadsheet data for historical reference
 
 ### Phase 3: Financial Planning (v0.4.0 - Q1 2026)
 
 #### What's Available
 
-- **Retirement planning tools (25x expenses rule)**
-- **Financial goal setting and tracking**
-- **Long-term forecasting with growth assumptions**
-- **Dividend income projections**
+- Retirement planning tools (25x expenses rule)
+- Financial goal setting and tracking
+- Long-term forecasting with growth assumptions
+- Dividend income projections
 
 #### Migration Steps
 
-**Month 1: Goal Migration**
+Month 1: Goal Migration
 
-1. **Retirement Planning Setup**
+1. Retirement Planning Setup
 
    - Transfer retirement savings targets from spreadsheet
    - Configure 25x expenses rule calculations
    - Set up 4% withdrawal rate projections
 
-2. **Emergency Fund and Other Goals**
+2. Emergency Fund and Other Goals
    - Set emergency fund targets (3-6 months expenses)
    - Create custom savings goals with timelines
    - Import goal progress data from spreadsheet
 
-**Month 2: Forecasting Migration** 3. **Growth Assumptions**
+Month 2: Forecasting Migration 3. Growth Assumptions
 
 - Transfer inflation assumptions from spreadsheet
 - Configure growth rates by asset class
 - Set up conservative/moderate/aggressive scenarios
 
-4. **Long-term Projections**
+4. Long-term Projections
    - Replicate your 2017-2056 forecasting approach
    - Validate projection accuracy against spreadsheet
    - Set up automated projection updates
 
-**Month 3: Dividend Analysis** 5. **Income Projections**
+Month 3: Dividend Analysis 5. Income Projections
 
 - Transfer dividend yield assumptions
 - Set up forward-looking income calculations
@@ -188,35 +188,35 @@ Replace spreadsheet workflows incrementally without losing any existing capabili
 
 #### Complete Migration
 
-- **Discontinue financial planning spreadsheet**
-- **Use Ashfolio exclusively** for all financial management
-- **Archive spreadsheet** with historical data export
+- Discontinue financial planning spreadsheet
+- Use Ashfolio exclusively for all financial management
+- Archive spreadsheet with historical data export
 
 ### Phase 4: Advanced Features (v0.5.0 - Q2 2026)
 
 #### What's Available
 
-- **Tax planning and optimization**
-- **Advanced portfolio analytics**
-- **Professional reporting capabilities**
-- **"Your Money Ratios" analysis**
+- Tax planning and optimization
+- Advanced portfolio analytics
+- Professional reporting capabilities
+- "Your Money Ratios" analysis
 
 #### Optimization Steps
 
-**Month 1: Tax Planning Integration**
+Month 1: Tax Planning Integration
 
-1. **Capital Gains Tracking**
+1. Capital Gains Tracking
    - Set up tax-loss harvesting alerts
    - Configure tax-efficient rebalancing
    - Plan for tax season reporting
 
-**Month 2: Advanced Analytics** 2. **Portfolio Analysis**
+Month 2: Advanced Analytics 2. Portfolio Analysis
 
 - Utilize advanced risk metrics
 - Set up benchmark comparisons
 - Configure rebalancing recommendations
 
-**Month 3: Professional Reporting** 3. **Comprehensive Reports**
+Month 3: Professional Reporting 3. Comprehensive Reports
 
 - Generate annual financial summaries
 - Create tax preparation exports
@@ -308,24 +308,24 @@ Replace spreadsheet workflows incrementally without losing any existing capabili
 
 ### Migration Support
 
-- **[Monthly Workflow Guide](monthly-workflow-guide.md)** - Optimal routine for financial updates
-- **[Data Import Guide](data-import-guide.md)** - Technical details for bulk data import
-- **[Feature Comparison](feature-comparison-guide.md)** - Spreadsheet vs Ashfolio feature mapping
+- [Monthly Workflow Guide](monthly-workflow-guide.md) - Optimal routine for financial updates
+- [Data Import Guide](data-import-guide.md) - Technical details for bulk data import
+- [Feature Comparison](feature-comparison-guide.md) - Spreadsheet vs Ashfolio feature mapping
 
 ### Technical Help
 
-- **[Troubleshooting Guide](../getting-started/troubleshooting.md)** - Common issues and solutions
-- **[GitHub Discussions](https://github.com/mdstaff/ashfolio/discussions)** - Community support for migration questions
-- **[GitHub Issues](https://github.com/mdstaff/ashfolio/issues)** - Report migration-related bugs or feature requests
+- [Troubleshooting Guide](../getting-started/troubleshooting.md) - Common issues and solutions
+- [GitHub Discussions](https://github.com/mdstaff/ashfolio/discussions) - Community support for migration questions
+- [GitHub Issues](https://github.com/mdstaff/ashfolio/issues) - Report migration-related bugs or feature requests
 
 ### Financial Planning Resources
 
-- **[Retirement Planning Guide](retirement-planning-guide.md)** - 25x rule and withdrawal rate planning
-- **[Investment Basics](investment-basics-guide.md)** - Fundamental concepts for new investors
-- **["Your Money Ratios" Guide](money-ratios-guide.md)** - Charles Farrell methodology implementation
+- [Retirement Planning Guide](retirement-planning-guide.md) - 25x rule and withdrawal rate planning
+- [Investment Basics](investment-basics-guide.md) - Fundamental concepts for new investors
+- ["Your Money Ratios" Guide](money-ratios-guide.md) - Charles Farrell methodology implementation
 
 ---
 
-**This migration guide evolves with each release phase. Check for updates as new features become available, and don't hesitate to provide feedback on your migration experience.**
+This migration guide evolves with each release phase. Check for updates as new features become available, and don't hesitate to provide feedback on your migration experience.
 
 _Your success in migrating from spreadsheet-based financial management helps improve Ashfolio for all users. Please share your experience and suggestions through [GitHub Discussions](https://github.com/mdstaff/ashfolio/discussions)._

@@ -10,7 +10,7 @@ Built on v0.1.0's existing PriceManager GenServer and Yahoo Finance integration.
 
 ### Requirement 1: Automatic Price Fetching
 
-**User Story:** As an investor entering transactions, I want to see current market prices when I select a symbol so that I can enter accurate transaction data.
+User Story: As an investor entering transactions, I want to see current market prices when I select a symbol so that I can enter accurate transaction data.
 
 #### Acceptance Criteria
 
@@ -22,7 +22,7 @@ Built on v0.1.0's existing PriceManager GenServer and Yahoo Finance integration.
 
 ### Requirement 2: Fallback and Error Handling
 
-**User Story:** As a user, I want the form to work even when price lookup fails so that I can still enter transactions manually.
+User Story: As a user, I want the form to work even when price lookup fails so that I can still enter transactions manually.
 
 #### Acceptance Criteria
 
@@ -34,7 +34,7 @@ Built on v0.1.0's existing PriceManager GenServer and Yahoo Finance integration.
 
 ### Requirement 3: Market Context Information
 
-**User Story:** As an investor, I want to understand the context of price data so that I can make informed decisions about my transaction entries.
+User Story: As an investor, I want to understand the context of price data so that I can make informed decisions about my transaction entries.
 
 #### Acceptance Criteria
 

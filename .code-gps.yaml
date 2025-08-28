@@ -1,4 +1,4 @@
-# Code GPS v2.0 - 269ms | 2 LiveViews | 20 Components
+# Code GPS v2.0 - 222ms | 2 LiveViews | 20 Components
 
 # === ROUTES ===
 /: DashboardLive ✅
@@ -41,21 +41,21 @@ flash: lib/ashfolio_web/components/core_components.ex:108 (7x) | attrs: [id, fla
 flash_group: lib/ashfolio_web/components/core_components.ex:147 (1x) | attrs: ["flash", "id"]
 simple_form: lib/ashfolio_web/components/core_components.ex:202 (7x) | attrs: ["for", "as", "rest"]
 button: lib/ashfolio_web/components/core_components.ex:229 (20x) | attrs: ["type", "class", "rest"]
-input: lib/ashfolio_web/components/core_components.ex:294 (38x) | attrs: [errors, checked, prompt...6]
+input: lib/ashfolio_web/components/core_components.ex:294 (45x) | attrs: [errors, checked, prompt...6]
 label: lib/ashfolio_web/components/core_components.ex:397 (3x) | attrs: ["for"]
 error: lib/ashfolio_web/components/core_components.ex:410 (9x)
 
 # === DEPENDENCIES ===
-ash: ✅ (1040)
-contex: ✅ (125)
-decimal: ✅ (867)
+ash: ✅ (1063)
+contex: ✅ (126)
+decimal: ✅ (1266)
 mox: ✅ (1)
 wallaby: ❌ (1)
 
 # === FRESHNESS ===
-recent: ["mix.exs", "lib/ashfolio/financial_management/retirement_calculator.ex", "test/ashfolio/financial_management/retirement_calculator_test.exs", "lib/mix/tasks/code_gps.ex", "test/ashfolio/financial_management/category_migration_test.exs"]
-uncommitted: 19 files
-commits_ahead: 0
+recent: ["lib/ashfolio/financial_management/contribution_analyzer.ex", "lib/ashfolio/portfolio.ex", "lib/ashfolio_web/components/forecast_chart.ex", "lib/ashfolio_web/components/top_bar.ex", "lib/ashfolio_web/live/error_helpers.ex"]
+uncommitted: 0 files
+commits_ahead: 5
 
 # === TEST GAPS ===
 missing_tests:

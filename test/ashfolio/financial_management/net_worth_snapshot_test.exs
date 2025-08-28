@@ -284,7 +284,7 @@ defmodule Ashfolio.FinancialManagement.NetWorthSnapshotTest do
       growth = NetWorthSnapshot.monthly_growth_rate!(~D[2024-01-01], ~D[2024-12-01])
 
       # 80000 to 110000 over 11 months
-      expected_monthly_rate = :math.pow(110_000 / 80000, 1 / 11) - 1
+      expected_monthly_rate = :math.pow(110_000 / 80_000, 1 / 11) - 1
       assert_in_delta Decimal.to_float(growth), expected_monthly_rate * 100, 1.0
     end
 

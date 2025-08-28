@@ -34,7 +34,7 @@ Tags: `@tag :integration`
 - Cross-domain interactions
 - PubSub communication
 
-Integration tests **must** reset global account balances in setup. See [Global Test Data Requirements](testing/global-test-data-requirements.md) for proper patterns.
+Integration tests must reset global account balances in setup. See [Global Test Data Requirements](testing/global-test-data-requirements.md) for proper patterns.
 
 ### 🌐 LiveView Tests (5-15 seconds)
 
@@ -77,13 +77,15 @@ Command: `just credo`
 Configuration: `.credo.exs` (if present)
 
 Credo checks for:
+
 - Code consistency and readability
-- Refactoring opportunities  
+- Refactoring opportunities
 - Code complexity issues
 - Security vulnerabilities
 - Performance anti-patterns
 
 Integration with workflow:
+
 ```bash
 just check      # Runs format, compile, credo, and smoke tests
 just commit     # Pre-commit validation includes credo
@@ -318,7 +320,7 @@ end
 
 ### The Problem
 
-When upgrading to Phoenix LiveView 1.1, we discovered a fundamental architectural issue causing **widespread duplicate ID errors** affecting 60+ tests:
+When upgrading to Phoenix LiveView 1.1, we discovered a fundamental architectural issue causing widespread duplicate ID errors affecting 60+ tests:
 
 ```elixir
 # INCORRECT CONFIGURATION (caused duplication)
@@ -385,4 +387,4 @@ A regression test has been added to ensure this configuration remains correct.
 
 ### Key Insight
 
-Phoenix LiveView 1.1's stricter validation is a **feature, not a bug** - it helped us identify a fundamental architectural problem that was degrading the user experience in production.
+Phoenix LiveView 1.1's stricter validation is a feature, not a bug - it helped us identify a fundamental architectural problem that was degrading the user experience in production.

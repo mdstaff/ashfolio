@@ -4,10 +4,10 @@ Welcome to Ashfolio! This guide will get you from zero to your first contributio
 
 ## Your Journey
 
-1. **Setup** → [Installation Guide](installation.md) (5 minutes)
-2. **Explore** → [Quick Start](quick-start.md) (10 minutes)
-3. **Understand** → [Architecture Overview](../development/architecture.md) (20 minutes)
-4. **Contribute** → [First Contribution](first-contribution.md) (30 minutes)
+1. Setup → [Installation Guide](installation.md) (5 minutes)
+2. Explore → [Quick Start](quick-start.md) (10 minutes)
+3. Understand → [Architecture Overview](../development/architecture.md) (20 minutes)
+4. Contribute → [First Contribution](first-contribution.md) (30 minutes)
 
 ## Role-Specific Paths
 
@@ -78,4 +78,4 @@ By the end of your onboarding, you should be able to:
 
 ---
 
-**Ready to begin?** Start with the [Installation Guide](installation.md) →
+Ready to begin? Start with the [Installation Guide](installation.md) →

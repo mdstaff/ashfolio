@@ -76,7 +76,7 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculatorTest do
     @tag :unit
     test "rejects non-decimal input" do
       # Test with various invalid inputs
-      invalid_inputs = ["50000", 50000, nil, %{}]
+      invalid_inputs = ["50000", 50_000, nil, %{}]
 
       for invalid_input <- invalid_inputs do
         assert {:error, reason} = RetirementCalculator.calculate_retirement_target(invalid_input)

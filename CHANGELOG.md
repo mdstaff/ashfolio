@@ -5,6 +5,60 @@ All notable changes to the Ashfolio project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - v0.4.3 Development
+
+### Added (Stage 3: Scenario Planning - Complete)
+
+- Scenario Planning Engine: Standard scenarios (pessimistic 5%, realistic 7%, optimistic 10%) with weighted averages
+- Custom Scenario Planning: User-defined growth rates for specialized financial modeling
+- Financial Independence Timeline: 25x expenses rule with 4% safe withdrawal rate calculations
+- Multi-Scenario FI Analysis: Compare FI timelines across different growth assumptions
+- Test Coverage: 32 comprehensive tests for scenario planning functionality
+- Demo Script: `scripts/test-scenario-planning.exs` for testing all features
+
+### Technical Implementation
+
+- `calculate_scenario_projections/3`: Standard growth scenario comparisons
+- `calculate_custom_scenarios/4`: Flexible custom growth rate modeling
+- `calculate_fi_timeline/4`: Financial independence timeline with scenario analysis
+- Pure calculation functions with no database dependencies
+- Performance optimized: <500ms for all FI timeline calculations
+- Comprehensive error handling and validation
+
+## [0.4.2] - 2025-08-26
+
+### Added
+
+- Retirement Calculator: Industry-standard retirement planning calculations
+- 25x Expenses Rule: Calculate retirement target based on annual expenses
+- 4% Safe Withdrawal Rate: Determine portfolio withdrawal sustainability
+- Emergency Fund Integration: Calculate and track emergency fund goals
+- Emergency Fund Status: Real-time emergency fund adequacy calculations
+
+### Technical Improvements
+
+- Decimal precision for all financial calculations
+- Comprehensive test coverage (100% passing)
+- Integration with expense tracking for automatic calculations
+- Pure calculation modules following functional programming patterns
+
+## [0.4.1] - 2025-08-25
+
+### Added
+
+- Financial Goals System: Complete goal tracking foundation
+- Goal Resource: CRUD operations for financial goals with validation
+- Goal Types: Support for emergency_fund, retirement, house_down_payment, vacation, custom
+- Progress Tracking: Automatic calculation of progress percentage and time to goal
+- Database Schema: Financial goals table with performance indexes
+
+### Technical Implementation
+
+- Ash Resource following existing Expense patterns
+- Code interface for clean API access
+- SQLite with optimized indexes for goal queries
+- 15 comprehensive tests with 100% coverage
+
 ## [0.3.4] - 2025-08-23
 
 ### Added

@@ -5,7 +5,7 @@
 During concurrent test execution, SQLite connection pool was experiencing disconnection errors:
 
 ```
-[error] Exqlite.Connection (#PID<0.357.0>) disconnected: ** (DBConnection.ConnectionError) client #PID<0.6685.0> exited
+[error] Exqlite.Connection (#PID<0.357.0>) disconnected:  (DBConnection.ConnectionError) client #PID<0.6685.0> exited
 ```
 
 Default SQLite connection pool timeouts were too aggressive for concurrent test execution, causing connections to be dropped during high-load testing scenarios.
@@ -142,6 +142,6 @@ These optimizations are test-specific because:
 
 ---
 
-**RESOLVED**  
+RESOLVED  
  Improved test stability and reduced noise in test output  
  Monitor production deployment for similar optimizations

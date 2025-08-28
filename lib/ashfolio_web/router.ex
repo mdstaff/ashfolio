@@ -35,6 +35,7 @@ defmodule AshfolioWeb.Router do
     live "/goals", FinancialGoalLive.Index, :index
     live "/goals/new", FinancialGoalLive.Index, :new
     live "/goals/:id/edit", FinancialGoalLive.Index, :edit
+    live "/forecast", ForecastLive.Index, :index
   end
 
   # Health check endpoints - accessible without authentication

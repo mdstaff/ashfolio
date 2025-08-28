@@ -53,7 +53,7 @@ brew update
 brew install erlang elixir
 ```
 
-**Recommended Versions:**
+Recommended Versions:
 
 - Erlang/OTP: 26.0+
 - Elixir: 1.15.0+
@@ -261,15 +261,15 @@ sqlite3 --version
 
 If tests fail with database sandbox errors:
 
-**Symptoms:**
+Symptoms:
 
 - Tests fail with `{:badmatch, :already_shared}` errors
 - Multiple tests failing with sandbox-related messages
 - Intermittent test failures in CI/CD
 
-**Cause:** SQLite has limited concurrent access compared to PostgreSQL
+Cause: SQLite has limited concurrent access compared to PostgreSQL
 
-**Resolution:**
+Resolution:
 
 - The test infrastructure automatically handles these conflicts
 - Tests should pass on retry

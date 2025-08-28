@@ -84,17 +84,17 @@ end
 
 ### Phase 1: Core Context Module (4-6 hours)
 
-**Priority: High**
-**Risk: Low**
+Priority: High
+Risk: Low
 
-**Deliverables:**
+Deliverables:
 
 - `lib/ashfolio/portfolio/context.ex`
 - Core functions: `get_user_dashboard_data/1`, `get_account_with_transactions/2`, `get_portfolio_summary/1`
 - Basic test coverage
 - Integration with existing Ash resources
 
-**Implementation Details:**
+Implementation Details:
 
 - Thin wrappers around existing Ash code interfaces
 - Leverage existing calculation modules (Calculator, HoldingsCalculator)
@@ -103,17 +103,17 @@ end
 
 ### Phase 2: Mix Task Wrappers (2-3 hours)
 
-**Priority: Medium**
-**Risk: Very Low**
+Priority: Medium
+Risk: Very Low
 
-**Deliverables:**
+Deliverables:
 
 - `lib/mix/tasks/ashfolio/dashboard.ex`
 - `lib/mix/tasks/ashfolio/accounts.ex`
 - `lib/mix/tasks/ashfolio/portfolio.ex`
 - CLI formatting and display logic
 
-**Implementation Details:**
+Implementation Details:
 
 - CLI wrappers around Context functions
 - Reuse existing FormatHelpers
@@ -121,16 +121,16 @@ end
 
 ### Phase 3: LiveView Integration Helpers (3-4 hours)
 
-**Priority: Medium**
-**Risk: Low**
+Priority: Medium
+Risk: Low
 
-**Deliverables:**
+Deliverables:
 
 - `lib/ashfolio_web/portfolio_helpers.ex`
 - Refactor existing LiveView modules to use helpers
 - Standardized assign patterns
 
-**Implementation Details:**
+Implementation Details:
 
 - Move existing assign logic into reusable functions
 - Maintain existing LiveView functionality
@@ -138,10 +138,10 @@ end
 
 ### Phase 4: Testing & Documentation (4-5 hours)
 
-**Priority: High**
-**Risk: Low**
+Priority: High
+Risk: Low
 
-**Deliverables:**
+Deliverables:
 
 - Comprehensive test coverage for Context module
 - Mix task tests
@@ -149,7 +149,7 @@ end
 - Integration tests
 - Updated documentation
 
-**Implementation Details:**
+Implementation Details:
 
 - Leverage existing test patterns and SQLiteHelpers
 - Test both success and error scenarios
@@ -157,28 +157,28 @@ end
 
 ## Technical Benefits
 
-### 1. **Local-First Optimized**
+### 1. Local-First Optimized
 
 - Single function calls replace multiple database queries
 - SQLite-optimized with proper connection pooling
 - Works completely offline
 - Batched queries reduce SQLite round trips
 
-### 2. **Ash Framework Native**
+### 2. Ash Framework Native
 
 - Leverages Ash's built-in query optimization
 - Uses Ash policies and calculations
 - Maintains type safety and validation
 - No breaking changes to existing Ash resources
 
-### 3. **Reusable Across Interfaces**
+### 3. Reusable Across Interfaces
 
 - Same functions work for LiveView, mix tasks, and future APIs
 - Consistent data structure across all interfaces
 - Easy to test and maintain
 - Foundation for future API endpoints
 
-### 4. **Performance Focused**
+### 4. Performance Focused
 
 - ETS caching for frequently accessed data
 - Concurrent processing where beneficial

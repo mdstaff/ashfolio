@@ -254,7 +254,7 @@ defmodule Ashfolio.FinancialManagement.EmergencyFundCalculatorTest do
     } do
       # Ensure no emergency fund goals exist
       goals = financial_goal_module.by_type!(:emergency_fund)
-      assert length(goals) == 0
+      assert Enum.empty?(goals)
 
       assert {:created, goal} = financial_goal_module.setup_emergency_fund_goal!(6)
 
@@ -291,7 +291,7 @@ defmodule Ashfolio.FinancialManagement.EmergencyFundCalculatorTest do
     } do
       # Ensure no goals exist
       goals = financial_goal_module.by_type!(:emergency_fund)
-      assert length(goals) == 0
+      assert Enum.empty(goals)
 
       assert {:no_goal, recommendation} =
                financial_goal_module.analyze_emergency_fund_readiness!()

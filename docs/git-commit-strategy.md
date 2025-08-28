@@ -1,6 +1,6 @@
 # Git Commit Strategy
 
-**Systematic Approach to Committing v0.2.0 Changes & Test Optimizations**
+Systematic Approach to Committing v0.2.0 Changes & Test Optimizations
 
 ## Current Status Analysis
 

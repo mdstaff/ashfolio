@@ -4,70 +4,70 @@
 
 ## Project Overview
 
-**Ashfolio** is a simplified Phase 1 portfolio management application built with Elixir/Phoenix and the Ash Framework. This provides essential project context for all AI agents.
+Ashfolio is a simplified Phase 1 portfolio management application built with Elixir/Phoenix and the Ash Framework. This provides essential project context for all AI agents.
 
 ### Key Project Characteristics
 
-- **Single-user local application** - No authentication, runs on localhost only
-- **Simplified Phase 1 scope** - Core portfolio tracking with manual price updates
-- **High confidence implementation** - Each task designed for 80-90% success rate
-- **Incremental development** - Tasks build on each other systematically
-- **macOS optimized** - Developed on macOS with Apple Silicon (M1 Pro), 16GB RAM
+- Single-user local application - No authentication, runs on localhost only
+- Simplified Phase 1 scope - Core portfolio tracking with manual price updates
+- High confidence implementation - Each task designed for 80-90% success rate
+- Incremental development - Tasks build on each other systematically
+- macOS optimized - Developed on macOS with Apple Silicon (M1 Pro), 16GB RAM
 
 ## Current Project Status
 
 ### Completed Foundation (28/29 tasks - 97% complete)
 
-**Development Environment:** Elixir/Phoenix/Ash Framework configured  
- **Project Structure:** Phoenix app with optimized directory structure  
- **Database:** SQLite configured with AshSqlite data layer  
- **ETS Caching:** Simple price caching system implemented  
- **Error Handling:** Centralized error handling with validation system  
- **User Resource:** Single default user Ash resource with validation  
- **Account Resource:** Investment account management with relationships  
- **Symbol Resource:** Financial symbols with market data support  
- **Transaction Resource:** Buy/sell/dividend/fee transaction management  
- **Database Migrations:** Core table migrations with performance indexes and management utilities  
- **Yahoo Finance Integration:** Market data fetching with comprehensive error handling  
- **Price Manager:** GenServer-based price coordination with dual storage  
- **Portfolio Calculator:** Complete calculation engine with financial precision  
- **Holdings Calculator:** Specialized holdings analysis with cost basis tracking  
- **LiveView Layout:** Responsive application layout with navigation system  
- **Simple Routing:** Basic Phoenix routing configuration with navigation  
- **Dashboard LiveView:** Functional portfolio dashboard with real-time data integration  
- **Holdings Table:** Complete holdings display with formatting and responsive design  
- **Manual Price Refresh:** User-initiated price updates with loading states and feedback  
- **Test Suite Status:** 383/383 tests passing (100% pass rate) - All critical stability issues resolved, including integration test fixes (Updated: August 7, 2025)
-**Account Management CRUD:** Complete account listing, creation, editing, deletion, and exclusion toggle functionality
-**Transaction Management CRUD:** Complete transaction entry, listing, editing, and deletion with all transaction types
-**Phase 10 Code Quality:** Production-ready codebase with clean compilation and resolved technical debt
-**PubSub Integration:** Complete real-time event system with dashboard updates for account and transaction changes
-**Code Simplification:** Simplified user creation logic using standard Ash patterns for better maintainability
+Development Environment: Elixir/Phoenix/Ash Framework configured  
+ Project Structure: Phoenix app with optimized directory structure  
+ Database: SQLite configured with AshSqlite data layer  
+ ETS Caching: Simple price caching system implemented  
+ Error Handling: Centralized error handling with validation system  
+ User Resource: Single default user Ash resource with validation  
+ Account Resource: Investment account management with relationships  
+ Symbol Resource: Financial symbols with market data support  
+ Transaction Resource: Buy/sell/dividend/fee transaction management  
+ Database Migrations: Core table migrations with performance indexes and management utilities  
+ Yahoo Finance Integration: Market data fetching with comprehensive error handling  
+ Price Manager: GenServer-based price coordination with dual storage  
+ Portfolio Calculator: Complete calculation engine with financial precision  
+ Holdings Calculator: Specialized holdings analysis with cost basis tracking  
+ LiveView Layout: Responsive application layout with navigation system  
+ Simple Routing: Basic Phoenix routing configuration with navigation  
+ Dashboard LiveView: Functional portfolio dashboard with real-time data integration  
+ Holdings Table: Complete holdings display with formatting and responsive design  
+ Manual Price Refresh: User-initiated price updates with loading states and feedback  
+ Test Suite Status: 383/383 tests passing (100% pass rate) - All critical stability issues resolved, including integration test fixes (Updated: August 7, 2025)
+Account Management CRUD: Complete account listing, creation, editing, deletion, and exclusion toggle functionality
+Transaction Management CRUD: Complete transaction entry, listing, editing, and deletion with all transaction types
+Phase 10 Code Quality: Production-ready codebase with clean compilation and resolved technical debt
+PubSub Integration: Complete real-time event system with dashboard updates for account and transaction changes
+Code Simplification: Simplified user creation logic using standard Ash patterns for better maintainability
 
 ### Currently Working On
 
-⚠️ **Phase 10:** Testing and Polish - **CRITICAL TEST STABILITY ISSUES**
+⚠️ Phase 10: Testing and Polish - CRITICAL TEST STABILITY ISSUES
 
 ### Current Priority Issues
 
-**RESOLVED: Test Suite Stability Crisis** (August 7, 2025)
+RESOLVED: Test Suite Stability Crisis (August 7, 2025)
 
-- **ALL RESOLVED** - 383/383 tests passing (100% pass rate)
-- Database state pollution and symbol uniqueness constraint violations - **FIXED**
-- Test isolation problems - **RESOLVED** with proper helper usage
-- **UNBLOCKED** - Test suite is now production-ready
+- ALL RESOLVED - 383/383 tests passing (100% pass rate)
+- Database state pollution and symbol uniqueness constraint violations - FIXED
+- Test isolation problems - RESOLVED with proper helper usage
+- UNBLOCKED - Test suite is now production-ready
 
 ### Next Priority Tasks
 
-**Phase 10 Test Stability: COMPLETED** (August 7, 2025)
+Phase 10 Test Stability: COMPLETED (August 7, 2025)
 
 - Final integration testing and performance validation
 - All test stability issues resolved
-- Database cleanup, test isolation, symbol uniqueness handling - **ALL COMPLETED**
-- **100% test pass rate achieved** (383/383 tests)
-- **v0.1.0 READY** - Test suite is production-ready
+- Database cleanup, test isolation, symbol uniqueness handling - ALL COMPLETED
+- 100% test pass rate achieved (383/383 tests)
+- v0.1.0 READY - Test suite is production-ready
 
-📋 **Next Development Focus:**
+📋 Next Development Focus:
 
 - Continue with remaining Phase 10 tasks (code quality, documentation)
 - Optional test suite optimizations (performance, coverage analysis)
@@ -75,7 +75,7 @@
 
 ### Phase 7 Research Summary (2025-08-02)
 
-**Holdings Table Implementation Research Complete:**
+Holdings Table Implementation Research Complete:
 
 - HoldingsCalculator provides complete holding objects with all financial fields
 - Phoenix core_components.ex has production-ready table with sorting capabilities
@@ -88,71 +88,71 @@ Phase 7 confidence increased from 80% to 85% due to completed research
 
 ### Recently Completed
 
-**Task 26.5:** Phase 10 Critical Compilation Issues (Completed - 2025-08-06)
+Task 26.5: Phase 10 Critical Compilation Issues (Completed - 2025-08-06)
 
-**Task 26 (Phase 9):** Transaction CRUD implementation (Completed - 2025-08-05)
+Task 26 (Phase 9): Transaction CRUD implementation (Completed - 2025-08-05)
 
-**Task 25 (Phase 9):** Transaction listing functionality (Completed - 2025-08-05)
+Task 25 (Phase 9): Transaction listing functionality (Completed - 2025-08-05)
 
-**Task 24 (Phase 9):** Transaction entry form (Completed - 2025-08-05)
+Task 24 (Phase 9): Transaction entry form (Completed - 2025-08-05)
 
-**Task 10:** Account deletion functionality (Completed - 2025-08-05)
+Task 10: Account deletion functionality (Completed - 2025-08-05)
 
-**Task 9:** Account editing functionality (Completed - 2025-08-04)
+Task 9: Account editing functionality (Completed - 2025-08-04)
 
-**Task 8:** Account creation functionality (Completed - 2025-08-04)
+Task 8: Account creation functionality (Completed - 2025-08-04)
 
-**Task 7:** AccountLive.FormComponent for reusable forms (Completed - 2025-08-04)
+Task 7: AccountLive.FormComponent for reusable forms (Completed - 2025-08-04)
 
-**Task 6:** Account exclusion toggle functionality (Completed - 2025-08-03)
+Task 6: Account exclusion toggle functionality (Completed - 2025-08-03)
 
-**Task 5:** Account detail view layout and transaction summary (Completed - 2025-08-03)
+Task 5: Account detail view layout and transaction summary (Completed - 2025-08-03)
 
-**PriceManager Test Fix:** Updated test to handle new last_refresh return format (Completed - 2025-08-03)
+PriceManager Test Fix: Updated test to handle new last_refresh return format (Completed - 2025-08-03)
 
-**Task 22:** Create account management LiveView (Completed - 2025-08-03)
+Task 22: Create account management LiveView (Completed - 2025-08-03)
 
-**Test Configuration Optimization:** Improved test suite performance (Completed - 2025-08-03)
+Test Configuration Optimization: Improved test suite performance (Completed - 2025-08-03)
 
-**Task 20:** Create holdings table (Completed - 2025-08-03)
+Task 20: Create holdings table (Completed - 2025-08-03)
 
-**Task 18:** Create basic dashboard LiveView (Completed - 2025-08-02)
+Task 18: Create basic dashboard LiveView (Completed - 2025-08-02)
 
-**Task 17:** Configure simple routing (Completed - 2025-08-02)
+Task 17: Configure simple routing (Completed - 2025-08-02)
 
-**Task 16:** Basic LiveView layout (Completed - 2025-08-02)
+Task 16: Basic LiveView layout (Completed - 2025-08-02)
 
-**Task 15:** Holdings value calculator (Completed - 2025-08-02)
+Task 15: Holdings value calculator (Completed - 2025-08-02)
 
-**Task 14:** Basic portfolio calculator (Completed - 2025-08-02)
+Task 14: Basic portfolio calculator (Completed - 2025-08-02)
 
-**Task 13:** ETS price caching integration (Completed - 2025-08-02)
+Task 13: ETS price caching integration (Completed - 2025-08-02)
 
-**Task 12:** Simple price manager GenServer (Completed - 2025-08-02)
+Task 12: Simple price manager GenServer (Completed - 2025-08-02)
 
-**Task 4:** Basic error handling system (Completed - 2025-01-28)
+Task 4: Basic error handling system (Completed - 2025-01-28)
 
-**Task 3:** ETS caching system (Completed - 2025-01-28)  
- **Task 2:** SQLite database configuration (Completed)  
- **Task 1.5:** Project directory structure optimization (Completed)  
- **Task 1:** Phoenix project initialization (Completed)
+Task 3: ETS caching system (Completed - 2025-01-28)  
+ Task 2: SQLite database configuration (Completed)  
+ Task 1.5: Project directory structure optimization (Completed)  
+ Task 1: Phoenix project initialization (Completed)
 
 ## Key Technical Architecture
 
 ### Data Model Structure
 
-- **User** - Single default user (no authentication)
-- **Account** - Investment accounts (Schwab, Fidelity, etc.)
-- **Symbol** - Stock/ETF symbols with market data
-- **Transaction** - Buy/sell/dividend/fee records
+- User - Single default user (no authentication)
+- Account - Investment accounts (Schwab, Fidelity, etc.)
+- Symbol - Stock/ETF symbols with market data
+- Transaction - Buy/sell/dividend/fee records
 
 ### Technology Stack
 
-- **Backend:** Phoenix 1.7+ with Ash Framework 3.0+
-- **Database:** SQLite with AshSqlite adapter
-- **Frontend:** Phoenix LiveView (no separate frontend)
-- **Cache:** Simple ETS for price data
-- **APIs:** Yahoo Finance (primary), CoinGecko (secondary)
+- Backend: Phoenix 1.7+ with Ash Framework 3.0+
+- Database: SQLite with AshSqlite adapter
+- Frontend: Phoenix LiveView (no separate frontend)
+- Cache: Simple ETS for price data
+- APIs: Yahoo Finance (primary), CoinGecko (secondary)
 
 ### Project Structure
 
@@ -187,9 +187,9 @@ ashfolio/
 
 ## Phase 1 Scope Boundaries
 
-**Included:** Manual price refresh, basic portfolio calculations, transaction entry, account management, holdings display, USD-only calculations
+Included: Manual price refresh, basic portfolio calculations, transaction entry, account management, holdings display, USD-only calculations
 
-**Excluded:** Real-time updates, advanced analytics, CSV import/export, multi-currency, background jobs, complex charting
+Excluded: Real-time updates, advanced analytics, CSV import/export, multi-currency, background jobs, complex charting
 
 ## Key Learnings & Technical Decisions
 
@@ -346,10 +346,10 @@ ashfolio/
 
 ## Key Reference Files
 
-- **Requirements:** `.kiro/specs/requirements.md` - Complete feature requirements
-- **Design:** `.kiro/specs/design.md` - Technical architecture details
-- **Tasks:** `.kiro/specs/tasks.md` - Implementation plan (29 tasks)
-- **Changelog:** `CHANGELOG.md` - **ALWAYS CHECK FIRST** - Detailed progress history and technical decisions
+- Requirements: `.kiro/specs/requirements.md` - Complete feature requirements
+- Design: `.kiro/specs/design.md` - Technical architecture details
+- Tasks: `.kiro/specs/tasks.md` - Implementation plan (29 tasks)
+- Changelog: `CHANGELOG.md` - ALWAYS CHECK FIRST - Detailed progress history and technical decisions
 
 ## Success Criteria
 
@@ -357,6 +357,6 @@ Project succeeds when users can: create accounts → enter transactions → view
 
 ---
 
-**Current Phase:** Phase 8 - Account Management (22/29 tasks)  
-**Next Milestone:** Account CRUD operations (Task 23)  
-**Test Suite Status:** 100% passing (383/383 tests) - Production-ready stability achieved (Updated: August 7, 2025)
+Current Phase: Phase 8 - Account Management (22/29 tasks)  
+Next Milestone: Account CRUD operations (Task 23)  
+Test Suite Status: 100% passing (383/383 tests) - Production-ready stability achieved (Updated: August 7, 2025)

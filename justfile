@@ -413,3 +413,7 @@ recompile:
     @mix clean
     @mix compile
     @echo "✅ Clean compile complete"
+
+# 📊 Generate Credo analysis reports
+credo-analysis:
+    @mix run scripts/generate_credo_analysis.exs

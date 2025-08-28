@@ -43,7 +43,7 @@ defmodule Mix.State do
 end
 ```
 
-- Mix reads `MIX_ENV` environment variable **once** during initialization
+- Mix reads `MIX_ENV` environment variable once during initialization
 - Converts it to an atom and stores it in Mix's internal state
 - The original environment variable may not be set or may be cleared
 - `Mix.env()` accesses this cached value, which is reliable
@@ -87,10 +87,10 @@ end
 
 #### Lessons Learned
 
-1. **Mix manages environment state internally** - don't assume the environment variable is always available
-2. **Use Mix.env() for runtime detection** - it's the authoritative source
-3. **Use environment variables for feature flags** - not for environment detection
-4. **Test your environment detection logic** - the behavior differs between Mix.env() and System.get_env()
+1. Mix manages environment state internally - don't assume the environment variable is always available
+2. Use Mix.env() for runtime detection - it's the authoritative source
+3. Use environment variables for feature flags - not for environment detection
+4. Test your environment detection logic - the behavior differs between Mix.env() and System.get_env()
 
 ## Logger Filters
 
@@ -129,7 +129,7 @@ def filter_function(log_event), do: log_event
 During test runs, especially concurrent performance tests, SQLite connection errors are commonly logged:
 
 ```
-20:15:15.681 [error] Exqlite.Connection (#PID<0.345.0>) disconnected: ** (DBConnection.ConnectionError) client #PID<0.8771.0> exited
+20:15:15.681 [error] Exqlite.Connection (#PID<0.345.0>) disconnected:  (DBConnection.ConnectionError) client #PID<0.8771.0> exited
 ```
 
 These errors occur due to:
@@ -140,11 +140,11 @@ These errors occur due to:
 
 ### Our Solution
 
-We implement a **surgical logger filter** that suppresses only these specific infrastructure errors while preserving all application errors.
+We implement a surgical logger filter that suppresses only these specific infrastructure errors while preserving all application errors.
 
 #### What Gets Suppressed
 
-Only error messages that contain **ALL** of these terms:
+Only error messages that contain ALL of these terms:
 
 - `"Exqlite.Connection"`
 - `"disconnected:"`

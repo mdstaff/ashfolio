@@ -10,7 +10,7 @@ The account management system will serve as the foundation for organizing transa
 
 ### Requirement 1: Account Listing and Overview
 
-**User Story:** As an investor, I want to view all my investment accounts in a clear, organized list so that I can quickly see my account portfolio and manage my accounts effectively.
+User Story: As an investor, I want to view all my investment accounts in a clear, organized list so that I can quickly see my account portfolio and manage my accounts effectively.
 
 #### Acceptance Criteria
 
@@ -22,7 +22,7 @@ The account management system will serve as the foundation for organizing transa
 
 ### Requirement 2: Account Creation
 
-**User Story:** As an investor, I want to create new investment accounts so that I can organize my transactions by different brokers and account types.
+User Story: As an investor, I want to create new investment accounts so that I can organize my transactions by different brokers and account types.
 
 #### Acceptance Criteria
 
@@ -34,7 +34,7 @@ The account management system will serve as the foundation for organizing transa
 
 ### Requirement 3: Account Editing and Updates
 
-**User Story:** As an investor, I want to edit my existing accounts so that I can update account information, balances, and settings as needed.
+User Story: As an investor, I want to edit my existing accounts so that I can update account information, balances, and settings as needed.
 
 #### Acceptance Criteria
 
@@ -46,7 +46,7 @@ The account management system will serve as the foundation for organizing transa
 
 ### Requirement 4: Account Balance Management
 
-**User Story:** As an investor, I want to track and update my account balances so that I can maintain accurate portfolio calculations and account records.
+User Story: As an investor, I want to track and update my account balances so that I can maintain accurate portfolio calculations and account records.
 
 #### Acceptance Criteria
 
@@ -59,7 +59,7 @@ The account management system will serve as the foundation for organizing transa
 
 ### Requirement 5: Account Exclusion Management
 
-**User Story:** As an investor, I want to exclude certain accounts from portfolio calculations so that I can focus on specific accounts or exclude inactive accounts from my analysis.
+User Story: As an investor, I want to exclude certain accounts from portfolio calculations so that I can focus on specific accounts or exclude inactive accounts from my analysis.
 
 #### Acceptance Criteria
 
@@ -71,7 +71,7 @@ The account management system will serve as the foundation for organizing transa
 
 ### Requirement 6: Account Deletion and Data Management
 
-**User Story:** As an investor, I want to delete accounts that are no longer needed so that I can keep my account list clean and organized.
+User Story: As an investor, I want to delete accounts that are no longer needed so that I can keep my account list clean and organized.
 
 #### Acceptance Criteria
 
@@ -84,7 +84,7 @@ The account management system will serve as the foundation for organizing transa
 
 ### Requirement 7: Account Detail View
 
-**User Story:** As an investor, I want to view detailed information about a specific account so that I can see comprehensive account data and associated transactions.
+User Story: As an investor, I want to view detailed information about a specific account so that I can see comprehensive account data and associated transactions.
 
 #### Acceptance Criteria
 
@@ -96,7 +96,7 @@ The account management system will serve as the foundation for organizing transa
 
 ### Requirement 8: Form Validation and Error Handling
 
-**User Story:** As a user, I want clear validation and error messages when managing accounts so that I can quickly understand and fix any issues with my input.
+User Story: As a user, I want clear validation and error messages when managing accounts so that I can quickly understand and fix any issues with my input.
 
 #### Acceptance Criteria
 
@@ -108,7 +108,7 @@ The account management system will serve as the foundation for organizing transa
 
 ### Requirement 9: Responsive Design and Accessibility
 
-**User Story:** As a user with different devices and accessibility needs, I want the account management interface to be usable across different screen sizes and assistive technologies.
+User Story: As a user with different devices and accessibility needs, I want the account management interface to be usable across different screen sizes and assistive technologies.
 
 #### Acceptance Criteria
 
@@ -120,7 +120,7 @@ The account management system will serve as the foundation for organizing transa
 
 ### Requirement 10: Integration with Portfolio System
 
-**User Story:** As an investor, I want account management to integrate seamlessly with my portfolio calculations so that account changes immediately reflect in my portfolio analysis.
+User Story: As an investor, I want account management to integrate seamlessly with my portfolio calculations so that account changes immediately reflect in my portfolio analysis.
 
 #### Acceptance Criteria
 
@@ -132,7 +132,7 @@ The account management system will serve as the foundation for organizing transa
 
 ### Requirement 11: Performance and Scalability Considerations
 
-**User Story:** As an investor with multiple accounts, I want the account management interface to remain responsive and efficient as my account list grows.
+User Story: As an investor with multiple accounts, I want the account management interface to remain responsive and efficient as my account list grows.
 
 #### Acceptance Criteria
 

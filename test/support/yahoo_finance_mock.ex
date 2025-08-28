@@ -1,4 +1,10 @@
 defmodule YahooFinanceMock do
+  @moduledoc """
+  Mock implementation for Yahoo Finance API calls during testing.
+
+  Provides stubbed responses for market data fetching functionality
+  to enable predictable testing without external API dependencies.
+  """
   @behaviour Ashfolio.MarketData.YahooFinanceBehaviour
 
   @impl true

@@ -8,33 +8,33 @@ This steering rule provides specific guidance for executing tasks from the Ashfo
 
 ## Before Starting Any Task
 
-1. **Verify Test Suite Stability**
+1. Verify Test Suite Stability
 
-   - **FIRST:** Run `just test` to ensure all tests pass (currently 201/201 passing)
+   - FIRST: Run `just test` to ensure all tests pass (currently 201/201 passing)
    - If tests fail, fix test issues before proceeding with new features
    - Use `just test-failed` for debugging failing tests
    - Use `just test-file-verbose <file>` only when debugging specific test failures
 
-2. **Read Context Documents**
+2. Read Context Documents
 
-   - **SECOND:** Check `CHANGELOG.md` for recent progress and technical decisions
+   - SECOND: Check `CHANGELOG.md` for recent progress and technical decisions
    - Always review `.kiro/specs/requirements.md` for feature requirements
    - Check `.kiro/specs/design.md` for technical architecture
    - Review the specific task details in `.kiro/specs/tasks.md`
 
-3. **Update Steering Documents**
+3. Update Steering Documents
 
    - Update `.kiro/steering/project-context.md` with current task being started
    - Move the task from "Next Priority Tasks" to "Currently Working On"
    - Update completion percentage if starting a new phase
 
-4. **Update Task Status**
+4. Update Task Status
 
    - Mark task as "in_progress" before starting work
    - Mark as "completed" only when fully finished
    - Handle sub-tasks individually if they exist
 
-5. **Verify Dependencies**
+5. Verify Dependencies
    - Ensure prerequisite tasks are completed
    - Check that required files/modules exist
    - Verify database migrations are up to date
@@ -50,7 +50,7 @@ This steering rule provides specific guidance for executing tasks from the Ashfo
 
 ### Testing Requirements
 
-- **Maintain 100% test pass rate** - all 201 tests must pass before and after changes
+- Maintain 100% test pass rate - all 201 tests must pass before and after changes
 - Unit tests for all new Ash resources and actions
 - Integration tests for complex workflows
 - Mock external APIs consistently
@@ -77,31 +77,31 @@ This steering rule provides specific guidance for executing tasks from the Ashfo
 
 ## After Task Completion
 
-1. **Verification Checklist**
+1. Verification Checklist
 
-   - **All tests pass** (`just test` shows 201/201 passing)
-   - **Seeding tests pass** (`just test-seeding` if seeding functionality was modified)
+   - All tests pass (`just test` shows 201/201 passing)
+   - Seeding tests pass (`just test-seeding` if seeding functionality was modified)
    - Application starts without errors (`mix phx.server`)
    - New functionality works as expected
    - No regressions in existing features
    - Test coverage maintained or improved (`just test-coverage`)
 
-2. **Update Task Status**
+2. Update Task Status
 
    - Mark task as "completed" in tasks.md
    - Update completion percentage in project-context.md
    - Note any deviations from original plan
 
-3. **Update Documentation**
+3. Update Documentation
 
-   - **Update `CHANGELOG.md`** with detailed task completion information
+   - Update `CHANGELOG.md` with detailed task completion information
    - Move completed task from "Currently Working On" to "Recently Completed" in project-context.md
    - Update "Next Priority Tasks" with upcoming tasks
-   - **Add key learnings** to "Key Learnings & Technical Decisions" section in project-context.md
+   - Add key learnings to "Key Learnings & Technical Decisions" section in project-context.md
    - Document any important technical decisions, patterns, or gotchas discovered
    - Update the current phase if a milestone is reached
 
-4. **Prepare for Next Task**
+4. Prepare for Next Task
    - Review next task requirements
    - Identify any blockers or dependencies
    - Update project status summary
@@ -131,11 +131,11 @@ This steering rule provides specific guidance for executing tasks from the Ashfo
 
 ## Common Task Execution Pitfalls
 
-- **Don't skip tests** - Each task should include appropriate testing
-- **Don't over-engineer** - Keep solutions simple and focused
-- **Don't ignore errors** - Handle edge cases and error scenarios
-- **Don't work on multiple tasks** - Complete one task fully before moving to next
-- **Don't skip documentation** - Update relevant docs when making changes
+- Don't skip tests - Each task should include appropriate testing
+- Don't over-engineer - Keep solutions simple and focused
+- Don't ignore errors - Handle edge cases and error scenarios
+- Don't work on multiple tasks - Complete one task fully before moving to next
+- Don't skip documentation - Update relevant docs when making changes
 
 ## Success Criteria
 

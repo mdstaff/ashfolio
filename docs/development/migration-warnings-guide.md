@@ -12,7 +12,7 @@ When running `mix ash_sqlite.generate_migrations`, it's common to see warnings w
 Domain Ashfolio.FinancialManagement is not present in config :ashfolio, ash_domains: [Ashfolio.Portfolio].
 ```
 
-**Expected during development**
+Expected during development
 Add new domain to `config/config.exs`
 Migration still generates successfully
 
@@ -22,7 +22,7 @@ Migration still generates successfully
 invalid association `transactions` in schema: associated schema does not have field `category_id`
 ```
 
-**Expected during incremental development**
+Expected during incremental development
 Forward references to fields that will be added in subsequent tasks
 Migration generates for current resource, relationship will be completed later
 
@@ -32,7 +32,7 @@ Migration generates for current resource, relationship will be completed later
 `destroy_if_not_system` cannot be done atomically, because the changes cannot be done atomically
 ```
 
-**Expected for custom validations**
+Expected for custom validations
 Add `require_atomic?(false)` to the action
 Migration generates, action works correctly
 
@@ -64,15 +64,15 @@ Elixir/Phoenix development commonly shows warnings during incremental developmen
 
 Only be concerned if you see:
 
-- **Compilation errors** (not warnings)
-- **No migration file generated**
-- **Database migration failures** when running `mix ecto.migrate`
+- Compilation errors (not warnings)
+- No migration file generated
+- Database migration failures when running `mix ecto.migrate`
 
 ## Best Practice
 
-1. **Generate migration** - Accept expected warnings
-2. **Run migration** - `mix ecto.migrate`
-3. **Address warnings** - Fix configuration and atomic issues
-4. **Continue development** - Forward references will be resolved in subsequent tasks
+1. Generate migration - Accept expected warnings
+2. Run migration - `mix ecto.migrate`
+3. Address warnings - Fix configuration and atomic issues
+4. Continue development - Forward references will be resolved in subsequent tasks
 
 This incremental approach allows for test-driven development while building complex, interconnected resources.

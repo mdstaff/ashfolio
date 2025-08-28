@@ -812,7 +812,7 @@ test.describe("Demo Mode End-to-End", () => {
 
 ### 7. Acceptance Criteria Summary
 
-**Demo Mode Must:**
+Demo Mode Must:
 
 1.  Activate within 500ms
 2.  Create obviously fake data (names like "Demo Stock Inc.")
@@ -825,7 +825,7 @@ test.describe("Demo Mode End-to-End", () => {
 9.  Be accessible (keyboard navigation, screen readers)
 10. Pass all automated tests
 
-**Demo Mode Must Not:**
+Demo Mode Must Not:
 
 1. ❌ Confuse users about what's real vs fake
 2. ❌ Persist demo data after exit
@@ -839,13 +839,13 @@ test.describe("Demo Mode End-to-End", () => {
 
 When implementing this specification:
 
-1. **Start with failing tests** - Write each test first, see it fail, then implement
-2. **Keep it simple** - Resist the urge to add complex features
-3. **Make it obviously fake** - Use clear demo indicators throughout
-4. **Test in browsers** - Use Playwright to verify visual consistency
-5. **Performance first** - Demo mode should be faster than real mode
-6. **Accessibility matters** - Ensure keyboard navigation and screen reader support
-7. **Document decisions** - Update this spec with any changes or improvements
+1. Start with failing tests - Write each test first, see it fail, then implement
+2. Keep it simple - Resist the urge to add complex features
+3. Make it obviously fake - Use clear demo indicators throughout
+4. Test in browsers - Use Playwright to verify visual consistency
+5. Performance first - Demo mode should be faster than real mode
+6. Accessibility matters - Ensure keyboard navigation and screen reader support
+7. Document decisions - Update this spec with any changes or improvements
 
 ### 9. Success Metrics
 
@@ -857,4 +857,4 @@ Track these metrics to validate demo mode effectiveness:
 - Seconds until user sees value in the app
 - Which v0.2.0 features get discovered most
 
-The goal is to create the **fastest path to value** while maintaining **user trust** through obvious fake data indicators.
+The goal is to create the fastest path to value while maintaining user trust through obvious fake data indicators.

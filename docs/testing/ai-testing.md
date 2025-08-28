@@ -414,19 +414,19 @@ just test-file-verbose test/path/to/failing_test.exs
 
 ```
 # SQLite Concurrency Issue
-** (Ash.Error.Unknown) %Sqlite.DbConnection.Error{message: "database is locked"}
+ (Ash.Error.Unknown) %Sqlite.DbConnection.Error{message: "database is locked"}
 → Solution: Use retry helpers or global data
 
 # Missing Test Data
-** (RuntimeError) Default user not found
+ (RuntimeError) Default user not found
 → Solution: Ensure setup_global_test_data!/0 was called
 
 # LiveView Error
-** (ArgumentError) expected first argument to be a %Phoenix.LiveView.Socket{}
+ (ArgumentError) expected first argument to be a %Phoenix.LiveView.Socket{}
 → Solution: Check LiveView test setup and imports
 
 # Mox Error
-** (Mox.UnexpectedCallError) no expectation defined for YahooFinanceMock.fetch_price/1
+ (Mox.UnexpectedCallError) no expectation defined for YahooFinanceMock.fetch_price/1
 → Solution: Add expect() calls in test setup
 ```
 
@@ -586,12 +586,12 @@ Before submitting test code, verify:
 
 ## Summary for AI Agents
 
-1. **Always use `async: false`** for SQLite compatibility
-2. **Prefer global data** over custom creation for performance
-3. **Use retry helpers** when custom resources are needed
-4. **Structure tests** with descriptive describe blocks
-5. **Handle both success and error cases**
-6. **Add proper setup** for GenServer and LiveView tests
+1. Always use `async: false` for SQLite compatibility
+2. Prefer global data over custom creation for performance
+3. Use retry helpers when custom resources are needed
+4. Structure tests with descriptive describe blocks
+5. Handle both success and error cases
+6. Add proper setup for GenServer and LiveView tests
 
 7. Using `async: true` (causes SQLite conflicts)
 8. Creating users/accounts directly without retry logic

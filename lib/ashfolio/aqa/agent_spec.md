@@ -1,12 +1,12 @@
 # AQA Agent Specification v1.0
 
-**Automated Quality Assurance Agent for Ashfolio Test Suite**
+Automated Quality Assurance Agent for Ashfolio Test Suite
 
 ## Technical Specifications
 
 ### Quality Thresholds
 
-**Test Suite Health Metrics**
+Test Suite Health Metrics
 
 ```elixir
 quality_thresholds = %{
@@ -37,7 +37,7 @@ quality_thresholds = %{
 
 ### Test Organization Framework
 
-**Directory Structure Enforcement**
+Directory Structure Enforcement
 
 ```
 test/
@@ -62,7 +62,7 @@ test/
     └── helpers/           # Shared test utilities
 ```
 
-**Required Test Metadata**
+Required Test Metadata
 
 ```elixir
 # Every test file must include these tags
@@ -80,14 +80,14 @@ test/
 
 ### Integration Points
 
-**Development Workflow**
+Development Workflow
 
 - Quality gate validation before commits
 - Automated quality reporting in build process
 - Real-time quality feedback during development
 - Test organization validation on push
 
-**Configuration Management**
+Configuration Management
 
 - Runtime behavior configuration
 - Threshold definitions and reporting settings
@@ -98,21 +98,21 @@ test/
 
 ### Phase 1: Foundation (Week 1-2)
 
-**Milestone 1.1: Infrastructure Setup**
+Milestone 1.1: Infrastructure Setup
 
 - Create AQA module structure in `lib/ashfolio/aqa/`
 - Implement basic test file discovery and parsing
 - Set up configuration management system
 - Create initial quality threshold definitions
 
-**Milestone 1.2: Analysis Engine**
+Milestone 1.2: Analysis Engine
 
 - Implement test complexity scoring algorithm
 - Create performance monitoring infrastructure
 - Build dependency mapping between tests and domains
 - Develop naming convention validation rules
 
-**Success Criteria**
+Success Criteria
 
 - [ ] AQA agent can discover and categorize all 500+ tests
 - [ ] Basic quality metrics collection is functional
@@ -121,21 +121,21 @@ test/
 
 ### Phase 2: Quality Gates (Week 3-4)
 
-**Milestone 2.1: Threshold Enforcement**
+Milestone 2.1: Threshold Enforcement
 
 - Implement quality gate validation logic
 - Create alert generation system with severity levels
 - Build reporting infrastructure for quality metrics
 - Integrate with existing test execution pipeline
 
-**Milestone 2.2: Trend Analysis**
+Milestone 2.2: Trend Analysis
 
 - Implement historical data collection and storage
 - Create trend analysis algorithms for quality metrics
 - Build predictive modeling for quality degradation
 - Generate actionable recommendations based on trends
 
-**Success Criteria**
+Success Criteria
 
 - [ ] Quality gates prevent degraded code from merging
 - [ ] Automated alerts notify team of quality issues
@@ -144,21 +144,21 @@ test/
 
 ### Phase 3: Optimization (Week 5-6)
 
-**Milestone 3.1: Advanced Analytics**
+Milestone 3.1: Advanced Analytics
 
 - Implement ML-based performance regression detection
 - Create intelligent test prioritization algorithms
 - Build optimization recommendation engine
 - Integrate with continuous improvement processes
 
-**Milestone 3.2: Team Integration**
+Milestone 3.2: Team Integration
 
 - Create developer-friendly quality dashboards
 - Implement quality coaching and guidance features
 - Build integration with project management tools
 - Establish quality improvement workflow processes
 
-**Success Criteria**
+Success Criteria
 
 - [ ] Test suite performance is continuously optimized
 - [ ] Developers receive proactive quality guidance
@@ -169,14 +169,14 @@ test/
 
 ### Quality Metrics Dashboard
 
-**Real-time Indicators**
+Real-time Indicators
 
 - Test suite health score (0-10 scale)
 - Current performance metrics vs. baseline
 - Quality gate status across all domains
 - Active alerts and their severity levels
 
-**Historical Trends**
+Historical Trends
 
 - 30-day rolling averages for all quality metrics
 - Month-over-month comparison charts
@@ -185,21 +185,21 @@ test/
 
 ### Maintenance Schedule
 
-**Daily Operations**
+Daily Operations
 
 - Automated quality metric collection
 - Performance baseline updates
 - Alert processing and notification
 - Quality gate validation
 
-**Weekly Reviews**
+Weekly Reviews
 
 - Trend analysis and reporting
 - Threshold adjustment recommendations
 - Quality improvement opportunity identification
 - Team performance feedback
 
-**Monthly Assessments**
+Monthly Assessments
 
 - Comprehensive architecture compliance review
 - Quality threshold effectiveness analysis
@@ -210,14 +210,14 @@ test/
 
 ### Quantitative KPIs
 
-**Test Suite Quality**
+Test Suite Quality
 
 - Overall health score: Target >8.0/10
 - Quality trend stability: <5% month-over-month variance
 - Alert resolution time: <24hrs for critical, <1 week for high
 - Developer satisfaction with quality feedback: >80%
 
-**Performance Optimization**
+Performance Optimization
 
 - Test suite execution time reduction: Target 20% improvement
 - Performance regression detection accuracy: >95%

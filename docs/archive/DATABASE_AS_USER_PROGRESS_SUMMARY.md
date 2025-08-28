@@ -10,7 +10,7 @@ We are systematically completing the database-as-user architecture migration tha
 
 Remove user_id parameters from all calculator functions
 
-**What was accomplished:**
+What was accomplished:
 
 - `calculator.ex` - Removed user_id from 3 functions
 - `holdings_calculator.ex` - Removed user_id from 5 functions
@@ -19,7 +19,7 @@ Remove user_id parameters from all calculator functions
 - `net_worth_calculator_optimized.ex` - Removed user_id from 3 functions
 - Updated all calling code in Context and other modules
 
-**Benefits realized:**
+Benefits realized:
 
 - Core business logic now properly reflects database-as-user architecture
 - Function signatures are semantically correct
@@ -29,7 +29,7 @@ Remove user_id parameters from all calculator functions
 
 Fix Context API function signatures and misleading names
 
-**What was accomplished:**
+What was accomplished:
 
 - Removed user_id parameters from 7 Context functions
 - Fixed duplicate `get_recent_transactions` function
@@ -38,7 +38,7 @@ Fix Context API function signatures and misleading names
 - Updated `context_behaviour.ex` callback signatures
 - Fixed all calling code in LiveView modules
 
-**Benefits realized:**
+Benefits realized:
 
 - Main API interface now semantically correct
 - No more meaningless user parameters
@@ -50,7 +50,7 @@ Fix Context API function signatures and misleading names
 
 Rename misleading function names
 
-**Planned changes:**
+Planned changes:
 
 ```elixir
 # Current -> Corrected
@@ -66,14 +66,14 @@ Transaction.list_for_user_by_date_range() -> Transaction.list_by_date_range()
 
 Remove unused user_id fetching and variables
 
-**Files to clean:**
+Files to clean:
 
 - `dashboard_live.ex`
 - `account_live/index.ex`
 - `transaction_live/index.ex`
 - `category_live/index.ex`
 
-**Pattern to remove:**
+Pattern to remove:
 
 ```elixir
 _user_id = get_default_user_id()  # Delete these lines
@@ -85,7 +85,7 @@ _user_id = get_default_user_id()  # Delete these lines
 
 Remove fake User module and compatibility helpers
 
-**Files to remove:**
+Files to remove:
 
 - `test/support/user_compatibility.ex` - Fake User module
 - User-related helpers in `test/support/sqlite_helpers.ex`
@@ -98,7 +98,7 @@ Will break ~40 test files (expected and planned)
 
 Update all test files to embrace database-as-user pattern
 
-**Changes needed:**
+Changes needed:
 
 - Remove all `{:ok, user} = User.create()` lines (~200+ instances)
 - Remove all `user: user` from test contexts (~150+ instances)
@@ -115,7 +115,7 @@ Update all test files to embrace database-as-user pattern
 
 Update all documentation to reflect database-as-user architecture
 
-**Files to update:**
+Files to update:
 
 - `docs/development/architecture.md` - Remove User from ER diagrams and relationships
 - `docs/TESTING_STRATEGY.md` - Update test patterns and remove User references
@@ -126,7 +126,7 @@ Update all documentation to reflect database-as-user architecture
 - API documentation - Update examples to reflect new architecture
 - Migration guides - Document the architectural change
 
-**Critical documentation cleanup:**
+Critical documentation cleanup:
 
 - Remove all references to User resource/entity/model
 - Update language from "user's data" to "database data"
@@ -140,7 +140,7 @@ Update all documentation to reflect database-as-user architecture
 
 Comprehensive testing and cleanup
 
-**Tasks:**
+Tasks:
 
 - Run full test suite
 - Manual testing of all features
@@ -160,18 +160,18 @@ Comprehensive testing and cleanup
 
 ### What's Working
 
-- **Production code compiles cleanly**
-- **Core calculator functions work correctly**
-- **Context API has clean signatures**
-- **LiveView modules render correctly**
-- **Database operations work properly**
+- Production code compiles cleanly
+- Core calculator functions work correctly
+- Context API has clean signatures
+- LiveView modules render correctly
+- Database operations work properly
 
 ### What's Still Broken ❌
 
-- **~40 test files fail** due to undefined User variables
-- **Test compatibility layer masks architectural issues**
-- **Function names still misleading** (accounts_for_user, etc.)
-- **Documentation doesn't match implementation**
+- ~40 test files fail due to undefined User variables
+- Test compatibility layer masks architectural issues
+- Function names still misleading (accounts_for_user, etc.)
+- Documentation doesn't match implementation
 
 ### Risk Level: LOW
 
@@ -189,11 +189,11 @@ Comprehensive testing and cleanup
 
 ## DECISION POINT
 
-**Should we continue?**
+Should we continue?
 
-- **YES** - We're making good progress and the benefits are already showing
-- **Manageable scope** - Each phase is focused and testable
-- **Low risk** - Production functionality remains intact
+- YES - We're making good progress and the benefits are already showing
+- Manageable scope - Each phase is focused and testable
+- Low risk - Production functionality remains intact
 
 ## NEXT STEPS
 
@@ -206,14 +206,14 @@ Comprehensive testing and cleanup
 
 ## SUCCESS METRICS
 
-**Must achieve:**
+Must achieve:
 
 - [ ] Zero user_id parameters in production code
 - [ ] Zero misleading function names
 - [ ] All tests pass without compatibility layer
 - [ ] Documentation matches implementation
 
-**Stretch goals:**
+Stretch goals:
 
 - [ ] Performance improvements from simplification
 - [ ] Reduced cognitive load for new developers

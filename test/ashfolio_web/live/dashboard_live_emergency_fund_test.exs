@@ -2,7 +2,6 @@ defmodule AshfolioWeb.DashboardLiveEmergencyFundTest do
   use AshfolioWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import Ashfolio.DataCase
 
   alias Ashfolio.FinancialManagement.{FinancialGoal, Expense}
 
@@ -44,7 +43,7 @@ defmodule AshfolioWeb.DashboardLiveEmergencyFundTest do
 
       {:ok, _view, html} = live(conn, ~p"/")
 
-      # Should show emergency fund status in goals widget  
+      # Should show emergency fund status in goals widget
       assert html =~ "Financial Goals"
       # Should be underfunded with $0 current
       assert html =~ "Emergency Fund: Underfunded"
@@ -67,7 +66,7 @@ defmodule AshfolioWeb.DashboardLiveEmergencyFundTest do
     end
 
     test "goals widget displays correct statistics", %{conn: conn} do
-      {:ok, view, html} = live(conn, ~p"/")
+      {:ok, _view, html} = live(conn, ~p"/")
 
       # Initially no goals
       # Total current amount
@@ -107,10 +106,9 @@ defmodule AshfolioWeb.DashboardLiveEmergencyFundTest do
       {:ok, view, _html} = live(conn, ~p"/")
 
       # Click the manage goals link
-      result =
-        view
-        |> element("a", "Manage Goals")
-        |> render_click()
+      view
+      |> element("a", "Manage Goals")
+      |> render_click()
 
       # Should navigate to goals page (this will be a redirect)
       assert_redirect(view, "/goals")
@@ -126,7 +124,7 @@ defmodule AshfolioWeb.DashboardLiveEmergencyFundTest do
       funding_levels = [
         # underfunded
         Decimal.new("0.00"),
-        # partially_funded  
+        # partially_funded
         Decimal.mult(goal.target_amount, Decimal.new("0.25")),
         # mostly_funded
         Decimal.mult(goal.target_amount, Decimal.new("0.75")),

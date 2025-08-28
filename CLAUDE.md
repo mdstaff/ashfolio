@@ -4,10 +4,10 @@
 
 ### Core Beliefs
 
-- **Incremental progress over big bangs** - Small changes that compile and pass tests
-- **Learning from existing code** - Study and plan before implementing
-- **Pragmatic over dogmatic** - Adapt to project reality
-- **Clear intent over clever code** - Be boring and obvious
+- Incremental progress over big bangs - Small changes that compile and pass tests
+- Learning from existing code - Study and plan before implementing
+- Pragmatic over dogmatic - Adapt to project reality
+- Clear intent over clever code - Be boring and obvious
 
 ### Simplicity Means
 
@@ -36,31 +36,34 @@ Break complex work into 3-5 stages. Document in `IMPLEMENTATION_PLAN.md`:
 
 ### 2. Implementation Flow
 
-1. **Understand** - Study existing patterns in codebase
-2. **Test** - Write test first (red)
-3. **Implement** - Minimal code to pass (green)
-4. **Refactor** - Clean up with tests passing
-5. **Commit** - With clear message linking to plan
+1. Understand - Study existing patterns in codebase
+2. Test - Write test first (red)
+3. Implement - Minimal code to pass (green)
+4. Refactor - Clean up with tests passing
+5. Commit - With clear message linking to plan
 
 ### 3. When Stuck (After 3 Attempts)
 
 Maximum 3 attempts per issue, then STOP.
 
-1. **Document the problem**:
+1. Document the problem:
+
    - What you tried
    - Specific error messages
    - Why you think it failed
 
-2. **Research existing solutions**:
+2. Research existing solutions:
+
    - Find 2-3 similar implementations
    - Note different approaches used
 
-3. **Question assumptions**:
+3. Question assumptions:
+
    - Is this the right abstraction level?
    - Can this be split into smaller problems?
    - Is there a simpler approach entirely?
 
-4. **Consider alternatives**:
+4. Consider alternatives:
    - Different library/framework feature?
    - Different architectural pattern?
    - Remove abstraction instead of adding?
@@ -69,21 +72,22 @@ Maximum 3 attempts per issue, then STOP.
 
 ### Architecture Principles
 
-- **Composition over inheritance** - Use dependency injection
-- **Interfaces over singletons** - Enable testing and flexibility
-- **Explicit over implicit** - Clear data flow and dependencies
-- **Test-driven when possible** - Never disable tests, fix them
+- Composition over inheritance - Use dependency injection
+- Interfaces over singletons - Enable testing and flexibility
+- Explicit over implicit - Clear data flow and dependencies
+- Test-driven when possible - Never disable tests, fix them
 
 ### Code Quality
 
-- **Minimum requirements**:
+- Minimum requirements:
+
   - Compile successfully
   - Pass all existing tests
   - Include tests for new functionality
   - Follow project formatting/linting
   - Include proper documentation for public APIs
 
-- **Before committing**:
+- Before committing:
   - Run formatters/linters
   - Self-review changes
   - Ensure commit message explains "why"
@@ -100,11 +104,11 @@ Maximum 3 attempts per issue, then STOP.
 
 When multiple valid approaches exist, choose based on:
 
-1. **Testability** - Can I easily test this?
-2. **Readability** - Will someone understand this in 6 months?
-3. **Consistency** - Does this match project patterns?
-4. **Simplicity** - Is this the simplest solution that works?
-5. **Reversibility** - How hard to change later?
+1. Testability - Can I easily test this?
+2. Readability - Will someone understand this in 6 months?
+3. Consistency - Does this match project patterns?
+4. Simplicity - Is this the simplest solution that works?
+5. Reversibility - How hard to change later?
 
 ## Project Integration
 
@@ -120,12 +124,91 @@ When multiple valid approaches exist, choose based on:
 - Use project's existing build system (see @justfile)
 - Use project's test framework and justfile commands (see @docs/TESTING_STRATEGY.md)
 
+## Phoenix/HEEx Development Rules
+
+### HEEx Template Variable Guidelines
+
+CRITICAL: All data accessed in HEEx templates must be in `assigns` and prefixed with `@`.
+
+#### ❌ NEVER DO THIS
+
+```elixir
+def render_component(assigns) do
+  scenarios = [:pessimistic, :realistic, :optimistic]
+  colors = ["#red", "#blue", "#green"]
+
+  ~H"""
+  <%= for {scenario, color} <- Enum.zip(scenarios, colors) do %>
+    <div style={"color: #{color}"}><%= scenario %></div>
+  <% end %>
+  """
+end
+```
+
+#### ✅ ALWAYS DO THIS
+
+```elixir
+def render_component(assigns) do
+  scenarios = [:pessimistic, :realistic, :optimistic]
+  colors = ["#red", "#blue", "#green"]
+
+  assigns = assign(assigns, :scenario_data, Enum.zip(scenarios, colors))
+
+  ~H"""
+  <%= for {scenario, color} <- @scenario_data do %>
+    <div style={"color: #{color}"}><%= scenario %></div>
+  <% end %>
+  """
+end
+```
+
+### HEEx Template Rules
+
+1. Variable Access: Only `@variable` syntax allowed in templates
+2. No Local Variables: Never reference function-local variables in `~H`
+3. Empty Templates: Use `~H"""<!-- content -->"""` not `~H""`
+4. Assigns Map: All template data must flow through `assigns` parameter
+
+### Pre-Development Checklist
+
+Before creating any Phoenix component or LiveView:
+
+- [ ] Plan all template variables to be passed via `assigns`
+- [ ] Never use local variables directly in `~H` templates
+- [ ] Test template rendering with `rendered_to_string/1`
+- [ ] Verify compilation with `mix compile --warnings-as-errors`
+
+### Frequent Warning Checks (Required)
+
+MANDATORY: Run these checks frequently during development:
+
+```bash
+# Check for compilation warnings every 30 minutes
+mix compile --warnings-as-errors
+
+# Check for HEEx template issues specifically
+grep -r "~H\"\"\"" lib/ --include="*.ex" | head -5
+
+# Verify Code GPS can run (disabled templates break it)
+mix code_gps --dry-run
+```
+
+When to Run Warning Checks:
+
+- After implementing any HEEx template
+- Before every commit
+- After adding 50+ lines of code
+- When switching between files/components
+- At end of every development session
+
 ## Quality Gates
 
 ### Definition of Done
 
 - [ ] Tests written and passing
 - [ ] Code follows project conventions
+- [ ] HEEx templates compile without warnings
+- [ ] All template variables accessed via @assigns
 - [ ] No linter/formatter warnings
 - [ ] Documentation follows style guide (see docs/development/documentation-style-guide.md)
 - [ ] Commit messages are clear
@@ -143,13 +226,15 @@ When multiple valid approaches exist, choose based on:
 
 ## Important Reminders
 
-**DO NOT**:
+DO NOT:
+
 - Use `--no-verify` to bypass commit hooks
 - Disable tests instead of fixing them
 - Commit code that doesn't compile
 - Make assumptions - verify with existing code
 
-**DO**:
+DO:
+
 - Commit working code incrementally
 - Update plan documentation as you go
 - Learn from existing implementations
@@ -159,13 +244,14 @@ When multiple valid approaches exist, choose based on:
 
 ## MANDATORY: Code GPS First
 
-**Before starting ANY development work, ALWAYS:**
+Before starting ANY development work, ALWAYS:
 
 1. Run `mix code_gps` to generate latest codebase analysis
 2. Read `.code-gps.yaml` to understand current architecture
 3. Use the integration opportunities and patterns listed
 
-**The Code GPS manifest contains:**
+The Code GPS manifest contains:
+
 - All LiveViews with events and subscriptions
 - Key components with usage counts and attributes
 - Existing patterns to follow
@@ -197,6 +283,7 @@ mix format && mix credo
 ## Phoenix/Elixir Patterns
 
 This codebase uses:
+
 - Phoenix LiveView for interactive UI
 - Ash framework for domain logic
 - Decimal for financial calculations
@@ -206,6 +293,7 @@ This codebase uses:
 ## Current Focus: v0.3.1
 
 Building frontend dashboard widgets with:
+
 - Expense tracking integration
 - Net worth visualization
 - Manual snapshot functionality

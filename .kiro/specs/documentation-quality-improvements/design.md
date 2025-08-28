@@ -202,7 +202,7 @@ http://localhost:4000/api/v1
 GET /api/v1/portfolio/summary
 ````
 
-**Response:**
+Response:
 
 ```json
 {
@@ -220,7 +220,7 @@ GET /api/v1/portfolio/summary
 GET /api/v1/holdings
 ```
 
-**Response:**
+Response:
 
 ```json
 {

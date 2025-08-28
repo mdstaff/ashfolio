@@ -6,8 +6,8 @@ Get Ashfolio running and explore its features in 10 minutes!
 
 Before starting, ensure you have:
 
-- **Elixir 1.14+** and **Erlang/OTP 25+**
-- **macOS** (currently optimized for Apple Silicon)
+- Elixir 1.14+ and Erlang/OTP 25+
+- macOS (currently optimized for Apple Silicon)
 - `brew install just`
 
 _Need to install these? See the [Installation Guide](installation.md)_
@@ -116,5 +116,5 @@ just test-db-emergency-reset
 
 ---
 
-**Having issues?** Check the [Troubleshooting Guide](troubleshooting.md)  
-**Ready to contribute?** See [First Contribution Guide](first-contribution.md)
+Having issues? Check the [Troubleshooting Guide](troubleshooting.md)  
+Ready to contribute? See [First Contribution Guide](first-contribution.md)

@@ -63,9 +63,9 @@ Dependencies requiring system-level installation or conflicting with local-first
 
 #### For Tier 1 Dependencies
 
-- **No approval required** for version updates within same major version
-- **Architecture review required** for major version upgrades
-- **Documentation update required** for any changes
+- No approval required for version updates within same major version
+- Architecture review required for major version upgrades
+- Documentation update required for any changes
 
 #### For Tier 2 Dependencies
 

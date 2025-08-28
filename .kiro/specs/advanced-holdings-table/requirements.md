@@ -10,7 +10,7 @@ Built on v0.1.0's existing holdings table and HoldingsCalculator with proven per
 
 ### Requirement 1: Table Sorting and Persistence
 
-**User Story:** As a portfolio manager with many holdings, I want to sort my holdings by different criteria so that I can analyze my positions effectively.
+User Story: As a portfolio manager with many holdings, I want to sort my holdings by different criteria so that I can analyze my positions effectively.
 
 #### Acceptance Criteria
 
@@ -22,7 +22,7 @@ Built on v0.1.0's existing holdings table and HoldingsCalculator with proven per
 
 ### Requirement 2: Holdings Filtering
 
-**User Story:** As an investor with a diverse portfolio, I want to filter my holdings so that I can focus on specific types of investments.
+User Story: As an investor with a diverse portfolio, I want to filter my holdings so that I can focus on specific types of investments.
 
 #### Acceptance Criteria
 
@@ -34,7 +34,7 @@ Built on v0.1.0's existing holdings table and HoldingsCalculator with proven per
 
 ### Requirement 3: Bulk Operations
 
-**User Story:** As a power user, I want to perform actions on multiple holdings at once so that I can manage my portfolio efficiently.
+User Story: As a power user, I want to perform actions on multiple holdings at once so that I can manage my portfolio efficiently.
 
 #### Acceptance Criteria
 
@@ -46,7 +46,7 @@ Built on v0.1.0's existing holdings table and HoldingsCalculator with proven per
 
 ### Requirement 4: Pagination for Large Portfolios
 
-**User Story:** As an investor with many holdings, I want the table to load quickly so that I can access my data without performance issues.
+User Story: As an investor with many holdings, I want the table to load quickly so that I can access my data without performance issues.
 
 #### Acceptance Criteria
 

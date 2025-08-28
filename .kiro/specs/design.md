@@ -682,7 +682,7 @@ end
 
 Based on research findings, the holdings table will use the following technical approach:
 
-**Data Source Integration:**
+Data Source Integration:
 
 ```elixir
 # In DashboardLive mount/3
@@ -703,7 +703,7 @@ Based on research findings, the holdings table will use the following technical 
 }
 ```
 
-**Table Component Usage:**
+Table Component Usage:
 
 ```elixir
 # Use existing Phoenix table component from core_components.ex
@@ -730,7 +730,7 @@ Based on research findings, the holdings table will use the following technical 
 </.table>
 ```
 
-**Sorting Implementation:**
+Sorting Implementation:
 
 ```elixir
 # LiveView state management
@@ -752,7 +752,7 @@ def handle_event("sort", %{"column" => column}, socket) do
 end
 ```
 
-**Formatting Helpers:**
+Formatting Helpers:
 
 ```elixir
 defp format_currency(decimal_value) do
@@ -1069,7 +1069,7 @@ end
 
 #### Solution Patterns
 
-**1. Accept Shared State in Tests**
+1. Accept Shared State in Tests
 
 ```elixir
 defmodule PriceManagerTest do
@@ -1093,7 +1093,7 @@ defmodule PriceManagerTest do
 end
 ```
 
-**2. Focus on Functionality Over Timing**
+2. Focus on Functionality Over Timing
 
 ```elixir
 # AVOID: Timing-dependent concurrent tests
@@ -1113,7 +1113,7 @@ test "processes requests successfully" do
 end
 ```
 
-**3. Mox Configuration for Shared Processes**
+3. Mox Configuration for Shared Processes
 
 ```elixir
 # test_helper.exs
@@ -1133,7 +1133,7 @@ test "handles multiple calls" do
 end
 ```
 
-**4. Test Architecture Considerations**
+4. Test Architecture Considerations
 
 ```elixir
 # For better testability, consider dependency injection:
@@ -1405,7 +1405,7 @@ This configuration system provides:
 
 ### Design Philosophy
 
-The user interface follows a **clean, data-focused design** that prioritizes:
+The user interface follows a clean, data-focused design that prioritizes:
 
 - Key portfolio metrics visible at first glance
 - Live updates without page refreshes using LiveView
@@ -2305,16 +2305,16 @@ end
 
 ### Architecture Decision: Web-First with Optional Native Integration
 
- Ashfolio is fundamentally a **Phoenix LiveView web application** that runs locally on `localhost:4000`. Users access it through their preferred web browser (Safari, Chrome, Firefox) for the full portfolio management experience.
+ Ashfolio is fundamentally a Phoenix LiveView web application that runs locally on `localhost:4000`. Users access it through their preferred web browser (Safari, Chrome, Firefox) for the full portfolio management experience.
 
-**Why Web-First?**
+Why Web-First?
 -  Leverage Phoenix LiveView's real-time capabilities without complex native UI code
 -  Works on any operating system with a web browser
 -  Standard web technologies and debugging tools
 -  Modern web capabilities for charts, tables, and interactive elements
 -  Phoenix LiveView provides seamless real-time data updates
 
- The following integrations are **optional additions** that enhance the user experience on macOS without replacing the core web application:
+ The following integrations are optional additions that enhance the user experience on macOS without replacing the core web application:
 
 -  Wraps the web app in a native `.app` for easier launching
 -  Menu bar widgets, native notifications, Spotlight indexing
@@ -2359,7 +2359,7 @@ config :ashfolio, Ashfolio.Repo,
 
 ### macOS System Integration (Optional Enhancements)
 
-These integrations are **optional features** that can be added after the core web application is complete. They enhance the user experience on macOS but are not required for core functionality.
+These integrations are optional features that can be added after the core web application is complete. They enhance the user experience on macOS but are not required for core functionality.
 
 #### Spotlight Integration
 

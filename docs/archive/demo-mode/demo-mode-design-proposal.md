@@ -130,25 +130,25 @@ Three carefully crafted personas representing different life stages:
 
 Features are introduced based on user readiness:
 
-1. **Dashboard Basics** (Immediate)
+1. Dashboard Basics (Immediate)
 
    - Net worth display
    - Account overview
    - Recent transactions
 
-2. **Data Entry** (After exploration)
+2. Data Entry (After exploration)
 
    - Add account
    - Enter transaction
    - Symbol search
 
-3. **Organization** (After 5+ transactions)
+3. Organization (After 5+ transactions)
 
    - Categories
    - Filtering
    - Account grouping
 
-4. **Advanced** (Power user)
+4. Advanced (Power user)
    - Bulk operations
    - Export/Import
    - Custom reports
@@ -268,20 +268,20 @@ Demo Session State:
 
 ### Key Performance Indicators
 
-1. **Engagement Metrics**
+1. Engagement Metrics
 
    - Tutorial start rate
    - Completion rate
    - Skip rate by step
    - Time to completion
 
-2. **Discovery Metrics**
+2. Discovery Metrics
 
    - Features discovered
    - Time to discovery
    - Usage after discovery
 
-3. **Conversion Metrics**
+3. Conversion Metrics
    - Demo to real account
    - Feature adoption rate
    - Return visitor rate
@@ -304,23 +304,23 @@ events: [
 
 ### Potential Risks & Solutions
 
-1. **Over-tutorialization**
+1. Over-tutorialization
 
    - Solution: Always skippable, smart detection
 
-2. **Demo/Real Data Confusion**
+2. Demo/Real Data Confusion
 
    - Solution: Clear visual indicators, separate database
 
-3. **Performance Impact**
+3. Performance Impact
 
    - Solution: Lazy loading, efficient animations
 
-4. **Mobile Experience**
+4. Mobile Experience
 
    - Solution: Responsive design, touch-optimized
 
-5. **Accessibility**
+5. Accessibility
    - Solution: Screen reader support, keyboard navigation
 
 ## Alternative Approaches

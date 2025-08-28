@@ -4,7 +4,7 @@
 
 ### What We've Done
 
-1. **Core Migration Completed**
+1. Core Migration Completed
 
    - Created `UserSettings` resource as singleton for user preferences
    - Removed `User` resource from production code
@@ -12,13 +12,13 @@
    - Updated calculator modules to remove user_id parameters
    - Created backward compatibility layers for testing
 
-2. **Test Compatibility Layer**
+2. Test Compatibility Layer
 
    - Created `test/support/user_compatibility.ex` providing `User.create()` for legacy tests
    - Created `test/support/sqlite_helpers.ex` with helper functions
    - Added compatibility functions like `accounts_for_user(_user_id)` that ignore the parameter
 
-3. **Partial Updates**
+3. Partial Updates
    - Many tests still have User references (though they work via compatibility layer)
    - LiveView modules have unused `_user_id` variables
    - Some functions still accept but ignore user_id parameters
@@ -26,26 +26,26 @@
 
 ### What's Still Problematic
 
-1. **Incomplete Test Refactoring**
+1. Incomplete Test Refactoring
 
    - Tests use compatibility layer instead of embracing database-as-user pattern
    - Many tests still create "users" unnecessarily
    - Test setup blocks have user references that aren't needed
    - The compatibility layer masks the true architecture
 
-2. **Unused Code Paths**
+2. Unused Code Paths
 
    - Functions accepting but ignoring user_id parameters
    - LiveView modules fetching but not using user_id
    - Backward compatibility functions that shouldn't be needed
 
-3. **Documentation Inconsistency**
+3. Documentation Inconsistency
 
    - Architecture docs still show User in ER diagrams
    - Migration plan exists but wasn't fully followed
    - Code comments reference user_id that doesn't exist
 
-4. **Semantic Confusion**
+4. Semantic Confusion
    - Code still talks about "users" when it means "database owner"
    - Function names like `accounts_for_user` don't make sense anymore
    - Variable names suggest multi-user when it's single-user
@@ -77,20 +77,20 @@
 
 ### Option 1: Complete the Migration (Recommended)
 
-**Pros:**
+Pros:
 
 - Clean, consistent architecture
 - No confusion for new developers
 - Better maintainability
 - True realization of database-as-user benefits
 
-**Cons:**
+Cons:
 
 - Significant refactoring effort
 - Risk of introducing bugs
 - Time investment
 
-**Steps:**
+Steps:
 
 1. Update all tests to not use User compatibility
 2. Remove compatibility layers
@@ -100,20 +100,20 @@
 
 ### Option 2: Formalize the Hybrid Approach
 
-**Pros:**
+Pros:
 
 - Less work in short term
 - Lower risk of breaking changes
 - Can be done incrementally
 
-**Cons:**
+Cons:
 
 - Permanent technical debt
 - Confusing architecture
 - Harder to maintain
 - New developers will be confused
 
-**Steps:**
+Steps:
 
 1. Document the compatibility layer as permanent
 2. Keep backward compatibility functions
@@ -122,13 +122,13 @@
 
 ### Option 3: Revert to Multi-User Architecture
 
-**Pros:**
+Pros:
 
 - Matches existing test patterns
 - Less cognitive dissonance
 - Standard Phoenix patterns
 
-**Cons:**
+Cons:
 
 - Loses database-as-user benefits
 - More complex data model
@@ -137,17 +137,17 @@
 
 ## Critical Questions to Answer
 
-1. **Is the database-as-user architecture still the right choice?**
+1. Is the database-as-user architecture still the right choice?
 
    - If YES: Complete the migration properly
    - If NO: Revert to standard multi-user
 
-2. **Are we willing to invest in completing the migration?**
+2. Are we willing to invest in completing the migration?
 
    - If YES: Create detailed refactoring plan
    - If NO: Document and formalize the hybrid
 
-3. **What's the priority: clean architecture or shipping features?**
+3. What's the priority: clean architecture or shipping features?
    - Clean architecture: Complete migration first
    - Features: Accept technical debt, document it
 
@@ -170,7 +170,7 @@
 
 ## Recommendation
 
-**Complete the migration properly.** The half-done state is worse than either fully migrated or not migrated at all. The current state creates confusion, technical debt, and maintenance burden without fully realizing the benefits of the database-as-user architecture.
+Complete the migration properly. The half-done state is worse than either fully migrated or not migrated at all. The current state creates confusion, technical debt, and maintenance burden without fully realizing the benefits of the database-as-user architecture.
 
 The investment to complete the migration is significant but finite. The cost of maintaining the hybrid approach is ongoing and compounds over time.
 

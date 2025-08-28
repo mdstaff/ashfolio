@@ -2,15 +2,15 @@
 
 ## Financial Management v0.2.0 Implementation
 
-**Document Version:** 1.0  
-**Date:** August 10, 2025  
-**Urgency:** HIGH - Blocking Issue Identified
+Document Version: 1.0  
+Date: August 10, 2025  
+Urgency: HIGH - Blocking Issue Identified
 
 ## Executive Summary
 
-The project architect has identified a **CRITICAL BLOCKING ISSUE** in the FinancialManagement v0.2.0 implementation that must be resolved immediately. The `TransactionCategory` resource is not registered in the `FinancialManagement` domain, breaking the cross-domain relationship with the `Transaction` resource.
+The project architect has identified a CRITICAL BLOCKING ISSUE in the FinancialManagement v0.2.0 implementation that must be resolved immediately. The `TransactionCategory` resource is not registered in the `FinancialManagement` domain, breaking the cross-domain relationship with the `Transaction` resource.
 
-**Impact:** This prevents the application from starting and blocks all testing of the new financial management features.
+Impact: This prevents the application from starting and blocks all testing of the new financial management features.
 
 ## Critical Issue - Domain Registration Missing
 
@@ -52,9 +52,9 @@ But the domain doesn't register the resource, creating a mismatch that prevents 
 
 ### Step 1: Register TransactionCategory in FinancialManagement Domain
 
-**File:** `/Users/matthewstaff/Projects/github.com/mdstaff/ashfolio/lib/ashfolio/financial_management.ex`
+File: `/Users/matthewstaff/Projects/github.com/mdstaff/ashfolio/lib/ashfolio/financial_management.ex`
 
-**Change Required:**
+Change Required:
 
 ```elixir
 defmodule Ashfolio.FinancialManagement do
@@ -100,24 +100,24 @@ Ashfolio.FinancialManagement.Info.resources()
 
 ### 1. Application Configuration (Medium Priority)
 
-**Investigation Needed:** Check if `Ashfolio.FinancialManagement` needs to be registered in the application configuration.
+Investigation Needed: Check if `Ashfolio.FinancialManagement` needs to be registered in the application configuration.
 
-**File to Check:** `/Users/matthewstaff/Projects/github.com/mdstaff/ashfolio/config/config.exs`
+File to Check: `/Users/matthewstaff/Projects/github.com/mdstaff/ashfolio/config/config.exs`
 
-**Action:** Look for existing domain configurations and add `Ashfolio.FinancialManagement` if required by the Ash Framework setup.
+Action: Look for existing domain configurations and add `Ashfolio.FinancialManagement` if required by the Ash Framework setup.
 
 ### 2. PubSub Module Verification (Low Priority)
 
-**Issue:** The `BalanceManager` module uses `Ashfolio.PubSub` but we should verify this module is properly configured.
+Issue: The `BalanceManager` module uses `Ashfolio.PubSub` but we should verify this module is properly configured.
 
-**Current Usage in BalanceManager:**
+Current Usage in BalanceManager:
 
 ```elixir
 # Line 137 in balance_manager.ex
 PubSub.broadcast("balance_changes", {:balance_updated, message})
 ```
 
-**Verification Steps:**
+Verification Steps:
 
 1. Confirm `Ashfolio.PubSub` is started in `application.ex` ( Already verified - line 17)
 2. Test PubSub functionality in BalanceManager tests
@@ -125,9 +125,9 @@ PubSub.broadcast("balance_changes", {:balance_updated, message})
 
 ### 3. ETS State Management Review (Low Priority)
 
-**Issue:** The `BalanceManager` uses ETS tables for balance history storage which may need review for production readiness.
+Issue: The `BalanceManager` uses ETS tables for balance history storage which may need review for production readiness.
 
-**Current Implementation:**
+Current Implementation:
 
 ```elixir
 # Lines 152-170 in balance_manager.ex
@@ -150,7 +150,7 @@ defp balance_history_table do
 end
 ```
 
-**Considerations:**
+Considerations:
 
 - ETS data is not persisted across application restarts
 - Consider if balance history should be stored in database for audit trails
@@ -160,17 +160,17 @@ end
 
 ### 🚨 IMMEDIATE (Must fix before any testing)
 
-1. **Fix domain registration** - Register `TransactionCategory` in `FinancialManagement` domain
-2. **Verify cross-domain relationship** - Ensure Transaction → TransactionCategory works
+1. Fix domain registration - Register `TransactionCategory` in `FinancialManagement` domain
+2. Verify cross-domain relationship - Ensure Transaction → TransactionCategory works
 
 ### 🟡 HIGH (Verify during current sprint)
 
-3. **Application configuration check** - Ensure domain is properly configured in app config
-4. **PubSub functionality test** - Verify BalanceManager PubSub integration works
+3. Application configuration check - Ensure domain is properly configured in app config
+4. PubSub functionality test - Verify BalanceManager PubSub integration works
 
 ### 🟢 MEDIUM (Address in next sprint)
 
-5. **ETS storage review** - Consider database persistence for balance history
+5. ETS storage review - Consider database persistence for balance history
 
 ## Testing Checklist
 
@@ -188,10 +188,10 @@ After fixing the critical issue, verify these work correctly:
 
 ### For the Development Team
 
-1. **STOP** all work on FinancialManagement features until domain registration is fixed
-2. **PRIORITY FIX** - One developer should immediately implement the domain registration fix
-3. **TESTING** - After fix, run full test suite to ensure no regressions
-4. **COORDINATION** - Notify the other agent working on BalanceManager tests that this fix is required first
+1. STOP all work on FinancialManagement features until domain registration is fixed
+2. PRIORITY FIX - One developer should immediately implement the domain registration fix
+3. TESTING - After fix, run full test suite to ensure no regressions
+4. COORDINATION - Notify the other agent working on BalanceManager tests that this fix is required first
 
 ### For the Agent Working on BalanceManager
 
@@ -212,7 +212,7 @@ The critical issue is resolved when:
 
 ## Architect Assessment Validation
 
-**Original Rating:** 4.2/5 - Well-architected but needs configuration fixes  
-**Post-Fix Expected Rating:** 4.8/5 - Production-ready with proper domain configuration
+Original Rating: 4.2/5 - Well-architected but needs configuration fixes  
+Post-Fix Expected Rating: 4.8/5 - Production-ready with proper domain configuration
 
 This confirms the architect's assessment was accurate - the implementation is well-designed but blocked by a critical configuration issue that prevents proper functionality.

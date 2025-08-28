@@ -18,12 +18,12 @@ just test-integration   # End-to-end workflows
 
 ## Testing Architecture
 
-### **Global Test Data Management** 🆕
+### Global Test Data Management 🆕
 
-- **[Global Test Data Requirements](./global-test-data-requirements.md)** - Why global test data exists and how to manage it
-- **[Test Data Implementation Patterns](./test-data-implementation-patterns.md)** - Concrete patterns for reliable test data management
+- [Global Test Data Requirements](./global-test-data-requirements.md) - Why global test data exists and how to manage it
+- [Test Data Implementation Patterns](./test-data-implementation-patterns.md) - Concrete patterns for reliable test data management
 
-### **Core Testing Documentation**
+### Core Testing Documentation
 
 ### Testing Framework
 
@@ -31,29 +31,29 @@ Tests organized by system layers with performance categorization and SQLite conc
 
 ### Core Testing Categories
 
-| Category          | Purpose                        | Command                  |
-| ----------------- | ------------------------------ | ------------------------ |
-| **Fast Tests**    | Development feedback loop      | `just test-fast`         |
-| **Ash Resources** | Business logic validation      | `just test-ash`          |
-| **LiveView**      | UI components and interactions | `just test-liveview`     |
-| **Calculations**  | Portfolio math and FIFO logic  | `just test-calculations` |
-| **Integration**   | End-to-end system workflows    | `just test-integration`  |
+| Category      | Purpose                        | Command                  |
+| ------------- | ------------------------------ | ------------------------ |
+| Fast Tests    | Development feedback loop      | `just test-fast`         |
+| Ash Resources | Business logic validation      | `just test-ash`          |
+| LiveView      | UI components and interactions | `just test-liveview`     |
+| Calculations  | Portfolio math and FIFO logic  | `just test-calculations` |
+| Integration   | End-to-end system workflows    | `just test-integration`  |
 
 ## Documentation Structure
 
 ### Core Testing Documents
 
-- **[Framework Guide](framework.md)** - Complete testing framework architecture and patterns
-- **[SQLite Patterns](patterns.md)** - SQLite concurrency handling and database testing patterns
-- **[Standards](standards.md)** - Testing consistency standards and best practices
+- [Framework Guide](framework.md) - Complete testing framework architecture and patterns
+- [SQLite Patterns](patterns.md) - SQLite concurrency handling and database testing patterns
+- [Standards](standards.md) - Testing consistency standards and best practices
 - Global test data management and requirements
-- **[AI Testing](ai-testing.md)** - AI-assisted testing patterns and guidelines
+- [AI Testing](ai-testing.md) - AI-assisted testing patterns and guidelines
 
 For detailed testing patterns and strategies, see [Testing Strategy](../TESTING_STRATEGY.md).
 
-#### ⚠️ **Critical for v0.3.0+**
+#### ⚠️ Critical for v0.3.0+
 
-**Global test data management** is essential for reliable testing. See [Global Test Data Requirements](global-test-data-requirements.md) for:
+Global test data management is essential for reliable testing. See [Global Test Data Requirements](global-test-data-requirements.md) for:
 
 - Why global test data exists in Ashfolio
 - SQLite concurrency handling requirements

@@ -10,7 +10,7 @@ Built on v0.1.0's existing responsive design with Tailwind CSS and Phoenix LiveV
 
 ### Requirement 1: Touch-Optimized Forms
 
-**User Story:** As a mobile user, I want forms that work well with touch input so that I can easily enter transactions on my phone.
+User Story: As a mobile user, I want forms that work well with touch input so that I can easily enter transactions on my phone.
 
 #### Acceptance Criteria
 
@@ -22,7 +22,7 @@ Built on v0.1.0's existing responsive design with Tailwind CSS and Phoenix LiveV
 
 ### Requirement 2: Mobile Navigation
 
-**User Story:** As a mobile user, I want easy navigation between sections so that I can access all portfolio features on my device.
+User Story: As a mobile user, I want easy navigation between sections so that I can access all portfolio features on my device.
 
 #### Acceptance Criteria
 
@@ -34,7 +34,7 @@ Built on v0.1.0's existing responsive design with Tailwind CSS and Phoenix LiveV
 
 ### Requirement 3: Responsive Data Tables
 
-**User Story:** As a mobile user, I want to view my portfolio data clearly so that I can monitor my investments on any device.
+User Story: As a mobile user, I want to view my portfolio data clearly so that I can monitor my investments on any device.
 
 #### Acceptance Criteria
 
@@ -46,7 +46,7 @@ Built on v0.1.0's existing responsive design with Tailwind CSS and Phoenix LiveV
 
 ### Requirement 4: Mobile Performance
 
-**User Story:** As a mobile user, I want the app to load quickly and respond smoothly so that I can efficiently manage my portfolio.
+User Story: As a mobile user, I want the app to load quickly and respond smoothly so that I can efficiently manage my portfolio.
 
 #### Acceptance Criteria
 

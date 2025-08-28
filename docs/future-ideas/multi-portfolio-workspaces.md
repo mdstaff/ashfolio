@@ -31,7 +31,7 @@ Ashfolio Application
 
 ## User Experience
 
-### 1. **Startup Flow**
+### 1. Startup Flow
 
 ```
 User opens Ashfolio
@@ -44,7 +44,7 @@ If registry exists → Show "Portfolio Selection" page
 User selects portfolio → Connect to that database → Dashboard
 ```
 
-### 2. **Portfolio Selection Page** (like VS Code workspace picker)
+### 2. Portfolio Selection Page (like VS Code workspace picker)
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -71,7 +71,7 @@ User selects portfolio → Connect to that database → Dashboard
 └─────────────────────────────────────────────────┘
 ```
 
-### 3. **In-App Portfolio Switching**
+### 3. In-App Portfolio Switching
 
 - Top bar shows current portfolio name
 - Quick switcher (Cmd+P style) to switch portfolios
@@ -79,7 +79,7 @@ User selects portfolio → Connect to that database → Dashboard
 
 ## Technical Implementation
 
-### **Global Portfolio Registry**
+### Global Portfolio Registry
 
 ```elixir
 defmodule Ashfolio.PortfolioRegistry do
@@ -164,7 +164,7 @@ defmodule Ashfolio.PortfolioRegistry do
 end
 ```
 
-### **Portfolio Manager Service**
+### Portfolio Manager Service
 
 ```elixir
 defmodule Ashfolio.PortfolioManager do
@@ -309,7 +309,7 @@ defmodule Ashfolio.PortfolioManager do
 end
 ```
 
-### **Dynamic Database Connection**
+### Dynamic Database Connection
 
 ```elixir
 defmodule Ashfolio.DynamicRepo do
@@ -341,7 +341,7 @@ defmodule Ashfolio.DynamicRepo do
 end
 ```
 
-### **Portfolio Selection LiveView**
+### Portfolio Selection LiveView
 
 ```elixir
 defmodule AshfolioWeb.PortfolioSelectionLive do
@@ -440,21 +440,21 @@ end
 
 ## Key Benefits
 
-### **1. True Multi-Portfolio Support**
+### 1. True Multi-Portfolio Support
 
 - Separate investment tracking
 - Each family member's portfolio
 - Growth vs Income vs Retirement
 - Test portfolios without affecting main data
 
-### **2. Perfect Data Isolation**
+### 2. Perfect Data Isolation
 
 - No data mixing between portfolios
 - Copy specific .db files
 - Send portfolio file to advisor/accountant
 - Move portfolios between devices easily
 
-### **3. Enhanced UX**
+### 3. Enhanced UX
 
 - Color coding, descriptions
 - Like IDE workspace switching
@@ -463,19 +463,19 @@ end
 
 ## Implementation Challenges
 
-### **1. Dynamic Database Connections**
+### 1. Dynamic Database Connections
 
 - Need to switch Ecto repos at runtime
 - Manage multiple database connections
 - Handle connection pooling for multiple databases
 
-### **2. Migration Management**
+### 2. Migration Management
 
 - Each portfolio database needs schema migrations
 - Version compatibility between portfolios
 - Backup/restore during schema updates
 
-### **3. State Management**
+### 3. State Management
 
 - Track current active portfolio in LiveView
 - Handle database switching in sessions

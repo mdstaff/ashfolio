@@ -65,7 +65,7 @@ transaction_categories - Hierarchical categorization
 - Net worth across investment and cash accounts
 - Transaction-based performance tracking
 
-**Account Types** (Implemented):
+Account Types (Implemented):
 
 - Investment: Brokerage accounts with stock/ETF positions
 - Checking: Primary transaction accounts
@@ -127,9 +127,9 @@ config :ashfolio, Ashfolio.Repo,
 
 ### Development Process
 
-**Testing Strategy** 
+Testing Strategy
 
-See @docs/TESTING_STRATEGY.md 
+See @docs/TESTING_STRATEGY.md
 
 ## Development Roadmap
 

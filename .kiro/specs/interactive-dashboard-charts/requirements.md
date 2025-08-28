@@ -10,7 +10,7 @@ Built on v0.1.0's dashboard with existing portfolio calculations and Phoenix Liv
 
 ### Requirement 1: Portfolio Performance Chart
 
-**User Story:** As a portfolio manager, I want to see my portfolio performance over time so that I can track my investment progress visually.
+User Story: As a portfolio manager, I want to see my portfolio performance over time so that I can track my investment progress visually.
 
 #### Acceptance Criteria
 
@@ -22,7 +22,7 @@ Built on v0.1.0's dashboard with existing portfolio calculations and Phoenix Liv
 
 ### Requirement 2: Asset Allocation Pie Chart
 
-**User Story:** As an investor, I want to see how my portfolio is allocated across different assets so that I can understand my diversification.
+User Story: As an investor, I want to see how my portfolio is allocated across different assets so that I can understand my diversification.
 
 #### Acceptance Criteria
 
@@ -34,7 +34,7 @@ Built on v0.1.0's dashboard with existing portfolio calculations and Phoenix Liv
 
 ### Requirement 3: Responsive Chart Design
 
-**User Story:** As a mobile user, I want charts to work well on my device so that I can view my portfolio data anywhere.
+User Story: As a mobile user, I want charts to work well on my device so that I can view my portfolio data anywhere.
 
 #### Acceptance Criteria
 

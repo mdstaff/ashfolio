@@ -61,7 +61,7 @@ This document provides comprehensive guidance for testing the Ashfolio applicati
 
 ### Global Test Data Strategy
 
-The project uses a **global test data approach** to eliminate SQLite concurrency issues:
+The project uses a global test data approach to eliminate SQLite concurrency issues:
 
 ```elixir
 # test_helper.exs - Called ONCE before any tests
@@ -459,13 +459,13 @@ just compile
 
 #### 5. Common Pitfalls
 
-- **Don't use `async: true`** - SQLite doesn't support it well
-- **Don't create duplicate users** - Use global user
-- **Don't ignore retry logic** - Use `with_retry/1` for custom resources
-- **Don't mock unnecessarily** - Use real data when possible
-- **Don't expect database isolation** - Global data persists across tests
-- **Don't use hardcoded symbols** - AAPL, MSFT, GOOGL, TSLA exist globally
-- **Don't assert exact counts** - Use membership checks instead
+- Don't use `async: true` - SQLite doesn't support it well
+- Don't create duplicate users - Use global user
+- Don't ignore retry logic - Use `with_retry/1` for custom resources
+- Don't mock unnecessarily - Use real data when possible
+- Don't expect database isolation - Global data persists across tests
+- Don't use hardcoded symbols - AAPL, MSFT, GOOGL, TSLA exist globally
+- Don't assert exact counts - Use membership checks instead
 
 ### Creating New Tests
 
@@ -515,10 +515,10 @@ end
 
 #### Step 3: Follow Data Patterns
 
-1. **Use global data** when possible
-2. **Create custom data** only when needed
-3. **Use retry helpers** for custom resources
-4. **Clean up** is handled automatically by sandbox
+1. Use global data when possible
+2. Create custom data only when needed
+3. Use retry helpers for custom resources
+4. Clean up is handled automatically by sandbox
 
 ## Troubleshooting
 
@@ -567,10 +567,10 @@ end
 
 #### Fast Test Execution
 
-1. **Use global data** (no creation overhead)
-2. **Exclude seeding tests** by default
-3. **Run specific files** during development
-4. **Use silent commands** for quick feedback
+1. Use global data (no creation overhead)
+2. Exclude seeding tests by default
+3. Run specific files during development
+4. Use silent commands for quick feedback
 
 #### Coverage Analysis
 

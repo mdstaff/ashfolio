@@ -381,4 +381,4 @@ Include:
 
 ---
 
-**Still having issues?** Don't hesitate to [open an issue](https://github.com/mdstaff/ashfolio/issues/new) with the debug information above!
+Still having issues? Don't hesitate to [open an issue](https://github.com/mdstaff/ashfolio/issues/new) with the debug information above!

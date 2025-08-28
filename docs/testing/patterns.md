@@ -16,12 +16,12 @@ This document provides detailed patterns and solutions for handling SQLite concu
 ### Common Error Patterns
 
 ```
-** (Ash.Error.Unknown) %Sqlite.DbConnection.Error{
+ (Ash.Error.Unknown) %Sqlite.DbConnection.Error{
   message: "database is locked",
   sqlite: %{extended_code: 5, code: :busy}
 }
 
-** (MatchError) no match of right hand side value:
+ (MatchError) no match of right hand side value:
 {:error, %{message: "Database busy"}}
 ```
 
@@ -568,11 +568,11 @@ end
 
 SQLite concurrency in tests requires:
 
-1. **Global test data strategy** to minimize writes
-2. **Retry logic with exponential backoff** for custom resources
-3. **Proper sandbox management** with checkout/checkin
-4. **GenServer permission handling** for cross-process access
-5. **Always async: false** for all test modules
-6. **Smart use of helpers** from SQLiteHelpers module
+1. Global test data strategy to minimize writes
+2. Retry logic with exponential backoff for custom resources
+3. Proper sandbox management with checkout/checkin
+4. GenServer permission handling for cross-process access
+5. Always async: false for all test modules
+6. Smart use of helpers from SQLiteHelpers module
 
 This approach provides reliable, fast test execution while working within SQLite's limitations.

@@ -253,12 +253,11 @@ defmodule AshfolioWeb.Live.ErrorHelpers do
 
   defp format_validation_errors(errors) when is_map(errors) do
     errors
-    |> Enum.map(fn {field, messages} ->
+    |> Enum.map_join("; ", fn {field, messages} ->
       field_name = humanize_field(field)
       message_list = Enum.join(messages, ", ")
       "#{field_name}: #{message_list}"
     end)
-    |> Enum.join("; ")
   end
 
   defp format_validation_errors(errors) when is_list(errors) do

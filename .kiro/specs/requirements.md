@@ -19,7 +19,7 @@ The application architecture:
 
 ### Requirement 1: Single User Local Application
 
-**User Story:** As a local user, I want to run the application on my personal machine without complex authentication so that I can manage my portfolio privately and securely.
+User Story: As a local user, I want to run the application on my personal machine without complex authentication so that I can manage my portfolio privately and securely.
 
 #### Acceptance Criteria
 
@@ -31,7 +31,7 @@ The application architecture:
 
 ### Requirement 2: Portfolio and Account Management
 
-**User Story:** As an investor, I want to manage multiple investment accounts and track my portfolio performance so that I can make informed financial decisions.
+User Story: As an investor, I want to manage multiple investment accounts and track my portfolio performance so that I can make informed financial decisions.
 
 #### Acceptance Criteria
 
@@ -43,7 +43,7 @@ The application architecture:
 
 ### Requirement 3: Transaction and Order Management
 
-**User Story:** As an investor, I want to record buy/sell transactions, dividends, and fees so that I can track my investment activity accurately.
+User Story: As an investor, I want to record buy/sell transactions, dividends, and fees so that I can track my investment activity accurately.
 
 #### Acceptance Criteria
 
@@ -56,7 +56,7 @@ The application architecture:
 
 ### Requirement 4: Symbol and Market Data Management
 
-**User Story:** As an investor, I want accurate and up-to-date market data for my investments so that I can track current values and performance.
+User Story: As an investor, I want accurate and up-to-date market data for my investments so that I can track current values and performance.
 
 #### Acceptance Criteria
 
@@ -71,7 +71,7 @@ The application architecture:
 
 ### Requirement 5: Simple Portfolio Performance Tracking
 
-**User Story:** As an investor, I want to see basic portfolio performance metrics so that I can understand my investment returns.
+User Story: As an investor, I want to see basic portfolio performance metrics so that I can understand my investment returns.
 
 #### Acceptance Criteria
 
@@ -83,7 +83,7 @@ The application architecture:
 
 ### Requirement 6: Manual Price Updates
 
-**User Story:** As an investor, I want to manually refresh market prices so that I can get current portfolio values when needed.
+User Story: As an investor, I want to manually refresh market prices so that I can get current portfolio values when needed.
 
 #### Acceptance Criteria
 
@@ -95,7 +95,7 @@ The application architecture:
 
 ### Requirement 7: Manual Transaction Entry
 
-**User Story:** As an investor, I want to manually enter my transactions so that I can track my investment activity.
+User Story: As an investor, I want to manually enter my transactions so that I can track my investment activity.
 
 #### Acceptance Criteria
 
@@ -107,7 +107,7 @@ The application architecture:
 
 ### Requirement 8: USD-Only Financial Calculations
 
-**User Story:** As a US-based investor, I want all financial calculations and displays to use USD currency so that I can focus on my domestic portfolio without currency complexity.
+User Story: As a US-based investor, I want all financial calculations and displays to use USD currency so that I can focus on my domestic portfolio without currency complexity.
 
 #### Acceptance Criteria
 
@@ -119,7 +119,7 @@ The application architecture:
 
 ### Requirement 9: Local API Access
 
-**User Story:** As a local user, I want simple API access to my portfolio data so that I can export data or integrate with personal tools.
+User Story: As a local user, I want simple API access to my portfolio data so that I can export data or integrate with personal tools.
 
 #### Acceptance Criteria
 
@@ -131,7 +131,7 @@ The application architecture:
 
 ### Requirement 10: Ash Framework Data Modeling
 
-**User Story:** As a developer, I want to use the Ash framework for data modeling and business logic so that I can leverage its powerful resource management and query capabilities.
+User Story: As a developer, I want to use the Ash framework for data modeling and business logic so that I can leverage its powerful resource management and query capabilities.
 
 #### Acceptance Criteria
 
@@ -145,7 +145,7 @@ The application architecture:
 
 ### Requirement 11: Basic Application Performance
 
-**User Story:** As a user, I want the application to be responsive and handle my portfolio data efficiently so that I can manage my investments without delays.
+User Story: As a user, I want the application to be responsive and handle my portfolio data efficiently so that I can manage my investments without delays.
 
 #### Acceptance Criteria
 
@@ -159,7 +159,7 @@ The application architecture:
 
 ### Requirement 12: User Interface and Experience
 
-**User Story:** As a portfolio manager, I want a clean, intuitive, and responsive interface that provides immediate access to my portfolio data so that I can efficiently monitor and manage my investments.
+User Story: As a portfolio manager, I want a clean, intuitive, and responsive interface that provides immediate access to my portfolio data so that I can efficiently monitor and manage my investments.
 
 #### Acceptance Criteria
 
@@ -173,7 +173,7 @@ The application architecture:
 
 ### Requirement 13: Dashboard and Portfolio Overview
 
-**User Story:** As an investor, I want a comprehensive dashboard that shows my portfolio performance at a glance so that I can quickly assess my investment status.
+User Story: As an investor, I want a comprehensive dashboard that shows my portfolio performance at a glance so that I can quickly assess my investment status.
 
 #### Acceptance Criteria
 
@@ -185,7 +185,7 @@ The application architecture:
 
 ### Requirement 14: Transaction Management Interface
 
-**User Story:** As an investor, I want an efficient interface for entering, editing, and managing my transactions so that I can maintain accurate portfolio records.
+User Story: As an investor, I want an efficient interface for entering, editing, and managing my transactions so that I can maintain accurate portfolio records.
 
 #### Acceptance Criteria
 
@@ -197,7 +197,7 @@ The application architecture:
 
 ### Requirement 15: Simple Data Display
 
-**User Story:** As an investor, I want to see my portfolio data in clear tables and basic charts so that I can understand my investments.
+User Story: As an investor, I want to see my portfolio data in clear tables and basic charts so that I can understand my investments.
 
 #### Acceptance Criteria
 
@@ -209,7 +209,7 @@ The application architecture:
 
 ### Requirement 16: Simple Price Management
 
-**User Story:** As a user, I want simple price updates for my portfolio so that I can see current values without complex background processing.
+User Story: As a user, I want simple price updates for my portfolio so that I can see current values without complex background processing.
 
 #### Acceptance Criteria
 
@@ -221,7 +221,7 @@ The application architecture:
 
 ### Requirement 17: Responsive Design and Accessibility
 
-**User Story:** As a user with different devices and accessibility needs, I want the application to be usable across different screen sizes and assistive technologies so that I can access my portfolio information anywhere.
+User Story: As a user with different devices and accessibility needs, I want the application to be usable across different screen sizes and assistive technologies so that I can access my portfolio information anywhere.
 
 #### Acceptance Criteria
 
@@ -234,7 +234,7 @@ The application architecture:
 
 ### Requirement 18: Basic Error Handling
 
-**User Story:** As a user, I want clear error messages when something goes wrong so that I understand what happened and can continue using the application.
+User Story: As a user, I want clear error messages when something goes wrong so that I understand what happened and can continue using the application.
 
 #### Acceptance Criteria
 
@@ -246,7 +246,7 @@ The application architecture:
 
 ### Requirement 19: Documentation and Developer Onboarding
 
-**User Story:** As a developer new to Elixir/Phoenix, I want comprehensive documentation and onboarding materials so that I can understand, contribute to, and maintain the codebase effectively.
+User Story: As a developer new to Elixir/Phoenix, I want comprehensive documentation and onboarding materials so that I can understand, contribute to, and maintain the codebase effectively.
 
 #### Acceptance Criteria
 
@@ -260,7 +260,7 @@ The application architecture:
 
 ### Requirement 19: Testing and Quality Assurance
 
-**User Story:** As a developer, I want comprehensive testing patterns and guidelines so that I can maintain code quality and prevent regressions, especially when working with GenServers and concurrent systems.
+User Story: As a developer, I want comprehensive testing patterns and guidelines so that I can maintain code quality and prevent regressions, especially when working with GenServers and concurrent systems.
 
 #### Acceptance Criteria
 

@@ -6,11 +6,11 @@ This guide establishes comprehensive standards for documenting Elixir code in th
 
 ## Core Principles
 
-1. **Documentation is Code** - Documentation should be maintained with the same rigor as code
-2. **Developer Experience First** - Documentation should help developers understand intent and usage quickly
-3. **Examples Drive Understanding** - Provide concrete examples for all public APIs
-4. **No Surprises** - Document edge cases, error conditions, and performance characteristics
-5. **Consistency** - Follow established patterns across the entire codebase
+1. Documentation is Code - Documentation should be maintained with the same rigor as code
+2. Developer Experience First - Documentation should help developers understand intent and usage quickly
+3. Examples Drive Understanding - Provide concrete examples for all public APIs
+4. No Surprises - Document edge cases, error conditions, and performance characteristics
+5. Consistency - Follow established patterns across the entire codebase
 
 ## Module Documentation (`@moduledoc`)
 
@@ -18,10 +18,10 @@ This guide establishes comprehensive standards for documenting Elixir code in th
 
 Every module MUST have a `@moduledoc` that includes:
 
-1. **Purpose Statement** - What this module does in 1-2 sentences
-2. **Key Features** - Bullet list of main capabilities
-3. **Usage Context** - When/how this module should be used
-4. **Performance Notes** - If relevant to module design
+1. Purpose Statement - What this module does in 1-2 sentences
+2. Key Features - Bullet list of main capabilities
+3. Usage Context - When/how this module should be used
+4. Performance Notes - If relevant to module design
 
 ### Template
 
@@ -110,11 +110,11 @@ defmodule Ashfolio.FinancialManagement.NetWorthCalculatorOptimized do
 
 Every public function MUST have `@doc` with:
 
-1. **Purpose** - What the function does
-2. **Parameters** - What each parameter expects
-3. **Return Values** - All possible return patterns
-4. **Examples** - Concrete usage examples
-5. **Error Conditions** - When/how it fails
+1. Purpose - What the function does
+2. Parameters - What each parameter expects
+3. Return Values - All possible return patterns
+4. Examples - Concrete usage examples
+5. Error Conditions - When/how it fails
 
 ### Template
 
@@ -238,10 +238,10 @@ Net worth calculation result containing all financial totals and breakdowns.
 
 Use `#` comments for:
 
-1. **Algorithm explanations** - Complex logic that isn't obvious
-2. **Business rule clarifications** - Why specific decisions are made
-3. **Performance notes** - Optimization explanations
-4. **Temporary workarounds** - With TODO and issue references
+1. Algorithm explanations - Complex logic that isn't obvious
+2. Business rule clarifications - Why specific decisions are made
+3. Performance notes - Optimization explanations
+4. Temporary workarounds - With TODO and issue references
 
 ### Comment Style
 

@@ -4,7 +4,7 @@
 
 This document outlines UI/UX improvements identified during the v0.2.0 review of Ashfolio. The application currently has a clean, professional design with excellent functionality. These improvements focus on polish, accessibility, and user experience enhancements.
 
-**Current Grade: B+ (Very Good)**
+Current Grade: B+ (Very Good)
 
 - Functionality: A
 - Visual Design: B+

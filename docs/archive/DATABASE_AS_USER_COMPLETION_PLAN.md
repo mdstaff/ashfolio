@@ -146,7 +146,7 @@ Remove fake User module and compatibility helpers
 Update all test files to embrace database-as-user pattern
 20/20 files complete (100%)
 
-**Successfully Refactored All Test Files:**
+Successfully Refactored All Test Files:
 
 - Removed all User entity references
 - Updated function calls to database-as-user equivalents
@@ -154,7 +154,7 @@ Update all test files to embrace database-as-user pattern
 - Fixed performance test function calls
 - 100% test passage rate on refactored files
 
-**Established Pattern Applied Consistently:**
+Established Pattern Applied Consistently:
 
 1. Remove `alias Ashfolio.Portfolio.User`
 2. Remove `{:ok, user} = User.create(...)` calls
@@ -189,10 +189,10 @@ Comprehensive testing and cleanup
 
 ### Order of Operations
 
-1. **Start with leaf modules** (no dependencies)
-2. **Move up dependency tree** gradually
-3. **Update tests after production code**
-4. **Documentation last** (reflects final state)
+1. Start with leaf modules (no dependencies)
+2. Move up dependency tree gradually
+3. Update tests after production code
+4. Documentation last (reflects final state)
 
 ### Risk Mitigation
 
@@ -260,24 +260,24 @@ Run performance tests before and after
 
 ## Decision Points
 
-1. **Should we maintain any backward compatibility?**
+1. Should we maintain any backward compatibility?
 
    - Recommendation: No, clean break for simplicity
 
-2. **Should we version the database schema?**
+2. Should we version the database schema?
 
    - Recommendation: Yes, add version table for future migrations
 
-3. **Should we provide migration tools for existing users?**
+3. Should we provide migration tools for existing users?
    - Recommendation: Yes, if any production deployments exist
 
 ## Next Steps
 
-1. **Review and approve this plan**
-2. **Create migration branch**
-3. **Begin Phase 1 analysis**
-4. **Execute phases in order**
-5. **Validate and merge**
+1. Review and approve this plan
+2. Create migration branch
+3. Begin Phase 1 analysis
+4. Execute phases in order
+5. Validate and merge
 
 ## Conclusion
 

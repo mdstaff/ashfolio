@@ -1,6 +1,6 @@
 # Ashfolio User Experience Enhancements Requirements Document
 
-> **📋 STATUS: ROADMAP DOCUMENT**  
+> 📋 STATUS: ROADMAP DOCUMENT  
 > This comprehensive spec has been broken down into focused, manageable specs:
 >
 > - [Symbol Autocomplete](../symbol-autocomplete/)
@@ -9,7 +9,7 @@
 > - [Advanced Holdings Table](../advanced-holdings-table/)
 > - [Mobile Optimization](../mobile-optimization/)
 >
-> **This document serves as a reference roadmap and will be removed once all focused specs are complete.**
+> This document serves as a reference roadmap and will be removed once all focused specs are complete.
 
 ## Introduction
 
@@ -30,7 +30,7 @@ The user experience enhancements focus on:
 
 ### Requirement 1: Intelligent Symbol Autocomplete
 
-**User Story:** As an investor entering transactions, I want intelligent symbol autocomplete so that I can quickly find and select securities without typing full symbol names or making errors.
+User Story: As an investor entering transactions, I want intelligent symbol autocomplete so that I can quickly find and select securities without typing full symbol names or making errors.
 
 #### Acceptance Criteria
 
@@ -44,7 +44,7 @@ The user experience enhancements focus on:
 
 ### Requirement 2: Real-Time Price Lookup Integration
 
-**User Story:** As an investor entering transactions, I want real-time price lookup when I select a symbol so that I can see current market prices and make informed transaction entries.
+User Story: As an investor entering transactions, I want real-time price lookup when I select a symbol so that I can see current market prices and make informed transaction entries.
 
 #### Acceptance Criteria
 
@@ -58,7 +58,7 @@ The user experience enhancements focus on:
 
 ### Requirement 3: Enhanced Dashboard with Interactive Charts
 
-**User Story:** As a portfolio manager, I want interactive charts and enhanced visualizations on my dashboard so that I can quickly understand my portfolio performance and allocation at a glance.
+User Story: As a portfolio manager, I want interactive charts and enhanced visualizations on my dashboard so that I can quickly understand my portfolio performance and allocation at a glance.
 
 #### Acceptance Criteria
 
@@ -72,7 +72,7 @@ The user experience enhancements focus on:
 
 ### Requirement 4: Streamlined Transaction Entry Workflow
 
-**User Story:** As an investor managing multiple transactions, I want a streamlined transaction entry workflow so that I can quickly add multiple transactions without repetitive data entry.
+User Story: As an investor managing multiple transactions, I want a streamlined transaction entry workflow so that I can quickly add multiple transactions without repetitive data entry.
 
 #### Acceptance Criteria
 
@@ -86,7 +86,7 @@ The user experience enhancements focus on:
 
 ### Requirement 5: Advanced Holdings Table with Sorting and Filtering
 
-**User Story:** As a portfolio manager with many holdings, I want advanced table features so that I can efficiently analyze and manage my positions.
+User Story: As a portfolio manager with many holdings, I want advanced table features so that I can efficiently analyze and manage my positions.
 
 #### Acceptance Criteria
 
@@ -100,7 +100,7 @@ The user experience enhancements focus on:
 
 ### Requirement 6: Enhanced Mobile and Responsive Experience
 
-**User Story:** As a mobile user, I want a fully optimized mobile experience so that I can manage my portfolio effectively on any device.
+User Story: As a mobile user, I want a fully optimized mobile experience so that I can manage my portfolio effectively on any device.
 
 #### Acceptance Criteria
 
@@ -114,7 +114,7 @@ The user experience enhancements focus on:
 
 ### Requirement 7: Real-Time Dashboard Updates and Notifications
 
-**User Story:** As a portfolio manager, I want real-time updates and notifications so that I stay informed of important changes without manual refreshing.
+User Story: As a portfolio manager, I want real-time updates and notifications so that I stay informed of important changes without manual refreshing.
 
 #### Acceptance Criteria
 
@@ -128,7 +128,7 @@ The user experience enhancements focus on:
 
 ### Requirement 8: Advanced Search and Quick Actions
 
-**User Story:** As a power user, I want advanced search capabilities and quick actions so that I can efficiently navigate and manage my portfolio data.
+User Story: As a power user, I want advanced search capabilities and quick actions so that I can efficiently navigate and manage my portfolio data.
 
 #### Acceptance Criteria
 
@@ -142,7 +142,7 @@ The user experience enhancements focus on:
 
 ### Requirement 9: Enhanced Data Visualization and Reporting
 
-**User Story:** As an investor, I want enhanced data visualization and basic reporting so that I can better understand my portfolio performance and make informed decisions.
+User Story: As an investor, I want enhanced data visualization and basic reporting so that I can better understand my portfolio performance and make informed decisions.
 
 #### Acceptance Criteria
 
@@ -156,7 +156,7 @@ The user experience enhancements focus on:
 
 ### Requirement 10: Improved Error Handling and User Guidance
 
-**User Story:** As a user, I want improved error handling and guidance so that I can resolve issues quickly and understand how to use the application effectively.
+User Story: As a user, I want improved error handling and guidance so that I can resolve issues quickly and understand how to use the application effectively.
 
 #### Acceptance Criteria
 
@@ -170,7 +170,7 @@ The user experience enhancements focus on:
 
 ### Requirement 11: Performance Optimization and Caching
 
-**User Story:** As a user, I want fast, responsive interactions so that I can manage my portfolio efficiently without waiting for slow operations.
+User Story: As a user, I want fast, responsive interactions so that I can manage my portfolio efficiently without waiting for slow operations.
 
 #### Acceptance Criteria
 
@@ -184,7 +184,7 @@ The user experience enhancements focus on:
 
 ### Requirement 12: Accessibility and Usability Enhancements
 
-**User Story:** As a user with accessibility needs, I want the application to be fully accessible so that I can use all features regardless of my abilities.
+User Story: As a user with accessibility needs, I want the application to be fully accessible so that I can use all features regardless of my abilities.
 
 #### Acceptance Criteria
 
