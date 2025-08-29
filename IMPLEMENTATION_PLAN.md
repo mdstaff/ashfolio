@@ -1,411 +1,312 @@
-# v0.4.3 Forecasting Engine Implementation Plan
+# v0.4.x Bug Fixes and Improvements Implementation Plan
 
 ## Overview
 
-Implement comprehensive portfolio forecasting and growth projection capabilities for long-term financial planning. Build on existing calculator patterns and integrate with retirement planning from v0.4.2.
+E2E testing has revealed several critical bugs in the v0.4.x features that need immediate attention. This plan uses TDD to systematically fix visualization bugs, broken forms, and missing UI elements.
 
-## TDD
+## 🐛 Critical Bugs Found During E2E Testing
 
-### Stage 1: Chart Components (Complete test-first)
+### Priority 1: Broken Features
+1. **Goal Creation Form** - KeyError for `:recommended_target` prevents new goal creation
+2. **Missing Navigation Links** - No access to Analytics (/expenses/analytics) and Net Worth (/net_worth)
 
-- [ ] Test: Chart renders with single scenario data
-- [ ] Test: Chart handles multiple scenarios
-- [ ] Test: Chart updates when data changes
-- [ ] Test: Chart handles edge cases (zero values, negative growth)
+### Priority 2: Chart Visualization Issues  
+1. **Growth Rate Display** - Shows "0.07%" instead of "7%" in parameters
+2. **Missing Initial Portfolio Value** - All charts start at $0 instead of initial value
+3. **Scenario Comparison Chart** - Only displays 1 line instead of 3 scenarios
+4. **Y-axis Formatting** - Shows "$2BGN" instead of proper formatting
+5. **Wrong Chart Reuse** - Contribution Impact shows Scenario Comparison chart
 
-### Stage 2: LiveView Form (Complete test-first)
+### Priority 3: Missing Features
+1. **v0.4.2 Retirement Planning UI** - No interface for 25x rule, 4% withdrawal calculations
 
-- [ ] Test: Form renders with correct fields
-- [ ] Test: Validation prevents invalid inputs
-- [ ] Test: Form submission triggers calculation
-- [ ] Test: Results display correctly
+## Stage 1: Fix Goal Creation Form [NOT STARTED]
 
-### Stage 3: Integration (Complete test-first)
-
-- [ ] Test: Scenario switching updates chart
-- [ ] Test: PubSub updates when portfolio changes
-- [ ] Test: Navigation from goals to forecast works
-
-## Stage 1: ForecastCalculator Foundation [Complete] ✅
-
-Deliverable: Core ForecastCalculator module with basic compound growth calculations
-
-### Tasks:
-
-1. TDD: Unit Tests for Basic Compound Growth (30 min)
-
-   - Test simple compound growth without contributions
-   - Test compound growth with regular monthly contributions
-   - Test edge cases (0 growth, 0 contributions, negative values)
-   - Test decimal precision handling
-
-2. Implement ForecastCalculator Module (45 min)
-
-   - Follow RetirementCalculator patterns for structure
-   - Implement `project_portfolio_growth/4` with compound interest formula
-   - Add proper error handling and Logger.debug calls
-   - Use Decimal throughout for precision
-
-3. TDD: Integration Tests (30 min)
-   - Test with realistic portfolio values
-   - Verify calculations match financial standards
-   - Test error handling paths
-
-Test Cases:
+### TDD Tests First:
 
 ```elixir
-# Basic compound growth
-assert {:ok, result} = ForecastCalculator.project_portfolio_growth(
-  Decimal.new("100000"), # current_value
-  Decimal.new("12000"),  # annual_contribution
-  10,                     # years
-  Decimal.new("0.07")    # 7% growth rate
-)
-# Expected: ~$235,000 after 10 years
-
-# Zero growth scenario
-assert {:ok, result} = ForecastCalculator.project_portfolio_growth(
-  Decimal.new("100000"),
-  Decimal.new("0"),
-  10,
-  Decimal.new("0")
-)
-assert Decimal.equal?(result, Decimal.new("100000"))
-
-# Edge case validations
-assert {:error, :negative_value} = ForecastCalculator.project_portfolio_growth(
-  Decimal.new("-100000"),
-  Decimal.new("12000"),
-  10,
-  Decimal.new("0.07")
-)
-```
-
-Success Criteria:
-
-- [x] All unit tests passing
-- [x] Compound growth formula accurate
-- [x] Error handling comprehensive
-- [x] Decimal precision maintained
-
-## Stage 2: Multi-Period Projections [Complete] ✅
-
-Deliverable: Project portfolio growth over multiple time horizons (5, 10, 15, 20, 25, 30 years)
-
-### Tasks:
-
-1. TDD: Multi-Period Tests (30 min)
-
-   - Test projection for standard periods
-   - Test result structure and data format
-   - Test performance with multiple calculations
-
-2. Implement Multi-Period Projection (45 min)
-
-   - Create `project_multi_period_growth/4` function
-   - Return map with projections for each period
-   - Include yearly breakdowns for first 5 years
-   - Add compound annual growth rate (CAGR) calculation
-
-3. Performance Optimization (30 min)
-   - Implement memoization for repeated calculations
-   - Optimize loops using Stream where appropriate
-   - Add performance tests
-
-Test Cases:
-
-```elixir
-# Multi-period projections
-assert {:ok, projections} = ForecastCalculator.project_multi_period_growth(
-  Decimal.new("100000"),
-  Decimal.new("12000"),
-  Decimal.new("0.07"),
-  [5, 10, 15, 20, 25, 30]
-)
-
-assert Map.has_key?(projections, :year_5)
-assert Map.has_key?(projections, :year_30)
-assert Map.has_key?(projections, :yearly_breakdown)
-assert Map.has_key?(projections, :cagr)
-
-# Performance test
-assert {time_us, {:ok, _}} = :timer.tc(fn ->
-  ForecastCalculator.project_multi_period_growth(
-    Decimal.new("100000"),
-    Decimal.new("12000"),
-    Decimal.new("0.07"),
-    [5, 10, 15, 20, 25, 30]
-  )
-end)
-assert time_us < 100_000  # Should complete in < 100ms
-```
-
-Success Criteria:
-
-- [x] Multi-period calculations working
-- [x] Performance < 100ms for 6 periods
-- [x] CAGR calculation accurate
-- [x] Yearly breakdown included
-
-## Stage 3: Scenario Planning Engine [Complete] ✅
-
-Deliverable: Compare multiple growth scenarios (pessimistic, realistic, optimistic)
-
-### Tasks:
-
-1. TDD: Scenario Comparison Tests (30 min)
-
-   - Test standard scenarios (5%, 7%, 10%)
-   - Test custom scenario creation
-   - Test scenario comparison structure
-
-2. Implement Scenario Planning (1 hour)
-
-   - Create `calculate_scenario_projections/3` with default scenarios
-   - Support custom scenario definitions
-   - Include probability-weighted outcomes
-   - Add financial independence calculations
-
-3. Integration with Retirement Calculator (30 min)
-   - Link scenarios to retirement readiness
-   - Calculate years to financial independence per scenario
-   - Add safe withdrawal rate projections
-
-Test Cases:
-
-```elixir
-# Standard scenarios
-assert {:ok, scenarios} = ForecastCalculator.calculate_scenario_projections(
-  Decimal.new("100000"),
-  Decimal.new("12000"),
-  30
-)
-
-assert Map.has_key?(scenarios, :pessimistic)  # 5% growth
-assert Map.has_key?(scenarios, :realistic)    # 7% growth
-assert Map.has_key?(scenarios, :optimistic)   # 10% growth
-
-# Custom scenarios
-custom_scenarios = [
-  %{name: :conservative, rate: Decimal.new("0.04")},
-  %{name: :aggressive, rate: Decimal.new("0.12")}
-]
-
-assert {:ok, results} = ForecastCalculator.calculate_custom_scenarios(
-  Decimal.new("100000"),
-  Decimal.new("12000"),
-  30,
-  custom_scenarios
-)
-
-# Financial independence calculation
-assert {:ok, fi_analysis} = ForecastCalculator.calculate_fi_timeline(
-  Decimal.new("100000"),
-  Decimal.new("12000"),
-  Decimal.new("50000"), # annual expenses
-  Decimal.new("0.07")
-)
-assert Map.has_key?(fi_analysis, :years_to_fi)
-assert Map.has_key?(fi_analysis, :fi_portfolio_value)
-```
-
-Success Criteria:
-
-- [x] Standard scenarios working (5%, 7%, 10%)
-- [x] Custom scenarios supported
-- [x] FI calculations integrated
-- [x] Comparison structure clear
-
-## Stage 4: Contribution Impact Analysis [Complete] ✅
-
-Deliverable: Analyze impact of different contribution levels on portfolio growth
-
-### Tasks:
-
-1. TDD: Contribution Analysis Tests (30 min)
-
-   - Test contribution sensitivity analysis
-   - Test incremental contribution impact
-   - Test contribution vs growth rate comparison
-
-2. Implement Contribution Analysis (45 min)
-
-   - Create `analyze_contribution_impact/4`
-   - Show impact of ±$100, ±$500, ±$1000 monthly changes
-   - Calculate breakeven contribution for target
-   - Add time-to-goal with different contributions
-
-3. Create Contribution Optimizer (30 min)
-   - Calculate minimum contribution for retirement goal
-   - Show trade-offs between time and contribution amount
-   - Integration with retirement planning
-
-Test Cases:
-
-```elixir
-# Contribution sensitivity
-assert {:ok, analysis} = ForecastCalculator.analyze_contribution_impact(
-  Decimal.new("100000"),
-  Decimal.new("1000"), # base monthly contribution
-  20, # years
-  Decimal.new("0.07")
-)
-
-assert Map.has_key?(analysis, :base_projection)
-assert Map.has_key?(analysis, :contribution_variations)
-assert length(analysis.contribution_variations) >= 5
-
-# Optimizer for retirement goal
-assert {:ok, optimization} = ForecastCalculator.optimize_contribution_for_goal(
-  Decimal.new("100000"),  # current value
-  Decimal.new("1250000"), # retirement target (25x * 50k expenses)
-  15, # target years
-  Decimal.new("0.07")
-)
-assert Map.has_key?(optimization, :required_monthly_contribution)
-assert Map.has_key?(optimization, :probability_of_success)
-```
-
-Success Criteria:
-
-- [x] Sensitivity analysis working
-- [x] Multiple contribution scenarios
-- [x] Optimization calculations accurate
-- [x] Integration with retirement goals
-
-## Stage 5: UI Integration & Charts [Complete] ✅
-
-Deliverable: LiveView components with interactive Contex charts for forecasting
-
-### Tasks:
-
-1. Create ForecastingLive Module (1 hour)
-
-   - Follow DashboardLive patterns
-   - Add PubSub subscriptions
-   - Implement form for inputs
-   - Handle real-time updates
-
-2. Implement Contex Charts (1.5 hours)
-
-   - Line chart for growth projections
-   - Area chart for scenario comparisons
-   - Bar chart for contribution impact
-   - Follow existing chart patterns from dashboard
-
-3. Add Dashboard Widget (30 min)
-   - Create forecast summary widget
-   - Show key metrics (30-year projection, FI timeline)
-   - Link to full forecasting page
-
-Test Cases:
-
-```elixir
-# LiveView tests
-@tag :liveview
-test "forecasting page loads with default values", %{conn: conn} do
-  {:ok, view, html} = live(conn, "/financial_planning/forecast")
-
-  assert html =~ "Portfolio Growth Projections"
-  assert html =~ "Scenario Planning"
-  assert html =~ "Contribution Analysis"
+@tag :unit
+test "calculate_recommended_target returns 6x monthly expenses for emergency fund" do
+  monthly_expenses = Decimal.new("1000.00")
+  expected = Decimal.new("6000.00")
+  
+  assert {:ok, result} = FinancialGoal.calculate_recommended_target(:emergency_fund, monthly_expenses)
+  assert Decimal.equal?(result, expected)
 end
 
 @tag :liveview
-test "updating inputs recalculates projections", %{conn: conn} do
-  {:ok, view, _} = live(conn, "/financial_planning/forecast")
-
-  view
-  |> form("#forecast-form", %{
-    current_value: "150000",
-    monthly_contribution: "2000",
-    growth_rate: "0.08"
-  })
-  |> render_change()
-
-  assert render(view) =~ "30-Year Projection"
-  assert render(view) =~ "$" # Updated value shown
-end
-
-# Widget integration
-@tag :liveview
-test "forecast widget appears on dashboard", %{conn: conn} do
-  {:ok, view, html} = live(conn, "/dashboard")
-
-  assert html =~ "Portfolio Forecast"
-  assert html =~ "Projected in 30 years"
+test "goal creation form includes recommended_target field" do
+  {:ok, view, _html} = live(conn, "/goals/new")
+  
+  assert has_element?(view, "#goal_recommended_target")
+  assert html =~ "Recommended Target"
 end
 ```
 
-Success Criteria:
+### Implementation Tasks:
+1. Add `calculate_recommended_target/2` to FinancialGoal module
+2. Update FinancialGoalLive.FormComponent with recommended_target field
+3. Add expense-based calculations for emergency fund targets
+4. Test form submission with all fields
 
-- [x] LiveView page functional
-- [x] Charts rendering correctly
-- [x] Real-time updates working
-- [x] Dashboard widget integrated
+**Files to modify:**
+- `lib/ashfolio_web/live/financial_goal_live/form_component.ex`
+- `lib/ashfolio/financial_management/financial_goal.ex`
+- `test/ashfolio_web/live/financial_goal_live_test.exs`
 
-## Timeline Summary
+## Stage 2: Fix Chart Data Issues [NOT STARTED]
 
-### Week 1 (Days 1-3)
+### TDD Tests First:
 
-- Day 1: Stage 1 - ForecastCalculator Foundation (2 hours)
-- Day 2: Stage 2 - Multi-Period Projections (2 hours)
-- Day 3: Stage 3 - Scenario Planning Engine (2 hours)
+```elixir
+@tag :unit
+test "format_growth_rate converts decimal to percentage string" do
+  assert "7%" = FormatHelper.format_growth_rate(Decimal.new("0.07"))
+  assert "5%" = FormatHelper.format_growth_rate(Decimal.new("0.05"))
+  assert "10%" = FormatHelper.format_growth_rate(Decimal.new("0.10"))
+end
 
-### Week 2 (Days 4-5)
+@tag :unit
+test "projection chart data starts with initial portfolio value" do
+  initial = Decimal.new("100000")
+  data = ForecastCalculator.generate_chart_data(initial, [], 0.07, 30)
+  
+  assert [first | _] = data
+  assert Decimal.equal?(first.value, initial)
+  assert first.year == 0
+end
 
-- Day 4: Stage 4 - Contribution Impact Analysis (2 hours)
-- Day 5: Stage 5 - UI Integration & Charts (3 hours)
+@tag :unit
+test "scenario comparison generates three distinct data series" do
+  params = %{initial: 100000, contribution: 1000, years: 30}
+  chart_data = ForecastCalculator.generate_scenario_chart(params)
+  
+  assert %{pessimistic: p_data, realistic: r_data, optimistic: o_data} = chart_data
+  assert length(p_data) == 31  # 0 to 30 years
+  assert length(r_data) == 31
+  assert length(o_data) == 31
+  refute p_data == r_data  # Ensure they're different
+end
+```
 
-Total Estimated Time: 11 hours across 5 days
+### Implementation Tasks:
+1. Create FormatHelper module with percentage formatting
+2. Update chart data generation to include year 0 with initial value
+3. Fix multi-series chart rendering in Contex
+4. Update all growth rate displays to use percentage format
 
-## Risk Mitigation
+**Files to modify:**
+- `lib/ashfolio_web/live/forecast_live/index.ex`
+- `lib/ashfolio/portfolio/forecast_calculator.ex`
+- `lib/ashfolio_web/helpers/format_helper.ex` (create new)
+- `test/ashfolio/portfolio/forecast_calculator_test.exs`
 
-### Technical Risks
+## Stage 3: Fix Chart Formatting [NOT STARTED]
 
-1. Complex compound interest calculations: Validate against online calculators and Excel
-2. Performance with 30-year projections: Use memoization and optimize calculations
-3. Chart rendering performance: Limit data points, use sampling for long periods
+### TDD Tests First:
 
-### Mitigation Strategies
+```elixir
+@tag :unit
+test "format_chart_axis handles millions correctly" do
+  assert "$1M" = ChartHelper.format_y_axis(1_000_000)
+  assert "$2.5M" = ChartHelper.format_y_axis(2_500_000)
+  assert "$500K" = ChartHelper.format_y_axis(500_000)
+  assert "$1K" = ChartHelper.format_y_axis(1_000)
+end
 
-- Write comprehensive tests first (TDD)
-- Validate calculations against multiple sources
-- Profile and optimize performance bottlenecks
-- Use existing patterns from RetirementCalculator
+@tag :unit
+test "contribution impact generates distinct chart from scenarios" do
+  base_contribution = Decimal.new("1000")
+  impact_data = ForecastCalculator.generate_contribution_impact(base_contribution, params)
+  
+  assert Enum.all?(impact_data, fn item ->
+    Map.has_key?(item, :contribution_delta) and
+    Map.has_key?(item, :final_value)
+  end)
+  
+  assert length(impact_data) == 6  # -1000, -500, -100, +100, +500, +1000
+end
+```
 
-## Definition of Done
+### Implementation Tasks:
+1. Implement ChartHelper with proper number formatting
+2. Create separate chart component for contribution impact
+3. Fix y-axis formatter in Contex configuration
+4. Ensure each tab renders its own unique chart
 
-### Overall Completion
+**Files to modify:**
+- `lib/ashfolio_web/helpers/chart_helper.ex` (create new)
+- `lib/ashfolio_web/live/forecast_live/contribution_chart.ex` (create new)
+- `lib/ashfolio_web/live/forecast_live/index.html.heex`
 
-- [x] All 5 stages complete
-- [x] 100% test coverage for ForecastCalculator (44 tests passing)
-- [x] Performance benchmarks met (<1 second for 30-year analysis)
-- [x] UI integrated with dashboard (ForecastLive.Index implemented)
-- [x] Documentation complete (comprehensive @doc strings)
-- [x] Credo warnings addressed (clean compilation)
-- [x] Manual testing of all scenarios (via LiveView interface)
+## Stage 4: Add Navigation Links [NOT STARTED]
 
-### Quality Gates
+### TDD Tests First:
 
-- All unit tests passing
-- All integration tests passing
-- LiveView tests functional
-- Performance tests meet benchmarks
-- Code follows existing patterns
-- Decimal precision maintained throughout
+```elixir
+@tag :unit
+test "navigation menu includes all major features" do
+  {:ok, _view, html} = live(conn, "/")
+  
+  assert html =~ ~r{href="/expenses/analytics"}
+  assert html =~ ~r{href="/net_worth"}
+  assert html =~ "Analytics"
+  assert html =~ "Net Worth"
+end
+```
 
-## Next Steps After v0.4.3
+### Implementation Tasks:
+1. Update navigation component in layouts
+2. Add Analytics and Net Worth links
+3. Test navigation from all pages
+4. Consider dropdown menu for sub-features
 
-v0.4.4 - Advanced Analytics:
+**Files to modify:**
+- `lib/ashfolio_web/components/layouts/app.html.heex`
+- `lib/ashfolio_web/components/top_bar.ex`
+- `test/ashfolio_web/components/navigation_test.exs` (create new)
 
-- Time-weighted return (TWR)
-- Money-weighted return (MWR)
-- Rolling returns analysis
-- Performance cache implementation
+## Stage 5: Implement Retirement Planning UI [NOT STARTED]
 
-v0.4.5 - Benchmark System:
+### TDD Tests First:
 
-- S&P 500 comparisons
-- Asset allocation analysis
-- Concentration risk metrics
+```elixir
+@tag :unit
+test "calculate 25x retirement target from annual expenses" do
+  annual_expenses = Decimal.new("50000")
+  expected = Decimal.new("1250000")
+  
+  assert {:ok, result} = RetirementCalculator.calculate_25x_target(annual_expenses)
+  assert Decimal.equal?(result, expected)
+end
+
+@tag :unit
+test "calculate 4% safe withdrawal rate" do
+  portfolio = Decimal.new("1000000")
+  expected_annual = Decimal.new("40000")
+  expected_monthly = Decimal.new("3333.33")
+  
+  assert {:ok, annual, monthly} = RetirementCalculator.safe_withdrawal_rate(portfolio)
+  assert Decimal.equal?(annual, expected_annual)
+  assert Decimal.round(monthly, 2) == expected_monthly
+end
+
+@tag :liveview
+test "retirement planning UI displays calculations" do
+  {:ok, view, _html} = live(conn, "/retirement")
+  
+  assert html =~ "25x Rule"
+  assert html =~ "4% Withdrawal Rate"
+  assert html =~ "Retirement Target"
+end
+```
+
+### Implementation Tasks:
+1. Create RetirementCalculator module if not exists
+2. Create RetirementLive LiveView
+3. Add retirement planning to navigation
+4. Integrate with existing expense and portfolio data
+
+**Files to create:**
+- `lib/ashfolio/financial_management/retirement_calculator.ex`
+- `lib/ashfolio_web/live/retirement_live/index.ex`
+- `lib/ashfolio_web/live/retirement_live/index.html.heex`
+- `test/ashfolio/financial_management/retirement_calculator_test.exs`
+- `test/ashfolio_web/live/retirement_live_test.exs`
+
+## Timeline
+
+### Day 1: Critical Fixes
+- Morning: Fix goal creation form (2 hours)
+- Afternoon: Add navigation links (1 hour)
+
+### Day 2: Chart Data Fixes
+- Morning: Fix growth rate display and initial values (2 hours)
+- Afternoon: Fix scenario comparison chart (2 hours)
+
+### Day 3: Chart Visualization
+- Morning: Fix y-axis formatting (1 hour)
+- Afternoon: Create contribution impact chart (2 hours)
+
+### Day 4: New Features
+- Full day: Implement retirement planning UI (4 hours)
+
+### Day 5: Testing & Polish
+- Morning: E2E testing of all fixes (2 hours)
+- Afternoon: Documentation and cleanup (2 hours)
+
+## Success Criteria
+
+- [ ] All goal creation forms work without errors
+- [ ] Charts display correct initial values
+- [ ] Growth rates show as percentages
+- [ ] All three scenario lines visible
+- [ ] Y-axis uses proper formatting
+- [ ] Contribution impact has unique chart
+- [ ] Navigation includes all features
+- [ ] Retirement planning UI functional
+- [ ] All tests passing
+- [ ] E2E testing confirms all fixes
+
+## Notes for AI Agent
+
+### Context
+- E2E testing completed on 2025-08-28
+- v0.4.3 calculations work but UI has bugs
+- v0.4.2 features missing from UI entirely
+- Emergency fund calculator works but goal creation broken
+
+### Priority Order
+1. Fix broken features (goal creation)
+2. Fix visualization bugs
+3. Add missing navigation
+4. Implement missing v0.4.2 UI
+
+### Testing Strategy
+- Write tests FIRST (TDD)
+- Each fix must have unit + integration tests
+- Run E2E tests after each stage
+- Use Playwright for final verification
+
+### Key Files Already Modified
+- `lib/ashfolio/financial_management/financial_goal.ex` - Working
+- `lib/ashfolio_web/live/forecast_live.ex` - Has bugs
+- `lib/ashfolio/portfolio/forecast_calculator.ex` - Calculations work
+
+### Dependencies
+- Contex for charts
+- Decimal for calculations
+- Phoenix LiveView 0.20+
+
+---
+
+## 📋 Summary for Principal Architect
+
+### Immediate Action Required
+
+**E2E Testing Results**: Comprehensive testing on 2025-08-28 revealed critical bugs blocking v0.4.3 production readiness.
+
+### Task Assignment for AI Agent
+
+Please implement these fixes using strict TDD methodology:
+
+1. **CRITICAL**: Fix goal creation form (blocks all goal functionality)
+2. **HIGH**: Fix chart visualization bugs (affects user understanding)  
+3. **MEDIUM**: Add missing navigation links (discoverability issue)
+4. **MEDIUM**: Implement v0.4.2 retirement planning UI
+
+### Success Definition
+- [ ] All goal creation workflows functional
+- [ ] Charts display accurate data with proper formatting
+- [ ] All features accessible via navigation
+- [ ] E2E tests pass for all v0.4.x features
+
+### Testing Strategy
+Each fix must follow red-green-refactor:
+1. Write failing test
+2. Implement minimal fix  
+3. Refactor and verify
+
+Use Playwright E2E tests to verify fixes before marking complete.
+
+**Time Estimate**: 3-4 days following TDD approach

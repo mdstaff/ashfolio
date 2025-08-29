@@ -718,7 +718,7 @@ defmodule AshfolioWeb.Components.ForecastChartTest do
       growth_factor = :math.pow(1 + Decimal.to_float(rate), year)
 
       initial
-      |> Decimal.mult(Decimal.new(growth_factor))
+      |> Decimal.mult(Decimal.from_float(growth_factor))
       |> Decimal.round(2)
     end)
   end

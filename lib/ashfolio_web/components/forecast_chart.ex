@@ -797,24 +797,35 @@ defmodule AshfolioWeb.Components.ForecastChart do
   end
 
   defp format_axis_value(value, :currency) when value >= 1_000_000 do
-    "$#{:erlang.float_to_binary(value / 1_000_000, decimals: 0)}M"
+    float_value = ensure_float(value)
+    "$#{:erlang.float_to_binary(float_value / 1_000_000, decimals: 0)}M"
   end
 
   defp format_axis_value(value, :currency) when value >= 1_000 do
-    "$#{:erlang.float_to_binary(value / 1_000, decimals: 0)}K"
+    float_value = ensure_float(value)
+    "$#{:erlang.float_to_binary(float_value / 1_000, decimals: 0)}K"
   end
 
   defp format_axis_value(value, :currency) do
-    "$#{:erlang.float_to_binary(value, decimals: 0)}"
+    float_value = ensure_float(value)
+    "$#{:erlang.float_to_binary(float_value, decimals: 0)}"
   end
 
   defp format_axis_value(value, :percentage) do
-    "#{:erlang.float_to_binary(value * 100, decimals: 0)}%"
+    float_value = ensure_float(value)
+    "#{:erlang.float_to_binary(float_value * 100, decimals: 0)}%"
   end
 
   defp format_axis_value(value, _) do
-    :erlang.float_to_binary(value, decimals: 0)
+    float_value = ensure_float(value)
+    :erlang.float_to_binary(float_value, decimals: 0)
   end
+
+  # Helper to ensure value is a float
+  defp ensure_float(value) when is_float(value), do: value
+  defp ensure_float(value) when is_integer(value), do: value * 1.0
+  defp ensure_float(%Decimal{} = value), do: Decimal.to_float(value)
+  defp ensure_float(_), do: 0.0
 
   defp format_value(value, format) do
     numeric_value =

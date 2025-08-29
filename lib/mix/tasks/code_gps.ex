@@ -438,7 +438,7 @@ defmodule Mix.Tasks.CodeGps do
 
   defp generate_yaml_manifest(data) do
     """
-    # Code GPS v#{data.metadata.version} - #{data.metadata.generation_time_ms}ms | #{length(data.live_views)} LiveViews | #{length(data.components)} Components
+    # Code GPS v#{data.metadata.version} | #{length(data.live_views)} LiveViews | #{length(data.components)} Components
 
     # === ROUTES ===
     #{encode_routes(data.routes)}

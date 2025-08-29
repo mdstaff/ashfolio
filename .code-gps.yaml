@@ -1,4 +1,4 @@
-# Code GPS v2.0 - 260ms | 3 LiveViews | 21 Components
+# Code GPS v2.0 | 3 LiveViews | 21 Components
 
 # === ROUTES ===
 /: DashboardLive ✅
@@ -20,6 +20,7 @@
 /goals/new: FinancialGoalLive ✅
 /goals/:id/edit: FinancialGoalLive ✅
 /forecast: ForecastLive ✅
+/retirement: RetirementLive ✅
 
 # === LIVE VIEWS ===
 Dashboard:
@@ -36,7 +37,7 @@ Example:
   missing: [expenses, net_worth, accounts...4]
 Forecast.Index:
   file: lib/ashfolio_web/live/forecast_live.ex
-  mount: 22 | render: 261
+  mount: 23 | render: 269
   events: [update_form, calculate_projection, calculate_scenarios...5]
   subscriptions: ["accounts", "transactions"]
   missing: ["expenses", "net_worth"]
@@ -53,15 +54,15 @@ label: lib/ashfolio_web/components/core_components.ex:397 (3x) | attrs: ["for"]
 error: lib/ashfolio_web/components/core_components.ex:410 (9x)
 
 # === DEPENDENCIES ===
-ash: ✅ (1113)
+ash: ✅ (1123)
 contex: ✅ (130)
-decimal: ✅ (1393)
+decimal: ✅ (1455)
 mox: ✅ (1)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio/cache.ex", "lib/ashfolio/error_handler.ex", "lib/ashfolio_web/components/core_components.ex", "lib/ashfolio_web/components/forecast_chart.ex", "lib/ashfolio_web/components/top_bar.ex"]
-uncommitted: 177 files
-commits_ahead: 2
+recent: ["lib/ashfolio/financial_management/financial_goal.ex", "lib/ashfolio_web/components/forecast_chart.ex", "lib/ashfolio_web/components/top_bar.ex", "lib/ashfolio_web/helpers/chart_helpers.ex", "lib/ashfolio_web/live/forecast_live.ex"]
+uncommitted: 1 files
+commits_ahead: 0
 
 # === TEST GAPS ===
 missing_tests:
@@ -73,7 +74,7 @@ lib/ashfolio_web/components/transaction_group.ex ❌
 orphaned_tests:
 test/ashfolio/financial_management/category_migration_test.exs ⚠️
 test/ashfolio/financial_management/symbol_search_cache_test.exs ⚠️
-test/ashfolio/financial_management/symbol_search_external_api_test.exs ⚠️
+test/ashfolio/market_data/price_manager_simple_test.exs ⚠️
 
 # === PATTERNS ===
 error_handling: "put_flash/3"

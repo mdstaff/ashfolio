@@ -133,6 +133,31 @@ defmodule AshfolioWeb.FinancialGoalLiveTest do
   end
 
   describe "Goal Form Component" do
+    test "new goal form loads without KeyError for recommended_target when no goal exists", %{conn: conn} do
+      # This test should pass when the KeyError for :recommended_target is fixed
+      {:ok, _view, html} = live(conn, ~p"/goals/new")
+
+      # Form should render without KeyError for recommended_target
+      assert html =~ "Add Financial Goal"
+      assert html =~ "Goal Name"
+      assert html =~ "Target Amount"
+      assert html =~ "Goal Type"
+    end
+
+    test "new goal form loads without KeyError for recommended_target when goal exists", %{conn: conn} do
+      # Create an emergency fund goal first to trigger the :analysis path
+      {:created, _goal} = FinancialGoal.setup_emergency_fund_goal!(6)
+
+      # This should trigger the KeyError since the :analysis path doesn't include recommended_target
+      {:ok, _view, html} = live(conn, ~p"/goals/new")
+
+      # Form should render without KeyError for recommended_target
+      assert html =~ "Add Financial Goal"
+      assert html =~ "Goal Name"
+      assert html =~ "Target Amount"
+      assert html =~ "Goal Type"
+    end
+
     @tag :failing
     test "new goal form loads without error", %{conn: conn} do
       # This test should pass when the FormData protocol issue is fixed

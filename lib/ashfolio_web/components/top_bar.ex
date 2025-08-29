@@ -72,11 +72,20 @@ defmodule AshfolioWeb.Components.TopBar do
             <.mobile_nav_link navigate={~p"/expenses"} current={@current_page == :expenses}>
               <.icon name="hero-currency-dollar" class="w-4 h-4 mr-3" /> Expenses
             </.mobile_nav_link>
+            <.mobile_nav_link navigate={~p"/expenses/analytics"} current={@current_page == :analytics}>
+              <.icon name="hero-chart-pie" class="w-4 h-4 mr-3" /> Analytics
+            </.mobile_nav_link>
+            <.mobile_nav_link navigate={~p"/net_worth"} current={@current_page == :net_worth}>
+              <.icon name="hero-trending-up" class="w-4 h-4 mr-3" /> Net Worth
+            </.mobile_nav_link>
             <.mobile_nav_link navigate={~p"/goals"} current={@current_page == :goals}>
               <.icon name="hero-flag" class="w-4 h-4 mr-3" /> Goals
             </.mobile_nav_link>
             <.mobile_nav_link navigate={~p"/forecast"} current={@current_page == :forecast}>
               <.icon name="hero-chart-line" class="w-4 h-4 mr-3" /> Forecast
+            </.mobile_nav_link>
+            <.mobile_nav_link navigate={~p"/retirement"} current={@current_page == :retirement}>
+              <.icon name="hero-shield-check" class="w-4 h-4 mr-3" /> Retirement
             </.mobile_nav_link>
           </div>
         </div>
@@ -96,11 +105,23 @@ defmodule AshfolioWeb.Components.TopBar do
           <.subheader_nav_link navigate={~p"/expenses"} current={@current_page == :expenses}>
             <.icon name="hero-currency-dollar" class="w-4 h-4 mr-1.5" /> Expenses
           </.subheader_nav_link>
+          <.subheader_nav_link
+            navigate={~p"/expenses/analytics"}
+            current={@current_page == :analytics}
+          >
+            <.icon name="hero-chart-pie" class="w-4 h-4 mr-1.5" /> Analytics
+          </.subheader_nav_link>
+          <.subheader_nav_link navigate={~p"/net_worth"} current={@current_page == :net_worth}>
+            <.icon name="hero-trending-up" class="w-4 h-4 mr-1.5" /> Net Worth
+          </.subheader_nav_link>
           <.subheader_nav_link navigate={~p"/goals"} current={@current_page == :goals}>
             <.icon name="hero-flag" class="w-4 h-4 mr-1.5" /> Goals
           </.subheader_nav_link>
           <.subheader_nav_link navigate={~p"/forecast"} current={@current_page == :forecast}>
             <.icon name="hero-chart-line" class="w-4 h-4 mr-1.5" /> Forecast
+          </.subheader_nav_link>
+          <.subheader_nav_link navigate={~p"/retirement"} current={@current_page == :retirement}>
+            <.icon name="hero-shield-check" class="w-4 h-4 mr-1.5" /> Retirement
           </.subheader_nav_link>
         </nav>
       </div>

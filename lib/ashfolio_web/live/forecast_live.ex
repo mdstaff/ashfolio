@@ -13,6 +13,7 @@ defmodule AshfolioWeb.ForecastLive.Index do
 
   alias Ashfolio.FinancialManagement.ForecastCalculator
   alias AshfolioWeb.Components.ForecastChart
+  alias AshfolioWeb.Helpers.ChartHelpers
   alias AshfolioWeb.Live.ErrorHelpers
   alias AshfolioWeb.Live.FormatHelpers
 
@@ -98,7 +99,8 @@ defmodule AshfolioWeb.ForecastLive.Index do
                 }
               }
 
-              chart_data = build_projection_chart_data(multi_projections, periods)
+              # Build chart data with proper initial value
+              chart_data = build_projection_chart_data(multi_projections, periods, current_value)
 
               socket =
                 socket
@@ -148,7 +150,8 @@ defmodule AshfolioWeb.ForecastLive.Index do
             }
           }
 
-          chart_data = build_scenario_chart_data(scenarios, years)
+          # Build scenario comparison chart data
+          chart_data = build_scenario_chart_data(scenarios, years, current_value)
 
           socket =
             socket
@@ -194,9 +197,14 @@ defmodule AshfolioWeb.ForecastLive.Index do
             }
           }
 
+          # Note: contribution impact chart will be handled differently
+          # For now, keep existing chart data structure
+          chart_data = %{}
+
           socket =
             socket
             |> assign(:contribution_analysis, contribution_analysis)
+            |> assign(:chart_data, chart_data)
             |> assign(:loading, false)
             |> ErrorHelpers.put_success_flash("Contribution analysis completed!")
 
@@ -513,16 +521,18 @@ defmodule AshfolioWeb.ForecastLive.Index do
 
   defp generate_chart_periods(max_years), do: Enum.take_every(0..max_years, 5)
 
-  defp build_projection_chart_data(multi_projections, periods) do
-    years = periods
+  defp build_projection_chart_data(multi_projections, periods, initial_value) do
+    # Ensure year 0 is included with initial value - fixes the $0 start issue
+    years = if 0 in periods, do: periods, else: [0 | periods]
 
     values =
-      Enum.map(periods, fn year ->
-        period_key = String.to_atom("year_#{year}")
-
-        case Map.get(multi_projections, period_key) do
-          nil -> Decimal.new("0")
-          value -> value
+      Enum.map(years, fn year ->
+        if year == 0 do
+          # Use actual current value, not $0
+          initial_value
+        else
+          period_key = String.to_atom("year_#{year}")
+          Map.get(multi_projections, period_key, Decimal.new("0"))
         end
       end)
 
@@ -536,18 +546,33 @@ defmodule AshfolioWeb.ForecastLive.Index do
     }
   end
 
-  defp build_scenario_chart_data(scenarios, years) do
-    chart_years = Enum.take_every(0..years, max(1, div(years, 10)))
+  defp build_scenario_chart_data(scenarios, years, initial_value) do
+    chart_years = ChartHelpers.generate_chart_periods(years)
 
-    # For simplicity, create linear projections between start and end values
+    # Use ChartHelpers for individual scenario projections with proper growth rates
     pessimistic_values =
-      build_scenario_progression(scenarios.pessimistic.portfolio_value, years, chart_years)
+      ChartHelpers.build_scenario_projection(
+        initial_value,
+        scenarios.pessimistic,
+        years,
+        0.05
+      )
 
     realistic_values =
-      build_scenario_progression(scenarios.realistic.portfolio_value, years, chart_years)
+      ChartHelpers.build_scenario_projection(
+        initial_value,
+        scenarios.realistic,
+        years,
+        0.07
+      )
 
     optimistic_values =
-      build_scenario_progression(scenarios.optimistic.portfolio_value, years, chart_years)
+      ChartHelpers.build_scenario_projection(
+        initial_value,
+        scenarios.optimistic,
+        years,
+        0.10
+      )
 
     %{
       type: :scenario_comparison,
@@ -559,18 +584,6 @@ defmodule AshfolioWeb.ForecastLive.Index do
         optimistic: optimistic_values
       }
     }
-  end
-
-  defp build_scenario_progression(final_value, total_years, chart_years) do
-    # Simple linear progression for chart display
-    Enum.map(chart_years, fn year ->
-      if year == 0 do
-        Decimal.new("0")
-      else
-        ratio = Decimal.div(Decimal.new(to_string(year)), Decimal.new(to_string(total_years)))
-        Decimal.mult(final_value, ratio)
-      end
-    end)
   end
 
   defp handle_calculation_error(socket, reason) do
@@ -648,7 +661,7 @@ defmodule AshfolioWeb.ForecastLive.Index do
           )}
         </p>
         <p>
-          • Annual Growth Rate: {FormatHelpers.format_percentage(@results.parameters.growth_rate)}
+          • Annual Growth Rate: {ChartHelpers.format_growth_rate(@results.parameters.growth_rate)}
         </p>
         <p>• Time Horizon: {@results.parameters.years} years</p>
       </div>

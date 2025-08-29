@@ -362,6 +362,7 @@ defmodule Ashfolio.FinancialManagement.FinancialGoal do
                  goal: goal,
                  monthly_expenses: monthly_expenses,
                  readiness_level: readiness_level,
+                 recommended_target: goal.target_amount,
                  months_coverage:
                    if(Decimal.gt?(monthly_expenses, Decimal.new("0.00")),
                      do: goal.target_amount |> Decimal.div(monthly_expenses) |> Decimal.round(1),
