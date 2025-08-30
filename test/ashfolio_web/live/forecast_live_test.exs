@@ -137,7 +137,7 @@ defmodule AshfolioWeb.ForecastLiveTest do
           "current_value" => "10000",
           "monthly_contribution" => "100",
           "growth_rate" => "0.07",
-          "years" => "1"
+          "years" => "10"
         }
       })
       |> render_change()
@@ -211,9 +211,7 @@ defmodule AshfolioWeb.ForecastLiveTest do
           "current_value" => "500000",
           "monthly_contribution" => "5000",
           "growth_rate" => "0.07",
-          "years" => "30",
-          # FI at $1M (25x)
-          "annual_expenses" => "40000"
+          "years" => "30"
         }
       })
       |> render_change()

@@ -718,15 +718,23 @@ defmodule AshfolioWeb.Components.ForecastChart do
   end
 
   defp build_stacked_area_path(years, values, base_values) do
+    # Ensure base_values is a list
+    normalized_base =
+      cond do
+        is_list(base_values) -> base_values
+        is_number(base_values) -> List.duplicate(base_values, length(years))
+        true -> List.duplicate(0, length(years))
+      end
+
     # Build area from base_values to base_values + values
     combined_values =
-      if is_list(base_values) and length(base_values) == length(values) do
-        base_values |> Enum.zip(values) |> Enum.map(fn {base, val} -> base + val end)
+      if is_list(normalized_base) and length(normalized_base) == length(values) do
+        normalized_base |> Enum.zip(values) |> Enum.map(fn {base, val} -> add_values(base, val) end)
       else
         values
       end
 
-    build_area_path(years, base_values || List.duplicate(0, length(years)), combined_values)
+    build_area_path(years, normalized_base, combined_values)
   end
 
   defp scale_x(value, %{years: years}) when is_list(years) and length(years) > 0 do
@@ -848,10 +856,27 @@ defmodule AshfolioWeb.Components.ForecastChart do
   defp format_scenario_name(name), do: to_string(name)
 
   defp add_arrays(list1, list2) when is_list(list1) and is_list(list2) do
-    list1 |> Enum.zip(list2) |> Enum.map(fn {a, b} -> a + b end)
+    list1 |> Enum.zip(list2) |> Enum.map(fn {a, b} -> add_values(a, b) end)
   end
 
   defp add_arrays(list, _) when is_list(list), do: list
   defp add_arrays(_, list) when is_list(list), do: list
   defp add_arrays(_, _), do: []
+
+  # Helper to add values of different types
+  defp add_values(a, b) when is_number(a) and is_number(b), do: a + b
+
+  defp add_values(a, %Decimal{} = b) when is_number(a) do
+    Decimal.add(Decimal.new(a), b)
+  end
+
+  defp add_values(%Decimal{} = a, b) when is_number(b) do
+    Decimal.add(a, Decimal.new(b))
+  end
+
+  defp add_values(%Decimal{} = a, %Decimal{} = b) do
+    Decimal.add(a, b)
+  end
+
+  defp add_values(a, b), do: a + b
 end

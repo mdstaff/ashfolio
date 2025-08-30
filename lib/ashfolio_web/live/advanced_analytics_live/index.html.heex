@@ -1,0 +1,377 @@
+<div class="container mx-auto px-4 py-6">
+  <!-- Page Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Advanced Portfolio Analytics</h1>
+    <p class="text-gray-600 mt-2">
+      Professional-grade performance analysis with Time-Weighted Return, Money-Weighted Return, and rolling returns.
+    </p>
+  </div>
+  
+<!-- Action Buttons -->
+  <div class="mb-6 flex flex-wrap gap-4">
+    <.button
+      phx-click="refresh_all"
+      disabled={@loading_all}
+      class="bg-blue-600 hover:bg-blue-700 text-white"
+    >
+      <%= if @loading_all do %>
+        <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+          </circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          >
+          </path>
+        </svg>
+        Calculating...
+      <% else %>
+        🔄 Refresh All Analytics
+      <% end %>
+    </.button>
+
+    <.button
+      phx-click="show_cache_stats"
+      class="bg-gray-600 hover:bg-gray-700 text-white"
+    >
+      📊 Cache Stats
+    </.button>
+
+    <.button
+      phx-click="clear_cache"
+      class="bg-red-600 hover:bg-red-700 text-white"
+    >
+      🗑️ Clear Cache
+    </.button>
+  </div>
+  
+<!-- Error Message -->
+  <%= if @error_message do %>
+    <div class="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">Calculation Error</h3>
+          <p class="mt-1 text-sm text-red-700">{@error_message}</p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  
+<!-- Analytics Dashboard Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    
+<!-- Time-Weighted Return Card -->
+    <div class="bg-white shadow-lg rounded-lg p-6 border border-gray-200">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-gray-900">Time-Weighted Return (TWR)</h2>
+        <.button
+          phx-click="calculate_twr"
+          disabled={@loading_twr}
+          class="text-sm bg-blue-500 hover:bg-blue-600 text-white"
+        >
+          <%= if @loading_twr do %>
+            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              >
+              </circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              >
+              </path>
+            </svg>
+          <% else %>
+            Calculate
+          <% end %>
+        </.button>
+      </div>
+
+      <div class="text-center">
+        <%= if @twr_result do %>
+          <div class={["text-4xl font-bold mb-2", percentage_color(@twr_result)]}>
+            {FormatHelpers.format_percentage(@twr_result)}
+          </div>
+          <p class="text-gray-600">Portfolio manager performance</p>
+          <p class="text-sm text-gray-500 mt-2">
+            Eliminates impact of cash flow timing
+          </p>
+        <% else %>
+          <div class="text-gray-400 py-8">
+            <%= if @loading_twr do %>
+              <div class="animate-pulse">
+                <div class="h-12 bg-gray-200 rounded mb-2"></div>
+                <div class="h-4 bg-gray-200 rounded"></div>
+              </div>
+            <% else %>
+              <p>Click "Calculate" to see your TWR</p>
+              <p class="text-xs mt-1">Industry-standard performance metric</p>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    
+<!-- Money-Weighted Return Card -->
+    <div class="bg-white shadow-lg rounded-lg p-6 border border-gray-200">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-gray-900">Money-Weighted Return (MWR)</h2>
+        <.button
+          phx-click="calculate_mwr"
+          disabled={@loading_mwr}
+          class="text-sm bg-green-500 hover:bg-green-600 text-white"
+        >
+          <%= if @loading_mwr do %>
+            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              >
+              </circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              >
+              </path>
+            </svg>
+          <% else %>
+            Calculate
+          <% end %>
+        </.button>
+      </div>
+
+      <div class="text-center">
+        <%= if @mwr_result do %>
+          <div class={["text-4xl font-bold mb-2", percentage_color(@mwr_result)]}>
+            {FormatHelpers.format_percentage(@mwr_result)}
+          </div>
+          <p class="text-gray-600">Your personal return experience</p>
+          <p class="text-sm text-gray-500 mt-2">
+            IRR-based calculation including timing
+          </p>
+        <% else %>
+          <div class="text-gray-400 py-8">
+            <%= if @loading_mwr do %>
+              <div class="animate-pulse">
+                <div class="h-12 bg-gray-200 rounded mb-2"></div>
+                <div class="h-4 bg-gray-200 rounded"></div>
+              </div>
+            <% else %>
+              <p>Click "Calculate" to see your MWR</p>
+              <p class="text-xs mt-1">Includes impact of contribution timing</p>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  
+<!-- Rolling Returns Analysis -->
+  <div class="bg-white shadow-lg rounded-lg p-6 border border-gray-200 mb-8">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-semibold text-gray-900">Rolling Returns Analysis</h2>
+      <.button
+        phx-click="calculate_rolling_returns"
+        disabled={@loading_rolling}
+        class="text-sm bg-purple-500 hover:bg-purple-600 text-white"
+      >
+        <%= if @loading_rolling do %>
+          <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            >
+            </circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            >
+            </path>
+          </svg>
+        <% else %>
+          Analyze
+        <% end %>
+      </.button>
+    </div>
+
+    <%= if @rolling_returns do %>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Best Period -->
+        <div class="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+          <h3 class="text-sm font-medium text-green-800 mb-2">Best 12-Month Period</h3>
+          <div class="text-2xl font-bold text-green-600">
+            {FormatHelpers.format_percentage(
+              @rolling_returns.analysis.best_period.annualized_return
+            )}
+          </div>
+          <p class="text-xs text-green-700 mt-1">Peak performance</p>
+        </div>
+        
+<!-- Worst Period -->
+        <div class="text-center p-4 bg-red-50 rounded-lg border border-red-200">
+          <h3 class="text-sm font-medium text-red-800 mb-2">Worst 12-Month Period</h3>
+          <div class="text-2xl font-bold text-red-600">
+            {FormatHelpers.format_percentage(
+              @rolling_returns.analysis.worst_period.annualized_return
+            )}
+          </div>
+          <p class="text-xs text-red-700 mt-1">Lowest performance</p>
+        </div>
+        
+<!-- Average & Volatility -->
+        <div class="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <h3 class="text-sm font-medium text-blue-800 mb-2">Average Return</h3>
+          <div class="text-2xl font-bold text-blue-600">
+            {FormatHelpers.format_percentage(@rolling_returns.analysis.average_return)}
+          </div>
+          <p class="text-xs text-blue-700 mt-1">
+            Volatility: {FormatHelpers.format_percentage(@rolling_returns.analysis.volatility)}
+          </p>
+        </div>
+      </div>
+      
+<!-- Rolling Returns Chart Placeholder -->
+      <div class="mt-6 h-64 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+        <div class="text-center">
+          <p class="text-gray-500 font-medium">Rolling Returns Chart</p>
+          <p class="text-sm text-gray-400 mt-1">
+            {length(@rolling_returns.rolling_periods)} periods analyzed
+          </p>
+          <p class="text-xs text-gray-400">Chart visualization coming soon</p>
+        </div>
+      </div>
+    <% else %>
+      <div class="text-center py-12">
+        <%= if @loading_rolling do %>
+          <div class="animate-pulse">
+            <div class="h-8 bg-gray-200 rounded mx-auto w-48 mb-4"></div>
+            <div class="h-4 bg-gray-200 rounded mx-auto w-32"></div>
+          </div>
+        <% else %>
+          <p class="text-gray-500 mb-2">Click "Analyze" to see rolling returns analysis</p>
+          <p class="text-sm text-gray-400">
+            Identifies performance patterns and volatility over time
+          </p>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+  
+<!-- Performance Cache Stats -->
+  <%= if @cache_stats && @cache_stats.entries > 0 do %>
+    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 mb-8">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Performance Cache Statistics</h3>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-gray-900">{@cache_stats.entries}</div>
+          <div class="text-sm text-gray-600">Cached Entries</div>
+        </div>
+
+        <div class="text-center">
+          <div class="text-2xl font-bold text-green-600">{@cache_stats.hit_rate}%</div>
+          <div class="text-sm text-gray-600">Cache Hit Rate</div>
+        </div>
+
+        <div class="text-center">
+          <div class="text-2xl font-bold text-blue-600">{@cache_stats.hits}</div>
+          <div class="text-sm text-gray-600">Cache Hits</div>
+        </div>
+
+        <div class="text-center">
+          <div class="text-2xl font-bold text-gray-600">
+            {div(@cache_stats.uptime_seconds, 60)}m
+          </div>
+          <div class="text-sm text-gray-600">Cache Uptime</div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  
+<!-- Calculation History -->
+  <%= if @calculation_history != [] do %>
+    <div class="bg-white shadow-lg rounded-lg p-6 border border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Calculations</h3>
+
+      <div class="space-y-3">
+        <%= for entry <- Enum.take(@calculation_history, 5) do %>
+          <div class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded">
+            <div class="flex items-center">
+              <div class="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+              <span class="font-medium text-gray-900">{entry.type}</span>
+              <span class="ml-2 text-gray-600">{entry.result}</span>
+            </div>
+            <div class="text-sm text-gray-500">
+              {Calendar.strftime(entry.timestamp, "%H:%M:%S")}
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+  
+<!-- Help Section -->
+  <div class="mt-12 bg-blue-50 rounded-lg p-6 border border-blue-200">
+    <h3 class="text-lg font-semibold text-blue-900 mb-3">Understanding Your Analytics</h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+      <div>
+        <h4 class="font-medium text-blue-800 mb-2">Time-Weighted Return (TWR)</h4>
+        <p class="text-blue-700">
+          Measures portfolio manager performance by eliminating the impact of cash flow timing.
+          This shows how well your investments performed, regardless of when you added or withdrew money.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="font-medium text-blue-800 mb-2">Money-Weighted Return (MWR)</h4>
+        <p class="text-blue-700">
+          Measures your personal investment experience including the timing of contributions.
+          This IRR-based calculation shows the actual return you achieved as an investor.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="font-medium text-blue-800 mb-2">Rolling Returns</h4>
+        <p class="text-blue-700">
+          Analyzes 12-month performance periods over time to identify patterns, consistency,
+          and volatility. Helps you understand performance stability and risk characteristics.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="font-medium text-blue-800 mb-2">Performance Cache</h4>
+        <p class="text-blue-700">
+          Calculations are cached for 1 hour to improve performance. Cache is automatically
+          invalidated when portfolio transactions change to ensure accuracy.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

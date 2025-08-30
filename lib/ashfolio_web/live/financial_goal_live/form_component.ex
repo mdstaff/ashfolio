@@ -348,6 +348,12 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
   end
 
   @impl true
+  def handle_event("validate", %{"form" => goal_params}, socket) do
+    # Handle form parameters with "form" key - delegate to financial_goal handler
+    handle_event("validate", %{"financial_goal" => goal_params}, socket)
+  end
+
+  @impl true
   def handle_event("save", %{"financial_goal" => goal_params}, socket) do
     socket = assign(socket, :saving, true)
 
@@ -372,6 +378,12 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
          |> assign(:form_errors, form_errors)
          |> assign_form(form)}
     end
+  end
+
+  @impl true
+  def handle_event("save", %{"form" => goal_params}, socket) do
+    # Handle form parameters with "form" key - delegate to financial_goal handler
+    handle_event("save", %{"financial_goal" => goal_params}, socket)
   end
 
   @impl true

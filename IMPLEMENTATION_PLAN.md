@@ -1,8 +1,12 @@
-# v0.4.x Bug Fixes and Improvements Implementation Plan
+# Ashfolio v0.4.x Implementation Plan
 
 ## Overview
 
-E2E testing has revealed several critical bugs in the v0.4.x features that need immediate attention. This plan uses TDD to systematically fix visualization bugs, broken forms, and missing UI elements.
+This implementation plan addresses critical bugs found during E2E testing and completes the v0.4.x roadmap. Following TDD methodology, we'll fix production-blocking issues first, then implement missing v0.4.2 features.
+
+**Current Status**: v0.4.1 Complete ✅, v0.4.2-v0.4.3 Bug fixes required
+**Timeline**: 2 weeks to production readiness
+**Methodology**: Test-driven development with E2E verification
 
 ## 🐛 Critical Bugs Found During E2E Testing
 
@@ -20,7 +24,12 @@ E2E testing has revealed several critical bugs in the v0.4.x features that need 
 ### Priority 3: Missing Features
 1. **v0.4.2 Retirement Planning UI** - No interface for 25x rule, 4% withdrawal calculations
 
-## Stage 1: Fix Goal Creation Form [NOT STARTED]
+## Phase 1: Critical Production Fixes (Week 1)
+
+### Stage 1: Fix Goal Creation Form [URGENT - P0]
+**Status**: [NOT STARTED]
+**Impact**: Blocks all goal functionality
+**Timeline**: Day 1 morning (2 hours)
 
 ### TDD Tests First:
 
@@ -54,7 +63,10 @@ end
 - `lib/ashfolio/financial_management/financial_goal.ex`
 - `test/ashfolio_web/live/financial_goal_live_test.exs`
 
-## Stage 2: Fix Chart Data Issues [NOT STARTED]
+### Stage 2: Fix Chart Data Issues [HIGH - P1] 
+**Status**: [NOT STARTED]
+**Impact**: User confusion, incorrect visualizations
+**Timeline**: Day 2 (4 hours)
 
 ### TDD Tests First:
 
@@ -101,7 +113,10 @@ end
 - `lib/ashfolio_web/helpers/format_helper.ex` (create new)
 - `test/ashfolio/portfolio/forecast_calculator_test.exs`
 
-## Stage 3: Fix Chart Formatting [NOT STARTED]
+### Stage 3: Fix Chart Formatting [HIGH - P1]
+**Status**: [NOT STARTED] 
+**Impact**: Professional appearance, data readability
+**Timeline**: Day 3 morning (3 hours)
 
 ### TDD Tests First:
 
@@ -139,7 +154,10 @@ end
 - `lib/ashfolio_web/live/forecast_live/contribution_chart.ex` (create new)
 - `lib/ashfolio_web/live/forecast_live/index.html.heex`
 
-## Stage 4: Add Navigation Links [NOT STARTED]
+### Stage 4: Add Navigation Links [MEDIUM - P1]
+**Status**: [NOT STARTED]
+**Impact**: Feature discoverability
+**Timeline**: Day 1 afternoon (1 hour)
 
 ### TDD Tests First:
 
@@ -166,7 +184,12 @@ end
 - `lib/ashfolio_web/components/top_bar.ex`
 - `test/ashfolio_web/components/navigation_test.exs` (create new)
 
-## Stage 5: Implement Retirement Planning UI [NOT STARTED]
+## Phase 2: Complete v0.4.2 Features (Week 2)
+
+### Stage 5: Implement Retirement Planning UI [MEDIUM - P2]
+**Status**: [NOT STARTED]
+**Impact**: Missing core v0.4.2 functionality
+**Timeline**: Day 4-5 (6 hours total)
 
 ### TDD Tests First:
 
@@ -214,26 +237,45 @@ end
 - `test/ashfolio/financial_management/retirement_calculator_test.exs`
 - `test/ashfolio_web/live/retirement_live_test.exs`
 
-## Timeline
+## Detailed Timeline
 
-### Day 1: Critical Fixes
-- Morning: Fix goal creation form (2 hours)
-- Afternoon: Add navigation links (1 hour)
+### Week 1: Production Readiness
+**Goal**: Fix all critical bugs blocking v0.4.3 release
 
-### Day 2: Chart Data Fixes
-- Morning: Fix growth rate display and initial values (2 hours)
-- Afternoon: Fix scenario comparison chart (2 hours)
+**Day 1: Critical Form & Navigation**
+- Morning (2h): Stage 1 - Fix goal creation form `:recommended_target` error  
+- Afternoon (1h): Stage 4 - Add missing navigation links
+- End of day: Goal creation working, all features accessible
 
-### Day 3: Chart Visualization
-- Morning: Fix y-axis formatting (1 hour)
-- Afternoon: Create contribution impact chart (2 hours)
+**Day 2: Chart Data Accuracy**
+- Morning (2h): Stage 2A - Fix growth rate formatting (0.07% → 7%)
+- Morning (1h): Stage 2B - Fix initial portfolio values (start from actual value)
+- Afternoon (2h): Stage 2C - Fix scenario comparison (show all 3 lines)
+- End of day: Charts display accurate data
 
-### Day 4: New Features
-- Full day: Implement retirement planning UI (4 hours)
+**Day 3: Chart Visualization Polish**
+- Morning (1h): Stage 3A - Fix Y-axis formatting ($2BGN → $2M)
+- Morning (2h): Stage 3B - Create separate contribution impact chart
+- Afternoon (1h): Integration testing and bug fixes
+- End of day: Professional chart appearance
 
-### Day 5: Testing & Polish
-- Morning: E2E testing of all fixes (2 hours)
-- Afternoon: Documentation and cleanup (2 hours)
+### Week 2: v0.4.2 Feature Completion
+**Goal**: Complete retirement planning functionality
+
+**Day 4: Retirement Calculator**
+- Morning (3h): Stage 5A - RetirementCalculator module (25x rule, 4% withdrawal)
+- Afternoon (2h): Stage 5B - Retirement calculations integration
+- End of day: Backend calculations complete
+
+**Day 5: Retirement UI & Polish**
+- Morning (3h): Stage 5C - RetirementLive interface and templates
+- Afternoon (2h): Stage 5D - Dashboard integration and testing
+- End of day: Complete v0.4.2 retirement planning
+
+### Success Milestones
+- **End of Week 1**: All v0.4.1 bugs fixed, charts working correctly
+- **End of Week 2**: v0.4.2 complete with retirement planning UI
+- **Production Ready**: E2E tests passing, no critical bugs
 
 ## Success Criteria
 
@@ -309,4 +351,14 @@ Each fix must follow red-green-refactor:
 
 Use Playwright E2E tests to verify fixes before marking complete.
 
-**Time Estimate**: 3-4 days following TDD approach
+**Time Estimate**: 2 weeks following TDD approach
+
+## Next Steps After Completion
+
+Upon successful completion of this implementation plan:
+
+1. **v0.4.3 Release**: Focus on forecasting engine polish and advanced scenarios
+2. **v0.4.4-v0.4.5**: Advanced analytics (TWR, MWR, benchmarks) per consolidated roadmap
+3. **v0.5.0**: Full platform integration and AER standardization
+
+See `CONSOLIDATED_ROADMAP.md` for complete strategic context and long-term vision.

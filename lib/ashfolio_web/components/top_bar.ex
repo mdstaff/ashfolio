@@ -87,12 +87,21 @@ defmodule AshfolioWeb.Components.TopBar do
             <.mobile_nav_link navigate={~p"/retirement"} current={@current_page == :retirement}>
               <.icon name="hero-shield-check" class="w-4 h-4 mr-3" /> Retirement
             </.mobile_nav_link>
+            <.mobile_nav_link
+              navigate={~p"/advanced_analytics"}
+              current={@current_page == :advanced_analytics}
+            >
+              <.icon name="hero-calculator" class="w-4 h-4 mr-3" /> Advanced Analytics
+            </.mobile_nav_link>
           </div>
         </div>
       </div>
       <!-- Main Navigation Subheader -->
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-gray-200 bg-white">
-        <nav class="flex -mb-px overflow-x-auto scrollbar-hide min-h-[52px]">
+        <nav
+          class="flex -mb-px overflow-x-auto scrollbar-hide min-h-[52px]"
+          aria-label="Main navigation"
+        >
           <.subheader_nav_link navigate={~p"/"} current={@current_page == :dashboard}>
             <.icon name="hero-chart-bar" class="w-4 h-4 mr-1.5" /> Dashboard
           </.subheader_nav_link>
@@ -122,6 +131,12 @@ defmodule AshfolioWeb.Components.TopBar do
           </.subheader_nav_link>
           <.subheader_nav_link navigate={~p"/retirement"} current={@current_page == :retirement}>
             <.icon name="hero-shield-check" class="w-4 h-4 mr-1.5" /> Retirement
+          </.subheader_nav_link>
+          <.subheader_nav_link
+            navigate={~p"/advanced_analytics"}
+            current={@current_page == :advanced_analytics}
+          >
+            <.icon name="hero-calculator" class="w-4 h-4 mr-1.5" /> Advanced Analytics
           </.subheader_nav_link>
         </nav>
       </div>

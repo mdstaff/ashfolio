@@ -194,14 +194,15 @@ defmodule AshfolioWeb.FinancialGoalLiveTest do
       |> element("a", "Add Goal")
       |> render_click()
 
-      # Submit form with valid data
+      # Submit form with valid data - using correct parameter structure the FormComponent expects
       view
-      |> form("#goal-form",
-        goal: %{
+      |> form("#financial-goal-form",
+        form: %{
           name: "Vacation Fund",
           target_amount: "5000.00",
           goal_type: "vacation",
-          monthly_contribution: "500.00"
+          monthly_contribution_amount: "500.00",
+          current_amount: "0.00"
         }
       )
       |> render_submit()
@@ -217,11 +218,11 @@ defmodule AshfolioWeb.FinancialGoalLiveTest do
     test "shows empty state when no goals exist", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/goals")
 
-      # The actual implementation shows a table even when empty
-      assert html =~ "Goal"
-      assert html =~ "Type"
-      assert html =~ "Progress"
-      assert html =~ "Target"
+      # The actual implementation shows an empty state message, not a table
+      assert html =~ "No financial goals yet"
+      assert html =~ "Start building your financial future"
+      assert html =~ "Create Emergency Fund"
+      assert html =~ "Add Custom Goal"
     end
 
     test "displays emergency fund goal in table", %{conn: conn} do
