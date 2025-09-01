@@ -61,8 +61,8 @@ decimal: ✅ (1522)
 mox: ✅ (1)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio/portfolio/performance_cache.ex", "lib/ashfolio/portfolio/performance_calculator.ex", "lib/ashfolio_web/components/forecast_chart.ex", "lib/ashfolio_web/components/top_bar.ex", "lib/ashfolio_web/live/advanced_analytics_live/index.ex"]
-uncommitted: 1 files
+recent: ["mix.exs", "lib/ashfolio/portfolio/performance_cache.ex", "lib/ashfolio/portfolio/performance_calculator.ex", "lib/ashfolio_web/components/forecast_chart.ex", "lib/ashfolio_web/components/top_bar.ex"]
+uncommitted: 0 files
 commits_ahead: 0
 
 # === TEST GAPS ===
