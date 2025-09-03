@@ -75,6 +75,7 @@
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-semibold text-gray-900">Time-Weighted Return (TWR)</h2>
         <.button
+          id="calculate-twr-button"
           phx-click="calculate_twr"
           disabled={@loading_twr}
           class="text-sm bg-blue-500 hover:bg-blue-600 text-white"
@@ -133,6 +134,7 @@
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-semibold text-gray-900">Money-Weighted Return (MWR)</h2>
         <.button
+          id="calculate-mwr-button"
           phx-click="calculate_mwr"
           disabled={@loading_mwr}
           class="text-sm bg-green-500 hover:bg-green-600 text-white"

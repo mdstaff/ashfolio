@@ -259,23 +259,6 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
         case get_monthly_returns_data() do
           {:ok, monthly_data} ->
             case PerformanceCalculator.calculate_rolling_returns(monthly_data, 12) do
-              {:ok, rolling_returns} ->
-                # Also calculate analysis
-                analysis = PerformanceCalculator.analyze_rolling_returns(monthly_data, 12)
-
-                result = %{
-                  rolling_periods: rolling_returns,
-                  analysis: analysis
-                }
-
-                # Cache the result
-                PerformanceCache.put(cache_key, result)
-
-                socket
-                |> assign(:rolling_returns, result)
-                |> add_to_calculation_history("Rolling Returns", "Analysis complete", "success")
-                |> assign(:error_message, nil)
-
               rolling_returns when is_list(rolling_returns) ->
                 # Handle direct list return (current implementation)
                 analysis = PerformanceCalculator.analyze_rolling_returns(monthly_data, 12)
@@ -329,8 +312,6 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   defp format_result_for_history(%Decimal{} = result) do
     FormatHelpers.format_percentage(result)
   end
-
-  defp format_result_for_history(_), do: "Calculation complete"
 
   # Data fetching functions (simplified for now)
 

@@ -55,13 +55,13 @@ label: lib/ashfolio_web/components/core_components.ex:397 (3x) | attrs: ["for"]
 error: lib/ashfolio_web/components/core_components.ex:410 (9x)
 
 # === DEPENDENCIES ===
-ash: ✅ (1177)
+ash: ✅ (1178)
 contex: ✅ (130)
-decimal: ✅ (1522)
+decimal: ✅ (1553)
 mox: ✅ (1)
 
 # === FRESHNESS ===
-recent: ["mix.exs", "lib/ashfolio/portfolio/performance_cache.ex", "lib/ashfolio/portfolio/performance_calculator.ex", "lib/ashfolio_web/components/forecast_chart.ex", "lib/ashfolio_web/components/top_bar.ex"]
+recent: ["lib/ashfolio_web/helpers/format_helper.ex", "lib/ashfolio_web/live/advanced_analytics_live/index.ex", "mix.exs", "test/ashfolio/financial_management/forecast_chart_data_test.exs", "test/ashfolio_web/components/navigation_test.exs"]
 uncommitted: 0 files
 commits_ahead: 0
 
@@ -74,8 +74,8 @@ lib/ashfolio_web/components/top_bar.ex ❌
 lib/ashfolio_web/components/transaction_group.ex ❌
 orphaned_tests:
 test/ashfolio/financial_management/category_migration_test.exs ⚠️
+test/ashfolio/financial_management/forecast_chart_data_test.exs ⚠️
 test/ashfolio/financial_management/symbol_search_cache_test.exs ⚠️
-test/ashfolio/market_data/price_manager_simple_test.exs ⚠️
 
 # === PATTERNS ===
 error_handling: "put_flash/3"

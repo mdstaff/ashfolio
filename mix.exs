@@ -61,7 +61,7 @@ defmodule Ashfolio.MixProject do
 
       # Styler - auto-formatting plugin
       {:styler, "~> 1.5", only: [:dev, :test], runtime: false},
-      
+
       # Dialyzer - static type analysis
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
 

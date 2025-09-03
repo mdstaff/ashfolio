@@ -94,6 +94,12 @@ credo:
     @mix credo --strict || true
     @echo "✅ Credo analysis complete"
 
+# 🔍 Run Dialyzer static analysis
+dialyzer:
+    @echo "🔍 Running Dialyzer static analysis..."
+    @mix dialyzer
+    @echo "✅ Dialyzer analysis complete"
+
 # 📦 Pre-commit validation
 commit:
     @echo "📦 Pre-commit validation..."
