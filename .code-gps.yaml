@@ -61,8 +61,8 @@ decimal: ✅ (1644)
 mox: ✅ (1)
 
 # === FRESHNESS ===
-recent: ["test/ashfolio/financial_management/emergency_fund_calculator_test.exs", "test/ashfolio_web/live/dashboard_live/expense_widget_test.exs", "test/ashfolio_web/live/financial_goal_form_test.exs", "lib/ashfolio_web/helpers/format_helper.ex", "lib/ashfolio_web/live/advanced_analytics_live/index.ex"]
-uncommitted: 3 files
+recent: ["lib/ashfolio/financial_management/aer_calculator.ex", "lib/ashfolio/financial_management/retirement_calculator.ex", "test/ashfolio/financial_management/aer_calculator_test.exs", "test/ashfolio/financial_management/emergency_fund_calculator_test.exs", "test/ashfolio_web/live/dashboard_live/expense_widget_test.exs"]
+uncommitted: 0 files
 commits_ahead: 0
 
 # === TEST GAPS ===

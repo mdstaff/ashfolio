@@ -4,11 +4,11 @@
 
 This implementation plan outlines the development of v0.5.0, focusing on platform integration, standardization, and production readiness. Following successful completion of v0.4.x, this release emphasizes maturation over new features.
 
-**Current Status**: Planning Phase  
-**Target Release**: Q2 2026 (10-12 weeks)  
+**Current Status**: In Development  
+**Target Release**: Q2 2026 (12 weeks)  
 **Methodology**: Incremental delivery with continuous testing
 
-## Phase 1: Foundation & Standardization (Weeks 1-3)
+## Phase 1: Foundation & Standardization (Weeks 1-4)
 
 ### Stage 1: AER Standardization [HIGH PRIORITY]
 **Status**: NOT STARTED  
@@ -52,40 +52,10 @@ This implementation plan outlines the development of v0.5.0, focusing on platfor
 
 **Success Criteria**: All queries execute in <100ms
 
-## Phase 2: Core Features (Weeks 4-7)
-
-### Stage 4: Benchmark System [MEDIUM PRIORITY]
-**Status**: NOT STARTED  
-**Impact**: Portfolio performance comparison  
-**Timeline**: Weeks 4-5 (8 days)
-
-#### Tasks
-1. Design benchmark data schema
-2. Create Benchmark resource with Ash
-3. Implement S&P 500 comparison
-4. Add benchmark data management UI
-5. Create performance comparison charts
-
-**Success Criteria**: Portfolio performance comparable to S&P 500
-
-### Stage 5: Asset Allocation Analysis [MEDIUM PRIORITY]
-**Status**: NOT STARTED  
-**Impact**: Portfolio composition insights  
-**Timeline**: Week 6 (5 days)
-
-#### Tasks
-1. Create AllocationAnalyzer module
-2. Implement asset class categorization
-3. Add geographic allocation analysis
-4. Identify concentration risks
-5. Generate rebalancing recommendations
-
-**Success Criteria**: Complete portfolio allocation breakdown available
-
-### Stage 6: Import/Export System [LOW PRIORITY]
+### Stage 4: Import/Export System [LOW PRIORITY]
 **Status**: NOT STARTED  
 **Impact**: Data portability  
-**Timeline**: Week 7 (5 days)
+**Timeline**: Week 4 (5 days)
 
 #### Tasks
 1. Implement CSV export for all entities
@@ -96,12 +66,40 @@ This implementation plan outlines the development of v0.5.0, focusing on platfor
 
 **Success Criteria**: Full data export and import working
 
-## Phase 3: Integration (Weeks 8-10)
+## Phase 2: Core Features & Integration (Weeks 5-8)
+
+### Stage 5: Benchmark System [MEDIUM PRIORITY]
+**Status**: NOT STARTED  
+**Impact**: Portfolio performance comparison  
+**Timeline**: Weeks 5-6 (8 days)
+
+#### Tasks
+1. Design benchmark data schema
+2. Create Benchmark resource with Ash
+3. Implement S&P 500 comparison
+4. Add benchmark data management UI
+5. Create performance comparison charts
+
+**Success Criteria**: Portfolio performance comparable to S&P 500
+
+### Stage 6: Asset Allocation Analysis [MEDIUM PRIORITY]
+**Status**: NOT STARTED  
+**Impact**: Portfolio composition insights  
+**Timeline**: Week 7 (5 days)
+
+#### Tasks
+1. Create AllocationAnalyzer module
+2. Implement asset class categorization
+3. Add geographic allocation analysis
+4. Identify concentration risks
+5. Generate rebalancing recommendations
+
+**Success Criteria**: Complete portfolio allocation breakdown available
 
 ### Stage 7: Dashboard Redesign [HIGH PRIORITY]
 **Status**: NOT STARTED  
 **Impact**: User experience  
-**Timeline**: Week 8-9 (8 days)
+**Timeline**: Week 8 (8 days)
 
 #### Tasks
 1. Design new dashboard layout
@@ -112,10 +110,12 @@ This implementation plan outlines the development of v0.5.0, focusing on platfor
 
 **Success Criteria**: Unified dashboard with all features accessible
 
-### Stage 8: Performance Optimization [MEDIUM PRIORITY]
+## Phase 3: Performance & Polish (Weeks 9-12)
+
+### Stage 8: Performance Optimization [HIGH PRIORITY]
 **Status**: NOT STARTED  
 **Impact**: Application responsiveness  
-**Timeline**: Week 10 (5 days)
+**Timeline**: Weeks 9-10 (8 days)
 
 #### Tasks
 1. Implement cache warming strategies
@@ -125,8 +125,6 @@ This implementation plan outlines the development of v0.5.0, focusing on platfor
 5. Load test with realistic data
 
 **Success Criteria**: Page load <1s, calculations <500ms
-
-## Phase 4: Polish & Release (Weeks 11-12)
 
 ### Stage 9: Tax Planning Foundation [LOW PRIORITY]
 **Status**: NOT STARTED  
@@ -142,15 +140,15 @@ This implementation plan outlines the development of v0.5.0, focusing on platfor
 
 **Success Criteria**: Basic tax calculations available
 
-### Stage 10: Final Polish [HIGH PRIORITY]
+### Stage 10: Production Readiness [HIGH PRIORITY]
 **Status**: NOT STARTED  
-**Impact**: Production readiness  
+**Impact**: Release preparation  
 **Timeline**: Week 12 (5 days)
 
 #### Tasks
 1. Complete documentation updates
 2. Fix all remaining bugs
-3. Performance testing and optimization
+3. Final performance testing
 4. User acceptance testing
 5. Release preparation
 
@@ -158,21 +156,19 @@ This implementation plan outlines the development of v0.5.0, focusing on platfor
 
 ## Technical Priorities
 
-### Must Complete
-1. AER standardization (affects all calculations)
-2. Dashboard integration (core user experience)
-3. Code quality improvements (maintainability)
-4. Database optimizations (performance)
+### Critical Path
+- AER standardization (affects all calculations)
+- Dashboard redesign (core user experience)
+- Performance optimization (application responsiveness)
 
-### Should Complete
-1. Benchmark system (portfolio comparison)
-2. Asset allocation analysis (portfolio insights)
-3. Import/export functionality (data portability)
+### Important Features
+- Benchmark system (portfolio comparison)
+- Asset allocation analysis (insights)
+- Import/export functionality (data portability)
 
-### Nice to Have
-1. Tax planning foundation (future features)
-2. Advanced widget customization
-3. Multiple benchmark support
+### Future Foundation
+- Tax planning preparation
+- Code quality improvements
 
 ## Success Criteria
 
@@ -181,50 +177,30 @@ This implementation plan outlines the development of v0.5.0, focusing on platfor
 - [ ] 100% test coverage maintained
 - [ ] Page load time <1 second
 - [ ] All calculations <500ms
+- [ ] All tests passing
 
 ### Feature Completeness
 - [ ] AER standardization implemented
 - [ ] Dashboard fully integrated
 - [ ] Benchmark system functional
-- [ ] Import/export operational
-
-### Quality Gates
-- [ ] All tests passing
-- [ ] Performance benchmarks met
-- [ ] Documentation complete
-- [ ] Code review completed
+- [ ] Performance optimization complete
 
 ## Risk Mitigation
 
-### Identified Risks
-1. **AER changes affect existing calculations**: Comprehensive testing required
-2. **Dashboard redesign complexity**: Incremental changes with user feedback
-3. **Performance with large datasets**: Early optimization and testing
-4. **Import/export data integrity**: Extensive validation and testing
-
-### Mitigation Strategies
-- Feature flags for gradual rollout
-- Incremental delivery with testing
-- Performance monitoring throughout
-- Regular backups during development
+### Key Risks & Strategies
+1. **AER calculation changes**: Comprehensive test suite with regression testing
+2. **Dashboard complexity**: Incremental delivery with user feedback
+3. **Performance degradation**: Early optimization and continuous monitoring
+4. **Data integrity**: Extensive validation and backup procedures
 
 ## Development Commands
 
 ```bash
-# Run tests with coverage
-mix test --cover
-
-# Check code quality
-just credo
-
-# Performance profiling
-mix profile.fprof
-
-# Generate Code GPS
-mix code_gps
-
-# Start development server
-just work
+# Essential commands
+mix test --cover    # Run tests with coverage
+just credo         # Check code quality
+mix code_gps       # Generate architecture analysis
+just work          # Start development server
 ```
 
 ## Next Steps

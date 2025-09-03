@@ -10,15 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Complete v0.4.x Series - Financial Planning Platform
 
 #### Added Features
-- **Financial Goals System**: Complete CRUD operations with emergency fund calculator
-- **Retirement Planning UI**: Full LiveView interface for 25x rule and 4% withdrawal calculations
-- **Portfolio Forecasting**: Scenario planning with pessimistic/realistic/optimistic projections
-- **Advanced Analytics**: TWR/MWR calculations with performance caching
-- **Professional Formatting**: FormatHelper module with $1M/$500K notation and proper percentages
-- **Contribution Analysis**: Impact modeling for different savings rates
-- **Financial Independence Timeline**: Multi-scenario analysis with weighted projections
+
+- Financial Goals System: Complete CRUD operations with emergency fund calculator
+- Retirement Planning UI: Full LiveView interface for 25x rule and 4% withdrawal calculations
+- Portfolio Forecasting: Scenario planning with pessimistic/realistic/optimistic projections
+- Advanced Analytics: TWR/MWR calculations with performance caching
+- Professional Formatting: FormatHelper module with $1M/$500K notation and proper percentages
+- Contribution Analysis: Impact modeling for different savings rates
+- Financial Independence Timeline: Multi-scenario analysis with weighted projections
 
 #### Technical Improvements
+
 - Zero Credo warnings achieved (production ready)
 - ETS-based performance caching for complex calculations
 - Comprehensive test coverage with 50+ new tests
@@ -26,12 +28,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Professional chart formatting throughout application
 
 #### Bug Fixes
+
 - Fixed expense widget test data isolation
 - Resolved test warnings and unused variables
 - Corrected Enum.empty? usage in tests
 - Fixed chart formatting and percentage displays
 
 ### Documentation Updates
+
 - Updated all roadmap documents to reflect completion
 - Marked v0.4.x specification as FINAL
 - Updated README with current feature status
@@ -138,9 +142,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ash Framework Integration: Proper resource usage for financial data operations
 - Decimal Precision: All financial calculations use Decimal for accuracy
 
-## [Unreleased] - v0.2.0 Development
-
 ## [0.2.2] - 2025-01-20
+
+### Added
+
+- NetWorthCalculator: Cross-account net worth calculation
+- FinancialManagement Domain: New domain for financial features
+- Enhanced Account Resource: Support for cash account types
+- TransactionCategory Resource: Transaction categorization system
+- BalanceManager: Manual cash balance updates with audit trail
+- Cross-Domain Integration: Portfolio and FinancialManagement integration
 
 ### Changed
 
@@ -152,17 +163,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation: Fixed architecture diagrams to match database-as-user implementation
 - Documentation: Simplified installation guide and removed outdated references
 - Documentation: Adopted neutral, professional tone throughout project documentation
-
-## [Unreleased] - v0.2.0 Development (Previous)
-
-### Added
-
-- NetWorthCalculator: Cross-account net worth calculation
-- FinancialManagement Domain: New domain for financial features
-- Enhanced Account Resource: Support for cash account types
-- TransactionCategory Resource: Transaction categorization system
-- BalanceManager: Manual cash balance updates with audit trail
-- Cross-Domain Integration: Portfolio and FinancialManagement integration
 
 ### Technical Improvements
 

@@ -41,31 +41,15 @@ Ashfolio manages financial data locally on your computer. Track investments, cas
 
 ### Financial Management
 
-#### Wealth Tracking
-
-- Investment Portfolios: Stock, ETF, bond, and crypto position management
-- Cash Management: Checking, savings, and money market account tracking
-- Asset Portfolio: Real estate, vehicles, and other assets
-- Net Worth Analytics: Financial position with trending and analysis
-
-#### Planning & Analysis
-
-- Expense Tracking: Monthly spending analysis and budget management
-- Retirement Planning: 401k, IRA, and retirement goal projections
-- Dividend Income: Forward-looking dividend projections
-- Tax Planning: Capital gains optimization strategies
-
-#### Advanced Analytics
-
-- Enhanced Expense Analytics: Year-over-year comparisons with interactive charts
-- Advanced Filtering: Category, amount range, and merchant search capabilities
-- Custom Date Ranges: Flexible date pickers with filtered expense previews
-- Spending Trends: Monthly analysis with 3/6-month trend indicators
-- Interactive Visualizations: Contex-powered SVG charts with graceful fallbacks
-- FIFO Cost Basis: Profit/loss calculations using industry standards
-- Real-time Pricing: Price updates from Yahoo Finance
-- Responsive Design: Works on desktop, tablet, and mobile
-- Goal Tracking: Progress monitoring for financial goals
+- Investment Portfolios: Stock, ETF, bond, and crypto position management with FIFO cost basis
+- Cash Management: Checking, savings, money market, and CD account tracking
+- Net Worth Analytics: Cross-account financial position analysis with trending
+- Expense Tracking: Monthly spending analysis with interactive charts and advanced filtering
+- Retirement Planning: 401k, IRA projections with industry-standard calculations
+- Goal Tracking: Progress monitoring for emergency funds and financial independence
+- Performance Analytics: Time-weighted returns, rolling performance, and benchmarking
+- Real-time Pricing: Automatic price updates from Yahoo Finance
+- Interactive Visualizations: Professional SVG charts with responsive design
 
 ### Setup
 
@@ -77,61 +61,50 @@ Ashfolio manages financial data locally on your computer. Track investments, cas
 
 ## Project Status
 
-Current Version: v0.4.5+ (Complete)
-Previous Release: v0.3.4
+Current Version: v0.5.0-dev (In Development)
 
-### Currently Available (v0.1.0 - v0.4.5 Features)
+### Currently Available
 
 #### Core Financial Management
-- Investment Portfolio Tracking: Account and transaction management with FIFO cost basis
-- Net Worth Calculation: Cross-account financial position analysis with manual snapshots
-- Cash Account Management: Checking, savings, money market, and CD accounts
-- Expense Tracking: Comprehensive expense analytics with interactive dashboard widgets
-- Transaction Categories: Organization and categorization for all transactions
-- Real-time Calculations: Portfolio value and performance analytics
 
-#### Financial Planning (v0.4.x Complete)
-- Financial Goals: Complete CRUD operations with emergency fund calculator
-- Emergency Fund Calculator: Automatic expense aggregation with 3-12 month recommendations
-- Retirement Planning: Industry-standard 25x rule and 4% safe withdrawal calculations
-- Portfolio Forecasting: Scenario planning with pessimistic/realistic/optimistic projections
-- Financial Independence: Timeline calculations with multi-scenario analysis
-- Contribution Analysis: Impact modeling for different savings rates
+- Investment Portfolio Tracking with FIFO cost basis calculations
+- Net Worth Calculation with cross-account analysis and manual snapshots
+- Cash Account Management for checking, savings, money market, and CD accounts
+- Comprehensive Expense Tracking with interactive dashboard widgets
+- Transaction Categories and organization
+- Real-time Portfolio Calculations and performance analytics
 
-#### Advanced Analytics (v0.4.4+ Complete)
-- Time-Weighted Return (TWR): Industry-standard portfolio performance calculations
-- Money-Weighted Return (MWR): IRR-based personal return analysis
-- Rolling Returns: Performance pattern analysis over time
-- Professional Formatting: Currency notation ($1M, $500K) and percentage display
-- Performance Caching: ETS-based optimization for complex calculations
+#### Financial Planning
 
-#### Visualization & UX
-- Interactive Visualizations: Contex-powered SVG charts for all analytics
-- Enhanced Analytics Dashboard: Year-over-year comparisons with advanced filtering
-- Responsive Interface: Multi-device support with mobile-optimized charts
-- Professional Chart Formatting: Proper financial notation throughout
+- Financial Goals with emergency fund calculator
+- Retirement Planning using industry-standard 25x rule and 4% safe withdrawal rates
+- Portfolio Forecasting with scenario planning (pessimistic/realistic/optimistic)
+- Financial Independence timeline calculations
+- Contribution Analysis and impact modeling
 
-### Coming Soon (v0.5.0+)
+#### Advanced Analytics
 
-#### v0.5.0: Platform Integration & Standardization
+- Time-Weighted Return (TWR) and Money-Weighted Return (MWR) calculations
+- Rolling Returns and performance pattern analysis
+- Interactive Visualizations powered by Contex SVG charts
+- Enhanced Analytics Dashboard with year-over-year comparisons
+- Professional financial notation and formatting
+- Performance caching for complex calculations
+
+### Coming Soon (v0.5.0)
+
 - AER Standardization: Consistent Annual Equivalent Rate across all calculators
 - Enhanced Benchmark System: S&P 500 and market index comparisons
 - Asset Allocation Analysis: Portfolio composition and rebalancing tools
 - Advanced Import/Export: Comprehensive data portability
 
-#### Future Enhancements
-- Monte Carlo Simulations: Advanced probability modeling
-- Tax Planning Tools: Capital gains optimization
-- Multi-currency Support: International portfolio management
-- Enhanced Mobile Experience: Native mobile optimizations
-
 ### Development Roadmap
 
-✅ v0.4.1-v0.4.5: Complete Financial Planning Platform (COMPLETE)
-- v0.5.0: AER Standardization & Integration (Next)
-- v0.6.0: Performance Optimization & Scale
-- v0.7.0: Tax Planning & Advanced Features
-- v1.0.0: Production Release
+- ✅ v0.3.x & v0.4.x: Complete
+- 🚧 v0.5.0: AER Standardization & Integration (In Development)
+- 📋 v0.6.0: Performance Optimization & Scale
+- 📋 v0.7.0: Tax Planning & Advanced Features
+- 📋 v1.0.0: Production Release
 
 See [roadmap](docs/roadmap/v0.2-v0.5-roadmap.md) for detailed feature timelines.
 
