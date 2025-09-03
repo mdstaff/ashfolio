@@ -10,6 +10,7 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
   """
 
   alias Ashfolio.FinancialManagement.Expense
+  alias Ashfolio.FinancialManagement.AERCalculator
 
   require Logger
 
@@ -626,14 +627,8 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
           if Decimal.equal?(growth_rate, Decimal.new("0")) do
             current_dividend
           else
-            # Compound growth: FV = PV * (1 + r)^n
-            growth_factor = Decimal.add(Decimal.new("1"), growth_rate)
-
-            # Calculate (1 + r)^n using iterative multiplication for precision
-            compound_factor = calculate_compound_factor(growth_factor, years)
-
-            current_dividend
-            |> Decimal.mult(compound_factor)
+            # Use AER standardized compound growth calculation
+            AERCalculator.compound_with_aer(current_dividend, growth_rate, years)
             |> Decimal.round(2)
           end
 
@@ -808,11 +803,6 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
     end
   end
 
-  defp calculate_compound_factor(growth_factor, years) do
-    Enum.reduce(1..years, Decimal.new("1"), fn _year, acc ->
-      Decimal.mult(acc, growth_factor)
-    end)
-  end
 
   # Private helper function for withdrawal risk analysis
   defp analyze_withdrawal_risk(withdrawal_rate) do

@@ -55,14 +55,14 @@ label: lib/ashfolio_web/components/core_components.ex:397 (3x) | attrs: ["for"]
 error: lib/ashfolio_web/components/core_components.ex:410 (9x)
 
 # === DEPENDENCIES ===
-ash: ✅ (1178)
+ash: ✅ (1181)
 contex: ✅ (130)
-decimal: ✅ (1553)
+decimal: ✅ (1644)
 mox: ✅ (1)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio_web/helpers/format_helper.ex", "lib/ashfolio_web/live/advanced_analytics_live/index.ex", "mix.exs", "test/ashfolio/financial_management/forecast_chart_data_test.exs", "test/ashfolio_web/components/navigation_test.exs"]
-uncommitted: 0 files
+recent: ["test/ashfolio/financial_management/emergency_fund_calculator_test.exs", "test/ashfolio_web/live/dashboard_live/expense_widget_test.exs", "test/ashfolio_web/live/financial_goal_form_test.exs", "lib/ashfolio_web/helpers/format_helper.ex", "lib/ashfolio_web/live/advanced_analytics_live/index.ex"]
+uncommitted: 3 files
 commits_ahead: 0
 
 # === TEST GAPS ===
