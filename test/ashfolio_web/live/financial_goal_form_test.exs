@@ -4,7 +4,6 @@ defmodule AshfolioWeb.FinancialGoalFormTest do
   import Phoenix.LiveViewTest
 
   alias Ashfolio.FinancialManagement.Expense
-  alias Ashfolio.FinancialManagement.FinancialGoal
 
   @moduletag :liveview
   @moduletag :unit
@@ -26,7 +25,7 @@ defmodule AshfolioWeb.FinancialGoalFormTest do
 
     test "form renders without KeyError when emergency fund suggestion exists", %{conn: conn} do
       # This test verifies the recommended_target field is properly handled
-      {:ok, view, html} = live(conn, ~p"/goals/new")
+      {:ok, _view, html} = live(conn, ~p"/goals/new")
 
       # Form should render without crashing
       assert html =~ "Add Financial Goal"

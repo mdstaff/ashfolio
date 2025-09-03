@@ -5,25 +5,37 @@ All notable changes to the Ashfolio project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - v0.4.3 Development
+## [0.4.5] - 2025-09-03
 
-### Added (Stage 3: Scenario Planning - Complete)
+### Complete v0.4.x Series - Financial Planning Platform
 
-- Scenario Planning Engine: Standard scenarios (pessimistic 5%, realistic 7%, optimistic 10%) with weighted averages
-- Custom Scenario Planning: User-defined growth rates for specialized financial modeling
-- Financial Independence Timeline: 25x expenses rule with 4% safe withdrawal rate calculations
-- Multi-Scenario FI Analysis: Compare FI timelines across different growth assumptions
-- Test Coverage: 32 comprehensive tests for scenario planning functionality
-- Demo Script: `scripts/test-scenario-planning.exs` for testing all features
+#### Added Features
+- **Financial Goals System**: Complete CRUD operations with emergency fund calculator
+- **Retirement Planning UI**: Full LiveView interface for 25x rule and 4% withdrawal calculations
+- **Portfolio Forecasting**: Scenario planning with pessimistic/realistic/optimistic projections
+- **Advanced Analytics**: TWR/MWR calculations with performance caching
+- **Professional Formatting**: FormatHelper module with $1M/$500K notation and proper percentages
+- **Contribution Analysis**: Impact modeling for different savings rates
+- **Financial Independence Timeline**: Multi-scenario analysis with weighted projections
 
-### Technical Implementation
+#### Technical Improvements
+- Zero Credo warnings achieved (production ready)
+- ETS-based performance caching for complex calculations
+- Comprehensive test coverage with 50+ new tests
+- All calculations optimized for sub-second response
+- Professional chart formatting throughout application
 
-- `calculate_scenario_projections/3`: Standard growth scenario comparisons
-- `calculate_custom_scenarios/4`: Flexible custom growth rate modeling
-- `calculate_fi_timeline/4`: Financial independence timeline with scenario analysis
-- Pure calculation functions with no database dependencies
-- Performance optimized: <500ms for all FI timeline calculations
-- Comprehensive error handling and validation
+#### Bug Fixes
+- Fixed expense widget test data isolation
+- Resolved test warnings and unused variables
+- Corrected Enum.empty? usage in tests
+- Fixed chart formatting and percentage displays
+
+### Documentation Updates
+- Updated all roadmap documents to reflect completion
+- Marked v0.4.x specification as FINAL
+- Updated README with current feature status
+- Documented all delivered modules and capabilities
 
 ## [0.4.2] - 2025-08-26
 

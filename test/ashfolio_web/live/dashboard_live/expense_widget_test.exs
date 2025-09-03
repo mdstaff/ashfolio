@@ -7,6 +7,12 @@ defmodule AshfolioWeb.DashboardLive.ExpenseWidgetTest do
 
   describe "expense widget" do
     setup do
+      # Clear any existing expenses to avoid test interference
+      Expense
+      |> Ash.Query.for_read(:read)
+      |> Ash.read!()
+      |> Enum.each(&Expense.destroy/1)
+
       # Create test expenses using Ash directly
       {:ok, expense1} =
         Expense.create(%{
@@ -18,7 +24,7 @@ defmodule AshfolioWeb.DashboardLive.ExpenseWidgetTest do
       {:ok, expense2} =
         Expense.create(%{
           amount: Decimal.new("50.00"),
-          date: Date.add(Date.utc_today(), -5),
+          date: Date.utc_today(),  # Both expenses in current month
           description: "Test expense 2"
         })
 
