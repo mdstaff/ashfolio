@@ -493,7 +493,7 @@ defmodule AshfolioWeb.ForecastLive.Index do
 
   defp get_current_portfolio_value do
     # For now, return a default value since we're focusing on the forecasting functionality
-    # TODO: Integrate with actual portfolio calculation when available
+    # TODO: Integrate with actual portfolio calculation when available (#future)
     Decimal.new("100000")
   end
 

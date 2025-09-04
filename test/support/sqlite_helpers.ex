@@ -11,6 +11,7 @@ defmodule Ashfolio.SQLiteHelpers do
   alias Ashfolio.Portfolio.Account
   alias Ashfolio.Portfolio.Symbol
   alias Ashfolio.Portfolio.Transaction
+  alias Ecto.Adapters.SQL.Sandbox
 
   # Note: UserSettings removed - using simplified approach for database-as-user architecture testing
 
@@ -484,7 +485,7 @@ defmodule Ashfolio.SQLiteHelpers do
 
     if price_manager_pid do
       # Allow the PriceManager process to access the database
-      Ecto.Adapters.SQL.Sandbox.allow(Ashfolio.Repo, self(), price_manager_pid)
+      Sandbox.allow(Ashfolio.Repo, self(), price_manager_pid)
 
       # Allow the PriceManager process to use Mox expectations
       Mox.allow(YahooFinanceMock, self(), price_manager_pid)

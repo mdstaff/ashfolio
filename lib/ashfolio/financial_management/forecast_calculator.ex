@@ -18,7 +18,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
 
   - **Portfolio Projections**: Single and multi-period growth calculations
   - **Scenario Analysis**: Pessimistic, realistic, and optimistic projections
-  - **Financial Independence**: 25x rule calculations and timeline analysis  
+  - **Financial Independence**: 25x rule calculations and timeline analysis
   - **Contribution Analysis**: Impact analysis and optimization calculations
   - **CAGR Analysis**: Compound Annual Growth Rate calculations for comparison
 
@@ -1109,7 +1109,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
 
       future_value_of_unit_contributions =
         AERCalculator.compound_with_aer(
-          # No initial principal 
+          # No initial principal
           Decimal.new("0"),
           growth_rate,
           years,

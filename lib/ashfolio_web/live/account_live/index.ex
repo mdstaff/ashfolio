@@ -114,51 +114,10 @@ defmodule AshfolioWeb.AccountLive.Index do
 
   @impl true
   def handle_event("toggle_exclusion", %{"id" => id}, socket) do
-    # Check if already toggling this account to prevent concurrent operations
     if socket.assigns.toggling_account_id == id do
       {:noreply, socket}
     else
-      # Store original accounts for potential rollback
-      accounts_list =
-        if is_map(socket.assigns.accounts),
-          do: socket.assigns.accounts.all,
-          else: socket.assigns.accounts
-
-      account_index = Enum.find_index(accounts_list, &(&1.id == id))
-
-      case account_index do
-        nil ->
-          {:noreply, ErrorHelpers.put_error_flash(socket, :not_found, "Account not found")}
-
-        _ ->
-          account = Enum.at(accounts_list, account_index)
-
-          # Since we're using Context API, we'll just mark the toggling state
-          # and let the Context API reload handle the actual update
-          socket = assign(socket, :toggling_account_id, id)
-
-          case Account.toggle_exclusion(account, %{is_excluded: !account.is_excluded}) do
-            {:ok, updated_account_from_db} ->
-              Ashfolio.PubSub.broadcast!("accounts", {:account_updated, updated_account_from_db})
-
-              # Reload accounts to ensure consistency using Context API
-              socket = assign_dashboard_data(socket)
-
-              socket =
-                socket
-                |> assign(:toggling_account_id, nil)
-                |> ErrorHelpers.put_success_flash("Account exclusion updated successfully")
-
-              {:noreply, socket}
-
-            {:error, reason} ->
-              # Clear the toggling state on failure
-              {:noreply,
-               socket
-               |> assign(:toggling_account_id, nil)
-               |> ErrorHelpers.put_error_flash(reason, "Failed to update account exclusion")}
-          end
-      end
+      {:noreply, toggle_account_exclusion(socket, id)}
     end
   end
 
@@ -626,6 +585,52 @@ defmodule AshfolioWeb.AccountLive.Index do
   end
 
   # Context API integration helpers
+
+  defp toggle_account_exclusion(socket, id) do
+    accounts_list =
+      if is_map(socket.assigns.accounts),
+        do: socket.assigns.accounts.all,
+        else: socket.assigns.accounts
+
+    case find_account_by_id(accounts_list, id) do
+      nil ->
+        ErrorHelpers.put_error_flash(socket, :not_found, "Account not found")
+
+      account ->
+        perform_account_toggle(socket, account, id)
+    end
+  end
+
+  defp find_account_by_id(accounts_list, id) do
+    Enum.find(accounts_list, &(&1.id == id))
+  end
+
+  defp perform_account_toggle(socket, account, id) do
+    socket = assign(socket, :toggling_account_id, id)
+
+    case Account.toggle_exclusion(account, %{is_excluded: !account.is_excluded}) do
+      {:ok, updated_account_from_db} ->
+        handle_successful_toggle(socket, updated_account_from_db)
+
+      {:error, reason} ->
+        handle_failed_toggle(socket, reason)
+    end
+  end
+
+  defp handle_successful_toggle(socket, updated_account) do
+    Ashfolio.PubSub.broadcast!("accounts", {:account_updated, updated_account})
+    socket = assign_dashboard_data(socket)
+
+    socket
+    |> assign(:toggling_account_id, nil)
+    |> ErrorHelpers.put_success_flash("Account exclusion updated successfully")
+  end
+
+  defp handle_failed_toggle(socket, reason) do
+    socket
+    |> assign(:toggling_account_id, nil)
+    |> ErrorHelpers.put_error_flash(reason, "Failed to update account exclusion")
+  end
 
   defp assign_dashboard_data(socket) do
     socket = assign(socket, :loading_dashboard, true)

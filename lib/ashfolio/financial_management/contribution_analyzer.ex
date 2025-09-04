@@ -169,8 +169,8 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
         # Calculate required contribution using binary search
         case find_required_contribution(current_value, target_amount, years, growth_rate) do
           {:ok, required_annual} ->
-            # Add small buffer to ensure we meet target in verification
-            required_annual = Decimal.mult(required_annual, Decimal.new("1.001"))
+            # Add buffer to ensure we meet target with AER precision
+            required_annual = Decimal.mult(required_annual, Decimal.new("1.002"))
             required_monthly = Decimal.div(required_annual, Decimal.new("12"))
 
             # Verify with final calculation
@@ -551,8 +551,8 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
              growth_rate
            ) do
         {:ok, projected_value} ->
-          # Check if we're close enough to target (within 0.1%)
-          tolerance = Decimal.mult(target_amount, Decimal.new("0.001"))
+          # Check if we're close enough to target (within 0.05%)
+          tolerance = Decimal.mult(target_amount, Decimal.new("0.0005"))
           difference = Decimal.abs(Decimal.sub(projected_value, target_amount))
 
           if Decimal.compare(difference, tolerance) == :gt do

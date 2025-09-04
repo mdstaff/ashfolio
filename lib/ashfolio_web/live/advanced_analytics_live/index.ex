@@ -4,7 +4,7 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
 
   Features:
   - Time-Weighted Return (TWR) calculations and charts
-  - Money-Weighted Return (MWR) with IRR methodology  
+  - Money-Weighted Return (MWR) with IRR methodology
   - Rolling returns analysis with volatility metrics
   - Performance caching for optimized load times
   - Real-time updates via PubSub integration
@@ -42,11 +42,9 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   def handle_event("calculate_twr", _params, socket) do
     Logger.debug("Calculating Time-Weighted Return")
 
-    socket =
-      socket
-      |> assign(:loading_twr, true)
-      |> calculate_time_weighted_return()
-      |> assign(:loading_twr, false)
+    # Set loading state immediately and schedule async calculation
+    socket = assign(socket, :loading_twr, true)
+    Process.send_after(self(), :complete_twr_calculation, 10)
 
     {:noreply, socket}
   end
@@ -55,11 +53,9 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   def handle_event("calculate_mwr", _params, socket) do
     Logger.debug("Calculating Money-Weighted Return")
 
-    socket =
-      socket
-      |> assign(:loading_mwr, true)
-      |> calculate_money_weighted_return()
-      |> assign(:loading_mwr, false)
+    # Set loading state immediately and schedule async calculation
+    socket = assign(socket, :loading_mwr, true)
+    Process.send_after(self(), :complete_mwr_calculation, 10)
 
     {:noreply, socket}
   end
@@ -68,11 +64,9 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   def handle_event("calculate_rolling_returns", _params, socket) do
     Logger.debug("Calculating Rolling Returns Analysis")
 
-    socket =
-      socket
-      |> assign(:loading_rolling, true)
-      |> calculate_rolling_returns()
-      |> assign(:loading_rolling, false)
+    # Set loading state immediately and schedule async calculation
+    socket = assign(socket, :loading_rolling, true)
+    Process.send_after(self(), :complete_rolling_calculation, 10)
 
     {:noreply, socket}
   end
@@ -138,6 +132,33 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   @impl true
   def handle_info({:account_updated, _account}, socket) do
     socket = maybe_calculate_analytics(socket)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(:complete_twr_calculation, socket) do
+    socket = 
+      socket
+      |> calculate_time_weighted_return()
+      |> assign(:loading_twr, false)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(:complete_mwr_calculation, socket) do
+    socket = 
+      socket
+      |> calculate_money_weighted_return()
+      |> assign(:loading_mwr, false)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(:complete_rolling_calculation, socket) do
+    socket = 
+      socket
+      |> calculate_rolling_returns()
+      |> assign(:loading_rolling, false)
     {:noreply, socket}
   end
 

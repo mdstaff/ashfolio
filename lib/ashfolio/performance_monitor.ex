@@ -9,6 +9,8 @@ defmodule Ashfolio.PerformanceMonitor do
   - Memory usage patterns
   """
 
+  alias Ashfolio.MarketData.RateLimiter
+
   require Logger
 
   @doc """
@@ -54,7 +56,7 @@ defmodule Ashfolio.PerformanceMonitor do
   Get rate limiter status for monitoring API usage.
   """
   def rate_limiter_stats do
-    case Ashfolio.MarketData.RateLimiter.get_status() do
+    case RateLimiter.get_status() do
       status when is_map(status) ->
         Map.put(status, :timestamp, DateTime.utc_now())
 

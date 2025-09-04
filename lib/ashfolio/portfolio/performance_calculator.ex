@@ -4,7 +4,7 @@ defmodule Ashfolio.Portfolio.PerformanceCalculator do
 
   Implements industry-standard methodologies:
   - Time-Weighted Return (TWR) - Portfolio manager performance
-  - Money-Weighted Return (MWR) - Investor's personal experience  
+  - Money-Weighted Return (MWR) - Investor's personal experience
   - Rolling Returns Analysis - Performance patterns over time
 
   Built for the Ashfolio portfolio management system with:
@@ -24,7 +24,7 @@ defmodule Ashfolio.Portfolio.PerformanceCalculator do
   ## Parameters
 
     - transactions: List of transaction maps with :date, :amount, :type fields
-    
+
   ## Returns
 
     - {:ok, twr_percentage} - Time-weighted return as percentage
@@ -67,7 +67,7 @@ defmodule Ashfolio.Portfolio.PerformanceCalculator do
   ## Parameters
 
     - cash_flows: List of cash flow maps with :date and :amount fields
-    
+
   ## Returns
 
     - {:ok, mwr_percentage} - Money-weighted return as percentage
@@ -284,7 +284,7 @@ defmodule Ashfolio.Portfolio.PerformanceCalculator do
       final_amount = Decimal.abs(final_flow.amount)
 
       # Simple return calculation for IRR approximation
-      # For the test case: -10k, -5k, +17k = 13.33% simple return  
+      # For the test case: -10k, -5k, +17k = 13.33% simple return
       if Decimal.compare(initial_amount, Decimal.new("0")) == :gt do
         # Sum all negative flows (investments)
         total_investment =

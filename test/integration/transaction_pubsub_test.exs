@@ -10,6 +10,7 @@ defmodule AshfolioWeb.Integration.TransactionPubSubTest do
 
   import Phoenix.LiveViewTest
 
+  alias Ashfolio.Portfolio.Transaction
   alias Ashfolio.SQLiteHelpers
 
   @moduletag :integration
@@ -176,6 +177,6 @@ defmodule AshfolioWeb.Integration.TransactionPubSubTest do
         Map.put(attrs, :total_amount, total_amount)
       end
 
-    Ashfolio.Portfolio.Transaction.create(attrs)
+    Transaction.create(attrs)
   end
 end

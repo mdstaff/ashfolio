@@ -2,6 +2,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
   use Ashfolio.DataCase, async: false
 
   alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.Portfolio.Transaction
   alias Ashfolio.SQLiteHelpers
 
   @moduletag :ash_resources
@@ -272,7 +273,7 @@ defmodule Ashfolio.FinancialManagement.TransactionCategoryTest do
 
       # Create transaction with category
       {:ok, transaction} =
-        Ashfolio.Portfolio.Transaction.create(%{
+        Transaction.create(%{
           type: :buy,
           quantity: Decimal.new("10"),
           price: Decimal.new("100"),

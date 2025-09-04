@@ -15,7 +15,7 @@ defmodule AshfolioWeb.Helpers.ChartHelpers do
 
       iex> format_growth_rate(Decimal.new("0.07"))
       "7%"
-      
+
       iex> format_growth_rate(Decimal.new("0.105"))
       "10.5%"
   """
@@ -59,10 +59,10 @@ defmodule AshfolioWeb.Helpers.ChartHelpers do
 
       iex> format_y_axis(1_000_000)
       "$1M"
-      
+
       iex> format_y_axis(2_500_000)
       "$2.5M"
-      
+
       iex> format_y_axis(500_000)
       "$500K"
   """

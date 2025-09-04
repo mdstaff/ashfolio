@@ -11,6 +11,7 @@ defmodule AshfolioWeb.Integration.SimplifiedPortfolioViewFlowTest do
   import Phoenix.LiveViewTest
 
   alias Ashfolio.Portfolio.Account
+  alias Ashfolio.Portfolio.Calculator
   alias Ashfolio.Portfolio.Symbol
   alias Ashfolio.Portfolio.Transaction
   alias Ashfolio.SQLiteHelpers
@@ -96,7 +97,7 @@ defmodule AshfolioWeb.Integration.SimplifiedPortfolioViewFlowTest do
 
       # Step 2: Verify portfolio calculations are working
       # Check if Calculator module works
-      case Ashfolio.Portfolio.Calculator.calculate_position_returns() do
+      case Calculator.calculate_position_returns() do
         {:ok, positions} ->
           # Verify positions were calculated
           assert length(positions) >= 1

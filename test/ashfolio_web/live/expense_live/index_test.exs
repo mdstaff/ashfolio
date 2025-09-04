@@ -4,6 +4,7 @@ defmodule AshfolioWeb.ExpenseLive.IndexTest do
   import Phoenix.LiveViewTest
 
   alias Ashfolio.FinancialManagement.Expense
+  alias Ashfolio.FinancialManagement.TransactionCategory
   alias Ashfolio.Portfolio.Account
 
   describe "expense index" do
@@ -27,7 +28,7 @@ defmodule AshfolioWeb.ExpenseLive.IndexTest do
         })
 
       {:ok, category} =
-        Ashfolio.FinancialManagement.TransactionCategory.create(%{
+        TransactionCategory.create(%{
           name: "Groceries",
           color: "#4CAF50"
         })

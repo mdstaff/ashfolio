@@ -195,29 +195,11 @@ defmodule Ashfolio.Context do
   """
   def get_recent_transactions(limit \\ 10) do
     track_performance(:get_recent_transactions, fn ->
-      case Account.list() do
-        {:ok, accounts} ->
-          account_ids = Enum.map(accounts, & &1.id)
-
-          # Use batch query to prevent N+1 queries, loading symbol and category relationships
-          case Transaction.by_accounts(account_ids) do
-            {:ok, transactions} ->
-              # Load relationships for recent transactions
-              loaded_transactions = Ash.load!(transactions, [:symbol, :category])
-
-              recent_transactions =
-                loaded_transactions
-                |> Enum.sort_by(& &1.date, {:desc, Date})
-                |> Enum.take(limit)
-
-              {:ok, recent_transactions}
-
-            error ->
-              normalize_error(error)
-          end
-
-        error ->
-          normalize_error(error)
+      with {:ok, accounts} <- Account.list(),
+           {:ok, transactions} <- fetch_account_transactions(accounts) do
+        {:ok, get_most_recent_transactions(transactions, limit)}
+      else
+        error -> normalize_error(error)
       end
     end)
   end
@@ -401,6 +383,19 @@ defmodule Ashfolio.Context do
 
   # Helper functions for database-as-user architecture
   # Note: These functions are kept for backward compatibility but are no longer used
+
+  defp fetch_account_transactions(accounts) do
+    account_ids = Enum.map(accounts, & &1.id)
+    Transaction.by_accounts(account_ids)
+  end
+
+  defp get_most_recent_transactions(transactions, limit) do
+    loaded_transactions = Ash.load!(transactions, [:symbol, :category])
+
+    loaded_transactions
+    |> Enum.sort_by(& &1.date, {:desc, Date})
+    |> Enum.take(limit)
+  end
 
   defp categorize_accounts(accounts) do
     %{

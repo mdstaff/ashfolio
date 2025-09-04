@@ -704,11 +704,7 @@ defmodule AshfolioWeb.ExpenseLive.Index do
             expense.description || ""
 
           :category ->
-            if expense.category do
-              expense.category.name
-            else
-              ""
-            end
+            get_expense_category_name(expense)
 
           _ ->
             expense.date
@@ -771,5 +767,13 @@ defmodule AshfolioWeb.ExpenseLive.Index do
     |> Ash.Query.sort(:name)
     |> Ash.read!()
     |> Enum.map(&{&1.name, &1.id})
+  end
+
+  defp get_expense_category_name(expense) do
+    if expense.category do
+      expense.category.name
+    else
+      ""
+    end
   end
 end

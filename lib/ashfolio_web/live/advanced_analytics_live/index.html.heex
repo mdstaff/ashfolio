@@ -81,7 +81,7 @@
           class="text-sm bg-blue-500 hover:bg-blue-600 text-white"
         >
           <%= if @loading_twr do %>
-            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+            <svg class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
               <circle
                 class="opacity-25"
                 cx="12"
@@ -98,6 +98,7 @@
               >
               </path>
             </svg>
+            Calculating...
           <% else %>
             Calculate
           <% end %>

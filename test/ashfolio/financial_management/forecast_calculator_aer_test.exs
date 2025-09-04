@@ -20,7 +20,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculatorAERTest do
   # [ ] Replace calculate_compound_growth_with_contributions/4 logic with AERCalculator.compound_with_aer/4
   # [ ] Remove calculate_future_value_of_present/3 and calculate_future_value_of_present_monthly/3
   # [ ] Remove calculate_future_value_of_annuity_monthly/3 (replaced by AER methodology)
-  # [ ] Remove calculate_power/2 helper (use AER's precise power calculations)  
+  # [ ] Remove calculate_power/2 helper (use AER's precise power calculations)
   # [ ] Update all scenario functions to delegate to AERCalculator
   # [ ] Ensure all rate inputs are treated as AER (no conversion needed in UI)
   # [ ] Performance: <100ms for 10-year projections
@@ -28,7 +28,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculatorAERTest do
   # Integration Points Identified:
   # - Line 219: calculate_compound_growth_with_contributions/4 - main integration point
   # - Line 256: calculate_future_value_of_present/3 - replace with AER
-  # - Line 263: calculate_future_value_of_present_monthly/3 - replace with AER  
+  # - Line 263: calculate_future_value_of_present_monthly/3 - replace with AER
   # - Line 270: calculate_future_value_of_annuity_monthly/3 - replace with AER
   # - Line 285: calculate_power/2 - use AER's power calculations
   # - Mixed compounding strategy (lines 232-252) - standardize to AER

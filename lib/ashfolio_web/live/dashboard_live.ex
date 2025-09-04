@@ -95,66 +95,8 @@ defmodule AshfolioWeb.DashboardLive do
 
   @impl true
   def handle_event("create_snapshot", _params, socket) do
-    # Calculate current net worth from all accounts
-    current_net_worth = calculate_current_net_worth()
-
-    # Prepare snapshot data
-    today = Date.utc_today()
-    total_assets = current_net_worth
-    total_liabilities = Decimal.new("0.00")
-    net_worth = Decimal.sub(total_assets, total_liabilities)
-
-    snapshot_data = %{
-      snapshot_date: today,
-      total_assets: total_assets,
-      total_liabilities: total_liabilities,
-      net_worth: net_worth,
-      cash_value: calculate_total_cash(),
-      investment_value: calculate_total_investments(),
-      is_automated: false
-    }
-
-    # Try to create new snapshot, or update existing one for today
-    case NetWorthSnapshot.create(snapshot_data) do
-      {:ok, _snapshot} ->
-        socket =
-          socket
-          |> put_flash(:info, "Net worth snapshot created successfully!")
-          |> load_portfolio_data()
-
-        {:noreply, socket}
-
-      {:error, _error} ->
-        # If creation failed (likely due to date uniqueness), try to find existing snapshot for today
-        case Enum.filter(NetWorthSnapshot.list!(), fn snapshot ->
-               Date.compare(snapshot.snapshot_date, today) == :eq
-             end) do
-          [existing_snapshot] ->
-            case NetWorthSnapshot.update(
-                   existing_snapshot,
-                   snapshot_data
-                 ) do
-              {:ok, _updated_snapshot} ->
-                socket =
-                  socket
-                  |> put_flash(:info, "Net worth snapshot updated for today!")
-                  |> load_portfolio_data()
-
-                {:noreply, socket}
-
-              {:error, update_error} ->
-                {:noreply,
-                 put_flash(
-                   socket,
-                   :error,
-                   "Failed to update snapshot: #{inspect(update_error)}"
-                 )}
-            end
-
-          [] ->
-            {:noreply, put_flash(socket, :error, "Failed to create snapshot: date conflict")}
-        end
-    end
+    snapshot_data = build_snapshot_data()
+    {:noreply, create_or_update_snapshot(socket, snapshot_data)}
   rescue
     error ->
       {:noreply, put_flash(socket, :error, "Failed to create snapshot: #{inspect(error)}")}
@@ -536,6 +478,69 @@ defmodule AshfolioWeb.DashboardLive do
   end
 
   # Private functions
+
+  defp build_snapshot_data do
+    current_net_worth = calculate_current_net_worth()
+    total_assets = current_net_worth
+    total_liabilities = Decimal.new("0.00")
+    net_worth = Decimal.sub(total_assets, total_liabilities)
+
+    %{
+      snapshot_date: Date.utc_today(),
+      total_assets: total_assets,
+      total_liabilities: total_liabilities,
+      net_worth: net_worth,
+      cash_value: calculate_total_cash(),
+      investment_value: calculate_total_investments(),
+      is_automated: false
+    }
+  end
+
+  defp create_or_update_snapshot(socket, snapshot_data) do
+    case NetWorthSnapshot.create(snapshot_data) do
+      {:ok, _snapshot} ->
+        handle_successful_snapshot_creation(socket)
+
+      {:error, _error} ->
+        handle_failed_snapshot_creation(socket, snapshot_data)
+    end
+  end
+
+  defp handle_successful_snapshot_creation(socket) do
+    socket
+    |> put_flash(:info, "Net worth snapshot created successfully!")
+    |> load_portfolio_data()
+  end
+
+  defp handle_failed_snapshot_creation(socket, snapshot_data) do
+    today = snapshot_data.snapshot_date
+
+    case find_existing_snapshot_for_today(today) do
+      [existing_snapshot] ->
+        update_existing_snapshot(socket, existing_snapshot, snapshot_data)
+
+      [] ->
+        put_flash(socket, :error, "Failed to create snapshot: date conflict")
+    end
+  end
+
+  defp find_existing_snapshot_for_today(today) do
+    Enum.filter(NetWorthSnapshot.list!(), fn snapshot ->
+      Date.compare(snapshot.snapshot_date, today) == :eq
+    end)
+  end
+
+  defp update_existing_snapshot(socket, existing_snapshot, snapshot_data) do
+    case NetWorthSnapshot.update(existing_snapshot, snapshot_data) do
+      {:ok, _updated_snapshot} ->
+        socket
+        |> put_flash(:info, "Net worth snapshot updated for today!")
+        |> load_portfolio_data()
+
+      {:error, update_error} ->
+        put_flash(socket, :error, "Failed to update snapshot: #{inspect(update_error)}")
+    end
+  end
 
   defp load_portfolio_data(socket) do
     Logger.debug("Loading portfolio data for dashboard")

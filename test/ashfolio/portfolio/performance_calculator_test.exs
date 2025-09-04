@@ -90,7 +90,7 @@ defmodule Ashfolio.Portfolio.PerformanceCalculatorTest do
         %{date: ~D[2023-03-15], amount: Decimal.new("11000"), type: :value},
         # Cash flow
         %{date: ~D[2023-06-01], amount: Decimal.new("-5000"), type: :buy},
-        # Interim value  
+        # Interim value
         %{date: ~D[2023-09-15], amount: Decimal.new("17500"), type: :value},
         %{date: ~D[2023-12-31], amount: Decimal.new("18500"), type: :current_value}
       ]
@@ -338,7 +338,7 @@ defmodule Ashfolio.Portfolio.PerformanceCalculatorTest do
       %{date: ~D[2020-01-01], return: Decimal.new("15.0")},
       %{date: ~D[2020-02-01], return: Decimal.new("12.0")},
       %{date: ~D[2020-03-01], return: Decimal.new("8.0")},
-      # Bad period start  
+      # Bad period start
       %{date: ~D[2020-04-01], return: Decimal.new("-15.0")},
       %{date: ~D[2020-05-01], return: Decimal.new("-8.0")},
       %{date: ~D[2020-06-01], return: Decimal.new("-3.0")},

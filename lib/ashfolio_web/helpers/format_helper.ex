@@ -8,13 +8,13 @@ defmodule AshfolioWeb.Helpers.FormatHelper do
   Formats a decimal growth rate as a percentage string.
 
   ## Examples
-      
+
       iex> format_growth_rate(Decimal.new("0.07"))
       "7%"
-      
+
       iex> format_growth_rate(Decimal.new("0.125"))
       "12.5%"
-      
+
       iex> format_growth_rate(Decimal.new("-0.05"))
       "-5%"
   """
@@ -50,13 +50,13 @@ defmodule AshfolioWeb.Helpers.FormatHelper do
 
       iex> format_chart_axis(1_000_000)
       "$1M"
-      
+
       iex> format_chart_axis(2_500_000)
       "$2.5M"
-      
+
       iex> format_chart_axis(500_000)
       "$500K"
-      
+
       iex> format_chart_axis(2_000_000_000)
       "$2B"
   """
@@ -109,7 +109,7 @@ defmodule AshfolioWeb.Helpers.FormatHelper do
 
       iex> format_currency(Decimal.new("1234567.89"))
       "$1,234,567.89"
-      
+
       iex> format_currency(1000)
       "$1,000.00"
   """
@@ -156,7 +156,7 @@ defmodule AshfolioWeb.Helpers.FormatHelper do
 
       iex> format_percentage(7.5)
       "7.5%"
-      
+
       iex> format_percentage(100)
       "100%"
   """

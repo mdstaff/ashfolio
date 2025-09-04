@@ -257,7 +257,7 @@ defmodule Ashfolio.FinancialManagement.AERCalculatorTest do
           :annual
         )
 
-      # Should be similar but slightly less than monthly (less frequent compounding)  
+      # Should be similar but slightly less than monthly (less frequent compounding)
       expected = Decimal.new("330000")
       assert_in_delta(Decimal.to_float(result), Decimal.to_float(expected), 10_000)
     end
