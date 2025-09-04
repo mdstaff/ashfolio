@@ -56,14 +56,14 @@ error: lib/ashfolio_web/components/core_components.ex:411 (9x)
 
 # === DEPENDENCIES ===
 ash: ✅ (1183)
-contex: ✅ (127)
+contex: ✅ (126)
 decimal: ✅ (1616)
 mox: ✅ (1)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio/financial_management/aer_calculator.ex", "lib/ashfolio/financial_management/forecast_calculator.ex", "lib/ashfolio/financial_management/retirement_calculator.ex", "test/ashfolio/financial_management/aer_calculator_test.exs", "test/ashfolio/financial_management/forecast_calculator_aer_test.exs"]
-uncommitted: 29 files
-commits_ahead: 1
+recent: [".credo.exs", "lib/ashfolio/context.ex", "lib/ashfolio/financial_management/contribution_analyzer.ex", "lib/ashfolio/financial_management/forecast_calculator.ex", "lib/ashfolio/performance_monitor.ex"]
+uncommitted: 8 files
+commits_ahead: 2
 
 # === TEST GAPS ===
 missing_tests:
@@ -83,4 +83,4 @@ currency_format: "Decimal formatting"
 test_setup: "Standard ExUnit setup"
 
 # === INTEGRATION OPPORTUNITIES ===
-
+# (none)

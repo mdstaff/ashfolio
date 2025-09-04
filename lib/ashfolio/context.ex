@@ -544,22 +544,30 @@ defmodule Ashfolio.Context do
     name = Map.get(form_params, "name")
 
     if name do
-      case Account.get_by_name(name) do
-        {:ok, existing_account} when not is_nil(existing_account) ->
-          if existing_account.id == current_account_id do
-            {:ok, %{}}
-          else
-            {:error, :validation_failed}
-          end
-
-        {:ok, nil} ->
-          {:ok, %{}}
-
-        {:error, _reason} ->
-          {:ok, %{}}
-      end
+      validate_name_against_existing_accounts(name, current_account_id)
     else
       {:ok, %{}}
+    end
+  end
+
+  defp validate_name_against_existing_accounts(name, current_account_id) do
+    case Account.get_by_name(name) do
+      {:ok, existing_account} when not is_nil(existing_account) ->
+        check_account_ownership(existing_account, current_account_id)
+
+      {:ok, nil} ->
+        {:ok, %{}}
+
+      {:error, _reason} ->
+        {:ok, %{}}
+    end
+  end
+
+  defp check_account_ownership(existing_account, current_account_id) do
+    if existing_account.id == current_account_id do
+      {:ok, %{}}
+    else
+      {:error, :validation_failed}
     end
   end
 

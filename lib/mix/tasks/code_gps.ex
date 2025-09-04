@@ -510,6 +510,10 @@ defmodule Mix.Tasks.CodeGps do
     |> Enum.map_join("\n", & &1)
   end
 
+  defp encode_suggestions_structured([]) do
+    "# (none)"
+  end
+
   defp encode_suggestions_structured(suggestions) do
     suggestions
     |> Enum.map(fn sugg ->
@@ -584,7 +588,11 @@ defmodule Mix.Tasks.CodeGps do
     |> Enum.map_join("\n", & &1)
   end
 
-  defp encode_freshness(%{recent_files: recent, uncommitted_count: uncommitted, commits_ahead: ahead}) do
+  defp encode_freshness(%{
+         recent_files: recent,
+         uncommitted_count: uncommitted,
+         commits_ahead: ahead
+       }) do
     recent_str =
       if length(recent) > 0 do
         "recent: #{inspect(Enum.take(recent, 5))}"

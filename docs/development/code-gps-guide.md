@@ -134,6 +134,48 @@ mix code_gps
 - Test coverage gaps: Systematic missing test detection
 - Optimization opportunities: N+1 queries, unused code
 
+## Implementation Roadmap
+
+This roadmap outlines the next steps for improving the Code GPS tool. The goal is to make the tool more robust, reliable, and feature-rich.
+
+### Phase 1: Stabilize and Harden
+
+This phase focuses on improving the existing implementation to make it more reliable and easier to maintain.
+
+#### 1. Robust Pattern Detection
+
+*   **Problem:** The current pattern detection mechanism samples a small number of files, which can lead to inconsistent results.
+*   **Solution:** Modify the `extract_patterns` function to analyze all relevant files instead of a small sample. This will ensure that the detected patterns are representative of the entire codebase.
+
+#### 2. Decouple Suggestion Engine
+
+*   **Problem:** The suggestion logic is hardcoded in the `generate_integration_hints` function, making it brittle and difficult to extend.
+*   **Solution:** Refactor the suggestion engine to be data-driven. Create a configurable rules engine where relationships between different parts of the application can be defined. For example, a rule could specify that the `DashboardLive` view should always display data from the `Expense` resource.
+
+#### 3. AST-based Parsing
+
+*   **Problem:** The tool currently relies heavily on regular expressions for parsing code, which can be unreliable.
+*   **Solution:** Replace all regex-based parsing with Abstract Syntax Tree (AST) parsing. Elixir's built-in `Code.string_to_quoted/2` function can be used to parse code into an AST, which can then be traversed to find the required information. This will make the analysis much more robust and resilient to code formatting changes.
+
+### Phase 2: Advanced Analysis
+
+This phase focuses on implementing the advanced features from the roadmap.
+
+#### 1. Test Coverage Analysis
+
+*   **Goal:** Provide a more detailed analysis of test coverage.
+*   **Implementation:** The tool can be extended to parse the output of the `mix test --cover` command. The `cover/excover.html` file contains detailed information about test coverage, which can be extracted and included in the Code GPS manifest.
+
+#### 2. Function Complexity Scoring
+
+*   **Goal:** Automatically identify complex functions that may need refactoring.
+*   **Implementation:** Use AST analysis to calculate the cyclomatic complexity of each function. This metric can be used to identify functions that are too complex and should be simplified.
+
+#### 3. Custom Rule Engine
+
+*   **Goal:** Allow projects to define their own custom analysis rules.
+*   **Implementation:** Create a simple DSL (Domain-Specific Language) or a configuration file where users can define their own patterns and suggestions. This would make the Code GPS tool much more flexible and adaptable to different projects.
+
 ## Comparison to LSP
 
 | Feature   | LSP               | Code GPS          |

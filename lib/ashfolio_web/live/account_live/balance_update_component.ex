@@ -296,34 +296,37 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
         {:error, "Balance is required"}
 
       trimmed_balance ->
-        case Float.parse(trimmed_balance) do
-          {balance_float, ""} ->
-            new_balance = Decimal.new(to_string(balance_float))
+        parse_numeric_balance(trimmed_balance, account)
+    end
+  end
 
-            # Security: Add reasonable maximum bounds (prevent unrealistic values)
-            # $1 billion max
-            max_balance = Decimal.new("1000000000.00")
+  defp parse_numeric_balance(balance_str, account) do
+    case Float.parse(balance_str) do
+      {balance_float, ""} ->
+        new_balance = Decimal.new(to_string(balance_float))
+        validate_balance_constraints(new_balance, account)
 
-            cond do
-              # Validate non-negative for savings/checking accounts
-              account.account_type in [:checking, :savings] && Decimal.negative?(new_balance) ->
-                {:error, "#{String.capitalize(to_string(account.account_type))} accounts cannot have negative balances"}
+      _ ->
+        {:error, "Please enter a valid number"}
+    end
+  end
 
-              # Security: Validate maximum reasonable balance
-              Decimal.gt?(new_balance, max_balance) ->
-                {:error, "Balance cannot exceed $1,000,000,000.00 (security limit)"}
+  defp validate_balance_constraints(balance, account) do
+    max_balance = Decimal.new("1000000000.00")
+    min_balance = Decimal.new("-1000000000.00")
 
-              # Security: Validate minimum bound (prevent extremely negative values)
-              Decimal.lt?(new_balance, Decimal.new("-1000000000.00")) ->
-                {:error, "Balance cannot be less than -$1,000,000,000.00 (security limit)"}
+    cond do
+      account.account_type in [:checking, :savings] && Decimal.negative?(balance) ->
+        {:error, "#{String.capitalize(to_string(account.account_type))} accounts cannot have negative balances"}
 
-              true ->
-                {:ok, new_balance}
-            end
+      Decimal.gt?(balance, max_balance) ->
+        {:error, "Balance cannot exceed $1,000,000,000.00 (security limit)"}
 
-          _ ->
-            {:error, "Please enter a valid number"}
-        end
+      Decimal.lt?(balance, min_balance) ->
+        {:error, "Balance cannot be less than -$1,000,000,000.00 (security limit)"}
+
+      true ->
+        {:ok, balance}
     end
   end
 
