@@ -9,8 +9,8 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
   for error handling, logging, and Decimal arithmetic precision.
   """
 
-  alias Ashfolio.FinancialManagement.Expense
   alias Ashfolio.FinancialManagement.AERCalculator
+  alias Ashfolio.FinancialManagement.Expense
 
   require Logger
 
@@ -628,7 +628,8 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
             current_dividend
           else
             # Use AER standardized compound growth calculation
-            AERCalculator.compound_with_aer(current_dividend, growth_rate, years)
+            current_dividend
+            |> AERCalculator.compound_with_aer(growth_rate, years)
             |> Decimal.round(2)
           end
 
@@ -802,7 +803,6 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
         end
     end
   end
-
 
   # Private helper function for withdrawal risk analysis
   defp analyze_withdrawal_risk(withdrawal_rate) do

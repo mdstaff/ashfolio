@@ -1,40 +1,51 @@
 defmodule Ashfolio.FinancialManagement.ForecastCalculator do
   @moduledoc """
-  Portfolio growth forecasting calculations for long-term financial planning.
+  Portfolio growth forecasting calculations using standardized AER methodology.
 
-  Implements compound growth projections with regular contributions using
-  industry-standard financial formulas for portfolio value forecasting.
+  All calculations use the Annual Equivalent Rate (AER) approach through integration
+  with `Ashfolio.FinancialManagement.AERCalculator` to ensure consistent compound
+  interest calculations across all portfolio projections.
 
-  ## Compounding Frequency
+  ## AER Standardization (v0.4.3+)
 
-  **Current Implementation (v0.4.3):**
-  - Growth-only scenarios: Annual compounding
-  - Scenarios with contributions: Monthly compounding (more realistic for regular investments)
+  **Current Implementation:**
+  - All scenarios use consistent AER methodology via AERCalculator
+  - Growth rates are interpreted as Annual Equivalent Rates
+  - Monthly contributions are properly converted using AER-to-monthly conversion
+  - Results are consistent across all functions and time periods
 
-  **Known Limitation:** Mixed compounding frequencies can make comparisons difficult.
-  This follows a pragmatic approach for v0.4.3 but should be standardized in v0.5.0
-  to use consistent AER (Annual Equivalent Rate) methodology throughout.
+  ## Key Features
+
+  - **Portfolio Projections**: Single and multi-period growth calculations
+  - **Scenario Analysis**: Pessimistic, realistic, and optimistic projections
+  - **Financial Independence**: 25x rule calculations and timeline analysis  
+  - **Contribution Analysis**: Impact analysis and optimization calculations
+  - **CAGR Analysis**: Compound Annual Growth Rate calculations for comparison
 
   ## Patterns
 
   This module follows patterns established in `lib/ashfolio/financial_management/retirement_calculator.ex`
-  for error handling, logging, and Decimal arithmetic precision.
+  for error handling, logging, and Decimal arithmetic precision. All compound interest
+  calculations are delegated to AERCalculator for consistency and accuracy.
   """
+
+  alias Ashfolio.FinancialManagement.AERCalculator
 
   require Logger
 
   @doc """
-  Projects portfolio growth over a specified time period with regular contributions.
+  Projects portfolio growth using standardized Annual Equivalent Rate (AER) methodology.
 
-  Uses compound growth formula combining Future Value of Present Value with
-  Future Value of Annuity for accurate long-term projections.
+  Delegates to AERCalculator.compound_with_aer/4 for consistent compound interest
+  calculations across all portfolio projections. All growth rates are interpreted
+  as Annual Equivalent Rates, with contributions handled via AER-to-monthly conversion.
 
-  Formula: FV = PV(1+r)^n + PMT[((1+r)^n - 1) / r]
-  Where:
-  - PV = Present Value (current_value)
-  - PMT = Annual Payment (annual_contribution)
-  - r = Annual growth rate
-  - n = Number of years
+  ## AER Methodology
+
+  - Growth rates are treated as Annual Equivalent Rates (user expectation: 7% = 7% effective annually)
+  - Monthly contributions use proper AER-to-monthly rate conversion
+  - Results match user expectations for annual growth rates
+  - Consistent across all time periods and scenario analysis
 
   ## Examples
 
@@ -217,76 +228,26 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
   # Private calculation functions
 
   defp calculate_compound_growth_with_contributions(current_value, annual_contribution, years, growth_rate) do
-    cond do
-      years == 0 ->
-        # Zero years means no growth, return original value
-        current_value
+    # Delegate to AERCalculator for standardized compound interest methodology
+    # Convert annual contribution to monthly for AERCalculator API
+    monthly_contribution = Decimal.div(annual_contribution, Decimal.new("12"))
 
-      Decimal.equal?(growth_rate, Decimal.new("0")) ->
-        # Zero growth: just add contributions
-        total_contributions = Decimal.mult(annual_contribution, Decimal.new(to_string(years)))
-        Decimal.add(current_value, total_contributions)
+    # Use AERCalculator.compound_with_aer/4 for consistent calculations
+    result =
+      AERCalculator.compound_with_aer(
+        current_value,
+        growth_rate,
+        years,
+        monthly_contribution
+      )
 
-      true ->
-        # Use appropriate compounding based on contributions
-        if Decimal.equal?(annual_contribution, Decimal.new("0")) do
-          # No contributions: use annual compounding for standard results
-          current_value
-          |> calculate_future_value_of_present(growth_rate, years)
-          |> Decimal.round(2)
-        else
-          # With contributions: use monthly compounding for accuracy
-          monthly_rate = Decimal.div(growth_rate, Decimal.new("12"))
-          monthly_contribution = Decimal.div(annual_contribution, Decimal.new("12"))
-          months = years * 12
-
-          future_value_of_present =
-            calculate_future_value_of_present_monthly(current_value, monthly_rate, months)
-
-          future_value_of_annuity =
-            calculate_future_value_of_annuity_monthly(monthly_contribution, monthly_rate, months)
-
-          future_value_of_present
-          |> Decimal.add(future_value_of_annuity)
-          |> Decimal.round(2)
-        end
-    end
-  end
-
-  defp calculate_future_value_of_present(current_value, growth_rate, years) do
-    # FV = PV * (1 + r)^n (annual compounding)
-    growth_factor = Decimal.add(Decimal.new("1"), growth_rate)
-    compound_factor = calculate_power(growth_factor, years)
-    Decimal.mult(current_value, compound_factor)
-  end
-
-  defp calculate_future_value_of_present_monthly(current_value, monthly_rate, months) do
-    # FV = PV * (1 + r)^n (monthly compounding)
-    growth_factor = Decimal.add(Decimal.new("1"), monthly_rate)
-    compound_factor = calculate_power(growth_factor, months)
-    Decimal.mult(current_value, compound_factor)
-  end
-
-  defp calculate_future_value_of_annuity_monthly(monthly_contribution, monthly_rate, months) do
-    # FV_Annuity = PMT * [((1 + r)^n - 1) / r] (monthly payments)
-    if Decimal.equal?(monthly_contribution, Decimal.new("0")) do
-      Decimal.new("0")
+    # For scenarios with contributions, round to 2 decimal places for backward compatibility
+    # For growth-only scenarios, maintain AERCalculator precision for exact UI interpretation
+    if Decimal.equal?(annual_contribution, Decimal.new("0")) do
+      result
     else
-      growth_factor = Decimal.add(Decimal.new("1"), monthly_rate)
-      compound_factor = calculate_power(growth_factor, months)
-
-      numerator = Decimal.sub(compound_factor, Decimal.new("1"))
-      annuity_factor = Decimal.div(numerator, monthly_rate)
-
-      Decimal.mult(monthly_contribution, annuity_factor)
+      Decimal.round(result, 2)
     end
-  end
-
-  defp calculate_power(base, exponent) do
-    # Calculate base^exponent using iterative multiplication for precision
-    Enum.reduce(1..exponent, Decimal.new("1"), fn _iteration, acc ->
-      Decimal.mult(acc, base)
-    end)
   end
 
   # Multi-period validation and calculation helpers
@@ -419,7 +380,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
       low |> Decimal.add(high) |> Decimal.div(Decimal.new("2"))
     else
       mid = low |> Decimal.add(high) |> Decimal.div(Decimal.new("2"))
-      mid_power_n = calculate_power(mid, Decimal.to_integer(n))
+      mid_power_n = power(mid, Decimal.to_integer(n))
 
       case Decimal.compare(mid_power_n, target) do
         :lt ->
@@ -719,27 +680,28 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
   end
 
   defp validate_custom_scenarios(scenarios) when is_list(scenarios) do
-    if Enum.all?(scenarios, &valid_custom_scenario?/1) do
-      # Check for unrealistic growth rates in scenarios
-      unrealistic =
-        Enum.find(scenarios, fn scenario ->
-          case validate_growth_rate(scenario.rate) do
-            {:error, :unrealistic_growth} -> true
-            _ -> false
-          end
-        end)
+    cond do
+      not Enum.all?(scenarios, &valid_custom_scenario?/1) ->
+        {:error, :invalid_scenario}
 
-      if unrealistic do
+      find_unrealistic_growth_rate_scenario(scenarios) ->
         {:error, :unrealistic_growth}
-      else
+
+      true ->
         :ok
-      end
-    else
-      {:error, :invalid_scenario}
     end
   end
 
   defp validate_custom_scenarios(_), do: {:error, :invalid_scenario}
+
+  defp find_unrealistic_growth_rate_scenario(scenarios) do
+    Enum.find(scenarios, fn scenario ->
+      case validate_growth_rate(scenario.rate) do
+        {:error, :unrealistic_growth} -> true
+        _ -> false
+      end
+    end)
+  end
 
   defp valid_custom_scenario?(%{name: name, rate: %Decimal{}} = _scenario) when is_atom(name), do: true
 
@@ -772,36 +734,54 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
       # Close enough, return the higher bound to ensure we meet target
       max_years
     else
-      mid_years = div(min_years + max_years, 2)
+      perform_binary_search_for_target_years(
+        current_value,
+        annual_contribution,
+        target_amount,
+        growth_rate,
+        min_years,
+        max_years
+      )
+    end
+  end
 
-      case project_portfolio_growth(current_value, annual_contribution, mid_years, growth_rate) do
-        {:ok, projected_value} ->
-          if Decimal.compare(projected_value, target_amount) == :lt do
-            # Need more years
-            find_years_to_target(
-              current_value,
-              annual_contribution,
-              target_amount,
-              growth_rate,
-              mid_years,
-              max_years
-            )
-          else
-            # We've reached the target, try fewer years
-            find_years_to_target(
-              current_value,
-              annual_contribution,
-              target_amount,
-              growth_rate,
-              min_years,
-              mid_years
-            )
-          end
+  defp perform_binary_search_for_target_years(
+         current_value,
+         annual_contribution,
+         target_amount,
+         growth_rate,
+         min_years,
+         max_years
+       ) do
+    mid_years = div(min_years + max_years, 2)
 
-        {:error, _reason} ->
-          # Default to max years if calculation fails
-          max_years
-      end
+    case project_portfolio_growth(current_value, annual_contribution, mid_years, growth_rate) do
+      {:ok, projected_value} ->
+        if Decimal.compare(projected_value, target_amount) == :lt do
+          # Need more years
+          find_years_to_target(
+            current_value,
+            annual_contribution,
+            target_amount,
+            growth_rate,
+            mid_years,
+            max_years
+          )
+        else
+          # We've reached the target, try fewer years
+          find_years_to_target(
+            current_value,
+            annual_contribution,
+            target_amount,
+            growth_rate,
+            min_years,
+            mid_years
+          )
+        end
+
+      {:error, _reason} ->
+        # Default to max years if calculation fails
+        max_years
     end
   end
 
@@ -1123,19 +1103,22 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
       # No growth: annuity factor is just the number of years
       {:ok, Decimal.new(to_string(years))}
     else
-      # Annuity factor: [((1+r)^n - 1) / r]
-      # For monthly contributions, we use monthly compounding
-      monthly_rate = Decimal.div(growth_rate, Decimal.new("12"))
-      months = years * 12
+      # Use AERCalculator to determine the annuity factor
+      # Calculate what $1/month for N years would grow to, then derive factor
+      unit_monthly_contribution = Decimal.new("1")
 
-      growth_factor = Decimal.add(Decimal.new("1"), monthly_rate)
-      compound_factor = calculate_power(growth_factor, months)
+      future_value_of_unit_contributions =
+        AERCalculator.compound_with_aer(
+          # No initial principal 
+          Decimal.new("0"),
+          growth_rate,
+          years,
+          unit_monthly_contribution
+        )
 
-      numerator = Decimal.sub(compound_factor, Decimal.new("1"))
-      monthly_annuity_factor = Decimal.div(numerator, monthly_rate)
-
-      # Convert to annual annuity factor
-      annual_annuity_factor = Decimal.div(monthly_annuity_factor, Decimal.new("12"))
+      # Annual annuity factor = FV of $1/month contributions * 12 (to convert to annual basis)
+      # This gives us the factor to multiply annual contributions by
+      annual_annuity_factor = Decimal.div(future_value_of_unit_contributions, Decimal.new("12"))
 
       {:ok, annual_annuity_factor}
     end
@@ -1198,5 +1181,13 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
       end)
 
     Decimal.round(probability, 2)
+  end
+
+  # Helper function for power calculations
+  defp power(base, exponent) when is_integer(exponent) and exponent >= 0 do
+    # Use float math for precision with large exponents
+    base_float = Decimal.to_float(base)
+    result_float = :math.pow(base_float, exponent)
+    Decimal.from_float(result_float)
   end
 end

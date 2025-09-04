@@ -55,15 +55,15 @@ label: lib/ashfolio_web/components/core_components.ex:397 (3x) | attrs: ["for"]
 error: lib/ashfolio_web/components/core_components.ex:410 (9x)
 
 # === DEPENDENCIES ===
-ash: ✅ (1181)
+ash: ✅ (1183)
 contex: ✅ (130)
-decimal: ✅ (1644)
+decimal: ✅ (1616)
 mox: ✅ (1)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio/financial_management/aer_calculator.ex", "lib/ashfolio/financial_management/retirement_calculator.ex", "test/ashfolio/financial_management/aer_calculator_test.exs", "test/ashfolio/financial_management/emergency_fund_calculator_test.exs", "test/ashfolio_web/live/dashboard_live/expense_widget_test.exs"]
+recent: ["lib/ashfolio/financial_management/aer_calculator.ex", "lib/ashfolio/financial_management/forecast_calculator.ex", "lib/ashfolio/financial_management/retirement_calculator.ex", "test/ashfolio/financial_management/aer_calculator_test.exs", "test/ashfolio/financial_management/forecast_calculator_aer_test.exs"]
 uncommitted: 0 files
-commits_ahead: 0
+commits_ahead: 1
 
 # === TEST GAPS ===
 missing_tests:
@@ -74,8 +74,8 @@ lib/ashfolio_web/components/top_bar.ex ❌
 lib/ashfolio_web/components/transaction_group.ex ❌
 orphaned_tests:
 test/ashfolio/financial_management/category_migration_test.exs ⚠️
+test/ashfolio/financial_management/forecast_calculator_aer_test.exs ⚠️
 test/ashfolio/financial_management/forecast_chart_data_test.exs ⚠️
-test/ashfolio/financial_management/symbol_search_cache_test.exs ⚠️
 
 # === PATTERNS ===
 error_handling: "put_flash/3"

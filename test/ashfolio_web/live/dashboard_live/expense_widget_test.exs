@@ -21,10 +21,11 @@ defmodule AshfolioWeb.DashboardLive.ExpenseWidgetTest do
           description: "Test expense 1"
         })
 
+      # Both expenses in current month
       {:ok, expense2} =
         Expense.create(%{
           amount: Decimal.new("50.00"),
-          date: Date.utc_today(),  # Both expenses in current month
+          date: Date.utc_today(),
           description: "Test expense 2"
         })
 
