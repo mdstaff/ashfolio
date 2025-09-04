@@ -577,32 +577,37 @@ defmodule AshfolioWeb.AccountLive.Show do
 
     case Context.get_account_with_transactions(account_id, 50) do
       {:ok, data} ->
-        transaction_stats = calculate_transaction_stats(data.transactions)
-
-        # Get balance history if it's a cash account
-        balance_history =
-          if data.account.account_type in [:checking, :savings, :money_market, :cd] do
-            case Context.get_balance_history(account_id) do
-              {:ok, history} -> history
-              {:error, _} -> []
-            end
-          else
-            []
-          end
-
-        socket
-        |> assign(:account, data.account)
-        |> assign(:transactions, data.transactions)
-        |> assign(:balance_history, balance_history)
-        |> assign(:account_summary, data.summary)
-        |> assign(:transaction_stats, transaction_stats)
-        |> assign(:page_title, "#{data.account.name} - Account Details")
-        |> assign(:loading_account, false)
+        process_account_data(socket, data, account_id)
 
       {:error, reason} ->
         socket
         |> put_flash(:error, format_error_message(reason))
         |> push_navigate(to: ~p"/accounts")
+    end
+  end
+
+  defp process_account_data(socket, data, account_id) do
+    transaction_stats = calculate_transaction_stats(data.transactions)
+    balance_history = get_account_balance_history(data.account, account_id)
+
+    socket
+    |> assign(:account, data.account)
+    |> assign(:transactions, data.transactions)
+    |> assign(:balance_history, balance_history)
+    |> assign(:account_summary, data.summary)
+    |> assign(:transaction_stats, transaction_stats)
+    |> assign(:page_title, "#{data.account.name} - Account Details")
+    |> assign(:loading_account, false)
+  end
+
+  defp get_account_balance_history(account, account_id) do
+    if account.account_type in [:checking, :savings, :money_market, :cd] do
+      case Context.get_balance_history(account_id) do
+        {:ok, history} -> history
+        {:error, _} -> []
+      end
+    else
+      []
     end
   end
 

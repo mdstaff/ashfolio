@@ -17,7 +17,7 @@ defmodule AshfolioWeb.HealthController do
       application: %{
         name: "ashfolio",
         version: :ashfolio |> Application.spec(:vsn) |> to_string(),
-        environment: :ashfolio |> Application.get_env(:environment, Mix.env()) |> to_string()
+        environment: :ashfolio |> Application.get_env(:environment, :prod) |> to_string()
       },
       system: get_system_info(),
       database: check_database_health(),

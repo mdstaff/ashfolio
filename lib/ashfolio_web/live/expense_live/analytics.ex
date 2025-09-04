@@ -792,51 +792,7 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
 
     case years_with_data do
       [current_year, previous_year | _] ->
-        current_year_expenses =
-          all_expenses
-          |> Enum.filter(fn expense -> expense.date.year == current_year end)
-          |> calculate_total_expenses()
-
-        previous_year_expenses =
-          all_expenses
-          |> Enum.filter(fn expense -> expense.date.year == previous_year end)
-          |> calculate_total_expenses()
-
-        case Decimal.compare(previous_year_expenses, Decimal.new(0)) do
-          :eq ->
-            %{
-              current_year: current_year,
-              previous_year: previous_year,
-              current_total: current_year_expenses,
-              previous_total: previous_year_expenses,
-              percentage_change: nil,
-              trend: :no_data
-            }
-
-          _ ->
-            # Calculate percentage change: ((current - previous) / previous) * 100
-            difference = Decimal.sub(current_year_expenses, previous_year_expenses)
-
-            percentage_change =
-              difference
-              |> Decimal.div(previous_year_expenses)
-              |> Decimal.mult(Decimal.new(100))
-              |> Decimal.round(1)
-
-            trend =
-              if Decimal.compare(percentage_change, Decimal.new(0)) == :gt,
-                do: :increase,
-                else: :decrease
-
-            %{
-              current_year: current_year,
-              previous_year: previous_year,
-              current_total: current_year_expenses,
-              previous_total: previous_year_expenses,
-              percentage_change: percentage_change,
-              trend: trend
-            }
-        end
+        calculate_year_comparison(all_expenses, current_year, previous_year)
 
       _ ->
         # Not enough data for comparison
@@ -847,6 +803,63 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
           previous_total: Decimal.new(0),
           percentage_change: nil,
           trend: :no_data
+        }
+    end
+  end
+
+  defp calculate_year_comparison(all_expenses, current_year, previous_year) do
+    current_year_expenses =
+      all_expenses
+      |> Enum.filter(fn expense -> expense.date.year == current_year end)
+      |> calculate_total_expenses()
+
+    previous_year_expenses =
+      all_expenses
+      |> Enum.filter(fn expense -> expense.date.year == previous_year end)
+      |> calculate_total_expenses()
+
+    build_year_comparison_result(
+      current_year,
+      previous_year,
+      current_year_expenses,
+      previous_year_expenses
+    )
+  end
+
+  defp build_year_comparison_result(current_year, previous_year, current_total, previous_total) do
+    case Decimal.compare(previous_total, Decimal.new(0)) do
+      :eq ->
+        %{
+          current_year: current_year,
+          previous_year: previous_year,
+          current_total: current_total,
+          previous_total: previous_total,
+          percentage_change: nil,
+          trend: :no_data
+        }
+
+      _ ->
+        # Calculate percentage change: ((current - previous) / previous) * 100
+        difference = Decimal.sub(current_total, previous_total)
+
+        percentage_change =
+          difference
+          |> Decimal.div(previous_total)
+          |> Decimal.mult(Decimal.new(100))
+          |> Decimal.round(1)
+
+        trend =
+          if Decimal.compare(percentage_change, Decimal.new(0)) == :gt,
+            do: :increase,
+            else: :decrease
+
+        %{
+          current_year: current_year,
+          previous_year: previous_year,
+          current_total: current_total,
+          previous_total: previous_total,
+          percentage_change: percentage_change,
+          trend: trend
         }
     end
   end

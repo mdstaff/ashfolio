@@ -573,15 +573,10 @@ defmodule Ashfolio.Context do
 
   # Error handling standardization
 
-  defp normalize_error(%Ash.Error.Invalid{}), do: {:error, :validation_failed}
-  defp normalize_error(%Ash.Error.Query.NotFound{}), do: {:error, :account_not_found}
   # Note: :user_not_found removed - no longer applicable in database-as-user architecture
   defp normalize_error({:error, :account_not_found}), do: {:error, :account_not_found}
   defp normalize_error({:error, :validation_failed}), do: {:error, :validation_failed}
-  defp normalize_error({:error, :insufficient_data}), do: {:error, :insufficient_data}
-  defp normalize_error({:error, :service_unavailable}), do: {:error, :service_unavailable}
-  defp normalize_error({:error, _}), do: {:error, :database_error}
-  defp normalize_error(_), do: {:error, :database_error}
+  defp normalize_error({:error, _reason}), do: {:error, :database_error}
 
   # Performance monitoring
 

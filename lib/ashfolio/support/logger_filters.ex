@@ -33,7 +33,7 @@ defmodule Ashfolio.Support.LoggerFilters do
       when level in [:error, :warning] do
     # SAFETY: Configurable filter with multiple safeguards
     filter_enabled =
-      Mix.env() == :test and
+      Application.get_env(:ashfolio, :environment, :prod) == :test and
         System.get_env("ASHFOLIO_FILTER_SQLITE_ERRORS", "true") in ["true", "1", "yes"]
 
     if filter_enabled do

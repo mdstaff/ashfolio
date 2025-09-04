@@ -264,8 +264,6 @@ defmodule AshfolioWeb.Live.ErrorHelpers do
     Enum.join(errors, "; ")
   end
 
-  defp format_validation_errors(error) when is_binary(error), do: error
-
   defp humanize_field(field) when is_atom(field) do
     field
     |> Atom.to_string()

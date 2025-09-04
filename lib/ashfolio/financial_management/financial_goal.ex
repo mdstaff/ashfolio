@@ -268,39 +268,30 @@ defmodule Ashfolio.FinancialManagement.FinancialGoal do
     and suggested monthly contribution for emergency fund planning.
     """
     def setup_emergency_fund_goal!(months \\ 6) do
-      alias Ashfolio.FinancialManagement.EmergencyFundCalculator
-
       existing_goals = by_type!(:emergency_fund)
 
       case existing_goals do
-        [] ->
-          # No existing emergency fund goal, create one
-          case EmergencyFundCalculator.auto_create_emergency_fund_goal(months) do
-            {:ok, goal} -> {:created, goal}
-            {:error, reason} -> {:error, reason}
-          end
+        [] -> create_new_emergency_fund_goal(months)
+        [goal | _] -> update_existing_emergency_fund_goal(goal, months)
+      end
+    end
 
-        [goal | _] ->
-          # Update existing goal with current expense data
-          case EmergencyFundCalculator.calculate_monthly_expenses_from_period(12) do
-            {:ok, monthly_expenses} ->
-              case EmergencyFundCalculator.calculate_emergency_fund_target(
-                     monthly_expenses,
-                     months
-                   ) do
-                {:ok, new_target} ->
-                  case update(goal, %{target_amount: new_target}) do
-                    {:ok, updated_goal} -> {:updated, updated_goal}
-                    {:error, reason} -> {:error, reason}
-                  end
+    defp create_new_emergency_fund_goal(months) do
+      alias Ashfolio.FinancialManagement.EmergencyFundCalculator
 
-                {:error, reason} ->
-                  {:error, reason}
-              end
+      case EmergencyFundCalculator.auto_create_emergency_fund_goal(months) do
+        {:ok, goal} -> {:created, goal}
+        {:error, reason} -> {:error, reason}
+      end
+    end
 
-            {:error, reason} ->
-              {:error, reason}
-          end
+    defp update_existing_emergency_fund_goal(goal, months) do
+      alias Ashfolio.FinancialManagement.EmergencyFundCalculator
+
+      with {:ok, monthly_expenses} <- EmergencyFundCalculator.calculate_monthly_expenses_from_period(12),
+           {:ok, new_target} <- EmergencyFundCalculator.calculate_emergency_fund_target(monthly_expenses, months),
+           {:ok, updated_goal} <- update(goal, %{target_amount: new_target}) do
+        {:updated, updated_goal}
       end
     end
 
@@ -317,62 +308,80 @@ defmodule Ashfolio.FinancialManagement.FinancialGoal do
 
       case EmergencyFundCalculator.calculate_monthly_expenses_from_period(12) do
         {:ok, monthly_expenses} ->
-          case emergency_goals do
-            [] ->
-              # No goal exists, provide recommendation to create one
-              {:ok, target_amount} =
-                EmergencyFundCalculator.calculate_emergency_fund_target(monthly_expenses, 6)
-
-              {:no_goal,
-               %{
-                 recommended_target: target_amount,
-                 monthly_expenses: monthly_expenses,
-                 months_coverage: 6,
-                 status: :no_goal,
-                 message: "No emergency fund goal set. Consider creating one."
-               }}
-
-            [goal | _] ->
-              # Analyze existing goal
-              # Emergency fund status calculation (always returns {:ok, status})
-              {:ok, status} =
-                EmergencyFundCalculator.emergency_fund_status(
-                  goal.target_amount,
-                  goal.current_amount,
-                  goal.monthly_contribution || Decimal.new("0.00")
-                )
-
-              readiness_level =
-                cond do
-                  status.goal_achieved ->
-                    :fully_funded
-
-                  Decimal.gte?(status.progress_percentage, Decimal.new("75.00")) ->
-                    :mostly_funded
-
-                  Decimal.gte?(status.progress_percentage, Decimal.new("25.00")) ->
-                    :partially_funded
-
-                  true ->
-                    :underfunded
-                end
-
-              {:analysis,
-               Map.merge(status, %{
-                 goal: goal,
-                 monthly_expenses: monthly_expenses,
-                 readiness_level: readiness_level,
-                 recommended_target: goal.target_amount,
-                 months_coverage:
-                   if(Decimal.gt?(monthly_expenses, Decimal.new("0.00")),
-                     do: goal.target_amount |> Decimal.div(monthly_expenses) |> Decimal.round(1),
-                     else: Decimal.new("0.00")
-                   )
-               })}
-          end
+          analyze_emergency_fund_with_expenses(emergency_goals, monthly_expenses)
 
         {:error, reason} ->
           {:error, reason}
+      end
+    end
+
+    # Helper function to reduce nesting depth
+    defp analyze_emergency_fund_with_expenses([], monthly_expenses) do
+      alias Ashfolio.FinancialManagement.EmergencyFundCalculator
+
+      # No goal exists, provide recommendation to create one
+      {:ok, target_amount} =
+        EmergencyFundCalculator.calculate_emergency_fund_target(monthly_expenses, 6)
+
+      {:no_goal,
+       %{
+         recommended_target: target_amount,
+         monthly_expenses: monthly_expenses,
+         months_coverage: 6,
+         status: :no_goal,
+         message: "No emergency fund goal set. Consider creating one."
+       }}
+    end
+
+    defp analyze_emergency_fund_with_expenses([goal | _], monthly_expenses) do
+      analyze_existing_emergency_fund_goal(goal, monthly_expenses)
+    end
+
+    # Helper function to reduce nesting depth
+    defp analyze_existing_emergency_fund_goal(goal, monthly_expenses) do
+      alias Ashfolio.FinancialManagement.EmergencyFundCalculator
+
+      # Emergency fund status calculation (always returns {:ok, status})
+      {:ok, status} =
+        EmergencyFundCalculator.emergency_fund_status(
+          goal.target_amount,
+          goal.current_amount,
+          goal.monthly_contribution || Decimal.new("0.00")
+        )
+
+      readiness_level = determine_readiness_level(status.progress_percentage, status.goal_achieved)
+
+      months_coverage =
+        if Decimal.gt?(monthly_expenses, Decimal.new("0.00")) do
+          goal.target_amount |> Decimal.div(monthly_expenses) |> Decimal.round(1)
+        else
+          Decimal.new("0.00")
+        end
+
+      {:analysis,
+       Map.merge(status, %{
+         goal: goal,
+         monthly_expenses: monthly_expenses,
+         readiness_level: readiness_level,
+         recommended_target: goal.target_amount,
+         months_coverage: months_coverage
+       })}
+    end
+
+    # Helper function to reduce nesting depth
+    defp determine_readiness_level(progress_percentage, goal_achieved) do
+      cond do
+        goal_achieved ->
+          :fully_funded
+
+        Decimal.gte?(progress_percentage, Decimal.new("75.00")) ->
+          :mostly_funded
+
+        Decimal.gte?(progress_percentage, Decimal.new("25.00")) ->
+          :partially_funded
+
+        true ->
+          :underfunded
       end
     end
   end

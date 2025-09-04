@@ -394,10 +394,6 @@ defmodule Ashfolio.FinancialManagement.SymbolSearch do
       {:error, %HTTPoison.Error{reason: reason}} ->
         Logger.warning("HTTP error during external symbol search: #{inspect(reason)}")
         {:error, :network_error}
-
-      {:error, reason} ->
-        Logger.error("Unexpected error during external symbol search: #{inspect(reason)}")
-        {:error, :api_unavailable}
     end
   end
 

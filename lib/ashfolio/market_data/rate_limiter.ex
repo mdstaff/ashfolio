@@ -31,7 +31,7 @@ defmodule Ashfolio.MarketData.RateLimiter do
   """
   def check_rate_limit(operation \\ :price_refresh, count \\ 1) do
     # Disable rate limiting in test environment to avoid interfering with tests
-    if Mix.env() == :test do
+    if Application.get_env(:ashfolio, :environment, :prod) == :test do
       :ok
     else
       GenServer.call(__MODULE__, {:check_rate_limit, operation, count})

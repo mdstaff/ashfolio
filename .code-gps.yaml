@@ -55,15 +55,15 @@ label: lib/ashfolio_web/components/core_components.ex:398 (3x) | attrs: ["for"]
 error: lib/ashfolio_web/components/core_components.ex:411 (9x)
 
 # === DEPENDENCIES ===
-ash: ✅ (1183)
+ash: ✅ (1181)
 contex: ✅ (126)
-decimal: ✅ (1616)
+decimal: ✅ (1611)
 mox: ✅ (1)
 
 # === FRESHNESS ===
-recent: [".credo.exs", "lib/ashfolio/context.ex", "lib/ashfolio/financial_management/contribution_analyzer.ex", "lib/ashfolio/financial_management/forecast_calculator.ex", "lib/ashfolio/performance_monitor.ex"]
-uncommitted: 8 files
-commits_ahead: 2
+recent: ["lib/ashfolio/financial_management/contribution_analyzer.ex", "lib/ashfolio/financial_management/financial_goal.ex", "lib/ashfolio/market_data/price_manager.ex", "lib/ashfolio/portfolio/calculator_optimized.ex", "lib/ashfolio/portfolio/holdings_calculator.ex"]
+uncommitted: 6 files
+commits_ahead: 4
 
 # === TEST GAPS ===
 missing_tests:

@@ -457,8 +457,7 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
     errors =
       case form_or_changeset do
         %AshPhoenix.Form{} = form -> AshPhoenix.Form.errors(form)
-        %Ash.Changeset{} = changeset -> changeset.errors
-        _ -> []
+        %Phoenix.HTML.Form{} = form -> form.errors
       end
 
     errors
@@ -518,21 +517,29 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
   defp calculate_months_to_goal(goal_params) do
     case Map.get(goal_params, "target_date") do
       target_date when is_binary(target_date) and target_date != "" ->
-        case Date.from_iso8601(target_date) do
-          {:ok, date} ->
-            today = Date.utc_today()
-
-            case Date.diff(date, today) do
-              days when days > 0 -> Decimal.new(div(days, 30))
-              _ -> Decimal.new("0")
-            end
-
-          _ ->
-            nil
-        end
+        calculate_months_from_date(target_date)
 
       _ ->
         nil
+    end
+  end
+
+  defp calculate_months_from_date(target_date) do
+    case Date.from_iso8601(target_date) do
+      {:ok, date} ->
+        days_to_goal(date)
+
+      _ ->
+        nil
+    end
+  end
+
+  defp days_to_goal(date) do
+    today = Date.utc_today()
+
+    case Date.diff(date, today) do
+      days when days > 0 -> Decimal.new(div(days, 30))
+      _ -> Decimal.new("0")
     end
   end
 

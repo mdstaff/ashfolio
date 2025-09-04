@@ -124,22 +124,27 @@ defmodule Ashfolio.SQLiteConcurrencyHelpers do
     # Reverse order for proper foreign key cleanup
     cleanup_specs
     |> Enum.reverse()
-    |> Enum.each(fn {module, filters} ->
-      with_retry(fn ->
-        case module.list() do
-          {:ok, records} ->
-            records
-            |> Enum.filter(fn record ->
-              Enum.all?(filters, fn {key, value} ->
-                Map.get(record, key) == value
-              end)
-            end)
-            |> Enum.each(&module.destroy/1)
+    |> Enum.each(&cleanup_module_data/1)
+  end
 
-          _ ->
-            :ok
-        end
-      end)
+  defp cleanup_module_data({module, filters}) do
+    with_retry(fn ->
+      case module.list() do
+        {:ok, records} -> delete_filtered_records(records, filters, module)
+        _ -> :ok
+      end
+    end)
+  end
+
+  defp delete_filtered_records(records, filters, module) do
+    records
+    |> Enum.filter(&record_matches_filters?(&1, filters))
+    |> Enum.each(&module.destroy/1)
+  end
+
+  defp record_matches_filters?(record, filters) do
+    Enum.all?(filters, fn {key, value} ->
+      Map.get(record, key) == value
     end)
   end
 

@@ -677,7 +677,6 @@ defmodule AshfolioWeb.AccountLive.Index do
 
   defp get_filtered_accounts(accounts, _filter) when is_list(accounts), do: accounts
 
-  defp format_error_message(:user_not_found), do: "User not found"
   defp format_error_message(reason), do: "Failed to load dashboard data: #{inspect(reason)}"
 
   defp apply_action(socket, :index, _params) do

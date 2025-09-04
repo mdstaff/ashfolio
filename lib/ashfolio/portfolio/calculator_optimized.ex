@@ -25,28 +25,7 @@ defmodule Ashfolio.Portfolio.CalculatorOptimized do
         if Enum.empty?(active_accounts) do
           {:ok, []}
         else
-          account_ids = Enum.map(active_accounts, & &1.id)
-
-          # Get all transactions in one query
-          all_transactions = Enum.flat_map(account_ids, &get_holdings_for_account/1)
-
-          # Extract unique symbol IDs
-          symbol_ids =
-            all_transactions
-            |> Enum.map(& &1.symbol_id)
-            |> Enum.uniq()
-
-          # Batch fetch all symbols in single query - eliminates N+1
-          case Symbol.get_by_ids(symbol_ids) do
-            {:ok, symbols} ->
-              symbol_map = Map.new(symbols, &{&1.id, &1})
-              holdings = group_holdings_with_preloaded_symbols(all_transactions, symbol_map)
-              {:ok, holdings}
-
-            {:error, reason} ->
-              Logger.warning("Failed to batch fetch symbols: #{inspect(reason)}")
-              {:error, reason}
-          end
+          process_active_accounts(active_accounts)
         end
 
       {:error, reason} ->
@@ -56,6 +35,31 @@ defmodule Ashfolio.Portfolio.CalculatorOptimized do
     error ->
       Logger.error("Error getting optimized holdings: #{inspect(error)}")
       {:error, :calculation_error}
+  end
+
+  defp process_active_accounts(active_accounts) do
+    account_ids = Enum.map(active_accounts, & &1.id)
+    all_transactions = Enum.flat_map(account_ids, &get_holdings_for_account/1)
+
+    symbol_ids =
+      all_transactions
+      |> Enum.map(& &1.symbol_id)
+      |> Enum.uniq()
+
+    fetch_symbols_and_build_holdings(symbol_ids, all_transactions)
+  end
+
+  defp fetch_symbols_and_build_holdings(symbol_ids, all_transactions) do
+    case Symbol.get_by_ids(symbol_ids) do
+      {:ok, symbols} ->
+        symbol_map = Map.new(symbols, &{&1.id, &1})
+        holdings = group_holdings_with_preloaded_symbols(all_transactions, symbol_map)
+        {:ok, holdings}
+
+      {:error, reason} ->
+        Logger.warning("Failed to batch fetch symbols: #{inspect(reason)}")
+        {:error, reason}
+    end
   end
 
   # Private helper for optimized symbol grouping
@@ -88,23 +92,38 @@ defmodule Ashfolio.Portfolio.CalculatorOptimized do
     Enum.reduce(transactions, {Decimal.new(0), Decimal.new(0)}, fn transaction, {net_qty, total_cost} ->
       case transaction.type do
         :buy ->
-          new_qty = Decimal.add(net_qty, transaction.quantity)
-          new_cost = Decimal.add(total_cost, transaction.total_amount)
-          {new_qty, new_cost}
+          handle_buy_transaction(transaction, net_qty, total_cost)
 
         :sell ->
-          new_qty = Decimal.add(net_qty, transaction.quantity)
-
-          if Decimal.equal?(net_qty, 0) do
-            {new_qty, total_cost}
-          else
-            sell_ratio = Decimal.div(Decimal.abs(transaction.quantity), net_qty)
-            cost_reduction = Decimal.mult(total_cost, sell_ratio)
-            new_cost = Decimal.sub(total_cost, cost_reduction)
-            {new_qty, new_cost}
-          end
+          handle_sell_transaction(transaction, net_qty, total_cost)
       end
     end)
+  end
+
+  # Helper function to reduce nesting depth
+  defp handle_buy_transaction(transaction, net_qty, total_cost) do
+    new_qty = Decimal.add(net_qty, transaction.quantity)
+    new_cost = Decimal.add(total_cost, transaction.total_amount)
+    {new_qty, new_cost}
+  end
+
+  # Helper function to reduce nesting depth
+  defp handle_sell_transaction(transaction, net_qty, total_cost) do
+    new_qty = Decimal.add(net_qty, transaction.quantity)
+
+    if Decimal.equal?(net_qty, 0) do
+      {new_qty, total_cost}
+    else
+      calculate_sell_cost_reduction(transaction, net_qty, new_qty, total_cost)
+    end
+  end
+
+  # Helper function to reduce nesting depth
+  defp calculate_sell_cost_reduction(transaction, net_qty, new_qty, total_cost) do
+    sell_ratio = Decimal.div(Decimal.abs(transaction.quantity), net_qty)
+    cost_reduction = Decimal.mult(total_cost, sell_ratio)
+    new_cost = Decimal.sub(total_cost, cost_reduction)
+    {new_qty, new_cost}
   end
 
   defp get_holdings_for_account(account_id) do

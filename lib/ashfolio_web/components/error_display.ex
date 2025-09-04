@@ -218,7 +218,6 @@ defmodule AshfolioWeb.Components.ErrorDisplay do
   defp format_error_message(error_tuple) do
     case ErrorHandler.handle_error(error_tuple) do
       {:error, message} -> message
-      _ -> "An unexpected error occurred. Please try again."
     end
   end
 end

@@ -615,39 +615,46 @@ defmodule AshfolioWeb.Components.ForecastChart do
 
   defp process_chart_data(%{data: data, type: type}) do
     case type do
-      :single_projection ->
-        %{
-          years: data.years || [],
-          values: data.values || []
-        }
-
-      :scenario_comparison ->
-        %{
-          years: data.years || [],
-          pessimistic: data.pessimistic || [],
-          realistic: data.realistic || [],
-          optimistic: data.optimistic || []
-        }
-
-      :confidence_band ->
-        %{
-          years: data.years || [],
-          median: data.median || [],
-          lower_bound: data.lower_bound || [],
-          upper_bound: data.upper_bound || []
-        }
-
-      :stacked_breakdown ->
-        %{
-          years: data.years || [],
-          principal: data.principal || [],
-          contributions: data.contributions || [],
-          growth: data.growth || []
-        }
-
-      _ ->
-        data
+      :single_projection -> build_single_projection_data(data)
+      :scenario_comparison -> build_scenario_comparison_data(data)
+      :confidence_band -> build_confidence_band_data(data)
+      :stacked_breakdown -> build_stacked_breakdown_data(data)
+      _ -> data
     end
+  end
+
+  defp build_single_projection_data(data) do
+    %{
+      years: data.years || [],
+      values: data.values || []
+    }
+  end
+
+  defp build_scenario_comparison_data(data) do
+    %{
+      years: data.years || [],
+      pessimistic: data.pessimistic || [],
+      realistic: data.realistic || [],
+      optimistic: data.optimistic || []
+    }
+  end
+
+  defp build_confidence_band_data(data) do
+    %{
+      years: data.years || [],
+      median: data.median || [],
+      lower_bound: data.lower_bound || [],
+      upper_bound: data.upper_bound || []
+    }
+  end
+
+  defp build_stacked_breakdown_data(data) do
+    %{
+      years: data.years || [],
+      principal: data.principal || [],
+      contributions: data.contributions || [],
+      growth: data.growth || []
+    }
   end
 
   defp empty_data?(%{years: years, values: values}) when is_list(years) and is_list(values) do

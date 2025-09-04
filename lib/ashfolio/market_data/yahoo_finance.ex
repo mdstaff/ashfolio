@@ -46,10 +46,6 @@ defmodule Ashfolio.MarketData.YahooFinance do
       {:error, %HTTPoison.Error{reason: reason}} ->
         Logger.error("HTTP error fetching price for #{symbol}: #{inspect(reason)}")
         {:error, :network_error}
-
-      {:error, reason} ->
-        Logger.error("Unexpected error fetching price for #{symbol}: #{inspect(reason)}")
-        {:error, :unknown_error}
     end
   end
 

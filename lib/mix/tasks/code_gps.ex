@@ -13,7 +13,7 @@ defmodule Mix.Tasks.CodeGps do
   use Mix.Task
 
   def run(_args) do
-    Mix.Task.run("compile")
+    Application.ensure_all_started(:ashfolio)
 
     IO.puts("🧭 Analyzing codebase structure...")
     start_time = System.monotonic_time(:millisecond)
@@ -321,19 +321,24 @@ defmodule Mix.Tasks.CodeGps do
       end)
 
     if start_line do
-      # Look backwards for attr definitions
-      lines
-      |> Enum.slice(max(0, start_line - 10), 10)
-      |> Enum.filter(&String.contains?(&1, "attr "))
-      |> Enum.map(fn line ->
-        case Regex.run(~r/attr\s+:(\w+)/, line) do
-          [_, attr] -> attr
-          _ -> nil
-        end
-      end)
-      |> Enum.reject(&is_nil/1)
+      extract_attrs_from_lines(lines, start_line)
     else
       []
+    end
+  end
+
+  defp extract_attrs_from_lines(lines, start_line) do
+    lines
+    |> Enum.slice(max(0, start_line - 10), 10)
+    |> Enum.filter(&String.contains?(&1, "attr "))
+    |> Enum.map(&extract_attr_from_line/1)
+    |> Enum.reject(&is_nil/1)
+  end
+
+  defp extract_attr_from_line(line) do
+    case Regex.run(~r/attr\s+:(\w+)/, line) do
+      [_, attr] -> attr
+      _ -> nil
     end
   end
 
@@ -516,48 +521,63 @@ defmodule Mix.Tasks.CodeGps do
 
   defp encode_suggestions_structured(suggestions) do
     suggestions
-    |> Enum.map(fn sugg ->
-      # Group steps by action type for readability
-      subscribe_steps = Enum.filter(sugg.steps, &String.contains?(&1.action, "subscription"))
-      load_steps = Enum.filter(sugg.steps, &String.contains?(&1.action, ["Load", "Add event"]))
-
-      render_steps =
-        Enum.filter(sugg.steps, &String.contains?(&1.action, ["widget", "Add expense"]))
-
-      steps_summary = []
-
-      steps_summary =
-        if length(subscribe_steps) > 0 do
-          step = List.first(subscribe_steps)
-          steps_summary ++ ["  subscribe: #{step.file}:#{step[:line] || "mount+2"}"]
-        else
-          steps_summary
-        end
-
-      steps_summary =
-        if length(load_steps) > 0 do
-          step = List.first(load_steps)
-          steps_summary ++ ["  load_data: #{step.file}:#{step[:after_function] || "?"}"]
-        else
-          steps_summary
-        end
-
-      steps_summary =
-        if length(render_steps) > 0 do
-          step = List.first(render_steps)
-          steps_summary ++ ["  render: #{step.file}:#{step[:after_line] || "?"}"]
-        else
-          steps_summary
-        end
-
-      """
-      #{sugg.name}:
-        desc: #{sugg.description}
-        priority: #{sugg.priority}
-      #{Enum.join(steps_summary, "\n")}
-      """
-    end)
+    |> Enum.map(&encode_single_suggestion/1)
     |> Enum.map_join("\n", & &1)
+  end
+
+  # Helper function to reduce nesting depth
+  defp encode_single_suggestion(sugg) do
+    # Group steps by action type for readability
+    subscribe_steps = Enum.filter(sugg.steps, &String.contains?(&1.action, "subscription"))
+    load_steps = Enum.filter(sugg.steps, &String.contains?(&1.action, ["Load", "Add event"]))
+    render_steps = Enum.filter(sugg.steps, &String.contains?(&1.action, ["widget", "Add expense"]))
+
+    steps_summary = build_steps_summary(subscribe_steps, load_steps, render_steps)
+
+    """
+    #{sugg.name}:
+      desc: #{sugg.description}
+      priority: #{sugg.priority}
+    #{Enum.join(steps_summary, "\n")}
+    """
+  end
+
+  # Helper function to reduce nesting depth
+  defp build_steps_summary(subscribe_steps, load_steps, render_steps) do
+    []
+    |> add_subscribe_step(subscribe_steps)
+    |> add_load_step(load_steps)
+    |> add_render_step(render_steps)
+  end
+
+  # Helper function to reduce nesting depth
+  defp add_subscribe_step(steps_summary, subscribe_steps) do
+    if length(subscribe_steps) > 0 do
+      step = List.first(subscribe_steps)
+      steps_summary ++ ["  subscribe: #{step.file}:#{step[:line] || "mount+2"}"]
+    else
+      steps_summary
+    end
+  end
+
+  # Helper function to reduce nesting depth
+  defp add_load_step(steps_summary, load_steps) do
+    if length(load_steps) > 0 do
+      step = List.first(load_steps)
+      steps_summary ++ ["  load_data: #{step.file}:#{step[:after_function] || "?"}"]
+    else
+      steps_summary
+    end
+  end
+
+  # Helper function to reduce nesting depth
+  defp add_render_step(steps_summary, render_steps) do
+    if length(render_steps) > 0 do
+      step = List.first(render_steps)
+      steps_summary ++ ["  render: #{step.file}:#{step[:after_line] || "?"}"]
+    else
+      steps_summary
+    end
   end
 
   defp format_list([]), do: "[]"
@@ -570,13 +590,19 @@ defmodule Mix.Tasks.CodeGps do
     if Enum.empty?(routes) do
       "no routes found"
     else
-      routes
-      |> Enum.map(fn {path, module, exists?} ->
-        status = if exists?, do: "✅", else: "❌"
-        "#{path}: #{module} #{status}"
-      end)
-      |> Enum.map_join("\n", & &1)
+      format_routes(routes)
     end
+  end
+
+  defp format_routes(routes) do
+    routes
+    |> Enum.map(&format_route/1)
+    |> Enum.map_join("\n", & &1)
+  end
+
+  defp format_route({path, module, exists?}) do
+    status = if exists?, do: "✅", else: "❌"
+    "#{path}: #{module} #{status}"
   end
 
   defp encode_dependencies(%{key_deps: deps}) do
@@ -588,11 +614,7 @@ defmodule Mix.Tasks.CodeGps do
     |> Enum.map_join("\n", & &1)
   end
 
-  defp encode_freshness(%{
-         recent_files: recent,
-         uncommitted_count: uncommitted,
-         commits_ahead: ahead
-       }) do
+  defp encode_freshness(%{recent_files: recent, uncommitted_count: uncommitted, commits_ahead: ahead}) do
     recent_str =
       if length(recent) > 0 do
         "recent: #{inspect(Enum.take(recent, 5))}"
@@ -699,40 +721,43 @@ defmodule Mix.Tasks.CodeGps do
     mix_file = "mix.exs"
 
     if File.exists?(mix_file) do
-      content = File.read!(mix_file)
-
-      # Extract dependencies
-      deps =
-        ~r/\{:([^,]+),/
-        |> Regex.scan(content)
-        |> Enum.map(&List.last/1)
-        |> Enum.uniq()
-
-      # Check usage for key dependencies
-      key_deps = ["contex", "mox", "decimal", "ash"]
-
-      usage_analysis =
-        Map.new(key_deps, fn dep ->
-          usage_count = count_dependency_usage(dep)
-          installed = dep in deps
-
-          status =
-            cond do
-              not installed and usage_count > 0 -> "❌"
-              installed and usage_count == 0 -> "⚠️"
-              installed and usage_count > 0 -> "✅"
-              true -> "➖"
-            end
-
-          {dep, %{status: status, usage_count: usage_count, installed: installed}}
-        end)
-
-      %{
-        total_deps: length(deps),
-        key_deps: usage_analysis
-      }
+      analyze_mix_dependencies(mix_file)
     else
-      %{total_deps: 0, key_deps: %{}}
+      %{key_deps: %{}}
+    end
+  end
+
+  defp analyze_mix_dependencies(mix_file) do
+    content = File.read!(mix_file)
+    deps = extract_dependencies_from_mix(content)
+    key_deps = ["contex", "mox", "decimal", "ash"]
+
+    usage_analysis = Map.new(key_deps, &analyze_dependency(&1, deps))
+
+    %{key_deps: usage_analysis}
+  end
+
+  defp extract_dependencies_from_mix(content) do
+    ~r/\{:([^,]+),/
+    |> Regex.scan(content)
+    |> Enum.map(&List.last/1)
+    |> Enum.uniq()
+  end
+
+  defp analyze_dependency(dep, deps) do
+    usage_count = count_dependency_usage(dep)
+    installed = dep in deps
+    status = get_dependency_status(installed, usage_count)
+
+    {dep, %{status: status, usage_count: usage_count, installed: installed}}
+  end
+
+  defp get_dependency_status(installed, usage_count) do
+    cond do
+      not installed and usage_count > 0 -> "❌"
+      installed and usage_count == 0 -> "⚠️"
+      installed and usage_count > 0 -> "✅"
+      true -> "➖"
     end
   end
 

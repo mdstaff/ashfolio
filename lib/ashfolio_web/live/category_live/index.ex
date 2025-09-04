@@ -476,7 +476,6 @@ defmodule AshfolioWeb.CategoryLive.Index do
   defp attempt_category_deletion(socket, id) do
     case get_category_transaction_count(id) do
       0 -> delete_category(socket, id)
-      count -> handle_category_with_transactions(socket, count)
     end
   end
 
@@ -495,13 +494,5 @@ defmodule AshfolioWeb.CategoryLive.Index do
         |> assign(:deleting_category_id, nil)
         |> ErrorHelpers.put_error_flash(reason, "Failed to delete category")
     end
-  end
-
-  defp handle_category_with_transactions(socket, count) do
-    socket
-    |> assign(:deleting_category_id, nil)
-    |> ErrorHelpers.put_error_flash(
-      "Cannot delete category that has #{count} transaction(s). Remove or reassign transactions first."
-    )
   end
 end

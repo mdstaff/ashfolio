@@ -235,33 +235,13 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
   @impl true
   def handle_event("save", expense_params, socket) do
     socket = assign(socket, :saving, true)
-
-    form_data = %{
-      "description" => String.trim(expense_params["description"] || ""),
-      "amount" => String.trim(expense_params["amount"] || ""),
-      "date" => expense_params["date"] || "",
-      "merchant" => String.trim(expense_params["merchant"] || ""),
-      "notes" => String.trim(expense_params["notes"] || ""),
-      "category_id" => expense_params["category_id"] || "",
-      "account_id" => expense_params["account_id"] || ""
-    }
-
-    # Final validation
+    form_data = sanitize_expense_params(expense_params)
     {form_valid, form_errors} = validate_expense_form(form_data)
 
     if form_valid do
-      case socket.assigns.action do
-        :new ->
-          create_expense(socket, form_data)
-
-        :edit ->
-          update_expense(socket, form_data)
-      end
+      handle_valid_save(socket, form_data)
     else
-      {:noreply,
-       socket
-       |> assign(:saving, false)
-       |> assign(:form_errors, form_errors)}
+      handle_invalid_save(socket, form_errors)
     end
   end
 
@@ -269,6 +249,34 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
   def handle_event("cancel", _params, socket) do
     notify_parent(:cancelled)
     {:noreply, socket}
+  end
+
+  defp sanitize_expense_params(params) do
+    %{
+      "description" => sanitize_string(params["description"]),
+      "amount" => sanitize_string(params["amount"]),
+      "date" => params["date"] || "",
+      "merchant" => sanitize_string(params["merchant"]),
+      "notes" => sanitize_string(params["notes"]),
+      "category_id" => params["category_id"] || "",
+      "account_id" => params["account_id"] || ""
+    }
+  end
+
+  defp sanitize_string(value), do: String.trim(value || "")
+
+  defp handle_valid_save(socket, form_data) do
+    case socket.assigns.action do
+      :new -> create_expense(socket, form_data)
+      :edit -> update_expense(socket, form_data)
+    end
+  end
+
+  defp handle_invalid_save(socket, form_errors) do
+    {:noreply,
+     socket
+     |> assign(:saving, false)
+     |> assign(:form_errors, form_errors)}
   end
 
   # Private functions
@@ -367,7 +375,6 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
 
   defp validate_expense_form(form_data) do
     errors = []
-    
     errors = validate_description(form_data["description"], errors)
     errors = validate_amount(form_data["amount"], errors)
     errors = validate_date(form_data["date"], errors)
