@@ -263,19 +263,19 @@ server mode="":
             if pgrep -f "mix phx.server" > /dev/null; then
                 echo "✅ Phoenix server is running"
                 echo "📱 Available at: http://localhost:4000"
-               
+
                 # Check health endpoint for detailed status
                 if health_response=$(curl -f -s http://localhost:4000/health 2>/dev/null); then
                     echo "🌐 Server is responding to requests"
                     echo "🏥 Health check endpoint: http://localhost:4000/health"
-                   
+
                     # Parse health status if jq is available
                     if command -v jq > /dev/null 2>&1; then
                         health_status=$(echo "$health_response" | jq -r '.status // "unknown"')
                         db_status=$(echo "$health_response" | jq -r '.database.status // "unknown"')
                         uptime=$(echo "$health_response" | jq -r '.system.uptime_seconds // "unknown"')
                         memory=$(echo "$health_response" | jq -r '.system.memory.total_mb // "unknown"')
-                       
+
                         echo "   Status: $health_status"
                         echo "   Database: $db_status"
                         echo "   Uptime: ${uptime}s"
@@ -318,9 +318,7 @@ clean:
 
 # 🧭 Generate Code GPS manifest for codebase navigation
 gps:
-    @echo "🧭 Analyzing codebase structure..."
     @mix code_gps
-    @echo "📍 Code GPS manifest generated: .code-gps.yaml"
 
 # ❓ Show help for a specific topic
 help topic="":

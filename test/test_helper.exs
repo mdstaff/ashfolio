@@ -10,6 +10,10 @@ ExUnit.configure(
 
 ExUnit.start()
 
+# Exclude slow tests by default for faster feedback loops
+# Run slow tests with: mix test --include slow
+ExUnit.configure(exclude: [:slow])
+
 # Set up Mox for mocking
 Mox.defmock(YahooFinanceMock, for: Ashfolio.MarketData.YahooFinanceBehaviour)
 Mox.defmock(HttpClientMock, for: Ashfolio.MarketData.HttpClientBehaviour)
