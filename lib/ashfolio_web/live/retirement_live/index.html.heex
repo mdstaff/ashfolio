@@ -101,7 +101,9 @@
         </div>
 
         <p class="mt-4 text-sm text-gray-600">
-          Based on the 25x rule, you need {Formatters.format_currency_with_cents(@retirement_target)} to safely retire with your current expense level.
+          Based on the 25x rule, you need {Formatters.format_currency_with_cents(
+            @retirement_target
+          )} to safely retire with your current expense level.
         </p>
       <% else %>
         <div class="text-gray-500 italic">

@@ -20,6 +20,7 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
   `RetirementCalculator` for error handling, logging, and Decimal precision.
   """
 
+  alias Ashfolio.Financial.DecimalHelpers, as: DH
   alias Ashfolio.FinancialManagement.ForecastCalculator
 
   require Decimal
@@ -73,7 +74,7 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
          :ok <- validate_years(years),
          :ok <- validate_growth_rate(growth_rate) do
       # Calculate base projection
-      base_annual = Decimal.mult(base_monthly_contribution, Decimal.new("12"))
+      base_annual = DH.monthly_to_annual(base_monthly_contribution)
 
       case ForecastCalculator.project_portfolio_growth(
              current_value,
@@ -177,8 +178,8 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
         end
       else
         results = %{
-          required_monthly_contribution: Decimal.new("0"),
-          required_annual_contribution: Decimal.new("0"),
+          required_monthly_contribution: DH.ensure_decimal("0"),
+          required_annual_contribution: DH.ensure_decimal("0"),
           projected_final_value: current_value,
           goal_already_achieved: true,
           current_surplus: Decimal.sub(current_value, target_amount),
@@ -259,7 +260,7 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
       # Find contribution needed to reach inflation-adjusted value
       case find_required_contribution(current_value, inflation_adjusted_value, years, growth_rate) do
         {:ok, required_annual} ->
-          required_monthly = Decimal.div(required_annual, Decimal.new("12"))
+          required_monthly = DH.annual_to_monthly(required_annual)
 
           breakeven = %{
             breakeven_monthly_contribution: required_monthly,
@@ -291,17 +292,17 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
 
       case ForecastCalculator.project_portfolio_growth(
              lump_sum_total,
-             Decimal.new("0"),
+             DH.ensure_decimal("0"),
              years,
              growth_rate
            ) do
         {:ok, lump_sum_value} ->
           # Calculate DCA scenario
-          monthly_dca = Decimal.div(available_amount, Decimal.new(to_string(years * 12)))
+          monthly_dca = Decimal.div(available_amount, DH.ensure_decimal(to_string(years * 12)))
 
           case ForecastCalculator.project_portfolio_growth(
                  current_value,
-                 Decimal.mult(monthly_dca, Decimal.new("12")),
+                 DH.monthly_to_annual(monthly_dca),
                  years,
                  growth_rate
                ) do
@@ -339,18 +340,20 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
   # Private helper functions
 
   defp validate_current_value(%Decimal{} = current_value) do
-    case Decimal.compare(current_value, Decimal.new("0")) do
-      :lt -> {:error, :negative_current_value}
-      _ -> :ok
+    if DH.negative?(current_value) do
+      {:error, :negative_current_value}
+    else
+      :ok
     end
   end
 
   defp validate_current_value(_), do: {:error, :invalid_input}
 
   defp validate_monthly_contribution(%Decimal{} = contribution) do
-    case Decimal.compare(contribution, Decimal.new("0")) do
-      :lt -> {:error, :negative_contribution}
-      _ -> :ok
+    if DH.negative?(contribution) do
+      {:error, :negative_contribution}
+    else
+      :ok
     end
   end
 
@@ -360,11 +363,14 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
   defp validate_years(_), do: {:error, :invalid_years}
 
   defp validate_growth_rate(%Decimal{} = growth_rate) do
+    max_rate = DH.ensure_decimal("0.5")
+    min_rate = DH.ensure_decimal("-0.5")
+
     cond do
-      Decimal.compare(growth_rate, Decimal.new("0.5")) == :gt ->
+      Decimal.compare(growth_rate, max_rate) == :gt ->
         {:error, :unrealistic_growth}
 
-      Decimal.compare(growth_rate, Decimal.new("-0.5")) == :lt ->
+      Decimal.compare(growth_rate, min_rate) == :lt ->
         {:error, :unrealistic_growth}
 
       true ->
@@ -375,9 +381,10 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
   defp validate_growth_rate(_), do: {:error, :invalid_input}
 
   defp validate_target_amount(%Decimal{} = target) do
-    case Decimal.compare(target, Decimal.new("0")) do
-      :gt -> :ok
-      _ -> {:error, :invalid_target}
+    if DH.positive?(target) do
+      :ok
+    else
+      {:error, :invalid_target}
     end
   end
 
@@ -388,18 +395,18 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
       # Use provided variations, ensuring no negative results
       custom_variations
       |> Enum.map(&Decimal.add(base_monthly, &1))
-      |> Enum.filter(&(Decimal.compare(&1, Decimal.new("0")) != :lt))
+      |> Enum.filter(&(!DH.negative?(&1)))
     else
       # Standard variations: -$500, -$100, +$100, +$500, +$1000
       [
-        Decimal.new("-500"),
-        Decimal.new("-100"),
-        Decimal.new("100"),
-        Decimal.new("500"),
-        Decimal.new("1000")
+        DH.ensure_decimal("-500"),
+        DH.ensure_decimal("-100"),
+        DH.ensure_decimal("100"),
+        DH.ensure_decimal("500"),
+        DH.ensure_decimal("1000")
       ]
       |> Enum.map(&Decimal.add(base_monthly, &1))
-      |> Enum.filter(&(Decimal.compare(&1, Decimal.new("0")) != :lt))
+      |> Enum.filter(&(!DH.negative?(&1)))
     end
   end
 
@@ -418,7 +425,7 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
 
   # Helper function to reduce nesting depth
   defp calculate_single_variation(monthly_amount, current_value, base_final_value, years, growth_rate) do
-    annual_amount = Decimal.mult(monthly_amount, Decimal.new("12"))
+    annual_amount = DH.monthly_to_annual(monthly_amount)
 
     case ForecastCalculator.project_portfolio_growth(current_value, annual_amount, years, growth_rate) do
       {:ok, final_value} ->
@@ -432,8 +439,8 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
   # Helper function to reduce nesting depth
   defp process_required_contribution(required_annual, current_value, target_amount, years, growth_rate) do
     # Add buffer to ensure we meet target with AER precision
-    required_annual = Decimal.mult(required_annual, Decimal.new("1.002"))
-    required_monthly = Decimal.div(required_annual, Decimal.new("12"))
+    required_annual = Decimal.mult(required_annual, DH.ensure_decimal("1.002"))
+    required_monthly = DH.annual_to_monthly(required_annual)
 
     # Verify with final calculation
     case ForecastCalculator.project_portfolio_growth(current_value, required_annual, years, growth_rate) do
@@ -505,13 +512,13 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
     difference = Decimal.sub(final_value, base_final_value)
 
     percentage_impact =
-      if Decimal.compare(base_final_value, Decimal.new("0")) == :gt do
+      if DH.positive?(base_final_value) do
         difference
         |> Decimal.div(base_final_value)
-        |> Decimal.mult(Decimal.new("100"))
-        |> Decimal.round(2)
+        |> DH.to_percentage()
+        |> DH.round_to(2)
       else
-        Decimal.new("0.00")
+        DH.ensure_decimal("0.00")
       end
 
     %{
@@ -526,9 +533,9 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
   defp find_required_contribution(current_value, target_amount, years, growth_rate) do
     # Binary search for required annual contribution
     # Start with reasonable bounds
-    min_contribution = Decimal.new("0")
+    min_contribution = DH.ensure_decimal("0")
     # $100k annual max
-    max_contribution = Decimal.new("100000")
+    max_contribution = DH.ensure_decimal("100000")
 
     binary_search_contribution(
       current_value,
@@ -568,7 +575,7 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
 
   # Helper function to reduce nesting depth
   defp search_iteration(current_value, target_amount, years, growth_rate, min_contrib, max_contrib, iterations_left) do
-    mid_contrib = min_contrib |> Decimal.add(max_contrib) |> Decimal.div(Decimal.new("2"))
+    mid_contrib = min_contrib |> Decimal.add(max_contrib) |> Decimal.div(DH.ensure_decimal("2"))
 
     case ForecastCalculator.project_portfolio_growth(current_value, mid_contrib, years, growth_rate) do
       {:ok, projected_value} ->
@@ -591,7 +598,7 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
 
   # Helper function to reduce nesting depth
   defp handle_projection_result(projected_value, target_amount, search_params) do
-    tolerance = Decimal.mult(target_amount, Decimal.new("0.0005"))
+    tolerance = Decimal.mult(target_amount, DH.ensure_decimal("0.0005"))
     difference = Decimal.abs(Decimal.sub(projected_value, target_amount))
 
     if Decimal.compare(difference, tolerance) == :gt do
@@ -642,9 +649,9 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
 
   defp build_confidence_analysis(current_value, annual_contribution, target_amount, years) do
     scenarios = [
-      {:pessimistic, Decimal.new("0.05")},
-      {:realistic, Decimal.new("0.07")},
-      {:optimistic, Decimal.new("0.10")}
+      {:pessimistic, DH.ensure_decimal("0.05")},
+      {:realistic, DH.ensure_decimal("0.07")},
+      {:optimistic, DH.ensure_decimal("0.10")}
     ]
 
     Enum.reduce(scenarios, %{}, fn {scenario_name, rate}, acc ->
@@ -673,9 +680,9 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
 
   defp build_already_achieved_analysis(current_value, _growth_rate, _years) do
     scenarios = [
-      {:pessimistic, Decimal.new("0.05")},
-      {:realistic, Decimal.new("0.07")},
-      {:optimistic, Decimal.new("0.10")}
+      {:pessimistic, DH.ensure_decimal("0.05")},
+      {:realistic, DH.ensure_decimal("0.07")},
+      {:optimistic, DH.ensure_decimal("0.10")}
     ]
 
     Enum.reduce(scenarios, %{}, fn {scenario_name, _rate}, acc ->
@@ -692,28 +699,31 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
     # Calculate weighted probability based on scenario outcomes
     # Weights: 20% pessimistic, 60% realistic, 20% optimistic
     weights = %{
-      pessimistic: Decimal.new("0.20"),
-      realistic: Decimal.new("0.60"),
-      optimistic: Decimal.new("0.20")
+      pessimistic: DH.ensure_decimal("0.20"),
+      realistic: DH.ensure_decimal("0.60"),
+      optimistic: DH.ensure_decimal("0.20")
     }
 
     weighted_success =
-      Enum.reduce(weights, Decimal.new("0"), fn {scenario_name, weight}, acc ->
+      Enum.reduce(weights, DH.ensure_decimal("0"), fn {scenario_name, weight}, acc ->
         calculate_weighted_scenario_success(confidence_analysis, scenario_name, weight, acc)
       end)
 
     # Convert to percentage
     weighted_success
-    |> Decimal.mult(Decimal.new("100"))
-    |> Decimal.round(1)
+    |> DH.to_percentage()
+    |> DH.round_to(1)
   end
 
   defp assess_goal_feasibility(required_monthly) do
+    challenging_threshold = DH.ensure_decimal("5000")
+    ambitious_threshold = DH.ensure_decimal("2500")
+
     cond do
-      Decimal.compare(required_monthly, Decimal.new("5000")) == :gt ->
+      Decimal.compare(required_monthly, challenging_threshold) == :gt ->
         :challenging
 
-      Decimal.compare(required_monthly, Decimal.new("2500")) == :gt ->
+      Decimal.compare(required_monthly, ambitious_threshold) == :gt ->
         :ambitious
 
       true ->
@@ -723,8 +733,8 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
 
   defp build_alternative_timeline(current_value, target_amount, growth_rate) do
     # For challenging goals, suggest more realistic timeline
-    max_reasonable_monthly = Decimal.new("3000")
-    max_reasonable_annual = Decimal.mult(max_reasonable_monthly, Decimal.new("12"))
+    max_reasonable_monthly = DH.ensure_decimal("3000")
+    max_reasonable_annual = DH.monthly_to_annual(max_reasonable_monthly)
 
     # Find years needed with reasonable contribution
     years_needed =
@@ -821,7 +831,7 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
 
   defp analyze_single_strategy(strategy, current_value, target_amount, years, growth_rate) do
     %{name: name, monthly: monthly_contribution} = strategy
-    annual_contribution = Decimal.mult(monthly_contribution, Decimal.new("12"))
+    annual_contribution = DH.monthly_to_annual(monthly_contribution)
 
     case ForecastCalculator.project_portfolio_growth(
            current_value,
@@ -830,7 +840,7 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
            growth_rate
          ) do
       {:ok, final_value} ->
-        total_contributions = Decimal.mult(annual_contribution, Decimal.new(to_string(years)))
+        total_contributions = Decimal.mult(annual_contribution, DH.ensure_decimal(to_string(years)))
         goal_achieved = Decimal.compare(final_value, target_amount) != :lt
         surplus_or_shortfall = Decimal.sub(final_value, target_amount)
 
@@ -906,83 +916,90 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
       strategies_achieving_goal: achieving_goals,
       success_rate:
         achieving_goals
-        |> Decimal.new()
-        |> Decimal.div(Decimal.new(total_strategies))
-        |> Decimal.mult(Decimal.new("100"))
-        |> Decimal.round(1)
+        |> DH.ensure_decimal()
+        |> Decimal.div(DH.ensure_decimal(total_strategies))
+        |> DH.to_percentage()
+        |> DH.round_to(1)
     }
   end
 
   defp calculate_contribution_efficiency(final_value, total_contributions) do
-    if Decimal.compare(total_contributions, Decimal.new("0")) == :gt do
-      final_value |> Decimal.div(total_contributions) |> Decimal.round(2)
+    if DH.positive?(total_contributions) do
+      final_value |> Decimal.div(total_contributions) |> DH.round_to(2)
     else
-      Decimal.new("1.0")
+      DH.ensure_decimal("1.0")
     end
   end
 
   defp calculate_marginal_benefit(monthly_contribution, _final_value) do
     # Marginal benefit per dollar contributed
     # For excessive contributions, this should be lower (diminishing returns)
-    total_annual_contribution = Decimal.mult(monthly_contribution, Decimal.new("12"))
+    total_annual_contribution = DH.monthly_to_annual(monthly_contribution)
 
-    if Decimal.compare(total_annual_contribution, Decimal.new("0")) == :gt do
+    if DH.positive?(total_annual_contribution) do
       # Simple diminishing returns model: higher contributions = lower marginal benefit
-      cond do
-        Decimal.compare(monthly_contribution, Decimal.new("2500")) == :gt ->
-          # Very high contributions have low marginal benefit
-          Decimal.new("0.8")
+      very_high_threshold = DH.ensure_decimal("2500")
+      high_threshold = DH.ensure_decimal("1500")
 
-        Decimal.compare(monthly_contribution, Decimal.new("1500")) == :gt ->
+      cond do
+        Decimal.compare(monthly_contribution, very_high_threshold) == :gt ->
+          # Very high contributions have low marginal benefit
+          DH.ensure_decimal("0.8")
+
+        Decimal.compare(monthly_contribution, high_threshold) == :gt ->
           # High contributions have reduced benefit
-          Decimal.new("0.9")
+          DH.ensure_decimal("0.9")
 
         true ->
           # Normal contributions have standard benefit
-          Decimal.new("1.1")
+          DH.ensure_decimal("1.1")
       end
     else
-      Decimal.new("1.0")
+      DH.ensure_decimal("1.0")
     end
   end
 
   defp calculate_inflation_factor(inflation_rate, years) do
     # (1 + inflation_rate)^years
-    inflation_multiplier = Decimal.add(Decimal.new("1"), inflation_rate)
+    inflation_multiplier = Decimal.add(DH.ensure_decimal("1"), inflation_rate)
 
-    Enum.reduce(1..years, Decimal.new("1"), fn _year, acc ->
+    Enum.reduce(1..years, DH.ensure_decimal("1"), fn _year, acc ->
       Decimal.mult(acc, inflation_multiplier)
     end)
   end
 
   defp determine_contribution_reason(real_return_rate) do
-    case Decimal.compare(real_return_rate, Decimal.new("0")) do
-      :lt -> :negative_real_returns
-      _ -> :maintain_purchasing_power
+    if DH.negative?(real_return_rate) do
+      :negative_real_returns
+    else
+      :maintain_purchasing_power
     end
   end
 
   defp assess_volatility_level(volatility) do
+    high_threshold = DH.ensure_decimal("0.20")
+    medium_threshold = DH.ensure_decimal("0.10")
+
     cond do
-      Decimal.compare(volatility, Decimal.new("0.20")) == :gt -> :high
-      Decimal.compare(volatility, Decimal.new("0.10")) == :gt -> :medium
+      Decimal.compare(volatility, high_threshold) == :gt -> :high
+      Decimal.compare(volatility, medium_threshold) == :gt -> :medium
       true -> :low
     end
   end
 
   defp calculate_best_case(expected_value, volatility) do
     # Best case: expected + 2 standard deviations
-    volatility_impact = Decimal.mult(expected_value, Decimal.mult(volatility, Decimal.new("2")))
+    volatility_impact = Decimal.mult(expected_value, Decimal.mult(volatility, DH.ensure_decimal("2")))
     Decimal.add(expected_value, volatility_impact)
   end
 
   defp calculate_worst_case(expected_value, volatility) do
     # Worst case: expected - 2 standard deviations
-    volatility_impact = Decimal.mult(expected_value, Decimal.mult(volatility, Decimal.new("2")))
+    volatility_impact = Decimal.mult(expected_value, Decimal.mult(volatility, DH.ensure_decimal("2")))
     worst_case = Decimal.sub(expected_value, volatility_impact)
     # Ensure not negative
-    if Decimal.compare(worst_case, Decimal.new("0")) == :lt do
-      Decimal.new("0")
+    if DH.negative?(worst_case) do
+      DH.ensure_decimal("0")
     else
       worst_case
     end
@@ -990,7 +1007,7 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
 
   defp calculate_volatility_reduction(volatility) do
     # DCA typically reduces effective volatility
-    volatility |> Decimal.mult(Decimal.new("0.7")) |> Decimal.round(3)
+    volatility |> Decimal.mult(DH.ensure_decimal("0.7")) |> DH.round_to(3)
   end
 
   defp build_timing_recommendation(lump_sum_value, dca_value, volatility_assessment) do
@@ -1029,7 +1046,7 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
   end
 
   defp add_weighted_success(scenario, weight, acc) do
-    success_value = if scenario.goal_met, do: Decimal.new("1"), else: Decimal.new("0")
+    success_value = if scenario.goal_met, do: DH.ensure_decimal("1"), else: DH.ensure_decimal("0")
     weighted_contribution = Decimal.mult(success_value, weight)
     Decimal.add(acc, weighted_contribution)
   end
