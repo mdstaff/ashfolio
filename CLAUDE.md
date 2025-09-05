@@ -201,6 +201,32 @@ When to Run Warning Checks:
 - When switching between files/components
 - At end of every development session
 
+### Code Formatting and Style Issues
+
+**IMPORTANT**: Always use `mix format` to automatically fix style issues instead of manually editing:
+
+```bash
+# Fix ALL whitespace and formatting issues automatically
+mix format
+
+# Format specific files
+mix format path/to/file.ex
+
+# This project uses Styler plugin which handles:
+# - Trailing whitespace removal
+# - Consistent indentation
+# - Line ending normalization
+# - Code organization and style consistency
+```
+
+**DO NOT** manually fix these Credo issues - let the formatter handle them:
+- Trailing whitespace
+- Line length (in most cases)
+- Indentation issues
+- Import/alias ordering
+
+Run `mix format` BEFORE running `mix credo` to avoid seeing issues that can be auto-fixed.
+
 ## Quality Gates
 
 ### Definition of Done

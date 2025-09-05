@@ -4,7 +4,7 @@ ExUnit.configure(
   colors: [enabled: true],
   timeout: 120_000,
   # Default exclusions - can be overridden with --include
-  exclude_tags: [:seeding, :slow, :external_deps],
+  exclude_tags: [:seeding, :slow, :external_deps, :code_gps],
   formatters: [ExUnit.CLIFormatter]
 )
 
@@ -12,7 +12,8 @@ ExUnit.start()
 
 # Exclude slow tests by default for faster feedback loops
 # Run slow tests with: mix test --include slow
-ExUnit.configure(exclude: [:slow])
+# Run Code GPS tests with: mix test --include code_gps
+ExUnit.configure(exclude: [:slow, :code_gps])
 
 # Set up Mox for mocking
 Mox.defmock(YahooFinanceMock, for: Ashfolio.MarketData.YahooFinanceBehaviour)

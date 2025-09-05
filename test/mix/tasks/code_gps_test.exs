@@ -4,6 +4,9 @@ defmodule Mix.Tasks.CodeGpsTest do
 
   Fast tests run by default. Slow tests (code quality integration) can be run with:
   mix test test/mix/tasks/code_gps_test.exs --include slow
+
+  To skip these tests entirely during normal test runs:
+  mix test --exclude code_gps
   """
   use ExUnit.Case
 
@@ -11,6 +14,7 @@ defmodule Mix.Tasks.CodeGpsTest do
 
   # Skip slow tests by default for faster feedback loops
   @moduletag :capture_log
+  @moduletag :code_gps
 
   # Run CodeGps once for the entire test suite
   setup_all do

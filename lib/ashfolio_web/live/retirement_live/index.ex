@@ -11,6 +11,7 @@ defmodule AshfolioWeb.RetirementLive.Index do
 
   use AshfolioWeb, :live_view
 
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.RetirementCalculator
   alias AshfolioWeb.Live.FormatHelpers
 

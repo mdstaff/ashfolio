@@ -1158,7 +1158,8 @@ defmodule Mix.Tasks.CodeGps do
     # Extract summary from the text output that appears after JSON
     lines = String.split(output, "\n")
 
-    # Look for analysis summary line like "Analysis took 1.6 seconds (0.1s to load, 1.5s running 54 checks on 223 files)"
+    # Look for analysis summary line like:
+    # "Analysis took 1.6 seconds (0.1s to load, 1.5s running 54 checks on 223 files)"
     analysis_line = Enum.find(lines, &String.contains?(&1, "Analysis took"))
 
     # Look for mods/funs line like "2052 mods/funs, found 10 refactoring opportunities"

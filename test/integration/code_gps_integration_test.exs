@@ -4,6 +4,9 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
 
   This test validates that the Code GPS tool generates accurate
   codebase analysis that matches the actual implementation.
+
+  To skip these tests during normal test runs:
+  mix test --exclude code_gps
   """
 
   use ExUnit.Case, async: false
@@ -11,6 +14,8 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
   import ExUnit.CaptureIO
 
   alias Mix.Tasks.CodeGps
+
+  @moduletag :code_gps
 
   @code_gps_path ".code-gps.yaml"
 

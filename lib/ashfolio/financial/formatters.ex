@@ -3,13 +3,13 @@ defmodule Ashfolio.Financial.Formatters do
   Unified currency and financial value formatting for consistent display across Ashfolio.
 
   Consolidates all currency formatting logic from helpers, LiveViews, and components
-  into a single, feature-complete API.
+  into a single, feature-complete API.  
 
   ## Examples
       iex> Ashfolio.Financial.Formatters.currency(Decimal.new("1234.56"))
       "$1,234.56"
       
-      iex> Ashfolio.Financial.Formatters.currency(Decimal.new("1234.56"), show_cents: false)
+      iex> Ashfolio.Financial.Formatters.currency(Decimal.new("1234.56"), show_cents: false)  
       "$1,235"
       
       iex> Ashfolio.Financial.Formatters.currency(Decimal.new("-123.45"))

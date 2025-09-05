@@ -5,18 +5,18 @@ defmodule Ashfolio.Financial.FormattersBackwardsCompatibilityTest do
 
   This test suite validates against the actual current implementations in:
   - lib/ashfolio_web/helpers/format_helper.ex
-  - lib/ashfolio_web/live/format_helpers.ex  
+  - lib/ashfolio_web/live/format_helpers.ex
   - lib/ashfolio_web/helpers/chart_helpers.ex
   """
 
   use ExUnit.Case, async: true
 
   alias Ashfolio.Financial.Formatters
+  alias AshfolioWeb.Helpers.ChartHelpers
+  alias AshfolioWeb.Helpers.FormatHelper
+  alias AshfolioWeb.Live.FormatHelpers
 
   describe "format_helper.ex backwards compatibility" do
-    # Import the actual existing implementation for comparison
-    alias AshfolioWeb.Helpers.FormatHelper
-
     test "identical behavior for decimal values" do
       test_values = [
         Decimal.new("1234.56"),
@@ -62,9 +62,6 @@ defmodule Ashfolio.Financial.FormattersBackwardsCompatibilityTest do
   end
 
   describe "format_helpers.ex backwards compatibility" do
-    # Import the actual existing implementation for comparison
-    alias AshfolioWeb.Live.FormatHelpers
-
     test "identical behavior with show_cents=true" do
       test_values = [
         Decimal.new("1234.56"),
@@ -137,9 +134,6 @@ defmodule Ashfolio.Financial.FormattersBackwardsCompatibilityTest do
   end
 
   describe "chart_helpers.ex backwards compatibility" do
-    # Import the actual existing implementation for comparison
-    alias AshfolioWeb.Helpers.ChartHelpers
-
     test "identical behavior for decimal values" do
       test_values = [
         Decimal.new("1234.56"),
@@ -196,18 +190,18 @@ defmodule Ashfolio.Financial.FormattersBackwardsCompatibilityTest do
 
       for value <- common_test_values do
         # Get outputs from all existing implementations
-        format_helper_output = AshfolioWeb.Helpers.FormatHelper.format_currency(value)
+        format_helper_output = FormatHelper.format_currency(value)
 
         # format_helpers.ex with show_cents=true (default behavior)
-        format_helpers_output = AshfolioWeb.Live.FormatHelpers.format_currency(value, true)
+        format_helpers_output = FormatHelpers.format_currency(value, true)
 
         # chart_helpers.ex output
-        chart_helpers_output = AshfolioWeb.Helpers.ChartHelpers.format_currency(value)
+        _chart_helpers_output = ChartHelpers.format_currency(value)
 
         # Get outputs from our unified implementation's compatibility functions
         our_classic_output = Formatters.format_currency_classic(value)
         our_with_cents_output = Formatters.format_currency_with_cents(value, true)
-        our_simple_output = Formatters.format_currency_simple(value)
+        _our_simple_output = Formatters.format_currency_simple(value)
 
         # Validate our compatibility functions match their respective originals
         assert our_classic_output == format_helper_output,
@@ -225,14 +219,14 @@ defmodule Ashfolio.Financial.FormattersBackwardsCompatibilityTest do
       negative_value = Decimal.new("-123.45")
 
       # All implementations should preserve negative values
-      format_helpers_output = AshfolioWeb.Live.FormatHelpers.format_currency(negative_value, true)
+      format_helpers_output = FormatHelpers.format_currency(negative_value, true)
       our_with_cents_output = Formatters.format_currency_with_cents(negative_value, true)
 
       assert our_with_cents_output == format_helpers_output
       assert String.starts_with?(our_with_cents_output, "-")
 
       # chart_helpers.ex also preserves negative values but with $-format
-      chart_helpers_output = AshfolioWeb.Helpers.ChartHelpers.format_currency(negative_value)
+      chart_helpers_output = ChartHelpers.format_currency(negative_value)
       our_simple_output = Formatters.format_currency_simple(negative_value)
 
       assert our_simple_output == chart_helpers_output
@@ -243,8 +237,8 @@ defmodule Ashfolio.Financial.FormattersBackwardsCompatibilityTest do
       large_value = Decimal.new("123456.78")
 
       # format_helper.ex and format_helpers.ex should have commas
-      format_helper_output = AshfolioWeb.Helpers.FormatHelper.format_currency(large_value)
-      format_helpers_output = AshfolioWeb.Live.FormatHelpers.format_currency(large_value, true)
+      format_helper_output = FormatHelper.format_currency(large_value)
+      format_helpers_output = FormatHelpers.format_currency(large_value, true)
 
       our_classic_output = Formatters.format_currency_classic(large_value)
       our_with_cents_output = Formatters.format_currency_with_cents(large_value, true)
@@ -255,7 +249,7 @@ defmodule Ashfolio.Financial.FormattersBackwardsCompatibilityTest do
       assert String.contains?(our_with_cents_output, ",")
 
       # chart_helpers.ex should NOT have commas
-      chart_helpers_output = AshfolioWeb.Helpers.ChartHelpers.format_currency(large_value)
+      chart_helpers_output = ChartHelpers.format_currency(large_value)
       our_simple_output = Formatters.format_currency_simple(large_value)
 
       assert our_simple_output == chart_helpers_output
@@ -268,7 +262,7 @@ defmodule Ashfolio.Financial.FormattersBackwardsCompatibilityTest do
       test_value = Decimal.new("1234.56")
 
       # format_helper.ex behavior: commas, cents, no negative handling
-      classic_result = AshfolioWeb.Helpers.FormatHelper.format_currency(test_value)
+      classic_result = FormatHelper.format_currency(test_value)
 
       unified_classic_result =
         Formatters.currency(test_value,
@@ -280,7 +274,7 @@ defmodule Ashfolio.Financial.FormattersBackwardsCompatibilityTest do
       assert unified_classic_result == classic_result
 
       # format_helpers.ex behavior: commas, configurable cents, negative handling
-      helpers_result = AshfolioWeb.Live.FormatHelpers.format_currency(test_value, true)
+      helpers_result = FormatHelpers.format_currency(test_value, true)
 
       unified_helpers_result =
         Formatters.currency(test_value,
@@ -292,7 +286,7 @@ defmodule Ashfolio.Financial.FormattersBackwardsCompatibilityTest do
       assert unified_helpers_result == helpers_result
 
       # chart_helpers.ex behavior: no commas, cents, preserves negatives
-      chart_result = AshfolioWeb.Helpers.ChartHelpers.format_currency(test_value)
+      chart_result = ChartHelpers.format_currency(test_value)
 
       unified_chart_result =
         Formatters.currency(test_value,
@@ -310,7 +304,7 @@ defmodule Ashfolio.Financial.FormattersBackwardsCompatibilityTest do
       # Test that we can safely replace calls without changing behavior
 
       # format_helper.ex pattern: format_currency(value)
-      original_call = fn value -> AshfolioWeb.Helpers.FormatHelper.format_currency(value) end
+      original_call = fn value -> FormatHelper.format_currency(value) end
       replacement_call = fn value -> Formatters.format_currency_classic(value) end
 
       test_values = [Decimal.new("123.45"), 123.45, nil]
@@ -321,7 +315,7 @@ defmodule Ashfolio.Financial.FormattersBackwardsCompatibilityTest do
 
       # format_helpers.ex pattern: format_currency(value, show_cents)
       original_call_2 = fn value, show_cents ->
-        AshfolioWeb.Live.FormatHelpers.format_currency(value, show_cents)
+        FormatHelpers.format_currency(value, show_cents)
       end
 
       replacement_call_2 = fn value, show_cents ->
@@ -335,7 +329,7 @@ defmodule Ashfolio.Financial.FormattersBackwardsCompatibilityTest do
       end
 
       # chart_helpers.ex pattern: format_currency(value)
-      original_call_3 = fn value -> AshfolioWeb.Helpers.ChartHelpers.format_currency(value) end
+      original_call_3 = fn value -> ChartHelpers.format_currency(value) end
       replacement_call_3 = fn value -> Formatters.format_currency_simple(value) end
 
       for value <- test_values do
