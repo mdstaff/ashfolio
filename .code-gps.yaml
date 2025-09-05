@@ -55,15 +55,33 @@ input: lib/ashfolio_web/components/core_components.ex:351 (45x)
 input: lib/ashfolio_web/components/core_components.ex:371 (45x)
 
 # === DEPENDENCIES ===
-ash: ❌ (1198)
+ash: ❌ (1201)
 contex: ❌ (126)
-decimal: ❌ (1645)
+decimal: ❌ (1649)
 mox: ❌ (1)
 
 # === FRESHNESS ===
-recent: ["config/code_gps_rules.exs", "lib/mix/tasks/code_gps.ex", "test/mix/tasks/code_gps_test.exs", "test/test_helper.exs", "lib/ashfolio/context.ex"]
-uncommitted: 14 files
-commits_ahead: 5
+recent: ["lib/ashfolio/financial/decimal_helpers.ex", "lib/ashfolio/financial_management/contribution_analyzer.ex", "lib/ashfolio/financial_management/forecast_calculator.ex", "test/ashfolio/financial/decimal_helpers_test.exs", "lib/ashfolio/financial/formatters.ex"]
+uncommitted: 1 files
+commits_ahead: 8
+
+# === TEST ANALYSIS ===
+summary:
+  total_test_modules: 117
+  total_tests: 1486
+  average_tests_per_module: 12.7
+
+top_10_test_modules:
+  Ashfolio.FinancialManagement.RetirementCalculatorTest: 47 tests, 137 assertions (13 describes) | test/ashfolio/financial_management/retirement_calculator_test.exs
+  Ashfolio.Financial.DecimalHelpersTest: 45 tests, 82 assertions (15 describes) | test/ashfolio/financial/decimal_helpers_test.exs
+  Ashfolio.FinancialManagement.ForecastCalculatorTest: 44 tests, 201 assertions (7 describes) | test/ashfolio/financial_management/forecast_calculator_test.exs
+  Ashfolio.Financial.FormattersTest: 38 tests, 79 assertions (8 describes) | test/ashfolio/financial/formatters_test.exs
+  Ashfolio.Portfolio.AccountTest: 35 tests, 81 assertions (3 describes) | test/ashfolio/portfolio/account_test.exs
+  AshfolioWeb.Live.FormatHelpersTest: 32 tests, 90 assertions (7 describes) | test/ashfolio_web/live/format_helpers_test.exs
+  Ashfolio.ErrorHandlerTest: 30 tests, 37 assertions (8 describes) | test/ashfolio/error_handler_test.exs
+  Ashfolio.Portfolio.CalculatorTest: 25 tests, 72 assertions (7 describes) | test/ashfolio/portfolio/calculator_test.exs
+  Ashfolio.Portfolio.TransactionTest: 25 tests, 58 assertions (2 describes) | test/ashfolio/portfolio/transaction_test.exs
+  AshfolioWeb.DashboardLiveTest: 22 tests, 62 assertions (8 describes) | test/ashfolio_web/live/dashboard_live_test.exs
 
 # === TEST GAPS ===
 missing_tests:
@@ -77,14 +95,45 @@ test/ashfolio/financial/formatters_backwards_compatibility_test.exs ⚠️
 test/ashfolio/financial_management/category_migration_test.exs ⚠️
 test/ashfolio/financial_management/forecast_calculator_aer_test.exs ⚠️
 
+# === MODULE ANALYSIS ===
+summary:
+  total_modules: 219 (101 lib, 118 test)
+  total_functions: 1628 (1577 lib, 51 test)
+  public/private: 550 public, 1078 private
+  average_functions_per_module: 7.4
+  complex_modules: 16 (>30 functions)
+      empty_modules: 112 (potential parsing issues)
+
+top_20_modules:
+  AshfolioWeb.Components.ForecastChart: 72 functions (1 public, 71 private) | lib/ashfolio_web/components/forecast_chart.ex
+  Ashfolio.ErrorHandler: 71 functions (4 public, 67 private) | lib/ashfolio/error_handler.ex
+  Mix.Tasks.CodeGps: 69 functions (4 public, 65 private) | lib/mix/tasks/code_gps.ex
+  AshfolioWeb.DashboardLive: 61 functions (13 public, 48 private) | lib/ashfolio_web/live/dashboard_live.ex
+  Ashfolio.FinancialManagement.ContributionAnalyzer: 58 functions (5 public, 53 private) | lib/ashfolio/financial_management/contribution_analyzer.ex
+  AshfolioWeb.FinancialGoalLive.Index: 57 functions (13 public, 44 private) | lib/ashfolio_web/live/financial_goal_live/index.ex
+  AshfolioWeb.TransactionLive.Index: 53 functions (19 public, 34 private) | lib/ashfolio_web/live/transaction_live/index.ex
+  Ashfolio.FinancialManagement.ForecastCalculator: 45 functions (7 public, 38 private) | lib/ashfolio/financial_management/forecast_calculator.ex
+  AshfolioWeb.ExpenseLive.Analytics: 41 functions (6 public, 35 private) | lib/ashfolio_web/live/expense_live/analytics.ex
+  AshfolioWeb.Components.TransactionGroup: 38 functions (1 public, 37 private) | lib/ashfolio_web/components/transaction_group.ex
+  AshfolioWeb.FinancialPlanningLive.Forecast: 38 functions (13 public, 25 private) | lib/ashfolio_web/live/financial_planning_live/forecast.ex
+  AshfolioWeb.CoreComponents: 35 functions (32 public, 3 private) | lib/ashfolio_web/components/core_components.ex
+  AshfolioWeb.ExpenseLive.Index: 33 functions (10 public, 23 private) | lib/ashfolio_web/live/expense_live/index.ex
+  Ashfolio.FinancialManagement.RetirementCalculator: 32 functions (14 public, 18 private) | lib/ashfolio/financial_management/retirement_calculator.ex
+  AshfolioWeb.Components.TransactionStats: 32 functions (1 public, 31 private) | lib/ashfolio_web/components/transaction_stats.ex
+  AshfolioWeb.ExpenseLive.FormComponent: 31 functions (5 public, 26 private) | lib/ashfolio_web/live/expense_live/form_component.ex
+  Ashfolio.FinancialManagement.SymbolSearch: 30 functions (4 public, 26 private) | lib/ashfolio/financial_management/symbol_search.ex
+  AshfolioWeb.AccountLive.Index: 30 functions (15 public, 15 private) | lib/ashfolio_web/live/account_live/index.ex
+  AshfolioWeb.AdvancedAnalyticsLive.Index: 30 functions (14 public, 16 private) | lib/ashfolio_web/live/advanced_analytics_live/index.ex
+  AshfolioWeb.Live.FormatHelpers: 30 functions (28 public, 2 private) | lib/ashfolio_web/live/format_helpers.ex
+
 # === CODE QUALITY ===
-credo_analysis: 2072 mods/funs, 226 files (2.3s)
+credo_analysis: 2110 mods/funs, 228 files (2.3s)
 credo_issues: 10 refactoring opportunities
-  lib/ashfolio/financial/formatters.ex:180 readability: There should be a final \n at the end of each file.
-  lib/ashfolio/financial/formatters.ex:4 readability: There should be no trailing white-space at the end of a line.
-  lib/ashfolio/financial/formatters.ex:7 readability: There should be no trailing white-space at the end of a line.
-  lib/ashfolio/financial/formatters.ex:24 readability: There should be no trailing white-space at the end of a line.
-  lib/ashfolio/financial/formatters.ex:31 readability: There should be no trailing white-space at the end of a line.
+  lib/ashfolio/portfolio/transaction.ex:423 refactor: Function is too complex (cyclomatic complexity is 10, max is 9).
+  lib/mix/tasks/code_gps.ex:195 readability: There should be no trailing white-space at the end of a line.
+  lib/mix/tasks/code_gps.ex:196 readability: There should be no trailing white-space at the end of a line.
+  lib/mix/tasks/code_gps.ex:200 readability: There should be no trailing white-space at the end of a line.
+  lib/mix/tasks/code_gps.ex:205 readability: There should be no trailing white-space at the end of a line.
 
 dialyzer_analysis: skipped for performance ⚡
 
