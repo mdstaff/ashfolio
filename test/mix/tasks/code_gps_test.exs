@@ -63,7 +63,7 @@ defmodule Mix.Tasks.CodeGpsTest do
 
     test "performance is under 20 seconds", %{generation_time: generation_time} do
       # Performance validated during setup_all - includes full Credo analysis
-      assert generation_time < 20000,
+      assert generation_time < 20_000,
              "Performance should be under 20 seconds, took #{generation_time}ms"
     end
 
@@ -149,7 +149,7 @@ defmodule Mix.Tasks.CodeGpsTest do
     } do
       # Should complete comprehensive analysis including Credo in under 20 seconds
       # Pattern analysis is fast, but Credo analysis adds ~12 seconds
-      assert generation_time < 20000,
+      assert generation_time < 20_000,
              "Comprehensive analysis with code quality should complete in <20 seconds, took #{generation_time}ms"
     end
 

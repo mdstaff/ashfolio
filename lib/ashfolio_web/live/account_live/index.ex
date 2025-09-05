@@ -3,6 +3,7 @@ defmodule AshfolioWeb.AccountLive.Index do
   use AshfolioWeb, :live_view
 
   alias Ashfolio.Context
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.Portfolio.Account
   alias Ashfolio.Portfolio.Transaction
   alias AshfolioWeb.AccountLive.FormComponent
@@ -244,19 +245,19 @@ defmodule AshfolioWeb.AccountLive.Index do
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="text-center">
                   <div class="text-2xl font-bold text-gray-900">
-                    {FormatHelpers.format_currency(@summary.total_balance)}
+                    {Formatters.format_currency_with_cents(@summary.total_balance)}
                   </div>
                   <div class="text-sm text-gray-500">Total Balance</div>
                 </div>
                 <div class="text-center">
                   <div class="text-2xl font-bold text-blue-600">
-                    {FormatHelpers.format_currency(@summary.investment_balance)}
+                    {Formatters.format_currency_with_cents(@summary.investment_balance)}
                   </div>
                   <div class="text-sm text-gray-500">Investment Value</div>
                 </div>
                 <div class="text-center">
                   <div class="text-2xl font-bold text-green-600">
-                    {FormatHelpers.format_currency(@summary.cash_balance)}
+                    {Formatters.format_currency_with_cents(@summary.cash_balance)}
                   </div>
                   <div class="text-sm text-gray-500">Cash Balance</div>
                 </div>
@@ -386,7 +387,7 @@ defmodule AshfolioWeb.AccountLive.Index do
                 <:col :let={account} label="Balance" class="text-right">
                   <div class="text-right">
                     <span class={"font-mono font-semibold text-lg #{if account.is_excluded, do: "text-gray-500", else: "text-gray-900"}"}>
-                      {FormatHelpers.format_currency(account.balance)}
+                      {Formatters.format_currency_with_cents(account.balance)}
                     </span>
                     <div class="text-xs text-gray-500 mt-1">
                       <%= if account.is_excluded do %>
@@ -562,7 +563,7 @@ defmodule AshfolioWeb.AccountLive.Index do
                 <p class="text-sm font-medium text-gray-900">
                   Filtered Balance:
                   <span class="font-mono">
-                    {FormatHelpers.format_currency(calculate_total_balance(display_accounts))}
+                    {Formatters.format_currency_with_cents(calculate_total_balance(display_accounts))}
                   </span>
                 </p>
               </div>

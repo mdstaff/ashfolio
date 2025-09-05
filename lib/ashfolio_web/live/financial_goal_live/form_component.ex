@@ -2,6 +2,7 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
   @moduledoc false
   use AshfolioWeb, :live_component
 
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.FinancialGoal
   alias AshfolioWeb.Live.ErrorHelpers
   alias AshfolioWeb.Live.FormatHelpers
@@ -55,13 +56,17 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
                     <div>
                       <span class="text-blue-800 font-medium">Monthly Expenses:</span>
                       <div class="text-blue-700">
-                        {FormatHelpers.format_currency(@emergency_fund_suggestion.monthly_expenses)}
+                        {Formatters.format_currency_with_cents(
+                          @emergency_fund_suggestion.monthly_expenses
+                        )}
                       </div>
                     </div>
                     <div>
                       <span class="text-blue-800 font-medium">Suggested Target:</span>
                       <div class="text-blue-700">
-                        {FormatHelpers.format_currency(@emergency_fund_suggestion.recommended_target)}
+                        {Formatters.format_currency_with_cents(
+                          @emergency_fund_suggestion.recommended_target
+                        )}
                       </div>
                     </div>
                     <div>
@@ -182,7 +187,7 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
                   <div>
                     <span class="text-gray-600 font-medium">Remaining:</span>
                     <div class="text-gray-900">
-                      {FormatHelpers.format_currency(@goal_calculations.amount_remaining)}
+                      {Formatters.format_currency_with_cents(@goal_calculations.amount_remaining)}
                     </div>
                   </div>
                   <%= if @goal_calculations.months_to_goal do %>
@@ -199,7 +204,7 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
                   <div class="mt-3 p-3 bg-blue-50 rounded border border-blue-200">
                     <p class="text-sm text-blue-800">
                       <strong>Recommended monthly contribution:</strong>
-                      {FormatHelpers.format_currency(@monthly_contribution_needed)} to reach your goal by the target date.
+                      {Formatters.format_currency_with_cents(@monthly_contribution_needed)} to reach your goal by the target date.
                     </p>
                   </div>
                 <% end %>

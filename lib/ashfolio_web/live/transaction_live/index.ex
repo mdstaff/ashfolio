@@ -7,6 +7,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
   import AshfolioWeb.Components.TransactionGroup
   import AshfolioWeb.Components.TransactionStats
 
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.TransactionCategory
   alias Ashfolio.FinancialManagement.TransactionFiltering
   alias Ashfolio.Portfolio.Transaction
@@ -713,20 +714,24 @@ defmodule AshfolioWeb.TransactionLive.Index do
                   <td class="relative p-0">
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
-                      <span class="relative">{FormatHelpers.format_currency(transaction.price)}</span>
-                    </div>
-                  </td>
-                  <td class="relative p-0">
-                    <div class="block py-4 pr-6 text-right">
-                      <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
-                      <span class="relative">{FormatHelpers.format_currency(transaction.fee)}</span>
+                      <span class="relative">
+                        {Formatters.format_currency_with_cents(transaction.price)}
+                      </span>
                     </div>
                   </td>
                   <td class="relative p-0">
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
                       <span class="relative">
-                        {FormatHelpers.format_currency(transaction.total_amount)}
+                        {Formatters.format_currency_with_cents(transaction.fee)}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="relative p-0">
+                    <div class="block py-4 pr-6 text-right">
+                      <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
+                      <span class="relative">
+                        {Formatters.format_currency_with_cents(transaction.total_amount)}
                       </span>
                     </div>
                   </td>

@@ -3,6 +3,7 @@ defmodule AshfolioWeb.DashboardLive do
   use AshfolioWeb, :live_view
 
   alias Ashfolio.Context
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.Expense
   alias Ashfolio.FinancialManagement.FinancialGoal
   alias Ashfolio.FinancialManagement.NetWorthSnapshot
@@ -354,7 +355,7 @@ defmodule AshfolioWeb.DashboardLive do
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
                       <span class="relative">
-                        {FormatHelpers.format_currency(holding.current_price)}
+                        {Formatters.format_currency_with_cents(holding.current_price)}
                       </span>
                     </div>
                   </td>
@@ -362,7 +363,7 @@ defmodule AshfolioWeb.DashboardLive do
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
                       <span class="relative">
-                        {FormatHelpers.format_currency(holding.current_value)}
+                        {Formatters.format_currency_with_cents(holding.current_value)}
                       </span>
                     </div>
                   </td>
@@ -370,7 +371,7 @@ defmodule AshfolioWeb.DashboardLive do
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
                       <span class="relative">
-                        {FormatHelpers.format_currency(holding.cost_basis)}
+                        {Formatters.format_currency_with_cents(holding.cost_basis)}
                       </span>
                     </div>
                   </td>
@@ -381,7 +382,7 @@ defmodule AshfolioWeb.DashboardLive do
                         "relative",
                         FormatHelpers.value_color_class(holding.unrealized_pnl)
                       ]}>
-                        <div>{FormatHelpers.format_currency(holding.unrealized_pnl)}</div>
+                        <div>{Formatters.format_currency_with_cents(holding.unrealized_pnl)}</div>
                         <div class="text-sm">
                           ({FormatHelpers.format_percentage(holding.unrealized_pnl_pct)})
                         </div>
@@ -462,10 +463,10 @@ defmodule AshfolioWeb.DashboardLive do
                     "text-sm font-medium",
                     FormatHelpers.value_color_class(transaction.total_amount)
                   ]}>
-                    {FormatHelpers.format_currency(transaction.total_amount)}
+                    {Formatters.format_currency_with_cents(transaction.total_amount)}
                   </p>
                   <p class="text-xs text-gray-500">
-                    @ {FormatHelpers.format_currency(get_transaction_price(transaction))}
+                    @ {Formatters.format_currency_with_cents(get_transaction_price(transaction))}
                   </p>
                 </div>
               </div>
@@ -589,14 +590,14 @@ defmodule AshfolioWeb.DashboardLive do
     net_worth_value = net_worth_data[:total_net_worth] || net_worth_data[:net_worth]
 
     socket
-    |> assign(:net_worth_total, FormatHelpers.format_currency(net_worth_value))
+    |> assign(:net_worth_total, Formatters.format_currency_with_cents(net_worth_value))
     |> assign(
       :net_worth_investment_value,
-      FormatHelpers.format_currency(net_worth_data.investment_value)
+      Formatters.format_currency_with_cents(net_worth_data.investment_value)
     )
     |> assign(
       :net_worth_cash_balance,
-      FormatHelpers.format_currency(net_worth_data[:cash_balance] || net_worth_data[:cash_value])
+      Formatters.format_currency_with_cents(net_worth_data[:cash_balance] || net_worth_data[:cash_value])
     )
     |> assign(:net_worth_breakdown, net_worth_data.breakdown)
     |> assign(:net_worth_error, nil)
@@ -650,14 +651,14 @@ defmodule AshfolioWeb.DashboardLive do
       {:ok, holdings_data} ->
         socket
         |> assign(:holdings, holdings_data.holdings)
-        |> assign(:portfolio_value, FormatHelpers.format_currency(holdings_data.total_value))
-        |> assign(:portfolio_pnl, FormatHelpers.format_currency(holdings_data.total_pnl))
-        |> assign(:total_return_amount, FormatHelpers.format_currency(holdings_data.total_pnl))
+        |> assign(:portfolio_value, Formatters.format_currency_with_cents(holdings_data.total_value))
+        |> assign(:portfolio_pnl, Formatters.format_currency_with_cents(holdings_data.total_pnl))
+        |> assign(:total_return_amount, Formatters.format_currency_with_cents(holdings_data.total_pnl))
         |> assign(
           :total_return_percent,
           FormatHelpers.format_percentage(holdings_data.total_pnl_pct)
         )
-        |> assign(:cost_basis, FormatHelpers.format_currency(holdings_data.total_cost_basis))
+        |> assign(:cost_basis, Formatters.format_currency_with_cents(holdings_data.total_cost_basis))
         |> assign(:holdings_count, to_string(holdings_data.holdings_count))
         |> assign(:sort_by, :symbol)
         |> assign(:sort_order, :asc)
@@ -776,16 +777,16 @@ defmodule AshfolioWeb.DashboardLive do
 
   defp assign_default_expense_values(socket) do
     socket
-    |> assign(:total_expenses, FormatHelpers.format_currency(Decimal.new("0.00")))
+    |> assign(:total_expenses, Formatters.format_currency_with_cents(Decimal.new("0.00")))
     |> assign(:expense_count, 0)
-    |> assign(:current_month_expenses, FormatHelpers.format_currency(Decimal.new("0.00")))
+    |> assign(:current_month_expenses, Formatters.format_currency_with_cents(Decimal.new("0.00")))
   end
 
   defp assign_default_goals_values(socket) do
     socket
     |> assign(:goals_active_count, 0)
-    |> assign(:goals_total_saved, FormatHelpers.format_currency(Decimal.new("0.00")))
-    |> assign(:goals_total_target, FormatHelpers.format_currency(Decimal.new("0.00")))
+    |> assign(:goals_total_saved, Formatters.format_currency_with_cents(Decimal.new("0.00")))
+    |> assign(:goals_total_target, Formatters.format_currency_with_cents(Decimal.new("0.00")))
     |> assign(:goals_emergency_fund_status, :no_goal)
   end
 
@@ -802,9 +803,9 @@ defmodule AshfolioWeb.DashboardLive do
     current_month_total = calculate_current_month_expenses(expenses)
 
     socket
-    |> assign(:total_expenses, FormatHelpers.format_currency(total_expenses))
+    |> assign(:total_expenses, Formatters.format_currency_with_cents(total_expenses))
     |> assign(:expense_count, expense_count)
-    |> assign(:current_month_expenses, FormatHelpers.format_currency(current_month_total))
+    |> assign(:current_month_expenses, Formatters.format_currency_with_cents(current_month_total))
   rescue
     _error ->
       socket
@@ -843,8 +844,8 @@ defmodule AshfolioWeb.DashboardLive do
 
     socket
     |> assign(:goals_active_count, active_count)
-    |> assign(:goals_total_saved, FormatHelpers.format_currency(total_saved))
-    |> assign(:goals_total_target, FormatHelpers.format_currency(total_target))
+    |> assign(:goals_total_saved, Formatters.format_currency_with_cents(total_saved))
+    |> assign(:goals_total_target, Formatters.format_currency_with_cents(total_target))
     |> assign(:goals_emergency_fund_status, emergency_fund_status)
   rescue
     _error ->

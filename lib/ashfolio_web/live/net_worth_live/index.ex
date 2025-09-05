@@ -2,8 +2,8 @@ defmodule AshfolioWeb.NetWorthLive.Index do
   @moduledoc false
   use AshfolioWeb, :live_view
 
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.NetWorthSnapshot
-  alias AshfolioWeb.Live.FormatHelpers
   alias Contex.Dataset
   alias Contex.LineChart
   alias Contex.Plot
@@ -190,7 +190,7 @@ defmodule AshfolioWeb.NetWorthLive.Index do
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="text-center">
               <div class="text-3xl font-bold text-gray-900">
-                {FormatHelpers.format_currency(@current_net_worth)}
+                {Formatters.format_currency_with_cents(@current_net_worth)}
               </div>
               <div class="text-sm text-gray-500">Current Net Worth</div>
             </div>
@@ -397,7 +397,7 @@ defmodule AshfolioWeb.NetWorthLive.Index do
 
   defp format_change(change) do
     sign = if Decimal.positive?(change), do: "+", else: ""
-    "#{sign}#{FormatHelpers.format_currency(change)}"
+    "#{sign}#{Formatters.format_currency_with_cents(change)}"
   end
 
   defp format_date_range("last_month"), do: "Last Month"

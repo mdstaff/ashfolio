@@ -2,8 +2,8 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
   @moduledoc false
   use AshfolioWeb, :live_view
 
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.Expense
-  alias AshfolioWeb.Live.FormatHelpers
   alias Contex.Dataset
   alias Contex.PieChart
   alias Contex.Plot
@@ -220,7 +220,7 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="text-center">
               <div class="text-3xl font-bold text-gray-900">
-                {FormatHelpers.format_currency(@total_expenses)}
+                {Formatters.format_currency_with_cents(@total_expenses)}
               </div>
               <div class="text-sm text-gray-500">Total Expenses</div>
             </div>
@@ -310,7 +310,7 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
                         </div>
                         <div class="text-right">
                           <div class="text-sm font-medium text-gray-900">
-                            {FormatHelpers.format_currency(amount)}
+                            {Formatters.format_currency_with_cents(amount)}
                           </div>
                           <div class="text-xs text-gray-500">
                             {Float.round(percentage, 1)}%

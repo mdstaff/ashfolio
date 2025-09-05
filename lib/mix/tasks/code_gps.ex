@@ -43,7 +43,8 @@ defmodule Mix.Tasks.CodeGps do
     end
 
     def collect_nodes(ast, filter_fun) do
-      Macro.prewalk(ast, [], fn
+      ast
+      |> Macro.prewalk([], fn
         node, acc ->
           case filter_fun.(node) do
             nil -> {node, acc}
@@ -124,24 +125,25 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp analyze_live_view_file(file) do
-    with content <- File.read!(file),
-         {:ok, ast} <- AstParser.parse_content(content) do
-      module_name = extract_module_name_ast(ast)
+    content = File.read!(file)
 
-      %{
-        name: module_name,
-        file: file,
-        mount_line:
-          find_function_line_ast(ast, :mount, 3) || find_function_line_regex(content, :mount, 3),
-        render_line:
-          find_function_line_ast(ast, :render, 1) || find_function_line_regex(content, :render, 1),
-        events: extract_handle_events_ast(ast),
-        assigns: extract_assigns_ast(ast),
-        subscriptions: extract_pubsub_subscriptions_ast(ast),
-        missing_subscriptions: suggest_missing_subscriptions(ast)
-      }
-    else
-      _ -> nil
+    case AstParser.parse_content(content) do
+      {:ok, ast} ->
+        module_name = extract_module_name_ast(ast)
+
+        %{
+          name: module_name,
+          file: file,
+          mount_line: find_function_line_ast(ast, :mount, 3) || find_function_line_regex(content, :mount, 3),
+          render_line: find_function_line_ast(ast, :render, 1) || find_function_line_regex(content, :render, 1),
+          events: extract_handle_events_ast(ast),
+          assigns: extract_assigns_ast(ast),
+          subscriptions: extract_pubsub_subscriptions_ast(ast),
+          missing_subscriptions: suggest_missing_subscriptions(ast)
+        }
+
+      _ ->
+        nil
     end
   end
 
@@ -152,34 +154,37 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp extract_components_from_file(file) do
-    with content <- File.read!(file),
-         {:ok, ast} <- AstParser.parse_content(content) do
-      AstParser.collect_nodes(ast, fn
-        # def component(assigns) do ... end
-        {:def, meta, [{name, _, [_assigns]}, _body]} ->
-          %{
-            name: name,
-            file: file,
-            line: meta[:line],
-            attrs: extract_component_attrs_ast(ast),
-            usage_count: count_component_usage(name)
-          }
+    content = File.read!(file)
 
-        # def component(assigns) when is_map(assigns) do ... end
-        {:def, meta, [{:when, _, [{name, _, [_assigns]}, _guard]}, _body]} ->
-          %{
-            name: name,
-            file: file,
-            line: meta[:line],
-            attrs: extract_component_attrs_ast(ast),
-            usage_count: count_component_usage(name)
-          }
+    case AstParser.parse_content(content) do
+      {:ok, ast} ->
+        AstParser.collect_nodes(ast, fn
+          # def component(assigns) do ... end
+          {:def, meta, [{name, _, [_assigns]}, _body]} ->
+            %{
+              name: name,
+              file: file,
+              line: meta[:line],
+              attrs: extract_component_attrs_ast(ast),
+              usage_count: count_component_usage(name)
+            }
 
-        _ ->
-          nil
-      end)
-    else
-      _ -> []
+          # def component(assigns) when is_map(assigns) do ... end
+          {:def, meta, [{:when, _, [{name, _, [_assigns]}, _guard]}, _body]} ->
+            %{
+              name: name,
+              file: file,
+              line: meta[:line],
+              attrs: extract_component_attrs_ast(ast),
+              usage_count: count_component_usage(name)
+            }
+
+          _ ->
+            nil
+        end)
+
+      _ ->
+        []
     end
   end
 
@@ -191,19 +196,22 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp analyze_test_file(file) do
-    with content <- File.read!(file),
-         {:ok, ast} <- AstParser.parse_content(content) do
-      module_name = extract_module_name_ast(ast)
+    content = File.read!(file)
 
-      %{
-        name: module_name,
-        file: file,
-        test_count: count_tests_ast(ast),
-        describes: extract_describe_blocks_ast(ast),
-        tested_module: infer_tested_module(module_name)
-      }
-    else
-      _ -> nil
+    case AstParser.parse_content(content) do
+      {:ok, ast} ->
+        module_name = extract_module_name_ast(ast)
+
+        %{
+          name: module_name,
+          file: file,
+          test_count: count_tests_ast(ast),
+          describes: extract_describe_blocks_ast(ast),
+          tested_module: infer_tested_module(module_name)
+        }
+
+      _ ->
+        nil
     end
   end
 
@@ -235,7 +243,8 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp extract_handle_events_ast(ast) do
-    AstParser.collect_nodes(ast, fn
+    ast
+    |> AstParser.collect_nodes(fn
       {:def, _, [{:handle_event, _, [event, _, _]}, _]} when is_binary(event) -> event
       _ -> nil
     end)
@@ -243,7 +252,8 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp extract_assigns_ast(ast) do
-    AstParser.collect_nodes(ast, fn
+    ast
+    |> AstParser.collect_nodes(fn
       {{:., _, [{:assign, _, _}, _]}, _, [_, key]} when is_atom(key) -> Atom.to_string(key)
       {{:., _, [:assign, _]}, _, [_, key, _]} when is_atom(key) -> Atom.to_string(key)
       _ -> nil
@@ -253,7 +263,8 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp extract_pubsub_subscriptions_ast(ast) do
-    AstParser.collect_nodes(ast, fn
+    ast
+    |> AstParser.collect_nodes(fn
       {{:., _, [{:__aliases__, _, [:Ashfolio, :PubSub]}, :subscribe]}, _, [topic]}
       when is_binary(topic) ->
         topic
@@ -286,7 +297,8 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp extract_component_attrs_ast(ast) do
-    AstParser.collect_nodes(ast, fn
+    ast
+    |> AstParser.collect_nodes(fn
       {:attr, _, [{name, _, _}, _]} -> Atom.to_string(name)
       _ -> nil
     end)
@@ -302,7 +314,8 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp count_tests_ast(ast) do
-    AstParser.collect_nodes(ast, fn
+    ast
+    |> AstParser.collect_nodes(fn
       {:test, _, [_, _]} -> true
       _ -> nil
     end)
@@ -585,10 +598,8 @@ defmodule Mix.Tasks.CodeGps do
       |> Stream.map(&File.read!/1)
       |> Enum.reduce(%{ashfolio_pubsub: 0, phoenix_pubsub: 0}, fn content, acc ->
         %{
-          ashfolio_pubsub:
-            acc.ashfolio_pubsub + count_pattern_occurrences(content, "Ashfolio.PubSub"),
-          phoenix_pubsub:
-            acc.phoenix_pubsub + count_pattern_occurrences(content, "Phoenix.PubSub")
+          ashfolio_pubsub: acc.ashfolio_pubsub + count_pattern_occurrences(content, "Ashfolio.PubSub"),
+          phoenix_pubsub: acc.phoenix_pubsub + count_pattern_occurrences(content, "Phoenix.PubSub")
         }
       end)
 
@@ -793,11 +804,7 @@ defmodule Mix.Tasks.CodeGps do
     |> Enum.map_join("\n", & &1)
   end
 
-  defp encode_freshness(%{
-         recent_files: recent,
-         uncommitted_count: uncommitted,
-         commits_ahead: ahead
-       }) do
+  defp encode_freshness(%{recent_files: recent, uncommitted_count: uncommitted, commits_ahead: ahead}) do
     recent_str =
       if length(recent) > 0 do
         "recent: #{inspect(Enum.take(recent, 5))}"
@@ -942,19 +949,23 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp analyze_mix_dependencies(mix_file) do
-    with content <- File.read!(mix_file),
-         {:ok, ast} <- AstParser.parse_content(content) do
-      deps = extract_dependencies_from_mix_ast(ast)
-      key_deps = ["contex", "mox", "decimal", "ash"]
-      usage_analysis = Map.new(key_deps, &analyze_dependency(&1, deps))
-      %{key_deps: usage_analysis}
-    else
-      _ -> %{key_deps: %{}}
+    content = File.read!(mix_file)
+
+    case AstParser.parse_content(content) do
+      {:ok, ast} ->
+        deps = extract_dependencies_from_mix_ast(ast)
+        key_deps = ["contex", "mox", "decimal", "ash"]
+        usage_analysis = Map.new(key_deps, &analyze_dependency(&1, deps))
+        %{key_deps: usage_analysis}
+
+      _ ->
+        %{key_deps: %{}}
     end
   end
 
   defp extract_dependencies_from_mix_ast(ast) do
-    AstParser.collect_nodes(ast, fn
+    ast
+    |> AstParser.collect_nodes(fn
       {:defp, _, [{:deps, _, []}, [do: deps_list]]} ->
         Enum.map(deps_list, fn
           {dep_name, _, _} -> Atom.to_string(dep_name)
@@ -1073,78 +1084,74 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp run_credo_analysis do
-    try do
-      # Get JSON output for detailed issues
-      {json_output, _} =
-        System.cmd("mix", ["credo", "--format", "json", "--strict"], stderr_to_stdout: true)
+    # Get JSON output for detailed issues
+    {json_output, _} =
+      System.cmd("mix", ["credo", "--format", "json", "--strict"], stderr_to_stdout: true)
 
-      # Get text output for summary statistics
-      {text_output, _} = System.cmd("mix", ["credo", "--strict"], stderr_to_stdout: true)
+    # Get text output for summary statistics
+    {text_output, _} = System.cmd("mix", ["credo", "--strict"], stderr_to_stdout: true)
 
-      # Parse both outputs
-      {issues, _} = parse_credo_output(json_output)
-      summary = extract_credo_summary(text_output)
+    # Parse both outputs
+    {issues, _} = parse_credo_output(json_output)
+    summary = extract_credo_summary(text_output)
 
-      {issues, summary}
-    rescue
-      _ ->
-        # Graceful degradation - if Credo fails, continue without it
-        {[], nil}
-    end
+    {issues, summary}
+  rescue
+    _ ->
+      # Graceful degradation - if Credo fails, continue without it
+      {[], nil}
   end
 
   defp parse_credo_output(output) do
-    try do
-      # Split output to handle mixed JSON + text output
-      lines = String.split(output, "\n")
+    # Split output to handle mixed JSON + text output
+    lines = String.split(output, "\n")
 
-      # Find JSON part (starts with {)
-      json_start = Enum.find_index(lines, &String.starts_with?(&1, "{"))
+    # Find JSON part (starts with {)
+    json_start = Enum.find_index(lines, &String.starts_with?(&1, "{"))
 
-      if json_start do
-        json_lines = Enum.drop(lines, json_start)
-        json_string = Enum.join(json_lines, "\n")
+    if json_start do
+      json_lines = Enum.drop(lines, json_start)
+      json_string = Enum.join(json_lines, "\n")
 
-        case Jason.decode(json_string) do
-          {:ok, json_data} ->
-            issues = Map.get(json_data, "issues", [])
+      case Jason.decode(json_string) do
+        {:ok, json_data} ->
+          issues = Map.get(json_data, "issues", [])
 
-            # Extract summary from full output
-            summary = extract_credo_summary(output)
+          # Extract summary from full output
+          summary = extract_credo_summary(output)
 
-            filtered_issues =
-              issues
-              |> Enum.filter(&filter_credo_issue/1)
-              |> Enum.map(&format_credo_issue/1)
-              |> Enum.take(10)
+          filtered_issues =
+            issues
+            |> Enum.filter(&filter_credo_issue/1)
+            |> Enum.map(&format_credo_issue/1)
+            |> Enum.take(10)
 
-            {filtered_issues, summary}
+          {filtered_issues, summary}
 
-          {:error, _} ->
-            # Try parsing the full output as JSON
-            case Jason.decode(output) do
-              {:ok, json_data} ->
-                issues = Map.get(json_data, "issues", [])
-                summary = %{mods_funs: "unknown", files: "unknown", analysis_time: "unknown"}
+        {:error, _} ->
+          # Try parsing the full output as JSON
+          case Jason.decode(output) do
+            {:ok, json_data} ->
+              issues = Map.get(json_data, "issues", [])
+              summary = %{mods_funs: "unknown", files: "unknown", analysis_time: "unknown"}
 
-                filtered_issues =
-                  issues
-                  |> Enum.filter(&filter_credo_issue/1)
-                  |> Enum.map(&format_credo_issue/1)
-                  |> Enum.take(10)
+              filtered_issues =
+                issues
+                |> Enum.filter(&filter_credo_issue/1)
+                |> Enum.map(&format_credo_issue/1)
+                |> Enum.take(10)
 
-                {filtered_issues, summary}
+              {filtered_issues, summary}
 
-              _ ->
-                {[], nil}
-            end
-        end
-      else
-        {[], nil}
+            _ ->
+              {[], nil}
+          end
       end
-    rescue
-      _ -> {[], nil}
+    else
+      {[], nil}
     end
+  rescue
+    _ -> {[], nil}
   end
 
   defp extract_credo_summary(output) do
@@ -1157,33 +1164,29 @@ defmodule Mix.Tasks.CodeGps do
     # Look for mods/funs line like "2052 mods/funs, found 10 refactoring opportunities"
     summary_line = Enum.find(lines, &String.contains?(&1, "mods/funs"))
 
-    cond do
-      analysis_line && summary_line ->
-        # Parse "2052 mods/funs, found 10 refactoring opportunities"
-        mods_funs =
-          case Regex.run(~r/(\d+) mods\/funs/, summary_line) do
-            [_, count] -> count
-            _ -> "unknown"
-          end
+    if analysis_line && summary_line do
+      # Parse "2052 mods/funs, found 10 refactoring opportunities"
+      mods_funs =
+        case Regex.run(~r/(\d+) mods\/funs/, summary_line) do
+          [_, count] -> count
+          _ -> "unknown"
+        end
 
-        # Parse "223 files"
-        files =
-          case Regex.run(~r/(\d+) files/, analysis_line) do
-            [_, count] -> count
-            _ -> "unknown"
-          end
+      # Parse "223 files"
+      files =
+        case Regex.run(~r/(\d+) files/, analysis_line) do
+          [_, count] -> count
+          _ -> "unknown"
+        end
 
-        # Parse analysis time "1.6 seconds"
-        time =
-          case Regex.run(~r/Analysis took ([\d.]+) seconds/, analysis_line) do
-            [_, seconds] -> seconds
-            _ -> "unknown"
-          end
+      # Parse analysis time "1.6 seconds"
+      time =
+        case Regex.run(~r/Analysis took ([\d.]+) seconds/, analysis_line) do
+          [_, seconds] -> seconds
+          _ -> "unknown"
+        end
 
-        %{mods_funs: mods_funs, files: files, analysis_time: time}
-
-      true ->
-        nil
+      %{mods_funs: mods_funs, files: files, analysis_time: time}
     end
   end
 

@@ -2,6 +2,7 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
   @moduledoc false
   use AshfolioWeb, :live_view
 
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.EmergencyFundStatus
   alias Ashfolio.FinancialManagement.FinancialGoal
   alias AshfolioWeb.FinancialGoalLive.FormComponent
@@ -187,13 +188,13 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
             </div>
             <div class="text-center">
               <div class="text-2xl font-bold text-green-600">
-                {FormatHelpers.format_currency(@total_current_amount)}
+                {Formatters.format_currency_with_cents(@total_current_amount)}
               </div>
               <div class="text-sm text-gray-500">Total Saved</div>
             </div>
             <div class="text-center">
               <div class="text-2xl font-bold text-purple-600">
-                {FormatHelpers.format_currency(@total_target_amount)}
+                {Formatters.format_currency_with_cents(@total_target_amount)}
               </div>
               <div class="text-sm text-gray-500">Total Target</div>
             </div>
@@ -435,7 +436,7 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-right">
                         <div class="text-sm font-medium text-gray-900">
-                          {FormatHelpers.format_currency(goal.current_amount)}
+                          {Formatters.format_currency_with_cents(goal.current_amount)}
                         </div>
                         <div class="text-sm text-gray-500">
                           {FormatHelpers.format_percentage(goal.progress_percentage)}% complete
@@ -445,7 +446,7 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
                         </div>
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
-                        {FormatHelpers.format_currency(goal.target_amount)}
+                        {Formatters.format_currency_with_cents(goal.target_amount)}
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         <%= if goal.target_date do %>
@@ -796,7 +797,7 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="text-center">
         <div class="text-3xl font-bold text-gray-900 mb-2">
-          {FormatHelpers.format_currency(@analysis.monthly_expenses)}
+          {Formatters.format_currency_with_cents(@analysis.monthly_expenses)}
         </div>
         <div class="text-sm text-gray-600">Monthly Expenses</div>
       </div>
@@ -804,7 +805,7 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
       <%= if @analysis.goal do %>
         <div class="text-center">
           <div class="text-3xl font-bold text-blue-600 mb-2">
-            {FormatHelpers.format_currency(@analysis.current_amount)}
+            {Formatters.format_currency_with_cents(@analysis.current_amount)}
           </div>
           <div class="text-sm text-gray-600">Current Emergency Fund</div>
           <div class="text-xs text-gray-500 mt-1">

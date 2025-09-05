@@ -143,7 +143,7 @@ defmodule Ashfolio.Portfolio.HoldingsCalculatorTest do
       type: type,
       quantity: Decimal.new(to_string(quantity)),
       price: Decimal.new(price),
-      date: ~D[2024-01-15]
+      date: ~D[2025-01-15]
     }
   end
 end

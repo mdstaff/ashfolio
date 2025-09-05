@@ -1,135 +1,96 @@
-# v0.5.0 Stage 1: AER Standardization Implementation Plan
+# IMPLEMENTATION_PLAN.md | v0.5.0 Refactoring Phase
 
 ## Overview
 
-Integration of AER (Annual Equivalent Rate) standardization into ForecastCalculator for consistent financial calculations across the Ashfolio platform.
+Post-credo cleanup refactoring to consolidate helper functions, eliminate duplicates, and improve API ergonomics across the codebase.
 
-🎉 STAGE 1 COMPLETE - ALL PHASES SUCCESSFUL
+**Analysis Results**: ~2042 modules/functions analyzed
+**Cleanup Potential**: ~2,052 LOC reduction across 28 modules
+**Function Reduction**: ~242 functions can be eliminated/consolidated
+**Quality Score**: 100/100 (0 credo issues, 0 dialyzer warnings)
 
-## Stage 1 Progress Status
+---
 
-### ✅ Day 1: RED Phase - Integration Test Foundation (Complete)
+## Stage 1: Financial Formatters Consolidation
 
-Completed:
+**Objective**: Eliminate 4 duplicate formatting implementations and create unified formatting API
 
-- ✅ Created comprehensive failing test suite: `test/ashfolio/financial_management/forecast_calculator_aer_test.exs`
-- ✅ Analyzed current ForecastCalculator implementation and identified integration points
-- ✅ Documented 8 key integration points that need AER standardization
-- ✅ 10 failing tests created covering all major use cases
-- ✅ Performance requirements documented (<100ms for typical projections)
+**Files to consolidate**:
+- `lib/ashfolio_web/helpers/format_helper.ex` (primary)
+- `lib/ashfolio_web/live/format_helpers.ex` (duplicate logic)
+- `lib/ashfolio_web/helpers/chart_helpers.ex` (chart formatting)
+- `lib/ashfolio_web/components/transaction_stats.ex` (component-local)
 
-Key Findings:
+**Deliverable**: Single `Ashfolio.Financial.Formatters` module
+**Impact**: ~200-300 lines eliminated, single import across codebase
+**Test cases**: Currency formatting, percentage display, chart axis labels
 
-- Current ForecastCalculator uses mixed compounding approach:
-  - Annual compounding for growth-only scenarios
-  - Monthly compounding for scenarios with contributions
-- Significant calculation differences observed:
-  - Growth-only: Small rounding differences (~0.01)
-  - With contributions: Major differences ($6k-$100k+) due to methodology mismatch
-- 8 major integration points identified for Day 2 implementation
+**Status**: Not Started
 
-Integration Points Documented:
+---
 
-1. Line 219: `calculate_compound_growth_with_contributions/4` - main integration point
-2. Line 256: `calculate_future_value_of_present/3` - replace with AER
-3. Line 263: `calculate_future_value_of_present_monthly/3` - replace with AER
-4. Line 270: `calculate_future_value_of_annuity_monthly/3` - replace with AER
-5. Line 285: `calculate_power/2` - use AER's precise calculations
-6. Mixed compounding strategy (lines 232-252) - standardize to AER
-7. All scenario calculation functions need AER delegation
-8. UI rate interpretation standardization (treat all as AER)
+## Stage 2: Decimal Helper Utilities
 
-Test Coverage:
+**Objective**: Reduce repetitive Decimal operations across 47+ files
 
-- Basic growth calculations (with/without contributions)
-- Multi-period projections
-- Edge cases (zero growth, negative returns, long horizons)
-- Scenario projections (pessimistic/realistic/optimistic)
-- Performance requirements
-- UI rate interpretation
+**Target patterns**:
+- `Decimal.add/sub/mult/div` operations 
+- Safe conversion helpers
+- Mathematical functions (power, nth_root, exp, ln)
 
-### ✅ Day 2: GREEN Phase - Implementation (Complete)
+**Deliverable**: `Ashfolio.Financial.DecimalHelpers` module with chainable operations
+**Impact**: ~150-200 lines reduced, consistent precision handling
+**Test cases**: Arithmetic operations, edge cases, type conversions
 
-Status: ✅ COMPLETE
+**Status**: Not Started
 
-Completed Objectives:
+---
 
-- ✅ Replaced ForecastCalculator's mixed compounding with AERCalculator delegation
-- ✅ Updated `calculate_compound_growth_with_contributions/4` to use `AERCalculator.compound_with_aer/4`
-- ✅ Removed redundant calculation functions (future value helpers, power calculations)
-- ✅ All 10 AER integration tests now pass (100% success rate)
-- ✅ Maintained performance requirements (<50ms average for 10-year projections)
-- ✅ All 54 existing ForecastCalculator tests continue to pass (backward compatibility maintained)
+## Stage 3: Data Transformation Utilities  
 
-Implementation Strategy:
+**Objective**: Standardize common list processing patterns in LiveViews
 
-1. Primary Integration: Replace core calculation logic with AERCalculator delegation
-2. Preserve API: All public function signatures remain unchanged
-3. Gradual Replacement: Replace internal functions systematically
-4. Test-Driven: Make tests pass one by one, starting with simplest cases
+**Target patterns**:
+- Account/transaction grouping logic
+- Sorting and filtering operations
+- Date/period calculations
 
-Expected Changes:
+**Deliverable**: `Ashfolio.DataHelpers` module with generic transformations
+**Impact**: ~100-150 lines consolidated, consistent data processing
+**Test cases**: Grouping operations, sorting, date range filtering
 
-- Significant refactoring of `calculate_compound_growth_with_contributions/4`
-- Removal of 3-4 helper functions (replaced by AER methodology)
-- All scenario functions updated to delegate to AERCalculator
-- No breaking changes to public API
+**Status**: Not Started
 
-### ✅ Day 3: REFACTOR Phase - Code Quality & Optimization (Complete)
+---
 
-Status: ✅ COMPLETE
+## Stage 4: Form Helper Consolidation
 
-Completed Objectives:
+**Objective**: Reduce repetitive form handling across 8+ components
 
-- ✅ Cleaned up remaining redundant code (removed duplicate calculation functions)
-- ✅ Optimized performance with AER integration (maintained <50ms average)
-- ✅ Updated comprehensive documentation and examples (module docs reflect AER methodology)
-- ✅ Verified test coverage and edge cases (64 total tests, 100% pass rate)
-- ✅ Fixed 2 Credo violations (function nesting depth reduced)
-- ✅ Extracted helper functions for better separation of concerns
-- ✅ Enhanced module documentation explaining AER standardization approach
+**Target patterns**:
+- Decimal parsing in forms
+- Changeset error handling
+- Form validation workflows
 
-## Success Criteria - ✅ ALL ACHIEVED
+**Deliverable**: `AshfolioWeb.FormHelpers` module
+**Impact**: Improved form consistency, reduced boilerplate
+**Test cases**: Decimal parsing, error display, validation chains
 
-- ✅ All tests in `forecast_calculator_aer_test.exs` pass (10/10 tests)
-- ✅ Existing ForecastCalculator tests continue to pass (54/54 tests, backward compatibility maintained)
-- ✅ Performance exceeds requirements (<50ms average vs <100ms target)
-- ✅ Calculation accuracy within industry standards (eliminated $100k+ discrepancies)
-- ✅ No breaking changes to public API (all function signatures preserved)
-- ✅ Code coverage improved for AER-related modules (89-91% coverage)
+**Status**: Not Started
 
-## Final Results Summary
+---
 
-Total Tests: 64 tests (54 existing + 10 new AER integration)  
-Pass Rate: 100% (64/64)  
-Performance: <50ms average (exceeded <100ms target)  
-Code Quality: Zero Credo violations (improved from 2)  
-Calculation Accuracy: Fixed major discrepancies up to $100k+  
-API Compatibility: 100% backward compatible
+## Stage 5: Mathematical Operations Module
 
-Branch: `feature/aer-standardization-v0.5.0`  
-Commit: `1b81eed` - "feat: standardize ForecastCalculator to use AER methodology"
+**Objective**: Consolidate duplicate math functions from multiple calculators
 
-## Notes for Day 2 Implementation
+**Files with duplicates**:
+- `lib/ashfolio/financial_management/aer_calculator.ex` (lines 279-311)  
+- `lib/ashfolio_web/helpers/chart_helpers.ex` (lines 156-192)
+- `lib/ashfolio/financial_management/forecast_calculator.ex`
 
-Key Insight: The main challenge is that current ForecastCalculator's mixed compounding approach was pragmatic for v0.4.3 but creates calculation inconsistencies. AERCalculator provides the standardized methodology needed for v0.5.0.
+**Deliverable**: `Ashfolio.Mathematical` module with precise operations
+**Impact**: Single source of truth for financial math, consistent precision
+**Test cases**: Power/root calculations, compound interest, edge cases
 
-Primary Integration Point:
-
-- Focus on line 219: `calculate_compound_growth_with_contributions/4`
-- This function drives most other calculations
-- Replace its internal logic with `AERCalculator.compound_with_aer/4` call
-
-Implementation Order:
-
-1. Start with growth-only scenarios (simplest case)
-2. Move to scenarios with contributions (most complex)
-3. Update multi-period and scenario calculations
-4. Verify edge cases and performance
-
-Test Results Summary:
-
-- 8/10 tests failing as expected (RED phase successful)
-- Calculation differences range from $0.01 to $100k+
-- Performance already meets requirements (<100ms)
-- Test suite provides comprehensive coverage for GREEN phase implementation
+**Status**: Not Started

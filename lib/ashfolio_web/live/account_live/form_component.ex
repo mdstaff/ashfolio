@@ -3,6 +3,7 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
   use AshfolioWeb, :live_component
 
   alias Ashfolio.Context
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.Portfolio.Account
   alias AshfolioWeb.Live.ErrorHelpers
   alias AshfolioWeb.Live.FormatHelpers
@@ -320,7 +321,7 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
       {:ok, account} ->
         success_message =
           if Map.get(form_params, "balance") && form_params["balance"] != "" do
-            "Account created successfully with balance of #{FormatHelpers.format_currency(account.balance)}"
+            "Account created successfully with balance of #{Formatters.format_currency_with_cents(account.balance)}"
           else
             "Account created successfully"
           end
@@ -356,7 +357,7 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
           if Map.get(form_params, "balance") &&
                form_params["balance"] != "" &&
                !Decimal.equal?(old_balance, account.balance) do
-            "Account updated successfully. Balance changed to #{FormatHelpers.format_currency(account.balance)}"
+            "Account updated successfully. Balance changed to #{Formatters.format_currency_with_cents(account.balance)}"
           else
             "Account updated successfully"
           end
@@ -491,7 +492,7 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
         Map.put(messages, :balance, "That's a lot! Please verify this amount is correct")
 
       {balance, ""} when balance > 0 ->
-        formatted = FormatHelpers.format_currency(Decimal.from_float(balance))
+        formatted = Formatters.format_currency_with_cents(Decimal.from_float(balance))
         Map.put(messages, :balance, "Balance will be set to #{formatted}")
 
       {+0.0, ""} ->

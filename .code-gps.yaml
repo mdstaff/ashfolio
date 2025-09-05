@@ -78,7 +78,7 @@ test/ashfolio/financial_management/category_migration_test.exs ⚠️
 test/ashfolio/financial_management/forecast_calculator_aer_test.exs ⚠️
 
 # === CODE QUALITY ===
-credo_analysis: 2072 mods/funs, 226 files (2.9s)
+credo_analysis: 2072 mods/funs, 226 files (2.3s)
 credo_issues: 10 refactoring opportunities
   lib/ashfolio/financial/formatters.ex:180 readability: There should be a final \n at the end of each file.
   lib/ashfolio/financial/formatters.ex:4 readability: There should be no trailing white-space at the end of a line.

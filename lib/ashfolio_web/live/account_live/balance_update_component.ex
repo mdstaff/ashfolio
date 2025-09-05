@@ -3,6 +3,7 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
   use AshfolioWeb, :live_component
 
   alias Ashfolio.Context
+  alias Ashfolio.Financial.Formatters
   alias AshfolioWeb.Live.ErrorHelpers
   alias AshfolioWeb.Live.FormatHelpers
 
@@ -71,7 +72,7 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
           <div class="text-center">
             <p class="text-sm font-medium text-gray-500 mb-1">Current Balance</p>
             <p class="text-2xl font-bold text-gray-900">
-              {FormatHelpers.format_currency(@account.balance)}
+              {Formatters.format_currency_with_cents(@account.balance)}
             </p>
             <%= if @account.balance_updated_at do %>
               <p class="text-xs text-gray-500 mt-1">
@@ -120,13 +121,15 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
                     <div class="flex items-center justify-between">
                       <span class="text-sm text-blue-800">Balance Change:</span>
                       <span class={"text-sm font-medium #{if is_increase, do: "text-green-600", else: "text-red-600"}"}>
-                        {if is_increase, do: "+", else: ""}{FormatHelpers.format_currency(change)}
+                        {if is_increase, do: "+", else: ""}{Formatters.format_currency_with_cents(
+                          change
+                        )}
                       </span>
                     </div>
                     <div class="flex items-center justify-between mt-1">
                       <span class="text-sm text-blue-800">New Balance:</span>
                       <span class="text-sm font-bold text-blue-900">
-                        {FormatHelpers.format_currency(new_balance_decimal)}
+                        {Formatters.format_currency_with_cents(new_balance_decimal)}
                       </span>
                     </div>
                   </div>
