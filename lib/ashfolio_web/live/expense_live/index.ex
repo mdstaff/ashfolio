@@ -7,7 +7,6 @@ defmodule AshfolioWeb.ExpenseLive.Index do
   alias Ashfolio.FinancialManagement.TransactionCategory
   alias AshfolioWeb.ExpenseLive.FormComponent
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -432,7 +431,7 @@ defmodule AshfolioWeb.ExpenseLive.Index do
                   <%= for expense <- @expenses do %>
                     <tr class="hover:bg-gray-50">
                       <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
-                        {FormatHelpers.format_date(expense.date)}
+                        {Formatters.format_date(expense.date)}
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm font-mono font-semibold text-right text-gray-900">
                         {Formatters.format_currency_with_cents(expense.amount)}

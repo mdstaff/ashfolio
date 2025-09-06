@@ -13,7 +13,6 @@ defmodule AshfolioWeb.TransactionLive.Index do
   alias Ashfolio.Portfolio.Transaction
   alias Ashfolio.PubSub
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
   alias AshfolioWeb.TransactionLive.FormComponent
 
   @impl true
@@ -671,7 +670,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
                     <div class="block py-4 pr-6">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 sm:rounded-l-xl" />
                       <span class="relative font-semibold text-zinc-900">
-                        {FormatHelpers.format_date(transaction.date)}
+                        {Formatters.format_date(transaction.date)}
                       </span>
                     </div>
                   </td>
@@ -707,7 +706,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
                       <span class="relative">
-                        {FormatHelpers.format_quantity(transaction.quantity)}
+                        {Formatters.format_quantity(transaction.quantity)}
                       </span>
                     </div>
                   </td>

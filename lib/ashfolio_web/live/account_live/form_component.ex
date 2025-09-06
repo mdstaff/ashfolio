@@ -6,7 +6,6 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
   alias Ashfolio.Financial.Formatters
   alias Ashfolio.Portfolio.Account
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def render(assigns) do
@@ -129,9 +128,7 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
               </p>
               <%= if @action == :edit and @account.balance_updated_at do %>
                 <p class="text-xs text-blue-600 mt-1">
-                  Balance last updated: {FormatHelpers.format_relative_time(
-                    @account.balance_updated_at
-                  )}
+                  Balance last updated: {Formatters.format_relative_time(@account.balance_updated_at)}
                 </p>
               <% end %>
             </div>

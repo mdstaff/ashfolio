@@ -11,7 +11,6 @@ defmodule AshfolioWeb.DashboardLive do
   alias Ashfolio.Portfolio.Account
   alias Ashfolio.Portfolio.HoldingsCalculator
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
 
   require Logger
 
@@ -156,7 +155,7 @@ defmodule AshfolioWeb.DashboardLive do
           <h1 class="text-2xl font-bold text-gray-900">Portfolio Dashboard</h1>
           <p class="text-gray-600">Overview of your investment portfolio</p>
           <p :if={@last_price_update} class="text-sm text-gray-500 mt-1">
-            Last updated: {FormatHelpers.format_relative_time(@last_price_update)}
+            Last updated: {Formatters.format_relative_time(@last_price_update)}
           </p>
         </div>
         <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -192,7 +191,7 @@ defmodule AshfolioWeb.DashboardLive do
           title="Total Value"
           value={@portfolio_value}
           change={@total_return_percent}
-          positive={FormatHelpers.positive?(@total_return_amount)}
+          positive={Formatters.positive?(@total_return_amount)}
           data_testid="total-value"
         />
         <.stat_card title="Daily Change" value="N/A" change="Phase 2" positive={true} />
@@ -200,7 +199,7 @@ defmodule AshfolioWeb.DashboardLive do
           title="Total Return"
           value={@total_return_amount}
           change={@total_return_percent}
-          positive={FormatHelpers.positive?(@total_return_amount)}
+          positive={Formatters.positive?(@total_return_amount)}
           data_testid="total-return"
         />
         <.stat_card
@@ -380,11 +379,11 @@ defmodule AshfolioWeb.DashboardLive do
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 sm:rounded-r-xl" />
                       <span class={[
                         "relative",
-                        FormatHelpers.value_color_class(holding.unrealized_pnl)
+                        Formatters.value_color_class(holding.unrealized_pnl)
                       ]}>
                         <div>{Formatters.format_currency_with_cents(holding.unrealized_pnl)}</div>
                         <div class="text-sm">
-                          ({FormatHelpers.format_percentage(holding.unrealized_pnl_pct)})
+                          ({Formatters.format_percentage(holding.unrealized_pnl_pct)})
                         </div>
                       </span>
                     </div>
@@ -453,7 +452,7 @@ defmodule AshfolioWeb.DashboardLive do
                       </p>
                       <span class="text-gray-300">•</span>
                       <p class="text-xs text-gray-500">
-                        {FormatHelpers.format_relative_time(transaction.date)}
+                        {Formatters.format_relative_time(transaction.date)}
                       </p>
                     </div>
                   </div>
@@ -461,7 +460,7 @@ defmodule AshfolioWeb.DashboardLive do
                 <div class="text-right">
                   <p class={[
                     "text-sm font-medium",
-                    FormatHelpers.value_color_class(transaction.total_amount)
+                    Formatters.value_color_class(transaction.total_amount)
                   ]}>
                     {Formatters.format_currency_with_cents(transaction.total_amount)}
                   </p>
@@ -656,7 +655,7 @@ defmodule AshfolioWeb.DashboardLive do
         |> assign(:total_return_amount, Formatters.format_currency_with_cents(holdings_data.total_pnl))
         |> assign(
           :total_return_percent,
-          FormatHelpers.format_percentage(holdings_data.total_pnl_pct)
+          Formatters.format_percentage(holdings_data.total_pnl_pct)
         )
         |> assign(:cost_basis, Formatters.format_currency_with_cents(holdings_data.total_cost_basis))
         |> assign(:holdings_count, to_string(holdings_data.holdings_count))

@@ -8,7 +8,6 @@ defmodule AshfolioWeb.AccountLive.Index do
   alias Ashfolio.Portfolio.Transaction
   alias AshfolioWeb.AccountLive.FormComponent
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -395,7 +394,7 @@ defmodule AshfolioWeb.AccountLive.Index do
                       <% end %>
                       <%= if account.balance_updated_at do %>
                         <p>
-                          Updated {FormatHelpers.format_relative_time(account.balance_updated_at)}
+                          Updated {Formatters.format_relative_time(account.balance_updated_at)}
                         </p>
                       <% else %>
                         <p>Balance not yet updated</p>

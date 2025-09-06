@@ -192,23 +192,23 @@ defmodule Mix.Tasks.CodeGps do
 
   defp analyze_tests do
     test_files = Path.wildcard("test/**/*_test.exs")
-    
-    test_analysis = 
+
+    test_analysis =
       test_files
       |> Enum.map(&analyze_test_file/1)
       |> Enum.reject(&is_nil/1)
-    
+
     # Build summary statistics
     total_tests = test_analysis |> Enum.map(& &1.test_count) |> Enum.sum()
     total_test_modules = length(test_analysis)
     avg_tests_per_module = if total_test_modules > 0, do: Float.round(total_tests / total_test_modules, 1), else: 0.0
-    
+
     # Find largest test modules
-    largest_test_modules = 
+    largest_test_modules =
       test_analysis
       |> Enum.sort_by(& &1.test_count, :desc)
       |> Enum.take(10)
-    
+
     %{
       test_modules: test_analysis,
       summary: %{
@@ -226,9 +226,10 @@ defmodule Mix.Tasks.CodeGps do
     case AstParser.parse_content(content) do
       {:ok, ast} ->
         module_name = extract_module_name_ast(ast)
-        test_count = count_tests_regex_fallback(content) # Use regex as it's more accurate
+        # Use regex as it's more accurate
+        test_count = count_tests_regex_fallback(content)
         describes = extract_describe_blocks_ast(ast)
-        
+
         %{
           name: module_name,
           file: file,
@@ -244,9 +245,9 @@ defmodule Mix.Tasks.CodeGps do
         # Fallback analysis for test files that fail AST parsing
         test_count = count_tests_regex_fallback(content)
         assertion_count = count_assertions_in_content(content)
-        
+
         %{
-          name: Path.basename(file, ".exs") |> Macro.camelize(),
+          name: file |> Path.basename(".exs") |> Macro.camelize(),
           file: file,
           test_count: test_count,
           describes: [],
@@ -281,22 +282,22 @@ defmodule Mix.Tasks.CodeGps do
           total_functions: function_counts.total,
           public_functions: function_counts.public,
           private_functions: function_counts.private,
-          type: (if String.contains?(file, "test/"), do: :test, else: :lib)
+          type: if(String.contains?(file, "test/"), do: :test, else: :lib)
         }
 
       {:error, _} ->
         # Fallback to basic analysis if AST parsing fails
         IO.warn("AST parsing failed for #{file}, using fallback analysis")
-        
+
         function_count = count_functions_regex_fallback(content)
-        
+
         %{
-          name: Path.basename(file, ".ex") |> Macro.camelize(),
+          name: file |> Path.basename(".ex") |> Macro.camelize(),
           file: file,
           total_functions: function_count,
           public_functions: function_count,
           private_functions: 0,
-          type: (if String.contains?(file, "test/"), do: :test, else: :lib)
+          type: if(String.contains?(file, "test/"), do: :test, else: :lib)
         }
     end
   end
@@ -322,7 +323,7 @@ defmodule Mix.Tasks.CodeGps do
   defp build_module_summary(modules) do
     lib_modules = Enum.filter(modules, &(&1.type == :lib))
     test_modules = Enum.filter(modules, &(&1.type == :test))
-    
+
     total_modules = length(modules)
     total_functions = modules |> Enum.map(& &1.total_functions) |> Enum.sum()
     total_public = modules |> Enum.map(& &1.public_functions) |> Enum.sum()
@@ -334,7 +335,7 @@ defmodule Mix.Tasks.CodeGps do
     avg_functions = if total_modules > 0, do: Float.round(total_functions / total_modules, 1), else: 0.0
 
     complex_modules = modules |> Enum.filter(&(&1.total_functions > 30)) |> length()
-    
+
     # Check for any modules with 0 functions (potential parsing issues)
     empty_modules = modules |> Enum.filter(&(&1.total_functions == 0)) |> length()
 
@@ -454,17 +455,6 @@ defmodule Mix.Tasks.CodeGps do
     |> Enum.map(&File.read!/1)
     |> Enum.map(&length(Regex.scan(~r/<.#{component_name}/, &1)))
     |> Enum.sum()
-  end
-
-  defp count_tests_ast(ast) do
-    ast
-    |> AstParser.collect_nodes(fn
-      # Match test macro calls: test "description" do ... end
-      {:test, _, [_description, _body]} -> true
-      {:test, _, [_description, _options, _body]} -> true
-      _ -> nil
-    end)
-    |> length()
   end
 
   defp extract_describe_blocks_ast(ast) do
@@ -1049,7 +1039,7 @@ defmodule Mix.Tasks.CodeGps do
     modules_str =
       Enum.map_join(largest, "\n", fn test_module ->
         name = String.replace(test_module.name || "Unknown", "Elixir.", "")
-        
+
         "  #{name}: #{test_module.test_count} tests, #{test_module.assertion_count} assertions (#{test_module.describe_count} describes) | #{test_module.file}"
       end)
 
@@ -1205,10 +1195,10 @@ defmodule Mix.Tasks.CodeGps do
   defp count_functions_regex_fallback(content) do
     def_pattern = ~r/^\s*def\s+[a-zA-Z_][a-zA-Z0-9_]*[\s\(]/m
     defp_pattern = ~r/^\s*defp\s+[a-zA-Z_][a-zA-Z0-9_]*[\s\(]/m
-    
+
     def_count = length(Regex.scan(def_pattern, content))
     defp_count = length(Regex.scan(defp_pattern, content))
-    
+
     def_count + defp_count
   end
 
@@ -1228,7 +1218,7 @@ defmodule Mix.Tasks.CodeGps do
       ~r/assert_in_delta/,
       ~r/assert_receive/
     ]
-    
+
     Enum.reduce(patterns, 0, fn pattern, acc ->
       acc + length(Regex.scan(pattern, content))
     end)

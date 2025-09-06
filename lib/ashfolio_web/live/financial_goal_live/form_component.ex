@@ -5,7 +5,6 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
   alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.FinancialGoal
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def render(assigns) do
@@ -181,7 +180,7 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
                   <div>
                     <span class="text-gray-600 font-medium">Progress:</span>
                     <div class="text-gray-900">
-                      {FormatHelpers.format_percentage(@goal_calculations.progress_percentage)}%
+                      {Formatters.format_percentage(@goal_calculations.progress_percentage)}%
                     </div>
                   </div>
                   <div>

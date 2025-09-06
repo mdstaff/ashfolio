@@ -13,7 +13,6 @@ defmodule AshfolioWeb.RetirementLive.Index do
 
   alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.RetirementCalculator
-  alias AshfolioWeb.Live.FormatHelpers
 
   require Logger
 

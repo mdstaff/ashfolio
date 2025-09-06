@@ -177,4 +177,164 @@ defmodule Ashfolio.Financial.Formatters do
     |> Enum.map_join(",", &Enum.join/1)
     |> String.reverse()
   end
+
+  @doc """
+  Formats percentage values with customizable decimal places.
+
+  ## Examples
+      iex> Formatters.format_percentage(Decimal.new("15.25"))
+      "15.25%"
+      
+      iex> Formatters.format_percentage(Decimal.new("15.25678"), 1)
+      "15.3%"
+  """
+  def format_percentage(value, decimal_places \\ 2)
+
+  def format_percentage(value, decimal_places) when is_struct(value, Decimal) do
+    formatted = value |> Decimal.round(decimal_places) |> Decimal.to_string()
+    "#{formatted}%"
+  end
+
+  def format_percentage(value, decimal_places) when is_number(value) do
+    format_percentage(Decimal.from_float(value * 1.0), decimal_places)
+  end
+
+  def format_percentage(nil, _decimal_places), do: "0.00%"
+  def format_percentage(_, _decimal_places), do: "0.00%"
+
+  @doc """
+  Formats relative time from a datetime to "X time ago".
+
+  ## Examples
+      iex> past_time = ~U[2025-01-28 10:25:00Z]
+      iex> current_time = ~U[2025-01-28 10:30:00Z]  
+      iex> Formatters.format_relative_time(past_time, current_time)
+      "5 minutes ago"
+  """
+  def format_relative_time(datetime, reference_time \\ nil)
+
+  def format_relative_time(%DateTime{} = datetime, reference_time) do
+    reference = reference_time || DateTime.utc_now()
+
+    case DateTime.diff(reference, datetime) do
+      diff when diff < 60 ->
+        "#{diff} second#{if diff == 1, do: "", else: "s"} ago"
+
+      diff when diff < 3600 ->
+        minutes = div(diff, 60)
+        "#{minutes} minute#{if minutes == 1, do: "", else: "s"} ago"
+
+      diff when diff < 86_400 ->
+        hours = div(diff, 3600)
+        "#{hours} hour#{if hours == 1, do: "", else: "s"} ago"
+
+      diff ->
+        days = div(diff, 86_400)
+        "#{days} day#{if days == 1, do: "", else: "s"} ago"
+    end
+  end
+
+  def format_relative_time(%Date{} = date, reference_time) do
+    # Convert Date to DateTime at midnight UTC
+    datetime = DateTime.new!(date, ~T[00:00:00], "Etc/UTC")
+    format_relative_time(datetime, reference_time)
+  end
+
+  def format_relative_time(nil, _reference_time), do: "Never"
+  def format_relative_time(_, _reference_time), do: "Unknown"
+
+  @doc """
+  Returns CSS class for positive/negative/neutral values.
+
+  ## Examples
+      iex> Formatters.value_color_class(Decimal.new("15.25"))
+      "text-green-700"
+      
+      iex> Formatters.value_color_class(Decimal.new("-15.25"))
+      "text-red-700"
+      
+      iex> Formatters.value_color_class(Decimal.new("0"))
+      "text-gray-600"
+  """
+  def value_color_class(
+        value,
+        positive_class \\ "text-green-700",
+        negative_class \\ "text-red-700",
+        neutral_class \\ "text-gray-600"
+      )
+
+  def value_color_class(value, positive_class, negative_class, neutral_class) when is_struct(value, Decimal) do
+    case Decimal.compare(value, Decimal.new("0")) do
+      :gt -> positive_class
+      :lt -> negative_class
+      :eq -> neutral_class
+    end
+  end
+
+  def value_color_class(value, positive_class, negative_class, neutral_class) when is_number(value) do
+    value_color_class(Decimal.from_float(value * 1.0), positive_class, negative_class, neutral_class)
+  end
+
+  def value_color_class(_, _positive_class, _negative_class, neutral_class), do: neutral_class
+
+  @doc """
+  Formats date values to readable format.
+
+  ## Examples
+      iex> Formatters.format_date(~D[2023-12-25])
+      "Dec 25, 2023"
+  """
+  def format_date(%Date{} = date) do
+    Calendar.strftime(date, "%b %d, %Y")
+  end
+
+  def format_date(nil), do: "N/A"
+  def format_date(_), do: "Invalid Date"
+
+  @doc """
+  Formats quantity values (for shares, etc.) with trailing zero removal.
+
+  ## Examples
+      iex> Formatters.format_quantity(Decimal.new("123.456"))
+      "123.456"
+      
+      iex> Formatters.format_quantity(Decimal.new("100.000"))
+      "100"
+  """
+  def format_quantity(value)
+
+  def format_quantity(value) when is_struct(value, Decimal) do
+    value
+    |> Decimal.round(6)
+    |> Decimal.to_string()
+    |> String.replace(~r/\.?0+$/, "")
+  end
+
+  def format_quantity(value) when is_number(value) do
+    format_quantity(Decimal.from_float(value * 1.0))
+  end
+
+  def format_quantity(nil), do: "0"
+  def format_quantity(_), do: "0"
+
+  @doc """
+  Checks if a value is positive (> 0).
+  Handles both Decimal values and formatted currency strings.
+  """
+  def positive?(value) when is_struct(value, Decimal) do
+    Ashfolio.Financial.DecimalHelpers.positive?(value)
+  end
+  
+  def positive?(formatted_currency) when is_binary(formatted_currency) do
+    # Handle formatted currency strings like "$123.45" or "-$45.67"
+    case formatted_currency do
+      <<"-", _rest::binary>> -> false
+      <<"$0.00">> -> false
+      <<"$", _rest::binary>> -> true
+      _ -> false
+    end
+  end
+  
+  def positive?(nil), do: false
+  def positive?(_), do: false
 end

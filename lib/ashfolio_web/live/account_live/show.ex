@@ -5,7 +5,6 @@ defmodule AshfolioWeb.AccountLive.Show do
   alias Ashfolio.Context
   alias Ashfolio.Financial.Formatters
   alias AshfolioWeb.AccountLive.BalanceUpdateComponent
-  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -220,7 +219,7 @@ defmodule AshfolioWeb.AccountLive.Show do
                   <% end %>
                   <%= if @account.balance_updated_at do %>
                     <p>
-                      Balance updated {FormatHelpers.format_relative_time(@account.balance_updated_at)}
+                      Balance updated {Formatters.format_relative_time(@account.balance_updated_at)}
                     </p>
                   <% else %>
                     <p class="text-yellow-600">
@@ -389,7 +388,7 @@ defmodule AshfolioWeb.AccountLive.Show do
                                 </span>
                               </div>
                               <p class="mt-0.5 text-sm text-gray-500">
-                                {FormatHelpers.format_relative_time(history_item.timestamp)}
+                                {Formatters.format_relative_time(history_item.timestamp)}
                               </p>
                             </div>
                             <%= if history_item.notes do %>

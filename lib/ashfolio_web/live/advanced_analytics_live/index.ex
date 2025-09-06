@@ -14,9 +14,9 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
 
   use AshfolioWeb, :live_view
 
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.Portfolio.PerformanceCache
   alias Ashfolio.Portfolio.PerformanceCalculator
-  alias AshfolioWeb.Live.FormatHelpers
 
   require Logger
 
@@ -355,7 +355,7 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   defp format_result_for_history(result) when is_binary(result), do: result
 
   defp format_result_for_history(%Decimal{} = result) do
-    FormatHelpers.format_percentage(result)
+    Formatters.format_percentage(result)
   end
 
   # Data fetching functions (simplified for now)

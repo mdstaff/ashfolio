@@ -7,7 +7,6 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
   alias Ashfolio.FinancialManagement.FinancialGoal
   alias AshfolioWeb.FinancialGoalLive.FormComponent
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -439,7 +438,7 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
                           {Formatters.format_currency_with_cents(goal.current_amount)}
                         </div>
                         <div class="text-sm text-gray-500">
-                          {FormatHelpers.format_percentage(goal.progress_percentage)}% complete
+                          {Formatters.format_percentage(goal.progress_percentage)}% complete
                         </div>
                         <div class="mt-1">
                           <.progress_bar percentage={goal.progress_percentage} />
@@ -451,7 +450,7 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         <%= if goal.target_date do %>
                           <div class="font-medium">
-                            {FormatHelpers.format_date(goal.target_date)}
+                            {Formatters.format_date(goal.target_date)}
                           </div>
                           <div class={[
                             "text-sm",

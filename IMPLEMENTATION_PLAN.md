@@ -4,10 +4,10 @@
 
 Post-credo cleanup refactoring to consolidate helper functions, eliminate duplicates, and improve API ergonomics across the codebase.
 
-**Analysis Results**: ~2042 modules/functions analyzed
-**Cleanup Potential**: ~2,052 LOC reduction across 28 modules
-**Function Reduction**: ~242 functions can be eliminated/consolidated
-**Quality Score**: 100/100 (0 credo issues, 0 dialyzer warnings)
+**Analysis Results**: 2,110 modules/functions analyzed (219 modules: 101 lib + 118 test)
+**Cleanup Potential**: ~300 function reduction achievable through consolidation  
+**Function Reduction**: Target ~14% decrease from current levels
+**Quality Score**: 85/100 (9 credo issues, 0 dialyzer warnings)
 
 ---
 
@@ -35,12 +35,43 @@ Post-credo cleanup refactoring to consolidate helper functions, eliminate duplic
 
 **Target patterns**:
 - `Decimal.add/sub/mult/div` operations 
-- Safe conversion helpers
-- Mathematical functions (power, nth_root, exp, ln)
+- Safe conversion helpers (ensure_decimal, to_percentage, monthly_to_annual)
+- Mathematical functions (safe_power, safe_nth_root, compound interest)
+- Sign checking helpers (positive?, negative?, zero?)
 
 **Deliverable**: `Ashfolio.Financial.DecimalHelpers` module with chainable operations
-**Impact**: ~150-200 lines reduced, consistent precision handling
-**Test cases**: Arithmetic operations, edge cases, type conversions
+**Impact**: 22 helper functions created, 45 comprehensive tests, enhanced precision handling
+**Test cases**: ✅ Arithmetic operations, edge cases, type conversions (45 tests passing)
+
+**Files Refactored**:
+- ✅ `lib/ashfolio/financial_management/forecast_calculator.ex` - DecimalHelpers integration complete
+- ✅ `lib/ashfolio/financial_management/contribution_analyzer.ex` - DecimalHelpers integration complete  
+- 🔄 `lib/ashfolio/financial_management/retirement_calculator.ex` - In progress
+
+**Status**: ⚠️ Partially Complete - Helper created but need to REMOVE duplicates, not just add helpers
+
+**⚠️ Critical Issue**: Function count increased from 2,072 to 2,110 despite refactoring
+**Root Cause**: Adding helpers without removing duplicate code  
+**Next Actions**: 
+1. Continue RetirementCalculator refactoring
+2. **DELETE** redundant format modules (format_helpers.ex, format_helper.ex)
+3. Focus on ELIMINATION, not just consolidation
+
+---
+
+## Stage 2.5: High-Impact Module Refactoring (PRIORITY)
+
+**Objective**: Refactor the largest, most complex modules identified by Code GPS analysis
+
+**Target modules** (Top complexity offenders):
+- `lib/mix/tasks/code_gps.ex` - 69 functions (tool needs splitting)
+- `lib/ashfolio_web/components/forecast_chart.ex` - 72 functions (component complexity)  
+- `lib/ashfolio/financial_management/contribution_analyzer.ex` - 58 functions (domain splitting)
+- `lib/ashfolio_web/live/dashboard_live.ex` - 61 functions (extract patterns)
+
+**Deliverable**: Split oversized modules, extract shared patterns
+**Impact**: ~150-200 function reduction through structural improvements
+**Priority**: HIGH - These modules represent 25% of total complexity
 
 **Status**: Not Started
 
@@ -94,3 +125,27 @@ Post-credo cleanup refactoring to consolidate helper functions, eliminate duplic
 **Test cases**: Power/root calculations, compound interest, edge cases
 
 **Status**: Not Started
+
+---
+
+## Current Metrics (Code GPS Analysis)
+
+**Module Distribution**:
+- Total modules: 219 (101 lib + 118 test)  
+- Total functions: 1,628 (1,577 lib + 51 test helper functions)
+- Test coverage: 1,486 test functions across 117 test modules
+- Complex modules (>30 functions): 16 modules
+
+**Top Refactoring Targets**:
+1. ForecastChart: 72 functions
+2. ErrorHandler: 71 functions  
+3. CodeGps: 69 functions
+4. DashboardLive: 61 functions
+5. ContributionAnalyzer: 58 functions
+
+**Function Count Trajectory**:
+- v0.4.x baseline: ~2,072 functions
+- Current (Stage 2 partial): 2,110 functions (+38)
+- Target (v0.5.0 complete): 1,800 functions (-310 from current)
+
+**Key Insight**: We must REMOVE duplicate code, not just add helpers

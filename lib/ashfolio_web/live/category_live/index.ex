@@ -2,10 +2,10 @@ defmodule AshfolioWeb.CategoryLive.Index do
   @moduledoc false
   use AshfolioWeb, :live_view
 
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.TransactionCategory
   alias AshfolioWeb.CategoryLive.FormComponent
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -292,7 +292,7 @@ defmodule AshfolioWeb.CategoryLive.Index do
                 <div :if={!category.is_system} class="flex items-center justify-between text-sm">
                   <span class="text-gray-500">Created:</span>
                   <span class="font-medium text-gray-900">
-                    {FormatHelpers.format_date(category.inserted_at)}
+                    {Formatters.format_date(category.inserted_at)}
                   </span>
                 </div>
               </div>

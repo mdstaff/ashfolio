@@ -160,7 +160,7 @@
             <div class="flex justify-between items-center mb-2">
               <span class="text-sm font-medium text-gray-700">Progress to Goal</span>
               <span class="text-sm font-medium text-gray-900">
-                {FormatHelpers.format_percentage(@progress_analysis.progress_percentage)}
+                {Formatters.format_percentage(@progress_analysis.progress_percentage)}
               </span>
             </div>
 
@@ -234,7 +234,7 @@
           <div>
             <dt class="text-sm font-medium text-gray-500">Progress</dt>
             <dd class="mt-1 text-lg font-semibold text-gray-900">
-              {FormatHelpers.format_percentage(@historical_analysis.progress_percentage)}%
+              {Formatters.format_percentage(@historical_analysis.progress_percentage)}%
             </dd>
           </div>
         </div>
