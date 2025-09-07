@@ -8,6 +8,35 @@ defmodule Ashfolio.FinancialManagement.SearchAlgorithms do
 
   alias Ashfolio.FinancialManagement.ForecastCalculator
 
+  # Context structs to reduce parameter counts
+  defmodule SearchContext do
+    @moduledoc "Search context for contribution optimization"
+    defstruct [
+      :target_amount,
+      :current_value,
+      :years,
+      :growth_rate,
+      :min_contribution,
+      :mid_contribution,
+      :max_contribution,
+      :max_iterations
+    ]
+  end
+
+  defmodule YearsSearchContext do
+    @moduledoc "Search context for years optimization"
+    defstruct [
+      :target_amount,
+      :current_value,
+      :monthly_contribution,
+      :growth_rate,
+      :min_years,
+      :mid_years,
+      :max_years,
+      :max_iterations
+    ]
+  end
+
   @doc """
   Finds the required monthly contribution to reach a target amount.
 
@@ -77,17 +106,18 @@ defmodule Ashfolio.FinancialManagement.SearchAlgorithms do
 
       case project_with_contribution(current_value, mid_contribution, years, growth_rate) do
         {:ok, final_value} ->
-          handle_search_result(
-            final_value,
-            target_amount,
-            current_value,
-            years,
-            growth_rate,
-            min_contribution,
-            mid_contribution,
-            max_contribution,
-            max_iterations
-          )
+          context = %SearchContext{
+            target_amount: target_amount,
+            current_value: current_value,
+            years: years,
+            growth_rate: growth_rate,
+            min_contribution: min_contribution,
+            mid_contribution: mid_contribution,
+            max_contribution: max_contribution,
+            max_iterations: max_iterations
+          }
+
+          handle_search_result(final_value, context)
 
         {:error, reason} ->
           {:error, reason}
@@ -126,17 +156,18 @@ defmodule Ashfolio.FinancialManagement.SearchAlgorithms do
 
       case project_with_contribution(current_value, monthly_contribution, mid_years, growth_rate) do
         {:ok, final_value} ->
-          handle_years_search_result(
-            final_value,
-            target_amount,
-            current_value,
-            monthly_contribution,
-            growth_rate,
-            min_years,
-            mid_years,
-            max_years,
-            max_iterations
-          )
+          context = %YearsSearchContext{
+            target_amount: target_amount,
+            current_value: current_value,
+            monthly_contribution: monthly_contribution,
+            growth_rate: growth_rate,
+            min_years: min_years,
+            mid_years: mid_years,
+            max_years: max_years,
+            max_iterations: max_iterations
+          }
+
+          handle_years_search_result(final_value, context)
 
         {:error, reason} ->
           {:error, reason}
@@ -175,77 +206,57 @@ defmodule Ashfolio.FinancialManagement.SearchAlgorithms do
 
   # Helper functions to reduce nesting depth
 
-  defp handle_search_result(
-         final_value,
-         target_amount,
-         current_value,
-         years,
-         growth_rate,
-         min_contribution,
-         mid_contribution,
-         max_contribution,
-         max_iterations
-       ) do
-    case handle_projection_result(final_value, target_amount) do
+  defp handle_search_result(final_value, context) do
+    case handle_projection_result(final_value, context.target_amount) do
       :target_reached ->
-        {:ok, mid_contribution}
+        {:ok, context.mid_contribution}
 
       :under_target ->
         binary_search_contribution(
-          current_value,
-          target_amount,
-          years,
-          growth_rate,
-          mid_contribution,
-          max_contribution,
-          max_iterations - 1
+          context.current_value,
+          context.target_amount,
+          context.years,
+          context.growth_rate,
+          context.mid_contribution,
+          context.max_contribution,
+          context.max_iterations - 1
         )
 
       :over_target ->
         binary_search_contribution(
-          current_value,
-          target_amount,
-          years,
-          growth_rate,
-          min_contribution,
-          mid_contribution,
-          max_iterations - 1
+          context.current_value,
+          context.target_amount,
+          context.years,
+          context.growth_rate,
+          context.min_contribution,
+          context.mid_contribution,
+          context.max_iterations - 1
         )
     end
   end
 
-  defp handle_years_search_result(
-         final_value,
-         target_amount,
-         current_value,
-         monthly_contribution,
-         growth_rate,
-         min_years,
-         mid_years,
-         max_years,
-         max_iterations
-       ) do
-    if Decimal.compare(final_value, target_amount) in [:gt, :eq] do
+  defp handle_years_search_result(final_value, context) do
+    if Decimal.compare(final_value, context.target_amount) in [:gt, :eq] do
       # Target reached, try fewer years
       search_required_years(
-        current_value,
-        monthly_contribution,
-        target_amount,
-        growth_rate,
-        min_years,
-        mid_years,
-        max_iterations - 1
+        context.current_value,
+        context.monthly_contribution,
+        context.target_amount,
+        context.growth_rate,
+        context.min_years,
+        context.mid_years,
+        context.max_iterations - 1
       )
     else
       # Target not reached, need more years
       search_required_years(
-        current_value,
-        monthly_contribution,
-        target_amount,
-        growth_rate,
-        mid_years,
-        max_years,
-        max_iterations - 1
+        context.current_value,
+        context.monthly_contribution,
+        context.target_amount,
+        context.growth_rate,
+        context.mid_years,
+        context.max_years,
+        context.max_iterations - 1
       )
     end
   end

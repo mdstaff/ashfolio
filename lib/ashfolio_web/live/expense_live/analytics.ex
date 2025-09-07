@@ -2,6 +2,7 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
   @moduledoc false
   use AshfolioWeb, :live_view
 
+  alias Ashfolio.DataHelpers
   alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.Expense
   alias Contex.Dataset
@@ -569,37 +570,8 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
     end
   end
 
-  defp filter_by_date_range(expenses, "current_month") do
-    start_date = Date.beginning_of_month(Date.utc_today())
-    Enum.filter(expenses, &(Date.compare(&1.date, start_date) != :lt))
-  end
-
-  defp filter_by_date_range(expenses, "last_month") do
-    today = Date.utc_today()
-    start_date = today |> Date.beginning_of_month() |> Date.add(-1) |> Date.beginning_of_month()
-    end_date = Date.end_of_month(start_date)
-
-    Enum.filter(expenses, fn expense ->
-      Date.compare(expense.date, start_date) != :lt && Date.compare(expense.date, end_date) != :gt
-    end)
-  end
-
-  defp filter_by_date_range(expenses, "last_3_months") do
-    start_date = Date.add(Date.utc_today(), -90)
-    Enum.filter(expenses, &(Date.compare(&1.date, start_date) != :lt))
-  end
-
-  defp filter_by_date_range(expenses, "last_6_months") do
-    start_date = Date.add(Date.utc_today(), -180)
-    Enum.filter(expenses, &(Date.compare(&1.date, start_date) != :lt))
-  end
-
-  defp filter_by_date_range(expenses, "all_time") do
-    expenses
-  end
-
-  defp filter_by_date_range(expenses, _) do
-    filter_by_date_range(expenses, "current_month")
+  defp filter_by_date_range(expenses, range) do
+    DataHelpers.filter_by_date_range(expenses, range, :date)
   end
 
   defp calculate_category_data(expenses) do

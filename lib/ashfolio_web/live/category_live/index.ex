@@ -458,8 +458,14 @@ defmodule AshfolioWeb.CategoryLive.Index do
   end
 
   defp get_filtered_categories(categories, :all), do: categories
-  defp get_filtered_categories(categories, :user), do: Enum.filter(categories, &(!&1.is_system))
-  defp get_filtered_categories(categories, :system), do: Enum.filter(categories, & &1.is_system)
+
+  defp get_filtered_categories(categories, :user) do
+    Enum.filter(categories, &(!&1.is_system))
+  end
+
+  defp get_filtered_categories(categories, :system) do
+    Enum.filter(categories, & &1.is_system)
+  end
 
   defp get_category_transaction_count(_category_id) do
     # Placeholder - in a real implementation, this would query the transactions

@@ -2,6 +2,7 @@ defmodule AshfolioWeb.NetWorthLive.Index do
   @moduledoc false
   use AshfolioWeb, :live_view
 
+  alias Ashfolio.DataHelpers
   alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.NetWorthSnapshot
   alias Contex.Dataset
@@ -311,32 +312,8 @@ defmodule AshfolioWeb.NetWorthLive.Index do
     end
   end
 
-  defp filter_by_date_range(snapshots, "last_month") do
-    cutoff_date = Date.add(Date.utc_today(), -30)
-    Enum.filter(snapshots, &(Date.compare(&1.snapshot_date, cutoff_date) != :lt))
-  end
-
-  defp filter_by_date_range(snapshots, "last_3_months") do
-    cutoff_date = Date.add(Date.utc_today(), -90)
-    Enum.filter(snapshots, &(Date.compare(&1.snapshot_date, cutoff_date) != :lt))
-  end
-
-  defp filter_by_date_range(snapshots, "last_6_months") do
-    cutoff_date = Date.add(Date.utc_today(), -180)
-    Enum.filter(snapshots, &(Date.compare(&1.snapshot_date, cutoff_date) != :lt))
-  end
-
-  defp filter_by_date_range(snapshots, "last_year") do
-    cutoff_date = Date.add(Date.utc_today(), -365)
-    Enum.filter(snapshots, &(Date.compare(&1.snapshot_date, cutoff_date) != :lt))
-  end
-
-  defp filter_by_date_range(snapshots, "all_time") do
-    snapshots
-  end
-
-  defp filter_by_date_range(snapshots, _) do
-    filter_by_date_range(snapshots, "last_6_months")
+  defp filter_by_date_range(snapshots, range) do
+    DataHelpers.filter_by_date_range(snapshots, range, :snapshot_date)
   end
 
   defp prepare_chart_data(snapshots) do

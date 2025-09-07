@@ -164,7 +164,7 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
     Logger.debug("Optimizing contribution for goal - target: #{target_amount}, years: #{years}")
 
     with :ok <- ValidationHelpers.validate_current_value(current_value),
-         :ok <- ValidationHelpers.validate_target_amount(target_amount, current_value),
+         :ok <- validate_goal_target_amount(target_amount),
          :ok <- ValidationHelpers.validate_years(years),
          :ok <- ValidationHelpers.validate_growth_rate(growth_rate) do
       # Check if goal is already achieved
@@ -821,4 +821,15 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
     weighted_contribution = Decimal.mult(success_value, weight)
     Decimal.add(acc, weighted_contribution)
   end
+
+  # Custom validation for goal optimization that allows already-achieved goals
+  defp validate_goal_target_amount(target_amount) when is_struct(target_amount, Decimal) do
+    if Decimal.compare(target_amount, Decimal.new("0")) == :gt do
+      :ok
+    else
+      {:error, "Target amount must be positive"}
+    end
+  end
+
+  defp validate_goal_target_amount(_), do: {:error, "Target amount must be a valid decimal"}
 end
