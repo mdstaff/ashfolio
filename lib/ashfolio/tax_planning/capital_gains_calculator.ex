@@ -251,37 +251,37 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculator do
 
   defp allocate_sale_to_lots(sell_transaction, buy_queue) do
     sell_quantity = Decimal.abs(sell_transaction.quantity)
-    allocate_quantity(sell_quantity, buy_queue, [])
+    allocate_quantity(sell_quantity, buy_queue, [], sell_transaction.date)
   end
 
-  defp allocate_quantity(remaining_qty, buy_queue, allocated_lots) do
+  defp allocate_quantity(remaining_qty, buy_queue, allocated_lots, sale_date) do
     zero = Decimal.new("0")
 
     if Decimal.equal?(remaining_qty, zero) do
       {allocated_lots, buy_queue}
     else
-      allocate_quantity_recursive(remaining_qty, buy_queue, allocated_lots)
+      allocate_quantity_recursive(remaining_qty, buy_queue, allocated_lots, sale_date)
     end
   end
 
-  defp allocate_quantity_recursive(remaining_qty, [], allocated_lots) do
+  defp allocate_quantity_recursive(remaining_qty, [], allocated_lots, _sale_date) do
     # Handle short sale or insufficient lots
     Logger.warning("Insufficient buy lots for complete allocation, remaining: #{remaining_qty}")
     {allocated_lots, []}
   end
 
-  defp allocate_quantity_recursive(remaining_qty, [first_lot | rest_queue], allocated_lots) do
+  defp allocate_quantity_recursive(remaining_qty, [first_lot | rest_queue], allocated_lots, sale_date) do
     if Decimal.compare(remaining_qty, first_lot.remaining_quantity) == :gt do
       # Use entire lot
       allocated_lot = %{
         tax_lot: first_lot,
         quantity_allocated: first_lot.remaining_quantity,
         cost_basis: first_lot.total_cost,
-        holding_period: calculate_holding_period(first_lot.purchase_date)
+        holding_period: calculate_holding_period(first_lot.purchase_date, sale_date)
       }
 
       new_remaining = Decimal.sub(remaining_qty, first_lot.remaining_quantity)
-      allocate_quantity_recursive(new_remaining, rest_queue, [allocated_lot | allocated_lots])
+      allocate_quantity_recursive(new_remaining, rest_queue, [allocated_lot | allocated_lots], sale_date)
     else
       # Partial lot usage
       allocated_quantity = remaining_qty
@@ -291,7 +291,7 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculator do
         tax_lot: first_lot,
         quantity_allocated: allocated_quantity,
         cost_basis: cost_basis,
-        holding_period: calculate_holding_period(first_lot.purchase_date)
+        holding_period: calculate_holding_period(first_lot.purchase_date, sale_date)
       }
 
       # Update remaining lot
@@ -306,8 +306,8 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculator do
     Decimal.mult(tax_lot.total_cost, ratio)
   end
 
-  defp calculate_holding_period(purchase_date) do
-    days_held = Date.diff(Date.utc_today(), purchase_date)
+  defp calculate_holding_period(purchase_date, sale_date) do
+    days_held = Date.diff(sale_date, purchase_date)
 
     %{
       days: days_held,
@@ -327,11 +327,26 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculator do
   end
 
   defp aggregate_realized_gains(processed_sales, symbol_data) do
+    # Calculate gains by summing up the realized_gain_loss from each sale
+    # and categorizing by holding period
     {short_term, long_term} =
       processed_sales
-      |> Enum.flat_map(& &1.allocated_lots)
-      |> Enum.group_by(& &1.holding_period.classification)
-      |> calculate_term_gains()
+      |> Enum.reduce({Decimal.new("0"), Decimal.new("0")}, fn sale, {st_acc, lt_acc} ->
+        # Categorize each allocated lot's proportional gain
+        sale.allocated_lots
+        |> Enum.reduce({st_acc, lt_acc}, fn lot, {st, lt} ->
+          # Calculate this lot's proportional share of the total sale gain
+          total_qty_sold = Enum.reduce(sale.allocated_lots, Decimal.new("0"), &Decimal.add(&2, &1.quantity_allocated))
+          lot_proportion = Decimal.div(lot.quantity_allocated, total_qty_sold)
+          lot_gain = Decimal.mult(sale.realized_gain_loss, lot_proportion)
+          
+          if lot.holding_period.classification == :short_term do
+            {Decimal.add(st, lot_gain), lt}
+          else
+            {st, Decimal.add(lt, lot_gain)}
+          end
+        end)
+      end)
 
     total_realized = Decimal.add(short_term, long_term)
 
@@ -346,44 +361,20 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculator do
     }
   end
 
-  defp calculate_term_gains(grouped_lots) do
-    short_term_gains =
-      grouped_lots
-      |> Map.get(:short_term, [])
-      |> Enum.map(&calculate_lot_gain/1)
-      |> Enum.reduce(Decimal.new("0"), &Decimal.add/2)
-
-    long_term_gains =
-      grouped_lots
-      |> Map.get(:long_term, [])
-      |> Enum.map(&calculate_lot_gain/1)
-      |> Enum.reduce(Decimal.new("0"), &Decimal.add/2)
-
-    {short_term_gains, long_term_gains}
-  end
-
-  defp calculate_lot_gain(allocated_lot) do
-    # Calculate proportional gain for this lot
-    # This needs the actual sale data
-    _total_sale_gain = allocated_lot.tax_lot.total_cost
-    # Implementation would need access to sale proceeds for accurate calculation
-    # For now, return cost basis for structure
-    allocated_lot.cost_basis
-  end
 
   defp tax_year_matches?(transaction, tax_year) do
     transaction.date.year == tax_year
   end
 
   defp get_current_holdings(_symbol_id) do
-    # This would integrate with existing Portfolio.Calculator logic
-    # For now, return mock structure
+    # For MVP, return stub data to test the structure
+    # Real implementation would calculate current positions from transactions
     {:ok, []}
   end
 
   defp get_account_holdings(_account_id) do
-    # This would integrate with existing account portfolio calculations
-    # For now, return mock structure
+    # For MVP, return stub data to test the structure  
+    # Real implementation would get holdings for specific account
     {:ok, []}
   end
 
@@ -401,6 +392,9 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculator do
 
       {:error, reason} ->
         {:error, reason}
+      
+      [] ->
+        {:ok, []}
     end
   end
 

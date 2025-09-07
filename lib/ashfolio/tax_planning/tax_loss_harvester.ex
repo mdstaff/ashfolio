@@ -219,29 +219,11 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvester do
 
   # Private helper functions
 
-  defp get_portfolio_positions(account_id) do
-    # Integration with existing Portfolio.Calculator for current holdings
-    # For MVP, return mock positions
-    positions = [
-      %{
-        symbol_id: "uuid-1",
-        symbol: "AAPL",
-        current_value: Decimal.new("9500"),
-        cost_basis: Decimal.new("11000"),
-        quantity: Decimal.new("100"),
-        current_price: Decimal.new("95"),
-        unrealized_gain_loss: Decimal.new("-1500")
-      }
-    ]
-
-    filtered_positions =
-      if account_id do
-        Enum.filter(positions, &(&1.account_id == account_id))
-      else
-        positions
-      end
-
-    {:ok, filtered_positions}
+  defp get_portfolio_positions(_account_id) do
+    # For MVP, return stub data to test the structure
+    # Real implementation would calculate current positions from transactions
+    # and include unrealized gain/loss calculations
+    {:ok, []}
   end
 
   defp get_recent_transactions(account_id) do
@@ -262,6 +244,9 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvester do
 
       {:error, reason} ->
         {:error, reason}
+        
+      [] ->
+        {:ok, []}
     end
   end
 
@@ -358,8 +343,7 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvester do
 
   defp get_symbol_details(symbol) do
     case Symbol.find_by_symbol(symbol) do
-      {:ok, [symbol_record]} -> {:ok, symbol_record}
-      {:ok, []} -> {:error, :symbol_not_found}
+      {:ok, symbol_record} -> {:ok, symbol_record}
       {:error, reason} -> {:error, reason}
     end
   end
@@ -367,8 +351,11 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvester do
   defp find_similar_assets(symbol_data, _options) do
     # Mock implementation for finding similar assets
     # Real implementation would use asset class, sector, or correlation data
+    # symbol_data is a list, take the first element
+    symbol_record = List.first(symbol_data)
+    
     similar_assets =
-      case symbol_data.symbol do
+      case symbol_record.symbol do
         "AAPL" -> ["MSFT", "GOOGL", "VTI", "QQQ"]
         "MSFT" -> ["AAPL", "GOOGL", "VTI", "QQQ"]
         _ -> ["VTI", "IVV", "SCHB"]
@@ -508,14 +495,15 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvester do
 
   defp get_symbol_string(transaction) do
     # Helper to get symbol string from transaction
-    # In real implementation, would load symbol relationship
     case transaction do
       %{symbol: %{symbol: symbol}} ->
         symbol
 
-      %{symbol_id: _symbol_id} ->
-        # Would load symbol by ID in real implementation
-        "UNKNOWN"
+      %{symbol_id: symbol_id} when is_binary(symbol_id) ->
+        case Symbol.get_by_id(symbol_id) do
+          {:ok, symbol_record} -> symbol_record.symbol
+          {:error, _} -> "UNKNOWN"
+        end
 
       _ ->
         "UNKNOWN"
