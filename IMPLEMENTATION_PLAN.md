@@ -64,16 +64,23 @@ Post-credo cleanup refactoring to consolidate helper functions, eliminate duplic
 **Objective**: Refactor the largest, most complex modules identified by Code GPS analysis
 
 **Target modules** (Top complexity offenders):
-- `lib/mix/tasks/code_gps.ex` - 69 functions (tool needs splitting)
-- `lib/ashfolio_web/components/forecast_chart.ex` - 72 functions (component complexity)  
-- `lib/ashfolio/financial_management/contribution_analyzer.ex` - 58 functions (domain splitting)
+- ✅ `lib/ashfolio_web/components/forecast_chart.ex` - 72→64 functions (extracted ChartData + ChartGeometry modules)
+- ✅ `lib/ashfolio/error_handler.ex` - 71→<30 functions (extracted ErrorCategorizer + ErrorFormatter modules)  
+- `lib/mix/tasks/code_gps.ex` - 68 functions (tool needs splitting)
 - `lib/ashfolio_web/live/dashboard_live.ex` - 61 functions (extract patterns)
+- `lib/ashfolio/financial_management/contribution_analyzer.ex` - 58 functions (domain splitting)
 
-**Deliverable**: Split oversized modules, extract shared patterns
-**Impact**: ~150-200 function reduction through structural improvements
+**Completed Refactorings**:
+1. **ForecastChart** (72→64 functions): Extracted data processing to `ChartData` (17 functions) and geometry calculations to `ChartGeometry` (11 functions)
+2. **ErrorHandler** (71→<30 functions): Extracted domain categorization to `ErrorCategorizer` (20+ functions) and message formatting to `ErrorFormatter` (25+ functions)
+
+**Deliverable**: Split oversized modules, extract shared patterns  
+**Impact**: ~17 functions reduced so far, targeting 150-200 total function reduction
 **Priority**: HIGH - These modules represent 25% of total complexity
 
-**Status**: Not Started
+**Current Function Count**: 1,597 (down from 1,606, targeting <1,800)
+
+**Status**: ⚠️ In Progress - 2 of 5 modules completed
 
 ---
 

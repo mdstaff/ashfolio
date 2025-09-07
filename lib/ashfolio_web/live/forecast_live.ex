@@ -14,7 +14,6 @@ defmodule AshfolioWeb.ForecastLive.Index do
   alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.ForecastCalculator
   alias AshfolioWeb.Components.ForecastChart
-  alias AshfolioWeb.Helpers.ChartHelpers
   alias AshfolioWeb.Live.ErrorHelpers
 
   require Logger
@@ -547,11 +546,11 @@ defmodule AshfolioWeb.ForecastLive.Index do
   end
 
   defp build_scenario_chart_data(scenarios, years, initial_value) do
-    chart_years = ChartHelpers.generate_chart_periods(years)
+    chart_years = Formatters.generate_chart_periods(years)
 
     # Use ChartHelpers for individual scenario projections with proper growth rates
     pessimistic_values =
-      ChartHelpers.build_scenario_projection(
+      Formatters.build_scenario_projection(
         initial_value,
         scenarios.pessimistic,
         years,
@@ -559,7 +558,7 @@ defmodule AshfolioWeb.ForecastLive.Index do
       )
 
     realistic_values =
-      ChartHelpers.build_scenario_projection(
+      Formatters.build_scenario_projection(
         initial_value,
         scenarios.realistic,
         years,
@@ -567,7 +566,7 @@ defmodule AshfolioWeb.ForecastLive.Index do
       )
 
     optimistic_values =
-      ChartHelpers.build_scenario_projection(
+      Formatters.build_scenario_projection(
         initial_value,
         scenarios.optimistic,
         years,
@@ -661,7 +660,7 @@ defmodule AshfolioWeb.ForecastLive.Index do
           )}
         </p>
         <p>
-          • Annual Growth Rate: {ChartHelpers.format_growth_rate(@results.parameters.growth_rate)}
+          • Annual Growth Rate: {Formatters.format_growth_rate(@results.parameters.growth_rate)}
         </p>
         <p>• Time Horizon: {@results.parameters.years} years</p>
       </div>

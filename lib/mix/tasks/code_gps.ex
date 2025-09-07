@@ -12,49 +12,8 @@ defmodule Mix.Tasks.CodeGps do
 
   use Mix.Task
 
-  # Helper module for all AST-related parsing.
-  defmodule AstParser do
-    @moduledoc false
-
-    def parse_content(content) do
-      case Code.string_to_quoted(content, columns: true) do
-        {:ok, ast} -> {:ok, ast}
-        {:error, _} -> {:error, :parsing_failed}
-      end
-    end
-
-    def find_node(ast, filter_fun) do
-      result =
-        Macro.prewalk(ast, nil, fn
-          node, acc ->
-            case filter_fun.(node) do
-              result when result != false and result != nil ->
-                {:halt, result}
-
-              _ ->
-                {node, acc}
-            end
-        end)
-
-      case result do
-        {:halt, value} -> value
-        {_ast, _acc} -> nil
-      end
-    end
-
-    def collect_nodes(ast, filter_fun) do
-      ast
-      |> Macro.prewalk([], fn
-        node, acc ->
-          case filter_fun.(node) do
-            nil -> {node, acc}
-            result -> {node, [result | acc]}
-          end
-      end)
-      |> elem(1)
-      |> Enum.reverse()
-    end
-  end
+  alias Mix.Tasks.CodeGps.AstParser
+  alias Mix.Tasks.CodeGps.PatternDetector
 
   def run(_args) do
     Mix.Task.run("compile")
@@ -369,21 +328,7 @@ defmodule Mix.Tasks.CodeGps do
   end
 
   defp find_function_line_ast(ast, fun_name, arity) do
-    AstParser.find_node(ast, fn
-      {:def, meta, [{^fun_name, _, args}, _]} when is_list(args) and length(args) == arity ->
-        meta[:line]
-
-      # Handle functions with attributes like @impl
-      {:@, _, _} ->
-        nil
-
-      # Also try defp functions
-      {:defp, meta, [{^fun_name, _, args}, _]} when is_list(args) and length(args) == arity ->
-        meta[:line]
-
-      _ ->
-        nil
-    end)
+    AstParser.find_function_line(ast, fun_name, arity)
   end
 
   defp extract_handle_events_ast(ast) do
@@ -478,285 +423,17 @@ defmodule Mix.Tasks.CodeGps do
   # === PATTERN EXTRACTION ===
 
   defp extract_patterns do
-    all_files = Path.wildcard("{lib,test}/**/*.{ex,exs}")
-
-    %{
-      error_handling: find_error_pattern(all_files),
-      currency_formatting: find_currency_pattern(all_files),
-      test_setup: find_test_setup_pattern(all_files),
-      component_style: find_component_pattern(all_files),
-      pubsub_usage: find_pubsub_pattern(all_files)
-    }
+    PatternDetector.extract_patterns()
   end
 
   # === SUGGESTION GENERATION (RULE-BASED) ===
 
-  defp generate_integration_hints(live_views, _components) do
-    rules = load_suggestion_rules()
-
-    Enum.flat_map(rules, &apply_rule(&1, live_views))
-  end
-
-  defp load_suggestion_rules do
-    rules_file = "config/code_gps_rules.exs"
-
-    if File.exists?(rules_file) do
-      try do
-        {rules, _binding} = Code.eval_file(rules_file)
-        rules
-      rescue
-        _ ->
-          IO.warn("Could not load or parse suggestion rules from #{rules_file}")
-          []
-      end
-    else
-      []
-    end
-  end
-
-  defp apply_rule(rule, live_views) do
-    live_views
-    |> Enum.filter(&live_view_matches?(rule.condition, &1))
-    |> Enum.map(&build_suggestion(rule, &1))
-  end
-
-  defp live_view_matches?(condition, live_view) do
-    # Check if the live view name contains the specified string
-    name_matches = String.contains?(live_view.name, condition.live_view)
-
-    # Check for missing subscription
-    subscription_matches =
-      case condition[:missing_subscription] do
-        nil -> true
-        topic -> name_matches and !Enum.member?(live_view.subscriptions, topic)
-      end
-
-    # Check for missing event handler
-    event_matches =
-      case condition[:missing_event] do
-        nil -> true
-        event -> name_matches and !Enum.member?(live_view.events, event)
-      end
-
-    name_matches and subscription_matches and event_matches
-  end
-
-  defp build_suggestion(rule, live_view) do
-    # Replace placeholders in suggestion steps
-    steps =
-      Enum.map(rule.suggestion.steps, fn step ->
-        step
-        |> Map.put(:file, live_view.file)
-        # Simple line logic for now - handle nil mount_line
-        |> Map.put(:line, (live_view.mount_line || 10) + 2)
-      end)
-
-    %{
-      name: rule.name,
-      description: rule.description,
-      priority: rule.priority,
-      steps: steps
-    }
+  defp generate_integration_hints(live_views, components) do
+    PatternDetector.generate_integration_hints(live_views, components)
   end
 
   defp count_analyzed_files do
     "{lib,test}/**/*.{ex,exs}" |> Path.wildcard() |> length()
-  end
-
-  # === PATTERN FINDERS ===
-
-  defp find_error_pattern(files) do
-    # Comprehensive analysis: check all lib files for error handling patterns
-    lib_files = Enum.filter(files, &String.starts_with?(&1, "lib/"))
-
-    # Use streaming for memory efficiency with large codebases
-    patterns_found =
-      lib_files
-      |> Stream.map(&File.read!/1)
-      |> Enum.reduce(%{}, fn content, acc ->
-        cond do
-          String.contains?(content, "Ashfolio.ErrorHandler.handle_error") ->
-            Map.put(acc, :ashfolio_error_handler, true)
-
-          String.contains?(content, "ErrorHelpers.put_error_flash") ->
-            Map.put(acc, :error_helpers, true)
-
-          String.contains?(content, "put_flash(socket, :error") ->
-            Map.put(acc, :put_flash_error, true)
-
-          String.contains?(content, "handle_error(") ->
-            Map.put(acc, :generic_handle_error, true)
-
-          true ->
-            acc
-        end
-      end)
-
-    cond do
-      Map.get(patterns_found, :ashfolio_error_handler) ->
-        "Ashfolio.ErrorHandler.handle_error/2"
-
-      Map.get(patterns_found, :error_helpers) ->
-        "ErrorHelpers.put_error_flash"
-
-      Map.get(patterns_found, :put_flash_error) ->
-        "put_flash(socket, :error, message)"
-
-      Map.get(patterns_found, :generic_handle_error) ->
-        "handle_error/1 pattern"
-
-      true ->
-        "put_flash/3"
-    end
-  end
-
-  defp find_currency_pattern(files) do
-    # Comprehensive analysis: check all lib files for currency formatting patterns
-    lib_files = Enum.filter(files, &String.starts_with?(&1, "lib/"))
-
-    patterns_found =
-      lib_files
-      |> Stream.map(&File.read!/1)
-      |> Enum.reduce(%{decimal: 0, money: 0, format_helpers: 0}, fn content, acc ->
-        %{
-          decimal: acc.decimal + count_pattern_occurrences(content, "Decimal"),
-          money: acc.money + count_pattern_occurrences(content, "Money."),
-          format_helpers:
-            acc.format_helpers +
-              count_pattern_occurrences(content, "FormatHelpers.format_currency")
-        }
-      end)
-
-    cond do
-      patterns_found.format_helpers > 0 ->
-        "FormatHelpers.format_currency"
-
-      patterns_found.money > 0 ->
-        "Money.to_string (#{patterns_found.money} usages)"
-
-      patterns_found.decimal > 10 ->
-        "Decimal operations (#{patterns_found.decimal} usages)"
-
-      true ->
-        "Decimal formatting"
-    end
-  end
-
-  defp find_test_setup_pattern(files) do
-    test_files = Enum.filter(files, &String.contains?(&1, "test/"))
-
-    if length(test_files) > 0 do
-      # Comprehensive analysis: check all test files for setup patterns
-      patterns_found =
-        test_files
-        |> Stream.map(&File.read!/1)
-        |> Enum.reduce(%{}, fn content, acc ->
-          cond do
-            String.contains?(content, "require Ash.Query") ->
-              Map.put(acc, :ash_query, true)
-
-            String.contains?(content, "Ashfolio.DataCase") ->
-              Map.put(acc, :data_case, true)
-
-            String.contains?(content, "Ashfolio.ConnCase") ->
-              Map.put(acc, :conn_case, true)
-
-            String.contains?(content, "setup do") ->
-              Map.put(acc, :setup_blocks, true)
-
-            true ->
-              acc
-          end
-        end)
-
-      cond do
-        Map.get(patterns_found, :ash_query) ->
-          "require Ash.Query; Ash-based test setup"
-
-        Map.get(patterns_found, :data_case) ->
-          "Ashfolio.DataCase setup pattern"
-
-        Map.get(patterns_found, :conn_case) ->
-          "Ashfolio.ConnCase setup pattern"
-
-        Map.get(patterns_found, :setup_blocks) ->
-          "Standard ExUnit setup blocks"
-
-        true ->
-          "Standard ExUnit setup"
-      end
-    else
-      "No test pattern found"
-    end
-  end
-
-  defp find_component_pattern(files) do
-    # Comprehensive analysis: focus on component files
-    component_files =
-      Enum.filter(files, fn file ->
-        String.contains?(file, "components") or String.contains?(file, "_live")
-      end)
-
-    if length(component_files) > 0 do
-      patterns_found =
-        component_files
-        |> Stream.map(&File.read!/1)
-        |> Enum.reduce(%{heex: 0, phoenix_html: 0, assigns: 0}, fn content, acc ->
-          %{
-            heex: acc.heex + count_pattern_occurrences(content, "~H\"\"\""),
-            phoenix_html: acc.phoenix_html + count_pattern_occurrences(content, "Phoenix.HTML"),
-            assigns: acc.assigns + count_pattern_occurrences(content, "@")
-          }
-        end)
-
-      cond do
-        patterns_found.heex > 0 ->
-          "~H sigil with proper assigns (#{patterns_found.heex} components)"
-
-        patterns_found.assigns > 100 ->
-          "Phoenix component style with heavy @ usage"
-
-        true ->
-          "Phoenix component style"
-      end
-    else
-      "Phoenix component style"
-    end
-  end
-
-  defp find_pubsub_pattern(files) do
-    # Comprehensive analysis: check all lib files for PubSub usage
-    lib_files = Enum.filter(files, &String.starts_with?(&1, "lib/"))
-
-    patterns_found =
-      lib_files
-      |> Stream.map(&File.read!/1)
-      |> Enum.reduce(%{ashfolio_pubsub: 0, phoenix_pubsub: 0}, fn content, acc ->
-        %{
-          ashfolio_pubsub: acc.ashfolio_pubsub + count_pattern_occurrences(content, "Ashfolio.PubSub"),
-          phoenix_pubsub: acc.phoenix_pubsub + count_pattern_occurrences(content, "Phoenix.PubSub")
-        }
-      end)
-
-    cond do
-      patterns_found.ashfolio_pubsub > 0 ->
-        "Ashfolio.PubSub.subscribe/1 (#{patterns_found.ashfolio_pubsub} usages)"
-
-      patterns_found.phoenix_pubsub > 0 ->
-        "Phoenix.PubSub (#{patterns_found.phoenix_pubsub} usages)"
-
-      true ->
-        "Phoenix.PubSub"
-    end
-  end
-
-  # Helper function for counting pattern occurrences
-  defp count_pattern_occurrences(content, pattern) do
-    content
-    |> String.split(pattern)
-    |> length()
-    |> Kernel.-(1)
-    |> max(0)
   end
 
   # === YAML GENERATION ===
@@ -1337,46 +1014,55 @@ defmodule Mix.Tasks.CodeGps do
     if json_start do
       json_lines = Enum.drop(lines, json_start)
       json_string = Enum.join(json_lines, "\n")
-
-      case Jason.decode(json_string) do
-        {:ok, json_data} ->
-          issues = Map.get(json_data, "issues", [])
-
-          # Extract summary from full output
-          summary = extract_credo_summary(output)
-
-          filtered_issues =
-            issues
-            |> Enum.filter(&filter_credo_issue/1)
-            |> Enum.map(&format_credo_issue/1)
-            |> Enum.take(10)
-
-          {filtered_issues, summary}
-
-        {:error, _} ->
-          # Try parsing the full output as JSON
-          case Jason.decode(output) do
-            {:ok, json_data} ->
-              issues = Map.get(json_data, "issues", [])
-              summary = %{mods_funs: "unknown", files: "unknown", analysis_time: "unknown"}
-
-              filtered_issues =
-                issues
-                |> Enum.filter(&filter_credo_issue/1)
-                |> Enum.map(&format_credo_issue/1)
-                |> Enum.take(10)
-
-              {filtered_issues, summary}
-
-            _ ->
-              {[], nil}
-          end
-      end
+      parse_json_output(json_string, output)
     else
       {[], nil}
     end
   rescue
     _ -> {[], nil}
+  end
+
+  defp parse_json_output(json_string, full_output) do
+    case Jason.decode(json_string) do
+      {:ok, json_data} ->
+        process_credo_json(json_data, full_output)
+
+      {:error, _} ->
+        # Try parsing the full output as JSON as fallback
+        parse_full_output_as_json(full_output)
+    end
+  end
+
+  defp process_credo_json(json_data, full_output) do
+    issues = Map.get(json_data, "issues", [])
+    summary = extract_credo_summary(full_output)
+
+    filtered_issues =
+      issues
+      |> Enum.filter(&filter_credo_issue/1)
+      |> Enum.map(&format_credo_issue/1)
+      |> Enum.take(10)
+
+    {filtered_issues, summary}
+  end
+
+  defp parse_full_output_as_json(output) do
+    case Jason.decode(output) do
+      {:ok, json_data} ->
+        issues = Map.get(json_data, "issues", [])
+        summary = %{mods_funs: "unknown", files: "unknown", analysis_time: "unknown"}
+
+        filtered_issues =
+          issues
+          |> Enum.filter(&filter_credo_issue/1)
+          |> Enum.map(&format_credo_issue/1)
+          |> Enum.take(10)
+
+        {filtered_issues, summary}
+
+      _ ->
+        {[], nil}
+    end
   end
 
   defp extract_credo_summary(output) do
