@@ -30,6 +30,7 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
   """
 
   alias Ashfolio.Financial.DecimalHelpers, as: DH
+  alias Ashfolio.Financial.Mathematical
   alias Ashfolio.FinancialManagement.AERCalculator
 
   require Logger
@@ -360,49 +361,13 @@ defmodule Ashfolio.FinancialManagement.ForecastCalculator do
     if Decimal.equal?(ratio, DH.ensure_decimal("1")) do
       DH.ensure_decimal("0")
     else
-      # Use binary search to find the nth root
-      nth_root = calculate_nth_root(ratio, years)
+      # Use Mathematical module for precise nth root calculation
+      nth_root = Mathematical.nth_root(ratio, years)
       Decimal.sub(nth_root, DH.ensure_decimal("1"))
     end
   end
 
-  defp calculate_nth_root(value, n) do
-    # Binary search approximation for nth root
-    # For typical investment scenarios, this provides sufficient accuracy
-    decimal_n = DH.ensure_decimal(n)
-
-    # Initial bounds: between 0.5 and 2.0 covers most financial scenarios
-    low = DH.ensure_decimal("0.5")
-    high = DH.ensure_decimal("2.0")
-
-    # Perform binary search iterations
-    # 20 iterations for precision
-    binary_search_nth_root(value, decimal_n, low, high, 20)
-  end
-
-  defp binary_search_nth_root(target, n, low, high, iterations_left) do
-    if iterations_left <= 0 do
-      # Return midpoint as final approximation
-      low |> Decimal.add(high) |> DH.safe_divide(DH.ensure_decimal("2"))
-    else
-      mid = low |> Decimal.add(high) |> DH.safe_divide(DH.ensure_decimal("2"))
-      mid_power_n = DH.safe_power(mid, Decimal.to_integer(n))
-
-      case Decimal.compare(mid_power_n, target) do
-        :lt ->
-          # mid^n < target, need higher value
-          binary_search_nth_root(target, n, mid, high, iterations_left - 1)
-
-        :gt ->
-          # mid^n > target, need lower value
-          binary_search_nth_root(target, n, low, mid, iterations_left - 1)
-
-        :eq ->
-          # Perfect match found
-          mid
-      end
-    end
-  end
+  # Mathematical operations now handled by Ashfolio.Financial.Mathematical module
 
   @doc """
   Calculates scenario projections using standard growth rates for comparison.

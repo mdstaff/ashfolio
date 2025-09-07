@@ -6,6 +6,7 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
   alias Ashfolio.FinancialManagement.Expense
   alias Ashfolio.FinancialManagement.TransactionCategory
   alias Ashfolio.Portfolio.Account
+  alias AshfolioWeb.FormHelpers
   alias AshfolioWeb.Live.ErrorHelpers
 
   @impl true
@@ -364,12 +365,12 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
   defp build_expense_params(form_data) do
     %{
       description: form_data["description"],
-      amount: parse_decimal(form_data["amount"]),
-      date: parse_date(form_data["date"]),
-      merchant: empty_to_nil(form_data["merchant"]),
-      notes: empty_to_nil(form_data["notes"]),
-      category_id: empty_to_nil(form_data["category_id"]),
-      account_id: empty_to_nil(form_data["account_id"])
+      amount: FormHelpers.parse_decimal_unsafe(form_data["amount"]),
+      date: FormHelpers.parse_date_unsafe(form_data["date"]),
+      merchant: FormHelpers.empty_to_nil(form_data["merchant"]),
+      notes: FormHelpers.empty_to_nil(form_data["notes"]),
+      category_id: FormHelpers.empty_to_nil(form_data["category_id"]),
+      account_id: FormHelpers.empty_to_nil(form_data["account_id"])
     }
   end
 
@@ -416,9 +417,10 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
   end
 
   defp validate_amount_value(amount_str, errors) do
-    case parse_decimal(amount_str) do
-      nil -> ["Amount must be a valid number" | errors]
-      amount -> validate_amount_positive(amount, errors)
+    case FormHelpers.parse_decimal(amount_str) do
+      {:ok, nil} -> ["Amount must be a valid number" | errors]
+      {:ok, amount} -> validate_amount_positive(amount, errors)
+      {:error, _} -> ["Amount must be a valid number" | errors]
     end
   end
 
@@ -438,34 +440,16 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
   end
 
   defp validate_date_format(date_str, errors) do
-    case parse_date(date_str) do
-      nil -> ["Date must be valid" | errors]
-      _ -> errors
+    case FormHelpers.parse_date(date_str) do
+      {:ok, _} -> errors
+      {:error, _} -> ["Date must be valid" | errors]
     end
   end
 
-  defp parse_decimal(nil), do: nil
-  defp parse_decimal(""), do: nil
-
-  defp parse_decimal(value) when is_binary(value) do
-    case Decimal.parse(value) do
-      {decimal, ""} -> decimal
-      _ -> nil
-    end
-  end
-
-  defp parse_date(nil), do: nil
-  defp parse_date(""), do: nil
-
-  defp parse_date(value) when is_binary(value) do
-    case Date.from_iso8601(value) do
-      {:ok, date} -> date
-      _ -> nil
-    end
-  end
-
-  defp empty_to_nil(""), do: nil
-  defp empty_to_nil(value), do: value
+  # Parsing functions removed - now using FormHelpers module for:
+  # - parse_decimal/1 -> FormHelpers.parse_decimal/1 or parse_decimal_unsafe/1
+  # - parse_date/1 -> FormHelpers.parse_date/1 or parse_date_unsafe/1
+  # - empty_to_nil/1 -> FormHelpers.empty_to_nil/1
 
   defp extract_ash_errors(%Invalid{errors: errors}) do
     Enum.map(errors, fn

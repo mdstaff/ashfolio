@@ -12,6 +12,7 @@ Welcome to Ashfolio's comprehensive documentation. Choose your path:
 
 - Architecture Overview → [development/architecture.md](development/architecture.md)
 - Database Management → [development/database-management.md](development/database-management.md)
+- Data Utilities Guide → [development/data-utilities-guide.md](development/data-utilities-guide.md)
 - Elixir & Mix Insights → [development/elixir-mix-insights.md](development/elixir-mix-insights.md)
 - AI Agent Development → [development/ai-agent-guide.md](development/ai-agent-guide.md)
 - Code GPS Guide → [development/code-gps-guide.md](development/code-gps-guide.md)

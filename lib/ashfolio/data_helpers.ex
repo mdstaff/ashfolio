@@ -4,7 +4,7 @@ defmodule Ashfolio.DataHelpers do
 
   Consolidates repetitive patterns for:
   - Date range filtering
-  - Category/status filtering  
+  - Category/status filtering
   - List sorting and grouping
   - Aggregation calculations
   """
@@ -19,7 +19,7 @@ defmodule Ashfolio.DataHelpers do
       iex> result = Ashfolio.DataHelpers.filter_by_date_range(expenses, "last_3_months")
       iex> length(result)
       1
-      
+
       iex> snapshots = [%{snapshot_date: ~D[2023-09-01], id: 1}]
       iex> Ashfolio.DataHelpers.filter_by_date_range(snapshots, "all_time", :snapshot_date)
       [%{snapshot_date: ~D[2023-09-01], id: 1}]
@@ -119,7 +119,7 @@ defmodule Ashfolio.DataHelpers do
       iex> goals = [%{name: "Car"}, %{name: "Emergency Fund"}]
       iex> Ashfolio.DataHelpers.sort_collection(goals, :name, :asc)
       [%{name: "Car"}, %{name: "Emergency Fund"}]
-      
+
       iex> expenses = [%{amount: 1000}, %{amount: 500}]
       iex> Ashfolio.DataHelpers.sort_collection(expenses, :amount, :desc)
       [%{amount: 1000}, %{amount: 500}]
@@ -140,7 +140,7 @@ defmodule Ashfolio.DataHelpers do
   def filter_by_status(collection, "active", status_field) do
     Enum.filter(collection, fn item ->
       status = Map.get(item, status_field)
-      status == :active || (is_map(item) && Map.get(item, :is_active) == true)
+      status == :active || has_active_flag?(item)
     end)
   end
 
@@ -290,4 +290,51 @@ defmodule Ashfolio.DataHelpers do
   end
 
   defp apply_filter(collection, _unknown_filter), do: collection
+
+  @doc """
+  Predicate function to check if an item has the active flag set.
+
+  Returns true if the item is a map with `is_active: true`, false otherwise.
+  This is used as a fallback in status filtering when the main status field
+  doesn't contain :active but the item should still be considered active.
+
+  ## Examples
+
+      iex> Ashfolio.DataHelpers.has_active_flag?(%{is_active: true})
+      true
+
+      iex> Ashfolio.DataHelpers.has_active_flag?(%{is_active: false})
+      false
+
+      iex> Ashfolio.DataHelpers.has_active_flag?(%{status: :active})
+      false
+
+      iex> Ashfolio.DataHelpers.has_active_flag?("active")
+      false
+  """
+  def has_active_flag?(%{is_active: true}), do: true
+  def has_active_flag?(_), do: false
+
+  @doc """
+  Predicate function to check if an item has the inactive flag set.
+
+  Returns true if the item is a map with `is_active: false`, false otherwise.
+  This provides the inverse check of `has_active_flag?/1`.
+
+  ## Examples
+
+      iex> Ashfolio.DataHelpers.has_inactive_flag?(%{is_active: false})
+      true
+
+      iex> Ashfolio.DataHelpers.has_inactive_flag?(%{is_active: true})
+      false
+
+      iex> Ashfolio.DataHelpers.has_inactive_flag?(%{status: :inactive})
+      false
+
+      iex> Ashfolio.DataHelpers.has_inactive_flag?("inactive")
+      false
+  """
+  def has_inactive_flag?(%{is_active: false}), do: true
+  def has_inactive_flag?(_), do: false
 end

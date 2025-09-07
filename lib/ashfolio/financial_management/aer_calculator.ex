@@ -15,6 +15,8 @@ defmodule Ashfolio.FinancialManagement.AERCalculator do
   - `future_value_with_regular_deposits/5` - FV with regular contributions
   """
 
+  alias Ashfolio.Financial.Mathematical
+
   require Logger
 
   @doc """
@@ -40,7 +42,7 @@ defmodule Ashfolio.FinancialManagement.AERCalculator do
       true ->
         # (1 + monthly_rate)^12 - 1
         one_plus_rate = Decimal.add(Decimal.new("1"), monthly_rate)
-        compounded = power(one_plus_rate, 12)
+        compounded = Mathematical.power(one_plus_rate, 12)
         Decimal.sub(compounded, Decimal.new("1"))
     end
   end
@@ -68,7 +70,7 @@ defmodule Ashfolio.FinancialManagement.AERCalculator do
       true ->
         # (1 + aer)^(1/12) - 1
         one_plus_aer = Decimal.add(Decimal.new("1"), aer)
-        monthly_factor = nth_root(one_plus_aer, 12)
+        monthly_factor = Mathematical.nth_root(one_plus_aer, 12)
         Decimal.sub(monthly_factor, Decimal.new("1"))
     end
   end
@@ -107,7 +109,7 @@ defmodule Ashfolio.FinancialManagement.AERCalculator do
         # No contributions: simple compound interest
         # FV = PV * (1 + r)^t
         multiplier =
-          power(
+          Mathematical.power(
             Decimal.add(Decimal.new("1"), aer),
             years
           )
@@ -132,7 +134,7 @@ defmodule Ashfolio.FinancialManagement.AERCalculator do
           Decimal.add(fv_principal, fv_contributions)
         else
           one_plus_r = Decimal.add(Decimal.new("1"), monthly_rate)
-          compound_factor = power(one_plus_r, months)
+          compound_factor = Mathematical.power(one_plus_r, months)
           numerator = Decimal.sub(compound_factor, Decimal.new("1"))
 
           fv_contributions =
@@ -165,7 +167,7 @@ defmodule Ashfolio.FinancialManagement.AERCalculator do
       # (1 + nominal/periods)^periods - 1
       period_rate = Decimal.div(nominal_rate, Decimal.new(to_string(periods)))
       one_plus_period = Decimal.add(Decimal.new("1"), period_rate)
-      compounded = power(one_plus_period, periods)
+      compounded = Mathematical.power(one_plus_period, periods)
       Decimal.sub(compounded, Decimal.new("1"))
     end
   end
@@ -188,7 +190,7 @@ defmodule Ashfolio.FinancialManagement.AERCalculator do
     else
       # periods * ((1 + effective)^(1/periods) - 1)
       one_plus_effective = Decimal.add(Decimal.new("1"), effective_rate)
-      period_factor = nth_root(one_plus_effective, periods)
+      period_factor = Mathematical.nth_root(one_plus_effective, periods)
       period_rate = Decimal.sub(period_factor, Decimal.new("1"))
       Decimal.mult(period_rate, Decimal.new(to_string(periods)))
     end
@@ -208,7 +210,7 @@ defmodule Ashfolio.FinancialManagement.AERCalculator do
   """
   def continuous_to_aer(continuous_rate) do
     # e^r - 1
-    e_power = exp(continuous_rate)
+    e_power = Mathematical.exp(continuous_rate)
     Decimal.sub(e_power, Decimal.new("1"))
   end
 
@@ -227,7 +229,7 @@ defmodule Ashfolio.FinancialManagement.AERCalculator do
   def aer_to_continuous(aer) do
     # ln(1 + AER)
     one_plus_aer = Decimal.add(Decimal.new("1"), aer)
-    ln(one_plus_aer)
+    Mathematical.ln(one_plus_aer)
   end
 
   @doc """
@@ -274,39 +276,5 @@ defmodule Ashfolio.FinancialManagement.AERCalculator do
     compound_with_aer(principal, aer, years, monthly_deposit)
   end
 
-  # Helper functions for mathematical operations
-
-  defp power(base, exponent) when is_integer(exponent) and exponent >= 0 do
-    # For better precision with large exponents, use float math then convert back
-    base_float = Decimal.to_float(base)
-    result_float = :math.pow(base_float, exponent)
-    Decimal.from_float(result_float)
-  end
-
-  defp power(base, exponent) when is_integer(exponent) and exponent < 0 do
-    positive_result = power(base, -exponent)
-    Decimal.div(Decimal.new("1"), positive_result)
-  end
-
-  defp nth_root(number, n) when is_integer(n) and n > 0 do
-    # Use Newton's method for nth root
-    # For better precision, convert to float, calculate, then back to Decimal
-    float_num = Decimal.to_float(number)
-    float_root = :math.pow(float_num, 1.0 / n)
-    Decimal.from_float(float_root)
-  end
-
-  defp exp(x) do
-    # e^x approximation using Taylor series or convert to float
-    float_x = Decimal.to_float(x)
-    float_result = :math.exp(float_x)
-    Decimal.from_float(float_result)
-  end
-
-  defp ln(x) do
-    # Natural logarithm
-    float_x = Decimal.to_float(x)
-    float_result = :math.log(float_x)
-    Decimal.from_float(float_result)
-  end
+  # Mathematical operations now delegated to Ashfolio.Financial.Mathematical module
 end
