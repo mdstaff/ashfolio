@@ -336,7 +336,7 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculatorTest do
       tax_year = 2024
       account_id = "test-account-uuid"
 
-      expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, args ->
+      expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, _args ->
         # Would filter by account in real implementation
         {:ok, []}
       end)

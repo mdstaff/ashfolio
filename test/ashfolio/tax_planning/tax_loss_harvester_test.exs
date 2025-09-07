@@ -1,11 +1,11 @@
 defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
   use ExUnit.Case, async: true
-  
+
   import Mox
 
-  alias Ashfolio.TaxPlanning.TaxLossHarvester
-  alias Ashfolio.Portfolio.Transaction
   alias Ashfolio.Portfolio.Symbol
+  alias Ashfolio.Portfolio.Transaction
+  alias Ashfolio.TaxPlanning.TaxLossHarvester
 
   setup :verify_on_exit!
   setup :set_mox_from_context
@@ -16,7 +16,7 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
       loss_threshold = Decimal.new("100.00")
 
       # Mock portfolio positions with losses
-      positions = [
+      _positions = [
         %{
           symbol_id: "uuid-1",
           symbol: "AAPL",
@@ -28,7 +28,7 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
           account_id: account_id
         },
         %{
-          symbol_id: "uuid-2", 
+          symbol_id: "uuid-2",
           symbol: "MSFT",
           current_value: Decimal.new("11000"),
           cost_basis: Decimal.new("10000"),
@@ -61,7 +61,8 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
 
     test "filters out positions with insufficient losses" do
       account_id = "test-account"
-      loss_threshold = Decimal.new("2000.00")  # High threshold
+      # High threshold
+      loss_threshold = Decimal.new("2000.00")
 
       # Mock positions with small losses
       expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, _args ->
@@ -77,23 +78,25 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
 
     test "detects wash sale risks from recent transactions" do
       account_id = "test-account"
-      
+
       # Mock recent purchase of same symbol
       recent_date = Date.add(Date.utc_today(), -15)
+
       expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, _args ->
-        {:ok, [
-          %{
-            id: "recent-buy",
-            type: :buy,
-            symbol_id: "uuid-1",
-            date: recent_date,
-            account_id: account_id
-          }
-        ]}
+        {:ok,
+         [
+           %{
+             id: "recent-buy",
+             type: :buy,
+             symbol_id: "uuid-1",
+             date: recent_date,
+             account_id: account_id
+           }
+         ]}
       end)
 
       assert {:ok, opportunities} = TaxLossHarvester.identify_opportunities(account_id)
-      
+
       # Wash sale detection would be in the detailed opportunity analysis
       # For MVP, we verify structure is in place
       assert is_list(opportunities.opportunities)
@@ -101,7 +104,7 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
 
     test "calculates tax benefits correctly" do
       account_id = "test-account"
-      
+
       expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, _args ->
         {:ok, []}
       end)
@@ -117,7 +120,7 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
 
     test "provides replacement suggestions" do
       account_id = "test-account"
-      
+
       expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, _args ->
         {:ok, []}
       end)
@@ -133,7 +136,7 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
 
     test "handles empty portfolio" do
       account_id = "empty-account"
-      
+
       expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, _args ->
         {:ok, []}
       end)
@@ -143,7 +146,7 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
 
     test "sorts opportunities by priority score" do
       account_id = "test-account"
-      
+
       expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, _args ->
         {:ok, []}
       end)
@@ -159,7 +162,7 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
   describe "recommend_replacements/3" do
     test "suggests similar assets for replacement" do
       symbol = "AAPL"
-      
+
       expect(Ashfolio.ContextMock, :read, fn Symbol, :find_by_symbol, args ->
         assert args[:symbol] == symbol
         {:ok, [%{id: "uuid-1", symbol: symbol, name: "Apple Inc."}]}
@@ -174,13 +177,15 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
         assert Map.has_key?(replacement, :symbol)
         assert Map.has_key?(replacement, :suitability_score)
         assert Map.has_key?(replacement, :correlation_to_original)
-        assert replacement.suitability_score >= 0.7  # Min threshold
+        # Min threshold
+        assert replacement.suitability_score >= 0.7
       end
     end
 
     test "filters replacements by suitability score" do
-      symbol = "OBSCURE"  # Would have low suitability replacements
-      
+      # Would have low suitability replacements
+      symbol = "OBSCURE"
+
       expect(Ashfolio.ContextMock, :read, fn Symbol, :find_by_symbol, args ->
         assert args[:symbol] == symbol
         {:ok, [%{id: "uuid-2", symbol: symbol, name: "Obscure Stock"}]}
@@ -195,8 +200,9 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
     end
 
     test "limits replacement suggestions to reasonable number" do
-      symbol = "VTI"  # Popular ETF with many similar options
-      
+      # Popular ETF with many similar options
+      symbol = "VTI"
+
       expect(Ashfolio.ContextMock, :read, fn Symbol, :find_by_symbol, args ->
         assert args[:symbol] == symbol
         {:ok, [%{id: "uuid-3", symbol: symbol, name: "Vanguard Total Stock Market"}]}
@@ -210,7 +216,7 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
 
     test "handles unknown symbol" do
       symbol = "UNKNOWN"
-      
+
       expect(Ashfolio.ContextMock, :read, fn Symbol, :find_by_symbol, args ->
         assert args[:symbol] == symbol
         {:ok, []}
@@ -221,9 +227,10 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
 
     test "considers allocation targets in recommendations" do
       symbol = "AAPL"
-      allocation_target = Decimal.new("0.10")  # 10% allocation
-      
-      expect(Ashfolio.ContextMock, :read, fn Symbol, :find_by_symbol, args ->
+      # 10% allocation
+      allocation_target = Decimal.new("0.10")
+
+      expect(Ashfolio.ContextMock, :read, fn Symbol, :find_by_symbol, _args ->
         {:ok, [%{id: "uuid-1", symbol: symbol, name: "Apple Inc."}]}
       end)
 
@@ -237,17 +244,21 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
   describe "check_wash_sale_compliance/4" do
     test "validates compliant replacement transaction" do
       sell_symbol = "AAPL"
-      buy_symbol = "MSFT"  # Different company, should be compliant
+      # Different company, should be compliant
+      buy_symbol = "MSFT"
       transaction_date = Date.utc_today()
-      
+
       # Mock no recent conflicting transactions
       expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, _args ->
         {:ok, []}
       end)
 
-      assert {:ok, compliance} = TaxLossHarvester.check_wash_sale_compliance(
-        sell_symbol, buy_symbol, transaction_date
-      )
+      assert {:ok, compliance} =
+               TaxLossHarvester.check_wash_sale_compliance(
+                 sell_symbol,
+                 buy_symbol,
+                 transaction_date
+               )
 
       assert compliance.is_compliant == true
       assert is_list(compliance.risk_factors)
@@ -257,25 +268,31 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
 
     test "detects wash sale violation with substantially identical securities" do
       sell_symbol = "VTI"
-      buy_symbol = "ITOT"  # Both total market ETFs - substantially identical
+      # Both total market ETFs - substantially identical
+      buy_symbol = "ITOT"
       transaction_date = Date.utc_today()
-      
+
       # Mock recent purchase of buy_symbol within wash sale period
       recent_date = Date.add(transaction_date, -15)
+
       expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, _args ->
-        {:ok, [
-          %{
-            id: "recent-buy",
-            type: :buy,
-            symbol: %{symbol: buy_symbol},
-            date: recent_date
-          }
-        ]}
+        {:ok,
+         [
+           %{
+             id: "recent-buy",
+             type: :buy,
+             symbol: %{symbol: buy_symbol},
+             date: recent_date
+           }
+         ]}
       end)
 
-      assert {:ok, compliance} = TaxLossHarvester.check_wash_sale_compliance(
-        sell_symbol, buy_symbol, transaction_date
-      )
+      assert {:ok, compliance} =
+               TaxLossHarvester.check_wash_sale_compliance(
+                 sell_symbol,
+                 buy_symbol,
+                 transaction_date
+               )
 
       # Substantially identical securities with recent purchase should be non-compliant
       assert compliance.is_compliant == false
@@ -285,24 +302,30 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
 
     test "provides safe transaction date for wash sale avoidance" do
       sell_symbol = "AAPL"
-      buy_symbol = "AAPL"  # Same symbol - definitely wash sale
+      # Same symbol - definitely wash sale
+      buy_symbol = "AAPL"
       transaction_date = Date.utc_today()
-      
+
       recent_purchase_date = Date.add(transaction_date, -10)
+
       expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, _args ->
-        {:ok, [
-          %{
-            id: "recent-buy",
-            type: :buy,
-            symbol: %{symbol: buy_symbol},
-            date: recent_purchase_date
-          }
-        ]}
+        {:ok,
+         [
+           %{
+             id: "recent-buy",
+             type: :buy,
+             symbol: %{symbol: buy_symbol},
+             date: recent_purchase_date
+           }
+         ]}
       end)
 
-      assert {:ok, compliance} = TaxLossHarvester.check_wash_sale_compliance(
-        sell_symbol, buy_symbol, transaction_date
-      )
+      assert {:ok, compliance} =
+               TaxLossHarvester.check_wash_sale_compliance(
+                 sell_symbol,
+                 buy_symbol,
+                 transaction_date
+               )
 
       # Safe date should be 31 days after recent purchase
       expected_safe_date = Date.add(recent_purchase_date, 31)
@@ -312,10 +335,14 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
     test "assesses symbol similarity correctly" do
       # Test various symbol similarity scenarios
       test_cases = [
-        {"SPY", "IVV", :high_similarity},      # Both S&P 500 ETFs
-        {"VTI", "ITOT", :high_similarity},     # Both total market ETFs  
-        {"AAPL", "MSFT", :low_similarity},     # Different companies
-        {"AAPL", "AAPL", :identical}           # Same symbol
+        # Both S&P 500 ETFs
+        {"SPY", "IVV", :high_similarity},
+        # Both total market ETFs  
+        {"VTI", "ITOT", :high_similarity},
+        # Different companies
+        {"AAPL", "MSFT", :low_similarity},
+        # Same symbol
+        {"AAPL", "AAPL", :identical}
       ]
 
       for {sell_symbol, buy_symbol, expected_level} <- test_cases do
@@ -323,17 +350,22 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
           {:ok, []}
         end)
 
-        assert {:ok, compliance} = TaxLossHarvester.check_wash_sale_compliance(
-          sell_symbol, buy_symbol, Date.utc_today()
-        )
+        assert {:ok, compliance} =
+                 TaxLossHarvester.check_wash_sale_compliance(
+                   sell_symbol,
+                   buy_symbol,
+                   Date.utc_today()
+                 )
 
         case expected_level do
           :identical ->
             assert compliance.similarity_assessment.similarity_score == 1.0
             assert compliance.similarity_assessment.substantially_identical == true
+
           :high_similarity ->
             assert compliance.similarity_assessment.similarity_score > 0.9
             assert compliance.similarity_assessment.substantially_identical == true
+
           :low_similarity ->
             assert compliance.similarity_assessment.similarity_score < 0.5
             assert compliance.similarity_assessment.substantially_identical == false
@@ -346,15 +378,19 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
       buy_symbol = "AAPL"
       transaction_date = Date.utc_today()
       account_id = "specific-account"
-      
+
       expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, _args ->
         # Would filter by account_id in real implementation
         {:ok, []}
       end)
 
-      assert {:ok, compliance} = TaxLossHarvester.check_wash_sale_compliance(
-        sell_symbol, buy_symbol, transaction_date, account_id
-      )
+      assert {:ok, compliance} =
+               TaxLossHarvester.check_wash_sale_compliance(
+                 sell_symbol,
+                 buy_symbol,
+                 transaction_date,
+                 account_id
+               )
 
       assert Map.has_key?(compliance, :is_compliant)
     end
@@ -364,9 +400,10 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
     test "creates optimal harvesting sequence" do
       portfolio_targets = %{
         "stocks" => Decimal.new("70.0"),
-        "bonds" => Decimal.new("20.0"), 
+        "bonds" => Decimal.new("20.0"),
         "cash" => Decimal.new("10.0")
       }
+
       tax_rate = Decimal.new("0.22")
 
       # Mock current allocations
@@ -374,9 +411,11 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
         {:ok, []}
       end)
 
-      assert {:ok, strategy} = TaxLossHarvester.optimize_harvest_strategy(
-        portfolio_targets, tax_rate
-      )
+      assert {:ok, strategy} =
+               TaxLossHarvester.optimize_harvest_strategy(
+                 portfolio_targets,
+                 tax_rate
+               )
 
       assert Map.has_key?(strategy, :actions)
       assert Map.has_key?(strategy, :total_estimated_savings)
@@ -397,9 +436,11 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
         {:ok, []}
       end)
 
-      assert {:ok, strategy} = TaxLossHarvester.optimize_harvest_strategy(
-        portfolio_targets, tax_rate
-      )
+      assert {:ok, strategy} =
+               TaxLossHarvester.optimize_harvest_strategy(
+                 portfolio_targets,
+                 tax_rate
+               )
 
       # Actions should be sorted by estimated tax savings (descending)
       if length(strategy.actions) > 1 do
@@ -416,16 +457,18 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
         {:ok, []}
       end)
 
-      assert {:ok, strategy} = TaxLossHarvester.optimize_harvest_strategy(
-        portfolio_targets, tax_rate
-      )
+      assert {:ok, strategy} =
+               TaxLossHarvester.optimize_harvest_strategy(
+                 portfolio_targets,
+                 tax_rate
+               )
 
       timeline = strategy.execution_timeline
-      
+
       assert Map.has_key?(timeline, :immediate_actions)
       assert Map.has_key?(timeline, :delayed_actions)
       assert Map.has_key?(timeline, :earliest_completion)
-      
+
       assert is_integer(timeline.immediate_actions)
       assert is_integer(timeline.delayed_actions)
       assert %Date{} = timeline.earliest_completion
@@ -438,15 +481,18 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
         "international" => Decimal.new("20.0"),
         "bonds" => Decimal.new("20.0")
       }
+
       tax_rate = Decimal.new("0.32")
 
       expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, _args ->
         {:ok, []}
       end)
 
-      assert {:ok, strategy} = TaxLossHarvester.optimize_harvest_strategy(
-        portfolio_targets, tax_rate
-      )
+      assert {:ok, strategy} =
+               TaxLossHarvester.optimize_harvest_strategy(
+                 portfolio_targets,
+                 tax_rate
+               )
 
       # Strategy should maintain allocation targets through replacements
       for action <- strategy.actions do
@@ -464,9 +510,11 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
         {:ok, []}
       end)
 
-      assert {:ok, strategy} = TaxLossHarvester.optimize_harvest_strategy(
-        portfolio_targets, tax_rate
-      )
+      assert {:ok, strategy} =
+               TaxLossHarvester.optimize_harvest_strategy(
+                 portfolio_targets,
+                 tax_rate
+               )
 
       # Should handle gracefully with empty action list
       assert strategy.actions == []
@@ -479,7 +527,7 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
       # This would test integration between harvesting and realized gains
       # For MVP, verify the modules can work together
       account_id = "integration-test"
-      
+
       expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, _args ->
         {:ok, []}
       end)
@@ -492,17 +540,19 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
     test "handles large portfolios efficiently" do
       # Test performance with larger datasets
       account_id = "large-portfolio"
-      
+
       expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, _args ->
         # Mock large transaction set
-        large_transaction_set = for i <- 1..100 do
-          %{
-            id: "txn-#{i}",
-            type: if rem(i, 2) == 0, do: :buy, else: :sell,
-            date: Date.add(Date.utc_today(), -i),
-            symbol_id: "symbol-#{rem(i, 10)}"
-          }
-        end
+        large_transaction_set =
+          for i <- 1..100 do
+            %{
+              id: "txn-#{i}",
+              type: if(rem(i, 2) == 0, do: :buy, else: :sell),
+              date: Date.add(Date.utc_today(), -i),
+              symbol_id: "symbol-#{rem(i, 10)}"
+            }
+          end
+
         {:ok, large_transaction_set}
       end)
 
@@ -511,12 +561,12 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
       end_time = System.monotonic_time(:millisecond)
 
       # Should complete in reasonable time (< 5 seconds for this test)
-      assert (end_time - start_time) < 5000
+      assert end_time - start_time < 5000
     end
 
     test "maintains data consistency across multiple operations" do
       account_id = "consistency-test"
-      
+
       expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, _args ->
         {:ok, []}
       end)
@@ -526,17 +576,18 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
       assert {:ok, opportunities2} = TaxLossHarvester.identify_opportunities(account_id)
 
       assert opportunities1.opportunities_found == opportunities2.opportunities_found
+
       assert Decimal.equal?(
-        opportunities1.total_harvestable_losses,
-        opportunities2.total_harvestable_losses
-      )
+               opportunities1.total_harvestable_losses,
+               opportunities2.total_harvestable_losses
+             )
     end
   end
 
   describe "error handling and edge cases" do
     test "handles database connection errors gracefully" do
       account_id = "db-error-test"
-      
+
       expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, _args ->
         {:error, :database_unavailable}
       end)
@@ -547,29 +598,33 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
     test "validates input parameters" do
       # Test invalid account ID
       assert {:error, :no_positions} = TaxLossHarvester.identify_opportunities("invalid-account")
-      
+
       # Test invalid loss threshold
       expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, _args ->
         {:ok, []}
       end)
 
       # Negative threshold should be handled
-      assert {:ok, opportunities} = TaxLossHarvester.identify_opportunities(
-        "test-account", 
-        Decimal.new("-100")  # Negative threshold
-      )
-      
+      assert {:ok, opportunities} =
+               TaxLossHarvester.identify_opportunities(
+                 "test-account",
+                 # Negative threshold
+                 Decimal.new("-100")
+               )
+
       assert is_list(opportunities.opportunities)
     end
 
     test "handles malformed transaction data" do
       account_id = "malformed-data"
-      
+
       expect(Ashfolio.ContextMock, :read, fn Transaction, :by_date_range, _args ->
-        {:ok, [
-          %{id: "bad-txn", type: nil, date: nil},  # Malformed transaction
-          %{id: "good-txn", type: :buy, date: Date.utc_today(), symbol_id: "test"}
-        ]}
+        {:ok,
+         [
+           # Malformed transaction
+           %{id: "bad-txn", type: nil, date: nil},
+           %{id: "good-txn", type: :buy, date: Date.utc_today(), symbol_id: "test"}
+         ]}
       end)
 
       # Should handle malformed data gracefully

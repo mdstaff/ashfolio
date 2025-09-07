@@ -90,7 +90,8 @@ defmodule Ashfolio.Financial.BenchmarkAnalyzerTest do
       portfolio_end = Decimal.new("110000")
       days = 365
 
-      assert {:ok, analysis} = BenchmarkAnalyzer.analyze_vs_benchmark(portfolio_start, portfolio_end, days, :total_market)
+      assert {:ok, analysis} =
+               BenchmarkAnalyzer.analyze_vs_benchmark(portfolio_start, portfolio_end, days, :total_market)
 
       assert analysis.benchmark_symbol == "VTI"
       # Total market average
@@ -145,7 +146,7 @@ defmodule Ashfolio.Financial.BenchmarkAnalyzerTest do
       portfolio_returns = [
         # 2% day
         Decimal.new("0.02"),
-        # -1% day  
+        # -1% day
         Decimal.new("-0.01"),
         # 1.5% day
         Decimal.new("0.015"),
@@ -348,12 +349,5 @@ defmodule Ashfolio.Financial.BenchmarkAnalyzerTest do
 
       assert Decimal.equal?(analysis.portfolio_return, Decimal.new("0.10"))
     end
-  end
-
-  # Helper function to create mock return data
-  defp create_mock_returns(count, base_return \\ "0.001") do
-    Enum.map(1..count, fn _ ->
-      Decimal.new(base_return)
-    end)
   end
 end

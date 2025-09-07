@@ -451,7 +451,7 @@ defmodule AshfolioWeb.BenchmarkLive.Index do
     # Parse start value
     {start_value, errors} = parse_currency_field(params["start_value"], "Start value", errors)
 
-    # Parse end value  
+    # Parse end value
     {end_value, errors} = parse_currency_field(params["end_value"], "End value", errors)
 
     # Parse benchmark and period

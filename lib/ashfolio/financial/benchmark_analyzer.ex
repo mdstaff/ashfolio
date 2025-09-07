@@ -283,7 +283,7 @@ defmodule Ashfolio.Financial.BenchmarkAnalyzer do
           case symbol do
             # Historical S&P 500 average
             "SPY" -> Decimal.new("0.10")
-            # Total market average  
+            # Total market average
             "VTI" -> Decimal.new("0.09")
             # International average
             "VTIAX" -> Decimal.new("0.07")

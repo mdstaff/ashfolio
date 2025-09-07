@@ -47,7 +47,7 @@ Unknown:
 flash: lib/ashfolio_web/components/core_components.ex:111 (95x)
 icon: lib/ashfolio_web/components/core_components.ex:599 (93x)
 error: lib/ashfolio_web/components/core_components.ex:411 (83x)
-list: lib/ashfolio_web/components/core_components.ex:541 (80x)
+list: lib/ashfolio_web/components/core_components.ex:541 (82x)
 input: lib/ashfolio_web/components/core_components.ex:295 (77x)
 input: lib/ashfolio_web/components/core_components.ex:306 (77x)
 
@@ -76,9 +76,9 @@ telemetry_metrics: ❌ (0)
 telemetry_poller: ❌ (0)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio/financial_management/search_algorithms.ex", "lib/ashfolio/data_helpers.ex", "lib/ashfolio/financial/mathematical.ex", "lib/ashfolio/financial_management/aer_calculator.ex", "lib/ashfolio/financial_management/forecast_calculator.ex"]
-uncommitted: 9 files
-commits_ahead: 17
+recent: ["lib/ashfolio/financial/benchmark_analyzer.ex", "lib/ashfolio/tax_planning/capital_gains_calculator.ex", "lib/ashfolio/tax_planning/tax_loss_harvester.ex", "lib/ashfolio_web/live/benchmark_live/index.ex", "lib/ashfolio_web/live/tax_planning_live/index.ex"]
+uncommitted: 8 files
+commits_ahead: 18
 
 # === TEST ANALYSIS ===
 summary:

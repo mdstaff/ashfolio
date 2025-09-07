@@ -65,7 +65,7 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvester do
       opportunities =
         positions
         |> Enum.map(&analyze_position_for_harvesting(&1, recent_transactions, loss_threshold, options))
-        |> Enum.filter(&is_harvestable_opportunity?/1)
+        |> Enum.filter(&harvestable_opportunity?/1)
         |> Enum.sort_by(& &1.tax_benefit, {:desc, Decimal})
 
       summary = calculate_harvest_summary(opportunities)
@@ -153,7 +153,13 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvester do
          {:ok, symbol_similarity} <- assess_symbol_similarity(sell_symbol, buy_symbol) do
       compliance_check = %{
         is_compliant:
-          assess_wash_sale_compliance(sell_symbol, buy_symbol, transaction_date, recent_transactions, symbol_similarity),
+          assess_wash_sale_compliance(
+            sell_symbol,
+            buy_symbol,
+            transaction_date,
+            recent_transactions,
+            symbol_similarity
+          ),
         risk_factors: identify_wash_sale_risks(sell_symbol, buy_symbol, recent_transactions, symbol_similarity),
         safe_date: calculate_safe_transaction_date(sell_symbol, recent_transactions),
         similarity_assessment: symbol_similarity
@@ -292,7 +298,7 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvester do
     end
   end
 
-  defp is_harvestable_opportunity?(opportunity) do
+  defp harvestable_opportunity?(opportunity) do
     Map.get(opportunity, :harvestable, false)
   end
 
@@ -301,10 +307,10 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvester do
     cutoff_date = Date.add(Date.utc_today(), -@wash_sale_days)
 
     recent_purchases =
-      recent_transactions
-      |> Enum.filter(&(&1.symbol_id == position.symbol_id))
-      |> Enum.filter(&(&1.type == :buy))
-      |> Enum.filter(&Date.after?(&1.date, cutoff_date))
+      Enum.filter(
+        recent_transactions,
+        &(&1.symbol_id == position.symbol_id and &1.type == :buy and Date.after?(&1.date, cutoff_date))
+      )
 
     length(recent_purchases) > 0
   end

@@ -211,8 +211,7 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculator do
     # Process all sell transactions using FIFO
     {processed_sales, _remaining_queue} =
       transactions
-      |> Enum.filter(&(&1.type == :sell))
-      |> Enum.filter(&tax_year_matches?(&1, tax_year))
+      |> Enum.filter(&(&1.type == :sell and tax_year_matches?(&1, tax_year)))
       |> Enum.reduce({[], buy_queue}, &process_sale_transaction/2)
 
     # Aggregate results
@@ -437,10 +436,7 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculator do
 
   defp calculate_annual_gains_summary(transactions, tax_year) do
     # Filter for sell transactions in tax year
-    sell_transactions =
-      transactions
-      |> Enum.filter(&(&1.type == :sell))
-      |> Enum.filter(&tax_year_matches?(&1, tax_year))
+    sell_transactions = Enum.filter(transactions, &(&1.type == :sell and tax_year_matches?(&1, tax_year)))
 
     # Calculate basic summary (full implementation would use FIFO)
     total_proceeds =

@@ -546,7 +546,7 @@ defmodule AshfolioWeb.TaxPlanningLive.IndexTest do
         {:ok, []}
       end)
 
-      {:ok, view, html} = live(conn, "/tax_planning")
+      {:ok, _view, html} = live(conn, "/tax_planning")
 
       # Should use consistent styling with other LiveViews
       assert html =~ "bg-white shadow"
