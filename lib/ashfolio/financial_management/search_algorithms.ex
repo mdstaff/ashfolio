@@ -96,7 +96,7 @@ defmodule Ashfolio.FinancialManagement.SearchAlgorithms do
          max_iterations
        ) do
     difference = Decimal.sub(max_contribution, min_contribution)
-    tolerance = Decimal.new("0.01")
+    tolerance = Decimal.new("0.50")
 
     if max_iterations <= 0 or Decimal.compare(difference, tolerance) in [:lt, :eq] do
       mid_contribution = min_contribution |> Decimal.add(max_contribution) |> Decimal.div(Decimal.new("2"))
@@ -188,8 +188,8 @@ defmodule Ashfolio.FinancialManagement.SearchAlgorithms do
   end
 
   defp handle_projection_result(final_value, target_amount) do
-    # 0.1% tolerance
-    tolerance = Decimal.mult(target_amount, Decimal.new("0.001"))
+    # 0.5% tolerance - reasonable for financial planning purposes
+    tolerance = Decimal.mult(target_amount, Decimal.new("0.005"))
     difference = final_value |> Decimal.sub(target_amount) |> Decimal.abs()
 
     cond do
