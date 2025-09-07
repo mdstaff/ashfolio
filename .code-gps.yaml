@@ -44,12 +44,12 @@ Unknown:
   missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
 
 # === KEY COMPONENTS ===
+flash: lib/ashfolio_web/components/core_components.ex:111 (95x)
 icon: lib/ashfolio_web/components/core_components.ex:599 (93x)
-flash: lib/ashfolio_web/components/core_components.ex:111 (92x)
-list: lib/ashfolio_web/components/core_components.ex:541 (77x)
-input: lib/ashfolio_web/components/core_components.ex:295 (75x)
-input: lib/ashfolio_web/components/core_components.ex:306 (75x)
-input: lib/ashfolio_web/components/core_components.ex:332 (75x)
+error: lib/ashfolio_web/components/core_components.ex:411 (83x)
+list: lib/ashfolio_web/components/core_components.ex:541 (80x)
+input: lib/ashfolio_web/components/core_components.ex:295 (77x)
+input: lib/ashfolio_web/components/core_components.ex:306 (77x)
 
 # === DEPENDENCIES ===
 bandit: ❌ (0)
@@ -76,15 +76,15 @@ telemetry_metrics: ❌ (0)
 telemetry_poller: ❌ (0)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio/data_helpers.ex", "lib/ashfolio/financial/mathematical.ex", "lib/ashfolio/financial_management/aer_calculator.ex", "lib/ashfolio/financial_management/forecast_calculator.ex", "lib/ashfolio_web/form_helpers.ex"]
-uncommitted: 5 files
-commits_ahead: 16
+recent: ["lib/ashfolio/financial_management/search_algorithms.ex", "lib/ashfolio/data_helpers.ex", "lib/ashfolio/financial/mathematical.ex", "lib/ashfolio/financial_management/aer_calculator.ex", "lib/ashfolio/financial_management/forecast_calculator.ex"]
+uncommitted: 9 files
+commits_ahead: 17
 
 # === TEST ANALYSIS ===
 summary:
-  total_test_modules: 117
-  total_tests: 1560
-  average_tests_per_module: 13.3
+  total_test_modules: 121
+  total_tests: 1660
+  average_tests_per_module: 13.7
 
 top_10_test_modules:
   Unknown: 48 tests, 86 assertions (15 describes) | test/ashfolio_web/form_helpers_test.exs
@@ -95,8 +95,8 @@ top_10_test_modules:
   Unknown: 38 tests, 79 assertions (8 describes) | test/ashfolio/financial/formatters_test.exs
   Unknown: 37 tests, 63 assertions (9 describes) | test/ashfolio/data_helpers_test.exs
   Unknown: 35 tests, 81 assertions (3 describes) | test/ashfolio/portfolio/account_test.exs
+  Unknown: 34 tests, 97 assertions (9 describes) | test/ashfolio_web/live/tax_planning_live/index_test.exs
   Unknown: 30 tests, 37 assertions (8 describes) | test/ashfolio/error_handler_test.exs
-  Unknown: 25 tests, 72 assertions (7 describes) | test/ashfolio/portfolio/calculator_test.exs
 
 # === TEST GAPS ===
 missing_tests:
@@ -112,11 +112,11 @@ test/ashfolio/financial_management/forecast_calculator_aer_test.exs ⚠️
 
 # === MODULE ANALYSIS ===
 summary:
-  total_modules: 124 (115 lib, 9 test)
-  total_functions: 1763 (1684 lib, 79 test)
-  public/private: 727 public, 1036 private
-  average_functions_per_module: 14.2
-  complex_modules: 16 (>30 functions)
+  total_modules: 129 (120 lib, 9 test)
+  total_functions: 1894 (1815 lib, 79 test)
+  public/private: 755 public, 1139 private
+  average_functions_per_module: 14.7
+  complex_modules: 17 (>30 functions)
       empty_modules: 17 (potential parsing issues)
 
 top_20_modules:
@@ -133,13 +133,13 @@ top_20_modules:
   Unknown: 38 functions (13 public, 25 private) | lib/ashfolio_web/live/financial_planning_live/forecast.ex
   Unknown: 36 functions (6 public, 30 private) | lib/ashfolio_web/live/expense_live/analytics.ex
   Unknown: 35 functions (32 public, 3 private) | lib/ashfolio_web/components/core_components.ex
+  Unknown: 34 functions (4 public, 30 private) | lib/ashfolio/tax_planning/capital_gains_calculator.ex
   Unknown: 33 functions (10 public, 23 private) | lib/ashfolio_web/live/expense_live/index.ex
   Unknown: 32 functions (14 public, 18 private) | lib/ashfolio/financial_management/retirement_calculator.ex
   Unknown: 32 functions (1 public, 31 private) | lib/ashfolio_web/components/transaction_stats.ex
   Unknown: 30 functions (4 public, 26 private) | lib/ashfolio/financial_management/symbol_search.ex
   Unknown: 30 functions (15 public, 15 private) | lib/ashfolio_web/live/account_live/index.ex
   Unknown: 30 functions (14 public, 16 private) | lib/ashfolio_web/live/advanced_analytics_live/index.ex
-  Unknown: 29 functions (10 public, 19 private) | lib/ashfolio_web/components/symbol_autocomplete.ex
 
 # === CODE QUALITY ===
 credo_analysis: Text parsing summary
