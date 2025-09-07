@@ -8,8 +8,8 @@ defmodule AshfolioWeb.DashboardLive do
   alias Ashfolio.FinancialManagement.FinancialGoal
   alias Ashfolio.FinancialManagement.NetWorthSnapshot
   alias Ashfolio.MarketData.PriceManager
-  alias Ashfolio.Portfolio.Account
   alias Ashfolio.Portfolio.HoldingsCalculator
+  alias AshfolioWeb.Live.DashboardCalculators
   alias AshfolioWeb.Live.ErrorHelpers
 
   require Logger
@@ -81,21 +81,28 @@ defmodule AshfolioWeb.DashboardLive do
 
   @impl true
   def handle_event("sort", %{"column" => column}, socket) do
-    {sort_by, sort_order} = toggle_sort(socket.assigns.sort_by, socket.assigns.sort_order, column)
-    holdings = sort_holdings(socket.assigns.holdings, sort_by, sort_order)
+    new_column_atom = String.to_existing_atom(column)
+    current_sort = socket.assigns.sort_by
+    current_order = socket.assigns.sort_order
+
+    {sort_by, sort_order} =
+      if current_sort == new_column_atom do
+        {new_column_atom, if(current_order == :asc, do: :desc, else: :asc)}
+      else
+        {new_column_atom, :asc}
+      end
 
     socket =
       socket
       |> assign(:sort_by, sort_by)
       |> assign(:sort_order, sort_order)
-      |> assign(:holdings, holdings)
 
     {:noreply, socket}
   end
 
   @impl true
   def handle_event("create_snapshot", _params, socket) do
-    snapshot_data = build_snapshot_data()
+    snapshot_data = DashboardCalculators.build_snapshot_data()
     {:noreply, create_or_update_snapshot(socket, snapshot_data)}
   rescue
     error ->
@@ -305,7 +312,10 @@ defmodule AshfolioWeb.DashboardLive do
                       class="hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded"
                       aria-label="Sort by symbol"
                     >
-                      Symbol {sort_indicator(@sort_by, @sort_order, :symbol)}
+                      Symbol
+                      <%= if @sort_by == :symbol do %>
+                        {if @sort_order == :asc, do: "↑", else: "↓"}
+                      <% end %>
                     </button>
                   </th>
                   <th class="p-0 pb-4 pr-6 font-normal text-right">Quantity</th>
@@ -317,7 +327,10 @@ defmodule AshfolioWeb.DashboardLive do
                       class="hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded"
                       aria-label="Sort by current value"
                     >
-                      Current Value {sort_indicator(@sort_by, @sort_order, :current_value)}
+                      Current Value
+                      <%= if @sort_by == :current_value do %>
+                        {if @sort_order == :asc, do: "↑", else: "↓"}
+                      <% end %>
                     </button>
                   </th>
                   <th class="p-0 pb-4 pr-6 font-normal text-right">Cost Basis</th>
@@ -328,7 +341,10 @@ defmodule AshfolioWeb.DashboardLive do
                       class="hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded"
                       aria-label="Sort by profit and loss"
                     >
-                      P&L {sort_indicator(@sort_by, @sort_order, :unrealized_pnl)}
+                      P&L
+                      <%= if @sort_by == :unrealized_pnl do %>
+                        {if @sort_order == :asc, do: "↑", else: "↓"}
+                      <% end %>
                     </button>
                   </th>
                 </tr>
@@ -347,7 +363,7 @@ defmodule AshfolioWeb.DashboardLive do
                   <td class="relative p-0">
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
-                      <span class="relative">{format_quantity(holding.quantity)}</span>
+                      <span class="relative">{Formatters.format_quantity(holding.quantity)}</span>
                     </div>
                   </td>
                   <td class="relative p-0">
@@ -448,7 +464,7 @@ defmodule AshfolioWeb.DashboardLive do
                       </p>
                       <span class="text-gray-300">•</span>
                       <p class="text-xs text-gray-500">
-                        {format_quantity(transaction.quantity)} shares
+                        {Formatters.format_quantity(transaction.quantity)} shares
                       </p>
                       <span class="text-gray-300">•</span>
                       <p class="text-xs text-gray-500">
@@ -478,23 +494,6 @@ defmodule AshfolioWeb.DashboardLive do
   end
 
   # Private functions
-
-  defp build_snapshot_data do
-    current_net_worth = calculate_current_net_worth()
-    total_assets = current_net_worth
-    total_liabilities = Decimal.new("0.00")
-    net_worth = Decimal.sub(total_assets, total_liabilities)
-
-    %{
-      snapshot_date: Date.utc_today(),
-      total_assets: total_assets,
-      total_liabilities: total_liabilities,
-      net_worth: net_worth,
-      cash_value: calculate_total_cash(),
-      investment_value: calculate_total_investments(),
-      is_automated: false
-    }
-  end
 
   defp create_or_update_snapshot(socket, snapshot_data) do
     case NetWorthSnapshot.create(snapshot_data) do
@@ -696,42 +695,7 @@ defmodule AshfolioWeb.DashboardLive do
       nil
   end
 
-  # Helper functions for holdings table
-
-  defp format_quantity(decimal_value) do
-    decimal_value
-    |> Decimal.round(6)
-    |> Decimal.to_string()
-    |> String.replace(~r/\.?0+$/, "")
-  end
-
-  defp sort_holdings(holdings, sort_by, sort_order) do
-    Enum.sort_by(holdings, &Map.get(&1, sort_by), sort_order)
-  end
-
-  defp toggle_sort(current_sort, current_order, new_column) do
-    new_column_atom = String.to_existing_atom(new_column)
-
-    if current_sort == new_column_atom do
-      {new_column_atom, toggle_order(current_order)}
-    else
-      {new_column_atom, :asc}
-    end
-  end
-
-  defp toggle_order(:asc), do: :desc
-  defp toggle_order(:desc), do: :asc
-
-  defp sort_indicator(current_sort, current_order, column) do
-    if current_sort == column do
-      case current_order do
-        :asc -> "↑"
-        :desc -> "↓"
-      end
-    else
-      ""
-    end
-  end
+  # Helper functions for holdings table - moved to HoldingsTable component
 
   # Helper function to safely get account count from breakdown
   defp get_account_count(breakdown, account_type) when is_map(breakdown) do
@@ -797,9 +761,9 @@ defmodule AshfolioWeb.DashboardLive do
       |> Ash.read!()
 
     # Calculate totals
-    total_expenses = calculate_total_expenses(expenses)
+    total_expenses = DashboardCalculators.calculate_total_expenses(expenses)
     expense_count = length(expenses)
-    current_month_total = calculate_current_month_expenses(expenses)
+    current_month_total = DashboardCalculators.calculate_current_month_expenses(expenses)
 
     socket
     |> assign(:total_expenses, Formatters.format_currency_with_cents(total_expenses))
@@ -849,62 +813,5 @@ defmodule AshfolioWeb.DashboardLive do
   rescue
     _error ->
       assign_default_goals_values(socket)
-  end
-
-  defp calculate_total_expenses(expenses) do
-    Enum.reduce(expenses, Decimal.new(0), fn expense, acc ->
-      Decimal.add(acc, expense.amount)
-    end)
-  end
-
-  defp calculate_current_net_worth do
-    # Calculate from current account balances
-    case Account |> Ash.Query.for_read(:read) |> Ash.read!() do
-      [] ->
-        Decimal.new(0)
-
-      accounts ->
-        Enum.reduce(accounts, Decimal.new(0), fn account, acc ->
-          Decimal.add(acc, account.balance)
-        end)
-    end
-  end
-
-  defp calculate_total_cash do
-    # Sum cash account balances
-    case Account.cash_accounts!() do
-      [] ->
-        Decimal.new(0)
-
-      accounts ->
-        Enum.reduce(accounts, Decimal.new(0), fn account, acc ->
-          Decimal.add(acc, account.balance)
-        end)
-    end
-  end
-
-  defp calculate_total_investments do
-    # Sum investment account balances
-    case Account.investment_accounts!() do
-      [] ->
-        Decimal.new(0)
-
-      accounts ->
-        Enum.reduce(accounts, Decimal.new(0), fn account, acc ->
-          Decimal.add(acc, account.balance)
-        end)
-    end
-  end
-
-  defp calculate_current_month_expenses(expenses) do
-    current_month = Date.beginning_of_month(Date.utc_today())
-
-    expenses
-    |> Enum.filter(fn expense ->
-      Date.compare(expense.date, current_month) != :lt
-    end)
-    |> Enum.reduce(Decimal.new(0), fn expense, acc ->
-      Decimal.add(acc, expense.amount)
-    end)
   end
 end

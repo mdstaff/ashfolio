@@ -22,6 +22,8 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
 
   alias Ashfolio.Financial.DecimalHelpers, as: DH
   alias Ashfolio.FinancialManagement.ForecastCalculator
+  alias Ashfolio.FinancialManagement.SearchAlgorithms
+  alias Ashfolio.FinancialManagement.ValidationHelpers
 
   require Decimal
   require Logger
@@ -69,10 +71,10 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
   def analyze_contribution_impact(current_value, base_monthly_contribution, years, growth_rate, custom_variations \\ nil) do
     Logger.debug("Analyzing contribution impact - base: #{base_monthly_contribution}, years: #{years}")
 
-    with :ok <- validate_current_value(current_value),
-         :ok <- validate_monthly_contribution(base_monthly_contribution),
-         :ok <- validate_years(years),
-         :ok <- validate_growth_rate(growth_rate) do
+    with :ok <- ValidationHelpers.validate_current_value(current_value),
+         :ok <- ValidationHelpers.validate_monthly_contribution(base_monthly_contribution),
+         :ok <- ValidationHelpers.validate_years(years),
+         :ok <- ValidationHelpers.validate_growth_rate(growth_rate) do
       # Calculate base projection
       base_annual = DH.monthly_to_annual(base_monthly_contribution)
 
@@ -161,14 +163,14 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
   def optimize_contribution_for_goal(current_value, target_amount, years, growth_rate) do
     Logger.debug("Optimizing contribution for goal - target: #{target_amount}, years: #{years}")
 
-    with :ok <- validate_current_value(current_value),
-         :ok <- validate_target_amount(target_amount),
-         :ok <- validate_years(years),
-         :ok <- validate_growth_rate(growth_rate) do
+    with :ok <- ValidationHelpers.validate_current_value(current_value),
+         :ok <- ValidationHelpers.validate_target_amount(target_amount, current_value),
+         :ok <- ValidationHelpers.validate_years(years),
+         :ok <- ValidationHelpers.validate_growth_rate(growth_rate) do
       # Check if goal is already achieved
       if Decimal.compare(current_value, target_amount) == :lt do
         # Calculate required contribution using binary search
-        case find_required_contribution(current_value, target_amount, years, growth_rate) do
+        case SearchAlgorithms.find_required_contribution(current_value, target_amount, years, growth_rate) do
           {:ok, required_annual} ->
             process_required_contribution(required_annual, current_value, target_amount, years, growth_rate)
 
@@ -209,10 +211,10 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
   def compare_contribution_strategies(current_value, target_amount, years, growth_rate, strategies) do
     Logger.debug("Comparing #{length(strategies)} contribution strategies")
 
-    with :ok <- validate_current_value(current_value),
-         :ok <- validate_target_amount(target_amount),
-         :ok <- validate_years(years),
-         :ok <- validate_growth_rate(growth_rate) do
+    with :ok <- ValidationHelpers.validate_current_value(current_value),
+         :ok <- ValidationHelpers.validate_target_amount(target_amount, current_value),
+         :ok <- ValidationHelpers.validate_years(years),
+         :ok <- ValidationHelpers.validate_growth_rate(growth_rate) do
       # Analyze each strategy
       analyzed_strategies =
         strategies
@@ -248,9 +250,9 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
   def calculate_contribution_breakeven(current_value, inflation_rate, growth_rate, years) do
     Logger.debug("Calculating contribution breakeven against #{inflation_rate} inflation")
 
-    with :ok <- validate_current_value(current_value),
-         :ok <- validate_growth_rate(growth_rate),
-         :ok <- validate_years(years) do
+    with :ok <- ValidationHelpers.validate_current_value(current_value),
+         :ok <- ValidationHelpers.validate_growth_rate(growth_rate),
+         :ok <- ValidationHelpers.validate_years(years) do
       real_return_rate = Decimal.sub(growth_rate, inflation_rate)
 
       # Calculate inflation-adjusted target value
@@ -258,7 +260,7 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
       inflation_adjusted_value = Decimal.mult(current_value, inflation_factor)
 
       # Find contribution needed to reach inflation-adjusted value
-      case find_required_contribution(current_value, inflation_adjusted_value, years, growth_rate) do
+      case SearchAlgorithms.find_required_contribution(current_value, inflation_adjusted_value, years, growth_rate) do
         {:ok, required_annual} ->
           required_monthly = DH.annual_to_monthly(required_annual)
 
@@ -284,9 +286,9 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
   def analyze_contribution_timing(current_value, available_amount, years, growth_rate, volatility) do
     Logger.debug("Analyzing contribution timing with #{volatility} volatility")
 
-    with :ok <- validate_current_value(current_value),
-         :ok <- validate_growth_rate(growth_rate),
-         :ok <- validate_years(years) do
+    with :ok <- ValidationHelpers.validate_current_value(current_value),
+         :ok <- ValidationHelpers.validate_growth_rate(growth_rate),
+         :ok <- ValidationHelpers.validate_years(years) do
       # Calculate lump sum scenario
       lump_sum_total = Decimal.add(current_value, available_amount)
 
@@ -338,57 +340,6 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
   end
 
   # Private helper functions
-
-  defp validate_current_value(%Decimal{} = current_value) do
-    if DH.negative?(current_value) do
-      {:error, :negative_current_value}
-    else
-      :ok
-    end
-  end
-
-  defp validate_current_value(_), do: {:error, :invalid_input}
-
-  defp validate_monthly_contribution(%Decimal{} = contribution) do
-    if DH.negative?(contribution) do
-      {:error, :negative_contribution}
-    else
-      :ok
-    end
-  end
-
-  defp validate_monthly_contribution(_), do: {:error, :invalid_input}
-
-  defp validate_years(years) when is_integer(years) and years > 0 and years <= 50, do: :ok
-  defp validate_years(_), do: {:error, :invalid_years}
-
-  defp validate_growth_rate(%Decimal{} = growth_rate) do
-    max_rate = DH.ensure_decimal("0.5")
-    min_rate = DH.ensure_decimal("-0.5")
-
-    cond do
-      Decimal.compare(growth_rate, max_rate) == :gt ->
-        {:error, :unrealistic_growth}
-
-      Decimal.compare(growth_rate, min_rate) == :lt ->
-        {:error, :unrealistic_growth}
-
-      true ->
-        :ok
-    end
-  end
-
-  defp validate_growth_rate(_), do: {:error, :invalid_input}
-
-  defp validate_target_amount(%Decimal{} = target) do
-    if DH.positive?(target) do
-      :ok
-    else
-      {:error, :invalid_target}
-    end
-  end
-
-  defp validate_target_amount(_), do: {:error, :invalid_input}
 
   defp generate_variations(base_monthly, custom_variations) do
     if custom_variations do
@@ -530,123 +481,6 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
     }
   end
 
-  defp find_required_contribution(current_value, target_amount, years, growth_rate) do
-    # Binary search for required annual contribution
-    # Start with reasonable bounds
-    min_contribution = DH.ensure_decimal("0")
-    # $100k annual max
-    max_contribution = DH.ensure_decimal("100000")
-
-    binary_search_contribution(
-      current_value,
-      target_amount,
-      years,
-      growth_rate,
-      min_contribution,
-      max_contribution,
-      # max iterations for better precision
-      30
-    )
-  end
-
-  defp binary_search_contribution(
-         current_value,
-         target_amount,
-         years,
-         growth_rate,
-         min_contrib,
-         max_contrib,
-         iterations_left
-       ) do
-    if iterations_left <= 0 do
-      {:ok, max_contrib}
-    else
-      search_iteration(
-        current_value,
-        target_amount,
-        years,
-        growth_rate,
-        min_contrib,
-        max_contrib,
-        iterations_left
-      )
-    end
-  end
-
-  # Helper function to reduce nesting depth
-  defp search_iteration(current_value, target_amount, years, growth_rate, min_contrib, max_contrib, iterations_left) do
-    mid_contrib = min_contrib |> Decimal.add(max_contrib) |> Decimal.div(DH.ensure_decimal("2"))
-
-    case ForecastCalculator.project_portfolio_growth(current_value, mid_contrib, years, growth_rate) do
-      {:ok, projected_value} ->
-        search_params = %{
-          current_value: current_value,
-          years: years,
-          growth_rate: growth_rate,
-          min_contrib: min_contrib,
-          mid_contrib: mid_contrib,
-          max_contrib: max_contrib,
-          iterations_left: iterations_left
-        }
-
-        handle_projection_result(projected_value, target_amount, search_params)
-
-      {:error, reason} ->
-        {:error, reason}
-    end
-  end
-
-  # Helper function to reduce nesting depth
-  defp handle_projection_result(projected_value, target_amount, search_params) do
-    tolerance = Decimal.mult(target_amount, DH.ensure_decimal("0.0005"))
-    difference = Decimal.abs(Decimal.sub(projected_value, target_amount))
-
-    if Decimal.compare(difference, tolerance) == :gt do
-      adjust_search_range(projected_value, target_amount, search_params)
-    else
-      {:ok, search_params.mid_contrib}
-    end
-  end
-
-  # Helper function to reduce nesting depth
-  defp adjust_search_range(projected_value, target_amount, search_params) do
-    %{
-      current_value: current_value,
-      years: years,
-      growth_rate: growth_rate,
-      min_contrib: min_contrib,
-      mid_contrib: mid_contrib,
-      max_contrib: max_contrib,
-      iterations_left: iterations_left
-    } = search_params
-
-    case Decimal.compare(projected_value, target_amount) do
-      :lt ->
-        # Need higher contribution - ensure we slightly overshoot
-        binary_search_contribution(
-          current_value,
-          target_amount,
-          years,
-          growth_rate,
-          mid_contrib,
-          max_contrib,
-          iterations_left - 1
-        )
-
-      _ ->
-        # Can use lower contribution (covers :gt and :eq)
-        binary_search_contribution(
-          current_value,
-          target_amount,
-          years,
-          growth_rate,
-          min_contrib,
-          mid_contrib,
-          iterations_left - 1
-        )
-    end
-  end
-
   defp build_confidence_analysis(current_value, annual_contribution, target_amount, years) do
     scenarios = [
       {:pessimistic, DH.ensure_decimal("0.05")},
@@ -738,10 +572,10 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
 
     # Find years needed with reasonable contribution
     years_needed =
-      find_years_for_contribution(
+      SearchAlgorithms.find_years_for_contribution(
         current_value,
-        target_amount,
         max_reasonable_annual,
+        target_amount,
         growth_rate
       )
 
@@ -772,61 +606,6 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
     end
   end
 
-  defp find_years_for_contribution(current_value, target_amount, annual_contribution, growth_rate) do
-    # Simple iteration to find required years
-    find_required_years(current_value, annual_contribution, target_amount, growth_rate, 1, 50)
-  end
-
-  defp find_required_years(current_value, annual_contribution, target_amount, growth_rate, min_years, max_years) do
-    if max_years - min_years <= 1 do
-      max_years
-    else
-      search_required_years(current_value, annual_contribution, target_amount, growth_rate, min_years, max_years)
-    end
-  end
-
-  # Helper function to reduce nesting depth
-  defp search_required_years(current_value, annual_contribution, target_amount, growth_rate, min_years, max_years) do
-    mid_years = div(min_years + max_years, 2)
-
-    case ForecastCalculator.project_portfolio_growth(current_value, annual_contribution, mid_years, growth_rate) do
-      {:ok, projected_value} ->
-        adjust_years_search(
-          projected_value,
-          target_amount,
-          current_value,
-          annual_contribution,
-          growth_rate,
-          min_years,
-          mid_years,
-          max_years
-        )
-
-      {:error, _reason} ->
-        max_years
-    end
-  end
-
-  # Helper function to reduce nesting depth
-  defp adjust_years_search(
-         projected_value,
-         target_amount,
-         current_value,
-         annual_contribution,
-         growth_rate,
-         min_years,
-         mid_years,
-         max_years
-       ) do
-    if Decimal.compare(projected_value, target_amount) == :lt do
-      # Need more years
-      find_required_years(current_value, annual_contribution, target_amount, growth_rate, mid_years, max_years)
-    else
-      # Can achieve in fewer years
-      find_required_years(current_value, annual_contribution, target_amount, growth_rate, min_years, mid_years)
-    end
-  end
-
   # Additional helper functions for new functionality
 
   defp analyze_single_strategy(strategy, current_value, target_amount, years, growth_rate) do
@@ -847,23 +626,15 @@ defmodule Ashfolio.FinancialManagement.ContributionAnalyzer do
         # Calculate years to goal
         years_to_goal =
           if goal_achieved do
-            find_required_years(
+            SearchAlgorithms.find_years_for_contribution(
               current_value,
               annual_contribution,
               target_amount,
-              growth_rate,
-              1,
-              years
+              growth_rate
             )
           else
-            find_required_years(
-              current_value,
-              annual_contribution,
-              target_amount,
-              growth_rate,
-              years,
-              50
-            )
+            # For unachieved goals, use reasonable upper bound
+            50
           end
 
         # Calculate efficiency metrics
