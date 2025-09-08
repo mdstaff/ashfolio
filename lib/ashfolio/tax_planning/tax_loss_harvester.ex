@@ -244,7 +244,7 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvester do
 
       {:error, reason} ->
         {:error, reason}
-        
+
       [] ->
         {:ok, []}
     end
@@ -353,7 +353,7 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvester do
     # Real implementation would use asset class, sector, or correlation data
     # symbol_data is a list, take the first element
     symbol_record = List.first(symbol_data)
-    
+
     similar_assets =
       case symbol_record.symbol do
         "AAPL" -> ["MSFT", "GOOGL", "VTI", "QQQ"]

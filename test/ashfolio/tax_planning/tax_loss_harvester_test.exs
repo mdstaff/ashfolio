@@ -1,8 +1,8 @@
 defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
   use Ashfolio.DataCase, async: false
 
-  alias Ashfolio.TaxPlanning.TaxLossHarvester
   alias Ashfolio.SQLiteHelpers
+  alias Ashfolio.TaxPlanning.TaxLossHarvester
 
   @moduletag :ash_resources
   @moduletag :unit
@@ -11,11 +11,12 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
 
   describe "identify_opportunities/3" do
     setup do
-      account = SQLiteHelpers.get_or_create_account(%{
-        name: "Tax Loss Test Account",
-        platform: "Test Platform"
-      })
-      
+      account =
+        SQLiteHelpers.get_or_create_account(%{
+          name: "Tax Loss Test Account",
+          platform: "Test Platform"
+        })
+
       %{account: account}
     end
 
@@ -51,17 +52,17 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
       transaction_date = Date.utc_today()
 
       assert {:ok, compliance} =
-        TaxLossHarvester.check_wash_sale_compliance(
-          sell_symbol,
-          buy_symbol,
-          transaction_date
-        )
+               TaxLossHarvester.check_wash_sale_compliance(
+                 sell_symbol,
+                 buy_symbol,
+                 transaction_date
+               )
 
       assert Map.has_key?(compliance, :is_compliant)
       assert Map.has_key?(compliance, :risk_factors)
       assert Map.has_key?(compliance, :safe_date)
       assert Map.has_key?(compliance, :similarity_assessment)
-      
+
       assert is_boolean(compliance.is_compliant)
       assert is_list(compliance.risk_factors)
       assert %Date{} = compliance.safe_date
@@ -74,11 +75,12 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvesterTest do
         "stocks" => Decimal.new("70.0"),
         "bonds" => Decimal.new("30.0")
       }
+
       tax_rate = Decimal.new("0.22")
 
       # Returns error because identify_opportunities returns :no_positions
       assert {:error, :no_positions} =
-        TaxLossHarvester.optimize_harvest_strategy(portfolio_targets, tax_rate)
+               TaxLossHarvester.optimize_harvest_strategy(portfolio_targets, tax_rate)
     end
   end
 end

@@ -3,8 +3,8 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculatorTest do
 
   alias Ashfolio.Portfolio.Symbol
   alias Ashfolio.Portfolio.Transaction
-  alias Ashfolio.TaxPlanning.CapitalGainsCalculator
   alias Ashfolio.SQLiteHelpers
+  alias Ashfolio.TaxPlanning.CapitalGainsCalculator
 
   @moduletag :ash_resources
   @moduletag :unit
@@ -13,13 +13,14 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculatorTest do
 
   describe "calculate_realized_gains/3" do
     setup do
-      account = SQLiteHelpers.get_or_create_account(%{
-        name: "Tax Test Account",
-        platform: "Test Platform"
-      })
-      
+      account =
+        SQLiteHelpers.get_or_create_account(%{
+          name: "Tax Test Account",
+          platform: "Test Platform"
+        })
+
       symbol = SQLiteHelpers.get_common_symbol("AAPL")
-      
+
       %{account: account, symbol: symbol}
     end
 
@@ -27,28 +28,30 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculatorTest do
       tax_year = 2024
 
       # Create buy transaction
-      {:ok, _buy_txn} = Transaction.create(%{
-        type: :buy,
-        symbol_id: symbol.id,
-        account_id: account.id,
-        date: ~D[2024-01-15],
-        quantity: Decimal.new("100"),
-        price: Decimal.new("150.00"),
-        total_amount: Decimal.new("15000.00"),
-        fee: Decimal.new("0")
-      })
+      {:ok, _buy_txn} =
+        Transaction.create(%{
+          type: :buy,
+          symbol_id: symbol.id,
+          account_id: account.id,
+          date: ~D[2024-01-15],
+          quantity: Decimal.new("100"),
+          price: Decimal.new("150.00"),
+          total_amount: Decimal.new("15000.00"),
+          fee: Decimal.new("0")
+        })
 
       # Create sell transaction
-      {:ok, _sell_txn} = Transaction.create(%{
-        type: :sell,
-        symbol_id: symbol.id,
-        account_id: account.id,
-        date: ~D[2024-06-15],
-        quantity: Decimal.new("-50"),
-        price: Decimal.new("160.00"),
-        total_amount: Decimal.new("8000.00"),
-        fee: Decimal.new("0")
-      })
+      {:ok, _sell_txn} =
+        Transaction.create(%{
+          type: :sell,
+          symbol_id: symbol.id,
+          account_id: account.id,
+          date: ~D[2024-06-15],
+          quantity: Decimal.new("-50"),
+          price: Decimal.new("160.00"),
+          total_amount: Decimal.new("8000.00"),
+          fee: Decimal.new("0")
+        })
 
       assert {:ok, analysis} = CapitalGainsCalculator.calculate_realized_gains(symbol.id, tax_year)
 
@@ -66,47 +69,51 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculatorTest do
       tax_year = 2024
 
       # Create a separate symbol for this test
-      {:ok, msft_symbol} = Symbol.create(%{
-        symbol: "MSFT",
-        name: "Microsoft Corp.",
-        asset_class: :stock,
-        data_source: :manual,
-        currency: "USD"
-      })
+      {:ok, msft_symbol} =
+        Symbol.create(%{
+          symbol: "MSFT",
+          name: "Microsoft Corp.",
+          asset_class: :stock,
+          data_source: :manual,
+          currency: "USD"
+        })
 
       # Create two buy transactions
-      {:ok, _buy1} = Transaction.create(%{
-        type: :buy,
-        symbol_id: msft_symbol.id,
-        account_id: account.id,
-        date: ~D[2023-01-15],
-        quantity: Decimal.new("100"),
-        price: Decimal.new("200.00"),
-        total_amount: Decimal.new("20000.00"),
-        fee: Decimal.new("0")
-      })
+      {:ok, _buy1} =
+        Transaction.create(%{
+          type: :buy,
+          symbol_id: msft_symbol.id,
+          account_id: account.id,
+          date: ~D[2023-01-15],
+          quantity: Decimal.new("100"),
+          price: Decimal.new("200.00"),
+          total_amount: Decimal.new("20000.00"),
+          fee: Decimal.new("0")
+        })
 
-      {:ok, _buy2} = Transaction.create(%{
-        type: :buy,
-        symbol_id: msft_symbol.id,
-        account_id: account.id,
-        date: ~D[2023-06-15],
-        quantity: Decimal.new("100"),
-        price: Decimal.new("250.00"),
-        total_amount: Decimal.new("25000.00"),
-        fee: Decimal.new("0")
-      })
+      {:ok, _buy2} =
+        Transaction.create(%{
+          type: :buy,
+          symbol_id: msft_symbol.id,
+          account_id: account.id,
+          date: ~D[2023-06-15],
+          quantity: Decimal.new("100"),
+          price: Decimal.new("250.00"),
+          total_amount: Decimal.new("25000.00"),
+          fee: Decimal.new("0")
+        })
 
-      {:ok, _sell1} = Transaction.create(%{
-        type: :sell,
-        symbol_id: msft_symbol.id,
-        account_id: account.id,
-        date: ~D[2024-03-15],
-        quantity: Decimal.new("-150"),
-        price: Decimal.new("280.00"),
-        total_amount: Decimal.new("42000.00"),
-        fee: Decimal.new("0")
-      })
+      {:ok, _sell1} =
+        Transaction.create(%{
+          type: :sell,
+          symbol_id: msft_symbol.id,
+          account_id: account.id,
+          date: ~D[2024-03-15],
+          quantity: Decimal.new("-150"),
+          price: Decimal.new("280.00"),
+          total_amount: Decimal.new("42000.00"),
+          fee: Decimal.new("0")
+        })
 
       assert {:ok, analysis} = CapitalGainsCalculator.calculate_realized_gains(msft_symbol.id, tax_year)
 
@@ -123,49 +130,53 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculatorTest do
       tax_year = 2024
 
       # Create Tesla symbol
-      {:ok, tsla_symbol} = Symbol.create(%{
-        symbol: "TSLA",
-        name: "Tesla Inc.",
-        asset_class: :stock,
-        data_source: :manual,
-        currency: "USD"
-      })
+      {:ok, tsla_symbol} =
+        Symbol.create(%{
+          symbol: "TSLA",
+          name: "Tesla Inc.",
+          asset_class: :stock,
+          data_source: :manual,
+          currency: "USD"
+        })
 
       # Create long-term position (> 1 year)
-      {:ok, _buy1} = Transaction.create(%{
-        type: :buy,
-        symbol_id: tsla_symbol.id,
-        account_id: account.id,
-        date: ~D[2022-01-15],
-        quantity: Decimal.new("50"),
-        price: Decimal.new("800.00"),
-        total_amount: Decimal.new("40000.00"),
-        fee: Decimal.new("0")
-      })
+      {:ok, _buy1} =
+        Transaction.create(%{
+          type: :buy,
+          symbol_id: tsla_symbol.id,
+          account_id: account.id,
+          date: ~D[2022-01-15],
+          quantity: Decimal.new("50"),
+          price: Decimal.new("800.00"),
+          total_amount: Decimal.new("40000.00"),
+          fee: Decimal.new("0")
+        })
 
       # Create short-term position (< 1 year)
-      {:ok, _buy2} = Transaction.create(%{
-        type: :buy,
-        symbol_id: tsla_symbol.id,
-        account_id: account.id,
-        date: ~D[2024-01-15],
-        quantity: Decimal.new("50"),
-        price: Decimal.new("900.00"),
-        total_amount: Decimal.new("45000.00"),
-        fee: Decimal.new("0")
-      })
+      {:ok, _buy2} =
+        Transaction.create(%{
+          type: :buy,
+          symbol_id: tsla_symbol.id,
+          account_id: account.id,
+          date: ~D[2024-01-15],
+          quantity: Decimal.new("50"),
+          price: Decimal.new("900.00"),
+          total_amount: Decimal.new("45000.00"),
+          fee: Decimal.new("0")
+        })
 
       # Sell using FIFO (long-term first)
-      {:ok, _sell1} = Transaction.create(%{
-        type: :sell,
-        symbol_id: tsla_symbol.id,
-        account_id: account.id,
-        date: ~D[2024-03-15],
-        quantity: Decimal.new("-75"),
-        price: Decimal.new("850.00"),
-        total_amount: Decimal.new("63750.00"),
-        fee: Decimal.new("0")
-      })
+      {:ok, _sell1} =
+        Transaction.create(%{
+          type: :sell,
+          symbol_id: tsla_symbol.id,
+          account_id: account.id,
+          date: ~D[2024-03-15],
+          quantity: Decimal.new("-75"),
+          price: Decimal.new("850.00"),
+          total_amount: Decimal.new("63750.00"),
+          fee: Decimal.new("0")
+        })
 
       assert {:ok, analysis} = CapitalGainsCalculator.calculate_realized_gains(tsla_symbol.id, tax_year)
 
@@ -178,37 +189,40 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculatorTest do
       tax_year = 2024
 
       # Create symbol for loss test
-      {:ok, loss_symbol} = Symbol.create(%{
-        symbol: "LOSS",
-        name: "Loss Stock",
-        asset_class: :stock,
-        data_source: :manual,
-        currency: "USD"
-      })
+      {:ok, loss_symbol} =
+        Symbol.create(%{
+          symbol: "LOSS",
+          name: "Loss Stock",
+          asset_class: :stock,
+          data_source: :manual,
+          currency: "USD"
+        })
 
       # Create buy transaction
-      {:ok, _buy1} = Transaction.create(%{
-        type: :buy,
-        symbol_id: loss_symbol.id,
-        account_id: account.id,
-        date: ~D[2023-01-15],
-        quantity: Decimal.new("100"),
-        price: Decimal.new("100.00"),
-        total_amount: Decimal.new("10000.00"),
-        fee: Decimal.new("0")
-      })
+      {:ok, _buy1} =
+        Transaction.create(%{
+          type: :buy,
+          symbol_id: loss_symbol.id,
+          account_id: account.id,
+          date: ~D[2023-01-15],
+          quantity: Decimal.new("100"),
+          price: Decimal.new("100.00"),
+          total_amount: Decimal.new("10000.00"),
+          fee: Decimal.new("0")
+        })
 
       # Create loss sell transaction
-      {:ok, _sell1} = Transaction.create(%{
-        type: :sell,
-        symbol_id: loss_symbol.id,
-        account_id: account.id,
-        date: ~D[2024-06-15],
-        quantity: Decimal.new("-100"),
-        price: Decimal.new("80.00"),
-        total_amount: Decimal.new("8000.00"),
-        fee: Decimal.new("0")
-      })
+      {:ok, _sell1} =
+        Transaction.create(%{
+          type: :sell,
+          symbol_id: loss_symbol.id,
+          account_id: account.id,
+          date: ~D[2024-06-15],
+          quantity: Decimal.new("-100"),
+          price: Decimal.new("80.00"),
+          total_amount: Decimal.new("8000.00"),
+          fee: Decimal.new("0")
+        })
 
       assert {:ok, analysis} = CapitalGainsCalculator.calculate_realized_gains(loss_symbol.id, tax_year)
 
@@ -229,49 +243,53 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculatorTest do
       tax_year = 2023
 
       # Create symbol for year filter test
-      {:ok, year_symbol} = Symbol.create(%{
-        symbol: "YEAR",
-        name: "Year Filter Test",
-        asset_class: :stock,
-        data_source: :manual,
-        currency: "USD"
-      })
+      {:ok, year_symbol} =
+        Symbol.create(%{
+          symbol: "YEAR",
+          name: "Year Filter Test",
+          asset_class: :stock,
+          data_source: :manual,
+          currency: "USD"
+        })
 
       # Create buy transaction in 2022
-      {:ok, _buy1} = Transaction.create(%{
-        type: :buy,
-        symbol_id: year_symbol.id,
-        account_id: account.id,
-        date: ~D[2022-01-15],
-        quantity: Decimal.new("100"),
-        price: Decimal.new("100.00"),
-        total_amount: Decimal.new("10000.00"),
-        fee: Decimal.new("0")
-      })
+      {:ok, _buy1} =
+        Transaction.create(%{
+          type: :buy,
+          symbol_id: year_symbol.id,
+          account_id: account.id,
+          date: ~D[2022-01-15],
+          quantity: Decimal.new("100"),
+          price: Decimal.new("100.00"),
+          total_amount: Decimal.new("10000.00"),
+          fee: Decimal.new("0")
+        })
 
       # Create sell transaction in 2023 (should be included)
-      {:ok, _sell1} = Transaction.create(%{
-        type: :sell,
-        symbol_id: year_symbol.id,
-        account_id: account.id,
-        date: ~D[2023-06-15],
-        quantity: Decimal.new("-50"),
-        price: Decimal.new("120.00"),
-        total_amount: Decimal.new("6000.00"),
-        fee: Decimal.new("0")
-      })
+      {:ok, _sell1} =
+        Transaction.create(%{
+          type: :sell,
+          symbol_id: year_symbol.id,
+          account_id: account.id,
+          date: ~D[2023-06-15],
+          quantity: Decimal.new("-50"),
+          price: Decimal.new("120.00"),
+          total_amount: Decimal.new("6000.00"),
+          fee: Decimal.new("0")
+        })
 
       # Create sell transaction in 2024 (should be excluded)
-      {:ok, _sell2} = Transaction.create(%{
-        type: :sell,
-        symbol_id: year_symbol.id,
-        account_id: account.id,
-        date: ~D[2024-06-15],
-        quantity: Decimal.new("-50"),
-        price: Decimal.new("130.00"),
-        total_amount: Decimal.new("6500.00"),
-        fee: Decimal.new("0")
-      })
+      {:ok, _sell2} =
+        Transaction.create(%{
+          type: :sell,
+          symbol_id: year_symbol.id,
+          account_id: account.id,
+          date: ~D[2024-06-15],
+          quantity: Decimal.new("-50"),
+          price: Decimal.new("130.00"),
+          total_amount: Decimal.new("6500.00"),
+          fee: Decimal.new("0")
+        })
 
       assert {:ok, analysis} = CapitalGainsCalculator.calculate_realized_gains(year_symbol.id, tax_year)
 

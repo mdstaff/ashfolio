@@ -330,16 +330,14 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculator do
     # Calculate gains by summing up the realized_gain_loss from each sale
     # and categorizing by holding period
     {short_term, long_term} =
-      processed_sales
-      |> Enum.reduce({Decimal.new("0"), Decimal.new("0")}, fn sale, {st_acc, lt_acc} ->
+      Enum.reduce(processed_sales, {Decimal.new("0"), Decimal.new("0")}, fn sale, {st_acc, lt_acc} ->
         # Categorize each allocated lot's proportional gain
-        sale.allocated_lots
-        |> Enum.reduce({st_acc, lt_acc}, fn lot, {st, lt} ->
-          # Calculate this lot's proportional share of the total sale gain
+        Enum.reduce(sale.allocated_lots, {st_acc, lt_acc}, fn lot, {st, lt} ->
           total_qty_sold = Enum.reduce(sale.allocated_lots, Decimal.new("0"), &Decimal.add(&2, &1.quantity_allocated))
+          # Calculate this lot's proportional share of the total sale gain
           lot_proportion = Decimal.div(lot.quantity_allocated, total_qty_sold)
           lot_gain = Decimal.mult(sale.realized_gain_loss, lot_proportion)
-          
+
           if lot.holding_period.classification == :short_term do
             {Decimal.add(st, lot_gain), lt}
           else
@@ -360,7 +358,6 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculator do
       transactions_processed: length(processed_sales)
     }
   end
-
 
   defp tax_year_matches?(transaction, tax_year) do
     transaction.date.year == tax_year
@@ -392,7 +389,7 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculator do
 
       {:error, reason} ->
         {:error, reason}
-      
+
       [] ->
         {:ok, []}
     end
