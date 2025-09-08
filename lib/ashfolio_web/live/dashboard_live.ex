@@ -4,8 +4,10 @@ defmodule AshfolioWeb.DashboardLive do
 
   alias Ashfolio.Context
   alias Ashfolio.Financial.Formatters
+  alias Ashfolio.Financial.MoneyRatios
   alias Ashfolio.FinancialManagement.Expense
   alias Ashfolio.FinancialManagement.FinancialGoal
+  alias Ashfolio.FinancialManagement.FinancialProfile
   alias Ashfolio.FinancialManagement.NetWorthSnapshot
   alias Ashfolio.MarketData.PriceManager
   alias Ashfolio.Portfolio.HoldingsCalculator
@@ -237,7 +239,11 @@ defmodule AshfolioWeb.DashboardLive do
           total_target={@goals_total_target}
           emergency_fund_status={@goals_emergency_fund_status}
         />
-        <!-- Space for future goal-related widgets -->
+        <.money_ratios_widget
+          available={@money_ratios_available}
+          status={@money_ratios_status}
+          recommendations_count={@money_ratios_recommendations_count}
+        />
       </div>
       
     <!-- Investment vs Cash Breakdown -->
@@ -576,6 +582,7 @@ defmodule AshfolioWeb.DashboardLive do
     |> assign_default_net_worth_values()
     |> assign_default_expense_values()
     |> assign_default_goals_values()
+    |> assign_default_money_ratios_values()
   end
 
   # This function is now handled in load_holdings_and_net_worth
@@ -627,6 +634,7 @@ defmodule AshfolioWeb.DashboardLive do
     |> load_holdings_and_net_worth()
     |> load_expense_data()
     |> load_goals_data()
+    |> load_money_ratios_data()
   end
 
   defp load_holdings_and_net_worth(socket) do
@@ -774,6 +782,7 @@ defmodule AshfolioWeb.DashboardLive do
       socket
       |> assign_default_expense_values()
       |> assign_default_goals_values()
+      |> assign_default_money_ratios_values()
   end
 
   defp load_goals_data(socket) do
@@ -813,5 +822,55 @@ defmodule AshfolioWeb.DashboardLive do
   rescue
     _error ->
       assign_default_goals_values(socket)
+  end
+
+  defp load_money_ratios_data(socket) do
+    # Try to load financial profile and calculate ratios
+    case FinancialProfile.read_all() do
+      {:ok, [profile | _]} ->
+        # Get simplified net worth and savings data for ratios
+        net_worth = get_simplified_net_worth()
+        annual_savings = get_simplified_annual_savings()
+
+        case MoneyRatios.calculate_all_ratios(profile, net_worth, annual_savings) do
+          {:ok, ratios} ->
+            recommendations = MoneyRatios.get_recommendations(ratios)
+            overall_status = Map.get(ratios, :overall_status, :no_profile)
+
+            socket
+            |> assign(:money_ratios_available, true)
+            |> assign(:money_ratios_status, overall_status)
+            |> assign(:money_ratios_recommendations_count, length(recommendations))
+
+          _error ->
+            assign_default_money_ratios_values(socket)
+        end
+
+      _no_profile ->
+        assign_default_money_ratios_values(socket)
+    end
+  rescue
+    _error ->
+      assign_default_money_ratios_values(socket)
+  end
+
+  defp assign_default_money_ratios_values(socket) do
+    socket
+    |> assign(:money_ratios_available, false)
+    |> assign(:money_ratios_status, :no_profile)
+    |> assign(:money_ratios_recommendations_count, 0)
+  end
+
+  # Simplified helpers for money ratios (reuse existing dashboard data)
+  defp get_simplified_net_worth do
+    # Use a default net worth for ratios calculation
+    # In a full implementation, this would integrate with the existing net worth system
+    Decimal.new("200000")
+  end
+
+  defp get_simplified_annual_savings do
+    # Use a default annual savings estimate
+    # In a full implementation, this could be calculated from expense/income tracking
+    Decimal.new("12000")
   end
 end

@@ -38,6 +38,7 @@ defmodule AshfolioWeb.Router do
     live "/forecast", ForecastLive.Index, :index
     live "/retirement", RetirementLive.Index, :index
     live "/advanced_analytics", AdvancedAnalyticsLive.Index, :index
+    live "/money-ratios", MoneyRatiosLive.Index, :index
   end
 
   # Health check endpoints - accessible without authentication

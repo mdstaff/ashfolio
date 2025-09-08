@@ -370,7 +370,7 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculator do
   end
 
   defp get_account_holdings(_account_id) do
-    # For MVP, return stub data to test the structure  
+    # For MVP, return stub data to test the structure
     # Real implementation would get holdings for specific account
     {:ok, []}
   end
