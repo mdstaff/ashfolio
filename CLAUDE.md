@@ -246,6 +246,44 @@ The following patterns are also valid and commonly used:
    <div {@rest}>
    ```
 
+## Financial Domain Rules
+
+### MANDATORY: Financial Calculation Standards
+
+- **Decimal Type Required**: ALL monetary values MUST use Decimal type, never Float
+- **Percentage Clarity**: Display percentages as "7%" not "0.07" in UI, document calculation basis
+- **FIFO Consistency**: Maintain FIFO cost basis across all tax calculations
+- **Formula Documentation**: Every financial formula MUST include:
+  - Industry standard reference (e.g., "Charles Farrell 25x rule")
+  - Mathematical formula in comment
+  - Edge case handling (negative values, zeros, infinity)
+
+### Financial Accuracy Checklist
+
+Before implementing ANY financial calculation:
+- [ ] Verify formula against industry standard source
+- [ ] Test with known financial scenarios (2008 crash, 1999 boom)
+- [ ] Validate tax implications with sample IRS calculations
+- [ ] Ensure Decimal precision throughout calculation chain
+- [ ] Document assumptions and limitations
+
+### Performance Standards for Financial Software
+
+#### Required Performance Benchmarks
+- Portfolio Calculations: <100ms for 1,000+ positions
+- Dashboard Refresh: <500ms with real-time data
+- Tax Calculations: <2s for full annual processing
+- Historical Analysis: <1s for 10-year lookback
+- CSV Import: <5s for 10,000 transactions
+
+#### Performance Testing Protocol
+```bash
+# Run before ANY financial feature merge
+just test perf          # Must pass all performance tests
+just perf-profile      # Generate performance profile (if exists)
+just perf-benchmark    # Compare against baseline (if exists)
+```
+
 ## Quality Gates
 
 ### Definition of Done
@@ -254,6 +292,8 @@ The following patterns are also valid and commonly used:
 - [ ] Code follows project conventions
 - [ ] HEEx templates compile without warnings
 - [ ] All template variables accessed via @assigns
+- [ ] Financial calculations use Decimal type exclusively
+- [ ] Performance benchmarks met for financial operations
 - [ ] No linter/formatter warnings
 - [ ] Documentation follows style guide (see docs/development/documentation-style-guide.md)
 - [ ] Commit messages are clear
@@ -268,6 +308,34 @@ The following patterns are also valid and commonly used:
 - Use existing test utilities/helpers
 - Tests should be deterministic
 - Follow testing strategy and organization (see docs/TESTING_STRATEGY.md)
+
+### Financial Testing Standards
+
+#### Test Coverage Requirements by Module Type
+- **Calculators**: 100% branch coverage + edge cases
+- **Tax Modules**: IRS example calculations + edge cases
+- **Portfolio Analytics**: Historical scenario testing required
+- **LiveView Financial**: User interaction + real-time updates
+
+#### Financial Test Data Requirements
+```elixir
+# ALWAYS include these test scenarios for financial features
+test "handles market crash scenario" do
+  # Test with 50% portfolio decline
+end
+
+test "handles negative interest rates" do
+  # European negative rate scenario
+end
+
+test "handles high inflation period" do
+  # 1970s-style inflation scenario
+end
+
+test "handles zero/nil values gracefully" do
+  # Ensure no division by zero or nil errors
+end
+```
 
 ## Important Reminders
 
@@ -351,13 +419,50 @@ This codebase uses:
 - Standard Phoenix components in `core_components.ex`
 - PubSub for real-time updates
 
-## Current Focus: v0.3.1
+## Current Focus: v0.5.0 - Financial Excellence
 
-Building frontend dashboard widgets with:
+Maintaining and enhancing comprehensive financial platform with:
 
-- Expense tracking integration
-- Net worth visualization
-- Manual snapshot functionality
-- Contex chart components
+- Money Ratios assessment (Charles Farrell methodology)
+- Tax planning and optimization
+- Retirement planning (25x rule, 4% withdrawal)
+- Expense analytics and tracking
+- Portfolio performance (TWR/MWR calculations)
+
+### Financial Module Patterns
+
+When working with financial modules:
+```elixir
+# ALWAYS follow this pattern for new calculators
+defmodule Ashfolio.FinancialManagement.Calculators.NewCalculator do
+  @moduledoc """
+  Implements [Industry Standard Name] calculation.
+  Reference: [Citation or URL]
+  
+  ## Formula
+  
+      result = principal * (1 + rate)^time
+  
+  ## Edge Cases
+  - Handles negative returns
+  - Handles zero values
+  - Returns {:error, reason} for invalid inputs
+  """
+  
+  alias Decimal, as: D
+  
+  @doc """
+  Calculates [what it does].
+  
+  ## Examples
+  
+      iex> calculate(D.new("1000"), D.new("0.07"), 10)
+      {:ok, #Decimal<1967.15>}
+  """
+  def calculate(principal, rate, time) when is_struct(principal, Decimal) do
+    # Implementation with Decimal precision
+  end
+end
+```
 
 Always check the Code GPS for latest component patterns and integration points.
