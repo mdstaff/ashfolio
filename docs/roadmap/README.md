@@ -4,13 +4,27 @@ This directory contains Ashfolio's strategic planning and architectural decision
 
 ## Current Documents
 
-### [v0.2-v0.5 Roadmap](v0.2-v0.5-roadmap.md)
+### Active Development
 
-Active roadmap for near-term feature development, organized by version with clear priorities and architectural alignment.
+- **[Financial Expansion Roadmap](financial-expansion-roadmap.md)** - Future feature planning for v0.6.0 and beyond
+- **[UI/UX Improvements](ui-ux-improvements.md)** - Ongoing user interface enhancements
+- **[QA Automation Roadmap](qa-automation-roadmap.md)** - Testing and quality assurance improvements
 
 ### [Architectural Decision Record](../architecture/adr-001-local-first-architecture.md)
 
 Professional ADR documenting our commitment to local-first, single-user SQLite architecture with complete rationale, alternatives considered, and consequences.
+
+## Completed Versions Archive
+
+### [v0.1.0 - v0.5.0 Consolidated Archive](../archive/v0.1-v0.5-consolidated-archive.md)
+
+Complete development history from inception through v0.5.0, documenting the evolution from basic portfolio tracker to comprehensive financial management platform with 1,680+ tests.
+
+**Archived Specifications:**
+- [v0.2-v0.5 Roadmap](../archive/v0.2-v0.5-roadmap.md) - Original roadmap (completed)
+- [v0.5.0 Specification](../archive/v0.5.0-specification.md) - Final v0.5 planning document
+- [v0.4.x Specification](../archive/v0.4.x-specification.md) - Financial planning features
+- [v0.3.x Specifications](../archive/) - Analytics and expense tracking
 
 ## Archive
 
@@ -60,18 +74,23 @@ Each roadmap feature requires:
 - Dependencies and prerequisites
 - Success criteria
 
-## Current Focus: v0.5.0
+## Current Status: v0.5.0 Complete ✅
 
-Active development phase focused on consolidating and refining existing features for production stability.
+**v0.5.0 has been successfully completed**, delivering a comprehensive financial management platform with:
+- 1,680+ comprehensive tests passing
+- Money Ratios assessment system (Charles Farrell methodology)
+- Advanced tax planning with FIFO calculations
+- Complete retirement planning features
+- Production-ready performance (<100ms portfolio calculations)
 
-Following the successful completion of v0.4.x (AER standardization, financial calculations, and test improvements), v0.5.0 emphasizes:
+## Next Phase: v0.6.0 Planning
 
-1. Production readiness improvements
-2. User experience refinements
-3. Performance optimizations
-4. Documentation completion
+The next development phase will focus on advanced portfolio management and optimization features. See the [Financial Expansion Roadmap](financial-expansion-roadmap.md) for detailed planning of:
 
-Target completion aligns with ongoing development priorities and architectural stability goals.
+1. Advanced portfolio optimization
+2. Risk analysis and management
+3. Alternative investment tracking
+4. Enhanced reporting capabilities
 
 ## Contributing to Roadmap
 
