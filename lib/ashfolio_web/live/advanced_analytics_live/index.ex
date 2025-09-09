@@ -211,18 +211,8 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   end
 
   defp perform_twr_calculation(socket, cache_key) do
-    case get_portfolio_transactions_for_twr() do
-      {:ok, transactions} ->
-        process_twr_result(socket, transactions, cache_key)
-
-      {:error, reason} ->
-        Logger.warning("Failed to get portfolio transactions: #{inspect(reason)}")
-
-        socket
-        |> assign(:twr_result, nil)
-        |> assign(:error_message, "Failed to retrieve portfolio data")
-        |> put_flash(:error, "Unable to load portfolio data for TWR calculation")
-    end
+    {:ok, transactions} = get_portfolio_transactions_for_twr()
+    process_twr_result(socket, transactions, cache_key)
   end
 
   defp process_twr_result(socket, transactions, cache_key) do
@@ -261,18 +251,8 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   end
 
   defp perform_mwr_calculation(socket, cache_key) do
-    case get_portfolio_cash_flows_for_mwr() do
-      {:ok, cash_flows} ->
-        process_mwr_result(socket, cash_flows, cache_key)
-
-      {:error, reason} ->
-        Logger.warning("Failed to get portfolio cash flows: #{inspect(reason)}")
-
-        socket
-        |> assign(:mwr_result, nil)
-        |> assign(:error_message, "Failed to retrieve cash flow data")
-        |> put_flash(:error, "Unable to load cash flow data for MWR calculation")
-    end
+    {:ok, cash_flows} = get_portfolio_cash_flows_for_mwr()
+    process_mwr_result(socket, cash_flows, cache_key)
   end
 
   defp process_mwr_result(socket, cash_flows, cache_key) do

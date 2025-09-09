@@ -17,7 +17,7 @@ defmodule AshfolioWeb.MoneyRatiosLive.IndexTest do
 
     @tag :liveview
     test "displays create profile form when no profile exists", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/money-ratios")
+      {:ok, _mview, html} = live(conn, "/money-ratios")
 
       assert html =~ "Create Financial Profile"
       assert html =~ "Gross Annual Income"

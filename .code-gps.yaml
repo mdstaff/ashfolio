@@ -45,8 +45,8 @@ Unknown:
   missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
 
 # === KEY COMPONENTS ===
-icon: lib/ashfolio_web/components/core_components.ex:599 (105x)
-flash: lib/ashfolio_web/components/core_components.ex:111 (98x)
+icon: lib/ashfolio_web/components/core_components.ex:599 (107x)
+flash: lib/ashfolio_web/components/core_components.ex:111 (100x)
 input: lib/ashfolio_web/components/core_components.ex:295 (83x)
 input: lib/ashfolio_web/components/core_components.ex:306 (83x)
 input: lib/ashfolio_web/components/core_components.ex:332 (83x)
@@ -77,9 +77,9 @@ telemetry_metrics: ❌ (0)
 telemetry_poller: ❌ (0)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio/financial/money_ratios.ex", "lib/ashfolio/financial/money_ratios/benchmarks.ex", "lib/ashfolio/financial_management.ex", "lib/ashfolio/financial_management/financial_profile.ex", "lib/ashfolio/tax_planning/capital_gains_calculator.ex"]
-uncommitted: 10 files
-commits_ahead: 21
+recent: ["lib/ashfolio_web/components/top_bar.ex", "lib/ashfolio_web/live/advanced_analytics_live/index.ex", "lib/ashfolio_web/live/expense_live/analytics.ex", "lib/ashfolio_web/live/financial_goal_live/index.ex", "lib/ashfolio_web/live/money_ratios_live/form_component.ex"]
+uncommitted: 4 files
+commits_ahead: 23
 
 # === TEST ANALYSIS ===
 summary:

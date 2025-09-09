@@ -15,6 +15,7 @@ defmodule AshfolioWeb.TaxPlanningLive.Index do
   def mount(_params, _session, socket) do
     socket =
       socket
+      |> assign_current_page(:tax_planning)
       |> assign(:page_title, "Tax Planning & Optimization")
       |> assign(:loading, false)
       |> assign(:errors, [])
@@ -954,8 +955,7 @@ defmodule AshfolioWeb.TaxPlanningLive.Index do
     # Process results
     results =
       task_results
-      |> Map.new()
-      |> Enum.reduce(%{}, fn {key, result}, acc ->
+      |> Enum.reduce(%{}, fn {:ok, {key, result}}, acc ->
         case result do
           {:ok, data} -> Map.put(acc, key, data)
           {:error, error} -> Map.put(acc, :errors, [error | Map.get(acc, :errors, [])])
@@ -977,7 +977,7 @@ defmodule AshfolioWeb.TaxPlanningLive.Index do
   # Private helper functions
 
   defp load_accounts(socket) do
-    case Account.list() do
+    case Account.list_all_accounts() do
       {:ok, accounts} ->
         active_accounts = Enum.filter(accounts, &(not &1.is_excluded))
         assign(socket, :accounts, active_accounts)
