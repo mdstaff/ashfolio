@@ -5,7 +5,7 @@
 **Stack**: Phoenix LiveView + Ash 3.4 + SQLite  
 **Pattern**: Database-as-user (no user_id fields)  
 **Status**: 1,680 tests passing, production-ready financial platform  
-**Focus**: Maintaining v0.5.0 excellence, considering v0.6.0 features  
+**Focus**: v0.5.0 complete - comprehensive financial platform ready for v0.6.0 planning  
 
 ## Quick Commands
 
