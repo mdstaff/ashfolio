@@ -60,29 +60,35 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvester do
     Logger.debug("Identifying tax-loss harvesting opportunities#{if account_id, do: " for account #{account_id}"}")
 
     with {:ok, positions} <- get_portfolio_positions(account_id),
-         {:ok, recent_transactions} <- get_recent_transactions(account_id),
-         :ok <- validate_positions(positions) do
-      opportunities =
-        positions
-        |> Enum.map(&analyze_position_for_harvesting(&1, recent_transactions, loss_threshold, options))
-        |> Enum.filter(&harvestable_opportunity?/1)
-        |> Enum.sort_by(& &1.tax_benefit, {:desc, Decimal})
+         {:ok, recent_transactions} <- get_recent_transactions(account_id) do
+      case positions do
+        [] ->
+          Logger.info("No positions found for tax loss harvesting")
+          {:error, :no_positions}
 
-      summary = calculate_harvest_summary(opportunities)
+        _ ->
+          opportunities =
+            positions
+            |> Enum.map(&analyze_position_for_harvesting(&1, recent_transactions, loss_threshold, options))
+            |> Enum.filter(&harvestable_opportunity?/1)
+            |> Enum.sort_by(& &1.tax_benefit, {:desc, Decimal})
 
-      result = %{
-        opportunities: opportunities,
-        total_harvestable_losses: summary.total_losses,
-        estimated_tax_savings: summary.tax_savings,
-        positions_analyzed: length(positions),
-        opportunities_found: length(opportunities)
-      }
+          summary = calculate_harvest_summary(opportunities)
 
-      Logger.debug(
-        "Tax-loss harvesting analysis complete: #{length(opportunities)} opportunities, #{summary.total_losses} potential losses"
-      )
+          result = %{
+            opportunities: opportunities,
+            total_harvestable_losses: summary.total_losses,
+            estimated_tax_savings: summary.tax_savings,
+            positions_analyzed: length(positions),
+            opportunities_found: length(opportunities)
+          }
 
-      {:ok, result}
+          Logger.debug(
+            "Tax-loss harvesting analysis complete: #{length(opportunities)} opportunities, #{summary.total_losses} potential losses"
+          )
+
+          {:ok, result}
+      end
     else
       {:error, reason} ->
         Logger.warning("Tax-loss harvesting analysis failed: #{inspect(reason)}")

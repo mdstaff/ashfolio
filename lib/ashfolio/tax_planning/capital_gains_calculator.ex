@@ -87,19 +87,19 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculator do
       "Calculating unrealized gains#{if symbol_id, do: " for symbol #{symbol_id}", else: " for all positions"}"
     )
 
-    with {:ok, holdings} <- get_current_holdings(symbol_id),
-         :ok <- validate_holdings(holdings) do
-      unrealized_analysis =
-        holdings
-        |> Enum.map(&calculate_position_unrealized_gains(&1, options))
-        |> aggregate_unrealized_gains()
+    case get_current_holdings(symbol_id) do
+      {:ok, holdings} when holdings != [] ->
+        unrealized_analysis =
+          holdings
+          |> Enum.map(&calculate_position_unrealized_gains(&1, options))
+          |> aggregate_unrealized_gains()
 
-      Logger.debug("Unrealized gains calculation complete: #{unrealized_analysis.total_unrealized_gains}")
-      {:ok, unrealized_analysis}
-    else
-      {:error, reason} ->
-        Logger.warning("Unrealized gains calculation failed: #{inspect(reason)}")
-        {:error, reason}
+        Logger.debug("Unrealized gains calculation complete: #{unrealized_analysis.total_unrealized_gains}")
+        {:ok, unrealized_analysis}
+
+      {:ok, []} ->
+        Logger.info("No holdings found for unrealized gains calculation")
+        {:error, :no_holdings}
     end
   end
 
@@ -123,19 +123,19 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculator do
     as_of_date = as_of_date || Date.utc_today()
     Logger.debug("Generating tax lot report#{if account_id, do: " for account #{account_id}"} as of #{as_of_date}")
 
-    with {:ok, holdings} <- get_account_holdings(account_id),
-         :ok <- validate_holdings(holdings) do
-      tax_lot_report =
-        holdings
-        |> Enum.map(&generate_symbol_tax_lots(&1, as_of_date))
-        |> aggregate_tax_lot_data()
+    case get_account_holdings(account_id) do
+      {:ok, holdings} when holdings != [] ->
+        tax_lot_report =
+          holdings
+          |> Enum.map(&generate_symbol_tax_lots(&1, as_of_date))
+          |> aggregate_tax_lot_data()
 
-      Logger.debug("Tax lot report generated with #{length(tax_lot_report.tax_lots)} lots")
-      {:ok, tax_lot_report}
-    else
-      {:error, reason} ->
-        Logger.warning("Tax lot report generation failed: #{inspect(reason)}")
-        {:error, reason}
+        Logger.debug("Tax lot report generated with #{length(tax_lot_report.tax_lots)} lots")
+        {:ok, tax_lot_report}
+
+      {:ok, []} ->
+        Logger.info("No holdings found for tax lot report")
+        {:error, :no_holdings}
     end
   end
 
@@ -201,8 +201,7 @@ defmodule Ashfolio.TaxPlanning.CapitalGainsCalculator do
   defp validate_transactions([]), do: {:error, :no_transactions}
   defp validate_transactions(_transactions), do: :ok
 
-  defp validate_holdings([]), do: {:error, :no_holdings}
-  defp validate_holdings(_holdings), do: :ok
+  # validate_holdings function removed - validation is now done inline
 
   defp calculate_fifo_gains(transactions, tax_year, symbol_data, _options) do
     # Initialize FIFO queue with buy transactions
