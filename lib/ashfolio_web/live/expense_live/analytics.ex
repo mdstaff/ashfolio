@@ -13,7 +13,7 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
   def mount(_params, _session, socket) do
     socket =
       socket
-      |> assign_current_page(:expenses)
+      |> assign_current_page(:analytics)
       |> assign(:page_title, "Expense Analytics")
       |> assign(:page_subtitle, "Visualize your spending patterns")
       |> assign(:expenses, [])

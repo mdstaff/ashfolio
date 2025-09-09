@@ -17,7 +17,7 @@ defmodule AshfolioWeb.MoneyRatiosLive.IndexTest do
 
     @tag :liveview
     test "displays create profile form when no profile exists", %{conn: conn} do
-      {:ok, view, html} = live(conn, "/money-ratios")
+      {:ok, _view, html} = live(conn, "/money-ratios")
 
       assert html =~ "Create Financial Profile"
       assert html =~ "Gross Annual Income"
@@ -28,7 +28,7 @@ defmodule AshfolioWeb.MoneyRatiosLive.IndexTest do
     @tag :liveview
     test "displays all 8 ratios when profile exists", %{conn: conn} do
       # Create a financial profile
-      {:ok, profile} =
+      {:ok, _profile} =
         FinancialProfile.create(%{
           gross_annual_income: Decimal.new("100000"),
           birth_year: 1985,
@@ -47,14 +47,14 @@ defmodule AshfolioWeb.MoneyRatiosLive.IndexTest do
 
     @tag :liveview
     test "shows proper status indicators", %{conn: conn} do
-      {:ok, profile} =
+      {:ok, _profile} =
         FinancialProfile.create(%{
           gross_annual_income: Decimal.new("100000"),
           birth_year: 1985,
           household_members: 2
         })
 
-      {:ok, view, html} = live(conn, "/money-ratios")
+      {:ok, _view, html} = live(conn, "/money-ratios")
 
       # Should have status indicators (emojis or classes)
       assert html =~ "status" or html =~ "✅" or html =~ "❌" or html =~ "⚠️"
@@ -62,13 +62,13 @@ defmodule AshfolioWeb.MoneyRatiosLive.IndexTest do
 
     @tag :liveview
     test "handles tab switching between overview, capital, debt, profile", %{conn: conn} do
-      {:ok, profile} =
+      {:ok, _profile} =
         FinancialProfile.create(%{
           gross_annual_income: Decimal.new("100000"),
           birth_year: 1985
         })
 
-      {:ok, view, html} = live(conn, "/money-ratios")
+      {:ok, view, _html} = live(conn, "/money-ratios")
 
       # Test tab switching
       view |> element("button", "Capital Analysis") |> render_click()
@@ -86,13 +86,13 @@ defmodule AshfolioWeb.MoneyRatiosLive.IndexTest do
 
     @tag :liveview
     test "updates ratios in real-time when profile changes", %{conn: conn} do
-      {:ok, profile} =
+      {:ok, _profile} =
         FinancialProfile.create(%{
           gross_annual_income: Decimal.new("100000"),
           birth_year: 1985
         })
 
-      {:ok, view, html} = live(conn, "/money-ratios")
+      {:ok, view, _html} = live(conn, "/money-ratios")
 
       # Switch to Financial Profile tab
       view |> element("button", "Financial Profile") |> render_click()
@@ -111,7 +111,7 @@ defmodule AshfolioWeb.MoneyRatiosLive.IndexTest do
 
     @tag :liveview
     test "validates profile form inputs", %{conn: conn} do
-      {:ok, view, html} = live(conn, "/money-ratios")
+      {:ok, view, _html} = live(conn, "/money-ratios")
 
       # Submit invalid data
       view
@@ -137,7 +137,7 @@ defmodule AshfolioWeb.MoneyRatiosLive.IndexTest do
           birth_year: 1995
         })
 
-      {:ok, view, html} = live(conn, "/money-ratios")
+      {:ok, _view, html} = live(conn, "/money-ratios")
 
       # Should show age-appropriate targets
       assert html =~ "Target" or html =~ "Benchmark"
@@ -145,20 +145,20 @@ defmodule AshfolioWeb.MoneyRatiosLive.IndexTest do
       # Clean up and test older professional
       FinancialProfile.destroy(profile_young)
 
-      {:ok, profile_older} =
+      {:ok, _profile_older} =
         FinancialProfile.create(%{
           gross_annual_income: Decimal.new("150000"),
           # ~50 years old
           birth_year: 1975
         })
 
-      {:ok, view2, html2} = live(conn, "/money-ratios")
+      {:ok, _view2, html2} = live(conn, "/money-ratios")
       assert html2 =~ "Target" or html2 =~ "Benchmark"
     end
 
     @tag :liveview
     test "shows recommendations in Action Plan tab", %{conn: conn} do
-      {:ok, profile} =
+      {:ok, _profile} =
         FinancialProfile.create(%{
           gross_annual_income: Decimal.new("100000"),
           birth_year: 1985,
@@ -166,7 +166,7 @@ defmodule AshfolioWeb.MoneyRatiosLive.IndexTest do
           mortgage_balance: Decimal.new("300000")
         })
 
-      {:ok, view, html} = live(conn, "/money-ratios")
+      {:ok, view, _html} = live(conn, "/money-ratios")
 
       # Switch to Action Plan
       view |> element("button", "Action Plan") |> render_click()
@@ -178,13 +178,13 @@ defmodule AshfolioWeb.MoneyRatiosLive.IndexTest do
 
     @tag :liveview
     test "handles missing net worth data gracefully", %{conn: conn} do
-      {:ok, profile} =
+      {:ok, _profile} =
         FinancialProfile.create(%{
           gross_annual_income: Decimal.new("100000"),
           birth_year: 1985
         })
 
-      {:ok, view, html} = live(conn, "/money-ratios")
+      {:ok, _view, html} = live(conn, "/money-ratios")
 
       # Should still render without crashing
       assert html =~ "Money Ratios"
@@ -217,7 +217,7 @@ defmodule AshfolioWeb.MoneyRatiosLive.IndexTest do
 
     @tag :integration
     test "profile form updates existing profile", %{conn: conn} do
-      {:ok, profile} =
+      {:ok, _profile} =
         FinancialProfile.create(%{
           gross_annual_income: Decimal.new("100000"),
           birth_year: 1985
@@ -249,13 +249,13 @@ defmodule AshfolioWeb.MoneyRatiosLive.IndexTest do
   describe "ratio calculation display" do
     @tag :unit
     test "formats ratio display correctly", %{conn: conn} do
-      {:ok, profile} =
+      {:ok, _profile} =
         FinancialProfile.create(%{
           gross_annual_income: Decimal.new("100000"),
           birth_year: 1985
         })
 
-      {:ok, view, html} = live(conn, "/money-ratios")
+      {:ok, _view, html} = live(conn, "/money-ratios")
 
       # Should format ratios nicely (e.g., "2.5x" not "2.500000")
       assert html =~ ~r/\d+\.?\d*x/ or html =~ ~r/\d+%/
@@ -263,7 +263,7 @@ defmodule AshfolioWeb.MoneyRatiosLive.IndexTest do
 
     @tag :unit
     test "displays appropriate colors for ratio status", %{conn: conn} do
-      {:ok, profile} =
+      {:ok, _profile} =
         FinancialProfile.create(%{
           gross_annual_income: Decimal.new("50000"),
           birth_year: 1985,
@@ -271,7 +271,7 @@ defmodule AshfolioWeb.MoneyRatiosLive.IndexTest do
           student_loan_balance: Decimal.new("100000")
         })
 
-      {:ok, view, html} = live(conn, "/money-ratios")
+      {:ok, _view, html} = live(conn, "/money-ratios")
 
       # Should have styling classes for behind/warning status
       assert html =~ "text-red" or html =~ "text-yellow" or html =~ "bg-red" or html =~ "danger"

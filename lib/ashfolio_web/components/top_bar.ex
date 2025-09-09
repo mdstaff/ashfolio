@@ -81,6 +81,9 @@ defmodule AshfolioWeb.Components.TopBar do
             <.mobile_nav_link navigate={~p"/goals"} current={@current_page == :goals}>
               <.icon name="hero-flag" class="w-4 h-4 mr-3" /> Goals
             </.mobile_nav_link>
+            <.mobile_nav_link navigate={~p"/money-ratios"} current={@current_page == :money_ratios}>
+              <.icon name="hero-scale" class="w-4 h-4 mr-3" /> Money Ratios
+            </.mobile_nav_link>
             <.mobile_nav_link navigate={~p"/forecast"} current={@current_page == :forecast}>
               <.icon name="hero-chart-line" class="w-4 h-4 mr-3" /> Forecast
             </.mobile_nav_link>
@@ -125,6 +128,9 @@ defmodule AshfolioWeb.Components.TopBar do
           </.subheader_nav_link>
           <.subheader_nav_link navigate={~p"/goals"} current={@current_page == :goals}>
             <.icon name="hero-flag" class="w-4 h-4 mr-1.5" /> Goals
+          </.subheader_nav_link>
+          <.subheader_nav_link navigate={~p"/money-ratios"} current={@current_page == :money_ratios}>
+            <.icon name="hero-scale" class="w-4 h-4 mr-1.5" /> Money Ratios
           </.subheader_nav_link>
           <.subheader_nav_link navigate={~p"/forecast"} current={@current_page == :forecast}>
             <.icon name="hero-chart-line" class="w-4 h-4 mr-1.5" /> Forecast

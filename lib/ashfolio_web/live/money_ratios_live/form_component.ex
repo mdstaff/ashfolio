@@ -7,7 +7,7 @@ defmodule AshfolioWeb.MoneyRatiosLive.FormComponent do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="bg-white shadow rounded-lg p-6">
+    <div class="bg-white shadow rounded-lg">
       <.form
         for={@form}
         as={:financial_profile}
@@ -15,78 +15,79 @@ defmodule AshfolioWeb.MoneyRatiosLive.FormComponent do
         phx-target={@myself}
         phx-change="validate"
         phx-submit="save"
-        class="space-y-6"
       >
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Income Information -->
-          <div class="space-y-4">
-            <h3 class="text-lg font-medium text-gray-900">Income Information</h3>
+        <div class="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Income Information -->
+            <div class="space-y-4">
+              <h3 class="text-lg font-medium text-gray-900">Income Information</h3>
 
-            <.input
-              field={@form[:gross_annual_income]}
-              type="number"
-              label="Gross Annual Income"
-              step="1000"
-              min="0"
-              placeholder="100000"
-              required
-            />
+              <.input
+                field={@form[:gross_annual_income]}
+                type="number"
+                label="Gross Annual Income"
+                step="1000"
+                min="0"
+                placeholder="100000"
+                required
+              />
 
-            <.input
-              field={@form[:birth_year]}
-              type="number"
-              label="Birth Year"
-              min="1900"
-              max={Date.utc_today().year}
-              placeholder="1985"
-              required
-            />
+              <.input
+                field={@form[:birth_year]}
+                type="number"
+                label="Birth Year"
+                min="1900"
+                max={Date.utc_today().year}
+                placeholder="1985"
+                required
+              />
 
-            <.input
-              field={@form[:household_members]}
-              type="number"
-              label="Household Members"
-              min="1"
-              max="10"
-              placeholder="1"
-            />
-          </div>
-          
+              <.input
+                field={@form[:household_members]}
+                type="number"
+                label="Household Members"
+                min="1"
+                max="10"
+                placeholder="1"
+              />
+            </div>
+            
     <!-- Assets & Debts -->
-          <div class="space-y-4">
-            <h3 class="text-lg font-medium text-gray-900">Assets & Debts</h3>
+            <div class="space-y-4">
+              <h3 class="text-lg font-medium text-gray-900">Assets & Debts</h3>
 
-            <.input
-              field={@form[:primary_residence_value]}
-              type="number"
-              label="Primary Residence Value (Optional)"
-              step="1000"
-              min="0"
-              placeholder="300000"
-            />
+              <.input
+                field={@form[:primary_residence_value]}
+                type="number"
+                label="Primary Residence Value (Optional)"
+                step="1000"
+                min="0"
+                placeholder="300000"
+              />
 
-            <.input
-              field={@form[:mortgage_balance]}
-              type="number"
-              label="Mortgage Balance (Optional)"
-              step="1000"
-              min="0"
-              placeholder="200000"
-            />
+              <.input
+                field={@form[:mortgage_balance]}
+                type="number"
+                label="Mortgage Balance (Optional)"
+                step="1000"
+                min="0"
+                placeholder="200000"
+              />
 
-            <.input
-              field={@form[:student_loan_balance]}
-              type="number"
-              label="Student Loan Balance (Optional)"
-              step="1000"
-              min="0"
-              placeholder="25000"
-            />
+              <.input
+                field={@form[:student_loan_balance]}
+                type="number"
+                label="Student Loan Balance (Optional)"
+                step="1000"
+                min="0"
+                placeholder="25000"
+              />
+            </div>
           </div>
         </div>
         
-    <!-- Form Actions -->
-        <div class="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+    <!-- Form Actions - Outside scrollable area -->
+        <div class="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50">
           <.button
             type="submit"
             phx-disable-with="Saving..."

@@ -438,7 +438,7 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
                           {Formatters.format_currency_with_cents(goal.current_amount)}
                         </div>
                         <div class="text-sm text-gray-500">
-                          {Formatters.format_percentage(goal.progress_percentage)}% complete
+                          {Formatters.format_percentage(goal.progress_percentage)} complete
                         </div>
                         <div class="mt-1">
                           <.progress_bar percentage={goal.progress_percentage} />
