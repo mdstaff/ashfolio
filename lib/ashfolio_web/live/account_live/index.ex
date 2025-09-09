@@ -3,11 +3,11 @@ defmodule AshfolioWeb.AccountLive.Index do
   use AshfolioWeb, :live_view
 
   alias Ashfolio.Context
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.Portfolio.Account
   alias Ashfolio.Portfolio.Transaction
   alias AshfolioWeb.AccountLive.FormComponent
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -114,51 +114,10 @@ defmodule AshfolioWeb.AccountLive.Index do
 
   @impl true
   def handle_event("toggle_exclusion", %{"id" => id}, socket) do
-    # Check if already toggling this account to prevent concurrent operations
     if socket.assigns.toggling_account_id == id do
       {:noreply, socket}
     else
-      # Store original accounts for potential rollback
-      accounts_list =
-        if is_map(socket.assigns.accounts),
-          do: socket.assigns.accounts.all,
-          else: socket.assigns.accounts
-
-      account_index = Enum.find_index(accounts_list, &(&1.id == id))
-
-      case account_index do
-        nil ->
-          {:noreply, ErrorHelpers.put_error_flash(socket, :not_found, "Account not found")}
-
-        _ ->
-          account = Enum.at(accounts_list, account_index)
-
-          # Since we're using Context API, we'll just mark the toggling state
-          # and let the Context API reload handle the actual update
-          socket = assign(socket, :toggling_account_id, id)
-
-          case Account.toggle_exclusion(account, %{is_excluded: !account.is_excluded}) do
-            {:ok, updated_account_from_db} ->
-              Ashfolio.PubSub.broadcast!("accounts", {:account_updated, updated_account_from_db})
-
-              # Reload accounts to ensure consistency using Context API
-              socket = assign_dashboard_data(socket)
-
-              socket =
-                socket
-                |> assign(:toggling_account_id, nil)
-                |> ErrorHelpers.put_success_flash("Account exclusion updated successfully")
-
-              {:noreply, socket}
-
-            {:error, reason} ->
-              # Clear the toggling state on failure
-              {:noreply,
-               socket
-               |> assign(:toggling_account_id, nil)
-               |> ErrorHelpers.put_error_flash(reason, "Failed to update account exclusion")}
-          end
-      end
+      {:noreply, toggle_account_exclusion(socket, id)}
     end
   end
 
@@ -285,19 +244,19 @@ defmodule AshfolioWeb.AccountLive.Index do
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="text-center">
                   <div class="text-2xl font-bold text-gray-900">
-                    {FormatHelpers.format_currency(@summary.total_balance)}
+                    {Formatters.format_currency_with_cents(@summary.total_balance)}
                   </div>
                   <div class="text-sm text-gray-500">Total Balance</div>
                 </div>
                 <div class="text-center">
                   <div class="text-2xl font-bold text-blue-600">
-                    {FormatHelpers.format_currency(@summary.investment_balance)}
+                    {Formatters.format_currency_with_cents(@summary.investment_balance)}
                   </div>
                   <div class="text-sm text-gray-500">Investment Value</div>
                 </div>
                 <div class="text-center">
                   <div class="text-2xl font-bold text-green-600">
-                    {FormatHelpers.format_currency(@summary.cash_balance)}
+                    {Formatters.format_currency_with_cents(@summary.cash_balance)}
                   </div>
                   <div class="text-sm text-gray-500">Cash Balance</div>
                 </div>
@@ -427,7 +386,7 @@ defmodule AshfolioWeb.AccountLive.Index do
                 <:col :let={account} label="Balance" class="text-right">
                   <div class="text-right">
                     <span class={"font-mono font-semibold text-lg #{if account.is_excluded, do: "text-gray-500", else: "text-gray-900"}"}>
-                      {FormatHelpers.format_currency(account.balance)}
+                      {Formatters.format_currency_with_cents(account.balance)}
                     </span>
                     <div class="text-xs text-gray-500 mt-1">
                       <%= if account.is_excluded do %>
@@ -435,7 +394,7 @@ defmodule AshfolioWeb.AccountLive.Index do
                       <% end %>
                       <%= if account.balance_updated_at do %>
                         <p>
-                          Updated {FormatHelpers.format_relative_time(account.balance_updated_at)}
+                          Updated {Formatters.format_relative_time(account.balance_updated_at)}
                         </p>
                       <% else %>
                         <p>Balance not yet updated</p>
@@ -603,7 +562,7 @@ defmodule AshfolioWeb.AccountLive.Index do
                 <p class="text-sm font-medium text-gray-900">
                   Filtered Balance:
                   <span class="font-mono">
-                    {FormatHelpers.format_currency(calculate_total_balance(display_accounts))}
+                    {Formatters.format_currency_with_cents(calculate_total_balance(display_accounts))}
                   </span>
                 </p>
               </div>
@@ -626,6 +585,52 @@ defmodule AshfolioWeb.AccountLive.Index do
   end
 
   # Context API integration helpers
+
+  defp toggle_account_exclusion(socket, id) do
+    accounts_list =
+      if is_map(socket.assigns.accounts),
+        do: socket.assigns.accounts.all,
+        else: socket.assigns.accounts
+
+    case find_account_by_id(accounts_list, id) do
+      nil ->
+        ErrorHelpers.put_error_flash(socket, :not_found, "Account not found")
+
+      account ->
+        perform_account_toggle(socket, account, id)
+    end
+  end
+
+  defp find_account_by_id(accounts_list, id) do
+    Enum.find(accounts_list, &(&1.id == id))
+  end
+
+  defp perform_account_toggle(socket, account, id) do
+    socket = assign(socket, :toggling_account_id, id)
+
+    case Account.toggle_exclusion(account, %{is_excluded: !account.is_excluded}) do
+      {:ok, updated_account_from_db} ->
+        handle_successful_toggle(socket, updated_account_from_db)
+
+      {:error, reason} ->
+        handle_failed_toggle(socket, reason)
+    end
+  end
+
+  defp handle_successful_toggle(socket, updated_account) do
+    Ashfolio.PubSub.broadcast!("accounts", {:account_updated, updated_account})
+    socket = assign_dashboard_data(socket)
+
+    socket
+    |> assign(:toggling_account_id, nil)
+    |> ErrorHelpers.put_success_flash("Account exclusion updated successfully")
+  end
+
+  defp handle_failed_toggle(socket, reason) do
+    socket
+    |> assign(:toggling_account_id, nil)
+    |> ErrorHelpers.put_error_flash(reason, "Failed to update account exclusion")
+  end
 
   defp assign_dashboard_data(socket) do
     socket = assign(socket, :loading_dashboard, true)
@@ -672,7 +677,6 @@ defmodule AshfolioWeb.AccountLive.Index do
 
   defp get_filtered_accounts(accounts, _filter) when is_list(accounts), do: accounts
 
-  defp format_error_message(:user_not_found), do: "User not found"
   defp format_error_message(reason), do: "Failed to load dashboard data: #{inspect(reason)}"
 
   defp apply_action(socket, :index, _params) do

@@ -78,52 +78,12 @@ defmodule Ashfolio.FinancialManagement.TransactionFiltering do
 
   defp apply_category_filter(query, %{category: category_filter}) do
     case category_filter do
-      :all ->
-        {:ok, query}
-
-      :uncategorized ->
-        filtered_query = from(t in query, where: is_nil(t.category_id))
-        {:ok, filtered_query}
-
-      category_id when is_binary(category_id) ->
-        # Validate UUID format before querying
-        case Ecto.UUID.cast(category_id) do
-          {:ok, _valid_uuid} ->
-            filtered_query = from(t in query, where: t.category_id == ^category_id)
-            {:ok, filtered_query}
-
-          :error ->
-            # Invalid UUID format, return empty result instead of error
-            {:ok, from(t in query, where: false)}
-        end
-
-      category_ids when is_list(category_ids) ->
-        if Enum.all?(category_ids, &is_binary/1) do
-          # Validate all UUIDs before querying
-          valid_uuids =
-            Enum.filter(category_ids, fn id ->
-              case Ecto.UUID.cast(id) do
-                {:ok, _} -> true
-                :error -> false
-              end
-            end)
-
-          if Enum.empty?(valid_uuids) do
-            # No valid UUIDs, return empty result
-            {:ok, from(t in query, where: false)}
-          else
-            filtered_query = from(t in query, where: t.category_id in ^valid_uuids)
-            {:ok, filtered_query}
-          end
-        else
-          {:error, "Invalid category filter format: all category IDs must be strings"}
-        end
-
-      nil ->
-        {:ok, query}
-
-      _invalid ->
-        {:error, "Invalid category filter format: must be :all, :uncategorized, string, or list of strings"}
+      :all -> {:ok, query}
+      :uncategorized -> apply_uncategorized_filter(query)
+      category_id when is_binary(category_id) -> apply_single_category_filter(query, category_id)
+      category_ids when is_list(category_ids) -> apply_multiple_category_filter(query, category_ids)
+      nil -> {:ok, query}
+      _invalid -> {:error, "Invalid category filter format: must be :all, :uncategorized, string, or list of strings"}
     end
   end
 
@@ -280,5 +240,47 @@ defmodule Ashfolio.FinancialManagement.TransactionFiltering do
   rescue
     error ->
       {:error, "Failed to get filter options: #{inspect(error)}"}
+  end
+
+  # Private helper functions for category filtering
+
+  defp apply_uncategorized_filter(query) do
+    filtered_query = from(t in query, where: is_nil(t.category_id))
+    {:ok, filtered_query}
+  end
+
+  defp apply_single_category_filter(query, category_id) do
+    case Ecto.UUID.cast(category_id) do
+      {:ok, _valid_uuid} ->
+        filtered_query = from(t in query, where: t.category_id == ^category_id)
+        {:ok, filtered_query}
+
+      :error ->
+        {:ok, from(t in query, where: false)}
+    end
+  end
+
+  defp apply_multiple_category_filter(query, category_ids) do
+    if Enum.all?(category_ids, &is_binary/1) do
+      valid_uuids = filter_valid_uuids(category_ids)
+
+      if Enum.empty?(valid_uuids) do
+        {:ok, from(t in query, where: false)}
+      else
+        filtered_query = from(t in query, where: t.category_id in ^valid_uuids)
+        {:ok, filtered_query}
+      end
+    else
+      {:error, "Invalid category filter format: all category IDs must be strings"}
+    end
+  end
+
+  defp filter_valid_uuids(category_ids) do
+    Enum.filter(category_ids, fn id ->
+      case Ecto.UUID.cast(id) do
+        {:ok, _} -> true
+        :error -> false
+      end
+    end)
   end
 end

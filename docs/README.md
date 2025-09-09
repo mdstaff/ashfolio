@@ -12,6 +12,7 @@ Welcome to Ashfolio's comprehensive documentation. Choose your path:
 
 - Architecture Overview → [development/architecture.md](development/architecture.md)
 - Database Management → [development/database-management.md](development/database-management.md)
+- Data Utilities Guide → [development/data-utilities-guide.md](development/data-utilities-guide.md)
 - Elixir & Mix Insights → [development/elixir-mix-insights.md](development/elixir-mix-insights.md)
 - AI Agent Development → [development/ai-agent-guide.md](development/ai-agent-guide.md)
 - Code GPS Guide → [development/code-gps-guide.md](development/code-gps-guide.md)
@@ -30,7 +31,7 @@ Welcome to Ashfolio's comprehensive documentation. Choose your path:
 
 ## Roadmap & Planning
 
-- v0.5.0 Specification → [roadmap/v0.5.0-specification.md](roadmap/v0.5.0-specification.md)
+- **v0.5.0 COMPLETE** → [CHANGELOG.md](../CHANGELOG.md#050---2025-09-09)
 - v0.2-v0.5 Roadmap Overview → [roadmap/v0.2-v0.5-roadmap.md](roadmap/v0.2-v0.5-roadmap.md)
 - Financial Expansion → [roadmap/financial-expansion-roadmap.md](roadmap/financial-expansion-roadmap.md)
 - UI/UX Improvements → [roadmap/ui-ux-improvements.md](roadmap/ui-ux-improvements.md)

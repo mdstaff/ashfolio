@@ -7,12 +7,12 @@ defmodule AshfolioWeb.TransactionLive.Index do
   import AshfolioWeb.Components.TransactionGroup
   import AshfolioWeb.Components.TransactionStats
 
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.TransactionCategory
   alias Ashfolio.FinancialManagement.TransactionFiltering
   alias Ashfolio.Portfolio.Transaction
   alias Ashfolio.PubSub
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
   alias AshfolioWeb.TransactionLive.FormComponent
 
   @impl true
@@ -399,7 +399,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
   defp parse_amount_range_filter(min_str, max_str) when is_binary(min_str) and is_binary(max_str) do
     with {min_amount, ""} <- Float.parse(min_str),
          {max_amount, ""} <- Float.parse(max_str) do
-      {Decimal.new(min_amount), Decimal.new(max_amount)}
+      {Decimal.from_float(min_amount), Decimal.from_float(max_amount)}
     else
       _ -> nil
     end
@@ -505,46 +505,54 @@ defmodule AshfolioWeb.TransactionLive.Index do
   end
 
   defp build_filter_active_string(filters) do
-    active_filters =
-      filters
-      |> Enum.filter(fn {_key, value} ->
-        case value do
-          nil -> false
-          :all -> false
-          "" -> false
-          [] -> false
-          %{} when map_size(value) == 0 -> false
-          _ -> true
-        end
-      end)
-      |> Enum.map(fn {key, value} ->
-        case {key, value} do
-          {:category, :uncategorized} ->
-            "category:uncategorized"
+    filters
+    |> get_active_filters()
+    |> build_filter_strings()
+    |> format_active_filters_string()
+  end
 
-          {:category, category_id} when is_binary(category_id) ->
-            "category:#{category_id}"
+  defp get_active_filters(filters) do
+    Enum.filter(filters, fn {_key, value} -> filter_has_value?(value) end)
+  end
 
-          {:transaction_type, type} ->
-            "type:#{type}"
-
-          {:date_range, {from_date, to_date}} ->
-            "date:#{Date.to_iso8601(from_date)}_#{Date.to_iso8601(to_date)}"
-
-          {:amount_range, {min_amount, max_amount}} ->
-            "amount:#{Decimal.to_string(min_amount)}_#{Decimal.to_string(max_amount)}"
-
-          _ ->
-            nil
-        end
-      end)
-      |> Enum.reject(&is_nil/1)
-
-    case active_filters do
-      [] -> "filters:none"
-      filters -> "filters:" <> Enum.join(filters, ",")
+  defp filter_has_value?(value) do
+    case value do
+      nil -> false
+      :all -> false
+      "" -> false
+      [] -> false
+      %{} when map_size(value) == 0 -> false
+      _ -> true
     end
   end
+
+  defp build_filter_strings(active_filters) do
+    active_filters
+    |> Enum.map(&format_filter_pair/1)
+    |> Enum.reject(&is_nil/1)
+  end
+
+  defp format_filter_pair({key, value}) do
+    case {key, value} do
+      {:category, :uncategorized} -> "category:uncategorized"
+      {:category, category_id} when is_binary(category_id) -> "category:#{category_id}"
+      {:transaction_type, type} -> "type:#{type}"
+      {:date_range, {from_date, to_date}} -> format_date_range_filter(from_date, to_date)
+      {:amount_range, {min_amount, max_amount}} -> format_amount_range_filter(min_amount, max_amount)
+      _ -> nil
+    end
+  end
+
+  defp format_date_range_filter(from_date, to_date) do
+    "date:#{Date.to_iso8601(from_date)}_#{Date.to_iso8601(to_date)}"
+  end
+
+  defp format_amount_range_filter(min_amount, max_amount) do
+    "amount:#{Decimal.to_string(min_amount)}_#{Decimal.to_string(max_amount)}"
+  end
+
+  defp format_active_filters_string([]), do: "filters:none"
+  defp format_active_filters_string(filters), do: "filters:" <> Enum.join(filters, ",")
 
   @impl true
   def render(assigns) do
@@ -662,7 +670,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
                     <div class="block py-4 pr-6">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 sm:rounded-l-xl" />
                       <span class="relative font-semibold text-zinc-900">
-                        {FormatHelpers.format_date(transaction.date)}
+                        {Formatters.format_date(transaction.date)}
                       </span>
                     </div>
                   </td>
@@ -698,27 +706,31 @@ defmodule AshfolioWeb.TransactionLive.Index do
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
                       <span class="relative">
-                        {FormatHelpers.format_quantity(transaction.quantity)}
+                        {Formatters.format_quantity(transaction.quantity)}
                       </span>
                     </div>
                   </td>
                   <td class="relative p-0">
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
-                      <span class="relative">{FormatHelpers.format_currency(transaction.price)}</span>
-                    </div>
-                  </td>
-                  <td class="relative p-0">
-                    <div class="block py-4 pr-6 text-right">
-                      <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
-                      <span class="relative">{FormatHelpers.format_currency(transaction.fee)}</span>
+                      <span class="relative">
+                        {Formatters.format_currency_with_cents(transaction.price)}
+                      </span>
                     </div>
                   </td>
                   <td class="relative p-0">
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
                       <span class="relative">
-                        {FormatHelpers.format_currency(transaction.total_amount)}
+                        {Formatters.format_currency_with_cents(transaction.fee)}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="relative p-0">
+                    <div class="block py-4 pr-6 text-right">
+                      <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
+                      <span class="relative">
+                        {Formatters.format_currency_with_cents(transaction.total_amount)}
                       </span>
                     </div>
                   </td>

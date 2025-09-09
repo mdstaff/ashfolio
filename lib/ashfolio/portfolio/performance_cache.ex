@@ -36,7 +36,7 @@ defmodule Ashfolio.Portfolio.PerformanceCache do
 
       iex> PerformanceCache.cache_key(:twr, "account-123", 12)
       "twr:account-123:12"
-      
+
       iex> PerformanceCache.cache_key(:mwr, "global", 36)
       "mwr:global:36"
   """
@@ -53,7 +53,7 @@ defmodule Ashfolio.Portfolio.PerformanceCache do
 
       iex> PerformanceCache.get("twr:account-123:12")
       {:ok, Decimal.new("15.67")}
-      
+
       iex> PerformanceCache.get("nonexistent:key")
       :miss
   """
@@ -91,7 +91,7 @@ defmodule Ashfolio.Portfolio.PerformanceCache do
 
       iex> PerformanceCache.put("twr:account-123:12", Decimal.new("15.67"))
       :ok
-      
+
       iex> PerformanceCache.put("mwr:global:24", Decimal.new("12.34"), 7200)
       :ok
   """

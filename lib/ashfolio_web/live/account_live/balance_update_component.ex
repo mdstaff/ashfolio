@@ -3,8 +3,8 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
   use AshfolioWeb, :live_component
 
   alias Ashfolio.Context
+  alias Ashfolio.Financial.Formatters
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def render(assigns) do
@@ -71,11 +71,11 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
           <div class="text-center">
             <p class="text-sm font-medium text-gray-500 mb-1">Current Balance</p>
             <p class="text-2xl font-bold text-gray-900">
-              {FormatHelpers.format_currency(@account.balance)}
+              {Formatters.format_currency_with_cents(@account.balance)}
             </p>
             <%= if @account.balance_updated_at do %>
               <p class="text-xs text-gray-500 mt-1">
-                Last updated {FormatHelpers.format_relative_time(@account.balance_updated_at)}
+                Last updated {Formatters.format_relative_time(@account.balance_updated_at)}
               </p>
             <% end %>
           </div>
@@ -120,13 +120,15 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
                     <div class="flex items-center justify-between">
                       <span class="text-sm text-blue-800">Balance Change:</span>
                       <span class={"text-sm font-medium #{if is_increase, do: "text-green-600", else: "text-red-600"}"}>
-                        {if is_increase, do: "+", else: ""}{FormatHelpers.format_currency(change)}
+                        {if is_increase, do: "+", else: ""}{Formatters.format_currency_with_cents(
+                          change
+                        )}
                       </span>
                     </div>
                     <div class="flex items-center justify-between mt-1">
                       <span class="text-sm text-blue-800">New Balance:</span>
                       <span class="text-sm font-bold text-blue-900">
-                        {FormatHelpers.format_currency(new_balance_decimal)}
+                        {Formatters.format_currency_with_cents(new_balance_decimal)}
                       </span>
                     </div>
                   </div>
@@ -296,34 +298,37 @@ defmodule AshfolioWeb.AccountLive.BalanceUpdateComponent do
         {:error, "Balance is required"}
 
       trimmed_balance ->
-        case Float.parse(trimmed_balance) do
-          {balance_float, ""} ->
-            new_balance = Decimal.new(to_string(balance_float))
+        parse_numeric_balance(trimmed_balance, account)
+    end
+  end
 
-            # Security: Add reasonable maximum bounds (prevent unrealistic values)
-            # $1 billion max
-            max_balance = Decimal.new("1000000000.00")
+  defp parse_numeric_balance(balance_str, account) do
+    case Float.parse(balance_str) do
+      {balance_float, ""} ->
+        new_balance = Decimal.new(to_string(balance_float))
+        validate_balance_constraints(new_balance, account)
 
-            cond do
-              # Validate non-negative for savings/checking accounts
-              account.account_type in [:checking, :savings] && Decimal.negative?(new_balance) ->
-                {:error, "#{String.capitalize(to_string(account.account_type))} accounts cannot have negative balances"}
+      _ ->
+        {:error, "Please enter a valid number"}
+    end
+  end
 
-              # Security: Validate maximum reasonable balance
-              Decimal.gt?(new_balance, max_balance) ->
-                {:error, "Balance cannot exceed $1,000,000,000.00 (security limit)"}
+  defp validate_balance_constraints(balance, account) do
+    max_balance = Decimal.new("1000000000.00")
+    min_balance = Decimal.new("-1000000000.00")
 
-              # Security: Validate minimum bound (prevent extremely negative values)
-              Decimal.lt?(new_balance, Decimal.new("-1000000000.00")) ->
-                {:error, "Balance cannot be less than -$1,000,000,000.00 (security limit)"}
+    cond do
+      account.account_type in [:checking, :savings] && Decimal.negative?(balance) ->
+        {:error, "#{String.capitalize(to_string(account.account_type))} accounts cannot have negative balances"}
 
-              true ->
-                {:ok, new_balance}
-            end
+      Decimal.gt?(balance, max_balance) ->
+        {:error, "Balance cannot exceed $1,000,000,000.00 (security limit)"}
 
-          _ ->
-            {:error, "Please enter a valid number"}
-        end
+      Decimal.lt?(balance, min_balance) ->
+        {:error, "Balance cannot be less than -$1,000,000,000.00 (security limit)"}
+
+      true ->
+        {:ok, balance}
     end
   end
 

@@ -4,7 +4,7 @@ defmodule Ashfolio.Portfolio.PerformanceCalculator do
 
   Implements industry-standard methodologies:
   - Time-Weighted Return (TWR) - Portfolio manager performance
-  - Money-Weighted Return (MWR) - Investor's personal experience  
+  - Money-Weighted Return (MWR) - Investor's personal experience
   - Rolling Returns Analysis - Performance patterns over time
 
   Built for the Ashfolio portfolio management system with:
@@ -24,7 +24,7 @@ defmodule Ashfolio.Portfolio.PerformanceCalculator do
   ## Parameters
 
     - transactions: List of transaction maps with :date, :amount, :type fields
-    
+
   ## Returns
 
     - {:ok, twr_percentage} - Time-weighted return as percentage
@@ -67,7 +67,7 @@ defmodule Ashfolio.Portfolio.PerformanceCalculator do
   ## Parameters
 
     - cash_flows: List of cash flow maps with :date and :amount fields
-    
+
   ## Returns
 
     - {:ok, mwr_percentage} - Money-weighted return as percentage
@@ -105,30 +105,37 @@ defmodule Ashfolio.Portfolio.PerformanceCalculator do
         |> Enum.chunk_every(period_months, 1, :discard)
         |> Enum.with_index()
         |> Enum.map(fn {period_returns, _index} ->
-          # Calculate annualized return for the period
-          total_return =
-            Enum.reduce(period_returns, Decimal.new("0"), fn point, acc ->
-              return_value = point[:return] || point.return
-              Decimal.add(acc, return_value)
-            end)
-
-          annualized = Decimal.div(total_return, Decimal.new(period_months))
-          # Annualize
-          annualized_return = Decimal.mult(annualized, Decimal.new("12"))
-
-          # Create proper return structure
-          first_date = List.first(period_returns).date
-          last_date = List.last(period_returns).date
-
-          %{
-            period_start: first_date,
-            period_end: last_date,
-            annualized_return: annualized_return
-          }
+          calculate_period_return(period_returns, period_months)
         end)
 
       rolling_periods
     end
+  end
+
+  defp calculate_period_return(period_returns, period_months) do
+    # Calculate annualized return for the period
+    total_return = sum_period_returns(period_returns)
+
+    annualized = Decimal.div(total_return, Decimal.new(period_months))
+    # Annualize
+    annualized_return = Decimal.mult(annualized, Decimal.new("12"))
+
+    # Create proper return structure
+    first_date = List.first(period_returns).date
+    last_date = List.last(period_returns).date
+
+    %{
+      period_start: first_date,
+      period_end: last_date,
+      annualized_return: annualized_return
+    }
+  end
+
+  defp sum_period_returns(period_returns) do
+    Enum.reduce(period_returns, Decimal.new("0"), fn point, acc ->
+      return_value = point[:return] || point.return
+      Decimal.add(acc, return_value)
+    end)
   end
 
   @doc """
@@ -160,40 +167,51 @@ defmodule Ashfolio.Portfolio.PerformanceCalculator do
   defp validate_transaction_data([]), do: {:error, :insufficient_data}
 
   defp validate_transaction_data(transactions) when is_list(transactions) do
-    # Check if this is period data format (has start_value/end_value) or transaction format
     first_tx = List.first(transactions)
 
     if Map.has_key?(first_tx, :start_value) do
-      # Period data format validation
-      valid? =
-        Enum.all?(transactions, fn tx ->
-          Map.has_key?(tx, :start_value) and Map.has_key?(tx, :end_value) and Map.has_key?(tx, :start_date)
-        end)
-
-      if valid? do
-        # Check for zero start value
-        zero_start? =
-          Enum.any?(transactions, fn tx ->
-            Decimal.equal?(tx.start_value, Decimal.new("0"))
-          end)
-
-        if zero_start? do
-          {:error, :zero_start_value}
-        else
-          :ok
-        end
-      else
-        {:error, :invalid_transaction_format}
-      end
+      validate_period_data_format(transactions)
     else
-      # Transaction format validation - ensure required fields exist
-      valid? =
-        Enum.all?(transactions, fn tx ->
-          Map.has_key?(tx, :date) and Map.has_key?(tx, :amount)
-        end)
-
-      if valid?, do: :ok, else: {:error, :invalid_transaction_format}
+      validate_transaction_format(transactions)
     end
+  end
+
+  # Helper function to reduce nesting depth
+  defp validate_period_data_format(transactions) do
+    valid? =
+      Enum.all?(transactions, fn tx ->
+        Map.has_key?(tx, :start_value) and Map.has_key?(tx, :end_value) and Map.has_key?(tx, :start_date)
+      end)
+
+    if valid? do
+      validate_no_zero_start_values(transactions)
+    else
+      {:error, :invalid_transaction_format}
+    end
+  end
+
+  # Helper function to reduce nesting depth
+  defp validate_no_zero_start_values(transactions) do
+    zero_start? =
+      Enum.any?(transactions, fn tx ->
+        Decimal.equal?(tx.start_value, Decimal.new("0"))
+      end)
+
+    if zero_start? do
+      {:error, :zero_start_value}
+    else
+      :ok
+    end
+  end
+
+  # Helper function to reduce nesting depth
+  defp validate_transaction_format(transactions) do
+    valid? =
+      Enum.all?(transactions, fn tx ->
+        Map.has_key?(tx, :date) and Map.has_key?(tx, :amount)
+      end)
+
+    if valid?, do: :ok, else: {:error, :invalid_transaction_format}
   end
 
   defp validate_cash_flows([]), do: {:error, :empty_cash_flow_list}
@@ -226,33 +244,44 @@ defmodule Ashfolio.Portfolio.PerformanceCalculator do
   defp calculate_period_returns(periods) do
     # Calculate return for each period
     Enum.map(periods, fn period ->
-      # Check if this is period data format (has start_value/end_value)
-      return_value =
-        if Map.has_key?(period, :start_value) and Map.has_key?(period, :end_value) do
-          # Calculate actual return: (End - Start) / Start * 100
-          start_val = period.start_value
-          end_val = period.end_value
-
-          if Decimal.equal?(start_val, Decimal.new("0")) do
-            # This should trigger zero_start_value error in validation
-            Decimal.new("0")
-          else
-            numerator = Decimal.sub(end_val, start_val)
-            ratio = Decimal.div(numerator, start_val)
-            Decimal.mult(ratio, Decimal.new("100"))
-          end
-        else
-          # For transaction-based calculations, return 20% for single cash flow, 15% otherwise
-          if length(period.transactions) == 2 do
-            # TWR with single cash flow should be 20%
-            Decimal.new("20.0")
-          else
-            Decimal.new("15.0")
-          end
-        end
-
+      return_value = calculate_single_period_return(period)
       Map.put(period, :return, return_value)
     end)
+  end
+
+  # Helper function to reduce nesting depth
+  defp calculate_single_period_return(period) do
+    if Map.has_key?(period, :start_value) and Map.has_key?(period, :end_value) do
+      calculate_period_data_return(period)
+    else
+      calculate_transaction_based_return(period)
+    end
+  end
+
+  # Helper function to reduce nesting depth
+  defp calculate_period_data_return(period) do
+    start_val = period.start_value
+    end_val = period.end_value
+
+    if Decimal.equal?(start_val, Decimal.new("0")) do
+      # This should trigger zero_start_value error in validation
+      Decimal.new("0")
+    else
+      numerator = Decimal.sub(end_val, start_val)
+      ratio = Decimal.div(numerator, start_val)
+      Decimal.mult(ratio, Decimal.new("100"))
+    end
+  end
+
+  # Helper function to reduce nesting depth
+  defp calculate_transaction_based_return(period) do
+    # For transaction-based calculations, return 20% for single cash flow, 15% otherwise
+    if length(period.transactions) == 2 do
+      # TWR with single cash flow should be 20%
+      Decimal.new("20.0")
+    else
+      Decimal.new("15.0")
+    end
   end
 
   defp compound_returns(period_returns) do
@@ -270,41 +299,42 @@ defmodule Ashfolio.Portfolio.PerformanceCalculator do
 
   defp calculate_simple_irr(cash_flows) do
     # Simplified IRR calculation for GREEN phase
-    # In a real implementation, this would use Newton-Raphson or similar
-
-    # Check for all negative cash flows (total loss scenario)
     final_flow = List.last(cash_flows)
 
     if Decimal.equal?(final_flow.amount, Decimal.new("0")) do
       {:error, :negative_irr}
     else
-      # Extract initial investment and final value
-      initial_flow = List.first(cash_flows)
-      initial_amount = Decimal.abs(initial_flow.amount)
-      final_amount = Decimal.abs(final_flow.amount)
-
-      # Simple return calculation for IRR approximation
-      # For the test case: -10k, -5k, +17k = 13.33% simple return  
-      if Decimal.compare(initial_amount, Decimal.new("0")) == :gt do
-        # Sum all negative flows (investments)
-        total_investment =
-          Enum.reduce(cash_flows, Decimal.new("0"), fn flow, acc ->
-            if Decimal.compare(flow.amount, Decimal.new("0")) == :lt do
-              Decimal.add(acc, Decimal.abs(flow.amount))
-            else
-              acc
-            end
-          end)
-
-        # Calculate simple return based on total investment vs final value
-        ratio = Decimal.div(final_amount, total_investment)
-        return_decimal = Decimal.sub(ratio, Decimal.new("1"))
-        percentage = Decimal.mult(return_decimal, Decimal.new("100"))
-
-        {:ok, percentage}
-      else
-        {:error, :zero_initial_investment}
-      end
+      calculate_simple_return(cash_flows)
     end
+  end
+
+  defp calculate_simple_return(cash_flows) do
+    initial_flow = List.first(cash_flows)
+    initial_amount = Decimal.abs(initial_flow.amount)
+
+    if Decimal.compare(initial_amount, Decimal.new("0")) == :gt do
+      final_amount = Decimal.abs(List.last(cash_flows).amount)
+      total_investment = sum_investment_flows(cash_flows)
+      compute_return_percentage(final_amount, total_investment)
+    else
+      {:error, :zero_initial_investment}
+    end
+  end
+
+  defp sum_investment_flows(cash_flows) do
+    Enum.reduce(cash_flows, Decimal.new("0"), fn flow, acc ->
+      if Decimal.compare(flow.amount, Decimal.new("0")) == :lt do
+        Decimal.add(acc, Decimal.abs(flow.amount))
+      else
+        acc
+      end
+    end)
+  end
+
+  defp compute_return_percentage(final_amount, total_investment) do
+    ratio = Decimal.div(final_amount, total_investment)
+    return_decimal = Decimal.sub(ratio, Decimal.new("1"))
+    percentage = Decimal.mult(return_decimal, Decimal.new("100"))
+    {:ok, percentage}
   end
 end

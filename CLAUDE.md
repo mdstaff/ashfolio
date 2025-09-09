@@ -201,6 +201,51 @@ When to Run Warning Checks:
 - When switching between files/components
 - At end of every development session
 
+### Code Formatting and Style Issues
+
+**IMPORTANT**: Always use `mix format` to automatically fix style issues instead of manually editing:
+
+```bash
+# Fix ALL whitespace and formatting issues automatically
+mix format
+
+# Format specific files
+mix format path/to/file.ex
+
+# This project uses Styler plugin which handles:
+# - Trailing whitespace removal
+# - Consistent indentation
+# - Line ending normalization
+# - Code organization and style consistency
+```
+
+**DO NOT** manually fix these Credo issues - let the formatter handle them:
+- Trailing whitespace
+- Line length (in most cases)
+- Indentation issues
+- Import/alias ordering
+
+Run `mix format` BEFORE running `mix credo` to avoid seeing issues that can be auto-fixed.
+
+### Additional HEEx Patterns (Validated)
+
+The following patterns are also valid and commonly used:
+
+1. **Helper Function Calls in Templates**: Direct function calls are acceptable
+   ```elixir
+   <span class={money_ratios_status_color(@status)}>
+   ```
+
+2. **Computed Assigns Pattern**: Pre-compute complex data before template
+   ```elixir
+   assigns = assign(assigns, :processed_data, process_calculation(assigns.raw_data))
+   ```
+
+3. **Attribute Spreading**: Use `{@rest}` for passing through attributes
+   ```elixir
+   <div {@rest}>
+   ```
+
 ## Quality Gates
 
 ### Definition of Done
@@ -252,25 +297,41 @@ Before starting ANY development work, ALWAYS:
 
 The Code GPS manifest contains:
 
-- All LiveViews with events and subscriptions
+- LiveView detection (Note: Currently detects only direct :live_view usage, not all LiveView modules)
 - Key components with usage counts and attributes
 - Existing patterns to follow
 - Specific integration opportunities with priorities
 
+### Known Code GPS Limitations
+
+- LiveView count may be undercounted (detects ~3 instead of actual ~20+)
+- Focus on component patterns and test analysis which are accurate
+- Use `find lib/ashfolio_web/live -name "*.ex"` for complete LiveView inventory
+
 ## Development Commands
 
 ```bash
-# Generate Code GPS manifest
+# Generate Code GPS manifest (run first, always)
 mix code_gps
 
-# Run tests
-just test
+# Run tests by category
+just test        # Standard suite (excludes slow/performance)
+just test unit   # Unit tests only (~230 tests, <1s each)
+just test smoke  # Critical paths (~11 tests, <2s)
+just test live   # LiveView tests (~36 tests, 5-15s)
+just test perf   # Performance tests (~14 tests, 30-60s)
+just test failed # Re-run failed tests
 
 # Start development server
-just work
+just dev         # Foreground mode
+just dev bg      # Background mode
+just server stop # Stop background server
 
-# Format and lint
-mix format && mix credo
+# Code quality
+mix format       # ALWAYS run before credo
+mix credo        # Static analysis (non-blocking warnings)
+just check       # Format + compile + credo + smoke tests
+just fix         # Auto-fix common issues
 ```
 
 ## Key Files to Reference

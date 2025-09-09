@@ -23,7 +23,7 @@ defmodule Ashfolio.DatabaseManager do
   Only use in development environment.
   """
   def reset_and_reseed! do
-    if Mix.env() != :dev do
+    if Application.get_env(:ashfolio, :environment, :prod) != :dev do
       raise "reset_and_reseed!/0 can only be run in development environment"
     end
 
@@ -47,7 +47,7 @@ defmodule Ashfolio.DatabaseManager do
   WARNING: This will delete ALL data in the specified table!
   """
   def truncate_table(table_name) when is_binary(table_name) do
-    if Mix.env() != :dev do
+    if Application.get_env(:ashfolio, :environment, :prod) != :dev do
       raise "truncate_table/1 can only be run in development environment"
     end
 
@@ -109,7 +109,7 @@ defmodule Ashfolio.DatabaseManager do
   WARNING: This will overwrite the current database!
   """
   def restore_backup(backup_path) do
-    if Mix.env() == :prod do
+    if Application.get_env(:ashfolio, :environment, :prod) == :prod do
       raise "restore_backup/1 cannot be run in production environment"
     end
 

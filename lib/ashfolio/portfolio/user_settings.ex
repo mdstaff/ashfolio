@@ -117,7 +117,7 @@ defmodule Ashfolio.Portfolio.UserSettings do
     def update_settings(attrs) do
       case get_settings() do
         {:ok, settings} ->
-          Ash.update(settings, :update, attrs)
+          settings |> Ash.Changeset.for_update(:update, attrs) |> Ash.update()
 
         {:error, reason} ->
           {:error, reason}

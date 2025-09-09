@@ -69,7 +69,7 @@ defmodule AshfolioWeb.RetirementLiveTest do
     test "calculates 4% withdrawal from portfolio value", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/retirement")
 
-      # Submit form with portfolio value 
+      # Submit form with portfolio value
       html =
         view
         |> form("#retirement-form", %{

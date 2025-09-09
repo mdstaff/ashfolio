@@ -2,11 +2,11 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
   @moduledoc false
   use AshfolioWeb, :live_view
 
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.EmergencyFundStatus
   alias Ashfolio.FinancialManagement.FinancialGoal
   alias AshfolioWeb.FinancialGoalLive.FormComponent
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -187,13 +187,13 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
             </div>
             <div class="text-center">
               <div class="text-2xl font-bold text-green-600">
-                {FormatHelpers.format_currency(@total_current_amount)}
+                {Formatters.format_currency_with_cents(@total_current_amount)}
               </div>
               <div class="text-sm text-gray-500">Total Saved</div>
             </div>
             <div class="text-center">
               <div class="text-2xl font-bold text-purple-600">
-                {FormatHelpers.format_currency(@total_target_amount)}
+                {Formatters.format_currency_with_cents(@total_target_amount)}
               </div>
               <div class="text-sm text-gray-500">Total Target</div>
             </div>
@@ -435,22 +435,22 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-right">
                         <div class="text-sm font-medium text-gray-900">
-                          {FormatHelpers.format_currency(goal.current_amount)}
+                          {Formatters.format_currency_with_cents(goal.current_amount)}
                         </div>
                         <div class="text-sm text-gray-500">
-                          {FormatHelpers.format_percentage(goal.progress_percentage)}% complete
+                          {Formatters.format_percentage(goal.progress_percentage)} complete
                         </div>
                         <div class="mt-1">
                           <.progress_bar percentage={goal.progress_percentage} />
                         </div>
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
-                        {FormatHelpers.format_currency(goal.target_amount)}
+                        {Formatters.format_currency_with_cents(goal.target_amount)}
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         <%= if goal.target_date do %>
                           <div class="font-medium">
-                            {FormatHelpers.format_date(goal.target_date)}
+                            {Formatters.format_date(goal.target_date)}
                           </div>
                           <div class={[
                             "text-sm",
@@ -712,22 +712,16 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
   end
 
   defp apply_sorting(goals, sort_by, sort_dir) do
-    Enum.sort_by(
-      goals,
-      fn goal ->
-        case sort_by do
-          :name -> goal.name || ""
-          :goal_type -> Atom.to_string(goal.goal_type)
-          :current_amount -> goal.current_amount
-          :target_amount -> goal.target_amount
-          :target_date -> goal.target_date || Date.utc_today()
-          :progress_percentage -> goal.progress_percentage
-          _ -> goal.target_date || Date.utc_today()
-        end
-      end,
-      sort_dir
-    )
+    Enum.sort_by(goals, &get_sorting_key(&1, sort_by), sort_dir)
   end
+
+  defp get_sorting_key(goal, :name), do: goal.name || ""
+  defp get_sorting_key(goal, :goal_type), do: Atom.to_string(goal.goal_type)
+  defp get_sorting_key(goal, :current_amount), do: goal.current_amount
+  defp get_sorting_key(goal, :target_amount), do: goal.target_amount
+  defp get_sorting_key(goal, :target_date), do: goal.target_date || Date.utc_today()
+  defp get_sorting_key(goal, :progress_percentage), do: goal.progress_percentage
+  defp get_sorting_key(goal, _), do: goal.target_date || Date.utc_today()
 
   defp calculate_goal_statistics(goals) do
     total_target =
@@ -802,7 +796,7 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="text-center">
         <div class="text-3xl font-bold text-gray-900 mb-2">
-          {FormatHelpers.format_currency(@analysis.monthly_expenses)}
+          {Formatters.format_currency_with_cents(@analysis.monthly_expenses)}
         </div>
         <div class="text-sm text-gray-600">Monthly Expenses</div>
       </div>
@@ -810,7 +804,7 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
       <%= if @analysis.goal do %>
         <div class="text-center">
           <div class="text-3xl font-bold text-blue-600 mb-2">
-            {FormatHelpers.format_currency(@analysis.current_amount)}
+            {Formatters.format_currency_with_cents(@analysis.current_amount)}
           </div>
           <div class="text-sm text-gray-600">Current Emergency Fund</div>
           <div class="text-xs text-gray-500 mt-1">
@@ -855,14 +849,18 @@ defmodule AshfolioWeb.FinancialGoalLive.Index do
         "#{months_int} months left"
 
       true ->
-        years = div(months_int, 12)
-        remaining_months = rem(months_int, 12)
+        format_years_and_months(months_int)
+    end
+  end
 
-        if remaining_months == 0 do
-          "#{years} year#{if years == 1, do: "", else: "s"} left"
-        else
-          "#{years}y #{remaining_months}m left"
-        end
+  defp format_years_and_months(months_int) do
+    years = div(months_int, 12)
+    remaining_months = rem(months_int, 12)
+
+    if remaining_months == 0 do
+      "#{years} year#{if years == 1, do: "", else: "s"} left"
+    else
+      "#{years}y #{remaining_months}m left"
     end
   end
 end

@@ -10,7 +10,8 @@ defmodule Ashfolio.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      compilers: [:phoenix_live_view] ++ Mix.compilers()
+      compilers: [:phoenix_live_view] ++ Mix.compilers(),
+      dialyzer: [plt_add_apps: [:mix]]
     ]
   end
 

@@ -1,0 +1,281 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="py-6">
+        <h1 class="text-3xl font-bold text-gray-900">Money Ratios</h1>
+        <p class="text-lg text-gray-600 mt-2">
+          Financial Health Assessment using Charles Farrell's methodology
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <%= if @financial_profile do %>
+      <!-- Tab Navigation -->
+      <div class="border-b border-gray-200 mb-8">
+        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+          <button
+            type="button"
+            phx-click="switch_tab"
+            phx-value-tab="overview"
+            class={"py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap #{tab_active_class(@current_tab, :overview)}"}
+          >
+            Overview
+          </button>
+          <button
+            type="button"
+            phx-click="switch_tab"
+            phx-value-tab="capital"
+            class={"py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap #{tab_active_class(@current_tab, :capital)}"}
+          >
+            Capital Analysis
+          </button>
+          <button
+            type="button"
+            phx-click="switch_tab"
+            phx-value-tab="debt"
+            class={"py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap #{tab_active_class(@current_tab, :debt)}"}
+          >
+            Debt Management
+          </button>
+          <button
+            type="button"
+            phx-click="switch_tab"
+            phx-value-tab="profile"
+            class={"py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap #{tab_active_class(@current_tab, :profile)}"}
+          >
+            Financial Profile
+          </button>
+          <button
+            type="button"
+            phx-click="switch_tab"
+            phx-value-tab="action"
+            class={"py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap #{tab_active_class(@current_tab, :action)}"}
+          >
+            Action Plan
+          </button>
+        </nav>
+      </div>
+      
+<!-- Tab Content -->
+      <%= case @current_tab do %>
+        <% :overview -> %>
+          <div class="space-y-6">
+            <h2 class="text-2xl font-bold text-gray-900">Financial Health Overview</h2>
+
+            <%= if Enum.any?(@ratios) do %>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Capital-to-Income Ratio -->
+                <%= if Map.get(@ratios, :capital_ratio) do %>
+                  <div class={"rounded-lg p-6 #{ratio_status_class(@ratios.capital_ratio)}"}>
+                    <div class="flex items-center justify-between mb-2">
+                      <h3 class="text-sm font-medium">Capital-to-Income Ratio</h3>
+                      <span class="text-lg">{ratio_status_icon(@ratios.capital_ratio)}</span>
+                    </div>
+                    <p class="text-2xl font-bold">{format_ratio(@ratios.capital_ratio)}</p>
+                    <p class="text-xs mt-1">Retirement savings vs income</p>
+                  </div>
+                <% end %>
+                
+<!-- Savings Ratio -->
+                <%= if Map.get(@ratios, :savings_ratio) do %>
+                  <div class={"rounded-lg p-6 #{ratio_status_class(@ratios.savings_ratio)}"}>
+                    <div class="flex items-center justify-between mb-2">
+                      <h3 class="text-sm font-medium">Savings Ratio</h3>
+                      <span class="text-lg">{ratio_status_icon(@ratios.savings_ratio)}</span>
+                    </div>
+                    <p class="text-2xl font-bold">{format_ratio(@ratios.savings_ratio)}</p>
+                    <p class="text-xs mt-1">Annual savings rate</p>
+                  </div>
+                <% end %>
+                
+<!-- Mortgage-to-Income Ratio -->
+                <%= if Map.get(@ratios, :mortgage_ratio) do %>
+                  <div class={"rounded-lg p-6 #{ratio_status_class(@ratios.mortgage_ratio)}"}>
+                    <div class="flex items-center justify-between mb-2">
+                      <h3 class="text-sm font-medium">Mortgage-to-Income Ratio</h3>
+                      <span class="text-lg">{ratio_status_icon(@ratios.mortgage_ratio)}</span>
+                    </div>
+                    <p class="text-2xl font-bold">{format_ratio(@ratios.mortgage_ratio)}</p>
+                    <p class="text-xs mt-1">Mortgage debt vs income</p>
+                  </div>
+                <% end %>
+                
+<!-- Education-to-Income Ratio -->
+                <%= if Map.get(@ratios, :education_ratio) do %>
+                  <div class={"rounded-lg p-6 #{ratio_status_class(@ratios.education_ratio)}"}>
+                    <div class="flex items-center justify-between mb-2">
+                      <h3 class="text-sm font-medium">Education-to-Income Ratio</h3>
+                      <span class="text-lg">{ratio_status_icon(@ratios.education_ratio)}</span>
+                    </div>
+                    <p class="text-2xl font-bold">{format_ratio(@ratios.education_ratio)}</p>
+                    <p class="text-xs mt-1">Student loan debt vs income</p>
+                  </div>
+                <% end %>
+              </div>
+              
+<!-- Insurance Advisory Cards (Simplified) -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+                <div class="rounded-lg p-6 bg-blue-50 text-blue-700">
+                  <h3 class="text-sm font-medium mb-2">Life Insurance</h3>
+                  <p class="text-lg font-bold">10x Income</p>
+                  <p class="text-xs mt-1">Recommended coverage</p>
+                </div>
+
+                <div class="rounded-lg p-6 bg-blue-50 text-blue-700">
+                  <h3 class="text-sm font-medium mb-2">Disability Insurance</h3>
+                  <p class="text-lg font-bold">60-70%</p>
+                  <p class="text-xs mt-1">Income replacement</p>
+                </div>
+
+                <div class="rounded-lg p-6 bg-blue-50 text-blue-700">
+                  <h3 class="text-sm font-medium mb-2">Long-term Care</h3>
+                  <p class="text-lg font-bold">Self-insure</p>
+                  <p class="text-xs mt-1">If net worth > $2M</p>
+                </div>
+
+                <div class="rounded-lg p-6 bg-blue-50 text-blue-700">
+                  <h3 class="text-sm font-medium mb-2">Investment Health</h3>
+                  <p class="text-lg font-bold">Age-Based</p>
+                  <p class="text-xs mt-1">Risk allocation</p>
+                </div>
+              </div>
+            <% else %>
+              <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                <div class="flex">
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-yellow-800">Missing Data</h3>
+                    <div class="mt-2 text-sm text-yellow-700">
+                      <p>
+                        We need your net worth data to Calculate accurate ratios. Please add this information to get your financial health assessment.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% :capital -> %>
+          <div class="space-y-6">
+            <h2 class="text-2xl font-bold text-gray-900">Capital Analysis</h2>
+            <%= if Map.get(@ratios, :capital_ratio) do %>
+              <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                  Capital-to-Income Ratio Details
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <p class="text-sm font-medium text-gray-500">Current Ratio</p>
+                    <p class="text-2xl font-bold text-gray-900">
+                      {format_decimal_as_ratio(@ratios.capital_ratio.current_ratio)}
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-500">Target Ratio</p>
+                    <p class="text-2xl font-bold text-gray-900">
+                      {format_decimal_as_ratio(@ratios.capital_ratio.target_ratio)}
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-500">Status</p>
+                    <p class={"text-2xl font-bold #{ratio_status_class(@ratios.capital_ratio)}"}>
+                      {ratio_status_icon(@ratios.capital_ratio)} {String.capitalize(
+                        to_string(@ratios.capital_ratio.status)
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% :debt -> %>
+          <div class="space-y-6">
+            <h2 class="text-2xl font-bold text-gray-900">Debt Management</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <%= if Map.get(@ratios, :mortgage_ratio) do %>
+                <div class="bg-white shadow rounded-lg p-6">
+                  <h3 class="text-lg font-medium text-gray-900 mb-4">Mortgage Analysis</h3>
+                  <p class="text-2xl font-bold">{format_ratio(@ratios.mortgage_ratio)}</p>
+                  <p class={"text-sm mt-2 #{ratio_status_class(@ratios.mortgage_ratio)}"}>
+                    {ratio_status_icon(@ratios.mortgage_ratio)} {String.capitalize(
+                      to_string(@ratios.mortgage_ratio.status)
+                    )}
+                  </p>
+                </div>
+              <% end %>
+
+              <%= if Map.get(@ratios, :education_ratio) do %>
+                <div class="bg-white shadow rounded-lg p-6">
+                  <h3 class="text-lg font-medium text-gray-900 mb-4">Education Debt Analysis</h3>
+                  <p class="text-2xl font-bold">{format_ratio(@ratios.education_ratio)}</p>
+                  <p class={"text-sm mt-2 #{ratio_status_class(@ratios.education_ratio)}"}>
+                    {ratio_status_icon(@ratios.education_ratio)} {String.capitalize(
+                      to_string(@ratios.education_ratio.status)
+                    )}
+                  </p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% :profile -> %>
+          <div class="space-y-6">
+            <h2 class="text-2xl font-bold text-gray-900">Financial Profile</h2>
+            <.live_component
+              module={AshfolioWeb.MoneyRatiosLive.FormComponent}
+              id="financial-profile-form"
+              financial_profile={@financial_profile}
+              action={if @financial_profile, do: :edit, else: :new}
+            />
+          </div>
+        <% :action -> %>
+          <div class="space-y-6">
+            <h2 class="text-2xl font-bold text-gray-900">Action Plan</h2>
+            <%= if Enum.any?(@recommendations) do %>
+              <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Recommendations</h3>
+                <ul class="space-y-3">
+                  <%= for recommendation <- @recommendations do %>
+                    <li class="flex items-start">
+                      <span class="flex-shrink-0 h-2 w-2 bg-blue-600 rounded-full mt-2 mr-3">
+                      </span>
+                      <p class="text-sm text-gray-700">{recommendation}</p>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+            <% else %>
+              <div class="bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex">
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-green-800">Excellent Work!</h3>
+                    <div class="mt-2 text-sm text-green-700">
+                      <p>All ratios are on track. Continue your current financial strategy.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+      <% end %>
+    <% else %>
+      <!-- No Profile State -->
+      <div class="max-w-2xl mx-auto">
+        <div class="text-center mb-8">
+          <h2 class="text-2xl font-bold text-gray-900">Create Financial Profile</h2>
+          <p class="text-lg text-gray-600 mt-2">
+            Get started with your money ratios assessment by providing some basic financial information.
+          </p>
+        </div>
+
+        <.live_component
+          module={AshfolioWeb.MoneyRatiosLive.FormComponent}
+          id="financial-profile-form-create"
+          financial_profile={nil}
+          action={:new}
+        />
+      </div>
+    <% end %>
+  </div>
+</div>

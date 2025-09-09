@@ -1,0 +1,150 @@
+# Ashfolio SessionStart Hook - v0.5.0
+# Optimized for Claude Code context management and /compact recovery
+
+# === AUTOMATIC CONTEXT LOADING ===
+# Claude Code automatically loads:
+# • CLAUDE.md (project root) - Development guidelines
+# • ~/.claude/CLAUDE.md (if exists) - User preferences
+# 
+# This sessionstart file is a project convention for manual reference
+
+# === ESSENTIAL PROJECT FILES TO LOAD ===
+@.code-gps.yaml
+@docs/TESTING_STRATEGY.md
+@justfile
+@mix.exs
+
+# === QUICK COMMAND REFERENCE ===
+# ALWAYS START WITH: mix code_gps
+# Then use these essential commands:
+#
+# Development:
+#   just work       → Start dev server (http://localhost:4000)
+#   just test       → Run tests (excludes slow/performance)
+#   just check      → Format + compile + credo + smoke tests
+#   just fix        → Auto-fix common test/DB issues
+#
+# Testing by Speed:
+#   just test unit  → <1s per test (TDD cycle)
+#   just test smoke → <2s critical paths only
+#   just test live  → 5-15s LiveView tests
+#   just test perf  → 30-60s performance tests
+#
+# Database:
+#   just db reset   → Full reset with sample data
+#   just db fix     → Emergency repair for test issues
+
+# === PROJECT ARCHITECTURE ===
+# Stack: Phoenix LiveView 0.20.17 + Ash 3.4 + SQLite
+# Pattern: Database-as-user (each SQLite DB = one user, no user_id fields)
+# Design: Local-first (all data on user's computer)
+# Tests: 970+ organized by speed/type (see docs/TESTING_STRATEGY.md)
+
+# === CURRENT FOCUS: v0.5.0 ===
+# Branch: feature/aer-standardization-v0.5.0
+# Goal: AER (Account Expense Ratio) standardization & financial planning
+# Status: Money Ratios assessment complete, tax planning in progress
+
+# === CRITICAL PHOENIX/HEEX RULES ===
+# ❌ NEVER use local variables in ~H templates
+# ✅ ALWAYS put ALL data in assigns map
+# ✅ ALWAYS access via @variable syntax
+# ❌ NEVER use ~H"" for empty templates
+# ✅ ALWAYS use ~H"""<!-- content -->"""
+#
+# Example - WRONG:
+#   def render(assigns) do
+#     items = ["a", "b"]  # Local variable
+#     ~H"""
+#     <%= for item <- items do %>  ❌ Can't access local var
+#       <div><%= item %></div>
+#     <% end %>
+#     """
+#   end
+#
+# Example - CORRECT:
+#   def render(assigns) do
+#     assigns = assign(assigns, :items, ["a", "b"])
+#     ~H"""
+#     <%= for item <- @items do %>  ✅ Uses @assigns
+#       <div><%= item %></div>
+#     <% end %>
+#     """
+#   end
+
+# === AI DEVELOPMENT WORKFLOW ===
+# 1. Run: mix code_gps (generates .code-gps.yaml manifest)
+# 2. Read: Check integration opportunities in manifest
+# 3. Test: just test unit for fast TDD feedback
+# 4. Format: mix format BEFORE mix credo
+# 5. Verify: mix compile --warnings-as-errors
+
+# === KEY DOMAINS & RESOURCES ===
+# Ashfolio.Portfolio Domain:
+#   • Account - Investment/cash accounts with balances
+#   • Symbol - Stocks/ETFs with Yahoo Finance integration
+#   • Transaction - Buy/sell/dividend with FIFO cost basis
+#   • Position - Current holdings with real-time valuation
+#
+# Ashfolio.FinancialManagement Domain:
+#   • TransactionCategory - Hierarchical expense categories
+#   • Expense - Categorized spending tracking
+#   • TaxStrategy - Tax planning calculations
+#   • MoneyRatios - Financial health assessment (25 ratios)
+
+# === TESTING STRATEGY ===
+# Categories (from fastest to slowest):
+#   unit        → Pure functions, no DB (<1s)
+#   integration → Cross-module with DB (2-5s)
+#   component   → LiveComponent isolation (3-8s)
+#   liveview    → Full LiveView tests (5-15s)
+#   edge_case   → Boundary conditions (varies)
+#   performance → Load & speed tests (30-60s)
+#   smoke       → Critical paths only (<2s)
+#
+# Run targeted: just test [category]
+# Run failed: just test failed
+
+# === CODE QUALITY CHECKLIST ===
+# Before ANY commit:
+# □ mix code_gps - Update codebase manifest
+# □ mix format - Auto-fix style issues
+# □ mix compile --warnings-as-errors
+# □ mix credo --strict
+# □ just test smoke - Critical paths pass
+# □ All HEEx templates use @assigns only
+
+# === FINANCIAL CALCULATIONS ===
+# • All money uses Decimal type (never float)
+# • FIFO cost basis for tax calculations
+# • Yahoo Finance for real-time quotes
+# • Account types: investment, checking, savings, money_market, cd
+# • Transaction types: BUY, SELL, DIVIDEND, FEE, INTEREST, LIABILITY
+
+# === EMERGENCY FIXES ===
+# Common issues and solutions:
+#   "undefined function" → mix deps.get && mix compile
+#   Test DB locked → just db test-reset
+#   Mass test failures → just fix
+#   Template warnings → Check @assigns usage
+#   Credo issues → mix format first, then mix credo
+
+# === DEVELOPMENT PHILOSOPHY ===
+# From CLAUDE.md:
+# • Incremental progress over big bangs
+# • Learn from existing code patterns
+# • Maximum 3 attempts, then reassess
+# • Test-driven when possible
+# • Boring solutions over clever code
+
+# === POST-COMPACT RECOVERY ===
+# After using /compact to consolidate context:
+# 1. This file auto-loads to restore orientation
+# 2. Run: mix code_gps for fresh analysis
+# 3. Check: .code-gps.yaml for integration points
+# 4. Continue with minimal but sufficient context
+
+# === NEXT STEPS ===
+# After this loads, immediately run:
+#   mix code_gps
+# Then review .code-gps.yaml for current integration opportunities.

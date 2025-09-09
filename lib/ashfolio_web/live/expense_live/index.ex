@@ -2,11 +2,11 @@ defmodule AshfolioWeb.ExpenseLive.Index do
   @moduledoc false
   use AshfolioWeb, :live_view
 
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.Expense
   alias Ashfolio.FinancialManagement.TransactionCategory
   alias AshfolioWeb.ExpenseLive.FormComponent
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -128,7 +128,7 @@ defmodule AshfolioWeb.ExpenseLive.Index do
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="text-center">
               <div class="text-2xl font-bold text-gray-900">
-                {FormatHelpers.format_currency(@total_expenses)}
+                {Formatters.format_currency_with_cents(@total_expenses)}
               </div>
               <div class="text-sm text-gray-500">Total Expenses</div>
             </div>
@@ -140,7 +140,7 @@ defmodule AshfolioWeb.ExpenseLive.Index do
             </div>
             <div class="text-center">
               <div class="text-2xl font-bold text-green-600">
-                {FormatHelpers.format_currency(@current_month_total)}
+                {Formatters.format_currency_with_cents(@current_month_total)}
               </div>
               <div class="text-sm text-gray-500">This Month</div>
             </div>
@@ -431,10 +431,10 @@ defmodule AshfolioWeb.ExpenseLive.Index do
                   <%= for expense <- @expenses do %>
                     <tr class="hover:bg-gray-50">
                       <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
-                        {FormatHelpers.format_date(expense.date)}
+                        {Formatters.format_date(expense.date)}
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm font-mono font-semibold text-right text-gray-900">
-                        {FormatHelpers.format_currency(expense.amount)}
+                        {Formatters.format_currency_with_cents(expense.amount)}
                       </td>
                       <td class="px-6 py-4 text-sm text-gray-900">
                         <div class="font-medium">{expense.description}</div>
@@ -704,11 +704,7 @@ defmodule AshfolioWeb.ExpenseLive.Index do
             expense.description || ""
 
           :category ->
-            if expense.category do
-              expense.category.name
-            else
-              ""
-            end
+            get_expense_category_name(expense)
 
           _ ->
             expense.date
@@ -771,5 +767,13 @@ defmodule AshfolioWeb.ExpenseLive.Index do
     |> Ash.Query.sort(:name)
     |> Ash.read!()
     |> Enum.map(&{&1.name, &1.id})
+  end
+
+  defp get_expense_category_name(expense) do
+    if expense.category do
+      expense.category.name
+    else
+      ""
+    end
   end
 end

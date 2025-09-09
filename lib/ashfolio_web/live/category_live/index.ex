@@ -2,10 +2,10 @@ defmodule AshfolioWeb.CategoryLive.Index do
   @moduledoc false
   use AshfolioWeb, :live_view
 
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.TransactionCategory
   alias AshfolioWeb.CategoryLive.FormComponent
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -70,48 +70,13 @@ defmodule AshfolioWeb.CategoryLive.Index do
 
   @impl true
   def handle_event("delete_category", %{"id" => id}, socket) do
-    # Set loading state for visual feedback
     socket = assign(socket, :deleting_category_id, id)
-
-    # Get category to check if it's a system category
     category = Enum.find(socket.assigns.categories, &(&1.id == id))
 
     if category && category.is_system do
-      {:noreply,
-       socket
-       |> assign(:deleting_category_id, nil)
-       |> ErrorHelpers.put_error_flash("System categories cannot be deleted")}
+      {:noreply, handle_system_category_deletion(socket)}
     else
-      # Check if category has any transactions before allowing deletion
-      case get_category_transaction_count(id) do
-        0 ->
-          # Safe to delete - no transactions
-          case TransactionCategory.destroy(id) do
-            :ok ->
-              Ashfolio.PubSub.broadcast!("categories", {:category_deleted, id})
-              socket = load_categories(socket)
-
-              {:noreply,
-               socket
-               |> ErrorHelpers.put_success_flash("Category deleted successfully")
-               |> assign(:deleting_category_id, nil)}
-
-            {:error, reason} ->
-              {:noreply,
-               socket
-               |> assign(:deleting_category_id, nil)
-               |> ErrorHelpers.put_error_flash(reason, "Failed to delete category")}
-          end
-
-        count ->
-          # Has transactions - cannot delete
-          {:noreply,
-           socket
-           |> assign(:deleting_category_id, nil)
-           |> ErrorHelpers.put_error_flash(
-             "Cannot delete category that has #{count} transaction(s). Remove or reassign transactions first."
-           )}
-      end
+      {:noreply, attempt_category_deletion(socket, id)}
     end
   end
 
@@ -327,7 +292,7 @@ defmodule AshfolioWeb.CategoryLive.Index do
                 <div :if={!category.is_system} class="flex items-center justify-between text-sm">
                   <span class="text-gray-500">Created:</span>
                   <span class="font-medium text-gray-900">
-                    {FormatHelpers.format_date(category.inserted_at)}
+                    {Formatters.format_date(category.inserted_at)}
                   </span>
                 </div>
               </div>
@@ -493,12 +458,47 @@ defmodule AshfolioWeb.CategoryLive.Index do
   end
 
   defp get_filtered_categories(categories, :all), do: categories
-  defp get_filtered_categories(categories, :user), do: Enum.filter(categories, &(!&1.is_system))
-  defp get_filtered_categories(categories, :system), do: Enum.filter(categories, & &1.is_system)
+
+  defp get_filtered_categories(categories, :user) do
+    Enum.filter(categories, &(!&1.is_system))
+  end
+
+  defp get_filtered_categories(categories, :system) do
+    Enum.filter(categories, & &1.is_system)
+  end
 
   defp get_category_transaction_count(_category_id) do
     # Placeholder - in a real implementation, this would query the transactions
     # For now, return 0 to allow deletion
     0
+  end
+
+  defp handle_system_category_deletion(socket) do
+    socket
+    |> assign(:deleting_category_id, nil)
+    |> ErrorHelpers.put_error_flash("System categories cannot be deleted")
+  end
+
+  defp attempt_category_deletion(socket, id) do
+    case get_category_transaction_count(id) do
+      0 -> delete_category(socket, id)
+    end
+  end
+
+  defp delete_category(socket, id) do
+    case TransactionCategory.destroy(id) do
+      :ok ->
+        Ashfolio.PubSub.broadcast!("categories", {:category_deleted, id})
+        socket = load_categories(socket)
+
+        socket
+        |> ErrorHelpers.put_success_flash("Category deleted successfully")
+        |> assign(:deleting_category_id, nil)
+
+      {:error, reason} ->
+        socket
+        |> assign(:deleting_category_id, nil)
+        |> ErrorHelpers.put_error_flash(reason, "Failed to delete category")
+    end
   end
 end

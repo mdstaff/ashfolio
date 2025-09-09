@@ -3,8 +3,8 @@ defmodule AshfolioWeb.AccountLive.Show do
   use AshfolioWeb, :live_view
 
   alias Ashfolio.Context
+  alias Ashfolio.Financial.Formatters
   alias AshfolioWeb.AccountLive.BalanceUpdateComponent
-  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -211,7 +211,7 @@ defmodule AshfolioWeb.AccountLive.Show do
               <div class="ml-4">
                 <p class="text-sm font-medium text-gray-500">Account Balance</p>
                 <p class={"text-2xl font-bold #{if @account.is_excluded, do: "text-gray-500", else: "text-gray-900"}"}>
-                  {FormatHelpers.format_currency(@account.balance)}
+                  {Formatters.format_currency_with_cents(@account.balance)}
                 </p>
                 <div class="text-xs text-gray-500 mt-1">
                   <%= if @account.is_excluded do %>
@@ -219,7 +219,7 @@ defmodule AshfolioWeb.AccountLive.Show do
                   <% end %>
                   <%= if @account.balance_updated_at do %>
                     <p>
-                      Balance updated {FormatHelpers.format_relative_time(@account.balance_updated_at)}
+                      Balance updated {Formatters.format_relative_time(@account.balance_updated_at)}
                     </p>
                   <% else %>
                     <p class="text-yellow-600">
@@ -375,18 +375,20 @@ defmodule AshfolioWeb.AccountLive.Show do
                             <div>
                               <div class="text-sm">
                                 <span class="font-medium text-gray-900">
-                                  Balance changed from {FormatHelpers.format_currency(
+                                  Balance changed from {Formatters.format_currency_with_cents(
                                     history_item.old_balance
-                                  )} to {FormatHelpers.format_currency(history_item.new_balance)}
+                                  )} to {Formatters.format_currency_with_cents(
+                                    history_item.new_balance
+                                  )}
                                 </span>
                                 <span class={"ml-2 text-sm #{if is_increase, do: "text-green-600", else: "text-red-600"}"}>
-                                  ({if is_increase, do: "+", else: ""}{FormatHelpers.format_currency(
+                                  ({if is_increase, do: "+", else: ""}{Formatters.format_currency_with_cents(
                                     change
                                   )})
                                 </span>
                               </div>
                               <p class="mt-0.5 text-sm text-gray-500">
-                                {FormatHelpers.format_relative_time(history_item.timestamp)}
+                                {Formatters.format_relative_time(history_item.timestamp)}
                               </p>
                             </div>
                             <%= if history_item.notes do %>
@@ -430,7 +432,7 @@ defmodule AshfolioWeb.AccountLive.Show do
                   </div>
                   <div class="text-sm text-gray-500">Buy Orders</div>
                   <div class="text-xs text-gray-400 mt-1">
-                    {FormatHelpers.format_currency(@transaction_stats.buy_total)}
+                    {Formatters.format_currency_with_cents(@transaction_stats.buy_total)}
                   </div>
                 </div>
                 
@@ -441,7 +443,7 @@ defmodule AshfolioWeb.AccountLive.Show do
                   </div>
                   <div class="text-sm text-gray-500">Sell Orders</div>
                   <div class="text-xs text-gray-400 mt-1">
-                    {FormatHelpers.format_currency(@transaction_stats.sell_total)}
+                    {Formatters.format_currency_with_cents(@transaction_stats.sell_total)}
                   </div>
                 </div>
                 
@@ -452,7 +454,7 @@ defmodule AshfolioWeb.AccountLive.Show do
                   </div>
                   <div class="text-sm text-gray-500">Dividends</div>
                   <div class="text-xs text-gray-400 mt-1">
-                    {FormatHelpers.format_currency(@transaction_stats.dividend_total)}
+                    {Formatters.format_currency_with_cents(@transaction_stats.dividend_total)}
                   </div>
                 </div>
                 
@@ -463,7 +465,7 @@ defmodule AshfolioWeb.AccountLive.Show do
                   </div>
                   <div class="text-sm text-gray-500">Fees</div>
                   <div class="text-xs text-gray-400 mt-1">
-                    {FormatHelpers.format_currency(@transaction_stats.fee_total)}
+                    {Formatters.format_currency_with_cents(@transaction_stats.fee_total)}
                   </div>
                 </div>
               </div>
@@ -554,9 +556,9 @@ defmodule AshfolioWeb.AccountLive.Show do
 
     success_message =
       if notes do
-        "Balance updated to #{FormatHelpers.format_currency(new_balance)}. Note: #{notes}"
+        "Balance updated to #{Formatters.format_currency_with_cents(new_balance)}. Note: #{notes}"
       else
-        "Balance updated to #{FormatHelpers.format_currency(new_balance)}"
+        "Balance updated to #{Formatters.format_currency_with_cents(new_balance)}"
       end
 
     {:noreply,
@@ -577,32 +579,37 @@ defmodule AshfolioWeb.AccountLive.Show do
 
     case Context.get_account_with_transactions(account_id, 50) do
       {:ok, data} ->
-        transaction_stats = calculate_transaction_stats(data.transactions)
-
-        # Get balance history if it's a cash account
-        balance_history =
-          if data.account.account_type in [:checking, :savings, :money_market, :cd] do
-            case Context.get_balance_history(account_id) do
-              {:ok, history} -> history
-              {:error, _} -> []
-            end
-          else
-            []
-          end
-
-        socket
-        |> assign(:account, data.account)
-        |> assign(:transactions, data.transactions)
-        |> assign(:balance_history, balance_history)
-        |> assign(:account_summary, data.summary)
-        |> assign(:transaction_stats, transaction_stats)
-        |> assign(:page_title, "#{data.account.name} - Account Details")
-        |> assign(:loading_account, false)
+        process_account_data(socket, data, account_id)
 
       {:error, reason} ->
         socket
         |> put_flash(:error, format_error_message(reason))
         |> push_navigate(to: ~p"/accounts")
+    end
+  end
+
+  defp process_account_data(socket, data, account_id) do
+    transaction_stats = calculate_transaction_stats(data.transactions)
+    balance_history = get_account_balance_history(data.account, account_id)
+
+    socket
+    |> assign(:account, data.account)
+    |> assign(:transactions, data.transactions)
+    |> assign(:balance_history, balance_history)
+    |> assign(:account_summary, data.summary)
+    |> assign(:transaction_stats, transaction_stats)
+    |> assign(:page_title, "#{data.account.name} - Account Details")
+    |> assign(:loading_account, false)
+  end
+
+  defp get_account_balance_history(account, account_id) do
+    if account.account_type in [:checking, :savings, :money_market, :cd] do
+      case Context.get_balance_history(account_id) do
+        {:ok, history} -> history
+        {:error, _} -> []
+      end
+    else
+      []
     end
   end
 

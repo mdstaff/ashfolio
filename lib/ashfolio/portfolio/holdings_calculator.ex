@@ -305,34 +305,8 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
   defp calculate_cost_basis_from_transactions(transactions) do
     # Simple FIFO cost basis calculation
     {total_quantity, total_cost, _} =
-      Enum.reduce(transactions, {Decimal.new(0), Decimal.new(0), []}, fn transaction, {qty, cost, lots} ->
-        case transaction.type do
-          :buy ->
-            new_qty = Decimal.add(qty, transaction.quantity)
-            new_cost = Decimal.add(cost, transaction.total_amount)
-
-            new_lot = %{
-              quantity: transaction.quantity,
-              cost: transaction.total_amount,
-              date: transaction.date
-            }
-
-            {new_qty, new_cost, [new_lot | lots]}
-
-          :sell ->
-            # For simplicity, reduce cost proportionally
-            sell_qty = Decimal.abs(transaction.quantity)
-
-            if Decimal.equal?(qty, 0) do
-              {qty, cost, lots}
-            else
-              sell_ratio = Decimal.div(sell_qty, qty)
-              cost_reduction = Decimal.mult(cost, sell_ratio)
-              new_qty = Decimal.sub(qty, sell_qty)
-              new_cost = Decimal.sub(cost, cost_reduction)
-              {new_qty, new_cost, lots}
-            end
-        end
+      Enum.reduce(transactions, {Decimal.new(0), Decimal.new(0), []}, fn transaction, acc ->
+        process_transaction_for_cost_basis(transaction, acc)
       end)
 
     average_cost =
@@ -349,34 +323,71 @@ defmodule Ashfolio.Portfolio.HoldingsCalculator do
     }
   end
 
+  defp process_transaction_for_cost_basis(transaction, {qty, cost, lots}) do
+    case transaction.type do
+      :buy ->
+        process_buy_transaction(transaction, qty, cost, lots)
+
+      :sell ->
+        process_sell_transaction(transaction, qty, cost, lots)
+    end
+  end
+
+  defp process_buy_transaction(transaction, qty, cost, lots) do
+    new_qty = Decimal.add(qty, transaction.quantity)
+    new_cost = Decimal.add(cost, transaction.total_amount)
+
+    new_lot = %{
+      quantity: transaction.quantity,
+      cost: transaction.total_amount,
+      date: transaction.date
+    }
+
+    {new_qty, new_cost, [new_lot | lots]}
+  end
+
+  defp process_sell_transaction(transaction, qty, cost, lots) do
+    # For simplicity, reduce cost proportionally
+    sell_qty = Decimal.abs(transaction.quantity)
+
+    if Decimal.equal?(qty, 0) do
+      {qty, cost, lots}
+    else
+      sell_ratio = Decimal.div(sell_qty, qty)
+      cost_reduction = Decimal.mult(cost, sell_ratio)
+      new_qty = Decimal.sub(qty, sell_qty)
+      new_cost = Decimal.sub(cost, cost_reduction)
+      {new_qty, new_cost, lots}
+    end
+  end
+
   defp get_symbol_transactions(symbol_id) do
     case Account.list() do
       {:ok, accounts} ->
-        active_accounts =
-          Enum.filter(accounts, fn account ->
-            not account.is_excluded
-          end)
-
-        transactions =
-          active_accounts
-          |> Enum.flat_map(fn account ->
-            case Transaction.by_account(account.id) do
-              {:ok, transactions} ->
-                Enum.filter(transactions, fn transaction ->
-                  transaction.symbol_id == symbol_id and transaction.type in [:buy, :sell]
-                end)
-
-              {:error, _} ->
-                []
-            end
-          end)
-          |> Enum.sort_by(& &1.date)
-
-        {:ok, transactions}
+        active_accounts = Enum.filter(accounts, &(not &1.is_excluded))
+        transactions = collect_symbol_transactions(active_accounts, symbol_id)
+        {:ok, Enum.sort_by(transactions, & &1.date)}
 
       {:error, reason} ->
         {:error, reason}
     end
+  end
+
+  defp collect_symbol_transactions(accounts, symbol_id) do
+    Enum.flat_map(accounts, &get_account_symbol_transactions(&1, symbol_id))
+  end
+
+  defp get_account_symbol_transactions(account, symbol_id) do
+    case Transaction.by_account(account.id) do
+      {:ok, transactions} -> filter_symbol_transactions(transactions, symbol_id)
+      {:error, _} -> []
+    end
+  end
+
+  defp filter_symbol_transactions(transactions, symbol_id) do
+    Enum.filter(transactions, fn transaction ->
+      transaction.symbol_id == symbol_id and transaction.type in [:buy, :sell]
+    end)
   end
 
   defp get_current_price(symbol) do

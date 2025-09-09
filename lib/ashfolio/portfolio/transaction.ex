@@ -408,57 +408,53 @@ defmodule Ashfolio.Portfolio.Transaction do
     type = Ash.Changeset.get_attribute(changeset, :type)
     quantity = Ash.Changeset.get_attribute(changeset, :quantity)
 
-    cond do
-      type == :buy and (is_nil(quantity) or Decimal.compare(quantity, 0) != :gt) ->
-        Ash.Changeset.add_error(changeset,
-          field: :quantity,
-          message: "Quantity must be positive for buy transactions"
-        )
+    validate_quantity_by_type(changeset, type, quantity)
+  end
 
-      type == :sell and (is_nil(quantity) or Decimal.compare(quantity, 0) != :lt) ->
-        Ash.Changeset.add_error(changeset,
-          field: :quantity,
-          message: "Quantity must be negative for sell transactions"
-        )
+  defp validate_quantity_by_type(changeset, type, quantity) do
+    case get_quantity_requirement(type) do
+      {:positive, message} -> validate_positive_quantity(changeset, quantity, message)
+      {:negative, message} -> validate_negative_quantity(changeset, quantity, message)
+      {:non_negative, message} -> validate_non_negative_quantity(changeset, quantity, message)
+      :valid -> changeset
+    end
+  end
 
-      type == :dividend and (is_nil(quantity) or Decimal.compare(quantity, 0) != :gt) ->
-        Ash.Changeset.add_error(changeset,
-          field: :quantity,
-          message: "Quantity must be positive for dividend transactions"
-        )
+  defp get_quantity_requirement(type) do
+    case type do
+      :buy -> {:positive, "Quantity must be positive for buy transactions"}
+      :sell -> {:negative, "Quantity must be negative for sell transactions"}
+      :dividend -> {:positive, "Quantity must be positive for dividend transactions"}
+      :interest -> {:positive, "Quantity must be positive for interest transactions"}
+      :liability -> {:negative, "Quantity must be negative for liability transactions"}
+      :fee -> {:non_negative, "Quantity cannot be negative for fee transactions"}
+      :deposit -> {:positive, "Quantity must be positive for deposit transactions"}
+      :withdrawal -> {:negative, "Quantity must be negative for withdrawal transactions"}
+      _ -> :valid
+    end
+  end
 
-      type == :interest and (is_nil(quantity) or Decimal.compare(quantity, 0) != :gt) ->
-        Ash.Changeset.add_error(changeset,
-          field: :quantity,
-          message: "Quantity must be positive for interest transactions"
-        )
+  defp validate_positive_quantity(changeset, quantity, message) do
+    if is_nil(quantity) or Decimal.compare(quantity, 0) != :gt do
+      Ash.Changeset.add_error(changeset, field: :quantity, message: message)
+    else
+      changeset
+    end
+  end
 
-      type == :liability and (is_nil(quantity) or Decimal.compare(quantity, 0) != :lt) ->
-        Ash.Changeset.add_error(changeset,
-          field: :quantity,
-          message: "Quantity must be negative for liability transactions"
-        )
+  defp validate_negative_quantity(changeset, quantity, message) do
+    if is_nil(quantity) or Decimal.compare(quantity, 0) != :lt do
+      Ash.Changeset.add_error(changeset, field: :quantity, message: message)
+    else
+      changeset
+    end
+  end
 
-      type == :fee and not is_nil(quantity) and Decimal.compare(quantity, 0) == :lt ->
-        Ash.Changeset.add_error(changeset,
-          field: :quantity,
-          message: "Quantity cannot be negative for fee transactions"
-        )
-
-      type == :deposit and (is_nil(quantity) or Decimal.compare(quantity, 0) != :gt) ->
-        Ash.Changeset.add_error(changeset,
-          field: :quantity,
-          message: "Quantity must be positive for deposit transactions"
-        )
-
-      type == :withdrawal and (is_nil(quantity) or Decimal.compare(quantity, 0) != :lt) ->
-        Ash.Changeset.add_error(changeset,
-          field: :quantity,
-          message: "Quantity must be negative for withdrawal transactions"
-        )
-
-      true ->
-        changeset
+  defp validate_non_negative_quantity(changeset, quantity, message) do
+    if not is_nil(quantity) and Decimal.compare(quantity, 0) == :lt do
+      Ash.Changeset.add_error(changeset, field: :quantity, message: message)
+    else
+      changeset
     end
   end
 

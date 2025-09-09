@@ -222,54 +222,9 @@ defmodule AshfolioWeb.Components.SymbolAutocomplete do
       |> assign(:error, nil)
 
     if String.length(query) >= socket.assigns.min_query_length do
-      socket =
-        socket
-        |> assign(:loading, true)
-        |> assign(:show_dropdown, true)
-
-      # Perform search with Context API
-      case context_module().search_symbols(query, max_results: socket.assigns.max_results + 1) do
-        {:ok, all_results} ->
-          {results, has_more} =
-            if length(all_results) > socket.assigns.max_results do
-              {Enum.take(all_results, socket.assigns.max_results), true}
-            else
-              {all_results, false}
-            end
-
-          announcement =
-            case length(results) do
-              0 -> "No symbols found for #{query}"
-              1 -> "1 symbol found"
-              count -> "#{count} symbols found"
-            end
-
-          {:noreply,
-           socket
-           |> assign(:loading, false)
-           |> assign(:results, results)
-           |> assign(:has_more_results, has_more)
-           |> assign(:announcement, announcement)}
-
-        {:error, reason} ->
-          error_message = format_search_error(reason)
-          Logger.warning("Symbol search failed for query '#{query}': #{inspect(reason)}")
-
-          {:noreply,
-           socket
-           |> assign(:loading, false)
-           |> assign(:results, [])
-           |> assign(:error, error_message)
-           |> assign(:announcement, "Search failed: #{error_message}")}
-      end
+      {:noreply, perform_symbol_search(socket, query)}
     else
-      # Query too short, hide dropdown
-      {:noreply,
-       socket
-       |> assign(:loading, false)
-       |> assign(:show_dropdown, false)
-       |> assign(:results, [])
-       |> assign(:announcement, "")}
+      {:noreply, clear_search_results(socket)}
     end
   end
 
@@ -373,6 +328,67 @@ defmodule AshfolioWeb.Components.SymbolAutocomplete do
   end
 
   # Private helper functions
+
+  defp perform_symbol_search(socket, query) do
+    socket =
+      socket
+      |> assign(:loading, true)
+      |> assign(:show_dropdown, true)
+
+    case context_module().search_symbols(query, max_results: socket.assigns.max_results + 1) do
+      {:ok, all_results} ->
+        handle_successful_search(socket, all_results, query)
+
+      {:error, reason} ->
+        handle_failed_search(socket, reason, query)
+    end
+  end
+
+  defp handle_successful_search(socket, all_results, query) do
+    {results, has_more} = limit_results(all_results, socket.assigns.max_results)
+    announcement = create_announcement(results, query)
+
+    socket
+    |> assign(:loading, false)
+    |> assign(:results, results)
+    |> assign(:has_more_results, has_more)
+    |> assign(:announcement, announcement)
+  end
+
+  defp handle_failed_search(socket, reason, query) do
+    error_message = format_search_error(reason)
+    Logger.warning("Symbol search failed for query '#{query}': #{inspect(reason)}")
+
+    socket
+    |> assign(:loading, false)
+    |> assign(:results, [])
+    |> assign(:error, error_message)
+    |> assign(:announcement, "Search failed: #{error_message}")
+  end
+
+  defp limit_results(all_results, max_results) do
+    if length(all_results) > max_results do
+      {Enum.take(all_results, max_results), true}
+    else
+      {all_results, false}
+    end
+  end
+
+  defp create_announcement(results, query) do
+    case length(results) do
+      0 -> "No symbols found for #{query}"
+      1 -> "1 symbol found"
+      count -> "#{count} symbols found"
+    end
+  end
+
+  defp clear_search_results(socket) do
+    socket
+    |> assign(:loading, false)
+    |> assign(:show_dropdown, false)
+    |> assign(:results, [])
+    |> assign(:announcement, "")
+  end
 
   defp format_asset_class(:stock), do: "Stock"
   defp format_asset_class(:etf), do: "ETF"

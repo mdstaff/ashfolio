@@ -262,24 +262,30 @@ defmodule Ashfolio.MarketData.PriceManager do
   end
 
   defp fetch_individually_with_rate_limit(symbols) do
-    results =
-      Enum.map(symbols, fn symbol ->
-        case RateLimiter.check_rate_limit(:individual_fetch, 1) do
-          :ok ->
-            case @yahoo_finance_module.fetch_price(symbol) do
-              {:ok, price} ->
-                {symbol, {:ok, price}}
-
-              {:error, reason} ->
-                {symbol, {:error, reason}}
-            end
-
-          {:error, :rate_limited, _retry_after_ms} ->
-            {symbol, {:error, :rate_limited}}
-        end
-      end)
-
+    results = Enum.map(symbols, &fetch_single_symbol_with_rate_limit/1)
     process_individual_results(results)
+  end
+
+  # Helper function to reduce nesting depth
+  defp fetch_single_symbol_with_rate_limit(symbol) do
+    case RateLimiter.check_rate_limit(:individual_fetch, 1) do
+      :ok ->
+        fetch_symbol_price(symbol)
+
+      {:error, :rate_limited, _retry_after_ms} ->
+        {symbol, {:error, :rate_limited}}
+    end
+  end
+
+  # Helper function to reduce nesting depth
+  defp fetch_symbol_price(symbol) do
+    case @yahoo_finance_module.fetch_price(symbol) do
+      {:ok, price} ->
+        {symbol, {:ok, price}}
+
+      {:error, reason} ->
+        {symbol, {:error, reason}}
+    end
   end
 
   defp process_successful_prices(price_map, requested_symbols) do

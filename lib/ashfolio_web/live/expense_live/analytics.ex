@@ -2,8 +2,9 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
   @moduledoc false
   use AshfolioWeb, :live_view
 
+  alias Ashfolio.DataHelpers
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.Expense
-  alias AshfolioWeb.Live.FormatHelpers
   alias Contex.Dataset
   alias Contex.PieChart
   alias Contex.Plot
@@ -12,7 +13,7 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
   def mount(_params, _session, socket) do
     socket =
       socket
-      |> assign_current_page(:expenses)
+      |> assign_current_page(:analytics)
       |> assign(:page_title, "Expense Analytics")
       |> assign(:page_subtitle, "Visualize your spending patterns")
       |> assign(:expenses, [])
@@ -220,7 +221,7 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="text-center">
               <div class="text-3xl font-bold text-gray-900">
-                {FormatHelpers.format_currency(@total_expenses)}
+                {Formatters.format_currency_with_cents(@total_expenses)}
               </div>
               <div class="text-sm text-gray-500">Total Expenses</div>
             </div>
@@ -310,7 +311,7 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
                         </div>
                         <div class="text-right">
                           <div class="text-sm font-medium text-gray-900">
-                            {FormatHelpers.format_currency(amount)}
+                            {Formatters.format_currency_with_cents(amount)}
                           </div>
                           <div class="text-xs text-gray-500">
                             {Float.round(percentage, 1)}%
@@ -569,37 +570,8 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
     end
   end
 
-  defp filter_by_date_range(expenses, "current_month") do
-    start_date = Date.beginning_of_month(Date.utc_today())
-    Enum.filter(expenses, &(Date.compare(&1.date, start_date) != :lt))
-  end
-
-  defp filter_by_date_range(expenses, "last_month") do
-    today = Date.utc_today()
-    start_date = today |> Date.beginning_of_month() |> Date.add(-1) |> Date.beginning_of_month()
-    end_date = Date.end_of_month(start_date)
-
-    Enum.filter(expenses, fn expense ->
-      Date.compare(expense.date, start_date) != :lt && Date.compare(expense.date, end_date) != :gt
-    end)
-  end
-
-  defp filter_by_date_range(expenses, "last_3_months") do
-    start_date = Date.add(Date.utc_today(), -90)
-    Enum.filter(expenses, &(Date.compare(&1.date, start_date) != :lt))
-  end
-
-  defp filter_by_date_range(expenses, "last_6_months") do
-    start_date = Date.add(Date.utc_today(), -180)
-    Enum.filter(expenses, &(Date.compare(&1.date, start_date) != :lt))
-  end
-
-  defp filter_by_date_range(expenses, "all_time") do
-    expenses
-  end
-
-  defp filter_by_date_range(expenses, _) do
-    filter_by_date_range(expenses, "current_month")
+  defp filter_by_date_range(expenses, range) do
+    DataHelpers.filter_by_date_range(expenses, range, :date)
   end
 
   defp calculate_category_data(expenses) do
@@ -792,51 +764,7 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
 
     case years_with_data do
       [current_year, previous_year | _] ->
-        current_year_expenses =
-          all_expenses
-          |> Enum.filter(fn expense -> expense.date.year == current_year end)
-          |> calculate_total_expenses()
-
-        previous_year_expenses =
-          all_expenses
-          |> Enum.filter(fn expense -> expense.date.year == previous_year end)
-          |> calculate_total_expenses()
-
-        case Decimal.compare(previous_year_expenses, Decimal.new(0)) do
-          :eq ->
-            %{
-              current_year: current_year,
-              previous_year: previous_year,
-              current_total: current_year_expenses,
-              previous_total: previous_year_expenses,
-              percentage_change: nil,
-              trend: :no_data
-            }
-
-          _ ->
-            # Calculate percentage change: ((current - previous) / previous) * 100
-            difference = Decimal.sub(current_year_expenses, previous_year_expenses)
-
-            percentage_change =
-              difference
-              |> Decimal.div(previous_year_expenses)
-              |> Decimal.mult(Decimal.new(100))
-              |> Decimal.round(1)
-
-            trend =
-              if Decimal.compare(percentage_change, Decimal.new(0)) == :gt,
-                do: :increase,
-                else: :decrease
-
-            %{
-              current_year: current_year,
-              previous_year: previous_year,
-              current_total: current_year_expenses,
-              previous_total: previous_year_expenses,
-              percentage_change: percentage_change,
-              trend: trend
-            }
-        end
+        calculate_year_comparison(all_expenses, current_year, previous_year)
 
       _ ->
         # Not enough data for comparison
@@ -847,6 +775,63 @@ defmodule AshfolioWeb.ExpenseLive.Analytics do
           previous_total: Decimal.new(0),
           percentage_change: nil,
           trend: :no_data
+        }
+    end
+  end
+
+  defp calculate_year_comparison(all_expenses, current_year, previous_year) do
+    current_year_expenses =
+      all_expenses
+      |> Enum.filter(fn expense -> expense.date.year == current_year end)
+      |> calculate_total_expenses()
+
+    previous_year_expenses =
+      all_expenses
+      |> Enum.filter(fn expense -> expense.date.year == previous_year end)
+      |> calculate_total_expenses()
+
+    build_year_comparison_result(
+      current_year,
+      previous_year,
+      current_year_expenses,
+      previous_year_expenses
+    )
+  end
+
+  defp build_year_comparison_result(current_year, previous_year, current_total, previous_total) do
+    case Decimal.compare(previous_total, Decimal.new(0)) do
+      :eq ->
+        %{
+          current_year: current_year,
+          previous_year: previous_year,
+          current_total: current_total,
+          previous_total: previous_total,
+          percentage_change: nil,
+          trend: :no_data
+        }
+
+      _ ->
+        # Calculate percentage change: ((current - previous) / previous) * 100
+        difference = Decimal.sub(current_total, previous_total)
+
+        percentage_change =
+          difference
+          |> Decimal.div(previous_total)
+          |> Decimal.mult(Decimal.new(100))
+          |> Decimal.round(1)
+
+        trend =
+          if Decimal.compare(percentage_change, Decimal.new(0)) == :gt,
+            do: :increase,
+            else: :decrease
+
+        %{
+          current_year: current_year,
+          previous_year: previous_year,
+          current_total: current_total,
+          previous_total: previous_total,
+          percentage_change: percentage_change,
+          trend: trend
         }
     end
   end

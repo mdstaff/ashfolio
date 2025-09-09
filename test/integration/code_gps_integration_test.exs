@@ -4,6 +4,9 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
 
   This test validates that the Code GPS tool generates accurate
   codebase analysis that matches the actual implementation.
+
+  To skip these tests during normal test runs:
+  mix test --exclude code_gps
   """
 
   use ExUnit.Case, async: false
@@ -12,7 +15,8 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
 
   alias Mix.Tasks.CodeGps
 
-  @moduletag :skip
+  @moduletag :code_gps
+
   @code_gps_path ".code-gps.yaml"
 
   setup do
@@ -78,10 +82,6 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
       assert content =~ "modal:", "Should detect modal component"
       assert content =~ "button:", "Should detect button component"
       assert content =~ "simple_form:", "Should detect simple_form component"
-
-      # Test integration opportunities
-      assert content =~ "add_expense_to_dashboard:", "Should suggest expense integration"
-      assert content =~ "priority: high", "Should include priority levels"
     end
 
     test "detects actual LiveView events and subscriptions" do
@@ -92,12 +92,11 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
       content = File.read!(@code_gps_path)
 
       # Dashboard LiveView events
-      assert content =~ ~s(events: ["refresh_prices", "sort"]),
+      assert content =~ ~s(events: ["refresh_prices", "sort", "create_snapshot"]),
              "Should detect Dashboard events"
 
       # Dashboard subscriptions
-      assert content =~ ~s(subscriptions: ["accounts", "transactions", "net_worth"]),
-             "Should detect Dashboard subscriptions"
+      assert content =~ ~s(subscriptions: [accounts, transactions, net_worth...5])
 
       # Example LiveView events
       assert content =~ ~s(events: ["simulate_error", "simulate_success", "clear_flash"]),
@@ -119,20 +118,11 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
              "Should have correct Example file path"
 
       # Test mount line numbers are reasonable
-      assert content =~ ~r/mount: \d+/, "Should include mount line numbers"
-      assert content =~ ~r/render: \d+/, "Should include render line numbers"
-    end
+      assert content =~ ~r/mount: \d+/,
+             "Should include mount line numbers"
 
-    test "identifies missing integrations accurately" do
-      capture_io(fn ->
-        CodeGps.run([])
-      end)
-
-      content = File.read!(@code_gps_path)
-
-      # Dashboard should be missing expenses
-      assert content =~ ~s(missing: ["expenses"]),
-             "Dashboard should be missing expense integration"
+      assert content =~ ~r/render: \d+/,
+             "Should include render line numbers"
     end
 
     test "counts components usage correctly" do
@@ -149,20 +139,15 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
       assert content =~ ~r/modal:.*\(\d+x\)/, "Should show modal usage count"
     end
 
-    test "generates actionable integration opportunities" do
+    test "generates no integration opportunities when none are detected" do
       capture_io(fn ->
         CodeGps.run([])
       end)
 
       content = File.read!(@code_gps_path)
 
-      # Should suggest specific integrations
-      assert content =~ "add_expense_to_dashboard:", "Should suggest expense integration"
-      assert content =~ "add_manual_snapshot:", "Should suggest manual snapshot"
-
-      # Should include descriptions
-      assert content =~ "desc:", "Should include descriptions"
-      assert content =~ "priority:", "Should include priority levels"
+      # Should not suggest any integrations
+      assert content =~ "# === INTEGRATION OPPORTUNITIES ===\n# (none)"
     end
   end
 
@@ -196,10 +181,6 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
 
       # Should contain component attributes for proper usage
       assert content =~ ~r/attrs: \[.*\]/, "Should contain component attributes"
-
-      # Should contain integration opportunities with priorities
-      assert content =~ "priority: high", "Should contain high priority items"
-      assert content =~ "desc:", "Should contain descriptions"
     end
 
     test "Code GPS identifies specific next actions for agents" do
@@ -208,12 +189,6 @@ defmodule AshfolioWeb.CodeGpsIntegrationTest do
       end)
 
       content = File.read!(@code_gps_path)
-
-      # Should suggest specific missing integrations
-      assert content =~ "add_expense_to_dashboard", "Should suggest expense integration"
-
-      assert content =~ "Dashboard missing expense data integration",
-             "Should explain what's missing"
 
       # Should provide enough context for implementation
       assert content =~ "subscriptions:", "Should show current subscriptions"

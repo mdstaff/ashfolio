@@ -2,9 +2,9 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
   @moduledoc false
   use AshfolioWeb, :live_component
 
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.FinancialGoal
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def render(assigns) do
@@ -55,13 +55,17 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
                     <div>
                       <span class="text-blue-800 font-medium">Monthly Expenses:</span>
                       <div class="text-blue-700">
-                        {FormatHelpers.format_currency(@emergency_fund_suggestion.monthly_expenses)}
+                        {Formatters.format_currency_with_cents(
+                          @emergency_fund_suggestion.monthly_expenses
+                        )}
                       </div>
                     </div>
                     <div>
                       <span class="text-blue-800 font-medium">Suggested Target:</span>
                       <div class="text-blue-700">
-                        {FormatHelpers.format_currency(@emergency_fund_suggestion.recommended_target)}
+                        {Formatters.format_currency_with_cents(
+                          @emergency_fund_suggestion.recommended_target
+                        )}
                       </div>
                     </div>
                     <div>
@@ -176,13 +180,13 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
                   <div>
                     <span class="text-gray-600 font-medium">Progress:</span>
                     <div class="text-gray-900">
-                      {FormatHelpers.format_percentage(@goal_calculations.progress_percentage)}%
+                      {Formatters.format_percentage(@goal_calculations.progress_percentage)}%
                     </div>
                   </div>
                   <div>
                     <span class="text-gray-600 font-medium">Remaining:</span>
                     <div class="text-gray-900">
-                      {FormatHelpers.format_currency(@goal_calculations.amount_remaining)}
+                      {Formatters.format_currency_with_cents(@goal_calculations.amount_remaining)}
                     </div>
                   </div>
                   <%= if @goal_calculations.months_to_goal do %>
@@ -199,7 +203,7 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
                   <div class="mt-3 p-3 bg-blue-50 rounded border border-blue-200">
                     <p class="text-sm text-blue-800">
                       <strong>Recommended monthly contribution:</strong>
-                      {FormatHelpers.format_currency(@monthly_contribution_needed)} to reach your goal by the target date.
+                      {Formatters.format_currency_with_cents(@monthly_contribution_needed)} to reach your goal by the target date.
                     </p>
                   </div>
                 <% end %>
@@ -457,8 +461,7 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
     errors =
       case form_or_changeset do
         %AshPhoenix.Form{} = form -> AshPhoenix.Form.errors(form)
-        %Ash.Changeset{} = changeset -> changeset.errors
-        _ -> []
+        %Phoenix.HTML.Form{} = form -> form.errors
       end
 
     errors
@@ -518,21 +521,29 @@ defmodule AshfolioWeb.FinancialGoalLive.FormComponent do
   defp calculate_months_to_goal(goal_params) do
     case Map.get(goal_params, "target_date") do
       target_date when is_binary(target_date) and target_date != "" ->
-        case Date.from_iso8601(target_date) do
-          {:ok, date} ->
-            today = Date.utc_today()
-
-            case Date.diff(date, today) do
-              days when days > 0 -> Decimal.new(div(days, 30))
-              _ -> Decimal.new("0")
-            end
-
-          _ ->
-            nil
-        end
+        calculate_months_from_date(target_date)
 
       _ ->
         nil
+    end
+  end
+
+  defp calculate_months_from_date(target_date) do
+    case Date.from_iso8601(target_date) do
+      {:ok, date} ->
+        days_to_goal(date)
+
+      _ ->
+        nil
+    end
+  end
+
+  defp days_to_goal(date) do
+    today = Date.utc_today()
+
+    case Date.diff(date, today) do
+      days when days > 0 -> Decimal.new(div(days, 30))
+      _ -> Decimal.new("0")
     end
   end
 

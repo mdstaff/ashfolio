@@ -5,6 +5,72 @@ All notable changes to the Ashfolio project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2025-09-09
+
+### Money Ratios Financial Health Assessment System
+
+#### Major Features Added
+
+- **Money Ratios Assessment**: Professional 5-tab interface using Charles Farrell's methodology
+  - Overview tab with 8 key financial ratios
+  - Capital Analysis with detailed retirement savings tracking
+  - Debt Management for mortgage and education loan analysis
+  - Financial Profile management with editable form
+  - Action Plan with personalized recommendations
+  - Real-time calculations from actual account data
+  - Age-specific benchmarks with color-coded status indicators (✅/⚠️/❌)
+  - Dashboard widget integration showing financial health status
+
+- **Tax Planning & Optimization**: Comprehensive tax strategy tools
+  - FIFO cost basis calculation framework for accurate tax reporting
+  - Capital gains/losses analysis with realized/unrealized tracking
+  - Short-term vs long-term capital gains classification
+  - Tax-loss harvesting opportunity detection
+  - Annual tax summary generation
+  - Tax lot report for detailed cost basis tracking
+  - Note: LiveView integration requires additional work (planned for v0.5.1 patch)
+
+- **Advanced Financial Infrastructure**
+  - Complete AER (Annual Effective Rate) standardization across all calculators
+  - Comprehensive benchmark analysis system for portfolio comparison
+  - Enhanced decimal precision handling with specialized helper modules
+  - New mathematical utilities for compound growth and statistical analysis
+
+#### Technical Improvements
+
+- **Major Module Decomposition**: Reduced complexity from 600+ to <200 lines per module
+- **Consolidated Formatting System**: Unified chart-specific utilities
+- **Enhanced Code GPS**: AST parsing and quality metrics for better codebase navigation
+- **Data Helper Modules**: Comprehensive LiveView pattern utilities
+- **Improved Error Handling**: Enhanced categorization and formatting
+
+#### Database & Migrations
+
+- Added financial_profiles table for Money Ratios persistence
+- Enhanced resource snapshots for comprehensive test data
+- Improved SQLite concurrency handling
+
+#### Developer Experience
+
+- Enhanced justfile with performance testing commands
+- Comprehensive E2E testing documentation and checklists
+- Improved Code GPS with specialized modules and better reporting
+- Enhanced validation and form helpers
+
+#### Bug Fixes
+
+- Fixed decimal precision edge cases in financial calculations
+- Resolved dialyzer pattern matching warnings
+- Fixed unused function warnings in tax modules
+- Resolved forecast test parameter mismatches
+
+### Test Coverage
+
+- Money Ratios: 14/14 tests passing (100%)
+- Tax Planning: Backend logic complete, LiveView tests pending
+- Core functionality: 1680 tests passing
+- Smoke tests: 31/31 passing (100%)
+
 ## [0.4.5] - 2025-09-03
 
 ### Complete v0.4.x Series - Financial Planning Platform

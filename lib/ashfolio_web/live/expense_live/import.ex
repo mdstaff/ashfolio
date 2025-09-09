@@ -83,32 +83,7 @@ defmodule AshfolioWeb.ExpenseLive.Import do
     category_mapping = params["category_mapping"] || %{}
 
     if account_id && account_id != "" do
-      result =
-        case socket.assigns.import_type do
-          :expenses ->
-            import_expenses(socket.assigns.preview_data, account_id, category_mapping)
-
-          :holdings ->
-            import_portfolio_holdings(socket.assigns.preview_data, account_id)
-        end
-
-      case result do
-        {:ok, count} ->
-          type_name = if socket.assigns.import_type == :expenses, do: "expenses", else: "holdings"
-
-          redirect_path =
-            if socket.assigns.import_type == :expenses,
-              do: ~p"/expenses",
-              else: ~p"/accounts/#{account_id}"
-
-          {:noreply,
-           socket
-           |> put_flash(:info, "Successfully imported #{count} #{type_name}!")
-           |> redirect(to: redirect_path)}
-
-        {:error, reason} ->
-          {:noreply, put_flash(socket, :error, "Import failed: #{reason}")}
-      end
+      {:noreply, perform_import(socket, account_id, category_mapping)}
     else
       {:noreply, put_flash(socket, :error, "Please select an account for import")}
     end
@@ -410,6 +385,41 @@ defmodule AshfolioWeb.ExpenseLive.Import do
       </div>
     </div>
     """
+  end
+
+  defp perform_import(socket, account_id, category_mapping) do
+    result =
+      case socket.assigns.import_type do
+        :expenses ->
+          import_expenses(socket.assigns.preview_data, account_id, category_mapping)
+
+        :holdings ->
+          import_portfolio_holdings(socket.assigns.preview_data, account_id)
+      end
+
+    case result do
+      {:ok, count} ->
+        handle_successful_import(socket, count, account_id)
+
+      {:error, reason} ->
+        put_flash(socket, :error, "Import failed: #{reason}")
+    end
+  end
+
+  defp handle_successful_import(socket, count, account_id) do
+    {type_name, redirect_path} = get_import_details(socket.assigns.import_type, account_id)
+
+    socket
+    |> put_flash(:info, "Successfully imported #{count} #{type_name}!")
+    |> redirect(to: redirect_path)
+  end
+
+  defp get_import_details(:expenses, _account_id) do
+    {"expenses", ~p"/expenses"}
+  end
+
+  defp get_import_details(:holdings, account_id) do
+    {"holdings", ~p"/accounts/#{account_id}"}
   end
 
   defp parse_csv_preview(csv_content) do

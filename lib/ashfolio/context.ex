@@ -195,29 +195,11 @@ defmodule Ashfolio.Context do
   """
   def get_recent_transactions(limit \\ 10) do
     track_performance(:get_recent_transactions, fn ->
-      case Account.list() do
-        {:ok, accounts} ->
-          account_ids = Enum.map(accounts, & &1.id)
-
-          # Use batch query to prevent N+1 queries, loading symbol and category relationships
-          case Transaction.by_accounts(account_ids) do
-            {:ok, transactions} ->
-              # Load relationships for recent transactions
-              loaded_transactions = Ash.load!(transactions, [:symbol, :category])
-
-              recent_transactions =
-                loaded_transactions
-                |> Enum.sort_by(& &1.date, {:desc, Date})
-                |> Enum.take(limit)
-
-              {:ok, recent_transactions}
-
-            error ->
-              normalize_error(error)
-          end
-
-        error ->
-          normalize_error(error)
+      with {:ok, accounts} <- Account.list(),
+           {:ok, transactions} <- fetch_account_transactions(accounts) do
+        {:ok, get_most_recent_transactions(transactions, limit)}
+      else
+        error -> normalize_error(error)
       end
     end)
   end
@@ -402,6 +384,19 @@ defmodule Ashfolio.Context do
   # Helper functions for database-as-user architecture
   # Note: These functions are kept for backward compatibility but are no longer used
 
+  defp fetch_account_transactions(accounts) do
+    account_ids = Enum.map(accounts, & &1.id)
+    Transaction.by_accounts(account_ids)
+  end
+
+  defp get_most_recent_transactions(transactions, limit) do
+    loaded_transactions = Ash.load!(transactions, [:symbol, :category])
+
+    loaded_transactions
+    |> Enum.sort_by(& &1.date, {:desc, Date})
+    |> Enum.take(limit)
+  end
+
   defp categorize_accounts(accounts) do
     %{
       all: accounts,
@@ -549,36 +544,39 @@ defmodule Ashfolio.Context do
     name = Map.get(form_params, "name")
 
     if name do
-      case Account.get_by_name(name) do
-        {:ok, existing_account} when not is_nil(existing_account) ->
-          if existing_account.id == current_account_id do
-            {:ok, %{}}
-          else
-            {:error, :validation_failed}
-          end
-
-        {:ok, nil} ->
-          {:ok, %{}}
-
-        {:error, _reason} ->
-          {:ok, %{}}
-      end
+      validate_name_against_existing_accounts(name, current_account_id)
     else
       {:ok, %{}}
     end
   end
 
+  defp validate_name_against_existing_accounts(name, current_account_id) do
+    case Account.get_by_name(name) do
+      {:ok, existing_account} when not is_nil(existing_account) ->
+        check_account_ownership(existing_account, current_account_id)
+
+      {:ok, nil} ->
+        {:ok, %{}}
+
+      {:error, _reason} ->
+        {:ok, %{}}
+    end
+  end
+
+  defp check_account_ownership(existing_account, current_account_id) do
+    if existing_account.id == current_account_id do
+      {:ok, %{}}
+    else
+      {:error, :validation_failed}
+    end
+  end
+
   # Error handling standardization
 
-  defp normalize_error(%Ash.Error.Invalid{}), do: {:error, :validation_failed}
-  defp normalize_error(%Ash.Error.Query.NotFound{}), do: {:error, :account_not_found}
   # Note: :user_not_found removed - no longer applicable in database-as-user architecture
   defp normalize_error({:error, :account_not_found}), do: {:error, :account_not_found}
   defp normalize_error({:error, :validation_failed}), do: {:error, :validation_failed}
-  defp normalize_error({:error, :insufficient_data}), do: {:error, :insufficient_data}
-  defp normalize_error({:error, :service_unavailable}), do: {:error, :service_unavailable}
-  defp normalize_error({:error, _}), do: {:error, :database_error}
-  defp normalize_error(_), do: {:error, :database_error}
+  defp normalize_error({:error, _reason}), do: {:error, :database_error}
 
   # Performance monitoring
 

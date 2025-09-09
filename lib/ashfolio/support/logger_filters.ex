@@ -32,6 +32,7 @@ defmodule Ashfolio.Support.LoggerFilters do
   def filter_sqlite_connection_errors(%{level: level, msg: {:string, message}} = log_event)
       when level in [:error, :warning] do
     # SAFETY: Configurable filter with multiple safeguards
+    # Note: Mix.env() is acceptable here as this is test-only helper code
     filter_enabled =
       Mix.env() == :test and
         System.get_env("ASHFOLIO_FILTER_SQLITE_ERRORS", "true") in ["true", "1", "yes"]

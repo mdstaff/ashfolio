@@ -1,86 +1,168 @@
-# Code GPS v2.0 | 3 LiveViews | 21 Components
+# Code GPS v3.1-final | 3 LiveViews | 28 Components
 
 # === ROUTES ===
-/: DashboardLive ✅
-/accounts: AccountLive ✅
-/accounts/new: AccountLive ✅
-/accounts/:id: AccountLive ✅
-/accounts/:id/edit: AccountLive ✅
-/transactions: TransactionLive ✅
-/categories: CategoryLive ✅
-/categories/new: CategoryLive ✅
-/categories/:id/edit: CategoryLive ✅
-/expenses: ExpenseLive ✅
-/expenses/new: ExpenseLive ✅
-/expenses/:id/edit: ExpenseLive ✅
-/expenses/import: ExpenseLive ✅
-/expenses/analytics: ExpenseLive ✅
-/net_worth: NetWorthLive ✅
-/goals: FinancialGoalLive ✅
-/goals/new: FinancialGoalLive ✅
-/goals/:id/edit: FinancialGoalLive ✅
-/forecast: ForecastLive ✅
-/retirement: RetirementLive ✅
-/advanced_analytics: AdvancedAnalyticsLive ✅
+/: AshfolioWeb.DashboardLive ❌
+/accounts: AshfolioWeb.AccountLive ❌
+/accounts/:id: AshfolioWeb.AccountLive ❌
+/accounts/:id/edit: AshfolioWeb.AccountLive ❌
+/accounts/new: AshfolioWeb.AccountLive ❌
+/advanced_analytics: AshfolioWeb.AdvancedAnalyticsLive ❌
+/categories: AshfolioWeb.CategoryLive ❌
+/categories/:id/edit: AshfolioWeb.CategoryLive ❌
+/categories/new: AshfolioWeb.CategoryLive ❌
+/expenses: AshfolioWeb.ExpenseLive ❌
+/expenses/:id/edit: AshfolioWeb.ExpenseLive ❌
+/expenses/analytics: AshfolioWeb.ExpenseLive ❌
+/expenses/import: AshfolioWeb.ExpenseLive ❌
+/expenses/new: AshfolioWeb.ExpenseLive ❌
+/forecast: AshfolioWeb.ForecastLive ❌
+/goals: AshfolioWeb.FinancialGoalLive ❌
+/goals/:id/edit: AshfolioWeb.FinancialGoalLive ❌
+/goals/new: AshfolioWeb.FinancialGoalLive ❌
+/money-ratios: AshfolioWeb.MoneyRatiosLive ❌
+/net_worth: AshfolioWeb.NetWorthLive ❌
+/retirement: AshfolioWeb.RetirementLive ❌
+/transactions: AshfolioWeb.TransactionLive ❌
 
 # === LIVE VIEWS ===
-Dashboard:
+Unknown:
   file: lib/ashfolio_web/live/dashboard_live.ex
-  mount: 18 | render: 207
+  mount: 20 | render: 158
   events: ["refresh_prices", "sort", "create_snapshot"]
-  subscriptions: [accounts, transactions, net_worth...5]
-  missing: []
-Example:
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Unknown:
   file: lib/ashfolio_web/live/example_live.ex
   mount: 14 | render: 42
   events: ["simulate_error", "simulate_success", "clear_flash"]
   subscriptions: []
-  missing: [expenses, net_worth, accounts...4]
-Forecast.Index:
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Unknown:
   file: lib/ashfolio_web/live/forecast_live.ex
-  mount: 23 | render: 269
-  events: [update_form, calculate_projection, calculate_scenarios...5]
-  subscriptions: ["accounts", "transactions"]
-  missing: ["expenses", "net_worth"]
-
+  mount: 22 | render: 268
+  events: ["update_form", "calculate_projection", "calculate_scenarios", "analyze_contributions", "switch_tab"]
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
 
 # === KEY COMPONENTS ===
-modal: lib/ashfolio_web/components/core_components.ex:46 (2x) | attrs: ["id", "show", "on_cancel"]
-flash: lib/ashfolio_web/components/core_components.ex:110 (7x) | attrs: [id, flash, title...5]
-flash_group: lib/ashfolio_web/components/core_components.ex:149 (1x) | attrs: ["flash", "id"]
-simple_form: lib/ashfolio_web/components/core_components.ex:204 (7x) | attrs: ["for", "as", "rest"]
-button: lib/ashfolio_web/components/core_components.ex:231 (20x) | attrs: ["type", "class", "rest"]
-input: lib/ashfolio_web/components/core_components.ex:294 (45x) | attrs: [errors, checked, prompt...6]
-label: lib/ashfolio_web/components/core_components.ex:397 (3x) | attrs: ["for"]
-error: lib/ashfolio_web/components/core_components.ex:410 (9x)
+icon: lib/ashfolio_web/components/core_components.ex:599 (107x)
+flash: lib/ashfolio_web/components/core_components.ex:111 (100x)
+input: lib/ashfolio_web/components/core_components.ex:295 (83x)
+input: lib/ashfolio_web/components/core_components.ex:306 (83x)
+input: lib/ashfolio_web/components/core_components.ex:332 (83x)
+input: lib/ashfolio_web/components/core_components.ex:351 (83x)
 
 # === DEPENDENCIES ===
-ash: ✅ (1181)
-contex: ✅ (130)
-decimal: ✅ (1644)
-mox: ✅ (1)
+bandit: ❌ (0)
+credo: ❌ (0)
+dns_cluster: ❌ (0)
+ecto_sql: ❌ (0)
+ecto_sqlite3: ❌ (0)
+esbuild: ❌ (0)
+finch: ❌ (0)
+floki: ❌ (0)
+gettext: ❌ (7)
+heroicons: ❌ (0)
+jason: ❌ (0)
+lazy_html: ❌ (0)
+phoenix: ❌ (27)
+phoenix_ecto: ❌ (0)
+phoenix_html: ❌ (0)
+phoenix_live_dashboard: ❌ (0)
+phoenix_live_reload: ❌ (0)
+phoenix_live_view: ❌ (0)
+swoosh: ❌ (1)
+tailwind: ❌ (1)
+telemetry_metrics: ❌ (0)
+telemetry_poller: ❌ (0)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio/financial_management/aer_calculator.ex", "lib/ashfolio/financial_management/retirement_calculator.ex", "test/ashfolio/financial_management/aer_calculator_test.exs", "test/ashfolio/financial_management/emergency_fund_calculator_test.exs", "test/ashfolio_web/live/dashboard_live/expense_widget_test.exs"]
-uncommitted: 0 files
-commits_ahead: 0
+recent: ["lib/ashfolio_web/components/top_bar.ex", "lib/ashfolio_web/live/advanced_analytics_live/index.ex", "lib/ashfolio_web/live/expense_live/analytics.ex", "lib/ashfolio_web/live/financial_goal_live/index.ex", "lib/ashfolio_web/live/money_ratios_live/form_component.ex"]
+uncommitted: 4 files
+commits_ahead: 23
+
+# === TEST ANALYSIS ===
+summary:
+  total_test_modules: 125
+  total_tests: 1680
+  average_tests_per_module: 13.4
+
+top_10_test_modules:
+  Unknown: 48 tests, 86 assertions (15 describes) | test/ashfolio_web/form_helpers_test.exs
+  Unknown: 47 tests, 137 assertions (13 describes) | test/ashfolio/financial_management/retirement_calculator_test.exs
+  Unknown: 45 tests, 78 assertions (15 describes) | test/ashfolio/financial/decimal_helpers_test.exs
+  Unknown: 44 tests, 66 assertions (14 describes) | test/ashfolio/financial/mathematical_test.exs
+  Unknown: 44 tests, 201 assertions (7 describes) | test/ashfolio/financial_management/forecast_calculator_test.exs
+  Unknown: 38 tests, 79 assertions (8 describes) | test/ashfolio/financial/formatters_test.exs
+  Unknown: 37 tests, 63 assertions (9 describes) | test/ashfolio/data_helpers_test.exs
+  Unknown: 35 tests, 81 assertions (3 describes) | test/ashfolio/portfolio/account_test.exs
+  Unknown: 34 tests, 97 assertions (9 describes) | test/ashfolio_web/live/tax_planning_live/index_test.exs
+  Unknown: 30 tests, 37 assertions (8 describes) | test/ashfolio/error_handler_test.exs
 
 # === TEST GAPS ===
 missing_tests:
 lib/ashfolio_web/live/example_live.ex ❌
+lib/ashfolio_web/components/chart_data.ex ❌
+lib/ashfolio_web/components/chart_geometry.ex ❌
 lib/ashfolio_web/components/core_components.ex ❌
-lib/ashfolio_web/components/layouts.ex ❌
-lib/ashfolio_web/components/top_bar.ex ❌
-lib/ashfolio_web/components/transaction_group.ex ❌
+lib/ashfolio_web/components/holdings_table.ex ❌
 orphaned_tests:
+test/ashfolio/financial/formatters_chart_test.exs ⚠️
 test/ashfolio/financial_management/category_migration_test.exs ⚠️
-test/ashfolio/financial_management/forecast_chart_data_test.exs ⚠️
-test/ashfolio/financial_management/symbol_search_cache_test.exs ⚠️
+test/ashfolio/financial_management/forecast_calculator_aer_test.exs ⚠️
+
+# === MODULE ANALYSIS ===
+summary:
+  total_modules: 134 (125 lib, 9 test)
+  total_functions: 1966 (1887 lib, 79 test)
+  public/private: 784 public, 1182 private
+  average_functions_per_module: 14.7
+  complex_modules: 17 (>30 functions)
+      empty_modules: 17 (potential parsing issues)
+
+top_20_modules:
+  Unknown: 64 functions (1 public, 63 private) | lib/ashfolio_web/components/forecast_chart.ex
+  Unknown: 59 functions (32 public, 27 private) | lib/ashfolio/data_helpers.ex
+  Unknown: 57 functions (13 public, 44 private) | lib/ashfolio_web/live/financial_goal_live/index.ex
+  Unknown: 55 functions (13 public, 42 private) | lib/ashfolio_web/live/dashboard_live.ex
+  Unknown: 53 functions (19 public, 34 private) | lib/ashfolio_web/live/transaction_live/index.ex
+  Unknown: 51 functions (33 public, 18 private) | lib/ashfolio_web/components/core_components.ex
+  Unknown: 49 functions (41 public, 8 private) | lib/ashfolio/financial/formatters.ex
+  Unknown: 46 functions (44 public, 2 private) | lib/ashfolio_web/form_helpers.ex
+  Unknown: 43 functions (7 public, 36 private) | lib/ashfolio/financial_management/forecast_calculator.ex
+  Unknown: 41 functions (5 public, 36 private) | lib/ashfolio/financial_management/contribution_analyzer.ex
+  Unknown: 38 functions (1 public, 37 private) | lib/ashfolio_web/components/transaction_group.ex
+  Unknown: 38 functions (13 public, 25 private) | lib/ashfolio_web/live/financial_planning_live/forecast.ex
+  Unknown: 36 functions (6 public, 30 private) | lib/ashfolio_web/live/expense_live/analytics.ex
+  Unknown: 33 functions (10 public, 23 private) | lib/ashfolio_web/live/expense_live/index.ex
+  Unknown: 32 functions (14 public, 18 private) | lib/ashfolio/financial_management/retirement_calculator.ex
+  Unknown: 32 functions (4 public, 28 private) | lib/ashfolio/tax_planning/capital_gains_calculator.ex
+  Unknown: 32 functions (1 public, 31 private) | lib/ashfolio_web/components/transaction_stats.ex
+  Unknown: 30 functions (4 public, 26 private) | lib/ashfolio/financial_management/symbol_search.ex
+  Unknown: 30 functions (15 public, 15 private) | lib/ashfolio_web/live/account_live/index.ex
+  Unknown: 30 functions (14 public, 16 private) | lib/ashfolio_web/live/advanced_analytics_live/index.ex
+
+# === CODE QUALITY ===
+credo_analysis: Text parsing summary
+credo_issues: 0 
+
+
+dialyzer_analysis: skipped for performance ⚡
+
+quality_score: 100/100 (0 total issues)
 
 # === PATTERNS ===
-error_handling: "put_flash/3"
-currency_format: "Decimal formatting"
-test_setup: "Standard ExUnit setup"
+error_handling: "Standard put_flash error handling"
+currency_format: "Basic decimal formatting"
+test_setup: "ExUnit setup blocks (125 total)"
 
 # === INTEGRATION OPPORTUNITIES ===
+Add PubSub Subscriptions:
+  desc: Add missing PubSub subscriptions: accounts, transactions, net_worth, expenses, goals, prices, forecasts
+  priority: medium
+  subscribe: lib/ashfolio_web/live/example_live.ex:14
 
+Use Popular Components:
+  desc: Consider using frequently used components: modal, flash, simple_form, button, input, input, input, input, input, label
+  priority: low
+  component:

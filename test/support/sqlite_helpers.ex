@@ -11,6 +11,7 @@ defmodule Ashfolio.SQLiteHelpers do
   alias Ashfolio.Portfolio.Account
   alias Ashfolio.Portfolio.Symbol
   alias Ashfolio.Portfolio.Transaction
+  alias Ecto.Adapters.SQL.Sandbox
 
   # Note: UserSettings removed - using simplified approach for database-as-user architecture testing
 
@@ -86,33 +87,39 @@ defmodule Ashfolio.SQLiteHelpers do
   """
   def create_common_symbols! do
     common_tickers = ["AAPL", "MSFT", "GOOGL", "TSLA"]
+    Enum.map(common_tickers, &create_or_get_symbol/1)
+  end
 
-    Enum.map(common_tickers, fn ticker ->
-      case Symbol.find_by_symbol(ticker) do
-        {:ok, [symbol]} ->
-          # Symbol already exists
-          symbol
+  # Helper function to reduce nesting depth
+  defp create_or_get_symbol(ticker) do
+    case Symbol.find_by_symbol(ticker) do
+      {:ok, [symbol]} ->
+        # Symbol already exists
+        symbol
 
-        {:ok, []} ->
-          # Create the symbol
-          params = %{
-            symbol: ticker,
-            name: "#{ticker} Test Company",
-            asset_class: :stock,
-            data_source: :manual,
-            current_price: Decimal.new("100.00"),
-            price_updated_at: DateTime.utc_now()
-          }
+      {:ok, []} ->
+        create_new_symbol(ticker)
 
-          case Symbol.create(params) do
-            {:ok, symbol} -> symbol
-            {:error, error} -> raise "Failed to create symbol #{ticker}: #{inspect(error)}"
-          end
+      {:error, error} ->
+        raise "Failed to query for symbol #{ticker}: #{inspect(error)}"
+    end
+  end
 
-        {:error, error} ->
-          raise "Failed to query for symbol #{ticker}: #{inspect(error)}"
-      end
-    end)
+  # Helper function to reduce nesting depth
+  defp create_new_symbol(ticker) do
+    params = %{
+      symbol: ticker,
+      name: "#{ticker} Test Company",
+      asset_class: :stock,
+      data_source: :manual,
+      current_price: Decimal.new("100.00"),
+      price_updated_at: DateTime.utc_now()
+    }
+
+    case Symbol.create(params) do
+      {:ok, symbol} -> symbol
+      {:error, error} -> raise "Failed to create symbol #{ticker}: #{inspect(error)}"
+    end
   end
 
   @doc """
@@ -280,36 +287,41 @@ defmodule Ashfolio.SQLiteHelpers do
     if attrs == %{} or Map.equal?(Map.take(attrs, Map.keys(default_attrs)), default_attrs) do
       get_default_account()
     else
-      # Custom attributes - use retry logic
-      with_retry(fn ->
-        account_name = attrs[:name] || "Test Account #{System.unique_integer([:positive])}"
-
-        case Account.get_by_name(account_name) do
-          {:ok, account} when not is_nil(account) ->
-            account
-
-          {:ok, nil} ->
-            params =
-              Map.merge(
-                %{
-                  name: account_name,
-                  balance: Decimal.new("5000.00"),
-                  currency: "USD",
-                  platform: "Test Platform"
-                },
-                attrs
-              )
-
-            case Account.create(params) do
-              {:ok, account} -> account
-              {:error, error} -> raise "Failed to create custom account: #{inspect(error)}"
-            end
-
-          {:error, error} ->
-            raise "Failed to query for account: #{inspect(error)}"
-        end
-      end)
+      create_custom_account_with_retry(attrs)
     end
+  end
+
+  defp create_custom_account_with_retry(attrs) do
+    with_retry(fn ->
+      account_name = attrs[:name] || "Test Account #{System.unique_integer([:positive])}"
+
+      case Account.get_by_name(account_name) do
+        {:ok, account} when not is_nil(account) -> account
+        {:ok, nil} -> create_new_account(account_name, attrs)
+        {:error, error} -> raise "Failed to query for account: #{inspect(error)}"
+      end
+    end)
+  end
+
+  defp create_new_account(account_name, attrs) do
+    params = build_account_params(account_name, attrs)
+
+    case Account.create(params) do
+      {:ok, account} -> account
+      {:error, error} -> raise "Failed to create custom account: #{inspect(error)}"
+    end
+  end
+
+  defp build_account_params(account_name, attrs) do
+    Map.merge(
+      %{
+        name: account_name,
+        balance: Decimal.new("5000.00"),
+        currency: "USD",
+        platform: "Test Platform"
+      },
+      attrs
+    )
   end
 
   @doc """
@@ -320,81 +332,94 @@ defmodule Ashfolio.SQLiteHelpers do
   """
   def get_or_create_symbol(ticker, attrs \\ %{}) do
     common_tickers = ["AAPL", "MSFT", "GOOGL", "TSLA"]
-
-    # Check if we need to update an existing symbol's price
     current_price = attrs[:current_price]
 
-    if ticker in common_tickers and current_price do
-      # Common ticker but with custom price - get and update
-      symbol = get_common_symbol(ticker)
+    cond do
+      ticker in common_tickers and current_price ->
+        update_common_symbol_price(ticker, current_price)
 
-      with_retry(fn ->
-        case Symbol.update_price(symbol, %{
-               current_price: current_price,
-               price_updated_at: DateTime.utc_now()
-             }) do
-          {:ok, updated_symbol} -> updated_symbol
-          {:error, error} -> raise "Failed to update symbol #{ticker} price: #{inspect(error)}"
-        end
-      end)
-    else
-      if ticker in common_tickers and attrs == %{} do
+      ticker in common_tickers and attrs == %{} ->
         get_common_symbol(ticker)
-      else
-        # Custom symbol or attributes - use retry logic
-        with_retry(fn ->
-          case Symbol.find_by_symbol(ticker) do
-            {:ok, [symbol]} ->
-              # Symbol exists - update price if provided
-              if current_price do
-                case Symbol.update_price(symbol, %{
-                       current_price: current_price,
-                       price_updated_at: DateTime.utc_now()
-                     }) do
-                  {:ok, updated_symbol} ->
-                    updated_symbol
 
-                  {:error, error} ->
-                    raise "Failed to update symbol #{ticker} price: #{inspect(error)}"
-                end
-              else
-                symbol
-              end
+      true ->
+        get_or_create_custom_symbol(ticker, attrs)
+    end
+  end
 
-            {:ok, []} ->
-              # Default params - only include current_price if not explicitly excluded
-              default_params = %{
-                symbol: ticker,
-                name: "#{ticker} Test Company",
-                asset_class: :stock,
-                data_source: :manual
-              }
+  defp update_common_symbol_price(ticker, current_price) do
+    symbol = get_common_symbol(ticker)
 
-              # Add default price unless attrs explicitly exclude it
-              default_params =
-                if Map.has_key?(attrs, :current_price) do
-                  # attrs has current_price key (even if nil) - respect that
-                  default_params
-                else
-                  # No current_price in attrs - add default
-                  Map.merge(default_params, %{
-                    current_price: Decimal.new("50.00"),
-                    price_updated_at: DateTime.utc_now()
-                  })
-                end
-
-              params = Map.merge(default_params, attrs)
-
-              case Symbol.create(params) do
-                {:ok, symbol} -> symbol
-                {:error, error} -> raise "Failed to create symbol #{ticker}: #{inspect(error)}"
-              end
-
-            {:error, error} ->
-              raise "Failed to query for symbol #{ticker}: #{inspect(error)}"
-          end
-        end)
+    with_retry(fn ->
+      case Symbol.update_price(symbol, %{
+             current_price: current_price,
+             price_updated_at: DateTime.utc_now()
+           }) do
+        {:ok, updated_symbol} -> updated_symbol
+        {:error, error} -> raise "Failed to update symbol #{ticker} price: #{inspect(error)}"
       end
+    end)
+  end
+
+  defp get_or_create_custom_symbol(ticker, attrs) do
+    with_retry(fn ->
+      case Symbol.find_by_symbol(ticker) do
+        {:ok, [symbol]} -> handle_existing_symbol(symbol, attrs)
+        {:ok, []} -> create_new_symbol(ticker, attrs)
+        {:error, error} -> raise "Failed to query for symbol #{ticker}: #{inspect(error)}"
+      end
+    end)
+  end
+
+  defp handle_existing_symbol(symbol, attrs) do
+    current_price = attrs[:current_price]
+
+    if current_price do
+      update_symbol_price(symbol, current_price)
+    else
+      symbol
+    end
+  end
+
+  defp update_symbol_price(symbol, current_price) do
+    case Symbol.update_price(symbol, %{
+           current_price: current_price,
+           price_updated_at: DateTime.utc_now()
+         }) do
+      {:ok, updated_symbol} -> updated_symbol
+      {:error, error} -> raise "Failed to update symbol #{symbol.symbol} price: #{inspect(error)}"
+    end
+  end
+
+  defp create_new_symbol(ticker, attrs) do
+    default_params = build_default_symbol_params(ticker)
+    default_params = maybe_add_default_price(default_params, attrs)
+    params = Map.merge(default_params, attrs)
+
+    case Symbol.create(params) do
+      {:ok, symbol} -> symbol
+      {:error, error} -> raise "Failed to create symbol #{ticker}: #{inspect(error)}"
+    end
+  end
+
+  defp build_default_symbol_params(ticker) do
+    %{
+      symbol: ticker,
+      name: "#{ticker} Test Company",
+      asset_class: :stock,
+      data_source: :manual
+    }
+  end
+
+  defp maybe_add_default_price(default_params, attrs) do
+    if Map.has_key?(attrs, :current_price) do
+      # attrs has current_price key (even if nil) - respect that
+      default_params
+    else
+      # No current_price in attrs - add default
+      Map.merge(default_params, %{
+        current_price: Decimal.new("50.00"),
+        price_updated_at: DateTime.utc_now()
+      })
     end
   end
 
@@ -484,7 +509,7 @@ defmodule Ashfolio.SQLiteHelpers do
 
     if price_manager_pid do
       # Allow the PriceManager process to access the database
-      Ecto.Adapters.SQL.Sandbox.allow(Ashfolio.Repo, self(), price_manager_pid)
+      Sandbox.allow(Ashfolio.Repo, self(), price_manager_pid)
 
       # Allow the PriceManager process to use Mox expectations
       Mox.allow(YahooFinanceMock, self(), price_manager_pid)

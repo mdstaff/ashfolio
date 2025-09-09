@@ -6,6 +6,7 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
   alias Ashfolio.FinancialManagement.Expense
   alias Ashfolio.FinancialManagement.TransactionCategory
   alias Ashfolio.Portfolio.Account
+  alias AshfolioWeb.FormHelpers
   alias AshfolioWeb.Live.ErrorHelpers
 
   @impl true
@@ -186,43 +187,7 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
 
   @impl true
   def update(%{action: action, expense: expense} = assigns, socket) do
-    # Prepare initial data
-    form_data =
-      case {action, expense} do
-        {:new, _} ->
-          %{
-            "description" => "",
-            "amount" => "",
-            "date" => Date.to_iso8601(Date.utc_today()),
-            "merchant" => "",
-            "notes" => "",
-            "category_id" => "",
-            "account_id" => ""
-          }
-
-        {:edit, expense} when not is_nil(expense) ->
-          %{
-            "description" => expense.description || "",
-            "amount" => if(expense.amount, do: Decimal.to_string(expense.amount), else: ""),
-            "date" => if(expense.date, do: Date.to_iso8601(expense.date), else: ""),
-            "merchant" => expense.merchant || "",
-            "notes" => expense.notes || "",
-            "category_id" => expense.category_id || "",
-            "account_id" => expense.account_id || ""
-          }
-
-        _ ->
-          %{
-            "description" => "",
-            "amount" => "",
-            "date" => Date.to_iso8601(Date.utc_today()),
-            "merchant" => "",
-            "notes" => "",
-            "category_id" => "",
-            "account_id" => ""
-          }
-      end
-
+    form_data = prepare_form_data(action, expense)
     form = to_form(form_data)
 
     # Load categories and accounts for dropdowns
@@ -271,33 +236,13 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
   @impl true
   def handle_event("save", expense_params, socket) do
     socket = assign(socket, :saving, true)
-
-    form_data = %{
-      "description" => String.trim(expense_params["description"] || ""),
-      "amount" => String.trim(expense_params["amount"] || ""),
-      "date" => expense_params["date"] || "",
-      "merchant" => String.trim(expense_params["merchant"] || ""),
-      "notes" => String.trim(expense_params["notes"] || ""),
-      "category_id" => expense_params["category_id"] || "",
-      "account_id" => expense_params["account_id"] || ""
-    }
-
-    # Final validation
+    form_data = sanitize_expense_params(expense_params)
     {form_valid, form_errors} = validate_expense_form(form_data)
 
     if form_valid do
-      case socket.assigns.action do
-        :new ->
-          create_expense(socket, form_data)
-
-        :edit ->
-          update_expense(socket, form_data)
-      end
+      handle_valid_save(socket, form_data)
     else
-      {:noreply,
-       socket
-       |> assign(:saving, false)
-       |> assign(:form_errors, form_errors)}
+      handle_invalid_save(socket, form_errors)
     end
   end
 
@@ -307,7 +252,67 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
     {:noreply, socket}
   end
 
+  defp sanitize_expense_params(params) do
+    %{
+      "description" => sanitize_string(params["description"]),
+      "amount" => sanitize_string(params["amount"]),
+      "date" => params["date"] || "",
+      "merchant" => sanitize_string(params["merchant"]),
+      "notes" => sanitize_string(params["notes"]),
+      "category_id" => params["category_id"] || "",
+      "account_id" => params["account_id"] || ""
+    }
+  end
+
+  defp sanitize_string(value), do: String.trim(value || "")
+
+  defp handle_valid_save(socket, form_data) do
+    case socket.assigns.action do
+      :new -> create_expense(socket, form_data)
+      :edit -> update_expense(socket, form_data)
+    end
+  end
+
+  defp handle_invalid_save(socket, form_errors) do
+    {:noreply,
+     socket
+     |> assign(:saving, false)
+     |> assign(:form_errors, form_errors)}
+  end
+
   # Private functions
+
+  defp prepare_form_data(action, expense) do
+    case {action, expense} do
+      {:new, _} -> default_form_data()
+      {:edit, expense} when not is_nil(expense) -> expense_to_form_data(expense)
+      _ -> default_form_data()
+    end
+  end
+
+  defp default_form_data do
+    %{
+      "description" => "",
+      "amount" => "",
+      "date" => Date.to_iso8601(Date.utc_today()),
+      "merchant" => "",
+      "notes" => "",
+      "category_id" => "",
+      "account_id" => ""
+    }
+  end
+
+  defp expense_to_form_data(expense) do
+    %{
+      "description" => expense.description || "",
+      "amount" => if(expense.amount, do: Decimal.to_string(expense.amount), else: ""),
+      "date" => if(expense.date, do: Date.to_iso8601(expense.date), else: ""),
+      "merchant" => expense.merchant || "",
+      "notes" => expense.notes || "",
+      "category_id" => expense.category_id || "",
+      "account_id" => expense.account_id || ""
+    }
+  end
 
   defp create_expense(socket, form_data) do
     expense_params = build_expense_params(form_data)
@@ -360,57 +365,20 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
   defp build_expense_params(form_data) do
     %{
       description: form_data["description"],
-      amount: parse_decimal(form_data["amount"]),
-      date: parse_date(form_data["date"]),
-      merchant: empty_to_nil(form_data["merchant"]),
-      notes: empty_to_nil(form_data["notes"]),
-      category_id: empty_to_nil(form_data["category_id"]),
-      account_id: empty_to_nil(form_data["account_id"])
+      amount: FormHelpers.parse_decimal_unsafe(form_data["amount"]),
+      date: FormHelpers.parse_date_unsafe(form_data["date"]),
+      merchant: FormHelpers.empty_to_nil(form_data["merchant"]),
+      notes: FormHelpers.empty_to_nil(form_data["notes"]),
+      category_id: FormHelpers.empty_to_nil(form_data["category_id"]),
+      account_id: FormHelpers.empty_to_nil(form_data["account_id"])
     }
   end
 
   defp validate_expense_form(form_data) do
     errors = []
-
-    # Validate description
-    errors =
-      case String.trim(form_data["description"]) do
-        "" -> ["Description can't be blank" | errors]
-        _ -> errors
-      end
-
-    # Validate amount
-    errors =
-      case String.trim(form_data["amount"]) do
-        "" ->
-          ["Amount can't be blank" | errors]
-
-        amount_str ->
-          case parse_decimal(amount_str) do
-            nil ->
-              ["Amount must be a valid number" | errors]
-
-            amount ->
-              if Decimal.compare(amount, Decimal.new("0")) == :gt do
-                errors
-              else
-                ["Amount must be greater than 0" | errors]
-              end
-          end
-      end
-
-    # Validate date
-    errors =
-      case form_data["date"] do
-        "" ->
-          ["Date can't be blank" | errors]
-
-        date_str ->
-          case parse_date(date_str) do
-            nil -> ["Date must be valid" | errors]
-            _ -> errors
-          end
-      end
+    errors = validate_description(form_data["description"], errors)
+    errors = validate_amount(form_data["amount"], errors)
+    errors = validate_date(form_data["date"], errors)
 
     form_valid = errors == []
     {form_valid, Enum.reverse(errors)}
@@ -432,28 +400,56 @@ defmodule AshfolioWeb.ExpenseLive.FormComponent do
     |> Enum.map(&{&1.name, &1.id})
   end
 
-  defp parse_decimal(nil), do: nil
-  defp parse_decimal(""), do: nil
+  # Validation helper functions
 
-  defp parse_decimal(value) when is_binary(value) do
-    case Decimal.parse(value) do
-      {decimal, ""} -> decimal
-      _ -> nil
+  defp validate_description(description, errors) do
+    case String.trim(description) do
+      "" -> ["Description can't be blank" | errors]
+      _ -> errors
     end
   end
 
-  defp parse_date(nil), do: nil
-  defp parse_date(""), do: nil
-
-  defp parse_date(value) when is_binary(value) do
-    case Date.from_iso8601(value) do
-      {:ok, date} -> date
-      _ -> nil
+  defp validate_amount(amount_str, errors) do
+    case String.trim(amount_str) do
+      "" -> ["Amount can't be blank" | errors]
+      trimmed_amount -> validate_amount_value(trimmed_amount, errors)
     end
   end
 
-  defp empty_to_nil(""), do: nil
-  defp empty_to_nil(value), do: value
+  defp validate_amount_value(amount_str, errors) do
+    case FormHelpers.parse_decimal(amount_str) do
+      {:ok, nil} -> ["Amount must be a valid number" | errors]
+      {:ok, amount} -> validate_amount_positive(amount, errors)
+      {:error, _} -> ["Amount must be a valid number" | errors]
+    end
+  end
+
+  defp validate_amount_positive(amount, errors) do
+    if Decimal.compare(amount, Decimal.new("0")) == :gt do
+      errors
+    else
+      ["Amount must be greater than 0" | errors]
+    end
+  end
+
+  defp validate_date(date_str, errors) do
+    case date_str do
+      "" -> ["Date can't be blank" | errors]
+      date -> validate_date_format(date, errors)
+    end
+  end
+
+  defp validate_date_format(date_str, errors) do
+    case FormHelpers.parse_date(date_str) do
+      {:ok, _} -> errors
+      {:error, _} -> ["Date must be valid" | errors]
+    end
+  end
+
+  # Parsing functions removed - now using FormHelpers module for:
+  # - parse_decimal/1 -> FormHelpers.parse_decimal/1 or parse_decimal_unsafe/1
+  # - parse_date/1 -> FormHelpers.parse_date/1 or parse_date_unsafe/1
+  # - empty_to_nil/1 -> FormHelpers.empty_to_nil/1
 
   defp extract_ash_errors(%Invalid{errors: errors}) do
     Enum.map(errors, fn

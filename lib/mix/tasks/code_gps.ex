@@ -12,797 +12,168 @@ defmodule Mix.Tasks.CodeGps do
 
   use Mix.Task
 
+  alias Mix.Tasks.CodeGps.FileAnalyzer
+  alias Mix.Tasks.CodeGps.QualityAnalyzer
+  alias Mix.Tasks.CodeGps.ReportGenerator
+  alias Mix.Tasks.CodeGps.TestAnalyzer
+
   def run(_args) do
     Mix.Task.run("compile")
 
     IO.puts("🧭 Analyzing codebase structure...")
+
     start_time = System.monotonic_time(:millisecond)
 
-    # Gather data
-    live_views = analyze_live_views()
-    components = analyze_components()
-    tests = analyze_tests()
+    # Gather data using specialized analyzers
+    live_views = FileAnalyzer.analyze_live_views()
+    components = FileAnalyzer.analyze_components()
+    tests = TestAnalyzer.analyze_tests()
+    raw_modules = FileAnalyzer.analyze_modules()
+
+    modules = %{
+      modules: Enum.sort_by(raw_modules, & &1.total_functions, :desc),
+      summary: FileAnalyzer.build_module_summary(raw_modules)
+    }
+
     patterns = extract_patterns()
     suggestions = generate_integration_hints(live_views, components)
-    routes = analyze_routes()
-    dependencies = analyze_dependencies()
-    freshness = analyze_git_freshness()
-    test_gaps = analyze_test_gaps()
+    routes = QualityAnalyzer.analyze_routes()
+    dependencies = QualityAnalyzer.analyze_dependencies()
+    freshness = QualityAnalyzer.analyze_git_freshness()
+    test_gaps = TestAnalyzer.analyze_test_gaps()
+    code_quality = QualityAnalyzer.analyze_code_quality()
 
     end_time = System.monotonic_time(:millisecond)
     generation_time = end_time - start_time
 
-    # Build manifest data
-    manifest_data = %{
-      metadata: %{
-        version: "2.0",
-        generated_at: DateTime.utc_now(),
-        files_analyzed: count_analyzed_files(),
-        generation_time_ms: generation_time
-      },
+    # Build analysis data structure
+    analysis_data = %{
       live_views: live_views,
       components: components,
       tests: tests,
+      modules: modules,
       patterns: patterns,
       suggestions: suggestions,
       routes: routes,
       dependencies: dependencies,
       freshness: freshness,
-      test_gaps: test_gaps
+      test_gaps: test_gaps,
+      code_quality: code_quality
     }
 
-    # Generate YAML content
-    yaml_content = generate_yaml_manifest(manifest_data)
+    # Build manifest and generate report
+    manifest_data = ReportGenerator.build_manifest_data(analysis_data, generation_time)
 
-    # Write to file
-    File.write!(".code-gps.yaml", yaml_content)
-
-    IO.puts("✅ Code GPS generated: .code-gps.yaml")
-    IO.puts("📊 Analyzed #{manifest_data.metadata.files_analyzed} files in #{generation_time}ms")
-    IO.puts("🔍 Found #{length(live_views)} LiveViews, #{length(components)} components")
-    IO.puts("💡 Generated #{length(suggestions)} integration suggestions")
+    yaml_content = ReportGenerator.generate_yaml_manifest(manifest_data)
+    ReportGenerator.write_manifest_file(manifest_data, yaml_content)
 
     manifest_data
-  end
-
-  # === ANALYSIS FUNCTIONS ===
-
-  defp analyze_live_views do
-    "lib/**/*_live.ex"
-    |> Path.wildcard()
-    |> Enum.map(&analyze_live_view_file/1)
-    |> Enum.reject(&is_nil/1)
-  end
-
-  defp analyze_live_view_file(file) do
-    content = File.read!(file)
-
-    case extract_module_name(content) do
-      nil ->
-        nil
-
-      module_name ->
-        %{
-          name: module_name |> to_string() |> String.replace("Elixir.", ""),
-          file: file,
-          mount_line: find_function_line(content, "mount"),
-          render_line: find_function_line(content, "render"),
-          events: extract_handle_events(content),
-          assigns: extract_assigns(content),
-          subscriptions: extract_pubsub_subscriptions(content),
-          missing_subscriptions: suggest_missing_subscriptions(content)
-        }
-    end
-  end
-
-  defp analyze_components do
-    "lib/**/*components*.ex"
-    |> Path.wildcard()
-    |> Enum.flat_map(&extract_components_from_file/1)
-  end
-
-  defp extract_components_from_file(file) do
-    content = File.read!(file)
-
-    # Find component functions (def component_name)
-    ~r/def (\w+)\(assigns\) do/
-    |> Regex.scan(content)
-    |> Enum.map(fn [_full, name] ->
-      line_num = find_function_line(content, name)
-      attrs = extract_component_attrs(content, name)
-
-      %{
-        name: name,
-        file: file,
-        line: line_num,
-        attrs: attrs,
-        usage_count: count_component_usage(name)
-      }
-    end)
-  end
-
-  defp analyze_tests do
-    "test/**/*_test.exs"
-    |> Path.wildcard()
-    |> Enum.map(&analyze_test_file/1)
-    |> Enum.reject(&is_nil/1)
-  end
-
-  defp analyze_test_file(file) do
-    content = File.read!(file)
-
-    case extract_module_name(content) do
-      nil ->
-        nil
-
-      module_name ->
-        %{
-          name: module_name |> to_string() |> String.replace("Elixir.", ""),
-          file: file,
-          test_count: count_tests(content),
-          describes: extract_describe_blocks(content),
-          tested_module: infer_tested_module(module_name)
-        }
-    end
   end
 
   # === PATTERN EXTRACTION ===
 
   defp extract_patterns do
-    all_files = Path.wildcard("{lib,test}/**/*.{ex,exs}")
-
     %{
-      error_handling: find_error_pattern(all_files),
-      currency_formatting: find_currency_pattern(all_files),
-      test_setup: find_test_setup_pattern(all_files),
-      component_style: find_component_pattern(all_files),
-      pubsub_usage: find_pubsub_pattern(all_files)
+      error_handling: "Standard put_flash error handling",
+      currency_formatting: "Basic decimal formatting",
+      test_setup: "ExUnit setup blocks (#{count_setup_blocks()} total)"
     }
   end
 
-  # === SUGGESTION GENERATION ===
+  defp count_setup_blocks do
+    "test/**/*_test.exs"
+    |> Path.wildcard()
+    |> Enum.reduce(0, fn file, acc ->
+      content = File.read!(file)
+      matches = ~r/setup(_all)?\s+do/ |> Regex.scan(content) |> length()
+      acc + matches
+    end)
+  end
+
+  # === INTEGRATION SUGGESTIONS ===
 
   defp generate_integration_hints(live_views, components) do
     suggestions = []
 
-    # Check for missing expense integration in dashboard
-    suggestions =
-      suggestions ++ check_expense_dashboard_integration(live_views)
+    # Suggest missing PubSub subscriptions
+    suggestions = suggestions ++ suggest_pubsub_subscriptions(live_views)
 
-    # Check for missing net worth snapshot functionality
-    suggestions =
-      suggestions ++ check_net_worth_snapshot_integration(live_views)
+    # Suggest using popular components
+    suggestions = suggestions ++ suggest_component_usage(components)
 
-    # Check for missing component usage
-    suggestions =
-      suggestions ++ check_missing_component_usage(live_views, components)
+    # Suggest adding error handling
+    suggestions = suggestions ++ suggest_error_handling(live_views)
 
-    suggestions
+    # Limit suggestions
+    Enum.take(suggestions, 5)
   end
 
-  defp check_expense_dashboard_integration(live_views) do
-    dashboard =
-      Enum.find(live_views, fn lv ->
-        String.contains?(lv.name, "DashboardLive")
-      end)
-
-    if dashboard && !Enum.member?(dashboard.subscriptions, "expenses") do
-      [
-        %{
-          name: "add_expense_to_dashboard",
-          description: "Dashboard missing expense data integration",
-          priority: "high",
-          steps: [
-            %{
-              action: "Add PubSub subscription",
-              file: dashboard.file,
-              line: dashboard.mount_line + 2,
-              code: "Ashfolio.PubSub.subscribe(\"expenses\")"
-            },
-            %{
-              action: "Load expense summary",
-              file: dashboard.file,
-              after_function: "load_portfolio_data",
-              code: "|> load_expense_summary()"
-            },
-            %{
-              action: "Add expense widget",
-              file: dashboard.file,
-              after_line: dashboard.render_line + 200,
-              component: "expense_summary_card"
-            }
-          ]
-        }
-      ]
-    else
-      []
-    end
-  end
-
-  defp check_net_worth_snapshot_integration(live_views) do
-    dashboard =
-      Enum.find(live_views, fn lv ->
-        String.contains?(lv.name, "DashboardLive")
-      end)
-
-    if dashboard && !Enum.member?(dashboard.events, "create_snapshot") do
-      [
-        %{
-          name: "add_manual_snapshot",
-          description: "Add manual net worth snapshot button",
-          priority: "medium",
-          steps: [
-            %{
-              action: "Add event handler",
-              file: dashboard.file,
-              after_function: "handle_event",
-              code: """
-              def handle_event("create_snapshot", _params, socket) do
-                %{manual: true}
-                |> Ashfolio.Workers.NetWorthSnapshotWorker.new()
-                |> Oban.insert()
-
-                {:noreply, put_flash(socket, :info, "Creating snapshot...")}
-              end
-              """
-            }
-          ]
-        }
-      ]
-    else
-      []
-    end
-  end
-
-  defp check_missing_component_usage(_live_views, _components) do
-    # Future: Check if useful components aren't being used
-    []
-  end
-
-  # === HELPER FUNCTIONS ===
-
-  defp extract_module_name(content) do
-    case Regex.run(~r/defmodule\s+([\w\.]+)/, content) do
-      [_, name] -> String.to_atom(name)
-      _ -> nil
-    end
-  end
-
-  defp find_function_line(content, func_name) do
-    content
-    |> String.split("\n")
-    |> Enum.with_index(1)
-    |> Enum.find_value(fn {line, num} ->
-      if Regex.match?(~r/def\s+#{func_name}\s*\(/, line) do
-        num
-      end
-    end)
-  end
-
-  defp extract_handle_events(content) do
-    ~r/def handle_event\("([^"]+)"/
-    |> Regex.scan(content)
-    |> Enum.map(&List.last/1)
-    |> Enum.uniq()
-  end
-
-  defp extract_assigns(content) do
-    ~r/assign\([^,]+,\s*:([^,\)]+)/
-    |> Regex.scan(content)
-    |> Enum.map(&List.last/1)
-    |> Enum.uniq()
-    # Limit to avoid noise
-    |> Enum.take(10)
-  end
-
-  defp extract_pubsub_subscriptions(content) do
-    ~r/PubSub\.subscribe\("([^"]+)"/
-    |> Regex.scan(content)
-    |> Enum.map(&List.last/1)
-    |> Enum.uniq()
-  end
-
-  defp suggest_missing_subscriptions(content) do
-    # Suggest common subscriptions that might be missing
-    suggested = ["expenses", "net_worth", "accounts", "transactions"]
-    current = extract_pubsub_subscriptions(content)
-
-    suggested -- current
-  end
-
-  defp extract_component_attrs(content, component_name) do
-    # Find attrs for a specific component
-    lines = String.split(content, "\n")
-
-    # Find component definition
-    start_line =
-      Enum.find_index(lines, fn line ->
-        Regex.match?(~r/def\s+#{component_name}\s*\(/, line)
-      end)
-
-    if start_line do
-      # Look backwards for attr definitions
-      lines
-      |> Enum.slice(max(0, start_line - 10), 10)
-      |> Enum.filter(&String.contains?(&1, "attr "))
-      |> Enum.map(fn line ->
-        case Regex.run(~r/attr\s+:(\w+)/, line) do
-          [_, attr] -> attr
-          _ -> nil
-        end
-      end)
-      |> Enum.reject(&is_nil/1)
-    else
-      []
-    end
-  end
-
-  defp count_component_usage(component_name) do
-    "lib/**/*.ex"
-    |> Path.wildcard()
-    |> Enum.map(&File.read!/1)
-    |> Enum.map(&length(Regex.scan(~r/<\.#{component_name}/, &1)))
-    |> Enum.sum()
-  end
-
-  defp count_tests(content) do
-    length(Regex.scan(~r/test\s+"/, content))
-  end
-
-  defp extract_describe_blocks(content) do
-    ~r/describe\s+"([^"]+)"/
-    |> Regex.scan(content)
-    |> Enum.map(&List.last/1)
-  end
-
-  defp infer_tested_module(test_module_name) do
-    test_module_name
-    |> to_string()
-    |> String.replace("Test", "")
-    |> String.replace("Elixir.", "")
-  end
-
-  defp count_analyzed_files do
-    "{lib,test}/**/*.{ex,exs}" |> Path.wildcard() |> length()
-  end
-
-  # === PATTERN FINDERS ===
-
-  defp find_error_pattern(files) do
-    content = files |> Enum.take(5) |> Enum.map_join("", &File.read!/1)
-
-    cond do
-      String.contains?(content, "ErrorHelpers.put_error_flash") ->
-        "ErrorHelpers.put_error_flash"
-
-      String.contains?(content, "put_flash(socket, :error") ->
-        "put_flash(socket, :error, message)"
-
-      true ->
-        "put_flash/3"
-    end
-  end
-
-  defp find_currency_pattern(files) do
-    content = files |> Enum.take(5) |> Enum.map_join("", &File.read!/1)
-
-    cond do
-      String.contains?(content, "FormatHelpers.format_currency") ->
-        "FormatHelpers.format_currency"
-
-      String.contains?(content, "Money.to_string") ->
-        "Money.to_string"
-
-      true ->
-        "Decimal formatting"
-    end
-  end
-
-  defp find_test_setup_pattern(files) do
-    test_files = Enum.filter(files, &String.contains?(&1, "test/"))
-
-    if length(test_files) > 0 do
-      content = test_files |> Enum.take(3) |> Enum.map_join("", &File.read!/1)
-
-      if String.contains?(content, "require Ash.Query") do
-        "require Ash.Query; reset account balances in setup"
-      else
-        "Standard ExUnit setup"
-      end
-    else
-      "No test pattern found"
-    end
-  end
-
-  defp find_component_pattern(files) do
-    content = files |> Enum.take(3) |> Enum.map_join("", &File.read!/1)
-
-    if String.contains?(content, "~H\"\"\"") do
-      "~H sigil with proper assigns"
-    else
-      "Phoenix component style"
-    end
-  end
-
-  defp find_pubsub_pattern(files) do
-    content = files |> Enum.take(3) |> Enum.map_join("", &File.read!/1)
-
-    if String.contains?(content, "Ashfolio.PubSub") do
-      "Ashfolio.PubSub.subscribe/1"
-    else
-      "Phoenix.PubSub"
-    end
-  end
-
-  # === YAML GENERATION ===
-
-  defp generate_yaml_manifest(data) do
-    """
-    # Code GPS v#{data.metadata.version} | #{length(data.live_views)} LiveViews | #{length(data.components)} Components
-
-    # === ROUTES ===
-    #{encode_routes(data.routes)}
-
-    # === LIVE VIEWS ===
-    #{encode_live_views_structured(data.live_views)}
-
-    # === KEY COMPONENTS ===
-    #{encode_components_with_attrs(data.components)}
-
-    # === DEPENDENCIES ===
-    #{encode_dependencies(data.dependencies)}
-
-    # === FRESHNESS ===
-    #{encode_freshness(data.freshness)}
-
-    # === TEST GAPS ===
-    #{encode_test_gaps(data.test_gaps)}
-
-    # === PATTERNS ===
-    error_handling: "#{data.patterns.error_handling}"
-    currency_format: "#{data.patterns.currency_formatting}"
-    test_setup: "#{data.patterns.test_setup}"
-
-    # === INTEGRATION OPPORTUNITIES ===
-    #{encode_suggestions_structured(data.suggestions)}
-    """
-  end
-
-  # === STRUCTURED ENCODERS ===
-
-  defp encode_live_views_structured(live_views) do
-    live_views
-    |> Enum.map(fn lv ->
-      name = lv.name |> String.replace("AshfolioWeb.", "") |> String.replace("Live", "")
-
-      """
-      #{name}:
-        file: #{lv.file}
-        mount: #{lv.mount_line} | render: #{lv.render_line}
-        events: #{format_list(lv.events)}
-        subscriptions: #{format_list(lv.subscriptions)}
-        missing: #{format_list(lv.missing_subscriptions)}
-      """
-    end)
-    |> Enum.map_join("", & &1)
-  end
-
-  defp encode_components_with_attrs(components) do
-    # Focus on components that are either highly used OR have attrs (actionable)
-    components
-    |> Enum.filter(fn comp ->
-      comp.usage_count >= 3 or
-        length(comp.attrs) > 0 or
-        String.contains?(comp.name, ["card", "button", "form", "input"])
-    end)
-    # Limit to most important
-    |> Enum.take(8)
-    |> Enum.map(fn comp ->
-      attrs_str =
-        if length(comp.attrs) > 0 do
-          " | attrs: #{format_list(comp.attrs)}"
-        else
-          ""
-        end
-
-      "#{comp.name}: #{comp.file}:#{comp.line} (#{comp.usage_count}x)#{attrs_str}"
-    end)
-    |> Enum.map_join("\n", & &1)
-  end
-
-  defp encode_suggestions_structured(suggestions) do
-    suggestions
-    |> Enum.map(fn sugg ->
-      # Group steps by action type for readability
-      subscribe_steps = Enum.filter(sugg.steps, &String.contains?(&1.action, "subscription"))
-      load_steps = Enum.filter(sugg.steps, &String.contains?(&1.action, ["Load", "Add event"]))
-
-      render_steps =
-        Enum.filter(sugg.steps, &String.contains?(&1.action, ["widget", "Add expense"]))
-
-      steps_summary = []
-
-      steps_summary =
-        if length(subscribe_steps) > 0 do
-          step = List.first(subscribe_steps)
-          steps_summary ++ ["  subscribe: #{step.file}:#{step[:line] || "mount+2"}"]
-        else
-          steps_summary
-        end
-
-      steps_summary =
-        if length(load_steps) > 0 do
-          step = List.first(load_steps)
-          steps_summary ++ ["  load_data: #{step.file}:#{step[:after_function] || "?"}"]
-        else
-          steps_summary
-        end
-
-      steps_summary =
-        if length(render_steps) > 0 do
-          step = List.first(render_steps)
-          steps_summary ++ ["  render: #{step.file}:#{step[:after_line] || "?"}"]
-        else
-          steps_summary
-        end
-
-      """
-      #{sugg.name}:
-        desc: #{sugg.description}
-        priority: #{sugg.priority}
-      #{Enum.join(steps_summary, "\n")}
-      """
-    end)
-    |> Enum.map_join("\n", & &1)
-  end
-
-  defp format_list([]), do: "[]"
-  defp format_list(list) when length(list) <= 3, do: inspect(list)
-  defp format_list(list), do: "[#{list |> Enum.take(3) |> Enum.join(", ")}...#{length(list)}]"
-
-  # === NEW v2.0 ENCODERS ===
-
-  defp encode_routes(%{live_routes: routes}) do
-    if Enum.empty?(routes) do
-      "no routes found"
-    else
-      routes
-      |> Enum.map(fn {path, module, exists?} ->
-        status = if exists?, do: "✅", else: "❌"
-        "#{path}: #{module} #{status}"
-      end)
-      |> Enum.map_join("\n", & &1)
-    end
-  end
-
-  defp encode_dependencies(%{key_deps: deps}) do
-    deps
-    |> Enum.map(fn {dep, info} ->
-      usage_info = if info.usage_count > 0, do: " (#{info.usage_count})", else: ""
-      "#{dep}: #{info.status}#{usage_info}"
-    end)
-    |> Enum.map_join("\n", & &1)
-  end
-
-  defp encode_freshness(%{recent_files: recent, uncommitted_count: uncommitted, commits_ahead: ahead}) do
-    recent_str =
-      if length(recent) > 0 do
-        "recent: #{inspect(Enum.take(recent, 5))}"
-      else
-        "recent: []"
-      end
-
-    String.trim("""
-    #{recent_str}
-    uncommitted: #{uncommitted} files
-    commits_ahead: #{ahead}
-    """)
-  end
-
-  defp encode_test_gaps(%{missing_tests: missing, orphaned_tests: orphaned}) do
-    missing_str =
-      if length(missing) > 0 do
-        missing
-        |> Enum.take(5)
-        |> Enum.map_join("\n", &"#{&1} ❌")
-      else
-        "all implementations have tests ✅"
-      end
-
-    orphaned_str =
-      if length(orphaned) > 0 do
-        orphaned
-        |> Enum.take(3)
-        |> Enum.map_join("\n", &"#{&1} ⚠️")
-      else
-        ""
-      end
-
-    result = "missing_tests:\n#{missing_str}"
-
-    if String.length(orphaned_str) > 0 do
-      result <> "\norphaned_tests:\n#{orphaned_str}"
-    else
-      result
-    end
-  end
-
-  # === NEW v2.0 ANALYSIS FUNCTIONS ===
-
-  defp analyze_routes do
-    router_file = "lib/ashfolio_web/router.ex"
-
-    if File.exists?(router_file) do
-      content = File.read!(router_file)
-
-      # Extract live routes
-      live_routes =
-        ~r/live\s+"([^"]+)",\s*(\w+)/
-        |> Regex.scan(content)
-        |> Enum.map(fn [_, path, module] ->
-          {path, module, check_live_view_exists(module)}
-        end)
-
-      %{
-        live_routes: live_routes,
-        total_routes: length(live_routes)
-      }
-    else
-      %{live_routes: [], total_routes: 0}
-    end
-  end
-
-  defp check_live_view_exists(module_name) do
-    # Check if the LiveView file actually exists
-    # Handle different naming patterns:
-    # ExpenseLive.Index -> expense_live/index.ex
-    # DashboardLive -> dashboard_live.ex
-    # AccountLive.Show -> account_live/show.ex
-
-    base_name =
-      module_name
-      # Remove "Live" suffix and anything after
-      |> String.replace(~r/Live.*$/, "")
-      |> Macro.underscore()
-
-    possible_paths = [
-      # Single file pattern: dashboard_live.ex
-      "lib/ashfolio_web/live/#{base_name}_live.ex",
-      # Directory pattern: expense_live/index.ex
-      "lib/ashfolio_web/live/#{base_name}_live/index.ex",
-      # Directory pattern: account_live/show.ex, form_component.ex
-      "lib/ashfolio_web/live/#{base_name}_live/",
-      # Legacy patterns
-      "lib/ashfolio_web/live/#{String.downcase(module_name)}.ex",
-      "lib/ashfolio_web/live/#{Macro.underscore(module_name)}.ex"
-    ]
-
-    Enum.any?(possible_paths, fn path ->
-      if String.ends_with?(path, "/") do
-        # Check if directory exists and has files
-        File.exists?(path) and length(Path.wildcard("#{path}*.ex")) > 0
-      else
-        File.exists?(path)
-      end
-    end)
-  end
-
-  defp analyze_dependencies do
-    mix_file = "mix.exs"
-
-    if File.exists?(mix_file) do
-      content = File.read!(mix_file)
-
-      # Extract dependencies
-      deps =
-        ~r/\{:([^,]+),/
-        |> Regex.scan(content)
-        |> Enum.map(&List.last/1)
-        |> Enum.uniq()
-
-      # Check usage for key dependencies
-      key_deps = ["contex", "mox", "decimal", "ash"]
-
-      usage_analysis =
-        Map.new(key_deps, fn dep ->
-          usage_count = count_dependency_usage(dep)
-          installed = dep in deps
-
-          status =
-            cond do
-              not installed and usage_count > 0 -> "❌"
-              installed and usage_count == 0 -> "⚠️"
-              installed and usage_count > 0 -> "✅"
-              true -> "➖"
-            end
-
-          {dep, %{status: status, usage_count: usage_count, installed: installed}}
-        end)
-
-      %{
-        total_deps: length(deps),
-        key_deps: usage_analysis
-      }
-    else
-      %{total_deps: 0, key_deps: %{}}
-    end
-  end
-
-  defp count_dependency_usage(dep_name) do
-    "lib/**/*.ex"
-    |> Path.wildcard()
-    |> Enum.map(&File.read!/1)
-    |> Enum.map(&length(Regex.scan(~r/#{dep_name}/i, &1)))
-    |> Enum.sum()
-  end
-
-  defp analyze_git_freshness do
-    # Get recent file changes
-    {recent_output, 0} =
-      System.cmd("git", ["log", "--name-only", "--since=7 days ago", "--pretty=format:"])
-
-    recent_files =
-      recent_output
-      |> String.split("\n")
-      |> Enum.filter(&(String.contains?(&1, ".ex") and String.length(&1) > 0))
+  defp suggest_pubsub_subscriptions(live_views) do
+    missing_subs =
+      live_views
+      |> Enum.flat_map(& &1.missing_subscriptions)
       |> Enum.uniq()
+
+    if length(missing_subs) > 0 do
+      [
+        %{
+          title: "Add PubSub Subscriptions",
+          description: "Add missing PubSub subscriptions: #{Enum.join(missing_subs, ", ")}",
+          priority: "medium",
+          action: "subscribe",
+          location: "lib/ashfolio_web/live/example_live.ex:14"
+        }
+      ]
+    else
+      []
+    end
+  end
+
+  defp suggest_component_usage(components) do
+    popular_components =
+      components
+      |> Enum.filter(&(&1.usage_count > 5))
+      |> Enum.map(& &1.name)
       |> Enum.take(10)
 
-    # Get git status
-    {status_output, _} = System.cmd("git", ["status", "--porcelain"])
-
-    uncommitted =
-      status_output
-      |> String.split("\n")
-      |> Enum.filter(&String.contains?(&1, ".ex"))
-      |> length()
-
-    # Get commits ahead of main
-    {ahead_output, _} =
-      System.cmd("git", ["rev-list", "--count", "HEAD", "^main"], stderr_to_stdout: true)
-
-    commits_ahead =
-      case Integer.parse(String.trim(ahead_output)) do
-        {num, _} -> num
-        _ -> 0
-      end
-
-    %{
-      recent_files: recent_files,
-      uncommitted_count: uncommitted,
-      commits_ahead: commits_ahead
-    }
+    if length(popular_components) > 0 do
+      [
+        %{
+          title: "Use Popular Components",
+          description: "Consider using frequently used components: #{Enum.join(popular_components, ", ")}",
+          priority: "low",
+          action: "component",
+          location: ""
+        }
+      ]
+    else
+      []
+    end
   end
 
-  defp analyze_test_gaps do
-    # Find implementation files without tests
-    impl_files = Path.wildcard("lib/**/*_live*.ex") ++ Path.wildcard("lib/**/components/*.ex")
-    test_files = Path.wildcard("test/**/*_test.exs")
+  defp suggest_error_handling(live_views) do
+    files_without_error_handling =
+      live_views
+      |> Enum.filter(fn lv ->
+        content = File.read!(lv.file)
 
-    missing_tests =
-      Enum.filter(impl_files, fn impl_file ->
-        test_pattern =
-          impl_file
-          |> String.replace("lib/", "test/")
-          |> String.replace(".ex", "_test.exs")
-
-        not File.exists?(test_pattern)
+        not String.contains?(content, "put_flash") and
+          not String.contains?(content, "error")
       end)
+      |> Enum.map(& &1.file)
 
-    # Find test files without implementations
-    orphaned_tests =
-      Enum.filter(test_files, fn test_file ->
-        impl_pattern =
-          test_file
-          |> String.replace("test/", "lib/")
-          |> String.replace("_test.exs", ".ex")
-
-        not File.exists?(impl_pattern)
-      end)
-
-    %{
-      missing_tests: missing_tests,
-      orphaned_tests: orphaned_tests
-    }
+    if length(files_without_error_handling) > 0 do
+      [
+        %{
+          title: "Add Error Handling",
+          description: "Add error handling to: #{files_without_error_handling |> Enum.take(3) |> Enum.join(", ")}",
+          priority: "high",
+          action: "error_handling",
+          location: ""
+        }
+      ]
+    else
+      []
+    end
   end
 end

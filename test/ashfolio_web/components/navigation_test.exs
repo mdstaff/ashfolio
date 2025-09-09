@@ -14,7 +14,7 @@ defmodule AshfolioWeb.Components.NavigationTest do
       assert html =~ ~r{href="/expenses/analytics"}
       assert html =~ "Analytics"
 
-      # Check for Net Worth link  
+      # Check for Net Worth link
       assert html =~ ~r{href="/net_worth"}
       assert html =~ "Net Worth"
 

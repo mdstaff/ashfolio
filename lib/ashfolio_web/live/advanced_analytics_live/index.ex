@@ -4,7 +4,7 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
 
   Features:
   - Time-Weighted Return (TWR) calculations and charts
-  - Money-Weighted Return (MWR) with IRR methodology  
+  - Money-Weighted Return (MWR) with IRR methodology
   - Rolling returns analysis with volatility metrics
   - Performance caching for optimized load times
   - Real-time updates via PubSub integration
@@ -14,9 +14,9 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
 
   use AshfolioWeb, :live_view
 
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.Portfolio.PerformanceCache
   alias Ashfolio.Portfolio.PerformanceCalculator
-  alias AshfolioWeb.Live.FormatHelpers
 
   require Logger
 
@@ -42,11 +42,9 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   def handle_event("calculate_twr", _params, socket) do
     Logger.debug("Calculating Time-Weighted Return")
 
-    socket =
-      socket
-      |> assign(:loading_twr, true)
-      |> calculate_time_weighted_return()
-      |> assign(:loading_twr, false)
+    # Set loading state immediately and schedule async calculation
+    socket = assign(socket, :loading_twr, true)
+    Process.send_after(self(), :complete_twr_calculation, 10)
 
     {:noreply, socket}
   end
@@ -55,11 +53,9 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   def handle_event("calculate_mwr", _params, socket) do
     Logger.debug("Calculating Money-Weighted Return")
 
-    socket =
-      socket
-      |> assign(:loading_mwr, true)
-      |> calculate_money_weighted_return()
-      |> assign(:loading_mwr, false)
+    # Set loading state immediately and schedule async calculation
+    socket = assign(socket, :loading_mwr, true)
+    Process.send_after(self(), :complete_mwr_calculation, 10)
 
     {:noreply, socket}
   end
@@ -68,11 +64,9 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   def handle_event("calculate_rolling_returns", _params, socket) do
     Logger.debug("Calculating Rolling Returns Analysis")
 
-    socket =
-      socket
-      |> assign(:loading_rolling, true)
-      |> calculate_rolling_returns()
-      |> assign(:loading_rolling, false)
+    # Set loading state immediately and schedule async calculation
+    socket = assign(socket, :loading_rolling, true)
+    Process.send_after(self(), :complete_rolling_calculation, 10)
 
     {:noreply, socket}
   end
@@ -142,6 +136,36 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   end
 
   @impl true
+  def handle_info(:complete_twr_calculation, socket) do
+    socket =
+      socket
+      |> calculate_time_weighted_return()
+      |> assign(:loading_twr, false)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(:complete_mwr_calculation, socket) do
+    socket =
+      socket
+      |> calculate_money_weighted_return()
+      |> assign(:loading_mwr, false)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(:complete_rolling_calculation, socket) do
+    socket =
+      socket
+      |> calculate_rolling_returns()
+      |> assign(:loading_rolling, false)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info(_msg, socket) do
     {:noreply, socket}
   end
@@ -182,31 +206,34 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
         assign(socket, :twr_result, cached_result)
 
       :miss ->
-        case get_portfolio_transactions_for_twr() do
-          {:ok, transactions} ->
-            case PerformanceCalculator.calculate_time_weighted_return(transactions) do
-              {:ok, twr} ->
-                # Cache the result
-                PerformanceCache.put(cache_key, twr)
+        perform_twr_calculation(socket, cache_key)
+    end
+  end
 
-                socket
-                |> assign(:twr_result, twr)
-                |> add_to_calculation_history("TWR", twr, "success")
-                |> assign(:error_message, nil)
+  defp perform_twr_calculation(socket, cache_key) do
+    {:ok, transactions} = get_portfolio_transactions_for_twr()
+    process_twr_result(socket, transactions, cache_key)
+  end
 
-              {:error, reason} ->
-                Logger.warning("TWR calculation failed: #{inspect(reason)}")
-                error_msg = "Time-Weighted Return calculation failed: #{inspect(reason)}"
+  defp process_twr_result(socket, transactions, cache_key) do
+    case PerformanceCalculator.calculate_time_weighted_return(transactions) do
+      {:ok, twr} ->
+        # Cache the result
+        PerformanceCache.put(cache_key, twr)
 
-                socket
-                |> assign(:twr_result, nil)
-                |> assign(:error_message, error_msg)
-                |> put_flash(:error, error_msg)
-            end
+        socket
+        |> assign(:twr_result, twr)
+        |> add_to_calculation_history("TWR", twr, "success")
+        |> assign(:error_message, nil)
 
-            # get_portfolio_transactions_for_twr always returns {:ok, _}, so this case is unused
-            # Keeping for future when real data access might fail
-        end
+      {:error, reason} ->
+        Logger.warning("TWR calculation failed: #{inspect(reason)}")
+        error_msg = "Time-Weighted Return calculation failed: #{inspect(reason)}"
+
+        socket
+        |> assign(:twr_result, nil)
+        |> assign(:error_message, error_msg)
+        |> put_flash(:error, error_msg)
     end
   end
 
@@ -219,31 +246,34 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
         assign(socket, :mwr_result, cached_result)
 
       :miss ->
-        case get_portfolio_cash_flows_for_mwr() do
-          {:ok, cash_flows} ->
-            case PerformanceCalculator.calculate_money_weighted_return(cash_flows) do
-              {:ok, mwr} ->
-                # Cache the result
-                PerformanceCache.put(cache_key, mwr)
+        perform_mwr_calculation(socket, cache_key)
+    end
+  end
 
-                socket
-                |> assign(:mwr_result, mwr)
-                |> add_to_calculation_history("MWR", mwr, "success")
-                |> assign(:error_message, nil)
+  defp perform_mwr_calculation(socket, cache_key) do
+    {:ok, cash_flows} = get_portfolio_cash_flows_for_mwr()
+    process_mwr_result(socket, cash_flows, cache_key)
+  end
 
-              {:error, reason} ->
-                Logger.warning("MWR calculation failed: #{inspect(reason)}")
-                error_msg = "Money-Weighted Return calculation failed: #{inspect(reason)}"
+  defp process_mwr_result(socket, cash_flows, cache_key) do
+    case PerformanceCalculator.calculate_money_weighted_return(cash_flows) do
+      {:ok, mwr} ->
+        # Cache the result
+        PerformanceCache.put(cache_key, mwr)
 
-                socket
-                |> assign(:mwr_result, nil)
-                |> assign(:error_message, error_msg)
-                |> put_flash(:error, error_msg)
-            end
+        socket
+        |> assign(:mwr_result, mwr)
+        |> add_to_calculation_history("MWR", mwr, "success")
+        |> assign(:error_message, nil)
 
-            # get_portfolio_cash_flows_for_mwr always returns {:ok, _}, so this case is unused
-            # Keeping for future when real data access might fail
-        end
+      {:error, reason} ->
+        Logger.warning("MWR calculation failed: #{inspect(reason)}")
+        error_msg = "Money-Weighted Return calculation failed: #{inspect(reason)}"
+
+        socket
+        |> assign(:mwr_result, nil)
+        |> assign(:error_message, error_msg)
+        |> put_flash(:error, error_msg)
     end
   end
 
@@ -256,37 +286,44 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
         assign(socket, :rolling_returns, cached_result)
 
       :miss ->
-        case get_monthly_returns_data() do
-          {:ok, monthly_data} ->
-            case PerformanceCalculator.calculate_rolling_returns(monthly_data, 12) do
-              rolling_returns when is_list(rolling_returns) ->
-                # Handle direct list return (current implementation)
-                analysis = PerformanceCalculator.analyze_rolling_returns(monthly_data, 12)
+        perform_rolling_returns_calculation(socket, cache_key)
+    end
+  end
 
-                result = %{
-                  rolling_periods: rolling_returns,
-                  analysis: analysis
-                }
+  defp perform_rolling_returns_calculation(socket, cache_key) do
+    case get_monthly_returns_data() do
+      {:ok, monthly_data} ->
+        process_rolling_returns_result(socket, monthly_data, cache_key)
+        # get_monthly_returns_data always returns {:ok, _}, so this case is unused
+        # Keeping for future when real data access might fail
+    end
+  end
 
-                PerformanceCache.put(cache_key, result)
+  defp process_rolling_returns_result(socket, monthly_data, cache_key) do
+    case PerformanceCalculator.calculate_rolling_returns(monthly_data, 12) do
+      rolling_returns when is_list(rolling_returns) ->
+        # Handle direct list return (current implementation)
+        analysis = PerformanceCalculator.analyze_rolling_returns(monthly_data, 12)
 
-                socket
-                |> assign(:rolling_returns, result)
-                |> add_to_calculation_history("Rolling Returns", "Analysis complete", "success")
+        result = %{
+          rolling_periods: rolling_returns,
+          analysis: analysis
+        }
 
-              {:error, reason} ->
-                Logger.warning("Rolling returns calculation failed: #{inspect(reason)}")
-                error_msg = "Rolling Returns calculation failed: #{inspect(reason)}"
+        PerformanceCache.put(cache_key, result)
 
-                socket
-                |> assign(:rolling_returns, nil)
-                |> assign(:error_message, error_msg)
-                |> put_flash(:error, error_msg)
-            end
+        socket
+        |> assign(:rolling_returns, result)
+        |> add_to_calculation_history("Rolling Returns", "Analysis complete", "success")
 
-            # get_monthly_returns_data always returns {:ok, _}, so this case is unused
-            # Keeping for future when real data access might fail
-        end
+      {:error, reason} ->
+        Logger.warning("Rolling returns calculation failed: #{inspect(reason)}")
+        error_msg = "Rolling Returns calculation failed: #{inspect(reason)}"
+
+        socket
+        |> assign(:rolling_returns, nil)
+        |> assign(:error_message, error_msg)
+        |> put_flash(:error, error_msg)
     end
   end
 
@@ -310,7 +347,7 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   defp format_result_for_history(result) when is_binary(result), do: result
 
   defp format_result_for_history(%Decimal{} = result) do
-    FormatHelpers.format_percentage(result)
+    Formatters.format_percentage(result)
   end
 
   # Data fetching functions (simplified for now)

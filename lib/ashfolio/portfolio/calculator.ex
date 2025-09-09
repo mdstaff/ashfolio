@@ -246,18 +246,9 @@ defmodule Ashfolio.Portfolio.Calculator do
           {new_qty, new_cost}
 
         :sell ->
-          # For sells, quantity is negative, so we add it (which subtracts)
           new_qty = Decimal.add(net_qty, transaction.quantity)
-          # For cost basis, we need to reduce it proportionally
-          # Guard against division by zero when net_qty is 0
-          if Decimal.equal?(net_qty, 0) do
-            {new_qty, total_cost}
-          else
-            sell_ratio = Decimal.div(Decimal.abs(transaction.quantity), net_qty)
-            cost_reduction = Decimal.mult(total_cost, sell_ratio)
-            new_cost = Decimal.sub(total_cost, cost_reduction)
-            {new_qty, new_cost}
-          end
+          new_cost = calculate_sell_cost_basis(net_qty, total_cost, transaction)
+          {new_qty, new_cost}
       end
     end)
   end
@@ -323,6 +314,16 @@ defmodule Ashfolio.Portfolio.Calculator do
 
       {:error, reason} ->
         {:error, reason}
+    end
+  end
+
+  defp calculate_sell_cost_basis(net_qty, total_cost, transaction) do
+    if Decimal.equal?(net_qty, 0) do
+      total_cost
+    else
+      sell_ratio = Decimal.div(Decimal.abs(transaction.quantity), net_qty)
+      cost_reduction = Decimal.mult(total_cost, sell_ratio)
+      Decimal.sub(total_cost, cost_reduction)
     end
   end
 end

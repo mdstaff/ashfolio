@@ -9,8 +9,9 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
   for error handling, logging, and Decimal arithmetic precision.
   """
 
-  alias Ashfolio.FinancialManagement.Expense
+  alias Ashfolio.Financial.DecimalHelpers, as: DH
   alias Ashfolio.FinancialManagement.AERCalculator
+  alias Ashfolio.FinancialManagement.Expense
 
   require Logger
 
@@ -23,8 +24,8 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
 
   ## Examples
 
-      iex> RetirementCalculator.calculate_retirement_target(Decimal.new("50000"))
-      {:ok, Decimal.new("1250000")}
+      iex> RetirementCalculator.calculate_retirement_target(DH.ensure_decimal("50000"))
+      {:ok, DH.ensure_decimal("1250000")}
 
       iex> RetirementCalculator.calculate_retirement_target(Decimal.new("0"))
       {:ok, Decimal.new("0")}
@@ -44,7 +45,7 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
     with :ok <- validate_input(annual_expenses),
          :ok <- validate_non_negative(annual_expenses) do
       # 25x rule: multiply annual expenses by 25 (based on 4% safe withdrawal rate)
-      target = Decimal.mult(annual_expenses, Decimal.new("25"))
+      target = Decimal.mult(annual_expenses, DH.ensure_decimal("25"))
 
       Logger.debug("25x retirement target calculated: #{target}")
       {:ok, target}
@@ -65,7 +66,7 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
   ## Examples
 
       iex> RetirementCalculator.annual_expenses_from_history()
-      {:ok, Decimal.new("48000.00")}
+      {:ok, DH.ensure_decimal("48000.00")}
 
   ## Returns
 
@@ -102,8 +103,8 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
           total_expenses
         else
           # Extrapolate based on days: (total / days) * 365
-          daily_average = Decimal.div(total_expenses, Decimal.new(to_string(days_in_period)))
-          Decimal.mult(daily_average, Decimal.new("365"))
+          daily_average = DH.safe_divide(total_expenses, days_in_period)
+          Decimal.mult(daily_average, 365)
         end
 
       Logger.debug("Annual expenses calculated from history: #{annual_estimate}")
@@ -124,7 +125,7 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
   ## Examples
 
       iex> RetirementCalculator.calculate_retirement_target_from_history()
-      {:ok, Decimal.new("1200000.00")}
+      {:ok, DH.ensure_decimal("1200000.00")}
 
   ## Returns
 
@@ -153,8 +154,8 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
 
   ## Examples
 
-      iex> RetirementCalculator.calculate_retirement_progress(Decimal.new("50000"), Decimal.new("625000"))
-      {:ok, %{target_amount: Decimal.new("1250000"), progress_percentage: Decimal.new("50.00"), ...}}
+      iex> RetirementCalculator.calculate_retirement_progress(DH.ensure_decimal("50000"), DH.ensure_decimal("625000"))
+      {:ok, %{target_amount: DH.ensure_decimal("1250000"), progress_percentage: DH.ensure_decimal("50.00"), ...}}
 
   ## Parameters
 
@@ -202,7 +203,7 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
 
   ## Examples
 
-      iex> RetirementCalculator.estimate_time_to_goal(Decimal.new("50000"), Decimal.new("500000"), Decimal.new("4000"))
+      iex> RetirementCalculator.estimate_time_to_goal(DH.ensure_decimal("50000"), DH.ensure_decimal("500000"), DH.ensure_decimal("4000"))
       {:ok, %{months_to_goal: 188, years_to_goal: 15, feasible: true}}
 
   ## Parameters
@@ -248,8 +249,8 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
 
   ## Examples
 
-      iex> RetirementCalculator.calculate_required_monthly_savings(Decimal.new("50000"), Decimal.new("250000"), 10)
-      {:ok, Decimal.new("8333.33")}
+      iex> RetirementCalculator.calculate_required_monthly_savings(DH.ensure_decimal("50000"), DH.ensure_decimal("250000"), 10)
+      {:ok, DH.ensure_decimal("8333.33")}
 
   ## Parameters
 
@@ -274,7 +275,7 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
           target_months = target_years * 12
 
           monthly_needed =
-            Decimal.div(progress.amount_remaining, Decimal.new(to_string(target_months)))
+            DH.safe_divide(progress.amount_remaining, target_months)
 
           rounded = Decimal.round(monthly_needed, 2)
 
@@ -294,7 +295,7 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
 
   ## Examples
 
-      iex> RetirementCalculator.calculate_retirement_progress_from_history(Decimal.new("600000"))
+      iex> RetirementCalculator.calculate_retirement_progress_from_history(DH.ensure_decimal("600000"))
       {:ok, %{target_amount: ..., progress_percentage: ..., ...}}
 
   ## Returns
@@ -320,8 +321,8 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
 
   ## Examples
 
-      iex> RetirementCalculator.calculate_retirement_progress_with_override(Decimal.new("40000"), Decimal.new("500000"))
-      {:ok, %{target_amount: Decimal.new("1000000"), progress_percentage: Decimal.new("50.00"), ...}}
+      iex> RetirementCalculator.calculate_retirement_progress_with_override(DH.ensure_decimal("40000"), DH.ensure_decimal("500000"))
+      {:ok, %{target_amount: DH.ensure_decimal("1000000"), progress_percentage: DH.ensure_decimal("50.00"), ...}}
 
   ## Returns
 
@@ -359,11 +360,11 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
 
   defp calculate_progress_percentage(current_amount, target_amount) do
     if Decimal.equal?(target_amount, Decimal.new("0")) do
-      Decimal.new("0.00")
+      DH.ensure_decimal("0.00")
     else
       current_amount
-      |> Decimal.div(target_amount)
-      |> Decimal.mult(Decimal.new("100"))
+      |> DH.safe_divide(target_amount)
+      |> Decimal.mult(DH.ensure_decimal("100"))
       |> Decimal.round(2)
     end
   end
@@ -391,7 +392,7 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
     else
       months =
         amount_remaining
-        |> Decimal.div(monthly_savings)
+        |> DH.safe_divide(monthly_savings)
         |> Decimal.to_integer()
 
       years = div(months, 12)
@@ -414,8 +415,8 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
 
   ## Examples
 
-      iex> RetirementCalculator.calculate_safe_withdrawal_amount(Decimal.new(\"1000000\"))
-      {:ok, Decimal.new(\"40000.00\")}
+      iex> RetirementCalculator.calculate_safe_withdrawal_amount(DH.ensure_decimal(\"1000000\"))
+      {:ok, DH.ensure_decimal(\"40000.00\")}
 
   ## Parameters
 
@@ -454,8 +455,8 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
 
   ## Examples
 
-      iex> RetirementCalculator.calculate_withdrawal_sustainability(Decimal.new(\"1000000\"), Decimal.new(\"35000\"))
-      {:ok, %{withdrawal_rate: Decimal.new(\"3.50\"), is_sustainable: true, risk_level: :low, ...}}
+      iex> RetirementCalculator.calculate_withdrawal_sustainability(DH.ensure_decimal(\"1000000\"), DH.ensure_decimal(\"35000\"))
+      {:ok, %{withdrawal_rate: DH.ensure_decimal(\"3.50\"), is_sustainable: true, risk_level: :low, ...}}
 
   ## Parameters
 
@@ -476,11 +477,11 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
       # Calculate withdrawal rate as percentage
       withdrawal_rate =
         if Decimal.equal?(portfolio_value, Decimal.new("0")) do
-          Decimal.new("0.00")
+          DH.ensure_decimal("0.00")
         else
           annual_withdrawal
-          |> Decimal.div(portfolio_value)
-          |> Decimal.mult(Decimal.new("100"))
+          |> DH.safe_divide(portfolio_value)
+          |> DH.to_percentage()
           |> Decimal.round(2)
         end
 
@@ -511,8 +512,8 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
 
   ## Examples
 
-      iex> RetirementCalculator.calculate_monthly_withdrawal_budget(Decimal.new(\"1200000\"))
-      {:ok, Decimal.new(\"4000.00\")}
+      iex> RetirementCalculator.calculate_monthly_withdrawal_budget(DH.ensure_decimal(\"1200000\"))
+      {:ok, DH.ensure_decimal(\"4000.00\")}
 
   ## Parameters
 
@@ -530,7 +531,7 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
       {:ok, annual_withdrawal} ->
         monthly_budget =
           annual_withdrawal
-          |> Decimal.div(Decimal.new("12"))
+          |> DH.safe_divide(DH.ensure_decimal("12"))
           |> Decimal.round(2)
 
         Logger.debug("Monthly withdrawal budget calculated: #{monthly_budget}")
@@ -549,9 +550,9 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
 
   ## Examples
 
-      iex> holdings = [%{symbol: "AAPL", shares: Decimal.new("100"), dividend_yield: Decimal.new("0.005"), price: Decimal.new("150")}]
+      iex> holdings = [%{symbol: "AAPL", shares: DH.ensure_decimal("100"), dividend_yield: DH.ensure_decimal("0.005"), price: DH.ensure_decimal("150")}]
       iex> RetirementCalculator.calculate_current_dividend_income(holdings)
-      {:ok, Decimal.new("75.00")}
+      {:ok, DH.ensure_decimal("75.00")}
 
   ## Parameters
 
@@ -603,8 +604,8 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
 
   ## Examples
 
-      iex> RetirementCalculator.project_dividend_growth(Decimal.new("1000"), Decimal.new("0.03"), 10)
-      {:ok, Decimal.new("1343.92")}
+      iex> RetirementCalculator.project_dividend_growth(DH.ensure_decimal("1000"), DH.ensure_decimal("0.03"), 10)
+      {:ok, DH.ensure_decimal("1343.92")}
 
   ## Parameters
 
@@ -628,7 +629,8 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
             current_dividend
           else
             # Use AER standardized compound growth calculation
-            AERCalculator.compound_with_aer(current_dividend, growth_rate, years)
+            current_dividend
+            |> AERCalculator.compound_with_aer(growth_rate, years)
             |> Decimal.round(2)
           end
 
@@ -649,8 +651,8 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
 
   ## Examples
 
-      iex> RetirementCalculator.calculate_monthly_dividend_income(Decimal.new("1200"))
-      {:ok, Decimal.new("100.00")}
+      iex> RetirementCalculator.calculate_monthly_dividend_income(DH.ensure_decimal("1200"))
+      {:ok, DH.ensure_decimal("100.00")}
 
   ## Parameters
 
@@ -668,7 +670,7 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
          :ok <- validate_non_negative(annual_dividend) do
       monthly_dividend =
         annual_dividend
-        |> Decimal.div(Decimal.new("12"))
+        |> DH.safe_divide(DH.ensure_decimal("12"))
         |> Decimal.round(2)
 
       Logger.debug("Monthly dividend income: #{monthly_dividend}")
@@ -688,8 +690,8 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
 
   ## Examples
 
-      iex> RetirementCalculator.analyze_dividend_coverage(Decimal.new("18000"), Decimal.new("24000"))
-      {:ok, %{coverage_percentage: Decimal.new("75.00"), is_fully_covered: false, ...}}
+      iex> RetirementCalculator.analyze_dividend_coverage(DH.ensure_decimal("18000"), DH.ensure_decimal("24000"))
+      {:ok, %{coverage_percentage: DH.ensure_decimal("75.00"), is_fully_covered: false, ...}}
 
   ## Parameters
 
@@ -712,23 +714,23 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
       coverage_percentage =
         if Decimal.equal?(annual_expenses, Decimal.new("0")) do
           # No expenses means full coverage
-          Decimal.new("100.00")
+          DH.ensure_decimal("100.00")
         else
           annual_dividend
-          |> Decimal.div(annual_expenses)
-          |> Decimal.mult(Decimal.new("100"))
+          |> DH.safe_divide(annual_expenses)
+          |> Decimal.mult(DH.ensure_decimal("100"))
           |> Decimal.round(2)
         end
 
       # Calculate monthly amounts
-      monthly_dividend = annual_dividend |> Decimal.div(Decimal.new("12")) |> Decimal.round(2)
-      monthly_expenses = annual_expenses |> Decimal.div(Decimal.new("12")) |> Decimal.round(2)
+      monthly_dividend = annual_dividend |> DH.safe_divide(DH.ensure_decimal("12")) |> Decimal.round(2)
+      monthly_expenses = annual_expenses |> DH.safe_divide(DH.ensure_decimal("12")) |> Decimal.round(2)
 
       # Calculate shortfall (0 if dividend exceeds expenses)
       monthly_shortfall =
         monthly_expenses
         |> Decimal.sub(monthly_dividend)
-        |> Decimal.max(Decimal.new("0"))
+        |> DH.decimal_max(Decimal.new("0"))
         |> Decimal.round(2)
 
       # Determine if fully covered
@@ -789,13 +791,13 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
   defp validate_years(_), do: {:error, :invalid_years}
 
   defp validate_growth_rate(growth_rate) do
-    case Decimal.compare(growth_rate, Decimal.new("0.5")) do
+    case Decimal.compare(growth_rate, DH.ensure_decimal("0.5")) do
       # > 50% is unrealistic
       :gt ->
         {:error, :unrealistic_growth}
 
       _ ->
-        case Decimal.compare(growth_rate, Decimal.new("-0.2")) do
+        case Decimal.compare(growth_rate, DH.ensure_decimal("-0.2")) do
           # < -20% is also unrealistic
           :lt -> {:error, :unrealistic_growth}
           _ -> :ok
@@ -803,30 +805,29 @@ defmodule Ashfolio.FinancialManagement.RetirementCalculator do
     end
   end
 
-
   # Private helper function for withdrawal risk analysis
   defp analyze_withdrawal_risk(withdrawal_rate) do
     cond do
-      Decimal.compare(withdrawal_rate, Decimal.new("4.0")) != :gt ->
+      Decimal.compare(withdrawal_rate, DH.ensure_decimal("4.0")) != :gt ->
         # <= 4%: Low risk, sustainable indefinitely
         {true, :low, :indefinite}
 
-      Decimal.compare(withdrawal_rate, Decimal.new("5.0")) != :gt ->
+      Decimal.compare(withdrawal_rate, DH.ensure_decimal("5.0")) != :gt ->
         # 4.1% - 5%: Moderate risk, may last 20-30 years
-        rate_diff = withdrawal_rate |> Decimal.sub(Decimal.new("4")) |> Decimal.round(0)
+        rate_diff = withdrawal_rate |> Decimal.sub(DH.ensure_decimal("4")) |> Decimal.round(0)
         years = 25 - Decimal.to_integer(rate_diff) * 3
         {false, :moderate, max(years, 15)}
 
       true ->
         # > 5%: High risk, likely to deplete portfolio
         years =
-          case Decimal.compare(withdrawal_rate, Decimal.new("8.0")) do
+          case Decimal.compare(withdrawal_rate, DH.ensure_decimal("8.0")) do
             # Very high withdrawal rate
             :gt ->
               8
 
             _ ->
-              rate_diff = withdrawal_rate |> Decimal.sub(Decimal.new("5")) |> Decimal.round(0)
+              rate_diff = withdrawal_rate |> Decimal.sub(DH.ensure_decimal("5")) |> Decimal.round(0)
               20 - Decimal.to_integer(rate_diff) * 2
           end
 

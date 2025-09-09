@@ -11,11 +11,10 @@ defmodule AshfolioWeb.ForecastLive.Index do
 
   use AshfolioWeb, :live_view
 
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.ForecastCalculator
   alias AshfolioWeb.Components.ForecastChart
-  alias AshfolioWeb.Helpers.ChartHelpers
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
 
   require Logger
 
@@ -493,7 +492,7 @@ defmodule AshfolioWeb.ForecastLive.Index do
 
   defp get_current_portfolio_value do
     # For now, return a default value since we're focusing on the forecasting functionality
-    # TODO: Integrate with actual portfolio calculation when available
+    # TODO: Integrate with actual portfolio calculation when available (#future)
     Decimal.new("100000")
   end
 
@@ -547,11 +546,11 @@ defmodule AshfolioWeb.ForecastLive.Index do
   end
 
   defp build_scenario_chart_data(scenarios, years, initial_value) do
-    chart_years = ChartHelpers.generate_chart_periods(years)
+    chart_years = Formatters.generate_chart_periods(years)
 
     # Use ChartHelpers for individual scenario projections with proper growth rates
     pessimistic_values =
-      ChartHelpers.build_scenario_projection(
+      Formatters.build_scenario_projection(
         initial_value,
         scenarios.pessimistic,
         years,
@@ -559,7 +558,7 @@ defmodule AshfolioWeb.ForecastLive.Index do
       )
 
     realistic_values =
-      ChartHelpers.build_scenario_projection(
+      Formatters.build_scenario_projection(
         initial_value,
         scenarios.realistic,
         years,
@@ -567,7 +566,7 @@ defmodule AshfolioWeb.ForecastLive.Index do
       )
 
     optimistic_values =
-      ChartHelpers.build_scenario_projection(
+      Formatters.build_scenario_projection(
         initial_value,
         scenarios.optimistic,
         years,
@@ -639,14 +638,14 @@ defmodule AshfolioWeb.ForecastLive.Index do
         <div class="text-center p-4 bg-blue-50 rounded-lg">
           <p class="text-sm text-gray-600">Final Portfolio Value</p>
           <p class="text-2xl font-bold text-blue-600">
-            {FormatHelpers.format_currency(@results.final_value)}
+            {Formatters.format_currency_with_cents(@results.final_value)}
           </p>
         </div>
 
         <div class="text-center p-4 bg-green-50 rounded-lg">
           <p class="text-sm text-gray-600">Total Growth</p>
           <p class="text-2xl font-bold text-green-600">
-            {FormatHelpers.format_currency(
+            {Formatters.format_currency_with_cents(
               Decimal.sub(@results.final_value, @results.parameters.current_value)
             )}
           </p>
@@ -656,12 +655,12 @@ defmodule AshfolioWeb.ForecastLive.Index do
       <div class="space-y-2 text-sm text-gray-600">
         <p><strong>Parameters:</strong></p>
         <p>
-          • Monthly Contribution: {FormatHelpers.format_currency(
+          • Monthly Contribution: {Formatters.format_currency_with_cents(
             @results.parameters.monthly_contribution
           )}
         </p>
         <p>
-          • Annual Growth Rate: {ChartHelpers.format_growth_rate(@results.parameters.growth_rate)}
+          • Annual Growth Rate: {Formatters.format_growth_rate(@results.parameters.growth_rate)}
         </p>
         <p>• Time Horizon: {@results.parameters.years} years</p>
       </div>
@@ -683,7 +682,7 @@ defmodule AshfolioWeb.ForecastLive.Index do
           <div>
             <h4 class="font-medium text-red-800">Pessimistic (5%)</h4>
             <p class="text-red-600">
-              {FormatHelpers.format_currency(@scenarios.pessimistic.portfolio_value)}
+              {Formatters.format_currency_with_cents(@scenarios.pessimistic.portfolio_value)}
             </p>
           </div>
           <.icon name="hero-arrow-trending-down" class="w-8 h-8 text-red-500" />
@@ -693,7 +692,7 @@ defmodule AshfolioWeb.ForecastLive.Index do
           <div>
             <h4 class="font-medium text-blue-800">Realistic (7%)</h4>
             <p class="text-blue-600">
-              {FormatHelpers.format_currency(@scenarios.realistic.portfolio_value)}
+              {Formatters.format_currency_with_cents(@scenarios.realistic.portfolio_value)}
             </p>
           </div>
           <.icon name="hero-arrow-trending-up" class="w-8 h-8 text-blue-500" />
@@ -703,7 +702,7 @@ defmodule AshfolioWeb.ForecastLive.Index do
           <div>
             <h4 class="font-medium text-green-800">Optimistic (10%)</h4>
             <p class="text-green-600">
-              {FormatHelpers.format_currency(@scenarios.optimistic.portfolio_value)}
+              {Formatters.format_currency_with_cents(@scenarios.optimistic.portfolio_value)}
             </p>
           </div>
           <.icon name="hero-trending-up" class="w-8 h-8 text-green-500" />
@@ -714,7 +713,7 @@ defmodule AshfolioWeb.ForecastLive.Index do
             <div>
               <h4 class="font-medium text-purple-800">Weighted Average</h4>
               <p class="text-purple-600">
-                {FormatHelpers.format_currency(@scenarios.weighted_average.portfolio_value)}
+                {Formatters.format_currency_with_cents(@scenarios.weighted_average.portfolio_value)}
               </p>
               <p class="text-xs text-purple-500 mt-1">
                 20% Pessimistic, 60% Realistic, 20% Optimistic
@@ -740,7 +739,7 @@ defmodule AshfolioWeb.ForecastLive.Index do
       <div class="mb-6 text-center p-4 bg-gray-50 rounded-lg">
         <p class="text-sm text-gray-600">Base Projection</p>
         <p class="text-2xl font-bold text-gray-900">
-          {FormatHelpers.format_currency(@analysis.base_projection)}
+          {Formatters.format_currency_with_cents(@analysis.base_projection)}
         </p>
       </div>
 
@@ -758,7 +757,7 @@ defmodule AshfolioWeb.ForecastLive.Index do
             </div>
             <div class="text-right">
               <div class="text-sm font-medium">
-                {FormatHelpers.format_currency(variation.portfolio_value)}
+                {Formatters.format_currency_with_cents(variation.portfolio_value)}
               </div>
               <div class={"text-xs #{if Decimal.compare(variation.value_difference, Decimal.new("0")) == :gt, do: "text-green-600", else: "text-red-600"}"}>
                 {format_value_difference(variation.value_difference)}
@@ -773,11 +772,11 @@ defmodule AshfolioWeb.ForecastLive.Index do
 
   defp format_contribution_change(%Decimal{} = change) do
     sign = if Decimal.compare(change, Decimal.new("0")) == :gt, do: "+", else: ""
-    "#{sign}#{FormatHelpers.format_currency(change)}"
+    "#{sign}#{Formatters.format_currency_with_cents(change)}"
   end
 
   defp format_value_difference(%Decimal{} = diff) do
     sign = if Decimal.compare(diff, Decimal.new("0")) == :gt, do: "+", else: ""
-    "#{sign}#{FormatHelpers.format_currency(diff)}"
+    "#{sign}#{Formatters.format_currency_with_cents(diff)}"
   end
 end

@@ -4,15 +4,15 @@ defmodule AshfolioWeb.RetirementLive.Index do
 
   Provides interactive forms for retirement planning with:
   - 25x rule calculation (retirement target)
-  - 4% safe withdrawal rate calculation  
+  - 4% safe withdrawal rate calculation
   - Retirement progress tracking
   - Historical expense analysis
   """
 
   use AshfolioWeb, :live_view
 
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.RetirementCalculator
-  alias AshfolioWeb.Live.FormatHelpers
 
   require Logger
 

@@ -4,6 +4,7 @@ defmodule AshfolioWeb.DashboardLive.ExpenseWidgetTest do
   import Phoenix.LiveViewTest
 
   alias Ashfolio.FinancialManagement.Expense
+  alias Ashfolio.FinancialManagement.TransactionCategory
 
   describe "expense widget" do
     setup do
@@ -21,10 +22,11 @@ defmodule AshfolioWeb.DashboardLive.ExpenseWidgetTest do
           description: "Test expense 1"
         })
 
+      # Both expenses in current month
       {:ok, expense2} =
         Expense.create(%{
           amount: Decimal.new("50.00"),
-          date: Date.utc_today(),  # Both expenses in current month
+          date: Date.utc_today(),
           description: "Test expense 2"
         })
 
@@ -87,7 +89,7 @@ defmodule AshfolioWeb.DashboardLive.ExpenseWidgetTest do
     test "shows top spending category when available", %{conn: conn} do
       # Create test category
       {:ok, category} =
-        Ashfolio.FinancialManagement.TransactionCategory.create(%{
+        TransactionCategory.create(%{
           name: "Groceries",
           color: "#4CAF50"
         })

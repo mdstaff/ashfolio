@@ -18,6 +18,7 @@ defmodule AshfolioWeb.CoreComponents do
   use Gettext, backend: AshfolioWeb.Gettext
 
   alias Ashfolio.FinancialManagement.EmergencyFundStatus
+  alias Phoenix.HTML.Form
   alias Phoenix.HTML.FormField
   alias Phoenix.LiveView.JS
 
@@ -305,7 +306,7 @@ defmodule AshfolioWeb.CoreComponents do
   def input(%{type: "checkbox"} = assigns) do
     assigns =
       assign_new(assigns, :checked, fn ->
-        Phoenix.HTML.Form.normalize_value("checkbox", assigns[:value])
+        Form.normalize_value("checkbox", assigns[:value])
       end)
 
     ~H"""
@@ -1046,4 +1047,90 @@ defmodule AshfolioWeb.CoreComponents do
   defp emergency_fund_status_color(status), do: EmergencyFundStatus.status_color(status)
   defp emergency_fund_dot_color(status), do: EmergencyFundStatus.dot_color(status)
   defp emergency_fund_status_text(status), do: EmergencyFundStatus.status_label(status)
+
+  @doc """
+  Renders a money ratios widget for the dashboard showing financial health status.
+  """
+  attr :available, :boolean, required: true
+  attr :status, :atom, required: true
+  attr :recommendations_count, :integer, required: true
+  attr :class, :string, default: nil
+
+  def money_ratios_widget(assigns) do
+    ~H"""
+    <div class={["bg-white rounded-lg shadow p-6", @class]}>
+      <div class="money-ratios-widget">
+        <div class="ratios-header">
+          <p class="text-sm font-medium text-gray-600">Money Ratios</p>
+          <%= if @available do %>
+            <p class="text-2xl font-semibold text-gray-900" data-testid="money-ratios-status">
+              {money_ratios_status_text(@status)}
+            </p>
+          <% else %>
+            <p class="text-lg text-gray-500" data-testid="money-ratios-no-profile">
+              Not Set Up
+            </p>
+          <% end %>
+        </div>
+
+        <%= if @available do %>
+          <div class="ratios-stats">
+            <div class="stat-item">
+              <span class="stat-label">Financial Health</span>
+              <span
+                class={[
+                  "stat-value",
+                  money_ratios_status_color(@status)
+                ]}
+                data-testid="money-ratios-health"
+              >
+                {money_ratios_status_badge(@status)}
+              </span>
+            </div>
+            <%= if @recommendations_count > 0 do %>
+              <span class="separator">•</span>
+              <div class="stat-item">
+                <span class="stat-label">Actions</span>
+                <span class="stat-value text-orange-600" data-testid="money-ratios-recommendations">
+                  {@recommendations_count} recommendations
+                </span>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="ratios-setup mt-3">
+            <p class="text-sm text-gray-500">
+              Set up your financial profile to track money ratios and get personalized recommendations.
+            </p>
+          </div>
+        <% end %>
+
+        <div class="ratios-actions mt-4">
+          <a href="/money-ratios" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+            {if @available, do: "View Analysis", else: "Get Started"}
+          </a>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  # Helper functions for money ratios widget
+  defp money_ratios_status_text(:excellent), do: "Excellent"
+  defp money_ratios_status_text(:on_track), do: "On Track"
+  defp money_ratios_status_text(:needs_attention), do: "Needs Attention"
+  defp money_ratios_status_text(:critical), do: "Critical"
+  defp money_ratios_status_text(_), do: "Unknown"
+
+  defp money_ratios_status_badge(:excellent), do: "✅ Excellent"
+  defp money_ratios_status_badge(:on_track), do: "✅ Good"
+  defp money_ratios_status_badge(:needs_attention), do: "⚠️ Review"
+  defp money_ratios_status_badge(:critical), do: "❌ Action Needed"
+  defp money_ratios_status_badge(_), do: "➖ Unknown"
+
+  defp money_ratios_status_color(:excellent), do: "text-green-600"
+  defp money_ratios_status_color(:on_track), do: "text-green-600"
+  defp money_ratios_status_color(:needs_attention), do: "text-yellow-600"
+  defp money_ratios_status_color(:critical), do: "text-red-600"
+  defp money_ratios_status_color(_), do: "text-gray-500"
 end

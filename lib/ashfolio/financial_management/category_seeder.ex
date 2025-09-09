@@ -71,35 +71,41 @@ defmodule Ashfolio.FinancialManagement.CategorySeeder do
   ]
 
   defp create_or_find_categories do
-    # Get existing categories (database-as-user architecture)
     existing_categories = get_existing_categories()
     existing_names = MapSet.new(existing_categories, & &1.name)
 
-    # Create missing categories
     results =
       @investment_categories
-      |> Enum.map(fn {name, color} ->
-        if MapSet.member?(existing_names, name) do
-          # Return existing category
-          Enum.find(existing_categories, &(&1.name == name))
-        else
-          # Create new category
-          case create_category(name, color) do
-            {:ok, category} ->
-              category
-
-            {:error, _reason} ->
-              # If creation fails, try to find existing (race condition handling)
-              case find_category_by_name(name) do
-                {:ok, category} when not is_nil(category) -> category
-                _ -> nil
-              end
-          end
-        end
-      end)
+      |> Enum.map(&get_or_create_category(&1, existing_categories, existing_names))
       |> Enum.reject(&is_nil/1)
 
-    # Verify we have all 6 categories
+    validate_category_results(results)
+  end
+
+  defp get_or_create_category({name, color}, existing_categories, existing_names) do
+    if MapSet.member?(existing_names, name) do
+      Enum.find(existing_categories, &(&1.name == name))
+    else
+      create_or_find_category(name, color)
+    end
+  end
+
+  defp create_or_find_category(name, color) do
+    case create_category(name, color) do
+      {:ok, category} -> category
+      {:error, _reason} -> fallback_find_category(name)
+    end
+  end
+
+  defp fallback_find_category(name) do
+    # Race condition handling - try to find existing category
+    case find_category_by_name(name) do
+      {:ok, category} when not is_nil(category) -> category
+      _ -> nil
+    end
+  end
+
+  defp validate_category_results(results) do
     if length(results) == 6 do
       {:ok, results}
     else

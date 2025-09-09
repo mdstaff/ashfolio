@@ -8,6 +8,8 @@ defmodule AshfolioWeb.Components.ForecastChart do
 
   use Phoenix.Component
 
+  alias AshfolioWeb.Components.ChartData
+
   @doc """
   Renders financial forecast charts with multiple visualization types.
 
@@ -58,10 +60,10 @@ defmodule AshfolioWeb.Components.ForecastChart do
 
   def render(assigns) do
     cond do
-      empty_data?(assigns.data) ->
+      ChartData.empty_data?(assigns.data) ->
         render_empty_state(assigns)
 
-      has_invalid_data?(assigns.data) ->
+      ChartData.has_invalid_data?(assigns.data) ->
         render_invalid_data_warning(assigns)
 
       true ->
@@ -614,54 +616,105 @@ defmodule AshfolioWeb.Components.ForecastChart do
   end
 
   defp process_chart_data(%{data: data, type: type}) do
-    case type do
-      :single_projection ->
-        %{
-          years: data.years || [],
-          values: data.values || []
-        }
-
-      :scenario_comparison ->
-        %{
-          years: data.years || [],
-          pessimistic: data.pessimistic || [],
-          realistic: data.realistic || [],
-          optimistic: data.optimistic || []
-        }
-
-      :confidence_band ->
-        %{
-          years: data.years || [],
-          median: data.median || [],
-          lower_bound: data.lower_bound || [],
-          upper_bound: data.upper_bound || []
-        }
-
-      :stacked_breakdown ->
-        %{
-          years: data.years || [],
-          principal: data.principal || [],
-          contributions: data.contributions || [],
-          growth: data.growth || []
-        }
-
-      _ ->
-        data
-    end
+    ChartData.build_data_for_type(data, type)
   end
 
-  defp empty_data?(%{years: years, values: values}) when is_list(years) and is_list(values) do
-    Enum.empty?(years) or Enum.empty?(values)
+  defp get_max_value(%{values: values}) when is_list(values) do
+    values
+    |> Enum.map(fn val ->
+      cond do
+        is_struct(val, Decimal) -> Decimal.to_float(val)
+        is_number(val) -> val
+        true -> 0
+      end
+    end)
+    |> Enum.max(fn -> 0 end)
   end
 
-  defp empty_data?(_data), do: false
+  defp get_max_value(_data), do: 1_000_000
 
-  defp has_invalid_data?(%{values: values}) when is_list(values) do
-    Enum.any?(values, &is_nil/1)
+  defp format_max_value(chart_data, format) do
+    max_val = get_max_value(chart_data)
+    format_axis_value(max_val, format)
   end
 
-  defp has_invalid_data?(_data), do: false
+  defp format_axis_value(value, :currency) when value >= 1_000_000 do
+    float_value = ensure_float(value)
+    "$#{:erlang.float_to_binary(float_value / 1_000_000, decimals: 0)}M"
+  end
 
+  defp format_axis_value(value, :currency) when value >= 1_000 do
+    float_value = ensure_float(value)
+    "$#{:erlang.float_to_binary(float_value / 1_000, decimals: 0)}K"
+  end
+
+  defp format_axis_value(value, :currency) do
+    float_value = ensure_float(value)
+    "$#{:erlang.float_to_binary(float_value, decimals: 0)}"
+  end
+
+  defp format_axis_value(value, :percentage) do
+    float_value = ensure_float(value)
+    "#{:erlang.float_to_binary(float_value * 100, decimals: 0)}%"
+  end
+
+  defp format_axis_value(value, _) do
+    float_value = ensure_float(value)
+    :erlang.float_to_binary(float_value, decimals: 0)
+  end
+
+  # Helper to ensure value is a float
+  defp ensure_float(value) when is_float(value), do: value
+  defp ensure_float(value) when is_integer(value), do: value * 1.0
+  defp ensure_float(%Decimal{} = value), do: Decimal.to_float(value)
+  defp ensure_float(_), do: 0.0
+
+  defp format_value(value, format) do
+    numeric_value =
+      cond do
+        is_struct(value, Decimal) -> Decimal.to_float(value)
+        is_number(value) -> value
+        true -> 0
+      end
+
+    format_axis_value(numeric_value, format)
+  end
+
+  defp axis_label_class(%{mobile: true}), do: "text-xs fill-current text-gray-600 axis-label-mobile"
+
+  defp axis_label_class(_), do: "text-xs fill-current text-gray-600"
+
+  defp format_scenario_name(:pessimistic), do: "Pessimistic (5%)"
+  defp format_scenario_name(:realistic), do: "Realistic (7%)"
+  defp format_scenario_name(:optimistic), do: "Optimistic (10%)"
+  defp format_scenario_name(name), do: to_string(name)
+
+  defp add_arrays(list1, list2) when is_list(list1) and is_list(list2) do
+    list1 |> Enum.zip(list2) |> Enum.map(fn {a, b} -> add_values(a, b) end)
+  end
+
+  defp add_arrays(list, _) when is_list(list), do: list
+  defp add_arrays(_, list) when is_list(list), do: list
+  defp add_arrays(_, _), do: []
+
+  # Helper to add values of different types
+  defp add_values(a, b) when is_number(a) and is_number(b), do: a + b
+
+  defp add_values(a, %Decimal{} = b) when is_number(a) do
+    Decimal.add(Decimal.new(a), b)
+  end
+
+  defp add_values(%Decimal{} = a, b) when is_number(b) do
+    Decimal.add(a, Decimal.new(b))
+  end
+
+  defp add_values(%Decimal{} = a, %Decimal{} = b) do
+    Decimal.add(a, b)
+  end
+
+  defp add_values(a, b), do: a + b
+
+  # Geometry helper functions for Decimal-aware path building
   defp build_line_path([], []), do: ""
 
   defp build_line_path(years, values) do
@@ -784,99 +837,4 @@ defmodule AshfolioWeb.Components.ForecastChart do
   end
 
   defp scale_y(_value, _data), do: 200
-
-  defp get_max_value(%{values: values}) when is_list(values) do
-    values
-    |> Enum.map(fn val ->
-      cond do
-        is_struct(val, Decimal) -> Decimal.to_float(val)
-        is_number(val) -> val
-        true -> 0
-      end
-    end)
-    |> Enum.max(fn -> 0 end)
-  end
-
-  defp get_max_value(_data), do: 1_000_000
-
-  defp format_max_value(chart_data, format) do
-    max_val = get_max_value(chart_data)
-    format_axis_value(max_val, format)
-  end
-
-  defp format_axis_value(value, :currency) when value >= 1_000_000 do
-    float_value = ensure_float(value)
-    "$#{:erlang.float_to_binary(float_value / 1_000_000, decimals: 0)}M"
-  end
-
-  defp format_axis_value(value, :currency) when value >= 1_000 do
-    float_value = ensure_float(value)
-    "$#{:erlang.float_to_binary(float_value / 1_000, decimals: 0)}K"
-  end
-
-  defp format_axis_value(value, :currency) do
-    float_value = ensure_float(value)
-    "$#{:erlang.float_to_binary(float_value, decimals: 0)}"
-  end
-
-  defp format_axis_value(value, :percentage) do
-    float_value = ensure_float(value)
-    "#{:erlang.float_to_binary(float_value * 100, decimals: 0)}%"
-  end
-
-  defp format_axis_value(value, _) do
-    float_value = ensure_float(value)
-    :erlang.float_to_binary(float_value, decimals: 0)
-  end
-
-  # Helper to ensure value is a float
-  defp ensure_float(value) when is_float(value), do: value
-  defp ensure_float(value) when is_integer(value), do: value * 1.0
-  defp ensure_float(%Decimal{} = value), do: Decimal.to_float(value)
-  defp ensure_float(_), do: 0.0
-
-  defp format_value(value, format) do
-    numeric_value =
-      cond do
-        is_struct(value, Decimal) -> Decimal.to_float(value)
-        is_number(value) -> value
-        true -> 0
-      end
-
-    format_axis_value(numeric_value, format)
-  end
-
-  defp axis_label_class(%{mobile: true}), do: "text-xs fill-current text-gray-600 axis-label-mobile"
-
-  defp axis_label_class(_), do: "text-xs fill-current text-gray-600"
-
-  defp format_scenario_name(:pessimistic), do: "Pessimistic (5%)"
-  defp format_scenario_name(:realistic), do: "Realistic (7%)"
-  defp format_scenario_name(:optimistic), do: "Optimistic (10%)"
-  defp format_scenario_name(name), do: to_string(name)
-
-  defp add_arrays(list1, list2) when is_list(list1) and is_list(list2) do
-    list1 |> Enum.zip(list2) |> Enum.map(fn {a, b} -> add_values(a, b) end)
-  end
-
-  defp add_arrays(list, _) when is_list(list), do: list
-  defp add_arrays(_, list) when is_list(list), do: list
-  defp add_arrays(_, _), do: []
-
-  # Helper to add values of different types
-  defp add_values(a, b) when is_number(a) and is_number(b), do: a + b
-
-  defp add_values(a, %Decimal{} = b) when is_number(a) do
-    Decimal.add(Decimal.new(a), b)
-  end
-
-  defp add_values(%Decimal{} = a, b) when is_number(b) do
-    Decimal.add(a, Decimal.new(b))
-  end
-
-  defp add_values(%Decimal{} = a, %Decimal{} = b) do
-    Decimal.add(a, b)
-  end
-
-  defp add_values(a, b), do: a + b
 end

@@ -263,7 +263,7 @@ test "complex filtering with multiple criteria performs efficiently" do
   setup_complex_transaction_dataset(2000)
 
   filters = %{
-    date_range: {~D[2024-01-01], ~D[2024-12-31]},
+    date_range: {~D[2025-01-01], ~D[2025-12-31]},
     categories: [category1.id, category2.id],
     transaction_types: [:buy, :sell],
     amount_range: {Decimal.new("100"), Decimal.new("10000")}

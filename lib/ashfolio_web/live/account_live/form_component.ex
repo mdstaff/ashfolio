@@ -3,9 +3,9 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
   use AshfolioWeb, :live_component
 
   alias Ashfolio.Context
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.Portfolio.Account
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def render(assigns) do
@@ -128,9 +128,7 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
               </p>
               <%= if @action == :edit and @account.balance_updated_at do %>
                 <p class="text-xs text-blue-600 mt-1">
-                  Balance last updated: {FormatHelpers.format_relative_time(
-                    @account.balance_updated_at
-                  )}
+                  Balance last updated: {Formatters.format_relative_time(@account.balance_updated_at)}
                 </p>
               <% end %>
             </div>
@@ -271,7 +269,7 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
       {:ok, _} ->
         save_account(socket, socket.assigns.action, form_params)
 
-      {:error, :name_already_taken} ->
+      {:error, :validation_failed} ->
         name = Map.get(form_params, "name")
         error_message = "Account name '#{name}' is already taken. Please choose another."
 
@@ -320,7 +318,7 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
       {:ok, account} ->
         success_message =
           if Map.get(form_params, "balance") && form_params["balance"] != "" do
-            "Account created successfully with balance of #{FormatHelpers.format_currency(account.balance)}"
+            "Account created successfully with balance of #{Formatters.format_currency_with_cents(account.balance)}"
           else
             "Account created successfully"
           end
@@ -356,7 +354,7 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
           if Map.get(form_params, "balance") &&
                form_params["balance"] != "" &&
                !Decimal.equal?(old_balance, account.balance) do
-            "Account updated successfully. Balance changed to #{FormatHelpers.format_currency(account.balance)}"
+            "Account updated successfully. Balance changed to #{Formatters.format_currency_with_cents(account.balance)}"
           else
             "Account updated successfully"
           end
@@ -406,116 +404,110 @@ defmodule AshfolioWeb.AccountLive.FormComponent do
   end
 
   defp generate_validation_messages(form_params, _form) do
-    messages = %{}
+    %{}
+    |> add_name_validation_message(form_params)
+    |> add_platform_validation_message(form_params)
+    |> add_balance_validation_message(form_params)
+    |> add_exclusion_validation_message(form_params)
+  end
 
-    # Name field validation messages
-    messages =
-      case Map.get(form_params, "name") do
-        nil ->
-          messages
+  defp add_name_validation_message(messages, form_params) do
+    case Map.get(form_params, "name") do
+      name when name in [nil, ""] ->
+        messages
 
-        "" ->
-          messages
+      name when byte_size(name) < 2 ->
+        Map.put(messages, :name, "Account name should be at least 2 characters long")
 
-        name when byte_size(name) < 2 ->
-          Map.put(messages, :name, "Account name should be at least 2 characters long")
+      name when byte_size(name) > 100 ->
+        Map.put(messages, :name, "Account name should be less than 100 characters")
 
-        name when byte_size(name) > 100 ->
-          Map.put(messages, :name, "Account name should be less than 100 characters")
+      name ->
+        validate_name_format(messages, name)
+    end
+  end
 
-        name ->
-          if String.match?(name, ~r/^[a-zA-Z0-9\s\-_]+$/) do
-            Map.put(messages, :name, "Good! Account name looks valid")
-          else
-            Map.put(
-              messages,
-              :name,
-              "Use only letters, numbers, spaces, hyphens, and underscores"
-            )
-          end
-      end
+  defp validate_name_format(messages, name) do
+    if String.match?(name, ~r/^[a-zA-Z0-9\s\-_]+$/) do
+      Map.put(messages, :name, "Good! Account name looks valid")
+    else
+      Map.put(messages, :name, "Use only letters, numbers, spaces, hyphens, and underscores")
+    end
+  end
 
-    # Platform field validation messages
-    messages =
-      case Map.get(form_params, "platform") do
-        nil ->
-          messages
+  defp add_platform_validation_message(messages, form_params) do
+    case Map.get(form_params, "platform") do
+      platform when platform in [nil, ""] ->
+        messages
 
-        "" ->
-          messages
+      platform when byte_size(platform) > 50 ->
+        Map.put(messages, :platform, "Platform name should be less than 50 characters")
 
-        platform when byte_size(platform) > 50 ->
-          Map.put(messages, :platform, "Platform name should be less than 50 characters")
+      platform ->
+        validate_platform_recognition(messages, platform)
+    end
+  end
 
-        platform ->
-          common_platforms = [
-            "Schwab",
-            "Fidelity",
-            "Vanguard",
-            "TD Ameritrade",
-            "E*TRADE",
-            "Robinhood",
-            "Interactive Brokers"
-          ]
+  defp validate_platform_recognition(messages, platform) do
+    common_platforms = [
+      "Schwab",
+      "Fidelity",
+      "Vanguard",
+      "TD Ameritrade",
+      "E*TRADE",
+      "Robinhood",
+      "Interactive Brokers"
+    ]
 
-          if Enum.any?(
-               common_platforms,
-               &String.contains?(String.downcase(platform), String.downcase(&1))
-             ) do
-            Map.put(messages, :platform, "Great! We recognize this platform")
-          else
-            Map.put(messages, :platform, "Platform name looks good")
-          end
-      end
+    if Enum.any?(common_platforms, &platform_matches?(&1, platform)) do
+      Map.put(messages, :platform, "Great! We recognize this platform")
+    else
+      Map.put(messages, :platform, "Platform name looks good")
+    end
+  end
 
-    # Balance field validation messages
-    messages =
-      case Map.get(form_params, "balance") do
-        nil ->
-          messages
+  defp platform_matches?(known_platform, input_platform) do
+    String.contains?(String.downcase(input_platform), String.downcase(known_platform))
+  end
 
-        "" ->
-          messages
+  defp add_balance_validation_message(messages, form_params) do
+    case Map.get(form_params, "balance") do
+      balance when balance in [nil, ""] ->
+        messages
 
-        balance_string ->
-          case Float.parse(balance_string) do
-            {balance, ""} when balance < 0 ->
-              Map.put(messages, :balance, "Balance cannot be negative")
+      balance_string ->
+        validate_balance_format(messages, balance_string)
+    end
+  end
 
-            {balance, ""} when balance > 10_000_000 ->
-              Map.put(messages, :balance, "That's a lot! Please verify this amount is correct")
+  defp validate_balance_format(messages, balance_string) do
+    case Float.parse(balance_string) do
+      {balance, ""} when balance < 0 ->
+        Map.put(messages, :balance, "Balance cannot be negative")
 
-            {balance, ""} when balance > 0 ->
-              formatted = FormatHelpers.format_currency(Decimal.new(balance))
-              Map.put(messages, :balance, "Balance will be set to #{formatted}")
+      {balance, ""} when balance > 10_000_000 ->
+        Map.put(messages, :balance, "That's a lot! Please verify this amount is correct")
 
-            {+0.0, ""} ->
-              Map.put(messages, :balance, "Account will be created with zero balance")
+      {balance, ""} when balance > 0 ->
+        formatted = Formatters.format_currency_with_cents(Decimal.from_float(balance))
+        Map.put(messages, :balance, "Balance will be set to #{formatted}")
 
-            _ ->
-              Map.put(messages, :balance, "Please enter a valid number (e.g., 1000.50)")
-          end
-      end
+      {+0.0, ""} ->
+        Map.put(messages, :balance, "Account will be created with zero balance")
 
-    # Exclusion field validation messages
-    messages =
-      case Map.get(form_params, "is_excluded") do
-        "true" ->
-          Map.put(
-            messages,
-            :is_excluded,
-            "This account will be excluded from portfolio calculations"
-          )
+      _ ->
+        Map.put(messages, :balance, "Please enter a valid number (e.g., 1000.50)")
+    end
+  end
 
-        _ ->
-          Map.put(
-            messages,
-            :is_excluded,
-            "This account will be included in portfolio calculations"
-          )
-      end
+  defp add_exclusion_validation_message(messages, form_params) do
+    case Map.get(form_params, "is_excluded") do
+      "true" ->
+        Map.put(messages, :is_excluded, "This account will be excluded from portfolio calculations")
 
-    messages
+      _ ->
+        Map.put(messages, :is_excluded, "This account will be included in portfolio calculations")
+    end
   end
 
   defp extract_form_errors(form) do

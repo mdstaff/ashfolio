@@ -5,11 +5,12 @@ defmodule AshfolioWeb.ExpenseLive.EnhancedAnalyticsTest do
 
   alias Ashfolio.FinancialManagement.Expense
   alias Ashfolio.FinancialManagement.TransactionCategory
+  alias Ashfolio.Portfolio.Account
 
   setup do
     # Create test data - following existing patterns from other tests
     {:ok, checking_account} =
-      Ashfolio.Portfolio.Account.create(%{
+      Account.create(%{
         name: "Test Checking",
         account_type: :checking,
         balance: Decimal.new("5000.00")

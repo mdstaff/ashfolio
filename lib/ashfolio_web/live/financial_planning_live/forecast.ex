@@ -2,12 +2,12 @@ defmodule AshfolioWeb.FinancialPlanningLive.Forecast do
   @moduledoc false
   use AshfolioWeb, :live_view
 
+  alias Ashfolio.Financial.Formatters
   alias Ashfolio.FinancialManagement.ContributionAnalyzer
   alias Ashfolio.FinancialManagement.FinancialGoal
   alias Ashfolio.FinancialManagement.ForecastCalculator
   alias AshfolioWeb.Components.ForecastChart
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -452,7 +452,7 @@ defmodule AshfolioWeb.FinancialPlanningLive.Forecast do
                     <div>
                       <div class="text-sm font-medium text-gray-900">{goal.name}</div>
                       <div class="text-xs text-gray-500">
-                        Target: {FormatHelpers.format_currency(goal.target_amount)}
+                        Target: {Formatters.format_currency_with_cents(goal.target_amount)}
                       </div>
                     </div>
                     <button
@@ -518,7 +518,7 @@ defmodule AshfolioWeb.FinancialPlanningLive.Forecast do
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="text-center p-4 bg-blue-50 rounded-lg">
                   <div class="text-2xl font-bold text-blue-600">
-                    {FormatHelpers.format_currency(@forecast_result.fi_amount)}
+                    {Formatters.format_currency_with_cents(@forecast_result.fi_amount)}
                   </div>
                   <div class="text-sm text-blue-800">FI Target Amount</div>
                 </div>
@@ -532,7 +532,7 @@ defmodule AshfolioWeb.FinancialPlanningLive.Forecast do
 
                 <div class="text-center p-4 bg-purple-50 rounded-lg">
                   <div class="text-2xl font-bold text-purple-600">
-                    {FormatHelpers.format_currency(@forecast_result.monthly_fi_income)}
+                    {Formatters.format_currency_with_cents(@forecast_result.monthly_fi_income)}
                   </div>
                   <div class="text-sm text-purple-800">Monthly FI Income</div>
                 </div>
@@ -580,7 +580,7 @@ defmodule AshfolioWeb.FinancialPlanningLive.Forecast do
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div class="p-4 bg-green-50 rounded-lg">
                     <div class="text-lg font-bold text-green-600">
-                      {FormatHelpers.format_currency(
+                      {Formatters.format_currency_with_cents(
                         @optimization_result.optimal_monthly_contribution
                       )}
                     </div>

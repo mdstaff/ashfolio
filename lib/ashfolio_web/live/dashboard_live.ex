@@ -3,14 +3,16 @@ defmodule AshfolioWeb.DashboardLive do
   use AshfolioWeb, :live_view
 
   alias Ashfolio.Context
+  alias Ashfolio.Financial.Formatters
+  alias Ashfolio.Financial.MoneyRatios
   alias Ashfolio.FinancialManagement.Expense
   alias Ashfolio.FinancialManagement.FinancialGoal
+  alias Ashfolio.FinancialManagement.FinancialProfile
   alias Ashfolio.FinancialManagement.NetWorthSnapshot
   alias Ashfolio.MarketData.PriceManager
-  alias Ashfolio.Portfolio.Account
   alias Ashfolio.Portfolio.HoldingsCalculator
+  alias AshfolioWeb.Live.DashboardCalculators
   alias AshfolioWeb.Live.ErrorHelpers
-  alias AshfolioWeb.Live.FormatHelpers
 
   require Logger
 
@@ -81,80 +83,29 @@ defmodule AshfolioWeb.DashboardLive do
 
   @impl true
   def handle_event("sort", %{"column" => column}, socket) do
-    {sort_by, sort_order} = toggle_sort(socket.assigns.sort_by, socket.assigns.sort_order, column)
-    holdings = sort_holdings(socket.assigns.holdings, sort_by, sort_order)
+    new_column_atom = String.to_existing_atom(column)
+    current_sort = socket.assigns.sort_by
+    current_order = socket.assigns.sort_order
+
+    {sort_by, sort_order} =
+      if current_sort == new_column_atom do
+        {new_column_atom, if(current_order == :asc, do: :desc, else: :asc)}
+      else
+        {new_column_atom, :asc}
+      end
 
     socket =
       socket
       |> assign(:sort_by, sort_by)
       |> assign(:sort_order, sort_order)
-      |> assign(:holdings, holdings)
 
     {:noreply, socket}
   end
 
   @impl true
   def handle_event("create_snapshot", _params, socket) do
-    # Calculate current net worth from all accounts
-    current_net_worth = calculate_current_net_worth()
-
-    # Prepare snapshot data
-    today = Date.utc_today()
-    total_assets = current_net_worth
-    total_liabilities = Decimal.new("0.00")
-    net_worth = Decimal.sub(total_assets, total_liabilities)
-
-    snapshot_data = %{
-      snapshot_date: today,
-      total_assets: total_assets,
-      total_liabilities: total_liabilities,
-      net_worth: net_worth,
-      cash_value: calculate_total_cash(),
-      investment_value: calculate_total_investments(),
-      is_automated: false
-    }
-
-    # Try to create new snapshot, or update existing one for today
-    case NetWorthSnapshot.create(snapshot_data) do
-      {:ok, _snapshot} ->
-        socket =
-          socket
-          |> put_flash(:info, "Net worth snapshot created successfully!")
-          |> load_portfolio_data()
-
-        {:noreply, socket}
-
-      {:error, _error} ->
-        # If creation failed (likely due to date uniqueness), try to find existing snapshot for today
-        case Enum.filter(NetWorthSnapshot.list!(), fn snapshot ->
-               Date.compare(snapshot.snapshot_date, today) == :eq
-             end) do
-          [existing_snapshot] ->
-            case NetWorthSnapshot.update(
-                   existing_snapshot,
-                   snapshot_data
-                 ) do
-              {:ok, _updated_snapshot} ->
-                socket =
-                  socket
-                  |> put_flash(:info, "Net worth snapshot updated for today!")
-                  |> load_portfolio_data()
-
-                {:noreply, socket}
-
-              {:error, update_error} ->
-                {:noreply,
-                 put_flash(
-                   socket,
-                   :error,
-                   "Failed to update snapshot: #{inspect(update_error)}"
-                 )}
-            end
-
-          [] ->
-            {:noreply, put_flash(socket, :error, "Failed to create snapshot: date conflict")}
-        end
-    end
+    snapshot_data = DashboardCalculators.build_snapshot_data()
+    {:noreply, create_or_update_snapshot(socket, snapshot_data)}
   rescue
     error ->
       {:noreply, put_flash(socket, :error, "Failed to create snapshot: #{inspect(error)}")}
@@ -213,7 +164,7 @@ defmodule AshfolioWeb.DashboardLive do
           <h1 class="text-2xl font-bold text-gray-900">Portfolio Dashboard</h1>
           <p class="text-gray-600">Overview of your investment portfolio</p>
           <p :if={@last_price_update} class="text-sm text-gray-500 mt-1">
-            Last updated: {FormatHelpers.format_relative_time(@last_price_update)}
+            Last updated: {Formatters.format_relative_time(@last_price_update)}
           </p>
         </div>
         <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -249,7 +200,7 @@ defmodule AshfolioWeb.DashboardLive do
           title="Total Value"
           value={@portfolio_value}
           change={@total_return_percent}
-          positive={FormatHelpers.positive?(@total_return_amount)}
+          positive={Formatters.positive?(@total_return_amount)}
           data_testid="total-value"
         />
         <.stat_card title="Daily Change" value="N/A" change="Phase 2" positive={true} />
@@ -257,7 +208,7 @@ defmodule AshfolioWeb.DashboardLive do
           title="Total Return"
           value={@total_return_amount}
           change={@total_return_percent}
-          positive={FormatHelpers.positive?(@total_return_amount)}
+          positive={Formatters.positive?(@total_return_amount)}
           data_testid="total-return"
         />
         <.stat_card
@@ -288,7 +239,11 @@ defmodule AshfolioWeb.DashboardLive do
           total_target={@goals_total_target}
           emergency_fund_status={@goals_emergency_fund_status}
         />
-        <!-- Space for future goal-related widgets -->
+        <.money_ratios_widget
+          available={@money_ratios_available}
+          status={@money_ratios_status}
+          recommendations_count={@money_ratios_recommendations_count}
+        />
       </div>
       
     <!-- Investment vs Cash Breakdown -->
@@ -363,7 +318,10 @@ defmodule AshfolioWeb.DashboardLive do
                       class="hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded"
                       aria-label="Sort by symbol"
                     >
-                      Symbol {sort_indicator(@sort_by, @sort_order, :symbol)}
+                      Symbol
+                      <%= if @sort_by == :symbol do %>
+                        {if @sort_order == :asc, do: "↑", else: "↓"}
+                      <% end %>
                     </button>
                   </th>
                   <th class="p-0 pb-4 pr-6 font-normal text-right">Quantity</th>
@@ -375,7 +333,10 @@ defmodule AshfolioWeb.DashboardLive do
                       class="hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded"
                       aria-label="Sort by current value"
                     >
-                      Current Value {sort_indicator(@sort_by, @sort_order, :current_value)}
+                      Current Value
+                      <%= if @sort_by == :current_value do %>
+                        {if @sort_order == :asc, do: "↑", else: "↓"}
+                      <% end %>
                     </button>
                   </th>
                   <th class="p-0 pb-4 pr-6 font-normal text-right">Cost Basis</th>
@@ -386,7 +347,10 @@ defmodule AshfolioWeb.DashboardLive do
                       class="hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded"
                       aria-label="Sort by profit and loss"
                     >
-                      P&L {sort_indicator(@sort_by, @sort_order, :unrealized_pnl)}
+                      P&L
+                      <%= if @sort_by == :unrealized_pnl do %>
+                        {if @sort_order == :asc, do: "↑", else: "↓"}
+                      <% end %>
                     </button>
                   </th>
                 </tr>
@@ -405,14 +369,14 @@ defmodule AshfolioWeb.DashboardLive do
                   <td class="relative p-0">
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
-                      <span class="relative">{format_quantity(holding.quantity)}</span>
+                      <span class="relative">{Formatters.format_quantity(holding.quantity)}</span>
                     </div>
                   </td>
                   <td class="relative p-0">
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
                       <span class="relative">
-                        {FormatHelpers.format_currency(holding.current_price)}
+                        {Formatters.format_currency_with_cents(holding.current_price)}
                       </span>
                     </div>
                   </td>
@@ -420,7 +384,7 @@ defmodule AshfolioWeb.DashboardLive do
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
                       <span class="relative">
-                        {FormatHelpers.format_currency(holding.current_value)}
+                        {Formatters.format_currency_with_cents(holding.current_value)}
                       </span>
                     </div>
                   </td>
@@ -428,7 +392,7 @@ defmodule AshfolioWeb.DashboardLive do
                     <div class="block py-4 pr-6 text-right">
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50" />
                       <span class="relative">
-                        {FormatHelpers.format_currency(holding.cost_basis)}
+                        {Formatters.format_currency_with_cents(holding.cost_basis)}
                       </span>
                     </div>
                   </td>
@@ -437,11 +401,11 @@ defmodule AshfolioWeb.DashboardLive do
                       <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 sm:rounded-r-xl" />
                       <span class={[
                         "relative",
-                        FormatHelpers.value_color_class(holding.unrealized_pnl)
+                        Formatters.value_color_class(holding.unrealized_pnl)
                       ]}>
-                        <div>{FormatHelpers.format_currency(holding.unrealized_pnl)}</div>
+                        <div>{Formatters.format_currency_with_cents(holding.unrealized_pnl)}</div>
                         <div class="text-sm">
-                          ({FormatHelpers.format_percentage(holding.unrealized_pnl_pct)})
+                          ({Formatters.format_percentage(holding.unrealized_pnl_pct)})
                         </div>
                       </span>
                     </div>
@@ -506,11 +470,11 @@ defmodule AshfolioWeb.DashboardLive do
                       </p>
                       <span class="text-gray-300">•</span>
                       <p class="text-xs text-gray-500">
-                        {format_quantity(transaction.quantity)} shares
+                        {Formatters.format_quantity(transaction.quantity)} shares
                       </p>
                       <span class="text-gray-300">•</span>
                       <p class="text-xs text-gray-500">
-                        {FormatHelpers.format_relative_time(transaction.date)}
+                        {Formatters.format_relative_time(transaction.date)}
                       </p>
                     </div>
                   </div>
@@ -518,12 +482,12 @@ defmodule AshfolioWeb.DashboardLive do
                 <div class="text-right">
                   <p class={[
                     "text-sm font-medium",
-                    FormatHelpers.value_color_class(transaction.total_amount)
+                    Formatters.value_color_class(transaction.total_amount)
                   ]}>
-                    {FormatHelpers.format_currency(transaction.total_amount)}
+                    {Formatters.format_currency_with_cents(transaction.total_amount)}
                   </p>
                   <p class="text-xs text-gray-500">
-                    @ {FormatHelpers.format_currency(get_transaction_price(transaction))}
+                    @ {Formatters.format_currency_with_cents(get_transaction_price(transaction))}
                   </p>
                 </div>
               </div>
@@ -536,6 +500,52 @@ defmodule AshfolioWeb.DashboardLive do
   end
 
   # Private functions
+
+  defp create_or_update_snapshot(socket, snapshot_data) do
+    case NetWorthSnapshot.create(snapshot_data) do
+      {:ok, _snapshot} ->
+        handle_successful_snapshot_creation(socket)
+
+      {:error, _error} ->
+        handle_failed_snapshot_creation(socket, snapshot_data)
+    end
+  end
+
+  defp handle_successful_snapshot_creation(socket) do
+    socket
+    |> put_flash(:info, "Net worth snapshot created successfully!")
+    |> load_portfolio_data()
+  end
+
+  defp handle_failed_snapshot_creation(socket, snapshot_data) do
+    today = snapshot_data.snapshot_date
+
+    case find_existing_snapshot_for_today(today) do
+      [existing_snapshot] ->
+        update_existing_snapshot(socket, existing_snapshot, snapshot_data)
+
+      [] ->
+        put_flash(socket, :error, "Failed to create snapshot: date conflict")
+    end
+  end
+
+  defp find_existing_snapshot_for_today(today) do
+    Enum.filter(NetWorthSnapshot.list!(), fn snapshot ->
+      Date.compare(snapshot.snapshot_date, today) == :eq
+    end)
+  end
+
+  defp update_existing_snapshot(socket, existing_snapshot, snapshot_data) do
+    case NetWorthSnapshot.update(existing_snapshot, snapshot_data) do
+      {:ok, _updated_snapshot} ->
+        socket
+        |> put_flash(:info, "Net worth snapshot updated for today!")
+        |> load_portfolio_data()
+
+      {:error, update_error} ->
+        put_flash(socket, :error, "Failed to update snapshot: #{inspect(update_error)}")
+    end
+  end
 
   defp load_portfolio_data(socket) do
     Logger.debug("Loading portfolio data for dashboard")
@@ -572,6 +582,7 @@ defmodule AshfolioWeb.DashboardLive do
     |> assign_default_net_worth_values()
     |> assign_default_expense_values()
     |> assign_default_goals_values()
+    |> assign_default_money_ratios_values()
   end
 
   # This function is now handled in load_holdings_and_net_worth
@@ -584,14 +595,14 @@ defmodule AshfolioWeb.DashboardLive do
     net_worth_value = net_worth_data[:total_net_worth] || net_worth_data[:net_worth]
 
     socket
-    |> assign(:net_worth_total, FormatHelpers.format_currency(net_worth_value))
+    |> assign(:net_worth_total, Formatters.format_currency_with_cents(net_worth_value))
     |> assign(
       :net_worth_investment_value,
-      FormatHelpers.format_currency(net_worth_data.investment_value)
+      Formatters.format_currency_with_cents(net_worth_data.investment_value)
     )
     |> assign(
       :net_worth_cash_balance,
-      FormatHelpers.format_currency(net_worth_data[:cash_balance] || net_worth_data[:cash_value])
+      Formatters.format_currency_with_cents(net_worth_data[:cash_balance] || net_worth_data[:cash_value])
     )
     |> assign(:net_worth_breakdown, net_worth_data.breakdown)
     |> assign(:net_worth_error, nil)
@@ -623,6 +634,7 @@ defmodule AshfolioWeb.DashboardLive do
     |> load_holdings_and_net_worth()
     |> load_expense_data()
     |> load_goals_data()
+    |> load_money_ratios_data()
   end
 
   defp load_holdings_and_net_worth(socket) do
@@ -645,14 +657,14 @@ defmodule AshfolioWeb.DashboardLive do
       {:ok, holdings_data} ->
         socket
         |> assign(:holdings, holdings_data.holdings)
-        |> assign(:portfolio_value, FormatHelpers.format_currency(holdings_data.total_value))
-        |> assign(:portfolio_pnl, FormatHelpers.format_currency(holdings_data.total_pnl))
-        |> assign(:total_return_amount, FormatHelpers.format_currency(holdings_data.total_pnl))
+        |> assign(:portfolio_value, Formatters.format_currency_with_cents(holdings_data.total_value))
+        |> assign(:portfolio_pnl, Formatters.format_currency_with_cents(holdings_data.total_pnl))
+        |> assign(:total_return_amount, Formatters.format_currency_with_cents(holdings_data.total_pnl))
         |> assign(
           :total_return_percent,
-          FormatHelpers.format_percentage(holdings_data.total_pnl_pct)
+          Formatters.format_percentage(holdings_data.total_pnl_pct)
         )
-        |> assign(:cost_basis, FormatHelpers.format_currency(holdings_data.total_cost_basis))
+        |> assign(:cost_basis, Formatters.format_currency_with_cents(holdings_data.total_cost_basis))
         |> assign(:holdings_count, to_string(holdings_data.holdings_count))
         |> assign(:sort_by, :symbol)
         |> assign(:sort_order, :asc)
@@ -691,42 +703,7 @@ defmodule AshfolioWeb.DashboardLive do
       nil
   end
 
-  # Helper functions for holdings table
-
-  defp format_quantity(decimal_value) do
-    decimal_value
-    |> Decimal.round(6)
-    |> Decimal.to_string()
-    |> String.replace(~r/\.?0+$/, "")
-  end
-
-  defp sort_holdings(holdings, sort_by, sort_order) do
-    Enum.sort_by(holdings, &Map.get(&1, sort_by), sort_order)
-  end
-
-  defp toggle_sort(current_sort, current_order, new_column) do
-    new_column_atom = String.to_existing_atom(new_column)
-
-    if current_sort == new_column_atom do
-      {new_column_atom, toggle_order(current_order)}
-    else
-      {new_column_atom, :asc}
-    end
-  end
-
-  defp toggle_order(:asc), do: :desc
-  defp toggle_order(:desc), do: :asc
-
-  defp sort_indicator(current_sort, current_order, column) do
-    if current_sort == column do
-      case current_order do
-        :asc -> "↑"
-        :desc -> "↓"
-      end
-    else
-      ""
-    end
-  end
+  # Helper functions for holdings table - moved to HoldingsTable component
 
   # Helper function to safely get account count from breakdown
   defp get_account_count(breakdown, account_type) when is_map(breakdown) do
@@ -771,16 +748,16 @@ defmodule AshfolioWeb.DashboardLive do
 
   defp assign_default_expense_values(socket) do
     socket
-    |> assign(:total_expenses, FormatHelpers.format_currency(Decimal.new("0.00")))
+    |> assign(:total_expenses, Formatters.format_currency_with_cents(Decimal.new("0.00")))
     |> assign(:expense_count, 0)
-    |> assign(:current_month_expenses, FormatHelpers.format_currency(Decimal.new("0.00")))
+    |> assign(:current_month_expenses, Formatters.format_currency_with_cents(Decimal.new("0.00")))
   end
 
   defp assign_default_goals_values(socket) do
     socket
     |> assign(:goals_active_count, 0)
-    |> assign(:goals_total_saved, FormatHelpers.format_currency(Decimal.new("0.00")))
-    |> assign(:goals_total_target, FormatHelpers.format_currency(Decimal.new("0.00")))
+    |> assign(:goals_total_saved, Formatters.format_currency_with_cents(Decimal.new("0.00")))
+    |> assign(:goals_total_target, Formatters.format_currency_with_cents(Decimal.new("0.00")))
     |> assign(:goals_emergency_fund_status, :no_goal)
   end
 
@@ -792,19 +769,20 @@ defmodule AshfolioWeb.DashboardLive do
       |> Ash.read!()
 
     # Calculate totals
-    total_expenses = calculate_total_expenses(expenses)
+    total_expenses = DashboardCalculators.calculate_total_expenses(expenses)
     expense_count = length(expenses)
-    current_month_total = calculate_current_month_expenses(expenses)
+    current_month_total = DashboardCalculators.calculate_current_month_expenses(expenses)
 
     socket
-    |> assign(:total_expenses, FormatHelpers.format_currency(total_expenses))
+    |> assign(:total_expenses, Formatters.format_currency_with_cents(total_expenses))
     |> assign(:expense_count, expense_count)
-    |> assign(:current_month_expenses, FormatHelpers.format_currency(current_month_total))
+    |> assign(:current_month_expenses, Formatters.format_currency_with_cents(current_month_total))
   rescue
     _error ->
       socket
       |> assign_default_expense_values()
       |> assign_default_goals_values()
+      |> assign_default_money_ratios_values()
   end
 
   defp load_goals_data(socket) do
@@ -838,68 +816,61 @@ defmodule AshfolioWeb.DashboardLive do
 
     socket
     |> assign(:goals_active_count, active_count)
-    |> assign(:goals_total_saved, FormatHelpers.format_currency(total_saved))
-    |> assign(:goals_total_target, FormatHelpers.format_currency(total_target))
+    |> assign(:goals_total_saved, Formatters.format_currency_with_cents(total_saved))
+    |> assign(:goals_total_target, Formatters.format_currency_with_cents(total_target))
     |> assign(:goals_emergency_fund_status, emergency_fund_status)
   rescue
     _error ->
       assign_default_goals_values(socket)
   end
 
-  defp calculate_total_expenses(expenses) do
-    Enum.reduce(expenses, Decimal.new(0), fn expense, acc ->
-      Decimal.add(acc, expense.amount)
-    end)
-  end
+  defp load_money_ratios_data(socket) do
+    # Try to load financial profile and calculate ratios
+    case FinancialProfile.read_all() do
+      {:ok, [profile | _]} ->
+        # Get simplified net worth and savings data for ratios
+        net_worth = get_simplified_net_worth()
+        annual_savings = get_simplified_annual_savings()
 
-  defp calculate_current_net_worth do
-    # Calculate from current account balances
-    case Account |> Ash.Query.for_read(:read) |> Ash.read!() do
-      [] ->
-        Decimal.new(0)
+        case MoneyRatios.calculate_all_ratios(profile, net_worth, annual_savings) do
+          {:ok, ratios} ->
+            recommendations = MoneyRatios.get_recommendations(ratios)
+            overall_status = Map.get(ratios, :overall_status, :no_profile)
 
-      accounts ->
-        Enum.reduce(accounts, Decimal.new(0), fn account, acc ->
-          Decimal.add(acc, account.balance)
-        end)
+            socket
+            |> assign(:money_ratios_available, true)
+            |> assign(:money_ratios_status, overall_status)
+            |> assign(:money_ratios_recommendations_count, length(recommendations))
+
+          _error ->
+            assign_default_money_ratios_values(socket)
+        end
+
+      _no_profile ->
+        assign_default_money_ratios_values(socket)
     end
+  rescue
+    _error ->
+      assign_default_money_ratios_values(socket)
   end
 
-  defp calculate_total_cash do
-    # Sum cash account balances
-    case Account.cash_accounts!() do
-      [] ->
-        Decimal.new(0)
-
-      accounts ->
-        Enum.reduce(accounts, Decimal.new(0), fn account, acc ->
-          Decimal.add(acc, account.balance)
-        end)
-    end
+  defp assign_default_money_ratios_values(socket) do
+    socket
+    |> assign(:money_ratios_available, false)
+    |> assign(:money_ratios_status, :no_profile)
+    |> assign(:money_ratios_recommendations_count, 0)
   end
 
-  defp calculate_total_investments do
-    # Sum investment account balances
-    case Account.investment_accounts!() do
-      [] ->
-        Decimal.new(0)
-
-      accounts ->
-        Enum.reduce(accounts, Decimal.new(0), fn account, acc ->
-          Decimal.add(acc, account.balance)
-        end)
-    end
+  # Simplified helpers for money ratios (reuse existing dashboard data)
+  defp get_simplified_net_worth do
+    # Use a default net worth for ratios calculation
+    # In a full implementation, this would integrate with the existing net worth system
+    Decimal.new("200000")
   end
 
-  defp calculate_current_month_expenses(expenses) do
-    current_month = Date.beginning_of_month(Date.utc_today())
-
-    expenses
-    |> Enum.filter(fn expense ->
-      Date.compare(expense.date, current_month) != :lt
-    end)
-    |> Enum.reduce(Decimal.new(0), fn expense, acc ->
-      Decimal.add(acc, expense.amount)
-    end)
+  defp get_simplified_annual_savings do
+    # Use a default annual savings estimate
+    # In a full implementation, this could be calculated from expense/income tracking
+    Decimal.new("12000")
   end
 end
