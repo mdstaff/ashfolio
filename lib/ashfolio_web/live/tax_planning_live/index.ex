@@ -954,8 +954,7 @@ defmodule AshfolioWeb.TaxPlanningLive.Index do
 
     # Process results
     results =
-      task_results
-      |> Enum.reduce(%{}, fn {:ok, {key, result}}, acc ->
+      Enum.reduce(task_results, %{}, fn {:ok, {key, result}}, acc ->
         case result do
           {:ok, data} -> Map.put(acc, key, data)
           {:error, error} -> Map.put(acc, :errors, [error | Map.get(acc, :errors, [])])

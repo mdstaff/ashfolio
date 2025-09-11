@@ -11,8 +11,9 @@ defmodule Mix.Tasks.CodeGps.FileAnalyzer do
   Analyzes all LiveView files in the project.
   """
   def analyze_live_views do
-    "lib/**/*_live.ex"
+    "lib/ashfolio_web/live/**/*.ex"
     |> Path.wildcard()
+    |> Enum.filter(&is_live_view_file?/1)
     |> Enum.map(&analyze_live_view_file/1)
     |> Enum.reject(&is_nil/1)
   end
@@ -89,12 +90,20 @@ defmodule Mix.Tasks.CodeGps.FileAnalyzer do
 
   # Private functions for LiveView analysis
 
+  defp is_live_view_file?(file) do
+    content = File.read!(file)
+    content =~ "use AshfolioWeb, :live_view"
+  end
+
   defp analyze_live_view_file(file) do
     content = File.read!(file)
 
     case AstParser.parse_content(content) do
       {:ok, ast} ->
-        module_name = extract_module_name_ast(ast)
+        module_name = case extract_module_name_ast(ast) do
+          "Unknown" -> extract_module_name_from_content(content)
+          name -> name
+        end
 
         %{
           name: module_name,
@@ -108,7 +117,17 @@ defmodule Mix.Tasks.CodeGps.FileAnalyzer do
         }
 
       _ ->
-        nil
+        # Fallback to regex-based analysis if AST parsing fails
+        %{
+          name: extract_module_name_from_content(content),
+          file: file,
+          mount_line: find_function_line_regex(content, :mount, 3),
+          render_line: find_function_line_regex(content, :render, 1),
+          events: [],
+          assigns: [],
+          subscriptions: [],
+          missing_subscriptions: []
+        }
     end
   end
 
@@ -116,6 +135,17 @@ defmodule Mix.Tasks.CodeGps.FileAnalyzer do
     case find_module_name_from_ast(ast) do
       {:ok, name} -> name |> Atom.to_string() |> String.split(".") |> List.last()
       _ -> "Unknown"
+    end
+  end
+
+  defp extract_module_name_from_content(content) do
+    case Regex.run(~r/defmodule\s+([A-Za-z0-9_.]+)/, content) do
+      [_, module_name] -> 
+        module_name
+        |> String.split(".")
+        |> List.last()
+      _ -> 
+        "Unknown"
     end
   end
 

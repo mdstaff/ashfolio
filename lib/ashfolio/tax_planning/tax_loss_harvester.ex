@@ -256,7 +256,6 @@ defmodule Ashfolio.TaxPlanning.TaxLossHarvester do
     end
   end
 
-
   defp analyze_position_for_harvesting(position, recent_transactions, loss_threshold, _options) do
     if Decimal.compare(position.unrealized_gain_loss, Decimal.negate(loss_threshold)) == :lt do
       # Position has harvestable loss

@@ -1,4 +1,4 @@
-# Code GPS v3.1-final | 3 LiveViews | 28 Components
+# Code GPS v3.1-final | 18 LiveViews | 28 Components
 
 # === ROUTES ===
 /: AshfolioWeb.DashboardLive ❌
@@ -26,22 +26,112 @@
 /transactions: AshfolioWeb.TransactionLive ❌
 
 # === LIVE VIEWS ===
-Unknown:
+Index:
+  file: lib/ashfolio_web/live/account_live/index.ex
+  mount: 13 | render: 183
+  events: ["new_account", "filter_accounts", "edit_account", "delete_account", "toggle_exclusion"]
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Show:
+  file: lib/ashfolio_web/live/account_live/show.ex
+  mount: 10 | render: 36
+  events: ["show_balance_update_modal"]
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Index:
+  file: lib/ashfolio_web/live/advanced_analytics_live/index.ex
+  mount: 24 | render: 
+  events: ["calculate_twr", "calculate_mwr", "calculate_rolling_returns", "refresh_all", "clear_cache", "show_cache_stats"]
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Index:
+  file: lib/ashfolio_web/live/benchmark_live/index.ex
+  mount: 17 | render: 40
+  events: ["update_form", "use_current_portfolio", "run_analysis"]
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Index:
+  file: lib/ashfolio_web/live/category_live/index.ex
+  mount: 11 | render: 134
+  events: ["new_category", "filter_categories", "edit_category", "delete_category", "cancel_form"]
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Dashboard:
   file: lib/ashfolio_web/live/dashboard_live.ex
   mount: 20 | render: 158
   events: ["refresh_prices", "sort", "create_snapshot"]
   subscriptions: []
   missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
-Unknown:
+Example:
   file: lib/ashfolio_web/live/example_live.ex
   mount: 14 | render: 42
   events: ["simulate_error", "simulate_success", "clear_flash"]
   subscriptions: []
   missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
-Unknown:
+Analytics:
+  file: lib/ashfolio_web/live/expense_live/analytics.ex
+  mount: 13 | render: 119
+  events: ["change_date_range", "update_year_comparison", "apply_advanced_filters", "apply_date_range"]
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Import:
+  file: lib/ashfolio_web/live/expense_live/import.ex
+  mount: 12 | render: 93
+  events: ["validate", "select_import_type", "upload", "validate_import", "import"]
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Index:
+  file: lib/ashfolio_web/live/expense_live/index.ex
+  mount: 12 | render: 105
+  events: ["sort", "search", "toggle_filters", "filter", "clear_filters"]
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Index:
+  file: lib/ashfolio_web/live/financial_goal_live/index.ex
+  mount: 12 | render: 130
+  events: ["sort", "toggle_filters", "filter", "clear_filters", "delete_goal", "setup_emergency_fund"]
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Forecast:
+  file: lib/ashfolio_web/live/financial_planning_live/forecast.ex
+  mount: 13 | render: 176
+  events: ["calculate_forecast", "switch_scenario", "toggle_advanced_settings", "analyze_contribution", "optimize_for_goal", "clear_results", "export_forecast"]
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Index:
   file: lib/ashfolio_web/live/forecast_live.ex
   mount: 22 | render: 268
   events: ["update_form", "calculate_projection", "calculate_scenarios", "analyze_contributions", "switch_tab"]
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Index:
+  file: lib/ashfolio_web/live/money_ratios_live/index.ex
+  mount: 23 | render: 
+  events: ["switch_tab", "save_profile"]
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Index:
+  file: lib/ashfolio_web/live/net_worth_live/index.ex
+  mount: 13 | render: 73
+  events: ["change_date_range", "create_snapshot"]
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Index:
+  file: lib/ashfolio_web/live/retirement_live/index.ex
+  mount: 20 | render: 
+  events: ["calculate", "use_historical_expenses"]
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Index:
+  file: lib/ashfolio_web/live/tax_planning_live/index.ex
+  mount: 15 | render: 42
+  events: ["switch_tab", "update_tax_year", "update_account", "update_tax_rate", "refresh_analysis"]
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Index:
+  file: lib/ashfolio_web/live/transaction_live/index.ex
+  mount: 19 | render: 558
+  events: ["new_transaction", "edit_transaction", "filter_transactions", "filter_by_category", "apply_composite_filters", "clear_filters", "delete_transaction"]
   subscriptions: []
   missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
 
@@ -79,14 +169,14 @@ telemetry_poller: ❌ (0)
 
 # === FRESHNESS ===
 recent: ["lib/ashfolio/context.ex", "lib/ashfolio/data_helpers.ex", "lib/ashfolio/database_manager.ex", "lib/ashfolio/error_categorizer.ex", "lib/ashfolio/error_formatter.ex"]
-uncommitted: 0 files
-commits_ahead: 1
+uncommitted: 6 files
+commits_ahead: 0
 
 # === TEST ANALYSIS ===
 summary:
-  total_test_modules: 125
-  total_tests: 1680
-  average_tests_per_module: 13.4
+  total_test_modules: 126
+  total_tests: 1669
+  average_tests_per_module: 13.2
 
 top_10_test_modules:
   Unknown: 48 tests, 86 assertions (15 describes) | test/ashfolio_web/form_helpers_test.exs
@@ -97,8 +187,8 @@ top_10_test_modules:
   Unknown: 38 tests, 79 assertions (8 describes) | test/ashfolio/financial/formatters_test.exs
   Unknown: 37 tests, 63 assertions (9 describes) | test/ashfolio/data_helpers_test.exs
   Unknown: 35 tests, 81 assertions (3 describes) | test/ashfolio/portfolio/account_test.exs
-  Unknown: 34 tests, 97 assertions (9 describes) | test/ashfolio_web/live/tax_planning_live/index_test.exs
   Unknown: 30 tests, 37 assertions (8 describes) | test/ashfolio/error_handler_test.exs
+  Unknown: 25 tests, 72 assertions (7 describes) | test/ashfolio/portfolio/calculator_test.exs
 
 # === TEST GAPS ===
 missing_tests:
@@ -115,9 +205,9 @@ test/ashfolio/financial_management/forecast_calculator_aer_test.exs ⚠️
 # === MODULE ANALYSIS ===
 summary:
   total_modules: 134 (125 lib, 9 test)
-  total_functions: 1962 (1883 lib, 79 test)
-  public/private: 784 public, 1178 private
-  average_functions_per_module: 14.6
+  total_functions: 1964 (1885 lib, 79 test)
+  public/private: 784 public, 1180 private
+  average_functions_per_module: 14.7
   complex_modules: 16 (>30 functions)
       empty_modules: 17 (potential parsing issues)
 
@@ -155,7 +245,7 @@ quality_score: 100/100 (0 total issues)
 # === PATTERNS ===
 error_handling: "Standard put_flash error handling"
 currency_format: "Basic decimal formatting"
-test_setup: "ExUnit setup blocks (125 total)"
+test_setup: "ExUnit setup blocks (126 total)"
 
 # === INTEGRATION OPPORTUNITIES ===
 Add PubSub Subscriptions:
