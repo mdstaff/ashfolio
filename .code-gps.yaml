@@ -168,8 +168,8 @@ telemetry_metrics: ❌ (0)
 telemetry_poller: ❌ (0)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio/context.ex", "lib/ashfolio/data_helpers.ex", "lib/ashfolio/database_manager.ex", "lib/ashfolio/error_categorizer.ex", "lib/ashfolio/error_formatter.ex"]
-uncommitted: 6 files
+recent: ["lib/ashfolio/tax_planning/tax_loss_harvester.ex", "lib/ashfolio_web/live/tax_planning_live/index.ex", "lib/mix/tasks/code_gps/file_analyzer.ex", "lib/ashfolio/context.ex", "lib/ashfolio/data_helpers.ex"]
+uncommitted: 0 files
 commits_ahead: 0
 
 # === TEST ANALYSIS ===

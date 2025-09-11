@@ -20,7 +20,7 @@
 
 ### 1. Planning & Staging
 
-Break complex work into 3-5 stages. Document in `IMPLEMENTATION_PLAN.md`:
+Break complex work into 3-5 stages. Document in `docs/planning/IMPLEMENTATION_PLAN.md`:
 
 ```markdown
 ## Stage N: [Name]
@@ -405,7 +405,7 @@ just fix         # Auto-fix common issues
 ## Key Files to Reference
 
 - `.code-gps.yaml` - Current codebase structure
-- `IMPLEMENTATION_PLAN.md` - Active development stages
+- `docs/planning/IMPLEMENTATION_PLAN.md` - Active development stages
 - `docs/TESTING_STRATEGY.md` - Test organization
 - `justfile` - Available commands
 
