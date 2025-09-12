@@ -12,5 +12,7 @@ defmodule Ashfolio.Portfolio do
     resource(Ashfolio.Portfolio.Account)
     resource(Ashfolio.Portfolio.Symbol)
     resource(Ashfolio.Portfolio.Transaction)
+    resource(Ashfolio.Portfolio.CorporateAction)
+    resource(Ashfolio.Portfolio.TransactionAdjustment)
   end
 end

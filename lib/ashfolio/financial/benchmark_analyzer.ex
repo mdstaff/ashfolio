@@ -14,9 +14,13 @@ defmodule Ashfolio.Financial.BenchmarkAnalyzer do
 
   alias Ashfolio.Financial.DecimalHelpers, as: DH
   alias Ashfolio.Financial.Mathematical
-  alias Ashfolio.MarketData.YahooFinance
 
   require Logger
+
+  # Support dependency injection for testing
+  defp yahoo_finance_module do
+    Application.get_env(:ashfolio, :yahoo_finance_module, Ashfolio.MarketData.YahooFinance)
+  end
 
   @benchmark_symbols %{
     sp500: "SPY",
@@ -298,17 +302,17 @@ defmodule Ashfolio.Financial.BenchmarkAnalyzer do
   end
 
   defp fetch_current_benchmark_price(symbol) do
-    case YahooFinance.fetch_price(symbol) do
+    case yahoo_finance_module().fetch_price(symbol) do
       {:ok, price} -> {:ok, price}
       {:error, reason} -> {:error, reason}
     end
   end
 
-  defp get_benchmark_returns(_symbol, _days) do
+  defp get_benchmark_returns(_symbol, days) do
     # MVP implementation: return mock data for beta calculation
     # Real implementation would fetch historical daily returns
     mock_returns =
-      Enum.map(1..30, fn _ ->
+      Enum.map(1..days, fn _ ->
         # Generate sample returns around 0.1% daily average
         "0.001"
         |> Decimal.new()
@@ -428,9 +432,13 @@ defmodule Ashfolio.Financial.BenchmarkAnalyzer do
       is_struct(portfolio.end_value, Decimal)
   end
 
+  defp find_best_performer([]), do: nil
+
   defp find_best_performer(portfolio_analyses) do
     Enum.max_by(portfolio_analyses, & &1.portfolio_return, Decimal)
   end
+
+  defp find_worst_performer([]), do: nil
 
   defp find_worst_performer(portfolio_analyses) do
     Enum.min_by(portfolio_analyses, & &1.portfolio_return, Decimal)

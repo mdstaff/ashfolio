@@ -169,7 +169,7 @@ telemetry_poller: ❌ (0)
 
 # === FRESHNESS ===
 recent: ["lib/ashfolio/tax_planning/tax_loss_harvester.ex", "lib/ashfolio_web/live/tax_planning_live/index.ex", "lib/mix/tasks/code_gps/file_analyzer.ex", "lib/ashfolio/context.ex", "lib/ashfolio/data_helpers.ex"]
-uncommitted: 0 files
+uncommitted: 1 files
 commits_ahead: 0
 
 # === TEST ANALYSIS ===
