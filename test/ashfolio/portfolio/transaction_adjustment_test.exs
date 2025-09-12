@@ -79,7 +79,11 @@ defmodule Ashfolio.Portfolio.TransactionAdjustmentTest do
 
       # Should fail validation because 100 * $200 != 200 * $150
       assert {:error, changeset} = TransactionAdjustment.create(invalid_attrs)
-      assert changeset.errors[:total_value_preservation]
+      # Value preservation error shows up on adjusted_price field
+      assert Enum.any?(changeset.errors, fn error ->
+        error.field == :adjusted_price &&
+        error.message =~ "value must be preserved"
+      end)
     end
 
     test "creates adjustment for dividend payment", %{transaction: transaction} do
@@ -133,7 +137,11 @@ defmodule Ashfolio.Portfolio.TransactionAdjustmentTest do
 
       # Try to create duplicate - should fail
       assert {:error, changeset} = TransactionAdjustment.create(adjustment_attrs)
-      assert changeset.errors[:transaction_corporate_action_unique]
+      # The unique constraint shows up as "has already been taken" on the individual fields
+      assert Enum.any?(changeset.errors, fn error ->
+        error.field in [:transaction_id, :corporate_action_id] &&
+        error.message =~ "already been taken"
+      end)
     end
   end
 
