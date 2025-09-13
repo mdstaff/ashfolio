@@ -69,7 +69,10 @@ defmodule AshfolioWeb.Components.TopBar do
             <.mobile_nav_link navigate={~p"/transactions"} current={@current_page == :transactions}>
               <.icon name="hero-arrow-right-left" class="w-4 h-4 mr-3" /> Transactions
             </.mobile_nav_link>
-            <.mobile_nav_link navigate={~p"/corporate-actions"} current={@current_page == :corporate_actions}>
+            <.mobile_nav_link
+              navigate={~p"/corporate-actions"}
+              current={@current_page == :corporate_actions}
+            >
               <.icon name="hero-building-office" class="w-4 h-4 mr-3" /> Corporate Actions
             </.mobile_nav_link>
             <.mobile_nav_link navigate={~p"/expenses"} current={@current_page == :expenses}>
@@ -117,7 +120,10 @@ defmodule AshfolioWeb.Components.TopBar do
           <.subheader_nav_link navigate={~p"/transactions"} current={@current_page == :transactions}>
             <.icon name="hero-arrow-right-left" class="w-4 h-4 mr-1.5" /> Transactions
           </.subheader_nav_link>
-          <.subheader_nav_link navigate={~p"/corporate-actions"} current={@current_page == :corporate_actions}>
+          <.subheader_nav_link
+            navigate={~p"/corporate-actions"}
+            current={@current_page == :corporate_actions}
+          >
             <.icon name="hero-building-office" class="w-4 h-4 mr-1.5" /> Corporate Actions
           </.subheader_nav_link>
           <.subheader_nav_link navigate={~p"/expenses"} current={@current_page == :expenses}>

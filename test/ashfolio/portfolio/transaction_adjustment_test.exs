@@ -46,7 +46,7 @@ defmodule Ashfolio.Portfolio.TransactionAdjustmentTest do
         original_quantity: Decimal.new("100"),
         adjusted_quantity: Decimal.new("200"),
         original_price: Decimal.new("200.00"),
-        adjusted_price: Decimal.new("100.00"),
+        adjusted_price: Decimal.new("100.00")
       }
 
       assert {:ok, adjustment} = TransactionAdjustment.create(adjustment_attrs)
@@ -74,16 +74,16 @@ defmodule Ashfolio.Portfolio.TransactionAdjustmentTest do
         adjusted_quantity: Decimal.new("200"),
         original_price: Decimal.new("200.00"),
         # This would increase total value
-        adjusted_price: Decimal.new("150.00"),
+        adjusted_price: Decimal.new("150.00")
       }
 
       # Should fail validation because 100 * $200 != 200 * $150
       assert {:error, changeset} = TransactionAdjustment.create(invalid_attrs)
       # Value preservation error shows up on adjusted_price field
       assert Enum.any?(changeset.errors, fn error ->
-        error.field == :adjusted_price &&
-        error.message =~ "value must be preserved"
-      end)
+               error.field == :adjusted_price &&
+                 error.message =~ "value must be preserved"
+             end)
     end
 
     test "creates adjustment for dividend payment", %{transaction: transaction} do
@@ -106,7 +106,7 @@ defmodule Ashfolio.Portfolio.TransactionAdjustmentTest do
         reason: "$5.00 dividend payment for 100 shares",
         dividend_per_share: Decimal.new("5.00"),
         shares_eligible: Decimal.new("100"),
-        total_dividend: Decimal.new("500.00"),
+        total_dividend: Decimal.new("500.00")
       }
 
       assert {:ok, adjustment} = TransactionAdjustment.create(adjustment_attrs)
@@ -129,7 +129,7 @@ defmodule Ashfolio.Portfolio.TransactionAdjustmentTest do
         original_quantity: Decimal.new("100"),
         adjusted_quantity: Decimal.new("200"),
         original_price: Decimal.new("200.00"),
-        adjusted_price: Decimal.new("100.00"),
+        adjusted_price: Decimal.new("100.00")
       }
 
       # Create first adjustment
@@ -139,9 +139,9 @@ defmodule Ashfolio.Portfolio.TransactionAdjustmentTest do
       assert {:error, changeset} = TransactionAdjustment.create(adjustment_attrs)
       # The unique constraint shows up as "has already been taken" on the individual fields
       assert Enum.any?(changeset.errors, fn error ->
-        error.field in [:transaction_id, :corporate_action_id] &&
-        error.message =~ "already been taken"
-      end)
+               error.field in [:transaction_id, :corporate_action_id] &&
+                 error.message =~ "already been taken"
+             end)
     end
   end
 
@@ -193,8 +193,8 @@ defmodule Ashfolio.Portfolio.TransactionAdjustmentTest do
           original_quantity: Decimal.new("50"),
           adjusted_quantity: Decimal.new("200"),
           original_price: Decimal.new("400.00"),
-          adjusted_price: Decimal.new("100.00"),
-          })
+          adjusted_price: Decimal.new("100.00")
+        })
 
       {:ok, _adj2} =
         TransactionAdjustment.create(%{
@@ -205,8 +205,8 @@ defmodule Ashfolio.Portfolio.TransactionAdjustmentTest do
           original_quantity: Decimal.new("25"),
           adjusted_quantity: Decimal.new("100"),
           original_price: Decimal.new("450.00"),
-          adjusted_price: Decimal.new("112.50"),
-          })
+          adjusted_price: Decimal.new("112.50")
+        })
 
       # Query adjustments for the corporate action
       {:ok, adjustments} = TransactionAdjustment.by_corporate_action(corporate_action.id)
@@ -224,8 +224,8 @@ defmodule Ashfolio.Portfolio.TransactionAdjustmentTest do
           original_quantity: Decimal.new("50"),
           adjusted_quantity: Decimal.new("200"),
           original_price: Decimal.new("400.00"),
-          adjusted_price: Decimal.new("100.00"),
-          })
+          adjusted_price: Decimal.new("100.00")
+        })
 
       # Query adjustments for the specific transaction
       {:ok, adjustments} = TransactionAdjustment.by_transaction(tx1.id)
@@ -261,8 +261,8 @@ defmodule Ashfolio.Portfolio.TransactionAdjustmentTest do
           adjusted_quantity: Decimal.new("100"),
           original_price: Decimal.new("400.00"),
           adjusted_price: Decimal.new("200.00"),
-          fifo_lot_order: 1,
-          })
+          fifo_lot_order: 1
+        })
 
       {:ok, adj2} =
         TransactionAdjustment.create(%{
@@ -275,8 +275,8 @@ defmodule Ashfolio.Portfolio.TransactionAdjustmentTest do
           adjusted_quantity: Decimal.new("50"),
           original_price: Decimal.new("450.00"),
           adjusted_price: Decimal.new("225.00"),
-          fifo_lot_order: 2,
-          })
+          fifo_lot_order: 2
+        })
 
       # Verify FIFO ordering is preserved
       assert adj1.fifo_lot_order < adj2.fifo_lot_order
@@ -330,8 +330,8 @@ defmodule Ashfolio.Portfolio.TransactionAdjustmentTest do
           original_quantity: Decimal.new("200"),
           adjusted_quantity: Decimal.new("400"),
           original_price: Decimal.new("100.00"),
-          adjusted_price: Decimal.new("50.00"),
-          })
+          adjusted_price: Decimal.new("50.00")
+        })
 
       # Mark as reversed (for corrections)
       {:ok, reversed_adjustment} =
@@ -357,8 +357,8 @@ defmodule Ashfolio.Portfolio.TransactionAdjustmentTest do
           adjusted_quantity: Decimal.new("400"),
           original_price: Decimal.new("100.00"),
           adjusted_price: Decimal.new("50.00"),
-          created_by: "system_processor",
-          })
+          created_by: "system_processor"
+        })
 
       assert adjustment.created_by == "system_processor"
       assert %DateTime{} = adjustment.inserted_at

@@ -2,8 +2,9 @@ defmodule AshfolioWeb.CorporateActionLive.Index do
   @moduledoc false
   use AshfolioWeb, :live_view
 
-  alias Ashfolio.Portfolio.{CorporateAction, Symbol}
+  alias Ashfolio.Portfolio.CorporateAction
   alias Ashfolio.Portfolio.Services.CorporateActionApplier
+  alias Ashfolio.Portfolio.Symbol
   alias AshfolioWeb.CorporateActionLive.FormComponent
 
   @impl true
@@ -98,8 +99,11 @@ defmodule AshfolioWeb.CorporateActionLive.Index do
         case CorporateActionApplier.preview_application(action) do
           {:ok, preview} ->
             {:noreply,
-             socket
-             |> put_flash(:info, "Preview: Would affect #{preview.affected_transactions} transactions, creating #{preview.estimated_adjustments} adjustments.")}
+             put_flash(
+               socket,
+               :info,
+               "Preview: Would affect #{preview.affected_transactions} transactions, creating #{preview.estimated_adjustments} adjustments."
+             )}
 
           {:error, reason} ->
             {:noreply, put_flash(socket, :error, "Preview failed: #{reason}")}
@@ -152,7 +156,7 @@ defmodule AshfolioWeb.CorporateActionLive.Index do
 
   defp list_corporate_actions do
     case Ash.read(CorporateAction, domain: Ashfolio.Portfolio) do
-      {:ok, actions} -> 
+      {:ok, actions} ->
         # Load the symbol relationship
         Enum.map(actions, fn action ->
           case Ash.get(Symbol, action.symbol_id, domain: Ashfolio.Portfolio) do
@@ -160,7 +164,9 @@ defmodule AshfolioWeb.CorporateActionLive.Index do
             {:error, _} -> %{action | symbol: %{ticker: "N/A", name: "Unknown"}}
           end
         end)
-      {:error, _} -> []
+
+      {:error, _} ->
+        []
     end
   end
 
@@ -172,6 +178,7 @@ defmodule AshfolioWeb.CorporateActionLive.Index do
   end
 
   defp filter_actions_by_status(actions, :all), do: actions
+
   defp filter_actions_by_status(actions, status) do
     Enum.filter(actions, &(&1.status == status))
   end
@@ -182,7 +189,7 @@ defmodule AshfolioWeb.CorporateActionLive.Index do
   defp format_action_type(:merger), do: "Merger"
   defp format_action_type(:spinoff), do: "Spinoff"
   defp format_action_type(:return_of_capital), do: "Return of Capital"
-  defp format_action_type(type), do: to_string(type) |> String.capitalize()
+  defp format_action_type(type), do: type |> to_string() |> String.capitalize()
 
   defp status_color(:pending), do: "bg-yellow-100 text-yellow-800"
   defp status_color(:applied), do: "bg-green-100 text-green-800"

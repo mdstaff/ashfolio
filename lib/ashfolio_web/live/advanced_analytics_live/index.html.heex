@@ -190,6 +190,141 @@
     </div>
   </div>
   
+<!-- Risk Metrics Analysis -->
+  <div class="bg-white shadow-lg rounded-lg p-6 border border-gray-200 mb-8">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-semibold text-gray-900">Risk Analytics Suite</h2>
+      <.button
+        phx-click="calculate_risk_metrics"
+        disabled={@loading_risk_metrics}
+        class="text-sm bg-red-500 hover:bg-red-600 text-white"
+      >
+        <%= if @loading_risk_metrics do %>
+          <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            >
+            </circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            >
+            </path>
+          </svg>
+        <% else %>
+          Calculate Risk Metrics
+        <% end %>
+      </.button>
+    </div>
+
+    <%= if @risk_metrics do %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <!-- Sharpe Ratio -->
+        <div class="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <h3 class="text-sm font-medium text-blue-800 mb-2">Sharpe Ratio</h3>
+          <div class="text-2xl font-bold text-blue-600">
+            {Formatters.format_quantity(@risk_metrics.sharpe_ratio.sharpe_ratio)}
+          </div>
+          <p class="text-xs text-blue-700 mt-1">Risk-adjusted return</p>
+          <p class="text-xs text-blue-600">
+            Volatility: {Formatters.format_percentage(@risk_metrics.sharpe_ratio.volatility)}
+          </p>
+        </div>
+        
+<!-- Sortino Ratio -->
+        <div class="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+          <h3 class="text-sm font-medium text-green-800 mb-2">Sortino Ratio</h3>
+          <div class="text-2xl font-bold text-green-600">
+            {Formatters.format_quantity(@risk_metrics.sortino_ratio.sortino_ratio)}
+          </div>
+          <p class="text-xs text-green-700 mt-1">Downside-focused ratio</p>
+          <p class="text-xs text-green-600">
+            Downside Dev: {Formatters.format_percentage(
+              @risk_metrics.sortino_ratio.downside_deviation
+            )}
+          </p>
+        </div>
+        
+<!-- Maximum Drawdown -->
+        <div class="text-center p-4 bg-red-50 rounded-lg border border-red-200">
+          <h3 class="text-sm font-medium text-red-800 mb-2">Maximum Drawdown</h3>
+          <div class="text-2xl font-bold text-red-600">
+            -{Formatters.format_percentage(@risk_metrics.maximum_drawdown.max_drawdown)}
+          </div>
+          <p class="text-xs text-red-700 mt-1">Peak-to-trough decline</p>
+          <p class="text-xs text-red-600">
+            Recovery: {@risk_metrics.maximum_drawdown.recovery_periods} periods
+          </p>
+        </div>
+        
+<!-- Value at Risk -->
+        <div class="text-center p-4 bg-orange-50 rounded-lg border border-orange-200">
+          <h3 class="text-sm font-medium text-orange-800 mb-2">Value at Risk (95%)</h3>
+          <div class="text-2xl font-bold text-orange-600">
+            {Formatters.format_currency(@risk_metrics.value_at_risk.var_amount)}
+          </div>
+          <p class="text-xs text-orange-700 mt-1">Potential loss (95% confidence)</p>
+          <p class="text-xs text-orange-600">
+            {Formatters.format_percentage(@risk_metrics.value_at_risk.var_percentage)}
+          </p>
+        </div>
+      </div>
+      
+<!-- Risk Metrics Detail -->
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h4 class="text-sm font-medium text-gray-800 mb-3">Risk Analysis Summary</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div>
+            <span class="font-medium text-gray-700">Portfolio Volatility:</span>
+            <span class="text-gray-600 ml-2">
+              {Formatters.format_percentage(@risk_metrics.portfolio_volatility)}
+            </span>
+          </div>
+          <div>
+            <span class="font-medium text-gray-700">Risk-Free Rate:</span>
+            <span class="text-gray-600 ml-2">
+              {Formatters.format_percentage(@risk_metrics.sharpe_ratio.risk_free_rate)}
+            </span>
+          </div>
+          <div>
+            <span class="font-medium text-gray-700">Excess Return:</span>
+            <span class="text-gray-600 ml-2">
+              {Formatters.format_percentage(@risk_metrics.sharpe_ratio.excess_return)}
+            </span>
+          </div>
+          <div>
+            <span class="font-medium text-gray-700">Analysis Date:</span>
+            <span class="text-gray-600 ml-2">
+              {Calendar.strftime(@risk_metrics.calculated_at, "%Y-%m-%d %H:%M")}
+            </span>
+          </div>
+        </div>
+      </div>
+    <% else %>
+      <div class="text-center py-12">
+        <%= if @loading_risk_metrics do %>
+          <div class="animate-pulse">
+            <div class="h-8 bg-gray-200 rounded mx-auto w-48 mb-4"></div>
+            <div class="h-4 bg-gray-200 rounded mx-auto w-32"></div>
+          </div>
+        <% else %>
+          <p class="text-gray-500 mb-2">
+            Click "Calculate Risk Metrics" to see your risk analysis
+          </p>
+          <p class="text-sm text-gray-400">
+            Comprehensive risk assessment including Sharpe ratio, drawdown, and VaR
+          </p>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+  
 <!-- Rolling Returns Analysis -->
   <div class="bg-white shadow-lg rounded-lg p-6 border border-gray-200 mb-8">
     <div class="flex items-center justify-between mb-6">
@@ -341,7 +476,7 @@
   <div class="mt-12 bg-blue-50 rounded-lg p-6 border border-blue-200">
     <h3 class="text-lg font-semibold text-blue-900 mb-3">Understanding Your Analytics</h3>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-sm">
       <div>
         <h4 class="font-medium text-blue-800 mb-2">Time-Weighted Return (TWR)</h4>
         <p class="text-blue-700">
@@ -355,6 +490,38 @@
         <p class="text-blue-700">
           Measures your personal investment experience including the timing of contributions.
           This IRR-based calculation shows the actual return you achieved as an investor.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="font-medium text-blue-800 mb-2">Sharpe Ratio</h4>
+        <p class="text-blue-700">
+          Risk-adjusted return metric. Higher values indicate better returns per unit of risk.
+          Above 1.0 is good, above 2.0 is excellent. Compares excess return to volatility.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="font-medium text-blue-800 mb-2">Sortino Ratio</h4>
+        <p class="text-blue-700">
+          Similar to Sharpe ratio but only penalizes downside volatility. Better for asymmetric
+          return distributions. Focuses on harmful volatility while ignoring upside variance.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="font-medium text-blue-800 mb-2">Maximum Drawdown</h4>
+        <p class="text-blue-700">
+          Largest peak-to-trough decline in portfolio value. Critical for understanding worst-case
+          scenarios and capital preservation. Lower values indicate better downside protection.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="font-medium text-blue-800 mb-2">Value at Risk (VaR)</h4>
+        <p class="text-blue-700">
+          Estimates maximum expected loss at 95% confidence level. Helps quantify potential losses
+          under normal market conditions. Used for risk budgeting and capital allocation.
         </p>
       </div>
 

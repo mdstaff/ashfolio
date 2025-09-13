@@ -13,16 +13,17 @@ defmodule Ashfolio.Portfolio.Calculators.StockSplitCalculatorTest do
       original_price = Decimal.new("200.00")
       split_ratio = {Decimal.new("1"), Decimal.new("2")}
 
-      result = StockSplitCalculator.calculate_adjusted_values(
-        original_quantity,
-        original_price,
-        split_ratio
-      )
+      result =
+        StockSplitCalculator.calculate_adjusted_values(
+          original_quantity,
+          original_price,
+          split_ratio
+        )
 
       assert {:ok, adjusted} = result
       assert Decimal.equal?(adjusted.quantity, Decimal.new("200"))
       assert Decimal.equal?(adjusted.price, Decimal.new("100.00"))
-      
+
       # Verify total value preservation
       original_value = Decimal.mult(original_quantity, original_price)
       adjusted_value = Decimal.mult(adjusted.quantity, adjusted.price)
@@ -35,16 +36,17 @@ defmodule Ashfolio.Portfolio.Calculators.StockSplitCalculatorTest do
       original_price = Decimal.new("50.00")
       split_ratio = {Decimal.new("2"), Decimal.new("1")}
 
-      result = StockSplitCalculator.calculate_adjusted_values(
-        original_quantity,
-        original_price,
-        split_ratio
-      )
+      result =
+        StockSplitCalculator.calculate_adjusted_values(
+          original_quantity,
+          original_price,
+          split_ratio
+        )
 
       assert {:ok, adjusted} = result
       assert Decimal.equal?(adjusted.quantity, Decimal.new("100"))
       assert Decimal.equal?(adjusted.price, Decimal.new("100.00"))
-      
+
       # Verify total value preservation
       original_value = Decimal.mult(original_quantity, original_price)
       adjusted_value = Decimal.mult(adjusted.quantity, adjusted.price)
@@ -57,11 +59,12 @@ defmodule Ashfolio.Portfolio.Calculators.StockSplitCalculatorTest do
       original_price = Decimal.new("150.00")
       split_ratio = {Decimal.new("2"), Decimal.new("3")}
 
-      result = StockSplitCalculator.calculate_adjusted_values(
-        original_quantity,
-        original_price,
-        split_ratio
-      )
+      result =
+        StockSplitCalculator.calculate_adjusted_values(
+          original_quantity,
+          original_price,
+          split_ratio
+        )
 
       assert {:ok, adjusted} = result
       assert Decimal.equal?(adjusted.quantity, Decimal.new("150"))
@@ -74,11 +77,12 @@ defmodule Ashfolio.Portfolio.Calculators.StockSplitCalculatorTest do
       original_price = Decimal.new("300.00")
       split_ratio = {Decimal.new("2"), Decimal.new("3")}
 
-      result = StockSplitCalculator.calculate_adjusted_values(
-        original_quantity,
-        original_price,
-        split_ratio
-      )
+      result =
+        StockSplitCalculator.calculate_adjusted_values(
+          original_quantity,
+          original_price,
+          split_ratio
+        )
 
       assert {:ok, adjusted} = result
       # 7 * (3/2) = 10.5 shares
@@ -91,11 +95,12 @@ defmodule Ashfolio.Portfolio.Calculators.StockSplitCalculatorTest do
       original_price = Decimal.new("200.00")
       invalid_ratio = {Decimal.new("0"), Decimal.new("2")}
 
-      result = StockSplitCalculator.calculate_adjusted_values(
-        original_quantity,
-        original_price,
-        invalid_ratio
-      )
+      result =
+        StockSplitCalculator.calculate_adjusted_values(
+          original_quantity,
+          original_price,
+          invalid_ratio
+        )
 
       assert {:error, reason} = result
       assert reason =~ "Invalid split ratio"
@@ -106,11 +111,12 @@ defmodule Ashfolio.Portfolio.Calculators.StockSplitCalculatorTest do
       original_price = Decimal.new("200.00")
       split_ratio = {Decimal.new("1"), Decimal.new("2")}
 
-      result = StockSplitCalculator.calculate_adjusted_values(
-        negative_quantity,
-        original_price,
-        split_ratio
-      )
+      result =
+        StockSplitCalculator.calculate_adjusted_values(
+          negative_quantity,
+          original_price,
+          split_ratio
+        )
 
       assert {:error, reason} = result
       assert reason =~ "must be positive"
@@ -165,7 +171,7 @@ defmodule Ashfolio.Portfolio.Calculators.StockSplitCalculatorTest do
 
       assert {:ok, adjustments} = results
       assert length(adjustments) == 3
-      
+
       # Verify each adjustment
       [adj1, adj2, adj3] = adjustments
       assert Decimal.equal?(adj1.adjusted_quantity, Decimal.new("200"))
@@ -190,7 +196,7 @@ defmodule Ashfolio.Portfolio.Calculators.StockSplitCalculatorTest do
       results = StockSplitCalculator.batch_apply(transactions, corporate_action)
 
       assert {:ok, adjustments} = results
-      
+
       # Verify FIFO ordering is preserved
       assert Enum.at(adjustments, 0).fifo_lot_order == 1
       assert Enum.at(adjustments, 1).fifo_lot_order == 2

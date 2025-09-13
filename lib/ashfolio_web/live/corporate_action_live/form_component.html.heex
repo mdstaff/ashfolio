@@ -2,12 +2,12 @@
   <!-- Backdrop -->
   <div class="absolute inset-0 bg-black bg-opacity-50" phx-click={JS.navigate(@navigate)}></div>
   
-  <!-- Modal -->
+<!-- Modal -->
   <div class="relative bg-white rounded-lg shadow-xl w-full max-w-2xl m-4 max-h-screen overflow-y-auto">
     <!-- Header -->
     <div class="flex items-center justify-between p-6 border-b border-gray-200">
       <h2 class="text-lg font-semibold text-gray-900">
-        <%= if @action == :new, do: "New Corporate Action", else: "Edit Corporate Action" %>
+        {if @action == :new, do: "New Corporate Action", else: "Edit Corporate Action"}
       </h2>
       <button
         phx-click={JS.navigate(@navigate)}
@@ -15,12 +15,17 @@
         aria-label="Close"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
     </div>
-
-    <!-- Form -->
+    
+<!-- Form -->
     <.form
       for={@form}
       phx-target={@myself}
@@ -34,7 +39,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">
             Action Type *
           </label>
-          <.input 
+          <.input
             field={@form[:action_type]}
             type="select"
             options={action_type_options()}
@@ -80,8 +85,8 @@
           />
         </div>
       </div>
-
-      <!-- Stock Split Fields (conditional) -->
+      
+<!-- Stock Split Fields (conditional) -->
       <div id="split-fields" class="space-y-4" style="display: none;">
         <h3 class="text-md font-medium text-gray-900">Stock Split Details</h3>
         <div class="grid grid-cols-2 gap-4">
@@ -114,8 +119,8 @@
           For a 2:1 split (1 share becomes 2), enter From: 1, To: 2
         </p>
       </div>
-
-      <!-- Dividend Fields (conditional) -->
+      
+<!-- Dividend Fields (conditional) -->
       <div id="dividend-fields" class="space-y-4" style="display: none;">
         <h3 class="text-md font-medium text-gray-900">Dividend Details</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -150,8 +155,8 @@
           </div>
         </div>
       </div>
-
-      <!-- Form Actions -->
+      
+<!-- Form Actions -->
       <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
         <button
           type="button"
@@ -164,12 +169,12 @@
           type="submit"
           class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
-          <%= if @action == :new, do: "Create Corporate Action", else: "Update Corporate Action" %>
+          {if @action == :new, do: "Create Corporate Action", else: "Update Corporate Action"}
         </button>
       </div>
     </.form>
     
-    <!-- JavaScript for conditional field display -->
+<!-- JavaScript for conditional field display -->
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         const actionTypeSelect = document.querySelector('select[name="corporate_action[action_type]"]');

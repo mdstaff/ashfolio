@@ -6,16 +6,21 @@ defmodule AshfolioWeb.CorporateActionLive.FormComponent do
 
   @impl true
   def update(assigns, socket) do
-    form = 
+    form =
       case assigns.action do
-        :new -> 
-          AshPhoenix.Form.for_create(CorporateAction, :create, 
+        :new ->
+          CorporateAction
+          |> AshPhoenix.Form.for_create(:create,
             domain: Ashfolio.Portfolio
-          ) |> to_form()
-        :edit -> 
-          AshPhoenix.Form.for_update(assigns.corporate_action, :update,
+          )
+          |> to_form()
+
+        :edit ->
+          assigns.corporate_action
+          |> AshPhoenix.Form.for_update(:update,
             domain: Ashfolio.Portfolio
-          ) |> to_form()
+          )
+          |> to_form()
       end
 
     socket =
@@ -28,7 +33,7 @@ defmodule AshfolioWeb.CorporateActionLive.FormComponent do
 
   @impl true
   def handle_event("validate", %{"corporate_action" => params}, socket) do
-    form = AshPhoenix.Form.validate(socket.assigns.form.source, params) |> to_form()
+    form = socket.assigns.form.source |> AshPhoenix.Form.validate(params) |> to_form()
     {:noreply, assign(socket, :form, form)}
   end
 
@@ -38,14 +43,15 @@ defmodule AshfolioWeb.CorporateActionLive.FormComponent do
 
   defp save_corporate_action(socket, _action, params) do
     form = AshPhoenix.Form.validate(socket.assigns.form.source, params)
-    
+
     case AshPhoenix.Form.submit(form) do
       {:ok, _corporate_action} ->
-        message = case socket.assigns.action do
-          :new -> "Corporate action created successfully"
-          :edit -> "Corporate action updated successfully"
-        end
-        
+        message =
+          case socket.assigns.action do
+            :new -> "Corporate action created successfully"
+            :edit -> "Corporate action updated successfully"
+          end
+
         socket =
           socket
           |> put_flash(:info, message)
@@ -54,10 +60,9 @@ defmodule AshfolioWeb.CorporateActionLive.FormComponent do
         {:noreply, socket}
 
       {:error, form} ->
-        {:noreply, assign(socket, :form, form |> to_form())}
+        {:noreply, assign(socket, :form, to_form(form))}
     end
   end
-
 
   defp action_type_options do
     [

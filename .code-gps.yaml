@@ -1,4 +1,4 @@
-# Code GPS v3.1-final | 18 LiveViews | 28 Components
+# Code GPS v3.1-final | 19 LiveViews | 28 Components
 
 # === ROUTES ===
 /: AshfolioWeb.DashboardLive ❌
@@ -10,6 +10,9 @@
 /categories: AshfolioWeb.CategoryLive ❌
 /categories/:id/edit: AshfolioWeb.CategoryLive ❌
 /categories/new: AshfolioWeb.CategoryLive ❌
+/corporate-actions: AshfolioWeb.CorporateActionLive ❌
+/corporate-actions/:id/edit: AshfolioWeb.CorporateActionLive ❌
+/corporate-actions/new: AshfolioWeb.CorporateActionLive ❌
 /expenses: AshfolioWeb.ExpenseLive ❌
 /expenses/:id/edit: AshfolioWeb.ExpenseLive ❌
 /expenses/analytics: AshfolioWeb.ExpenseLive ❌
@@ -54,6 +57,12 @@ Index:
   file: lib/ashfolio_web/live/category_live/index.ex
   mount: 11 | render: 134
   events: ["new_category", "filter_categories", "edit_category", "delete_category", "cancel_form"]
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Index:
+  file: lib/ashfolio_web/live/corporate_action_live/index.ex
+  mount: 10 | render: 
+  events: ["filter", "apply_action", "preview_action", "reverse_action", "delete"]
   subscriptions: []
   missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
 Dashboard:
@@ -136,12 +145,12 @@ Index:
   missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
 
 # === KEY COMPONENTS ===
-icon: lib/ashfolio_web/components/core_components.ex:599 (107x)
-flash: lib/ashfolio_web/components/core_components.ex:111 (98x)
-input: lib/ashfolio_web/components/core_components.ex:295 (83x)
-input: lib/ashfolio_web/components/core_components.ex:306 (83x)
-input: lib/ashfolio_web/components/core_components.ex:332 (83x)
-input: lib/ashfolio_web/components/core_components.ex:351 (83x)
+flash: lib/ashfolio_web/components/core_components.ex:111 (111x)
+icon: lib/ashfolio_web/components/core_components.ex:599 (109x)
+input: lib/ashfolio_web/components/core_components.ex:295 (92x)
+input: lib/ashfolio_web/components/core_components.ex:306 (92x)
+input: lib/ashfolio_web/components/core_components.ex:332 (92x)
+input: lib/ashfolio_web/components/core_components.ex:351 (92x)
 
 # === DEPENDENCIES ===
 bandit: ❌ (0)
@@ -168,15 +177,15 @@ telemetry_metrics: ❌ (0)
 telemetry_poller: ❌ (0)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio/tax_planning/tax_loss_harvester.ex", "lib/ashfolio_web/live/tax_planning_live/index.ex", "lib/mix/tasks/code_gps/file_analyzer.ex", "lib/ashfolio/context.ex", "lib/ashfolio/data_helpers.ex"]
-uncommitted: 1 files
-commits_ahead: 0
+recent: ["lib/ashfolio/portfolio/calculators/dividend_calculator.ex", "lib/ashfolio/portfolio/calculators/stock_split_calculator.ex", "lib/ashfolio/portfolio/services/corporate_action_applier.ex", "lib/ashfolio_web/components/top_bar.ex", "lib/ashfolio_web/live/corporate_action_live/form_component.ex"]
+uncommitted: 0 files
+commits_ahead: 3
 
 # === TEST ANALYSIS ===
 summary:
-  total_test_modules: 126
-  total_tests: 1669
-  average_tests_per_module: 13.2
+  total_test_modules: 132
+  total_tests: 1724
+  average_tests_per_module: 13.1
 
 top_10_test_modules:
   Unknown: 48 tests, 86 assertions (15 describes) | test/ashfolio_web/form_helpers_test.exs
@@ -204,12 +213,12 @@ test/ashfolio/financial_management/forecast_calculator_aer_test.exs ⚠️
 
 # === MODULE ANALYSIS ===
 summary:
-  total_modules: 134 (125 lib, 9 test)
-  total_functions: 1964 (1885 lib, 79 test)
-  public/private: 784 public, 1180 private
-  average_functions_per_module: 14.7
+  total_modules: 141 (132 lib, 9 test)
+  total_functions: 2025 (1946 lib, 79 test)
+  public/private: 807 public, 1218 private
+  average_functions_per_module: 14.4
   complex_modules: 16 (>30 functions)
-      empty_modules: 17 (potential parsing issues)
+      empty_modules: 19 (potential parsing issues)
 
 top_20_modules:
   Unknown: 64 functions (1 public, 63 private) | lib/ashfolio_web/components/forecast_chart.ex
@@ -245,7 +254,7 @@ quality_score: 100/100 (0 total issues)
 # === PATTERNS ===
 error_handling: "Standard put_flash error handling"
 currency_format: "Basic decimal formatting"
-test_setup: "ExUnit setup blocks (126 total)"
+test_setup: "ExUnit setup blocks (136 total)"
 
 # === INTEGRATION OPPORTUNITIES ===
 Add PubSub Subscriptions:

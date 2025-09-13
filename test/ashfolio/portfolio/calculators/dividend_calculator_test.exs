@@ -10,11 +10,12 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
     test "calculates regular cash dividend correctly" do
       shares_owned = Decimal.new("100")
       dividend_per_share = Decimal.new("0.50")
-      
-      result = DividendCalculator.calculate_dividend_payment(
-        shares_owned,
-        dividend_per_share
-      )
+
+      result =
+        DividendCalculator.calculate_dividend_payment(
+          shares_owned,
+          dividend_per_share
+        )
 
       assert {:ok, payment} = result
       assert Decimal.equal?(payment.total_dividend, Decimal.new("50.00"))
@@ -25,11 +26,12 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
     test "handles fractional shares in dividend calculation" do
       shares_owned = Decimal.new("123.45")
       dividend_per_share = Decimal.new("1.25")
-      
-      result = DividendCalculator.calculate_dividend_payment(
-        shares_owned,
-        dividend_per_share
-      )
+
+      result =
+        DividendCalculator.calculate_dividend_payment(
+          shares_owned,
+          dividend_per_share
+        )
 
       assert {:ok, payment} = result
       # 123.45 * 1.25 = 154.3125
@@ -39,12 +41,13 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
     test "rounds to penny for dividend payments" do
       shares_owned = Decimal.new("100")
       dividend_per_share = Decimal.new("0.333")
-      
-      result = DividendCalculator.calculate_dividend_payment(
-        shares_owned,
-        dividend_per_share,
-        round_to_penny: true
-      )
+
+      result =
+        DividendCalculator.calculate_dividend_payment(
+          shares_owned,
+          dividend_per_share,
+          round_to_penny: true
+        )
 
       assert {:ok, payment} = result
       # 100 * 0.333 = 33.30 (rounded from 33.3)
@@ -54,11 +57,12 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
     test "returns error for negative shares" do
       shares_owned = Decimal.new("-100")
       dividend_per_share = Decimal.new("0.50")
-      
-      result = DividendCalculator.calculate_dividend_payment(
-        shares_owned,
-        dividend_per_share
-      )
+
+      result =
+        DividendCalculator.calculate_dividend_payment(
+          shares_owned,
+          dividend_per_share
+        )
 
       assert {:error, reason} = result
       assert reason =~ "Shares must be positive"
@@ -67,11 +71,12 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
     test "returns error for negative dividend" do
       shares_owned = Decimal.new("100")
       dividend_per_share = Decimal.new("-0.50")
-      
-      result = DividendCalculator.calculate_dividend_payment(
-        shares_owned,
-        dividend_per_share
-      )
+
+      result =
+        DividendCalculator.calculate_dividend_payment(
+          shares_owned,
+          dividend_per_share
+        )
 
       assert {:error, reason} = result
       assert reason =~ "Dividend per share must be positive"
@@ -80,11 +85,12 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
     test "handles zero dividend correctly" do
       shares_owned = Decimal.new("100")
       dividend_per_share = Decimal.new("0")
-      
-      result = DividendCalculator.calculate_dividend_payment(
-        shares_owned,
-        dividend_per_share
-      )
+
+      result =
+        DividendCalculator.calculate_dividend_payment(
+          shares_owned,
+          dividend_per_share
+        )
 
       assert {:ok, payment} = result
       assert Decimal.equal?(payment.total_dividend, Decimal.new("0"))
@@ -98,14 +104,16 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
         pay_date: ~D[2024-06-15],
         ex_date: ~D[2024-06-01]
       }
-      
-      holding_period_days = 90 # Held for 90 days
-      
-      status = DividendCalculator.classify_dividend_tax_status(
-        dividend_attrs,
-        holding_period_days
-      )
-      
+
+      # Held for 90 days
+      holding_period_days = 90
+
+      status =
+        DividendCalculator.classify_dividend_tax_status(
+          dividend_attrs,
+          holding_period_days
+        )
+
       assert status == :qualified
     end
 
@@ -115,14 +123,15 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
         pay_date: ~D[2024-06-15],
         ex_date: ~D[2024-06-01]
       }
-      
+
       holding_period_days = 90
-      
-      status = DividendCalculator.classify_dividend_tax_status(
-        dividend_attrs,
-        holding_period_days
-      )
-      
+
+      status =
+        DividendCalculator.classify_dividend_tax_status(
+          dividend_attrs,
+          holding_period_days
+        )
+
       assert status == :ordinary
     end
 
@@ -132,14 +141,16 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
         pay_date: ~D[2024-06-15],
         ex_date: ~D[2024-06-01]
       }
-      
-      holding_period_days = 30 # Less than 60 days required
-      
-      status = DividendCalculator.classify_dividend_tax_status(
-        dividend_attrs,
-        holding_period_days
-      )
-      
+
+      # Less than 60 days required
+      holding_period_days = 30
+
+      status =
+        DividendCalculator.classify_dividend_tax_status(
+          dividend_attrs,
+          holding_period_days
+        )
+
       assert status == :ordinary
     end
   end
@@ -151,7 +162,7 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
         quantity: Decimal.new("100"),
         purchase_date: ~D[2024-01-01]
       }
-      
+
       corporate_action = %{
         id: Ecto.UUID.generate(),
         dividend_amount: Decimal.new("0.75"),
@@ -161,9 +172,9 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
         pay_date: ~D[2024-06-15],
         description: "$0.75 quarterly dividend"
       }
-      
+
       result = DividendCalculator.apply_to_position(position, corporate_action)
-      
+
       assert {:ok, adjustment_attrs} = result
       assert adjustment_attrs.transaction_id == position.transaction_id
       assert adjustment_attrs.corporate_action_id == corporate_action.id
@@ -195,7 +206,7 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
           purchase_date: ~D[2024-03-01]
         }
       ]
-      
+
       corporate_action = %{
         id: "ca1",
         dividend_amount: Decimal.new("1.00"),
@@ -205,12 +216,12 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
         pay_date: ~D[2024-06-15],
         description: "$1.00 quarterly dividend"
       }
-      
+
       result = DividendCalculator.batch_apply_dividends(positions, corporate_action)
-      
+
       assert {:ok, adjustments} = result
       assert length(adjustments) == 3
-      
+
       [adj1, adj2, adj3] = adjustments
       assert Decimal.equal?(adj1.total_dividend, Decimal.new("100.00"))
       assert Decimal.equal?(adj2.total_dividend, Decimal.new("50.00"))
@@ -225,7 +236,7 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
           purchase_date: ~D[2024-03-01]
         },
         %{
-          transaction_id: "tx2", 
+          transaction_id: "tx2",
           quantity: Decimal.new("50"),
           purchase_date: ~D[2024-01-01]
         },
@@ -235,7 +246,7 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
           purchase_date: ~D[2024-02-01]
         }
       ]
-      
+
       corporate_action = %{
         id: "ca1",
         dividend_amount: Decimal.new("0.50"),
@@ -245,17 +256,20 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
         pay_date: ~D[2024-06-15],
         description: "Dividend"
       }
-      
+
       result = DividendCalculator.batch_apply_dividends(positions, corporate_action)
-      
+
       assert {:ok, adjustments} = result
-      
+
       # Should be sorted by purchase date (FIFO)
       sorted_adjustments = Enum.sort_by(adjustments, & &1.fifo_lot_order)
-      
-      assert sorted_adjustments |> Enum.at(0) |> Map.get(:transaction_id) == "tx2" # Earliest
-      assert sorted_adjustments |> Enum.at(1) |> Map.get(:transaction_id) == "tx3" # Middle
-      assert sorted_adjustments |> Enum.at(2) |> Map.get(:transaction_id) == "tx1" # Latest
+
+      # Earliest
+      assert sorted_adjustments |> Enum.at(0) |> Map.get(:transaction_id) == "tx2"
+      # Middle
+      assert sorted_adjustments |> Enum.at(1) |> Map.get(:transaction_id) == "tx3"
+      # Latest
+      assert sorted_adjustments |> Enum.at(2) |> Map.get(:transaction_id) == "tx1"
     end
   end
 
@@ -263,12 +277,13 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
     test "calculates standard qualified dividend withholding" do
       total_dividend = Decimal.new("100.00")
       tax_status = :qualified
-      
-      withholding = DividendCalculator.calculate_tax_withholding(
-        total_dividend,
-        tax_status
-      )
-      
+
+      withholding =
+        DividendCalculator.calculate_tax_withholding(
+          total_dividend,
+          tax_status
+        )
+
       # Default 15% for qualified dividends
       assert Decimal.equal?(withholding, Decimal.new("15.00"))
     end
@@ -276,12 +291,13 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
     test "calculates ordinary dividend withholding" do
       total_dividend = Decimal.new("100.00")
       tax_status = :ordinary
-      
-      withholding = DividendCalculator.calculate_tax_withholding(
-        total_dividend,
-        tax_status
-      )
-      
+
+      withholding =
+        DividendCalculator.calculate_tax_withholding(
+          total_dividend,
+          tax_status
+        )
+
       # Default 24% for ordinary dividends
       assert Decimal.equal?(withholding, Decimal.new("24.00"))
     end
@@ -290,13 +306,14 @@ defmodule Ashfolio.Portfolio.Calculators.DividendCalculatorTest do
       total_dividend = Decimal.new("100.00")
       tax_status = :qualified
       custom_rate = Decimal.new("0.20")
-      
-      withholding = DividendCalculator.calculate_tax_withholding(
-        total_dividend,
-        tax_status,
-        withholding_rate: custom_rate
-      )
-      
+
+      withholding =
+        DividendCalculator.calculate_tax_withholding(
+          total_dividend,
+          tax_status,
+          withholding_rate: custom_rate
+        )
+
       assert Decimal.equal?(withholding, Decimal.new("20.00"))
     end
   end

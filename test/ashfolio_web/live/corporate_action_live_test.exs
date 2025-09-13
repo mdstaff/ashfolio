@@ -22,12 +22,13 @@ defmodule AshfolioWeb.CorporateActionLiveTest do
 
       # Click the new corporate action link
       result = index_live |> element("a", "New Corporate Action") |> render_click()
-      
+
       # Check if we get a live redirect (which would indicate an error)
       case result do
         {:error, {:live_redirect, %{to: to}}} ->
           # Navigate to the new path manually
-          {:ok, index_live, _html} = live(conn, to)
+          {:ok, _index_live, _html} = live(conn, to)
+
         _ ->
           # Normal patch behavior
           assert_patch(index_live, ~p"/corporate-actions/new")
@@ -35,14 +36,16 @@ defmodule AshfolioWeb.CorporateActionLiveTest do
 
       # Fill out the form
       assert index_live
-             |> form("#corporate-action-form", corporate_action: %{
-               action_type: "stock_split",
-               symbol_id: symbol.id,
-               ex_date: "2024-06-01",
-               description: "2:1 stock split test",
-               split_ratio_from: "1",
-               split_ratio_to: "2"
-             })
+             |> form("#corporate-action-form",
+               corporate_action: %{
+                 action_type: "stock_split",
+                 symbol_id: symbol.id,
+                 ex_date: "2024-06-01",
+                 description: "2:1 stock split test",
+                 split_ratio_from: "1",
+                 split_ratio_to: "2"
+               }
+             )
              |> render_submit()
 
       assert_patch(index_live, ~p"/corporate-actions")

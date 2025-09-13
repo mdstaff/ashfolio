@@ -168,24 +168,23 @@ defmodule Ashfolio.Portfolio.TransactionAdjustment do
     # Value preservation validation for quantity/price adjustments
     validate(fn changeset, _context ->
       adjustment_type = Ash.Changeset.get_attribute(changeset, :adjustment_type)
-      
+
       if adjustment_type == :quantity_price do
         original_qty = Ash.Changeset.get_attribute(changeset, :original_quantity)
         original_price = Ash.Changeset.get_attribute(changeset, :original_price)
         adjusted_qty = Ash.Changeset.get_attribute(changeset, :adjusted_quantity)
         adjusted_price = Ash.Changeset.get_attribute(changeset, :adjusted_price)
-        
+
         if original_qty && original_price && adjusted_qty && adjusted_price do
           original_value = Decimal.mult(original_qty, original_price)
           adjusted_value = Decimal.mult(adjusted_qty, adjusted_price)
-          
+
           # Allow for small rounding differences (0.01%)
           tolerance = Decimal.mult(original_value, Decimal.new("0.0001"))
           diff = Decimal.abs(Decimal.sub(original_value, adjusted_value))
-          
+
           if Decimal.compare(diff, tolerance) == :gt do
-            {:error, field: :adjusted_price, 
-             message: "Total value must be preserved in quantity/price adjustments"}
+            {:error, field: :adjusted_price, message: "Total value must be preserved in quantity/price adjustments"}
           else
             :ok
           end
