@@ -86,7 +86,7 @@ defmodule AshfolioWeb.FinancialGoalLiveTest do
       # Goal name
       assert html =~ "Emergency Fund"
       # Progress
-      assert html =~ "0.00%% complete"
+      assert html =~ "0.00% complete"
     end
 
     test "handles different emergency fund readiness levels", %{conn: conn} do
@@ -237,7 +237,7 @@ defmodule AshfolioWeb.FinancialGoalLiveTest do
       # Current amount
       assert html =~ "$0.00"
       # Progress
-      assert html =~ "0.00%% complete"
+      assert html =~ "0.00% complete"
       # Target
       assert html =~ "$#{Decimal.to_string(goal.target_amount)}"
       # Date

@@ -10,9 +10,9 @@ defmodule Mix.Tasks.CodeGps.FileAnalyzerTest do
     test "detects all LiveView files, not just files ending in _live.ex" do
       live_views = FileAnalyzer.analyze_live_views()
 
-      # Should find exactly 18 LiveView modules (not LiveComponents or helpers)
-      assert length(live_views) == 18,
-             "Should detect exactly 18 LiveView files in lib/ashfolio_web/live/, found: #{length(live_views)}"
+      # Should find exactly 19 LiveView modules (not LiveComponents or helpers)
+      assert length(live_views) == 19,
+             "Should detect exactly 19 LiveView files in lib/ashfolio_web/live/, found: #{length(live_views)}"
 
       # Should find DashboardLive (ends in _live.ex)
       dashboard_lv = Enum.find(live_views, &(&1.name == "DashboardLive"))
