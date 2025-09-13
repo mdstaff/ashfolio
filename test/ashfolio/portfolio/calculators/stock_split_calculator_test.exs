@@ -149,9 +149,9 @@ defmodule Ashfolio.Portfolio.Calculators.StockSplitCalculatorTest do
   describe "batch_apply/2" do
     test "applies split to multiple transactions" do
       transactions = [
-        %{id: "tx1", quantity: Decimal.new("100"), price: Decimal.new("200.00")},
-        %{id: "tx2", quantity: Decimal.new("50"), price: Decimal.new("200.00")},
-        %{id: "tx3", quantity: Decimal.new("75"), price: Decimal.new("200.00")}
+        %{id: "tx1", quantity: Decimal.new("100"), price: Decimal.new("200.00"), date: ~D[2024-01-01]},
+        %{id: "tx2", quantity: Decimal.new("50"), price: Decimal.new("200.00"), date: ~D[2024-01-02]},
+        %{id: "tx3", quantity: Decimal.new("75"), price: Decimal.new("200.00"), date: ~D[2024-01-03]}
       ]
 
       corporate_action = %{

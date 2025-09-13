@@ -84,8 +84,8 @@ defmodule Ashfolio.Portfolio.Calculators.StockSplitCalculator do
   Preserves FIFO ordering by adding fifo_lot_order to adjustments.
   """
   def batch_apply(transactions, corporate_action) do
-    # Sort by date to ensure FIFO ordering
-    sorted_transactions = Enum.sort_by(transactions, & &1[:date])
+    # Sort by date to ensure FIFO ordering 
+    sorted_transactions = Enum.sort_by(transactions, & &1.date)
     
     adjustments = 
       sorted_transactions
