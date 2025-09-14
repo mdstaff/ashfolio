@@ -14,7 +14,6 @@ defmodule AshfolioWeb.CorporateActionLiveTest do
       assert html =~ "No corporate actions found"
     end
 
-    @tag :skip
     test "saves new corporate action", %{conn: conn} do
       # First, we need some test data - create a symbol
       symbol = Ashfolio.SQLiteHelpers.get_or_create_symbol("TEST", %{name: "Test Corp"})

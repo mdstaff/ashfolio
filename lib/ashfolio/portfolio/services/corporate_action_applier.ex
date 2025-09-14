@@ -12,11 +12,13 @@ defmodule Ashfolio.Portfolio.Services.CorporateActionApplier do
   ## Supported Actions
   - Stock splits (forward and reverse)
   - Cash dividends (qualified and ordinary)
+  - Mergers and acquisitions (stock-for-stock, cash, mixed consideration)
+  - Spinoffs (basis allocation between original and new shares)
   - Stock dividends (future)
-  - Mergers and acquisitions (future)
   """
 
   alias Ashfolio.Portfolio.Calculators.DividendCalculator
+  alias Ashfolio.Portfolio.Calculators.MergerCalculator
   alias Ashfolio.Portfolio.Calculators.StockSplitCalculator
   alias Ashfolio.Portfolio.CorporateAction
   alias Ashfolio.Portfolio.Transaction
@@ -145,6 +147,8 @@ defmodule Ashfolio.Portfolio.Services.CorporateActionApplier do
 
   defp action_type_supported?(:stock_split), do: true
   defp action_type_supported?(:cash_dividend), do: true
+  defp action_type_supported?(:merger), do: true
+  defp action_type_supported?(:spinoff), do: true
   defp action_type_supported?(_), do: false
 
   defp do_apply_corporate_action(corporate_action) do
@@ -195,6 +199,12 @@ defmodule Ashfolio.Portfolio.Services.CorporateActionApplier do
       :cash_dividend ->
         calculate_dividend_adjustments(transactions, corporate_action)
 
+      :merger ->
+        calculate_merger_adjustments(transactions, corporate_action)
+
+      :spinoff ->
+        calculate_spinoff_adjustments(transactions, corporate_action)
+
       unsupported_type ->
         {:error, "Calculator not implemented for #{unsupported_type}"}
     end
@@ -227,6 +237,26 @@ defmodule Ashfolio.Portfolio.Services.CorporateActionApplier do
 
       {:error, reason} ->
         {:error, "Dividend calculation failed: #{reason}"}
+    end
+  end
+
+  defp calculate_merger_adjustments(transactions, corporate_action) do
+    case MergerCalculator.batch_apply_merger(transactions, corporate_action) do
+      {:ok, adjustments} ->
+        {:ok, adjustments}
+
+      {:error, reason} ->
+        {:error, "Merger calculation failed: #{reason}"}
+    end
+  end
+
+  defp calculate_spinoff_adjustments(transactions, corporate_action) do
+    case MergerCalculator.batch_apply_spinoff(transactions, corporate_action) do
+      {:ok, adjustments} ->
+        {:ok, adjustments}
+
+      {:error, reason} ->
+        {:error, "Spinoff calculation failed: #{reason}"}
     end
   end
 

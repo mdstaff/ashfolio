@@ -157,26 +157,71 @@ defmodule Ashfolio.Portfolio.CorporateAction do
     validate(present(:ex_date), message: "Ex-date is required")
     validate(present(:description), message: "Description is required")
 
-    # Basic positive number validations
-    validate(compare(:split_ratio_from, greater_than: 0),
-      message: "Split ratio from must be positive"
-    )
+    # Conditional validations based on action type
+    validate(fn changeset, _context ->
+      action_type = Ash.Changeset.get_attribute(changeset, :action_type)
 
-    validate(compare(:split_ratio_to, greater_than: 0),
-      message: "Split ratio to must be positive"
-    )
+      case action_type do
+        :stock_split ->
+          # Validate split ratios for stock splits
+          from_ratio = Ash.Changeset.get_attribute(changeset, :split_ratio_from)
+          to_ratio = Ash.Changeset.get_attribute(changeset, :split_ratio_to)
 
-    validate(compare(:dividend_amount, greater_than: 0),
-      message: "Dividend amount must be positive"
-    )
+          cond do
+            is_nil(from_ratio) ->
+              {:error, field: :split_ratio_from, message: "Split ratio from is required for stock splits"}
 
-    validate(compare(:exchange_ratio, greater_than: 0),
-      message: "Exchange ratio must be positive"
-    )
+            is_nil(to_ratio) ->
+              {:error, field: :split_ratio_to, message: "Split ratio to is required for stock splits"}
 
-    validate(compare(:cash_consideration, greater_than_or_equal_to: 0),
-      message: "Cash consideration cannot be negative"
-    )
+            not positive_decimal?(from_ratio) ->
+              {:error, field: :split_ratio_from, message: "Split ratio from must be positive"}
+
+            not positive_decimal?(to_ratio) ->
+              {:error, field: :split_ratio_to, message: "Split ratio to must be positive"}
+
+            true ->
+              :ok
+          end
+
+        type when type in [:cash_dividend, :stock_dividend, :return_of_capital] ->
+          # Validate dividend amount for dividend actions
+          amount = Ash.Changeset.get_attribute(changeset, :dividend_amount)
+
+          cond do
+            is_nil(amount) ->
+              {:error, field: :dividend_amount, message: "Dividend amount is required for #{type}"}
+
+            not positive_decimal?(amount) ->
+              {:error, field: :dividend_amount, message: "Dividend amount must be positive"}
+
+            true ->
+              :ok
+          end
+
+        :merger ->
+          # Validate merger fields
+          exchange_ratio = Ash.Changeset.get_attribute(changeset, :exchange_ratio)
+          cash = Ash.Changeset.get_attribute(changeset, :cash_consideration)
+
+          cond do
+            is_nil(exchange_ratio) && is_nil(cash) ->
+              {:error, message: "Merger must have either exchange ratio or cash consideration"}
+
+            not is_nil(exchange_ratio) && not positive_decimal?(exchange_ratio) ->
+              {:error, field: :exchange_ratio, message: "Exchange ratio must be positive"}
+
+            not is_nil(cash) && not non_negative_decimal?(cash) ->
+              {:error, field: :cash_consideration, message: "Cash consideration cannot be negative"}
+
+            true ->
+              :ok
+          end
+
+        _ ->
+          :ok
+      end
+    end)
 
     # Custom validation for future ex_date with applied status
     validate(fn changeset, _context ->
@@ -293,4 +338,29 @@ defmodule Ashfolio.Portfolio.CorporateAction do
     define(:pending)
     define(:by_status, args: [:status])
   end
+
+  # Private helper functions for validations
+  defp positive_decimal?(nil), do: false
+
+  defp positive_decimal?(value) when is_binary(value) do
+    case Decimal.parse(value) do
+      {decimal, ""} -> Decimal.compare(decimal, 0) == :gt
+      _ -> false
+    end
+  end
+
+  defp positive_decimal?(%Decimal{} = value), do: Decimal.compare(value, 0) == :gt
+  defp positive_decimal?(_), do: false
+
+  defp non_negative_decimal?(nil), do: false
+
+  defp non_negative_decimal?(value) when is_binary(value) do
+    case Decimal.parse(value) do
+      {decimal, ""} -> Decimal.compare(decimal, 0) != :lt
+      _ -> false
+    end
+  end
+
+  defp non_negative_decimal?(%Decimal{} = value), do: Decimal.compare(value, 0) != :lt
+  defp non_negative_decimal?(_), do: false
 end

@@ -131,10 +131,11 @@ defmodule Ashfolio.Portfolio.Services.CorporateActionApplierTest do
       {:ok, corporate_action} =
         CorporateAction.create(%{
           # Not yet implemented
-          action_type: :spinoff,
+          action_type: :return_of_capital,
           symbol_id: symbol.id,
           ex_date: ~D[2024-06-01],
-          description: "Spinoff action",
+          description: "Return of capital action",
+          dividend_amount: Decimal.new("1.00"),
           status: :pending
         })
 

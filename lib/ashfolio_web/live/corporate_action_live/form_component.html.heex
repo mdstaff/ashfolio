@@ -177,28 +177,32 @@
 <!-- JavaScript for conditional field display -->
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        const actionTypeSelect = document.querySelector('select[name="corporate_action[action_type]"]');
+        const actionTypeSelect = document.querySelector('select[name="form[action_type]"]');
         const splitFields = document.getElementById('split-fields');
         const dividendFields = document.getElementById('dividend-fields');
-        
+
         function toggleFields() {
+          if (!actionTypeSelect) return;
+
           const actionType = actionTypeSelect.value;
-          
+
           // Hide all conditional fields first
-          splitFields.style.display = 'none';
-          dividendFields.style.display = 'none';
-          
+          if (splitFields) splitFields.style.display = 'none';
+          if (dividendFields) dividendFields.style.display = 'none';
+
           // Show relevant fields based on action type
-          if (actionType === 'stock_split') {
+          if (actionType === 'stock_split' && splitFields) {
             splitFields.style.display = 'block';
-          } else if (actionType === 'cash_dividend' || actionType === 'stock_dividend') {
+          } else if ((actionType === 'cash_dividend' || actionType === 'stock_dividend') && dividendFields) {
             dividendFields.style.display = 'block';
           }
         }
-        
+
         // Initial toggle and event listener
-        toggleFields();
-        actionTypeSelect.addEventListener('change', toggleFields);
+        if (actionTypeSelect) {
+          toggleFields();
+          actionTypeSelect.addEventListener('change', toggleFields);
+        }
       });
     </script>
   </div>

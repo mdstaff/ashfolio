@@ -32,12 +32,12 @@ defmodule AshfolioWeb.CorporateActionLive.FormComponent do
   end
 
   @impl true
-  def handle_event("validate", %{"corporate_action" => params}, socket) do
+  def handle_event("validate", %{"form" => params}, socket) do
     form = socket.assigns.form.source |> AshPhoenix.Form.validate(params) |> to_form()
     {:noreply, assign(socket, :form, form)}
   end
 
-  def handle_event("save", %{"corporate_action" => params}, socket) do
+  def handle_event("save", %{"form" => params}, socket) do
     save_corporate_action(socket, socket.assigns.action, params)
   end
 
