@@ -23,18 +23,33 @@ defmodule AshfolioWeb.CorporateActionLive.FormComponent do
           |> to_form()
       end
 
+    # Initialize action_type for conditional field rendering
+    action_type =
+      case assigns.action do
+        :edit -> assigns.corporate_action.action_type || ""
+        :new -> ""
+      end
+
     socket =
       socket
       |> assign(assigns)
       |> assign(:form, form)
+      |> assign(:action_type, action_type)
 
     {:ok, socket}
   end
 
   @impl true
   def handle_event("validate", %{"form" => params}, socket) do
+    # Extract action type for conditional field rendering
+    action_type = params["action_type"] || ""
+
     form = socket.assigns.form.source |> AshPhoenix.Form.validate(params) |> to_form()
-    {:noreply, assign(socket, :form, form)}
+
+    {:noreply,
+     socket
+     |> assign(:form, form)
+     |> assign(:action_type, action_type)}
   end
 
   def handle_event("save", %{"form" => params}, socket) do
@@ -44,7 +59,7 @@ defmodule AshfolioWeb.CorporateActionLive.FormComponent do
   defp save_corporate_action(socket, _action, params) do
     form = AshPhoenix.Form.validate(socket.assigns.form.source, params)
 
-    case AshPhoenix.Form.submit(form) do
+    case AshPhoenix.Form.submit(form, params: params) do
       {:ok, _corporate_action} ->
         message =
           case socket.assigns.action do
