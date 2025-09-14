@@ -3,7 +3,6 @@ defmodule AshfolioWeb.MoneyRatiosLive.IndexTest do
 
   import Phoenix.LiveViewTest
 
-  alias Ashfolio.Financial.MoneyRatios
   alias Ashfolio.FinancialManagement.FinancialProfile
 
   describe "MoneyRatiosLive.Index" do
@@ -35,7 +34,7 @@ defmodule AshfolioWeb.MoneyRatiosLive.IndexTest do
           household_members: 2
         })
 
-      {:ok, view, html} = live(conn, "/money-ratios")
+      {:ok, _view, html} = live(conn, "/money-ratios")
 
       assert html =~ "Capital-to-Income Ratio"
       assert html =~ "Savings Ratio"

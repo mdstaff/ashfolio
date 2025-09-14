@@ -1,0 +1,231 @@
+<div class="space-y-8">
+  <!-- Header Section -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">{@page_title}</h1>
+      <p class="text-gray-600 mt-1">{@page_subtitle}</p>
+    </div>
+
+    <.link
+      navigate={~p"/corporate-actions/new"}
+      class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+    >
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+        />
+      </svg>
+      New Corporate Action
+    </.link>
+  </div>
+  
+<!-- Filter Section -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <div class="flex space-x-4">
+      <button
+        phx-click="filter"
+        phx-value-status="all"
+        class={[
+          "px-4 py-2 rounded-lg font-medium transition-colors",
+          if(@filter_status == :all,
+            do: "bg-blue-100 text-blue-700",
+            else: "text-gray-600 hover:text-gray-900"
+          )
+        ]}
+      >
+        All ({length(@corporate_actions)})
+      </button>
+
+      <button
+        phx-click="filter"
+        phx-value-status="pending"
+        class={[
+          "px-4 py-2 rounded-lg font-medium transition-colors",
+          if(@filter_status == :pending,
+            do: "bg-yellow-100 text-yellow-700",
+            else: "text-gray-600 hover:text-gray-900"
+          )
+        ]}
+      >
+        Pending
+      </button>
+
+      <button
+        phx-click="filter"
+        phx-value-status="applied"
+        class={[
+          "px-4 py-2 rounded-lg font-medium transition-colors",
+          if(@filter_status == :applied,
+            do: "bg-green-100 text-green-700",
+            else: "text-gray-600 hover:text-gray-900"
+          )
+        ]}
+      >
+        Applied
+      </button>
+
+      <button
+        phx-click="filter"
+        phx-value-status="reversed"
+        class={[
+          "px-4 py-2 rounded-lg font-medium transition-colors",
+          if(@filter_status == :reversed,
+            do: "bg-red-100 text-red-700",
+            else: "text-gray-600 hover:text-gray-900"
+          )
+        ]}
+      >
+        Reversed
+      </button>
+    </div>
+  </div>
+  
+<!-- Corporate Actions Table -->
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-semibold text-gray-900">Corporate Actions</h2>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Symbol
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Type
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Description
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Ex-Date
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Status
+            </th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <%= for action <- filter_actions_by_status(@corporate_actions, @filter_status) do %>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {action.symbol.symbol || "N/A"}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {format_action_type(action.action_type)}
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-900">
+                {action.description}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {Calendar.strftime(action.ex_date, "%Y-%m-%d")}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class={[
+                  "inline-flex px-2 py-1 text-xs font-semibold rounded-full",
+                  status_color(action.status)
+                ]}>
+                  {String.capitalize(to_string(action.status))}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                <%= if action.status == :pending do %>
+                  <button
+                    phx-click="preview_action"
+                    phx-value-id={action.id}
+                    class="text-blue-600 hover:text-blue-900"
+                    title="Preview Impact"
+                  >
+                    Preview
+                  </button>
+
+                  <button
+                    phx-click="apply_action"
+                    phx-value-id={action.id}
+                    class="text-green-600 hover:text-green-900"
+                    data-confirm="Are you sure you want to apply this corporate action?"
+                  >
+                    Apply
+                  </button>
+                <% end %>
+
+                <%= if action.status == :applied do %>
+                  <button
+                    phx-click="reverse_action"
+                    phx-value-id={action.id}
+                    class="text-red-600 hover:text-red-900"
+                    data-confirm="Are you sure you want to reverse this corporate action?"
+                  >
+                    Reverse
+                  </button>
+                <% end %>
+
+                <.link
+                  navigate={~p"/corporate-actions/#{action.id}/edit"}
+                  class="text-blue-600 hover:text-blue-900"
+                >
+                  Edit
+                </.link>
+
+                <button
+                  phx-click="delete"
+                  phx-value-id={action.id}
+                  class="text-red-600 hover:text-red-900"
+                  data-confirm="Are you sure you want to delete this corporate action?"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <%= if Enum.empty?(filter_actions_by_status(@corporate_actions, @filter_status)) do %>
+        <div class="text-center py-12">
+          <svg
+            class="mx-auto h-12 w-12 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No corporate actions found</h3>
+          <p class="mt-1 text-sm text-gray-500">
+            <%= if @filter_status == :all do %>
+              Get started by creating your first corporate action.
+            <% else %>
+              No corporate actions match the current filter.
+            <% end %>
+          </p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Form Modal (when show_form is true) -->
+<%= if @show_form do %>
+  <.live_component
+    module={FormComponent}
+    id={(@selected_action && @selected_action.id) || :new}
+    action={@form_action}
+    corporate_action={@selected_action}
+    symbols={@symbols}
+    navigate={~p"/corporate-actions"}
+  />
+<% end %>

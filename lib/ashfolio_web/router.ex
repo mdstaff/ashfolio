@@ -40,6 +40,9 @@ defmodule AshfolioWeb.Router do
     live "/advanced_analytics", AdvancedAnalyticsLive.Index, :index
     live "/money-ratios", MoneyRatiosLive.Index, :index
     live "/tax-planning", TaxPlanningLive.Index, :index
+    live "/corporate-actions", CorporateActionLive.Index, :index
+    live "/corporate-actions/new", CorporateActionLive.Index, :new
+    live "/corporate-actions/:id/edit", CorporateActionLive.Index, :edit
   end
 
   # Health check endpoints - accessible without authentication

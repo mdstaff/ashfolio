@@ -63,7 +63,7 @@ defmodule AshfolioWeb.AdvancedAnalyticsLiveTest do
 
       _html =
         view
-        |> element("button", "Calculate")
+        |> element("button#calculate-twr-button")
         |> render_click()
 
       # Should display TWR result
@@ -94,6 +94,9 @@ defmodule AshfolioWeb.AdvancedAnalyticsLiveTest do
       |> element("button[phx-click='calculate_rolling_returns']")
       |> render_click()
 
+      # Wait for async calculation to complete (uses Process.send_after with 10ms delay)
+      Process.sleep(50)
+
       # Should display rolling returns analysis
       final_html = render(view)
       assert final_html =~ "Best 12-Month Period"
@@ -112,8 +115,8 @@ defmodule AshfolioWeb.AdvancedAnalyticsLiveTest do
         |> element("button[phx-click='refresh_all']")
         |> render_click()
 
-      # Should show loading state for all calculations
-      assert html =~ "Calculating..."
+      # Should show success message after refresh
+      assert html =~ "All analytics refreshed successfully"
 
       # Final result should have all analytics
       final_html = render(view)

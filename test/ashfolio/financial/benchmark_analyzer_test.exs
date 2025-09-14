@@ -192,7 +192,7 @@ defmodule Ashfolio.Financial.BenchmarkAnalyzerTest do
 
   describe "get_benchmark_data/2" do
     test "retrieves S&P 500 benchmark data" do
-      expect(YahooFinanceMock, :fetch_price, fn "SPY" ->
+      expect(YahooFinanceMock, :fetch_price, 2, fn "SPY" ->
         {:ok, Decimal.new("450.25")}
       end)
 
@@ -207,7 +207,7 @@ defmodule Ashfolio.Financial.BenchmarkAnalyzerTest do
     end
 
     test "retrieves total market benchmark data" do
-      expect(YahooFinanceMock, :fetch_price, fn "VTI" ->
+      expect(YahooFinanceMock, :fetch_price, 2, fn "VTI" ->
         {:ok, Decimal.new("220.50")}
       end)
 
@@ -312,7 +312,7 @@ defmodule Ashfolio.Financial.BenchmarkAnalyzerTest do
       portfolio_start = Decimal.new("100000")
       portfolio_end = Decimal.new("100000")
 
-      assert {:ok, analysis} = BenchmarkAnalyzer.analyze_vs_benchmark(portfolio_start, portfolio_end, 365)
+      assert {:ok, analysis} = BenchmarkAnalyzer.analyze_vs_benchmark(portfolio_start, portfolio_end, 365, :sp500)
 
       assert Decimal.equal?(analysis.portfolio_return, Decimal.new("0.00"))
       # Underperformed by 10%
@@ -328,7 +328,7 @@ defmodule Ashfolio.Financial.BenchmarkAnalyzerTest do
       # -10% return
       portfolio_end = Decimal.new("90000")
 
-      assert {:ok, analysis} = BenchmarkAnalyzer.analyze_vs_benchmark(portfolio_start, portfolio_end, 365)
+      assert {:ok, analysis} = BenchmarkAnalyzer.analyze_vs_benchmark(portfolio_start, portfolio_end, 365, :sp500)
 
       assert Decimal.equal?(analysis.portfolio_return, Decimal.new("-0.10"))
       # Underperformed by 20%
@@ -345,7 +345,7 @@ defmodule Ashfolio.Financial.BenchmarkAnalyzerTest do
       # 10% return on small amount
       portfolio_end = Decimal.new("0.011")
 
-      assert {:ok, analysis} = BenchmarkAnalyzer.analyze_vs_benchmark(portfolio_start, portfolio_end, 365)
+      assert {:ok, analysis} = BenchmarkAnalyzer.analyze_vs_benchmark(portfolio_start, portfolio_end, 365, :sp500)
 
       assert Decimal.equal?(analysis.portfolio_return, Decimal.new("0.10"))
     end

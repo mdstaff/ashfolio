@@ -90,6 +90,7 @@ defmodule Mix.Tasks.CodeGps.FileAnalyzer do
 
   # Private functions for LiveView analysis
 
+  # TODO: rename predicate function
   defp is_live_view_file?(file) do
     content = File.read!(file)
     content =~ "use AshfolioWeb, :live_view"
@@ -100,10 +101,11 @@ defmodule Mix.Tasks.CodeGps.FileAnalyzer do
 
     case AstParser.parse_content(content) do
       {:ok, ast} ->
-        module_name = case extract_module_name_ast(ast) do
-          "Unknown" -> extract_module_name_from_content(content)
-          name -> name
-        end
+        module_name =
+          case extract_module_name_ast(ast) do
+            "Unknown" -> extract_module_name_from_content(content)
+            name -> name
+          end
 
         %{
           name: module_name,
@@ -140,11 +142,12 @@ defmodule Mix.Tasks.CodeGps.FileAnalyzer do
 
   defp extract_module_name_from_content(content) do
     case Regex.run(~r/defmodule\s+([A-Za-z0-9_.]+)/, content) do
-      [_, module_name] -> 
+      [_, module_name] ->
         module_name
         |> String.split(".")
         |> List.last()
-      _ -> 
+
+      _ ->
         "Unknown"
     end
   end

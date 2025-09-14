@@ -1,4 +1,4 @@
-# Code GPS v3.1-final | 18 LiveViews | 28 Components
+# Code GPS v3.1-final | 19 LiveViews | 28 Components
 
 # === ROUTES ===
 /: AshfolioWeb.DashboardLive ❌
@@ -10,6 +10,9 @@
 /categories: AshfolioWeb.CategoryLive ❌
 /categories/:id/edit: AshfolioWeb.CategoryLive ❌
 /categories/new: AshfolioWeb.CategoryLive ❌
+/corporate-actions: AshfolioWeb.CorporateActionLive ❌
+/corporate-actions/:id/edit: AshfolioWeb.CorporateActionLive ❌
+/corporate-actions/new: AshfolioWeb.CorporateActionLive ❌
 /expenses: AshfolioWeb.ExpenseLive ❌
 /expenses/:id/edit: AshfolioWeb.ExpenseLive ❌
 /expenses/analytics: AshfolioWeb.ExpenseLive ❌
@@ -40,8 +43,8 @@ Show:
   missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
 Index:
   file: lib/ashfolio_web/live/advanced_analytics_live/index.ex
-  mount: 24 | render: 
-  events: ["calculate_twr", "calculate_mwr", "calculate_rolling_returns", "refresh_all", "clear_cache", "show_cache_stats"]
+  mount: 25 | render: 
+  events: ["calculate_twr", "calculate_mwr", "calculate_rolling_returns", "calculate_risk_metrics", "refresh_all", "clear_cache", "show_cache_stats"]
   subscriptions: []
   missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
 Index:
@@ -54,6 +57,12 @@ Index:
   file: lib/ashfolio_web/live/category_live/index.ex
   mount: 11 | render: 134
   events: ["new_category", "filter_categories", "edit_category", "delete_category", "cancel_form"]
+  subscriptions: []
+  missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
+Index:
+  file: lib/ashfolio_web/live/corporate_action_live/index.ex
+  mount: 11 | render: 
+  events: ["filter", "apply_action", "preview_action", "reverse_action", "delete"]
   subscriptions: []
   missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
 Dashboard:
@@ -136,12 +145,12 @@ Index:
   missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
 
 # === KEY COMPONENTS ===
-icon: lib/ashfolio_web/components/core_components.ex:599 (107x)
-flash: lib/ashfolio_web/components/core_components.ex:111 (98x)
-input: lib/ashfolio_web/components/core_components.ex:295 (83x)
-input: lib/ashfolio_web/components/core_components.ex:306 (83x)
-input: lib/ashfolio_web/components/core_components.ex:332 (83x)
-input: lib/ashfolio_web/components/core_components.ex:351 (83x)
+flash: lib/ashfolio_web/components/core_components.ex:111 (112x)
+icon: lib/ashfolio_web/components/core_components.ex:599 (109x)
+input: lib/ashfolio_web/components/core_components.ex:295 (92x)
+input: lib/ashfolio_web/components/core_components.ex:306 (92x)
+input: lib/ashfolio_web/components/core_components.ex:332 (92x)
+input: lib/ashfolio_web/components/core_components.ex:351 (92x)
 
 # === DEPENDENCIES ===
 bandit: ❌ (0)
@@ -168,14 +177,14 @@ telemetry_metrics: ❌ (0)
 telemetry_poller: ❌ (0)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio/tax_planning/tax_loss_harvester.ex", "lib/ashfolio_web/live/tax_planning_live/index.ex", "lib/mix/tasks/code_gps/file_analyzer.ex", "lib/ashfolio/context.ex", "lib/ashfolio/data_helpers.ex"]
-uncommitted: 0 files
-commits_ahead: 0
+recent: ["lib/ashfolio/portfolio/calculators/dividend_calculator.ex", "lib/ashfolio/portfolio/calculators/risk_metrics_calculator.ex", "lib/ashfolio/portfolio/calculators/stock_split_calculator.ex", "lib/ashfolio/portfolio/services/corporate_action_applier.ex", "lib/ashfolio/portfolio/transaction_adjustment.ex"]
+uncommitted: 10 files
+commits_ahead: 5
 
 # === TEST ANALYSIS ===
 summary:
-  total_test_modules: 126
-  total_tests: 1669
+  total_test_modules: 134
+  total_tests: 1773
   average_tests_per_module: 13.2
 
 top_10_test_modules:
@@ -188,7 +197,7 @@ top_10_test_modules:
   Unknown: 37 tests, 63 assertions (9 describes) | test/ashfolio/data_helpers_test.exs
   Unknown: 35 tests, 81 assertions (3 describes) | test/ashfolio/portfolio/account_test.exs
   Unknown: 30 tests, 37 assertions (8 describes) | test/ashfolio/error_handler_test.exs
-  Unknown: 25 tests, 72 assertions (7 describes) | test/ashfolio/portfolio/calculator_test.exs
+  Unknown: 28 tests, 84 assertions (7 describes) | test/ashfolio/portfolio/calculators/risk_metrics_calculator_test.exs
 
 # === TEST GAPS ===
 missing_tests:
@@ -204,12 +213,12 @@ test/ashfolio/financial_management/forecast_calculator_aer_test.exs ⚠️
 
 # === MODULE ANALYSIS ===
 summary:
-  total_modules: 134 (125 lib, 9 test)
-  total_functions: 1964 (1885 lib, 79 test)
-  public/private: 784 public, 1180 private
-  average_functions_per_module: 14.7
-  complex_modules: 16 (>30 functions)
-      empty_modules: 17 (potential parsing issues)
+  total_modules: 142 (134 lib, 8 test)
+  total_functions: 2079 (2002 lib, 77 test)
+  public/private: 818 public, 1261 private
+  average_functions_per_module: 14.6
+  complex_modules: 17 (>30 functions)
+      empty_modules: 18 (potential parsing issues)
 
 top_20_modules:
   Unknown: 64 functions (1 public, 63 private) | lib/ashfolio_web/components/forecast_chart.ex
@@ -225,13 +234,13 @@ top_20_modules:
   Unknown: 38 functions (1 public, 37 private) | lib/ashfolio_web/components/transaction_group.ex
   Unknown: 38 functions (13 public, 25 private) | lib/ashfolio_web/live/financial_planning_live/forecast.ex
   Unknown: 36 functions (6 public, 30 private) | lib/ashfolio_web/live/expense_live/analytics.ex
+  Unknown: 35 functions (16 public, 19 private) | lib/ashfolio_web/live/advanced_analytics_live/index.ex
   Unknown: 33 functions (10 public, 23 private) | lib/ashfolio_web/live/expense_live/index.ex
   Unknown: 32 functions (14 public, 18 private) | lib/ashfolio/financial_management/retirement_calculator.ex
   Unknown: 32 functions (1 public, 31 private) | lib/ashfolio_web/components/transaction_stats.ex
   Unknown: 30 functions (4 public, 26 private) | lib/ashfolio/financial_management/symbol_search.ex
   Unknown: 30 functions (4 public, 26 private) | lib/ashfolio/tax_planning/capital_gains_calculator.ex
   Unknown: 30 functions (15 public, 15 private) | lib/ashfolio_web/live/account_live/index.ex
-  Unknown: 30 functions (14 public, 16 private) | lib/ashfolio_web/live/advanced_analytics_live/index.ex
 
 # === CODE QUALITY ===
 credo_analysis: Text parsing summary
@@ -245,7 +254,7 @@ quality_score: 100/100 (0 total issues)
 # === PATTERNS ===
 error_handling: "Standard put_flash error handling"
 currency_format: "Basic decimal formatting"
-test_setup: "ExUnit setup blocks (126 total)"
+test_setup: "ExUnit setup blocks (138 total)"
 
 # === INTEGRATION OPPORTUNITIES ===
 Add PubSub Subscriptions:

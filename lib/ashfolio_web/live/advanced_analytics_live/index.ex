@@ -15,6 +15,7 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   use AshfolioWeb, :live_view
 
   alias Ashfolio.Financial.Formatters
+  alias Ashfolio.Portfolio.Calculators.RiskMetricsCalculator
   alias Ashfolio.Portfolio.PerformanceCache
   alias Ashfolio.Portfolio.PerformanceCalculator
 
@@ -72,6 +73,17 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   end
 
   @impl true
+  def handle_event("calculate_risk_metrics", _params, socket) do
+    Logger.debug("Calculating Risk Metrics")
+
+    # Set loading state immediately and schedule async calculation
+    socket = assign(socket, :loading_risk_metrics, true)
+    Process.send_after(self(), :complete_risk_metrics_calculation, 10)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("refresh_all", _params, socket) do
     Logger.debug("Refreshing all analytics calculations")
 
@@ -81,6 +93,7 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
       |> calculate_time_weighted_return()
       |> calculate_money_weighted_return()
       |> calculate_rolling_returns()
+      |> calculate_risk_metrics()
       |> assign(:loading_all, false)
       |> put_flash(:info, "All analytics refreshed successfully")
 
@@ -166,6 +179,16 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   end
 
   @impl true
+  def handle_info(:complete_risk_metrics_calculation, socket) do
+    socket =
+      socket
+      |> calculate_risk_metrics()
+      |> assign(:loading_risk_metrics, false)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info(_msg, socket) do
     {:noreply, socket}
   end
@@ -177,9 +200,11 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
     |> assign(:twr_result, nil)
     |> assign(:mwr_result, nil)
     |> assign(:rolling_returns, nil)
+    |> assign(:risk_metrics, nil)
     |> assign(:loading_twr, false)
     |> assign(:loading_mwr, false)
     |> assign(:loading_rolling, false)
+    |> assign(:loading_risk_metrics, false)
     |> assign(:loading_all, false)
     |> assign(:cache_stats, get_cache_stats())
     |> assign(:calculation_history, [])
@@ -327,6 +352,59 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
     end
   end
 
+  defp calculate_risk_metrics(socket) do
+    cache_key = PerformanceCache.cache_key(:risk_metrics, "global", 12)
+
+    case PerformanceCache.get(cache_key) do
+      {:ok, cached_result} ->
+        Logger.debug("Using cached risk metrics result")
+        assign(socket, :risk_metrics, cached_result)
+
+      :miss ->
+        perform_risk_metrics_calculation(socket, cache_key)
+    end
+  end
+
+  defp perform_risk_metrics_calculation(socket, cache_key) do
+    {:ok, returns} = get_portfolio_returns_for_risk_analysis()
+    {:ok, portfolio_values} = get_portfolio_values_for_drawdown()
+    process_risk_metrics_result(socket, returns, portfolio_values, cache_key)
+  end
+
+  defp process_risk_metrics_result(socket, returns, portfolio_values, cache_key) do
+    # Calculate all risk metrics
+    with {:ok, sharpe} <- RiskMetricsCalculator.calculate_sharpe_ratio(returns),
+         {:ok, sortino} <- RiskMetricsCalculator.calculate_sortino_ratio(returns),
+         {:ok, max_drawdown} <- RiskMetricsCalculator.calculate_maximum_drawdown(portfolio_values),
+         {:ok, var_result} <- RiskMetricsCalculator.calculate_value_at_risk(returns, List.last(portfolio_values)) do
+      # Combine all metrics
+      risk_metrics = %{
+        sharpe_ratio: sharpe,
+        sortino_ratio: sortino,
+        maximum_drawdown: max_drawdown,
+        value_at_risk: var_result,
+        portfolio_volatility: sharpe.volatility,
+        calculated_at: DateTime.utc_now()
+      }
+
+      PerformanceCache.put(cache_key, risk_metrics)
+
+      socket
+      |> assign(:risk_metrics, risk_metrics)
+      |> add_to_calculation_history("Risk Metrics", "Complete analysis", "success")
+      |> assign(:error_message, nil)
+    else
+      {:error, reason} ->
+        Logger.warning("Risk metrics calculation failed: #{inspect(reason)}")
+        error_msg = "Risk metrics calculation failed: #{inspect(reason)}"
+
+        socket
+        |> assign(:risk_metrics, nil)
+        |> assign(:error_message, error_msg)
+        |> put_flash(:error, error_msg)
+    end
+  end
+
   defp add_to_calculation_history(socket, calculation_type, result, status) do
     timestamp = DateTime.utc_now()
 
@@ -401,6 +479,45 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
       end)
 
     {:ok, sample_returns}
+  end
+
+  defp get_portfolio_returns_for_risk_analysis do
+    # Generate sample monthly returns for risk analysis
+    sample_returns =
+      Enum.map(1..24, fn _i ->
+        # 0.8% monthly average
+        base_return = 0.008
+        # 4% monthly volatility
+        volatility = 0.04
+        random_component = :rand.normal() * volatility
+
+        return_value = base_return + random_component
+        Decimal.from_float(return_value)
+      end)
+
+    {:ok, sample_returns}
+  end
+
+  defp get_portfolio_values_for_drawdown do
+    # Generate sample portfolio values showing growth with drawdowns
+    initial_value = 100_000
+
+    values =
+      Enum.scan(1..36, initial_value, fn month, prev_value ->
+        # Simulate monthly returns with occasional drawdowns
+        monthly_return =
+          case month do
+            # Simulate a market crash period
+            month when month in [18, 19, 20] -> -0.08 + :rand.uniform() * 0.05
+            # Normal growth with volatility
+            _ -> 0.008 + (:rand.uniform() - 0.5) * 0.06
+          end
+
+        prev_value * (1 + monthly_return)
+      end)
+
+    decimal_values = Enum.map(values, &Decimal.from_float/1)
+    {:ok, decimal_values}
   end
 
   defp get_cache_stats do
