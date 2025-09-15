@@ -86,12 +86,13 @@ defmodule Ashfolio.Portfolio.Calculators.MergerCalculator do
   Returns `{:ok, %{quantity: Decimal, basis_per_share: Decimal, cash_received: Decimal, recognized_gain_loss: Decimal}}`.
   """
   def calculate_mixed_merger(original_quantity, original_basis_per_share, exchange_ratio, cash_per_share) do
-    with :ok <- validate_mixed_merger_inputs(
-           original_quantity,
-           original_basis_per_share,
-           exchange_ratio,
-           cash_per_share
-         ) do
+    with :ok <-
+           validate_mixed_merger_inputs(
+             original_quantity,
+             original_basis_per_share,
+             exchange_ratio,
+             cash_per_share
+           ) do
       # Calculate totals
       total_original_basis = D.mult(original_quantity, original_basis_per_share)
       total_cash_received = D.mult(original_quantity, cash_per_share)
@@ -138,12 +139,13 @@ defmodule Ashfolio.Portfolio.Calculators.MergerCalculator do
   Returns `{:ok, %{original_basis_per_share: Decimal, spinoff_basis_per_share: Decimal, spinoff_quantity: Decimal}}`.
   """
   def calculate_spinoff(original_quantity, original_basis_per_share, spinoff_ratio, allocation_percentage) do
-    with :ok <- validate_spinoff_inputs(
-           original_quantity,
-           original_basis_per_share,
-           spinoff_ratio,
-           allocation_percentage
-         ) do
+    with :ok <-
+           validate_spinoff_inputs(
+             original_quantity,
+             original_basis_per_share,
+             spinoff_ratio,
+             allocation_percentage
+           ) do
       # Calculate spinoff quantity (e.g., 1:1 means 1 spinoff share per 1 original share)
       spinoff_quantity = D.mult(original_quantity, spinoff_ratio)
 

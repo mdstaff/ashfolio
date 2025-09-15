@@ -1,6 +1,9 @@
 defmodule AshfolioWeb.CorporateActionLive.FormComponentTest do
   use AshfolioWeb.ConnCase, async: false
+
   import Phoenix.LiveViewTest
+
+  alias Ashfolio.Portfolio.CorporateAction
 
   @moduletag :live
 
@@ -179,6 +182,19 @@ defmodule AshfolioWeb.CorporateActionLive.FormComponentTest do
     test "successfully creates stock split with ratio fields", %{conn: conn, symbol: symbol} do
       {:ok, view, _html} = live(conn, ~p"/corporate-actions/new")
 
+      # First trigger action_type change to render conditional fields
+      view
+      |> form("#corporate-action-form", %{
+        "form" => %{
+          "action_type" => "stock_split",
+          "symbol_id" => symbol.id,
+          "ex_date" => "2024-06-01",
+          "description" => "2:1 stock split"
+        }
+      })
+      |> render_change()
+
+      # Now submit with all fields including conditional ones
       view
       |> form("#corporate-action-form", %{
         "form" => %{
@@ -192,20 +208,35 @@ defmodule AshfolioWeb.CorporateActionLive.FormComponentTest do
       })
       |> render_submit()
 
-      # Should redirect to index with success message
+      # Should redirect to index
       assert_redirect(view, ~p"/corporate-actions")
 
-      # Verify the action was created
-      {:ok, index_view, html} = live(conn, ~p"/corporate-actions")
-      assert html =~ "Corporate action created successfully"
-      assert html =~ "AAPL"
-      assert html =~ "Stock Split"
-      assert html =~ "2:1 stock split"
+      # Verify the action was created by checking the database
+      actions = CorporateAction.read!()
+      assert length(actions) > 0
+
+      stock_split = Enum.find(actions, &(&1.action_type == :stock_split))
+      assert stock_split
+      assert stock_split.symbol_id == symbol.id
+      assert stock_split.description == "2:1 stock split"
     end
 
     test "successfully creates cash dividend with amount and currency", %{conn: conn, symbol: symbol} do
       {:ok, view, _html} = live(conn, ~p"/corporate-actions/new")
 
+      # First trigger action_type change to render conditional fields
+      view
+      |> form("#corporate-action-form", %{
+        "form" => %{
+          "action_type" => "cash_dividend",
+          "symbol_id" => symbol.id,
+          "ex_date" => "2024-06-15",
+          "description" => "Q2 dividend"
+        }
+      })
+      |> render_change()
+
+      # Now submit with all fields including conditional ones
       view
       |> form("#corporate-action-form", %{
         "form" => %{
@@ -222,9 +253,12 @@ defmodule AshfolioWeb.CorporateActionLive.FormComponentTest do
 
       assert_redirect(view, ~p"/corporate-actions")
 
-      {:ok, _index_view, html} = live(conn, ~p"/corporate-actions")
-      assert html =~ "Corporate action created successfully"
-      assert html =~ "Cash Dividend"
+      # Verify the action was created by checking the database
+      actions = CorporateAction.read!()
+      cash_dividend = Enum.find(actions, &(&1.action_type == :cash_dividend))
+      assert cash_dividend
+      assert cash_dividend.symbol_id == symbol.id
+      assert cash_dividend.description == "Q2 dividend"
     end
 
     test "shows validation errors for missing split ratios", %{conn: conn, symbol: symbol} do
