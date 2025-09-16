@@ -147,10 +147,10 @@ Index:
 # === KEY COMPONENTS ===
 flash: lib/ashfolio_web/components/core_components.ex:111 (112x)
 icon: lib/ashfolio_web/components/core_components.ex:599 (109x)
-input: lib/ashfolio_web/components/core_components.ex:295 (92x)
-input: lib/ashfolio_web/components/core_components.ex:306 (92x)
-input: lib/ashfolio_web/components/core_components.ex:332 (92x)
-input: lib/ashfolio_web/components/core_components.ex:351 (92x)
+input: lib/ashfolio_web/components/core_components.ex:295 (96x)
+input: lib/ashfolio_web/components/core_components.ex:306 (96x)
+input: lib/ashfolio_web/components/core_components.ex:332 (96x)
+input: lib/ashfolio_web/components/core_components.ex:351 (96x)
 
 # === DEPENDENCIES ===
 bandit: ❌ (0)
@@ -177,15 +177,15 @@ telemetry_metrics: ❌ (0)
 telemetry_poller: ❌ (0)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio/portfolio/calculators/dividend_calculator.ex", "lib/ashfolio/portfolio/calculators/risk_metrics_calculator.ex", "lib/ashfolio/portfolio/calculators/stock_split_calculator.ex", "lib/ashfolio/portfolio/services/corporate_action_applier.ex", "lib/ashfolio/portfolio/transaction_adjustment.ex"]
+recent: ["lib/ashfolio/portfolio/calculators/merger_calculator.ex", "lib/ashfolio_web/live/corporate_action_live/form_component.html.heex", "lib/ashfolio/financial/benchmark_analyzer.ex", "lib/ashfolio/portfolio.ex", "lib/ashfolio/portfolio/calculators/dividend_calculator.ex"]
 uncommitted: 10 files
-commits_ahead: 5
+commits_ahead: 0
 
 # === TEST ANALYSIS ===
 summary:
-  total_test_modules: 134
-  total_tests: 1773
-  average_tests_per_module: 13.2
+  total_test_modules: 137
+  total_tests: 1845
+  average_tests_per_module: 13.5
 
 top_10_test_modules:
   Unknown: 48 tests, 86 assertions (15 describes) | test/ashfolio_web/form_helpers_test.exs
@@ -193,11 +193,11 @@ top_10_test_modules:
   Unknown: 45 tests, 78 assertions (15 describes) | test/ashfolio/financial/decimal_helpers_test.exs
   Unknown: 44 tests, 66 assertions (14 describes) | test/ashfolio/financial/mathematical_test.exs
   Unknown: 44 tests, 201 assertions (7 describes) | test/ashfolio/financial_management/forecast_calculator_test.exs
+  Unknown: 43 tests, 122 assertions (10 describes) | test/ashfolio/portfolio/calculators/risk_metrics_calculator_test.exs
   Unknown: 38 tests, 79 assertions (8 describes) | test/ashfolio/financial/formatters_test.exs
   Unknown: 37 tests, 63 assertions (9 describes) | test/ashfolio/data_helpers_test.exs
   Unknown: 35 tests, 81 assertions (3 describes) | test/ashfolio/portfolio/account_test.exs
   Unknown: 30 tests, 37 assertions (8 describes) | test/ashfolio/error_handler_test.exs
-  Unknown: 28 tests, 84 assertions (7 describes) | test/ashfolio/portfolio/calculators/risk_metrics_calculator_test.exs
 
 # === TEST GAPS ===
 missing_tests:
@@ -213,9 +213,9 @@ test/ashfolio/financial_management/forecast_calculator_aer_test.exs ⚠️
 
 # === MODULE ANALYSIS ===
 summary:
-  total_modules: 142 (134 lib, 8 test)
-  total_functions: 2079 (2002 lib, 77 test)
-  public/private: 818 public, 1261 private
+  total_modules: 144 (136 lib, 8 test)
+  total_functions: 2099 (2022 lib, 77 test)
+  public/private: 823 public, 1276 private
   average_functions_per_module: 14.6
   complex_modules: 17 (>30 functions)
       empty_modules: 18 (potential parsing issues)
@@ -254,7 +254,7 @@ quality_score: 100/100 (0 total issues)
 # === PATTERNS ===
 error_handling: "Standard put_flash error handling"
 currency_format: "Basic decimal formatting"
-test_setup: "ExUnit setup blocks (138 total)"
+test_setup: "ExUnit setup blocks (141 total)"
 
 # === INTEGRATION OPPORTUNITIES ===
 Add PubSub Subscriptions:
