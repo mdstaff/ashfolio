@@ -20,7 +20,7 @@ defmodule Ashfolio.Portfolio.Calculators.CorrelationCalculator do
 
       iex> returns_a = [Decimal.new("0.05"), Decimal.new("0.03"), Decimal.new("-0.02")]
       iex> returns_b = [Decimal.new("0.04"), Decimal.new("0.02"), Decimal.new("-0.01")]
-      iex> {:ok, correlation} = CorrelationCalculator.calculate_pair(returns_a, returns_b)
+      iex> {:ok, _correlation} = CorrelationCalculator.calculate_pair(returns_a, returns_b)
 
   ## Performance
 

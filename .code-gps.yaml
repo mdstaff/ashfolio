@@ -147,10 +147,10 @@ Index:
 # === KEY COMPONENTS ===
 flash: lib/ashfolio_web/components/core_components.ex:111 (112x)
 icon: lib/ashfolio_web/components/core_components.ex:599 (109x)
+list: lib/ashfolio_web/components/core_components.ex:541 (106x)
 input: lib/ashfolio_web/components/core_components.ex:295 (96x)
 input: lib/ashfolio_web/components/core_components.ex:306 (96x)
 input: lib/ashfolio_web/components/core_components.ex:332 (96x)
-input: lib/ashfolio_web/components/core_components.ex:351 (96x)
 
 # === DEPENDENCIES ===
 bandit: ❌ (0)
@@ -177,14 +177,14 @@ telemetry_metrics: ❌ (0)
 telemetry_poller: ❌ (0)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio/portfolio/calculators/merger_calculator.ex", "lib/ashfolio_web/live/corporate_action_live/form_component.html.heex", "lib/ashfolio/financial/benchmark_analyzer.ex", "lib/ashfolio/portfolio.ex", "lib/ashfolio/portfolio/calculators/dividend_calculator.ex"]
-uncommitted: 10 files
-commits_ahead: 0
+recent: ["lib/ashfolio/portfolio/calculators/correlation_calculator.ex", "lib/ashfolio/portfolio/calculators/covariance_calculator.ex", "lib/ashfolio/portfolio/calculators/beta_calculator.ex", "lib/ashfolio/portfolio/calculators/drawdown_calculator.ex", "lib/ashfolio/portfolio/calculators/risk_metrics_calculator.ex"]
+uncommitted: 4 files
+commits_ahead: 3
 
 # === TEST ANALYSIS ===
 summary:
-  total_test_modules: 137
-  total_tests: 1845
+  total_test_modules: 139
+  total_tests: 1880
   average_tests_per_module: 13.5
 
 top_10_test_modules:
@@ -213,10 +213,10 @@ test/ashfolio/financial_management/forecast_calculator_aer_test.exs ⚠️
 
 # === MODULE ANALYSIS ===
 summary:
-  total_modules: 144 (136 lib, 8 test)
-  total_functions: 2099 (2022 lib, 77 test)
-  public/private: 823 public, 1276 private
-  average_functions_per_module: 14.6
+  total_modules: 146 (138 lib, 8 test)
+  total_functions: 2122 (2045 lib, 77 test)
+  public/private: 832 public, 1290 private
+  average_functions_per_module: 14.5
   complex_modules: 17 (>30 functions)
       empty_modules: 18 (potential parsing issues)
 

@@ -1,102 +1,130 @@
 # Ashfolio Documentation
 
-Welcome to Ashfolio - a comprehensive personal financial management platform with portfolio tracking, tax optimization, retirement planning, and financial health assessment.
+Welcome to the Ashfolio documentation! This is your guide to understanding, using, and contributing to Ashfolio - a local-first, privacy-focused financial management platform.
 
-## 🚀 Quick Start
+## 📚 Documentation Overview
 
-- **Installation** → [getting-started/installation.md](getting-started/installation.md)
-- **First Steps** → [getting-started/first-contribution.md](getting-started/first-contribution.md)
-- **Troubleshooting** → [getting-started/troubleshooting.md](getting-started/troubleshooting.md)
+### For Users
+- **[Getting Started](getting-started/)** - Installation and quick start guide
+- **[User Guides](user-guides/)** - Feature guides and workflows
+- **[Roadmap](../ROADMAP.md)** - Product vision and upcoming features
 
-## Development
+### For Developers
+- **[Development](development/)** - Architecture, patterns, and contribution guides
+- **[Testing](testing/)** - Testing framework and strategies
+- **[API Documentation](api/)** - REST API and endpoints
+- **[Architecture Decisions](architecture/)** - Key architectural choices
 
-- Architecture Overview → [development/architecture.md](development/architecture.md)
-- Database Management → [development/database-management.md](development/database-management.md)
-- Data Utilities Guide → [development/data-utilities-guide.md](development/data-utilities-guide.md)
-- Elixir & Mix Insights → [development/elixir-mix-insights.md](development/elixir-mix-insights.md)
-- AI Agent Development → [development/ai-agent-guide.md](development/ai-agent-guide.md)
-- Code GPS Guide → [development/code-gps-guide.md](development/code-gps-guide.md)
-- Phoenix LiveView Layouts → [development/phoenix-liveview-layouts.md](development/phoenix-liveview-layouts.md)
-- SQLite Optimizations → [development/sqlite-optimizations.md](development/sqlite-optimizations.md)
+### Planning & Progress
+- **[Implementation Plan](planning/IMPLEMENTATION_PLAN.md)** - Current v0.7.0 development status
+- **[Professional Assessment](planning/CFP_CPA_ASSESSMENT.md)** - CFP/CPA feature evaluation
+- **[Future Ideas](future-ideas/)** - Concept exploration and possibilities
 
-## Testing
+## 🚀 Quick Links
 
-- Testing Strategy → [TESTING_STRATEGY.md](TESTING_STRATEGY.md)
-- SQLite Testing Patterns → [testing/patterns.md](testing/patterns.md)
+### Essential Documents
+- [Installation Guide](getting-started/installation.md) - Get Ashfolio running
+- [Monthly Workflow](user-guides/monthly-workflow-guide.md) - Regular maintenance tasks
+- [Portfolio Management](user-guides/portfolio-management-guide.md) - Core functionality
+- [Tax Planning](user-guides/tax-planning-optimization-guide.md) - Tax optimization features
 
-## API Reference
+### Development
+- [CLAUDE.md](../CLAUDE.md) - AI agent development guidelines
+- [Code GPS Guide](development/code-gps-guide.md) - Codebase navigation tool
+- [Testing Standards](testing/standards.md) - Quality requirements
+- [Documentation Style Guide](development/documentation-style-guide.md) - Writing standards
 
-- REST API Guide → [api/rest-api.md](api/rest-api.md)
-- API Endpoints → [api/endpoints.md](api/endpoints.md)
+## 📊 Current Status
 
-## 📚 User Guides
+### Version: v0.7.0 (In Progress)
+- **Stage 1**: Advanced Risk Metrics ✅ Complete
+- **Stage 2**: Correlation & Covariance ✅ Complete
+- **Stage 3**: Portfolio Optimization 🚧 Next
+- **Stage 4**: Advanced Analytics LiveView 📋 Planned
 
-### Core Features
-- **Portfolio Management** → [user-guides/portfolio-management.md](user-guides/portfolio-management.md)
-- **Expense Tracking** → [user-guides/expense-tracking.md](user-guides/expense-tracking.md)
+### Statistics
+- **Tests**: 1,880+ passing tests
+- **Coverage**: 95%+ for financial calculations
+- **Performance**: All calculations < 100ms
+- **Architecture**: Phoenix LiveView + Ash 3.4 + SQLite
 
-### Advanced Features (v0.5.0)
-- **Money Ratios Assessment** → [user-guides/money-ratios-assessment.md](user-guides/money-ratios-assessment.md) 🆕
-- **Tax Planning & Optimization** → [user-guides/tax-planning-optimization.md](user-guides/tax-planning-optimization.md) 🆕
-- **Portfolio Analytics (TWR/MWR)** → [user-guides/portfolio-analytics-guide.md](user-guides/portfolio-analytics-guide.md) 🆕
-- **Retirement Planning** → [user-guides/retirement-planning.md](user-guides/retirement-planning.md)
+## 🗂️ Documentation Structure
 
-## 🎯 Current Status
+```
+docs/
+├── README.md                    # You are here
+├── getting-started/             # New user onboarding
+├── user-guides/                 # End-user documentation
+├── development/                 # Developer documentation
+├── testing/                     # Testing documentation
+├── architecture/                # Architecture decisions
+├── api/                        # API documentation
+├── roadmap/                    # Future planning
+├── planning/                   # Active development
+├── future-ideas/               # Concept exploration
+└── archive/                    # Historical documentation
+```
 
-### v0.5.0 Complete ✅
-Ashfolio has reached feature completeness with:
-- **1,680+ comprehensive tests** passing
-- **Money Ratios** financial health assessment (Charles Farrell methodology)
-- **Tax Planning** with FIFO cost basis and loss harvesting
-- **Advanced Analytics** including TWR and MWR calculations
-- **Performance Optimized** (<100ms portfolio calculations)
+## 🔍 Finding Information
 
-## Roadmap & Planning
+### By Role
 
-- **v0.5.0 COMPLETE** → [Consolidated Archive](archive/v0.1-v0.5-consolidated-archive.md)
-- **v0.6.0 Planning** → [Financial Expansion Roadmap](roadmap/financial-expansion-roadmap.md)
-- **UI/UX Improvements** → [roadmap/ui-ux-improvements.md](roadmap/ui-ux-improvements.md)
-- **Architecture Decisions** → [architecture/](architecture/)
+#### I'm a New User
+1. Start with [Installation Guide](getting-started/installation.md)
+2. Follow the [Quick Start](getting-started/quick-start.md)
+3. Review [Portfolio Management](user-guides/portfolio-management-guide.md)
 
-## 📋 Feature Overview
+#### I'm a Developer
+1. Read [CLAUDE.md](../CLAUDE.md) for development guidelines
+2. Review [Architecture](development/architecture.md)
+3. Check [First Contribution](getting-started/first-contribution.md)
 
-### Portfolio Management
-- Multi-account tracking (brokerage, retirement, cash)
-- FIFO cost basis with tax lot tracking
-- Real-time position updates with PubSub
-- Transaction import and categorization
-- Dividend and split tracking
+#### I'm Evaluating Ashfolio
+1. Read the main [README](../README.md)
+2. Review the [Roadmap](../ROADMAP.md)
+3. Check [Professional Assessment](planning/CFP_CPA_ASSESSMENT.md)
 
-### Financial Analytics
-- Time-Weighted Returns (TWR)
-- Money-Weighted Returns (MWR/XIRR)
-- Risk metrics (Sharpe, Sortino, Max Drawdown)
-- Benchmark comparisons
-- Performance attribution
+## 📝 Documentation Standards
 
-### Tax Optimization
-- Capital gains/loss tracking
-- Tax loss harvesting opportunities
-- Wash sale rule compliance
-- Tax-efficient rebalancing
-- Year-end tax planning tools
+All documentation follows our [Documentation Style Guide](development/documentation-style-guide.md):
 
-### Financial Planning
-- Money Ratios assessment (savings, debt, capital)
-- Retirement readiness analysis
-- 25x rule and 4% withdrawal modeling
-- FIRE calculations
-- Monte Carlo simulations
+- **Clear Structure**: Consistent organization and navigation
+- **Role-Based Content**: Targeted for specific audiences
+- **Practical Examples**: Real-world usage scenarios
+- **Version Tracking**: Clear indication of feature availability
+- **Visual Aids**: Screenshots and diagrams where helpful
 
-### Expense Management
-- Automatic categorization
-- Trend analysis and budgeting
-- Custom categories
-- Spending insights
-- Monthly/annual reports
+## 🤝 Contributing to Documentation
+
+We welcome documentation improvements! See our [Contributing Guide](../CONTRIBUTING.md) for:
+
+- Documentation standards
+- Pull request process
+- Review guidelines
+- Style requirements
+
+## 📮 Getting Help
+
+If you can't find what you're looking for:
+
+1. Check the [Troubleshooting Guide](getting-started/troubleshooting.md)
+2. Search existing [GitHub Issues](https://github.com/mdstaff/ashfolio/issues)
+3. Ask in [Discussions](https://github.com/mdstaff/ashfolio/discussions)
+4. Create an [Issue](https://github.com/mdstaff/ashfolio/issues/new)
+
+## 🔄 Recent Updates
+
+### September 2025
+- ✅ Completed v0.7.0 Stage 1: Beta, Drawdown, and Risk Metrics Calculators
+- ✅ Completed v0.7.0 Stage 2: Correlation & Covariance Analysis
+- 📚 Documentation reorganization and cleanup
+- 🎯 Enhanced portfolio analytics capabilities
+
+### August 2025
+- ✅ Released v0.6.0: Corporate Actions Engine
+- ✅ Added comprehensive tax document generation
+- ✅ Implemented stock splits, dividends, and mergers
 
 ---
 
-_For quick development setup: `just dev`_
-_For comprehensive project guidelines: [../CONTRIBUTING.md](../CONTRIBUTING.md)_
-_Stack: Phoenix LiveView 1.7.14 + Ash 3.4 + SQLite_
+*Last Updated: September 2025 | Version: v0.7.0-dev*

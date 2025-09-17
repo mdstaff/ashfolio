@@ -140,11 +140,8 @@ defmodule Ashfolio.Portfolio.Calculators.CovarianceCalculator do
             returns_i = Enum.at(asset_returns, i)
             returns_j = Enum.at(asset_returns, j)
 
-            case calculate_covariance(returns_i, returns_j) do
-              {:ok, cov} -> cov
-              # This shouldn't happen
-              {:error, _} -> D.new("0")
-            end
+            {:ok, cov} = calculate_covariance(returns_i, returns_j)
+            cov
           else
             # Lower triangle: will be filled by symmetry
             D.new("0")
