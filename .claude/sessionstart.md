@@ -38,8 +38,19 @@ just fix            # Auto-repair common issues
 **Portfolio**: Account, Symbol, Transaction, Position (FIFO cost basis)  
 **FinancialManagement**: Expense, MoneyRatios, TaxStrategy, Categories
 
-## Completed Features (v0.5.0)
+## Completed Features (v0.6.0 + v0.7.0 Partial)
 
+**v0.6.0 Corporate Actions Engine** (Complete)
+- Stock splits, dividends, mergers, spinoffs with FIFO preservation
+- 1,776+ tests passing with comprehensive TDD coverage
+
+**v0.7.0 Advanced Portfolio Analytics** (50% Complete)
+- ✅ Stage 1: BetaCalculator, DrawdownCalculator, Enhanced RiskMetrics (57 tests)
+- ✅ Stage 2: CorrelationCalculator, CovarianceCalculator (43 tests)
+- 🚧 Stage 3: Portfolio optimization and efficient frontier (3 weeks remaining)
+- 📋 Stage 4: Interactive analytics LiveView dashboard (2 weeks planned)
+
+**Previous Foundation**
 - Money Ratios assessment (Charles Farrell methodology)
 - Tax planning with FIFO calculations
 - Retirement planning (25x rule, 4% withdrawal)

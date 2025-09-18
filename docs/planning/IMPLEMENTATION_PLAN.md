@@ -33,14 +33,31 @@ Build institutional-grade portfolio analytics suite extending the existing RiskM
 **Stage 3: Portfolio Optimization** - Efficient frontier and mean-variance optimization
 **Stage 4: Advanced Analytics LiveView** - Interactive visualizations and dashboards
 
-## Success Criteria
+## 🎯 Value-Driven Success Criteria
 
-- [ ] 200+ new tests, all passing with TDD approach
-- [ ] <100ms response time for 1,000+ position portfolios
-- [ ] Integration with existing AdvancedAnalyticsLive
-- [ ] Comprehensive documentation with mathematical formulas
-- [ ] Code GPS shows all new calculators properly integrated
-- [ ] Professional visualizations for all metrics
+### Professional Quality Standards
+- [ ] **200+ new tests**, all passing with strict TDD red/green cycles
+- [ ] **<100ms response time** for 1,000+ position portfolios (institutional requirement)
+- [ ] **Mathematical accuracy** validated against CFA Level III curriculum examples
+- [ ] **Professional documentation** with formulas, references, and performance characteristics
+
+### User Experience Excellence
+- [ ] **Interactive visualizations** with hover tooltips and professional styling
+- [ ] **Real-time updates** via PubSub for portfolio changes
+- [ ] **Mobile-responsive** charts and analytics panels
+- [ ] **Error handling** with graceful degradation for edge cases
+
+### Technical Integration
+- [ ] **Seamless integration** with existing AdvancedAnalyticsLive
+- [ ] **Code GPS validation** showing proper module integration
+- [ ] **Performance monitoring** with ETS caching for expensive operations
+- [ ] **Zero compilation warnings** and full Decimal precision
+
+### Business Value Delivery
+- [ ] **Portfolio rebalancing recommendations** based on efficient frontier analysis
+- [ ] **Risk assessment dashboard** showing beta, drawdown, and correlation metrics
+- [ ] **Professional-grade analytics** suitable for CFP/CPA financial planning use
+- [ ] **Export capabilities** for client reporting and compliance documentation
 
 ---
 
@@ -322,16 +339,136 @@ end
 
 ---
 
-## Stage 3: Portfolio Optimization (Efficient Frontier) [NOT STARTED]
+## Stage 3: Portfolio Optimization (Efficient Frontier) [REFINED TDD PLAN - ARCHITECT APPROVED]
 
-**Deliverable**: Mean-variance optimization with efficient frontier visualization
+**Deliverable**: Two-to-three asset analytical optimization with efficient frontier visualization
+**Timeline**: 4 weeks (October-November 2025)
+**Value Proposition**: Foundation for portfolio optimization with clear mathematical validation
+**Scope Refinement**: Focus on analytical solutions for 2-3 assets, defer multi-asset to v0.8.0
 
-**Pre-Implementation Setup**:
-1. Research Elixir optimization libraries or implement simplex algorithm
-2. Create test file: `test/ashfolio/portfolio/optimization/portfolio_optimizer_test.exs`
-3. Create module: `lib/ashfolio/portfolio/optimization/portfolio_optimizer.ex`
-4. Create visualization: `lib/ashfolio_web/live/components/efficient_frontier_chart.ex`
-5. Prepare test data with known optimal solutions from Markowitz papers
+### 🎯 Sprint 1: Core Mathematical Foundation (Week 1)
+
+**Focus**: Build robust two-asset optimization with analytical solutions (no matrix operations)
+
+#### Task 3.1: Two-Asset Portfolio Optimizer - Analytical Solution (3 days)
+
+##### Task 3.1.1: Basic Two-Asset Optimization (Day 1)
+**RED** → Write failing test for analytical two-asset solution
+```elixir
+test "two asset portfolio finds analytical optimum" do
+  # Asset A: 12% return, 20% volatility
+  # Asset B: 8% return, 15% volatility
+  # Correlation: 0.3 (known academic example)
+
+  assets = [
+    %{symbol: "AAPL", expected_return: D.new("0.12"), volatility: D.new("0.20")},
+    %{symbol: "TSLA", expected_return: D.new("0.08"), volatility: D.new("0.15")}
+  ]
+  correlation_matrix = [[D.new("1.0"), D.new("0.3")], [D.new("0.3"), D.new("1.0")]]
+
+  {:ok, result} = PortfolioOptimizer.optimize_two_asset(assets, correlation_matrix)
+
+  # Expected: 73% Asset A, 27% Asset B (from Markowitz equations)
+  assert_in_delta(D.to_float(result.weights.aapl), 0.73, 0.02)
+  assert_in_delta(D.to_float(result.weights.tsla), 0.27, 0.02)
+  assert D.equal?(D.add(result.weights.aapl, result.weights.tsla), D.new("1.0"))
+end
+```
+
+**GREEN** → Implement analytical solution (no quadratic programming needed)
+```elixir
+# Formula: w1 = (σ₂² - σ₁σ₂ρ) / (σ₁² + σ₂² - 2σ₁σ₂ρ)
+def optimize_two_asset(assets, correlation_matrix) do
+  # Direct analytical solution from Markowitz theory
+end
+```
+
+#### Task 3.2: Minimum Variance Portfolio (2 days)
+**RED** → Test minimum variance calculation
+```elixir
+test "finds global minimum variance portfolio" do
+  # 3-asset portfolio with known minimum variance solution
+  assets = load_three_asset_test_case()
+
+  {:ok, min_var} = PortfolioOptimizer.find_minimum_variance(assets)
+
+  # Should have lowest possible volatility
+  assert D.compare(min_var.volatility, D.new("0.12")) == :eq  # Known result
+  assert Enum.all?(min_var.weights, &(D.compare(&1, D.new("0")) != :lt))  # No shorts
+end
+```
+
+**GREEN** → Implement using inverse covariance matrix method
+
+#### Task 3.3: Target Return Optimizer (3 days)
+**RED** → Test constrained optimization with target return
+**GREEN** → Implement Lagrange multiplier solution
+**REFACTOR** → Extract common matrix operations
+
+### 🎯 Sprint 2: Efficient Frontier Engine (Week 2)
+
+**Focus**: Generate complete efficient frontier curve with 50+ optimal portfolios
+
+#### Task 3.4: Frontier Point Generator (3 days)
+**RED** → Test frontier completeness and shape validation
+```elixir
+test "generates complete efficient frontier curve" do
+  assets = load_diversified_test_portfolio(5)  # 5 different asset classes
+
+  {:ok, frontier} = EfficientFrontier.generate(assets, points: 50)
+
+  assert length(frontier.portfolios) == 50
+
+  # Validate frontier shape (concave, upward sloping generally)
+  sorted_by_risk = Enum.sort_by(frontier.portfolios, &D.to_float(&1.volatility))
+  returns = Enum.map(sorted_by_risk, &D.to_float(&1.expected_return))
+
+  # Check for general upward trend (allowing for some variation)
+  upward_trends = count_upward_segments(returns)
+  assert upward_trends > 40  # Most segments should trend upward
+end
+```
+
+**GREEN** → Build frontier generator with validated academic test cases
+**REFACTOR** → Optimize for 50x50 matrix performance
+
+#### Task 3.5: Sharpe Ratio Maximizer (2 days)
+**RED** → Test maximum Sharpe ratio identification
+**GREEN** → Implement tangency portfolio finder
+**REFACTOR** → Cache expensive covariance calculations
+
+### 🎯 Sprint 3: Professional Visualizations & Integration (Week 3)
+
+**Focus**: Interactive efficient frontier charts and portfolio analytics integration
+
+#### Task 3.6: Efficient Frontier Chart Component (3 days)
+**RED** → Test SVG chart rendering with real data
+```elixir
+test "renders professional efficient frontier chart" do
+  frontier_data = generate_test_frontier()
+
+  assigns = %{frontier: frontier_data, current_portfolio: test_portfolio()}
+  html = rendered_to_string(EfficientFrontierChart.render(assigns))
+
+  # Validate chart elements
+  assert html =~ "efficient-frontier-curve"
+  assert html =~ "current-portfolio-marker"
+  assert html =~ "tangency-portfolio"
+  assert html =~ "minimum-variance-portfolio"
+
+  # Check axis labels and scales
+  assert html =~ "Volatility (%)"
+  assert html =~ "Expected Return (%)"
+end
+```
+
+**GREEN** → Build interactive SVG component with hover tooltips
+**REFACTOR** → Add professional styling and responsive design
+
+#### Task 3.7: Advanced Analytics Integration (2 days)
+**RED** → Test optimization recommendations in LiveView
+**GREEN** → Integrate with existing AdvancedAnalyticsLive
+**REFACTOR** → Add performance monitoring and error handling
 
 **TDD Test Specifications**:
 ```elixir
@@ -531,9 +668,71 @@ end
 
 ---
 
-## Stage 4: Factor Analysis & Attribution [NOT STARTED]
+## Stage 4: Advanced Analytics LiveView Dashboard [REFINED TDD PLAN]
 
-**Deliverable**: Multi-factor model with performance attribution
+**Deliverable**: Professional interactive analytics dashboard with real-time portfolio insights
+**Timeline**: 2 weeks (November 2025)
+**Value Proposition**: Transform complex analytics into actionable portfolio management interface
+
+### 🎯 Sprint 1: Interactive Dashboard Foundation (Week 1)
+
+#### Task 4.1: Portfolio Analytics Live Integration (3 days)
+**RED** → Test comprehensive analytics dashboard loading
+```elixir
+test "loads complete portfolio analytics dashboard" do
+  {:ok, view, html} = live(conn, ~p"/analytics/portfolio")
+
+  # Verify all analytics sections are present
+  assert html =~ "risk-metrics-panel"
+  assert html =~ "correlation-heatmap"
+  assert html =~ "efficient-frontier-chart"
+  assert html =~ "portfolio-composition"
+
+  # Check real-time data loading
+  assert view.assigns.portfolio_data
+  assert view.assigns.risk_metrics
+  assert length(view.assigns.correlation_matrix) > 0
+end
+```
+
+**GREEN** → Integrate all Stage 1-3 calculators into unified dashboard
+**REFACTOR** → Optimize data loading with async operations
+
+#### Task 4.2: Real-Time Risk Monitoring (2 days)
+**RED** → Test live risk metric updates
+**GREEN** → Implement PubSub updates for portfolio changes
+**REFACTOR** → Add performance caching for expensive calculations
+
+### 🎯 Sprint 2: Advanced Visualizations (Week 2)
+
+#### Task 4.3: Interactive Correlation Heatmap (3 days)
+**RED** → Test dynamic correlation visualization
+```elixir
+test "renders interactive correlation heatmap" do
+  portfolio = create_diversified_test_portfolio()
+
+  {:ok, view, _} = live(conn, ~p"/analytics/correlation")
+
+  html = element(view, "[data-test='correlation-heatmap']") |> render()
+
+  # Validate heatmap structure
+  assert html =~ "correlation-cell"
+  assert html =~ "data-correlation="
+  assert html =~ "tooltip-trigger"
+
+  # Test interactivity
+  html = element(view, "[data-symbol='AAPL'][data-symbol-y='TSLA']") |> render_hover()
+  assert html =~ "Correlation: 0.65"
+end
+```
+
+**GREEN** → Build professional SVG heatmap with hover interactions
+**REFACTOR** → Add color scaling and responsive design
+
+#### Task 4.4: Performance Attribution Widget (2 days)
+**RED** → Test sector and asset attribution breakdown
+**GREEN** → Implement attribution calculations and visualization
+**REFACTOR** → Add drill-down capabilities
 
 **TDD Test Specifications**:
 ```elixir
