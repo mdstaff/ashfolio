@@ -148,7 +148,7 @@ defmodule Ashfolio.Portfolio.Calculators.CorrelationCalculator do
   @spec calculate_correlation(return_series(), return_series()) :: {:ok, D.t()} | error()
   defp calculate_correlation(returns_a, returns_b) do
     # Check if the series are identical (perfect positive correlation)
-    if Enum.zip(returns_a, returns_b) |> Enum.all?(fn {a, b} -> D.equal?(a, b) end) do
+    if returns_a |> Enum.zip(returns_b) |> Enum.all?(fn {a, b} -> D.equal?(a, b) end) do
       {:ok, D.new("1.0")}
     else
       mean_a = calculate_mean(returns_a)

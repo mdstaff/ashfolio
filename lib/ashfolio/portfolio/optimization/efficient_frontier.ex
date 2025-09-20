@@ -207,15 +207,13 @@ defmodule Ashfolio.Portfolio.Optimization.EfficientFrontier do
     max_return_asset = Enum.max_by(assets, &D.to_float(&1.expected_return))
 
     weights =
-      assets
-      |> Enum.map(fn asset ->
+      Map.new(assets, fn asset ->
         if asset.symbol == max_return_asset.symbol do
           {String.to_atom(String.downcase(asset.symbol)), D.new("1.0")}
         else
           {String.to_atom(String.downcase(asset.symbol)), D.new("0.0")}
         end
       end)
-      |> Map.new()
 
     {:ok,
      %{
@@ -298,19 +296,16 @@ defmodule Ashfolio.Portfolio.Optimization.EfficientFrontier do
 
   @spec generate_corner_portfolios([asset()], correlation_matrix()) :: [frontier_portfolio()]
   defp generate_corner_portfolios(assets, _correlation_matrix) do
-    assets
-    |> Enum.map(fn asset ->
+    Enum.map(assets, fn asset ->
       # Create portfolio with 100% in this asset
       weights =
-        assets
-        |> Enum.map(fn a ->
+        Map.new(assets, fn a ->
           if a.symbol == asset.symbol do
             {String.to_atom(String.downcase(a.symbol)), D.new("1.0")}
           else
             {String.to_atom(String.downcase(a.symbol)), D.new("0.0")}
           end
         end)
-        |> Map.new()
 
       %{
         weights: weights,
@@ -328,11 +323,9 @@ defmodule Ashfolio.Portfolio.Optimization.EfficientFrontier do
     equal_weight = D.div(D.new("1"), D.new(to_string(n)))
 
     weights =
-      assets
-      |> Enum.map(fn asset ->
+      Map.new(assets, fn asset ->
         {String.to_atom(String.downcase(asset.symbol)), equal_weight}
       end)
-      |> Map.new()
 
     # Calculate portfolio return and volatility
     expected_return =
@@ -346,7 +339,7 @@ defmodule Ashfolio.Portfolio.Optimization.EfficientFrontier do
       assets
       |> Enum.map(& &1.volatility)
       |> Enum.reduce(D.new("0"), &D.add/2)
-      |> then(&D.div(&1, D.new(to_string(n))))
+      |> D.div(D.new(to_string(n)))
 
     %{
       weights: weights,
@@ -367,8 +360,7 @@ defmodule Ashfolio.Portfolio.Optimization.EfficientFrontier do
       max_float = D.to_float(max_return)
       step = (max_float - min_float) / (points - 1)
 
-      0..(points - 1)
-      |> Enum.map(fn i ->
+      Enum.map(0..(points - 1), fn i ->
         target_float = min_float + step * i
         D.new(Float.to_string(target_float))
       end)

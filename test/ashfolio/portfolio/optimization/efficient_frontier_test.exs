@@ -17,7 +17,8 @@ defmodule Ashfolio.Portfolio.Optimization.EfficientFrontierTest do
       {:ok, frontier} = EfficientFrontier.generate(assets, correlation_matrix, points: 20)
 
       # Should generate requested number of portfolios
-      assert length(frontier.portfolios) >= 15  # Allow for some optimization failures
+      # Allow for some optimization failures
+      assert length(frontier.portfolios) >= 15
 
       # Portfolios should be on efficient frontier (increasing return with risk generally)
       sorted_portfolios = Enum.sort_by(frontier.portfolios, &D.to_float(&1.volatility))
@@ -29,7 +30,8 @@ defmodule Ashfolio.Portfolio.Optimization.EfficientFrontierTest do
         |> Enum.chunk_every(2, 1, :discard)
         |> Enum.count(fn [a, b] -> b >= a - 0.001 end)
 
-      assert increasing_count > length(returns) * 0.8  # 80% should be increasing
+      # 80% should be increasing
+      assert increasing_count > length(returns) * 0.8
 
       # Min variance portfolio should be included
       assert frontier.min_variance_portfolio
@@ -51,6 +53,7 @@ defmodule Ashfolio.Portfolio.Optimization.EfficientFrontierTest do
       single_asset = [
         %{symbol: "STOCK", expected_return: D.new("0.15"), volatility: D.new("0.20")}
       ]
+
       correlation_matrix = [[D.new("1.0")]]
 
       assert {:error, :insufficient_assets} =

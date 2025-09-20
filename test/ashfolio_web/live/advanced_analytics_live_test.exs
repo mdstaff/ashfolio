@@ -107,6 +107,26 @@ defmodule AshfolioWeb.AdvancedAnalyticsLiveTest do
     end
 
     @tag :liveview
+    test "calculates efficient frontier analysis", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/advanced_analytics")
+
+      view
+      |> element("button[phx-click='calculate_efficient_frontier']")
+      |> render_click()
+
+      # Wait for async calculation to complete
+      Process.sleep(50)
+
+      # Should display efficient frontier results
+      final_html = render(view)
+      assert final_html =~ "Minimum Variance Portfolio"
+      assert final_html =~ "Tangency Portfolio"
+      assert final_html =~ "Maximum Return Portfolio"
+      assert final_html =~ "Optimal Portfolio Allocations"
+      assert final_html =~ "Markowitz Mean-Variance"
+    end
+
+    @tag :liveview
     test "refresh all button works correctly", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/advanced_analytics")
 
@@ -124,6 +144,8 @@ defmodule AshfolioWeb.AdvancedAnalyticsLiveTest do
       assert final_html =~ "Portfolio manager performance"
       # MWR
       assert final_html =~ "Your personal return experience"
+      # Efficient Frontier
+      assert final_html =~ "Minimum Variance Portfolio"
       assert final_html =~ "All analytics refreshed successfully"
     end
 
@@ -186,6 +208,7 @@ defmodule AshfolioWeb.AdvancedAnalyticsLiveTest do
       assert html =~ "Recent Calculations"
       assert html =~ "TWR"
       assert html =~ "MWR"
+      assert html =~ "Efficient Frontier"
     end
 
     @tag :liveview

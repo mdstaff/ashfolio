@@ -324,19 +324,21 @@ defmodule Ashfolio.Portfolio.Optimization.PortfolioOptimizer do
     cov_ab = D.mult(D.mult(sigma_a, sigma_b), correlation)
 
     # Numerator: (μ_A - r_f)σ_B² - (μ_B - r_f)ρσ_Aσ_B
-    numerator = D.sub(
-      D.mult(excess_a, sigma_b_sq),
-      D.mult(excess_b, cov_ab)
-    )
+    numerator =
+      D.sub(
+        D.mult(excess_a, sigma_b_sq),
+        D.mult(excess_b, cov_ab)
+      )
 
     # Denominator: (μ_A - r_f)σ_B² + (μ_B - r_f)σ_A² - (μ_A - r_f + μ_B - r_f)ρσ_Aσ_B
-    denominator = D.sub(
-      D.add(
-        D.mult(excess_a, sigma_b_sq),
-        D.mult(excess_b, sigma_a_sq)
-      ),
-      D.mult(D.add(excess_a, excess_b), cov_ab)
-    )
+    denominator =
+      D.sub(
+        D.add(
+          D.mult(excess_a, sigma_b_sq),
+          D.mult(excess_b, sigma_a_sq)
+        ),
+        D.mult(D.add(excess_a, excess_b), cov_ab)
+      )
 
     # Check for special cases
     if D.equal?(denominator, D.new("0")) do
@@ -347,24 +349,27 @@ defmodule Ashfolio.Portfolio.Optimization.PortfolioOptimizer do
       weight_b = D.sub(D.new("1"), weight_a)
 
       # Calculate portfolio metrics
-      portfolio_return = D.add(
-        D.mult(asset_a.expected_return, weight_a),
-        D.mult(asset_b.expected_return, weight_b)
-      )
+      portfolio_return =
+        D.add(
+          D.mult(asset_a.expected_return, weight_a),
+          D.mult(asset_b.expected_return, weight_b)
+        )
 
-      portfolio_vol = calculate_two_asset_volatility(
-        weight_a,
-        weight_b,
-        sigma_a,
-        sigma_b,
-        correlation
-      )
+      portfolio_vol =
+        calculate_two_asset_volatility(
+          weight_a,
+          weight_b,
+          sigma_a,
+          sigma_b,
+          correlation
+        )
 
-      sharpe_ratio = if D.equal?(portfolio_vol, D.new("0")) do
-        D.new("0")
-      else
-        D.div(D.sub(portfolio_return, risk_free_rate), portfolio_vol)
-      end
+      sharpe_ratio =
+        if D.equal?(portfolio_vol, D.new("0")) do
+          D.new("0")
+        else
+          D.div(D.sub(portfolio_return, risk_free_rate), portfolio_vol)
+        end
 
       weights = %{
         String.to_atom(String.downcase(asset_a.symbol)) => weight_a,
@@ -380,7 +385,6 @@ defmodule Ashfolio.Portfolio.Optimization.PortfolioOptimizer do
        }}
     end
   end
-
 
   defp calculate_two_asset_volatility(w_a, w_b, sigma_a, sigma_b, correlation) do
     # σp = √(w₁²σ₁² + w₂²σ₂² + 2w₁w₂σ₁σ₂ρ)
