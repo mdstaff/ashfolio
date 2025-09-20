@@ -65,9 +65,11 @@ defmodule Ashfolio.Portfolio.Optimization.PortfolioOptimizer do
     with :ok <- validate_two_asset_inputs(assets, correlation_matrix) do
       # For the general optimization, we'll maximize Sharpe ratio with a reasonable risk-free rate
       # This provides a more meaningful optimization than just minimum variance
-      # 3% risk-free rate assumption
+      # 3% risk-free rate assumption for tangency portfolio
       risk_free_rate = D.new("0.03")
-      maximize_sharpe(assets, correlation_matrix, risk_free_rate)
+
+      # Find the tangency portfolio (maximum Sharpe ratio)
+      find_tangency_portfolio(assets, correlation_matrix, risk_free_rate)
     end
   end
 
@@ -163,9 +165,8 @@ defmodule Ashfolio.Portfolio.Optimization.PortfolioOptimizer do
           {:ok, optimization_result()} | {:error, atom()}
   def maximize_sharpe(assets, correlation_matrix, risk_free_rate) when length(assets) == 2 do
     with :ok <- validate_two_asset_inputs(assets, correlation_matrix) do
-      # For two assets, we can iterate through different weight combinations
-      # to find the maximum Sharpe ratio
-      find_max_sharpe_two_assets(assets, correlation_matrix, risk_free_rate)
+      # Use analytical solution for tangency portfolio
+      find_tangency_portfolio(assets, correlation_matrix, risk_free_rate)
     end
   end
 
@@ -302,86 +303,84 @@ defmodule Ashfolio.Portfolio.Optimization.PortfolioOptimizer do
     end
   end
 
-  defp find_max_sharpe_two_assets(assets, correlation_matrix, risk_free_rate) do
+  defp find_tangency_portfolio(assets, correlation_matrix, risk_free_rate) do
+    # Analytical solution for tangency portfolio (maximum Sharpe ratio)
+    # Based on Markowitz theory and CFA curriculum examples
     [asset_a, asset_b] = assets
+    correlation = correlation_matrix |> Enum.at(0) |> Enum.at(1)
 
-    # Check if both assets have same expected return as risk-free rate
+    # Calculate excess returns
     excess_a = D.sub(asset_a.expected_return, risk_free_rate)
     excess_b = D.sub(asset_b.expected_return, risk_free_rate)
 
-    if D.equal?(excess_a, D.new("0")) and D.equal?(excess_b, D.new("0")) do
-      # Zero excess returns - return minimum variance portfolio
-      assets
-      |> optimize_two_asset_minimum_variance(correlation_matrix)
-      |> case do
-        {:ok, result} ->
-          {:ok, Map.put(result, :sharpe_ratio, D.new("0"))}
+    sigma_a = asset_a.volatility
+    sigma_b = asset_b.volatility
 
-        error ->
-          error
-      end
+    # Calculate the weight in asset A using the tangency portfolio formula
+    # w_A = (μ_A - r_f)σ_B² - (μ_B - r_f)σ_ABσ_B / [(μ_A - r_f)σ_B² + (μ_B - r_f)σ_A² - (μ_A - r_f + μ_B - r_f)σ_ABσ_B]
+
+    sigma_a_sq = D.mult(sigma_a, sigma_a)
+    sigma_b_sq = D.mult(sigma_b, sigma_b)
+    cov_ab = D.mult(D.mult(sigma_a, sigma_b), correlation)
+
+    # Numerator: (μ_A - r_f)σ_B² - (μ_B - r_f)ρσ_Aσ_B
+    numerator = D.sub(
+      D.mult(excess_a, sigma_b_sq),
+      D.mult(excess_b, cov_ab)
+    )
+
+    # Denominator: (μ_A - r_f)σ_B² + (μ_B - r_f)σ_A² - (μ_A - r_f + μ_B - r_f)ρσ_Aσ_B
+    denominator = D.sub(
+      D.add(
+        D.mult(excess_a, sigma_b_sq),
+        D.mult(excess_b, sigma_a_sq)
+      ),
+      D.mult(D.add(excess_a, excess_b), cov_ab)
+    )
+
+    # Check for special cases
+    if D.equal?(denominator, D.new("0")) do
+      # Degenerate case - use minimum variance
+      optimize_two_asset_minimum_variance(assets, correlation_matrix)
     else
-      # Search for maximum Sharpe ratio by testing different weight combinations
-      # For simplicity, we'll test 101 points from 0% to 100% in asset A
-      weights_to_test =
-        Enum.map(0..100, fn i -> D.div(D.new(to_string(i)), D.new("100")) end)
+      weight_a = D.div(numerator, denominator)
+      weight_b = D.sub(D.new("1"), weight_a)
 
-      correlation = correlation_matrix |> Enum.at(0) |> Enum.at(1)
+      # Calculate portfolio metrics
+      portfolio_return = D.add(
+        D.mult(asset_a.expected_return, weight_a),
+        D.mult(asset_b.expected_return, weight_b)
+      )
 
-      best =
-        weights_to_test
-        |> Enum.map(fn w_a ->
-          w_b = D.sub(D.new("1"), w_a)
+      portfolio_vol = calculate_two_asset_volatility(
+        weight_a,
+        weight_b,
+        sigma_a,
+        sigma_b,
+        correlation
+      )
 
-          # Calculate portfolio return and volatility
-          portfolio_return =
-            D.add(
-              D.mult(asset_a.expected_return, w_a),
-              D.mult(asset_b.expected_return, w_b)
-            )
-
-          portfolio_vol =
-            calculate_two_asset_volatility(
-              w_a,
-              w_b,
-              asset_a.volatility,
-              asset_b.volatility,
-              correlation
-            )
-
-          excess_return = D.sub(portfolio_return, risk_free_rate)
-
-          sharpe =
-            if D.equal?(portfolio_vol, D.new("0")) do
-              D.new("0")
-            else
-              D.div(excess_return, portfolio_vol)
-            end
-
-          %{
-            weight_a: w_a,
-            weight_b: w_b,
-            return: portfolio_return,
-            volatility: portfolio_vol,
-            sharpe: sharpe
-          }
-        end)
-        |> Enum.max_by(fn p -> D.to_float(p.sharpe) end)
+      sharpe_ratio = if D.equal?(portfolio_vol, D.new("0")) do
+        D.new("0")
+      else
+        D.div(D.sub(portfolio_return, risk_free_rate), portfolio_vol)
+      end
 
       weights = %{
-        String.to_atom(String.downcase(asset_a.symbol)) => best.weight_a,
-        String.to_atom(String.downcase(asset_b.symbol)) => best.weight_b
+        String.to_atom(String.downcase(asset_a.symbol)) => weight_a,
+        String.to_atom(String.downcase(asset_b.symbol)) => weight_b
       }
 
       {:ok,
        %{
          weights: weights,
-         expected_return: best.return,
-         volatility: best.volatility,
-         sharpe_ratio: best.sharpe
+         expected_return: portfolio_return,
+         volatility: portfolio_vol,
+         sharpe_ratio: sharpe_ratio
        }}
     end
   end
+
 
   defp calculate_two_asset_volatility(w_a, w_b, sigma_a, sigma_b, correlation) do
     # σp = √(w₁²σ₁² + w₂²σ₂² + 2w₁w₂σ₁σ₂ρ)

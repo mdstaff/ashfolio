@@ -147,39 +147,44 @@ defmodule Ashfolio.Portfolio.Calculators.CorrelationCalculator do
 
   @spec calculate_correlation(return_series(), return_series()) :: {:ok, D.t()} | error()
   defp calculate_correlation(returns_a, returns_b) do
-    mean_a = calculate_mean(returns_a)
-    mean_b = calculate_mean(returns_b)
-
-    {sum_products, sum_squares_a, sum_squares_b} =
-      returns_a
-      |> Enum.zip(returns_b)
-      |> Enum.reduce({D.new("0"), D.new("0"), D.new("0")}, fn {a, b}, {prod_acc, sq_a_acc, sq_b_acc} ->
-        diff_a = D.sub(a, mean_a)
-        diff_b = D.sub(b, mean_b)
-
-        prod = D.mult(diff_a, diff_b)
-        sq_a = D.mult(diff_a, diff_a)
-        sq_b = D.mult(diff_b, diff_b)
-
-        {
-          D.add(prod_acc, prod),
-          D.add(sq_a_acc, sq_a),
-          D.add(sq_b_acc, sq_b)
-        }
-      end)
-
-    denominator_squared = D.mult(sum_squares_a, sum_squares_b)
-
-    if D.equal?(denominator_squared, D.new("0")) do
-      {:error, :zero_variance}
+    # Check if the series are identical (perfect positive correlation)
+    if Enum.zip(returns_a, returns_b) |> Enum.all?(fn {a, b} -> D.equal?(a, b) end) do
+      {:ok, D.new("1.0")}
     else
-      # Calculate square root of denominator
-      denominator = sqrt_decimal(denominator_squared)
-      correlation = D.div(sum_products, denominator)
+      mean_a = calculate_mean(returns_a)
+      mean_b = calculate_mean(returns_b)
 
-      # Ensure correlation is within bounds due to floating point precision
-      bounded_correlation = bound_correlation(correlation)
-      {:ok, bounded_correlation}
+      {sum_products, sum_squares_a, sum_squares_b} =
+        returns_a
+        |> Enum.zip(returns_b)
+        |> Enum.reduce({D.new("0"), D.new("0"), D.new("0")}, fn {a, b}, {prod_acc, sq_a_acc, sq_b_acc} ->
+          diff_a = D.sub(a, mean_a)
+          diff_b = D.sub(b, mean_b)
+
+          prod = D.mult(diff_a, diff_b)
+          sq_a = D.mult(diff_a, diff_a)
+          sq_b = D.mult(diff_b, diff_b)
+
+          {
+            D.add(prod_acc, prod),
+            D.add(sq_a_acc, sq_a),
+            D.add(sq_b_acc, sq_b)
+          }
+        end)
+
+      denominator_squared = D.mult(sum_squares_a, sum_squares_b)
+
+      if D.equal?(denominator_squared, D.new("0")) do
+        {:error, :zero_variance}
+      else
+        # Calculate square root of denominator
+        denominator = sqrt_decimal(denominator_squared)
+        correlation = D.div(sum_products, denominator)
+
+        # Ensure correlation is within bounds due to floating point precision
+        bounded_correlation = bound_correlation(correlation)
+        {:ok, bounded_correlation}
+      end
     end
   end
 

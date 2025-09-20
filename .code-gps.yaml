@@ -147,7 +147,7 @@ Index:
 # === KEY COMPONENTS ===
 flash: lib/ashfolio_web/components/core_components.ex:111 (112x)
 icon: lib/ashfolio_web/components/core_components.ex:599 (109x)
-list: lib/ashfolio_web/components/core_components.ex:541 (106x)
+list: lib/ashfolio_web/components/core_components.ex:541 (107x)
 input: lib/ashfolio_web/components/core_components.ex:295 (96x)
 input: lib/ashfolio_web/components/core_components.ex:306 (96x)
 input: lib/ashfolio_web/components/core_components.ex:332 (96x)
@@ -177,15 +177,15 @@ telemetry_metrics: ❌ (0)
 telemetry_poller: ❌ (0)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio/portfolio/optimization/portfolio_optimizer.ex", "lib/ashfolio/portfolio/optimization/two_asset_optimizer.ex", "lib/ashfolio/portfolio/calculators/correlation_calculator.ex", "lib/ashfolio/portfolio/calculators/covariance_calculator.ex", "lib/ashfolio/portfolio/calculators/beta_calculator.ex"]
+recent: ["lib/ashfolio/portfolio/calculators/correlation_calculator.ex", "lib/ashfolio/portfolio/calculators/covariance_calculator.ex", "lib/ashfolio/portfolio/optimization/efficient_frontier.ex", "lib/ashfolio/portfolio/optimization/portfolio_optimizer.ex", "lib/ashfolio_web/live/advanced_analytics_live/index.html.heex"]
 uncommitted: 0 files
-commits_ahead: 5
+commits_ahead: 6
 
 # === TEST ANALYSIS ===
 summary:
-  total_test_modules: 141
-  total_tests: 1911
-  average_tests_per_module: 13.6
+  total_test_modules: 142
+  total_tests: 1923
+  average_tests_per_module: 13.5
 
 top_10_test_modules:
   Unknown: 48 tests, 86 assertions (15 describes) | test/ashfolio_web/form_helpers_test.exs
@@ -213,10 +213,10 @@ test/ashfolio/financial_management/forecast_calculator_aer_test.exs ⚠️
 
 # === MODULE ANALYSIS ===
 summary:
-  total_modules: 148 (140 lib, 8 test)
-  total_functions: 2154 (2077 lib, 77 test)
-  public/private: 843 public, 1311 private
-  average_functions_per_module: 14.6
+  total_modules: 149 (141 lib, 8 test)
+  total_functions: 2166 (2089 lib, 77 test)
+  public/private: 845 public, 1321 private
+  average_functions_per_module: 14.5
   complex_modules: 17 (>30 functions)
       empty_modules: 18 (potential parsing issues)
 

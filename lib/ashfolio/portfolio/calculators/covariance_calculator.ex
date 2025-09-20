@@ -21,7 +21,7 @@ defmodule Ashfolio.Portfolio.Calculators.CovarianceCalculator do
 
       iex> returns_a = [Decimal.new("0.05"), Decimal.new("0.03"), Decimal.new("-0.02")]
       iex> returns_b = [Decimal.new("0.04"), Decimal.new("0.02"), Decimal.new("-0.01")]
-      iex> {:ok, covariance} = CovarianceCalculator.calculate_pair(returns_a, returns_b)
+      iex> {:ok, _covariance} = CovarianceCalculator.calculate_pair(returns_a, returns_b)
 
   ## Performance
 
