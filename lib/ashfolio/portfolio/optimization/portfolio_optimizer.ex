@@ -170,8 +170,15 @@ defmodule Ashfolio.Portfolio.Optimization.PortfolioOptimizer do
     end
   end
 
+  def maximize_sharpe(assets, correlation_matrix, risk_free_rate) when length(assets) >= 3 do
+    # Use approximation approach: sample efficient frontier and find max Sharpe ratio
+    with :ok <- validate_correlation_matrix(correlation_matrix, length(assets)) do
+      find_tangency_via_frontier_sampling(assets, correlation_matrix, risk_free_rate)
+    end
+  end
+
   def maximize_sharpe(_assets, _correlation_matrix, _risk_free_rate) do
-    {:error, :not_implemented_for_n_assets}
+    {:error, :insufficient_assets}
   end
 
   @doc """
@@ -515,5 +522,145 @@ defmodule Ashfolio.Portfolio.Optimization.PortfolioOptimizer do
     else
       iterate_sqrt(target, next, iterations - 1)
     end
+  end
+
+  # Approximation-based tangency portfolio for N assets
+  @spec find_tangency_via_frontier_sampling([asset()], correlation_matrix(), D.t()) ::
+          {:ok, optimization_result()} | {:error, atom()}
+  defp find_tangency_via_frontier_sampling(assets, correlation_matrix, risk_free_rate) do
+    # Generate candidate portfolios by sampling efficient frontier
+    candidate_portfolios = generate_candidate_portfolios(assets, correlation_matrix)
+
+    # Find portfolio with maximum Sharpe ratio
+    case find_max_sharpe_portfolio(candidate_portfolios, risk_free_rate) do
+      {:ok, portfolio} -> {:ok, portfolio}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  @spec generate_candidate_portfolios([asset()], correlation_matrix()) :: [optimization_result()]
+  defp generate_candidate_portfolios(assets, correlation_matrix) do
+    n = length(assets)
+
+    # Generate diverse portfolio weights using multiple strategies
+    candidates = []
+
+    # 1. Equal-weighted portfolio
+    equal_weight = D.div(D.new("1"), D.new(to_string(n)))
+    equal_weights = Map.new(assets, fn asset ->
+      {String.to_atom(String.downcase(asset.symbol)), equal_weight}
+    end)
+    equal_portfolio = build_portfolio_result(assets, equal_weights, correlation_matrix)
+    candidates = [equal_portfolio | candidates]
+
+    # 2. Return-weighted portfolios (bias toward higher-return assets)
+    total_return = Enum.reduce(assets, D.new("0"), fn asset, acc ->
+      D.add(acc, asset.expected_return)
+    end)
+
+    return_weights = Map.new(assets, fn asset ->
+      weight = D.div(asset.expected_return, total_return)
+      {String.to_atom(String.downcase(asset.symbol)), weight}
+    end)
+    return_portfolio = build_portfolio_result(assets, return_weights, correlation_matrix)
+    candidates = [return_portfolio | candidates]
+
+    # 3. Inverse volatility weighted portfolios (bias toward lower-risk assets)
+    inverse_vols = Enum.map(assets, fn asset -> D.div(D.new("1"), asset.volatility) end)
+    total_inverse_vol = Enum.reduce(inverse_vols, D.new("0"), &D.add/2)
+
+    inverse_vol_weights = assets
+    |> Enum.zip(inverse_vols)
+    |> Map.new(fn {asset, inv_vol} ->
+      weight = D.div(inv_vol, total_inverse_vol)
+      {String.to_atom(String.downcase(asset.symbol)), weight}
+    end)
+    inv_vol_portfolio = build_portfolio_result(assets, inverse_vol_weights, correlation_matrix)
+    candidates = [inv_vol_portfolio | candidates]
+
+    # 4. Corner portfolios (100% in each asset)
+    corner_portfolios = Enum.map(assets, fn focused_asset ->
+      corner_weights = Map.new(assets, fn asset ->
+        weight = if asset.symbol == focused_asset.symbol, do: D.new("1"), else: D.new("0")
+        {String.to_atom(String.downcase(asset.symbol)), weight}
+      end)
+      build_portfolio_result(assets, corner_weights, correlation_matrix)
+    end)
+    candidates = corner_portfolios ++ candidates
+
+    # 5. Blend portfolios (combinations of the above)
+    blend_1_weights = Map.new(assets, fn asset ->
+      # 70% equal weight + 30% return weight
+      symbol_atom = String.to_atom(String.downcase(asset.symbol))
+      equal_w = Map.get(equal_weights, symbol_atom)
+      return_w = Map.get(return_weights, symbol_atom)
+      blended = D.add(D.mult(equal_w, D.new("0.7")), D.mult(return_w, D.new("0.3")))
+      {symbol_atom, blended}
+    end)
+    blend_1_portfolio = build_portfolio_result(assets, blend_1_weights, correlation_matrix)
+    candidates = [blend_1_portfolio | candidates]
+
+    # Filter out any invalid portfolios
+    Enum.filter(candidates, fn portfolio ->
+      portfolio != nil and
+      D.compare(portfolio.volatility, D.new("0")) == :gt and
+      D.compare(portfolio.expected_return, D.new("0")) == :gt
+    end)
+  end
+
+  @spec build_portfolio_result([asset()], map(), correlation_matrix()) :: optimization_result() | nil
+  defp build_portfolio_result(assets, weights, correlation_matrix) do
+    try do
+      # Calculate expected return
+      expected_return = assets
+      |> Enum.map(fn asset ->
+        symbol_atom = String.to_atom(String.downcase(asset.symbol))
+        weight = Map.get(weights, symbol_atom, D.new("0"))
+        D.mult(asset.expected_return, weight)
+      end)
+      |> Enum.reduce(D.new("0"), &D.add/2)
+
+      # Calculate portfolio volatility
+      weight_values = Enum.map(assets, fn asset ->
+        symbol_atom = String.to_atom(String.downcase(asset.symbol))
+        Map.get(weights, symbol_atom, D.new("0"))
+      end)
+
+      volatility = calculate_portfolio_volatility(assets, weight_values, correlation_matrix)
+
+      %{
+        weights: weights,
+        expected_return: expected_return,
+        volatility: volatility,
+        sharpe_ratio: nil  # Will be calculated later
+      }
+    rescue
+      _ -> nil
+    end
+  end
+
+  @spec find_max_sharpe_portfolio([optimization_result()], D.t()) ::
+          {:ok, optimization_result()} | {:error, atom()}
+  defp find_max_sharpe_portfolio([], _risk_free_rate), do: {:error, :no_valid_portfolios}
+
+  defp find_max_sharpe_portfolio(portfolios, risk_free_rate) do
+    # Calculate Sharpe ratio for each portfolio and find maximum
+    portfolios_with_sharpe = Enum.map(portfolios, fn portfolio ->
+      excess_return = D.sub(portfolio.expected_return, risk_free_rate)
+      sharpe_ratio = if D.compare(portfolio.volatility, D.new("0")) == :gt do
+        D.div(excess_return, portfolio.volatility)
+      else
+        D.new("0")
+      end
+
+      Map.put(portfolio, :sharpe_ratio, sharpe_ratio)
+    end)
+
+    # Find portfolio with maximum Sharpe ratio
+    best_portfolio = Enum.max_by(portfolios_with_sharpe, fn portfolio ->
+      D.to_float(portfolio.sharpe_ratio)
+    end)
+
+    {:ok, best_portfolio}
   end
 end

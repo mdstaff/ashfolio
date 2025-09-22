@@ -130,7 +130,10 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
 
   @impl true
   def handle_event("show_cache_stats", _params, socket) do
-    socket = assign(socket, :cache_stats, get_cache_stats())
+    socket =
+      socket
+      |> assign(:cache_stats, get_cache_stats())
+      |> put_flash(:info, "Cache statistics updated")
     {:noreply, socket}
   end
 
