@@ -12,10 +12,10 @@
     <.button
       phx-click="refresh_all"
       disabled={@loading_all}
-      class="bg-blue-600 hover:bg-blue-700 text-white"
+      class="btn-primary"
     >
       <%= if @loading_all do %>
-        <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+        <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-current" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
           </circle>
           <path
@@ -33,14 +33,14 @@
 
     <.button
       phx-click="show_cache_stats"
-      class="bg-gray-600 hover:bg-gray-700 text-white"
+      class="btn-secondary"
     >
       📊 Cache Stats
     </.button>
 
     <.button
       phx-click="clear_cache"
-      class="bg-red-600 hover:bg-red-700 text-white"
+      class="btn-danger"
     >
       🗑️ Clear Cache
     </.button>
@@ -78,7 +78,7 @@
           id="calculate-twr-button"
           phx-click="calculate_twr"
           disabled={@loading_twr}
-          class="text-sm bg-blue-500 hover:bg-blue-600 text-white"
+          class="btn-secondary"
         >
           <%= if @loading_twr do %>
             <svg class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
@@ -138,7 +138,7 @@
           id="calculate-mwr-button"
           phx-click="calculate_mwr"
           disabled={@loading_mwr}
-          class="text-sm bg-green-500 hover:bg-green-600 text-white"
+          class="btn-secondary"
         >
           <%= if @loading_mwr do %>
             <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -197,7 +197,7 @@
       <.button
         phx-click="calculate_risk_metrics"
         disabled={@loading_risk_metrics}
-        class="text-sm bg-red-500 hover:bg-red-600 text-white"
+        class="btn-secondary"
       >
         <%= if @loading_risk_metrics do %>
           <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -332,7 +332,7 @@
       <.button
         phx-click="calculate_rolling_returns"
         disabled={@loading_rolling}
-        class="text-sm bg-purple-500 hover:bg-purple-600 text-white"
+        class="btn-secondary"
       >
         <%= if @loading_rolling do %>
           <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -413,6 +413,193 @@
           <p class="text-gray-500 mb-2">Click "Analyze" to see rolling returns analysis</p>
           <p class="text-sm text-gray-400">
             Identifies performance patterns and volatility over time
+          </p>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+  
+<!-- Efficient Frontier Analysis -->
+  <div class="bg-white shadow-lg rounded-lg p-6 border border-gray-200 mb-8">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-semibold text-gray-900">Efficient Frontier Analysis</h2>
+      <.button
+        phx-click="calculate_efficient_frontier"
+        disabled={@loading_efficient_frontier}
+        class="btn-secondary"
+      >
+        <%= if @loading_efficient_frontier do %>
+          <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            >
+            </circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            >
+            </path>
+          </svg>
+        <% else %>
+          Calculate Efficient Frontier
+        <% end %>
+      </.button>
+    </div>
+
+    <%= if @efficient_frontier do %>
+      <!-- Key Portfolio Points -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <!-- Minimum Variance Portfolio -->
+        <div class="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <h3 class="text-sm font-medium text-blue-800 mb-2">Minimum Variance Portfolio</h3>
+          <div class="text-lg font-bold text-blue-600 mb-1">
+            {Formatters.format_percentage(
+              @efficient_frontier.min_variance_portfolio.expected_return
+            )}
+          </div>
+          <div class="text-sm text-blue-700">
+            Risk: {Formatters.format_percentage(
+              @efficient_frontier.min_variance_portfolio.volatility
+            )}
+          </div>
+          <p class="text-xs text-blue-600 mt-2">Lowest risk combination</p>
+        </div>
+        
+<!-- Tangency Portfolio -->
+        <%= if @efficient_frontier.tangency_portfolio do %>
+          <div class="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+            <h3 class="text-sm font-medium text-green-800 mb-2">Tangency Portfolio</h3>
+            <div class="text-lg font-bold text-green-600 mb-1">
+              {Formatters.format_percentage(
+                @efficient_frontier.tangency_portfolio.expected_return
+              )}
+            </div>
+            <div class="text-sm text-green-700">
+              Risk: {Formatters.format_percentage(
+                @efficient_frontier.tangency_portfolio.volatility
+              )}
+            </div>
+            <div class="text-xs text-green-600 mt-1">
+              Sharpe: {Formatters.format_quantity(
+                @efficient_frontier.tangency_portfolio.sharpe_ratio
+              )}
+            </div>
+            <p class="text-xs text-green-600 mt-1">Best risk-adjusted return</p>
+          </div>
+        <% end %>
+        
+<!-- Maximum Return Portfolio -->
+        <div class="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
+          <h3 class="text-sm font-medium text-purple-800 mb-2">Maximum Return Portfolio</h3>
+          <div class="text-lg font-bold text-purple-600 mb-1">
+            {Formatters.format_percentage(
+              @efficient_frontier.max_return_portfolio.expected_return
+            )}
+          </div>
+          <div class="text-sm text-purple-700">
+            Risk: {Formatters.format_percentage(
+              @efficient_frontier.max_return_portfolio.volatility
+            )}
+          </div>
+          <p class="text-xs text-purple-600 mt-2">Highest expected return</p>
+        </div>
+      </div>
+      
+<!-- Portfolio Allocations -->
+      <div class="bg-gray-50 rounded-lg p-4 mb-6">
+        <h4 class="text-sm font-medium text-gray-800 mb-3">Optimal Portfolio Allocations</h4>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Min Variance Weights -->
+          <div>
+            <h5 class="text-xs font-semibold text-blue-800 mb-2">Minimum Variance</h5>
+            <%= for {asset, weight} <- @efficient_frontier.min_variance_portfolio.weights do %>
+              <div class="flex justify-between text-xs py-1">
+                <span class="text-gray-700">{String.upcase(to_string(asset))}:</span>
+                <span class="text-blue-600 font-medium">
+                  {Formatters.format_percentage(weight)}
+                </span>
+              </div>
+            <% end %>
+          </div>
+          
+<!-- Tangency Weights -->
+          <%= if @efficient_frontier.tangency_portfolio do %>
+            <div>
+              <h5 class="text-xs font-semibold text-green-800 mb-2">Tangency Portfolio</h5>
+              <%= for {asset, weight} <- @efficient_frontier.tangency_portfolio.weights do %>
+                <div class="flex justify-between text-xs py-1">
+                  <span class="text-gray-700">{String.upcase(to_string(asset))}:</span>
+                  <span class="text-green-600 font-medium">
+                    {Formatters.format_percentage(weight)}
+                  </span>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+          
+<!-- Max Return Weights -->
+          <div>
+            <h5 class="text-xs font-semibold text-purple-800 mb-2">Maximum Return</h5>
+            <%= for {asset, weight} <- @efficient_frontier.max_return_portfolio.weights do %>
+              <div class="flex justify-between text-xs py-1">
+                <span class="text-gray-700">{String.upcase(to_string(asset))}:</span>
+                <span class="text-purple-600 font-medium">
+                  {Formatters.format_percentage(weight)}
+                </span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      
+<!-- Frontier Statistics -->
+      <div class="bg-indigo-50 rounded-lg p-4">
+        <h4 class="text-sm font-medium text-indigo-800 mb-3">Efficient Frontier Analysis</h4>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div>
+            <span class="font-medium text-indigo-700">Portfolios Generated:</span>
+            <span class="text-indigo-600 ml-2">{length(@efficient_frontier.portfolios)}</span>
+          </div>
+          <div>
+            <span class="font-medium text-indigo-700">Assets:</span>
+            <span class="text-indigo-600 ml-2">STOCK, BOND, REIT</span>
+          </div>
+          <div>
+            <span class="font-medium text-indigo-700">Optimization:</span>
+            <span class="text-indigo-600 ml-2">Markowitz Mean-Variance</span>
+          </div>
+          <div>
+            <span class="font-medium text-indigo-700">Risk Range:</span>
+            <span class="text-indigo-600 ml-2">
+              {Formatters.format_percentage(@efficient_frontier.min_variance_portfolio.volatility)} - {Formatters.format_percentage(
+                @efficient_frontier.max_return_portfolio.volatility
+              )}
+            </span>
+          </div>
+        </div>
+        <p class="text-xs text-indigo-600 mt-3">
+          Interactive chart visualization coming soon. Each point represents an optimal risk-return combination.
+        </p>
+      </div>
+    <% else %>
+      <div class="text-center py-12">
+        <%= if @loading_efficient_frontier do %>
+          <div class="animate-pulse">
+            <div class="h-8 bg-gray-200 rounded mx-auto w-48 mb-4"></div>
+            <div class="h-4 bg-gray-200 rounded mx-auto w-32"></div>
+          </div>
+        <% else %>
+          <p class="text-gray-500 mb-2">
+            Click "Calculate Efficient Frontier" to see portfolio optimization
+          </p>
+          <p class="text-sm text-gray-400">
+            Markowitz mean-variance optimization for optimal risk-return combinations
           </p>
         <% end %>
       </div>
@@ -530,6 +717,14 @@
         <p class="text-blue-700">
           Analyzes 12-month performance periods over time to identify patterns, consistency,
           and volatility. Helps you understand performance stability and risk characteristics.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="font-medium text-blue-800 mb-2">Efficient Frontier</h4>
+        <p class="text-blue-700">
+          Markowitz mean-variance optimization showing optimal risk-return combinations.
+          The tangency portfolio offers the best Sharpe ratio (risk-adjusted return).
         </p>
       </div>
 

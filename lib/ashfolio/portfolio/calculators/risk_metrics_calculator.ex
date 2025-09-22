@@ -5,6 +5,8 @@ defmodule Ashfolio.Portfolio.Calculators.RiskMetricsCalculator do
   Implements industry-standard risk metrics required for fiduciary compliance:
   - Sharpe Ratio - Risk-adjusted return (excess return per unit of volatility)
   - Sortino Ratio - Downside deviation-focused risk assessment
+  - Calmar Ratio - Annualized return per unit of maximum drawdown
+  - Sterling Ratio - Modified Calmar ratio with drawdown threshold adjustment
   - Maximum Drawdown - Peak-to-trough decline measurement
   - Value at Risk (VaR) - Potential loss at 95% confidence interval
   - Information Ratio - Active management effectiveness
@@ -14,12 +16,16 @@ defmodule Ashfolio.Portfolio.Calculators.RiskMetricsCalculator do
 
   - Sharpe, W.F. (1966). "Mutual Fund Performance"
   - Sortino, F.A. & Price, L.N. (1994). "Performance Measurement in a Downside Risk Framework"
+  - Young, T.W. (1991). "Calmar Ratio: A Smoother Tool"
+  - Kestner, L.N. (2003). "Quantitative Trading Strategies" (Sterling Ratio)
   - CFA Institute Standards for risk measurement
 
   ## Mathematical Formulas
 
       Sharpe Ratio = (Portfolio Return - Risk-Free Rate) / Portfolio Volatility
       Sortino Ratio = (Portfolio Return - Target Return) / Downside Deviation
+      Calmar Ratio = Annualized Return / Maximum Drawdown
+      Sterling Ratio = Annualized Return / (Maximum Drawdown - Threshold)
       Maximum Drawdown = (Peak Value - Trough Value) / Peak Value
       VaR(95%) = Portfolio Value × (Mean Return - 1.645 × Standard Deviation)
   """
@@ -29,6 +35,77 @@ defmodule Ashfolio.Portfolio.Calculators.RiskMetricsCalculator do
   alias Decimal, as: D
 
   require Logger
+
+  # Type definitions
+  @type returns :: list(D.t())
+  @type portfolio_values :: list(D.t())
+  @type sharpe_ratio_result ::
+          {:ok,
+           %{
+             sharpe_ratio: D.t(),
+             excess_return: D.t(),
+             volatility: D.t(),
+             risk_free_rate: D.t(),
+             mean_return: D.t()
+           }}
+          | {:error, atom()}
+  @type sortino_ratio_result ::
+          {:ok,
+           %{
+             sortino_ratio: D.t(),
+             excess_return: D.t(),
+             downside_deviation: D.t(),
+             target_return: D.t(),
+             mean_return: D.t()
+           }}
+          | {:error, atom()}
+  @type max_drawdown_result ::
+          {:ok,
+           %{
+             max_drawdown: D.t(),
+             max_drawdown_percentage: D.t(),
+             peak_value: D.t(),
+             trough_value: D.t(),
+             recovery_periods: non_neg_integer()
+           }}
+          | {:error, atom()}
+  @type var_result ::
+          {:ok,
+           %{
+             var_amount: D.t(),
+             var_percentage: D.t(),
+             z_score: D.t(),
+             confidence_level: D.t(),
+             expected_return: D.t(),
+             volatility: D.t()
+           }}
+          | {:error, atom()}
+  @type calmar_ratio_result ::
+          {:ok,
+           %{
+             calmar_ratio: D.t(),
+             annualized_return: D.t(),
+             max_drawdown: D.t()
+           }}
+          | {:error, atom()}
+  @type sterling_ratio_result ::
+          {:ok,
+           %{
+             sterling_ratio: D.t(),
+             annualized_return: D.t(),
+             adjusted_drawdown: D.t(),
+             max_drawdown: D.t(),
+             threshold: D.t()
+           }}
+          | {:error, atom()}
+  @type information_ratio_result ::
+          {:ok,
+           %{
+             information_ratio: D.t(),
+             active_return: D.t(),
+             tracking_error: D.t()
+           }}
+          | {:error, atom()}
 
   @doc """
   Calculates Sharpe Ratio for risk-adjusted return analysis.
@@ -53,6 +130,7 @@ defmodule Ashfolio.Portfolio.Calculators.RiskMetricsCalculator do
       iex> D.compare(result.sharpe_ratio, D.new("0")) == :gt
       true
   """
+  @spec calculate_sharpe_ratio(returns(), D.t()) :: sharpe_ratio_result()
   def calculate_sharpe_ratio(returns, risk_free_rate \\ D.new("0.045")) when is_list(returns) do
     Logger.debug("Calculating Sharpe Ratio for #{length(returns)} return periods")
 
@@ -106,6 +184,7 @@ defmodule Ashfolio.Portfolio.Calculators.RiskMetricsCalculator do
     - {:ok, %{sortino_ratio: Decimal, excess_return: Decimal, downside_deviation: Decimal}}
     - {:error, reason} - Error with descriptive reason
   """
+  @spec calculate_sortino_ratio(returns(), D.t()) :: sortino_ratio_result()
   def calculate_sortino_ratio(returns, target_return \\ D.new("0")) when is_list(returns) do
     Logger.debug("Calculating Sortino Ratio for #{length(returns)} return periods")
 
@@ -152,6 +231,7 @@ defmodule Ashfolio.Portfolio.Calculators.RiskMetricsCalculator do
     - {:ok, %{max_drawdown: Decimal, peak_value: Decimal, trough_value: Decimal, recovery_periods: integer}}
     - {:error, reason} - Error with descriptive reason
   """
+  @spec calculate_maximum_drawdown(portfolio_values()) :: max_drawdown_result()
   def calculate_maximum_drawdown(cumulative_values) when is_list(cumulative_values) do
     Logger.debug("Calculating Maximum Drawdown for #{length(cumulative_values)} value points")
 
@@ -189,6 +269,7 @@ defmodule Ashfolio.Portfolio.Calculators.RiskMetricsCalculator do
     - {:ok, %{var_amount: Decimal, var_percentage: Decimal, z_score: Decimal}}
     - {:error, reason} - Error with descriptive reason
   """
+  @spec calculate_value_at_risk(returns(), D.t(), D.t()) :: var_result()
   def calculate_value_at_risk(returns, portfolio_value, confidence_level \\ D.new("0.95")) when is_list(returns) do
     Logger.debug("Calculating VaR at #{confidence_level} confidence for portfolio value #{portfolio_value}")
 
@@ -221,6 +302,139 @@ defmodule Ashfolio.Portfolio.Calculators.RiskMetricsCalculator do
   end
 
   @doc """
+  Calculates Calmar Ratio for downside risk-adjusted performance.
+
+  The Calmar Ratio measures annualized return per unit of maximum drawdown,
+  providing insight into risk-adjusted performance with focus on worst-case losses.
+
+  ## Formula
+
+      Calmar Ratio = Annualized Return / Maximum Drawdown
+
+  ## Parameters
+
+    - returns: List of Decimal - Portfolio returns (e.g., monthly or daily)
+    - cumulative_values: List of Decimal - Portfolio values over time
+
+  ## Returns
+
+    - {:ok, %{calmar_ratio: Decimal, annualized_return: Decimal, max_drawdown: Decimal}}
+    - {:error, reason} - Error with descriptive reason
+
+  ## Examples
+
+      iex> returns = [D.new("0.05"), D.new("0.03"), D.new("-0.02")]
+      iex> values = [D.new("100000"), D.new("105000"), D.new("108000"), D.new("106000")]
+      iex> {:ok, result} = RiskMetricsCalculator.calculate_calmar_ratio(returns, values)
+      iex> D.compare(result.calmar_ratio, D.new("0")) == :gt
+      true
+  """
+  @spec calculate_calmar_ratio(returns(), portfolio_values()) :: calmar_ratio_result()
+  def calculate_calmar_ratio(returns, cumulative_values) when is_list(returns) and is_list(cumulative_values) do
+    Logger.debug("Calculating Calmar Ratio for #{length(returns)} return periods")
+
+    with :ok <- validate_returns(returns),
+         :ok <- validate_values(cumulative_values),
+         :ok <- validate_data_alignment(returns, cumulative_values) do
+      # Calculate annualized return
+      annualized_return = calculate_annualized_return(returns)
+
+      # Calculate maximum drawdown
+      {:ok, drawdown_result} = calculate_maximum_drawdown(cumulative_values)
+      max_drawdown = drawdown_result.max_drawdown
+
+      # Calmar Ratio = Annualized Return / Maximum Drawdown
+      calmar_ratio =
+        if D.equal?(max_drawdown, D.new("0")) do
+          # Special case: no drawdown means infinite Calmar ratio
+          # Return a large but finite number for practical purposes
+          D.new("999.99")
+        else
+          DH.safe_divide(annualized_return, max_drawdown)
+        end
+
+      result = %{
+        calmar_ratio: D.round(calmar_ratio, 4),
+        annualized_return: D.round(annualized_return, 6),
+        max_drawdown: D.round(max_drawdown, 6)
+      }
+
+      Logger.debug("Calmar Ratio calculated: #{result.calmar_ratio}")
+      {:ok, result}
+    end
+  end
+
+  @doc """
+  Calculates Sterling Ratio for risk-adjusted return with drawdown threshold.
+
+  The Sterling Ratio is similar to Calmar Ratio but subtracts a threshold from
+  maximum drawdown, providing a more conservative risk assessment.
+
+  ## Formula
+
+      Sterling Ratio = Annualized Return / (Maximum Drawdown - Threshold)
+
+  ## Parameters
+
+    - returns: List of Decimal - Portfolio returns
+    - cumulative_values: List of Decimal - Portfolio values over time
+    - threshold: Decimal - Threshold to subtract from drawdown (default: 0.10 for 10%)
+
+  ## Returns
+
+    - {:ok, %{sterling_ratio: Decimal, annualized_return: Decimal, adjusted_drawdown: Decimal}}
+    - {:error, reason} - Error with descriptive reason
+
+  ## Examples
+
+      iex> returns = [D.new("0.05"), D.new("-0.02"), D.new("0.03")]
+      iex> values = [D.new("100000"), D.new("105000"), D.new("103000"), D.new("106000")]
+      iex> {:ok, result} = RiskMetricsCalculator.calculate_sterling_ratio(returns, values)
+      iex> D.compare(result.sterling_ratio, D.new("0")) == :gt
+      true
+  """
+  @spec calculate_sterling_ratio(returns(), portfolio_values(), D.t()) :: sterling_ratio_result()
+  def calculate_sterling_ratio(returns, cumulative_values, threshold \\ D.new("0.10"))
+      when is_list(returns) and is_list(cumulative_values) do
+    Logger.debug("Calculating Sterling Ratio for #{length(returns)} return periods with threshold #{threshold}")
+
+    with :ok <- validate_returns(returns),
+         :ok <- validate_values(cumulative_values),
+         :ok <- validate_data_alignment(returns, cumulative_values),
+         :ok <- validate_threshold(threshold) do
+      # Calculate annualized return
+      annualized_return = calculate_annualized_return(returns)
+
+      # Calculate maximum drawdown
+      {:ok, drawdown_result} = calculate_maximum_drawdown(cumulative_values)
+      max_drawdown = drawdown_result.max_drawdown
+
+      # Adjusted Drawdown = Maximum Drawdown - Threshold
+      adjusted_drawdown = D.sub(max_drawdown, threshold)
+
+      # Sterling Ratio = Annualized Return / Adjusted Drawdown
+      sterling_ratio =
+        if D.compare(adjusted_drawdown, D.new("0.001")) == :lt do
+          # When adjusted drawdown is very small, return a high value
+          D.new("999.99")
+        else
+          DH.safe_divide(annualized_return, adjusted_drawdown)
+        end
+
+      result = %{
+        sterling_ratio: D.round(sterling_ratio, 4),
+        annualized_return: D.round(annualized_return, 6),
+        adjusted_drawdown: D.round(adjusted_drawdown, 6),
+        max_drawdown: D.round(max_drawdown, 6),
+        threshold: threshold
+      }
+
+      Logger.debug("Sterling Ratio calculated: #{result.sterling_ratio}")
+      {:ok, result}
+    end
+  end
+
+  @doc """
   Calculates Information Ratio for active management assessment.
 
   Information Ratio measures excess return per unit of tracking error, evaluating
@@ -236,6 +450,7 @@ defmodule Ashfolio.Portfolio.Calculators.RiskMetricsCalculator do
     - {:ok, %{information_ratio: Decimal, tracking_error: Decimal, active_return: Decimal}}
     - {:error, reason} - Error with descriptive reason
   """
+  @spec calculate_information_ratio(returns(), returns()) :: information_ratio_result()
   def calculate_information_ratio(portfolio_returns, benchmark_returns)
       when is_list(portfolio_returns) and is_list(benchmark_returns) do
     Logger.debug("Calculating Information Ratio with #{length(portfolio_returns)} periods")
@@ -273,6 +488,7 @@ defmodule Ashfolio.Portfolio.Calculators.RiskMetricsCalculator do
 
   # Private helper functions
 
+  @spec validate_returns(returns()) :: :ok | {:error, atom()}
   defp validate_returns(returns) do
     cond do
       length(returns) < 2 ->
@@ -334,6 +550,7 @@ defmodule Ashfolio.Portfolio.Calculators.RiskMetricsCalculator do
     end
   end
 
+  @spec calculate_mean(returns()) :: D.t()
   defp calculate_mean(values) do
     sum = Enum.reduce(values, D.new("0"), &D.add/2)
     DH.safe_divide(sum, length(values))
@@ -357,7 +574,7 @@ defmodule Ashfolio.Portfolio.Calculators.RiskMetricsCalculator do
     # Only consider returns below target for downside deviation
     downside_returns = Enum.filter(returns, &(D.compare(&1, target_return) == :lt))
 
-    if length(downside_returns) == 0 do
+    if Enum.empty?(downside_returns) do
       D.new("0")
     else
       downside_variance_sum =
@@ -438,5 +655,52 @@ defmodule Ashfolio.Portfolio.Calculators.RiskMetricsCalculator do
       # Quarterly
       true -> D.new("4")
     end
+  end
+
+  defp validate_data_alignment(returns, cumulative_values) do
+    # cumulative_values should have one more element than returns
+    # (initial value + one value after each return)
+    expected_values_length = length(returns) + 1
+    actual_values_length = length(cumulative_values)
+
+    if actual_values_length == expected_values_length do
+      :ok
+    else
+      {:error, :mismatched_data_lengths}
+    end
+  end
+
+  defp validate_threshold(%D{} = threshold) do
+    if D.compare(threshold, D.new("0")) == :lt or D.compare(threshold, D.new("1")) == :gt do
+      {:error, :invalid_threshold}
+    else
+      :ok
+    end
+  end
+
+  defp calculate_annualized_return(returns) do
+    # Calculate geometric mean return and annualize it
+    n = length(returns)
+    periods_per_year = infer_periods_per_year(n)
+
+    # Calculate cumulative return: (1 + r1) × (1 + r2) × ... × (1 + rn) - 1
+    cumulative_factor =
+      Enum.reduce(returns, D.new("1"), fn return, acc ->
+        D.mult(acc, D.add(D.new("1"), return))
+      end)
+
+    # Geometric mean return per period
+    geometric_mean =
+      if D.equal?(cumulative_factor, D.new("0")) do
+        D.new("0")
+      else
+        # (cumulative_factor)^(1/n) - 1
+        period_return = D.sub(Mathematical.nth_root(cumulative_factor, n), D.new("1"))
+        period_return
+      end
+
+    # Annualize: ((1 + geometric_mean)^periods_per_year) - 1
+    annualized_factor = Mathematical.power(D.add(D.new("1"), geometric_mean), D.to_float(periods_per_year))
+    D.sub(annualized_factor, D.new("1"))
   end
 end

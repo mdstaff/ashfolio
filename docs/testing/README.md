@@ -46,8 +46,9 @@ Tests organized by system layers with performance categorization and SQLite conc
 - [Framework Guide](framework.md) - Complete testing framework architecture and patterns
 - [SQLite Patterns](patterns.md) - SQLite concurrency handling and database testing patterns
 - [Standards](standards.md) - Testing consistency standards and best practices
-- Global test data management and requirements
 - [AI Testing](ai-testing.md) - AI-assisted testing patterns and guidelines
+- [Playwright MCP Testing](playwright-mcp-testing-agent.md) - Universal browser automation testing agent
+- [Playwright Testing Prompt](playwright-testing-prompt.md) - Quick-start prompts for UI testing
 
 For detailed testing patterns and strategies, see [Testing Strategy](../TESTING_STRATEGY.md).
 

@@ -1,58 +1,64 @@
 # Archive Documentation
 
-This directory contains historical documentation that is no longer actively maintained but preserved for reference.
+Historical documentation preserved for reference. Documents organized by category.
 
-## v0.4.x Documentation
+## Directory Structure
 
-Completed v0.4.x series documentation (delivered 2025-09-03):
+### versions/ - Version Documentation
+- `v0.1-v0.5/` - Early version consolidated documentation
+- `v0.3/` - v0.3.x specifications and TDD documentation
+- `v0.4/` - v0.4.x financial planning platform specification
+- `v0.5/` - v0.5.0 specification (completed 2025-09-03)
+- `v0.6/` - v0.6.0 corporate actions implementation and testing
+- `v0.7/` - v0.7.0 advanced portfolio analytics and Playwright testing
 
-- v0.4.x-specification.md - Complete financial planning platform specification
-- v0.4.x-credo-task-list.md - Code quality improvement tasks (completed)
+### migrations/ - Database & Migration Documentation
+- `database-as-user/` - Complete database-as-user migration (v0.2.0)
+- `v0.2.0-migration/` - v0.2.0 migration execution documentation
+- `migration-warnings-guide.md` - General migration best practices
 
-## Development Documentation  
+### testing/ - Testing Strategy & QA Documentation
+- `strategies/` - Test data patterns and framework decisions
+- `qa-plans/` - Specific QA execution plans and scripts
+- `checklists/` - Accessibility, HEEx, and other validation checklists
 
-Historical development guides superseded by current documentation:
+### performance/ - Performance Optimization History
+- `phase-1-optimization-summary.md` - Initial performance improvements
+- `phase-2-optimization-summary.md` - Advanced optimizations
+- `phase-3-implementation-plan.md` - Third phase optimization strategy
+- `performance-optimization.md` - Overall optimization methodology
 
-- wallaby-removal-action-plan.md - Browser testing strategy (completed v0.3.x)
-- migration-warnings-guide.md - v0.2.0 migration warnings (resolved)
-- agent-coordination-guidelines.md - Superseded by ai-agent-guide.md
-- rfc-dependency-governance.md - Superseded by dependency-governance.md
-- heex-template-checklist.md - Integrated into phoenix-liveview-layouts.md
-- performance-optimization.md - Completed optimizations for v0.3.x
+### features/ - Feature Specifications
+- `implemented/` - Completed feature specifications
+- `proposed/` - Feature proposals that were not implemented
+- `demo-mode/` - Demo mode specifications (proposed but not implemented)
 
-## Testing Documentation
+### technical/ - Technical Documentation & RFCs
+- Agent coordination guidelines
+- RFC dependency governance
+- Framework documentation
 
-Historical testing documentation incorporated into main strategy:
+### code-gps/ - Code Analysis History
+Historical code analysis and GPS reports.
 
-- global-test-data-requirements.md - Incorporated into TESTING_STRATEGY.md
-- test-data-implementation-patterns.md - Merged with patterns.md
-- playwright-qa-script.md - Not implemented (using LiveView testing)
-- accessibility-checklist.md - Integrated into testing standards
+## Quick Navigation
 
-## v0.2.0-migration/
+**Version History**: `versions/v0.6/` and `versions/v0.7/` for recent, `versions/v0.3/` through `versions/v0.5/` for early platform specs
 
-Documentation from the database-as-user architecture migration completed in v0.2.0:
+**Migration Documentation**: `migrations/database-as-user/` for complete migration, `migrations/migration-warnings-guide.md` for guidance
 
-- DATABASE_AS_USER_FINAL_STATUS.md - Final status of migration (95% complete)
-- CRITICAL_ISSUES_RESOLUTION.md - Critical domain registration issues (resolved)
-- QUICK_FIX_CHECKLIST.md - Urgent fixes for domain registration (completed)
-- v0.2.0-qa-report.md - Quality assurance testing results for v0.2.0
+**Testing Documentation**: `testing/strategies/` for test strategies, `testing/qa-plans/` for QA execution, `testing/checklists/` for validation
 
-## demo-mode/
+**Performance History**: `performance/` for all optimization phases
 
-Demo mode specifications that were proposed but never implemented:
-
-- demo-mode-design-proposal.md - Comprehensive demo mode design
-- demo-mode-implementation-examples.md - Technical implementation examples
-- demo-mode-tdd-specification.md - TDD approach for demo mode
+**Feature Specifications**: `features/implemented/` for completed, `features/proposed/` for proposed
 
 ## Archive Policy
 
-Documents are archived when:
+Documents archived when:
+1. Work completed
+2. Features deprecated
+3. Architecture changes
+4. Documentation superseded
 
-1. The work they describe is completed
-2. The features they specify are no longer planned
-3. They become obsolete due to architectural changes
-4. They're superseded by newer documentation
-
-Archived documents are kept for historical context and may be referenced when working on related features in the future.
+Archived documents preserved for historical context and reference.

@@ -1,18 +1,18 @@
-# Ashfolio SessionStart - v0.5.0
+# Ashfolio SessionStart - v0.7.0 (In Progress)
 
 ## Essential Context
 
-**Stack**: Phoenix LiveView + Ash 3.4 + SQLite  
-**Pattern**: Database-as-user (no user_id fields)  
-**Status**: 1,680 tests passing, production-ready financial platform  
-**Focus**: v0.5.0 complete - comprehensive financial platform ready for v0.6.0 planning  
+**Stack**: Phoenix LiveView + Ash 3.4 + SQLite
+**Pattern**: Database-as-user (no user_id fields)
+**Status**: 1,864 tests passing (16 failures to fix), production-ready financial platform
+**Focus**: v0.7.0 50% complete - Advanced Portfolio Analytics implementation
 
 ## Quick Commands
 
 ```bash
 mix code_gps        # ALWAYS start here
 just test           # Run standard tests
-just test unit      # <1s TDD cycle  
+just test unit      # <1s TDD cycle
 just test smoke     # <2s critical paths
 just dev            # Start server (localhost:4000)
 just check          # Format + compile + credo + smoke
@@ -27,8 +27,9 @@ just fix            # Auto-repair common issues
 **Testing**: Include market crash/edge case scenarios for financial features
 
 ## Key Files
+
 - `.code-gps.yaml` - Current architecture
-- `docs/TESTING_STRATEGY.md` - Test organization  
+- `docs/TESTING_STRATEGY.md` - Test organization
 - `justfile` - Available commands
 - `.claude/financial-rules.md` - Specialized financial development rules
 
@@ -37,15 +38,28 @@ just fix            # Auto-repair common issues
 **Portfolio**: Account, Symbol, Transaction, Position (FIFO cost basis)  
 **FinancialManagement**: Expense, MoneyRatios, TaxStrategy, Categories
 
-## Completed Features (v0.5.0)
+## Completed Features (v0.6.0 + v0.7.0 Partial)
+
+**v0.6.0 Corporate Actions Engine** (Complete)
+- Stock splits, dividends, mergers, spinoffs with FIFO preservation
+- 1,776+ tests passing with comprehensive TDD coverage
+
+**v0.7.0 Advanced Portfolio Analytics** (50% Complete)
+- ✅ Stage 1: BetaCalculator, DrawdownCalculator, Enhanced RiskMetrics (57 tests)
+- ✅ Stage 2: CorrelationCalculator, CovarianceCalculator (43 tests)
+- 🚧 Stage 3: Portfolio optimization and efficient frontier (3 weeks remaining)
+- 📋 Stage 4: Interactive analytics LiveView dashboard (2 weeks planned)
+
+**Previous Foundation**
 - Money Ratios assessment (Charles Farrell methodology)
-- Tax planning with FIFO calculations  
+- Tax planning with FIFO calculations
 - Retirement planning (25x rule, 4% withdrawal)
 - Expense analytics with advanced filtering
 - Portfolio performance (TWR/MWR calculations)
 - Real-time dashboard with PubSub updates
 
 ## Emergency Fixes
+
 - `mix deps.get && mix compile` - undefined function
 - `just db test-reset` - test DB locked
 - `just fix` - mass test failures

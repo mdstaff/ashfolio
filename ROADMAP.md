@@ -128,9 +128,48 @@ Transform Ashfolio from comprehensive personal finance tool to professional-grad
 - State tax differential analysis
 - Conversion ladder planning
 
-## v0.7.0: Estate & Advanced Tax Planning
+## v0.7.0: Advanced Portfolio Analytics 🚧 IN PROGRESS
 
-*Q2 2026 (8 weeks)*  
+*Q4 2025 (8 weeks)*
+*Focus: Professional-grade portfolio analytics and optimization*
+
+### Status: 50% Complete
+- **Stage 1**: Risk Metrics (Beta, Drawdown, Calmar, Sterling) ✅ Complete
+- **Stage 2**: Correlation & Covariance Matrices ✅ Complete
+- **Stage 3**: Portfolio Optimization (Efficient Frontier) 🚧 Next
+- **Stage 4**: Advanced Analytics LiveView 📋 Planned
+
+### Completed Features (September 2025)
+
+#### Advanced Risk Metrics ✅
+- **Beta Calculator** - Systematic risk vs market (20 tests passing)
+- **Drawdown Calculator** - Maximum loss and recovery tracking (24 tests)
+- **Enhanced Risk Metrics** - Added Calmar & Sterling ratios (13 new tests)
+- Performance: All calculations < 100ms requirement met
+
+#### Correlation & Covariance Analysis ✅
+- **Correlation Calculator** - Pearson correlation, matrices, rolling windows (27 tests)
+- **Covariance Calculator** - Pairwise and matrix calculations (16 tests)
+- Full Decimal precision throughout
+- Newton's method for square root calculations
+
+### Remaining Work
+
+#### Portfolio Optimization Engine
+- **Efficient Frontier** - Mean-variance optimization
+- **Monte Carlo Simulation** - Risk/return scenarios
+- **Rebalancing Recommendations** - Tax-aware suggestions
+- **Asset Allocation Analysis** - Optimal portfolio weights
+
+#### Advanced Analytics LiveView
+- **Interactive Dashboards** - Real-time analytics
+- **Correlation Heatmaps** - Visual correlation matrices
+- **Risk/Return Scatter** - Portfolio positioning
+- **Historical Performance** - Time-series analysis
+
+## v0.8.0: Estate & Advanced Tax Planning
+
+*Q1 2026 (8 weeks)*
 *Focus: Comprehensive wealth transfer and advanced tax strategies*
 
 ### Estate Planning Foundation 🆕
@@ -159,9 +198,9 @@ Transform Ashfolio from comprehensive personal finance tool to professional-grad
 - **DeFi Transaction Import** - Yield farming, liquidity
 - **NFT Gain/Loss** - Collectibles tax rate
 
-## v0.8.0: Institutional Features
+## v0.9.0: Institutional Features
 
-*Q3 2026 (8 weeks)*  
+*Q2 2026 (8 weeks)*  
 *Focus: Features for advisors managing multiple households*
 
 ### Multi-Entity Support
@@ -176,9 +215,9 @@ Transform Ashfolio from comprehensive personal finance tool to professional-grad
 - **Custom Report Builder** - Drag-and-drop fields
 - **Audit Trail** - Complete change history
 
-## v0.9.0: Integration & Automation
+## v0.10.0: Integration & Automation
 
-*Q4 2026 (6 weeks)*  
+*Q3 2026 (6 weeks)*  
 *Focus: Workflow automation and external integrations*
 
 ### Import/Export Ecosystem
@@ -273,6 +312,8 @@ Transform Ashfolio from comprehensive personal finance tool to professional-grad
 
 ## Revision History
 
+- **2025-09-16**: v0.7.0 50% complete - Risk metrics and correlation/covariance done
+- **2025-09**: Reorganized roadmap to reflect v0.7.0 portfolio analytics focus
 - **2025-09**: Added professional assessment features (Tax Docs, RMD, Roth)
 - **2025-09**: Prioritized based on CFP/CPA scoring matrix
 - **2025-08**: v0.5.0 completed with tax planning

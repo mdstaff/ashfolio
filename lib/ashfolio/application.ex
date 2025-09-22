@@ -23,6 +23,8 @@ defmodule Ashfolio.Application do
       Ashfolio.MarketData.RateLimiter,
       # Start the PriceManager for coordinating market data updates
       Ashfolio.MarketData.PriceManager,
+      # Start the PerformanceCache for analytics caching
+      Ashfolio.Portfolio.PerformanceCache,
       # Start to serve requests, typically the last entry
       AshfolioWeb.Endpoint
     ]

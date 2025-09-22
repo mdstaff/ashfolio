@@ -376,6 +376,229 @@ defmodule Ashfolio.Portfolio.Calculators.RiskMetricsCalculatorTest do
     end
   end
 
+  describe "calculate_calmar_ratio/2" do
+    test "calculates Calmar ratio with positive returns and drawdown" do
+      returns = [D.new("0.12"), D.new("0.08"), D.new("-0.05"), D.new("0.15"), D.new("0.10")]
+
+      cumulative_values = [
+        D.new("100000"),
+        D.new("112000"),
+        D.new("121000"),
+        D.new("115000"),
+        D.new("132000"),
+        D.new("145000")
+      ]
+
+      assert {:ok, result} = RiskMetricsCalculator.calculate_calmar_ratio(returns, cumulative_values)
+
+      assert %{
+               calmar_ratio: calmar,
+               annualized_return: annual_return,
+               max_drawdown: max_dd
+             } = result
+
+      # Should have positive Calmar ratio with positive average returns
+      assert D.compare(calmar, D.new("0")) == :gt
+      assert D.compare(annual_return, D.new("0")) == :gt
+      assert D.compare(max_dd, D.new("0")) == :gt
+    end
+
+    test "calculates Calmar ratio with negative returns" do
+      returns = [D.new("-0.05"), D.new("-0.08"), D.new("-0.03"), D.new("-0.12")]
+      cumulative_values = [D.new("100000"), D.new("95000"), D.new("87000"), D.new("84000"), D.new("74000")]
+
+      assert {:ok, result} = RiskMetricsCalculator.calculate_calmar_ratio(returns, cumulative_values)
+
+      # Should have negative Calmar ratio with negative returns
+      assert D.compare(result.calmar_ratio, D.new("0")) == :lt
+      assert D.compare(result.annualized_return, D.new("0")) == :lt
+    end
+
+    test "handles zero drawdown scenario" do
+      # Continuously rising portfolio
+      returns = [D.new("0.05"), D.new("0.03"), D.new("0.07"), D.new("0.04")]
+      cumulative_values = [D.new("100000"), D.new("105000"), D.new("108150"), D.new("115721"), D.new("120350")]
+
+      assert {:ok, result} = RiskMetricsCalculator.calculate_calmar_ratio(returns, cumulative_values)
+
+      # With zero drawdown, Calmar ratio should be effectively infinite, but we return a default high value
+      assert D.compare(result.max_drawdown, D.new("0")) == :eq
+      assert D.compare(result.calmar_ratio, D.new("999.99")) == :eq
+    end
+
+    test "handles market crash scenario" do
+      # 2008-style crash with recovery
+      returns = [D.new("0.15"), D.new("-0.25"), D.new("-0.35"), D.new("-0.15"), D.new("0.30"), D.new("0.20")]
+
+      cumulative_values = [
+        D.new("100000"),
+        D.new("115000"),
+        D.new("86250"),
+        D.new("56063"),
+        D.new("47653"),
+        D.new("61949"),
+        D.new("74339")
+      ]
+
+      assert {:ok, result} = RiskMetricsCalculator.calculate_calmar_ratio(returns, cumulative_values)
+
+      # Should capture severe drawdown impact on risk-adjusted return
+      assert D.compare(result.max_drawdown, D.new("0.40")) == :gt
+      assert is_struct(result.calmar_ratio, D)
+    end
+
+    test "rejects insufficient data" do
+      assert {:error, :insufficient_data} =
+               RiskMetricsCalculator.calculate_calmar_ratio([D.new("0.05")], [D.new("100000"), D.new("105000")])
+
+      assert {:error, :insufficient_data} = RiskMetricsCalculator.calculate_calmar_ratio([], [])
+    end
+
+    test "rejects mismatched data lengths" do
+      returns = [D.new("0.05"), D.new("0.03")]
+      cumulative_values = [D.new("100000"), D.new("105000")]
+
+      assert {:error, :mismatched_data_lengths} =
+               RiskMetricsCalculator.calculate_calmar_ratio(returns, cumulative_values)
+    end
+  end
+
+  describe "calculate_sterling_ratio/3" do
+    test "calculates Sterling ratio with default threshold" do
+      returns = [D.new("0.12"), D.new("0.08"), D.new("-0.05"), D.new("0.15")]
+      cumulative_values = [D.new("100000"), D.new("112000"), D.new("120960"), D.new("114912"), D.new("132149")]
+
+      assert {:ok, result} = RiskMetricsCalculator.calculate_sterling_ratio(returns, cumulative_values)
+
+      assert %{
+               sterling_ratio: sterling,
+               annualized_return: _annual_return,
+               adjusted_drawdown: adj_dd
+             } = result
+
+      # Default threshold is 10%, so adjusted drawdown should account for this
+      assert D.compare(sterling, D.new("0")) == :gt
+      # Adjusted drawdown can be negative if max_drawdown < threshold
+      assert is_struct(adj_dd, D)
+    end
+
+    test "calculates Sterling ratio with custom threshold" do
+      returns = [D.new("0.10"), D.new("-0.08"), D.new("0.12"), D.new("-0.15")]
+      cumulative_values = [D.new("100000"), D.new("110000"), D.new("101200"), D.new("113344"), D.new("96342")]
+      # 5% threshold
+      threshold = D.new("0.05")
+
+      assert {:ok, result} = RiskMetricsCalculator.calculate_sterling_ratio(returns, cumulative_values, threshold)
+
+      # Adjusted drawdown = max_drawdown - threshold
+      # Should be different from default 10% threshold
+      assert is_struct(result.sterling_ratio, D)
+      assert is_struct(result.adjusted_drawdown, D)
+    end
+
+    test "handles maximum drawdown less than threshold" do
+      # Small drawdown scenario
+      returns = [D.new("0.05"), D.new("-0.02"), D.new("0.03"), D.new("0.01")]
+      cumulative_values = [D.new("100000"), D.new("105000"), D.new("102900"), D.new("105987"), D.new("107047")]
+      # 10% threshold
+      threshold = D.new("0.10")
+
+      assert {:ok, result} = RiskMetricsCalculator.calculate_sterling_ratio(returns, cumulative_values, threshold)
+
+      # When drawdown < threshold, adjusted drawdown should be minimal
+      # Sterling ratio should be very high
+      assert D.compare(result.sterling_ratio, D.new("100")) == :gt
+    end
+
+    test "handles high inflation period scenario" do
+      # 1970s-style returns with high volatility
+      returns = [
+        D.new("0.20"),
+        D.new("-0.12"),
+        D.new("0.25"),
+        D.new("-0.18"),
+        D.new("0.15"),
+        D.new("-0.08")
+      ]
+
+      cumulative_values = [
+        D.new("100000"),
+        D.new("120000"),
+        D.new("105600"),
+        D.new("132000"),
+        D.new("108240"),
+        D.new("124476"),
+        D.new("114518")
+      ]
+
+      assert {:ok, result} = RiskMetricsCalculator.calculate_sterling_ratio(returns, cumulative_values)
+
+      # Should handle high volatility environment
+      assert is_struct(result.sterling_ratio, D)
+      assert D.compare(result.adjusted_drawdown, D.new("0")) == :gt
+    end
+
+    test "rejects negative thresholds" do
+      returns = [D.new("0.05"), D.new("0.03")]
+      cumulative_values = [D.new("100000"), D.new("105000"), D.new("108150")]
+
+      assert {:error, :invalid_threshold} =
+               RiskMetricsCalculator.calculate_sterling_ratio(returns, cumulative_values, D.new("-0.05"))
+    end
+
+    test "rejects threshold greater than 100%" do
+      returns = [D.new("0.05"), D.new("0.03")]
+      cumulative_values = [D.new("100000"), D.new("105000"), D.new("108150")]
+
+      assert {:error, :invalid_threshold} =
+               RiskMetricsCalculator.calculate_sterling_ratio(returns, cumulative_values, D.new("1.5"))
+    end
+  end
+
+  describe "performance tests for new ratios" do
+    test "calculates Calmar ratio for 1000 returns under 100ms" do
+      # Generate 1000 random returns
+      returns = for _ <- 1..1000, do: D.new(Float.to_string(Enum.random(-20..30) / 100))
+
+      # Generate corresponding cumulative values
+      {cumulative_values, _} =
+        Enum.reduce(returns, {[D.new("100000")], D.new("100000")}, fn return, {acc, current_value} ->
+          new_value = D.mult(current_value, D.add(D.new("1"), return))
+          {[new_value | acc], new_value}
+        end)
+
+      cumulative_values = Enum.reverse(cumulative_values)
+
+      start_time = System.monotonic_time(:millisecond)
+      assert {:ok, _result} = RiskMetricsCalculator.calculate_calmar_ratio(returns, cumulative_values)
+      end_time = System.monotonic_time(:millisecond)
+
+      execution_time = end_time - start_time
+      assert execution_time < 100, "Calmar ratio calculation took #{execution_time}ms, expected < 100ms"
+    end
+
+    test "calculates Sterling ratio for 1000 returns under 100ms" do
+      # Generate 1000 random returns
+      returns = for _ <- 1..1000, do: D.new(Float.to_string(Enum.random(-20..30) / 100))
+
+      # Generate corresponding cumulative values
+      {cumulative_values, _} =
+        Enum.reduce(returns, {[D.new("100000")], D.new("100000")}, fn return, {acc, current_value} ->
+          new_value = D.mult(current_value, D.add(D.new("1"), return))
+          {[new_value | acc], new_value}
+        end)
+
+      cumulative_values = Enum.reverse(cumulative_values)
+
+      start_time = System.monotonic_time(:millisecond)
+      assert {:ok, _result} = RiskMetricsCalculator.calculate_sterling_ratio(returns, cumulative_values)
+      end_time = System.monotonic_time(:millisecond)
+
+      execution_time = end_time - start_time
+      assert execution_time < 100, "Sterling ratio calculation took #{execution_time}ms, expected < 100ms"
+    end
+  end
+
   describe "financial accuracy scenarios" do
     test "handles 1999 dot-com boom scenario" do
       # Tech bubble high returns followed by crash
@@ -404,6 +627,29 @@ defmodule Ashfolio.Portfolio.Calculators.RiskMetricsCalculatorTest do
 
       # Should capture amplified market movements
       assert D.compare(D.abs(result.active_return), D.new("0.01")) == :gt
+    end
+
+    test "validates Calmar vs Sterling ratios in volatile markets" do
+      # High volatility scenario that should show difference between ratios
+      returns = [D.new("0.25"), D.new("-0.30"), D.new("0.20"), D.new("-0.15"), D.new("0.18")]
+
+      cumulative_values = [
+        D.new("100000"),
+        D.new("125000"),
+        D.new("87500"),
+        D.new("105000"),
+        D.new("89250"),
+        D.new("105315")
+      ]
+
+      assert {:ok, calmar_result} = RiskMetricsCalculator.calculate_calmar_ratio(returns, cumulative_values)
+      assert {:ok, sterling_result} = RiskMetricsCalculator.calculate_sterling_ratio(returns, cumulative_values)
+
+      # Sterling ratio should typically be higher than Calmar due to threshold adjustment
+      # (when drawdown > threshold)
+      if D.compare(calmar_result.max_drawdown, D.new("0.10")) == :gt do
+        assert D.compare(sterling_result.sterling_ratio, calmar_result.calmar_ratio) == :gt
+      end
     end
   end
 end

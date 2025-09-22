@@ -16,8 +16,10 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
 
   alias Ashfolio.Financial.Formatters
   alias Ashfolio.Portfolio.Calculators.RiskMetricsCalculator
+  alias Ashfolio.Portfolio.Optimization.EfficientFrontier
   alias Ashfolio.Portfolio.PerformanceCache
   alias Ashfolio.Portfolio.PerformanceCalculator
+  alias Decimal, as: D
 
   require Logger
 
@@ -84,6 +86,17 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   end
 
   @impl true
+  def handle_event("calculate_efficient_frontier", _params, socket) do
+    Logger.debug("Calculating Efficient Frontier")
+
+    # Set loading state immediately and schedule async calculation
+    socket = assign(socket, :loading_efficient_frontier, true)
+    Process.send_after(self(), :complete_efficient_frontier_calculation, 10)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("refresh_all", _params, socket) do
     Logger.debug("Refreshing all analytics calculations")
 
@@ -94,6 +107,7 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
       |> calculate_money_weighted_return()
       |> calculate_rolling_returns()
       |> calculate_risk_metrics()
+      |> calculate_efficient_frontier()
       |> assign(:loading_all, false)
       |> put_flash(:info, "All analytics refreshed successfully")
 
@@ -116,7 +130,10 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
 
   @impl true
   def handle_event("show_cache_stats", _params, socket) do
-    socket = assign(socket, :cache_stats, get_cache_stats())
+    socket =
+      socket
+      |> assign(:cache_stats, get_cache_stats())
+      |> put_flash(:info, "Cache statistics updated")
     {:noreply, socket}
   end
 
@@ -189,6 +206,16 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   end
 
   @impl true
+  def handle_info(:complete_efficient_frontier_calculation, socket) do
+    socket =
+      socket
+      |> calculate_efficient_frontier()
+      |> assign(:loading_efficient_frontier, false)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info(_msg, socket) do
     {:noreply, socket}
   end
@@ -201,10 +228,12 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
     |> assign(:mwr_result, nil)
     |> assign(:rolling_returns, nil)
     |> assign(:risk_metrics, nil)
+    |> assign(:efficient_frontier, nil)
     |> assign(:loading_twr, false)
     |> assign(:loading_mwr, false)
     |> assign(:loading_rolling, false)
     |> assign(:loading_risk_metrics, false)
+    |> assign(:loading_efficient_frontier, false)
     |> assign(:loading_all, false)
     |> assign(:cache_stats, get_cache_stats())
     |> assign(:calculation_history, [])
@@ -405,6 +434,47 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
     end
   end
 
+  defp calculate_efficient_frontier(socket) do
+    cache_key = PerformanceCache.cache_key(:efficient_frontier, "global", 12)
+
+    case PerformanceCache.get(cache_key) do
+      {:ok, cached_result} ->
+        Logger.debug("Using cached efficient frontier result")
+        assign(socket, :efficient_frontier, cached_result)
+
+      :miss ->
+        perform_efficient_frontier_calculation(socket, cache_key)
+    end
+  end
+
+  defp perform_efficient_frontier_calculation(socket, cache_key) do
+    {:ok, assets} = get_sample_assets_for_frontier()
+    correlation_matrix = get_sample_correlation_matrix()
+    process_efficient_frontier_result(socket, assets, correlation_matrix, cache_key)
+  end
+
+  defp process_efficient_frontier_result(socket, assets, correlation_matrix, cache_key) do
+    case EfficientFrontier.generate(assets, correlation_matrix, points: 25) do
+      {:ok, frontier} ->
+        # Cache the result
+        PerformanceCache.put(cache_key, frontier)
+
+        socket
+        |> assign(:efficient_frontier, frontier)
+        |> add_to_calculation_history("Efficient Frontier", "Portfolio optimization complete", "success")
+        |> assign(:error_message, nil)
+
+      {:error, reason} ->
+        Logger.warning("Efficient frontier calculation failed: #{inspect(reason)}")
+        error_msg = "Efficient frontier calculation failed: #{inspect(reason)}"
+
+        socket
+        |> assign(:efficient_frontier, nil)
+        |> assign(:error_message, error_msg)
+        |> put_flash(:error, error_msg)
+    end
+  end
+
   defp add_to_calculation_history(socket, calculation_type, result, status) do
     timestamp = DateTime.utc_now()
 
@@ -424,7 +494,7 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
 
   defp format_result_for_history(result) when is_binary(result), do: result
 
-  defp format_result_for_history(%Decimal{} = result) do
+  defp format_result_for_history(%D{} = result) do
     Formatters.format_percentage(result)
   end
 
@@ -443,9 +513,9 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
     # Generate sample data for demonstration
     # In production, this would fetch actual portfolio transactions
     sample_transactions = [
-      %{date: ~D[2023-01-01], amount: Decimal.new("-10000"), type: :buy},
-      %{date: ~D[2023-06-01], amount: Decimal.new("-5000"), type: :buy},
-      %{date: ~D[2023-12-31], amount: Decimal.new("18500"), type: :current_value}
+      %{date: ~D[2023-01-01], amount: D.new("-10000"), type: :buy},
+      %{date: ~D[2023-06-01], amount: D.new("-5000"), type: :buy},
+      %{date: ~D[2023-12-31], amount: D.new("18500"), type: :current_value}
     ]
 
     {:ok, sample_transactions}
@@ -454,9 +524,9 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
   defp get_portfolio_cash_flows_for_mwr do
     # Generate sample cash flow data
     sample_cash_flows = [
-      %{date: ~D[2023-01-01], amount: Decimal.new("-10000")},
-      %{date: ~D[2023-06-01], amount: Decimal.new("-5000")},
-      %{date: ~D[2023-12-31], amount: Decimal.new("17000")}
+      %{date: ~D[2023-01-01], amount: D.new("-10000")},
+      %{date: ~D[2023-06-01], amount: D.new("-5000")},
+      %{date: ~D[2023-12-31], amount: D.new("17000")}
     ]
 
     {:ok, sample_cash_flows}
@@ -474,7 +544,7 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
 
         %{
           date: month_date,
-          return: Decimal.from_float(return_pct)
+          return: D.from_float(return_pct)
         }
       end)
 
@@ -492,7 +562,7 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
         random_component = :rand.normal() * volatility
 
         return_value = base_return + random_component
-        Decimal.from_float(return_value)
+        D.from_float(return_value)
       end)
 
     {:ok, sample_returns}
@@ -516,7 +586,7 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
         prev_value * (1 + monthly_return)
       end)
 
-    decimal_values = Enum.map(values, &Decimal.from_float/1)
+    decimal_values = Enum.map(values, &D.from_float/1)
     {:ok, decimal_values}
   end
 
@@ -526,10 +596,30 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
     _ -> %{entries: 0, hit_rate: 0.0, uptime_seconds: 0}
   end
 
+  defp get_sample_assets_for_frontier do
+    # Sample portfolio assets for efficient frontier demonstration
+    assets = [
+      %{symbol: "STOCK", expected_return: D.new("0.12"), volatility: D.new("0.18")},
+      %{symbol: "BOND", expected_return: D.new("0.04"), volatility: D.new("0.06")},
+      %{symbol: "REIT", expected_return: D.new("0.08"), volatility: D.new("0.15")}
+    ]
+
+    {:ok, assets}
+  end
+
+  defp get_sample_correlation_matrix do
+    # Sample correlation matrix for the assets above
+    [
+      [D.new("1.0"), D.new("0.2"), D.new("0.3")],
+      [D.new("0.2"), D.new("1.0"), D.new("0.1")],
+      [D.new("0.3"), D.new("0.1"), D.new("1.0")]
+    ]
+  end
+
   defp percentage_color(nil), do: "text-gray-400"
 
   defp percentage_color(value) do
-    if Decimal.compare(value, Decimal.new("0")) == :gt do
+    if D.compare(value, D.new("0")) == :gt do
       "text-green-600"
     else
       "text-red-600"
