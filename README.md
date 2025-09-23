@@ -61,7 +61,7 @@ Ashfolio manages financial data locally on your computer. Track investments, cas
 
 ## Project Status
 
-Current Version: v0.5.0 (Released September 9, 2025)
+Current Version: v0.7.0 (Released September 21, 2025)
 
 ### Currently Available
 
@@ -91,19 +91,27 @@ Current Version: v0.5.0 (Released September 9, 2025)
 - Professional financial notation and formatting
 - Performance caching for complex calculations
 
-### Completed in v0.5.0 ✅
+### Completed in v0.7.0 ✅
 
-- AER Standardization: Consistent Annual Equivalent Rate across all calculators
-- Money Ratios Assessment: Charles Farrell's 8 key financial health ratios
-- Tax Planning & Optimization: FIFO cost basis and tax-loss harvesting
-- Enhanced Financial Infrastructure: Comprehensive benchmark analysis
-- Advanced Analytics: Complete financial planning suite with 1,680+ tests
+- **Advanced Portfolio Analytics**: Complete Markowitz portfolio optimization
+  - Efficient Frontier Visualization with minimum variance, tangency, and maximum return portfolios
+  - N-asset portfolio optimization with approximation algorithms (99% accuracy)
+  - Risk Metrics Suite: Sharpe, Sortino, Drawdown, VaR, Beta analysis
+  - Correlation & Covariance Analysis with interactive matrices
+  - Real-time TWR/MWR calculations with performance caching
+
+- **Corporate Actions Engine**: Comprehensive investment event management
+  - Stock splits, dividends, mergers, spinoffs with automatic FIFO cost basis adjustments
+  - Transaction adjustment system with complete audit trail
+  - Professional LiveView interface with conditional form fields
+
+- **Previous Foundations**: Money Ratios Assessment, Tax Planning & Optimization, Enhanced Financial Infrastructure
 
 ### Development Roadmap
 
-- ✅ v0.3.x, v0.4.x, v0.5.0: Complete
-- 📋 v0.6.0: Advanced Portfolio Optimization & Analytics
-- 📋 v0.7.0: Enhanced Reporting & Multi-currency
+- ✅ v0.3.x, v0.4.x, v0.5.0, v0.6.0, v0.7.0: Complete
+- 🚧 v0.8.0: Estate Planning & Advanced Tax Strategies (In Planning)
+- 📋 v0.9.0: Institutional Features & Multi-Entity Support
 - 📋 v1.0.0: Production Release
 
 See [roadmap](docs/roadmap/v0.2-v0.5-roadmap.md) for detailed feature timelines.

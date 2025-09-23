@@ -177,9 +177,9 @@ telemetry_metrics: ❌ (0)
 telemetry_poller: ❌ (0)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio/application.ex", "lib/ashfolio/portfolio/optimization/portfolio_optimizer.ex", "lib/ashfolio_web/live/advanced_analytics_live/index.ex", "lib/ashfolio_web/live/advanced_analytics_live/index.html.heex", "lib/ashfolio/portfolio/calculators/correlation_calculator.ex"]
-uncommitted: 2 files
-commits_ahead: 9
+recent: ["lib/ashfolio/application.ex", "lib/ashfolio/portfolio/calculators/beta_calculator.ex", "lib/ashfolio/portfolio/calculators/correlation_calculator.ex", "lib/ashfolio/portfolio/calculators/covariance_calculator.ex", "lib/ashfolio/portfolio/calculators/drawdown_calculator.ex"]
+uncommitted: 1 files
+commits_ahead: 0
 
 # === TEST ANALYSIS ===
 summary:
