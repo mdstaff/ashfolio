@@ -7,6 +7,11 @@
 # General application configuration
 import Config
 
+# Configure Ash AI
+# Note: This is the framework default. Ashfolio uses its own AI provider config below.
+config :ash_ai,
+  default_model: LangChain.ChatModels.ChatOpenAI
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails
@@ -54,6 +59,32 @@ config :ashfolio, Oban,
     analytics: 2
   ]
 
+# Configure AI Provider
+#
+# Ashfolio follows a local-first philosophy for privacy and control.
+# By default, we use Ollama (local LLM) to keep your financial data on your computer.
+#
+# RECOMMENDED (Default): Ollama - 100% Private, Local AI
+#   ai_provider: :ollama
+#   ai_model: "llama3"
+#
+#   Setup: brew install ollama && ollama pull llama3
+#   See: docs/features/ai-natural-language-entry.md
+#
+# ALTERNATIVE: OpenAI - Cloud API (Opt-In)
+#   ai_provider: :openai
+#   ai_model: "gpt-4o-mini"
+#
+#   Setup: export OPENAI_API_KEY="sk-..."
+#   Note: Transaction descriptions are sent to OpenAI for processing
+#
+config :ashfolio,
+  ai_provider: :ollama,
+  ai_model: "llama3",
+  ai_handlers: [
+    Ashfolio.AI.Handlers.TransactionParser
+  ]
+
 # Configure Ash Framework
 config :ashfolio, ash_domains: [Ashfolio.Portfolio, Ashfolio.FinancialManagement]
 
@@ -70,6 +101,10 @@ config :esbuild,
     cd: Path.expand("../assets", __DIR__),
     env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
   ]
+
+# Configure LangChain (requires OPENAI_API_KEY env var)
+config :langchain,
+  openai_key: System.get_env("OPENAI_API_KEY")
 
 # Configures Elixir's Logger
 config :logger, :console,

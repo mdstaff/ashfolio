@@ -14,6 +14,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
   alias Ashfolio.PubSub
   alias AshfolioWeb.Live.ErrorHelpers
   alias AshfolioWeb.TransactionLive.FormComponent
+  alias Decimal, as: D
 
   @impl true
   def mount(params, _session, socket) do
@@ -93,6 +94,82 @@ defmodule AshfolioWeb.TransactionLive.Index do
      |> assign(:show_form, true)
      |> assign(:form_action, :new)
      |> assign(:selected_transaction, nil)}
+  end
+
+  @impl true
+  def handle_event("parse_transaction_text", %{"text" => text}, socket) do
+    case Ashfolio.AI.Dispatcher.process_text(text) do
+      {:ok, %{type: :transaction_draft, data: result}} ->
+        # Pre-fill a new transaction struct with the parsed data
+        # We need to find the account and symbol IDs if possible, or let the user select them
+
+        # Attempt to resolve symbol
+        symbol_id =
+          if result.symbol do
+            case Ashfolio.Portfolio.Symbol.find_by_symbol(result.symbol) do
+              {:ok, [symbol | _]} -> symbol.id
+              # User will need to select/create
+              _ -> nil
+            end
+          end
+
+        # Attempt to resolve account
+        account_id =
+          if result.account do
+            case Ashfolio.Portfolio.Account.get_by_name(result.account) do
+              {:ok, account} -> account.id
+              # User will need to select
+              _ -> nil
+            end
+          end
+
+        # Create a pre-filled transaction struct
+        # Note: We don't save it yet, just open the form
+        # Calculate total_amount with proper Decimal handling
+        total_amount =
+          case {result.quantity, result.price} do
+            {nil, _} -> nil
+            {_, nil} -> nil
+            {qty, price} -> D.mult(qty, price)
+          end
+
+        prefilled_transaction = %Transaction{
+          type: result.type,
+          quantity: result.quantity,
+          price: result.price,
+          total_amount: total_amount,
+          date: result.date,
+          symbol_id: symbol_id,
+          account_id: account_id,
+          notes: "Parsed from: #{text}"
+        }
+
+        {:noreply,
+         socket
+         |> assign(:show_form, true)
+         |> assign(:form_action, :new)
+         |> assign(:selected_transaction, prefilled_transaction)
+         |> put_flash(:info, "Transaction parsed! Please review and save.")}
+
+      {:error, :no_handler_found} ->
+        {:noreply,
+         put_flash(
+           socket,
+           :error,
+           "I didn't understand that command. Try 'Bought 10 AAPL at 150 on Fidelity'"
+         )}
+
+      {:error, :ai_unavailable} ->
+        {:noreply,
+         put_flash(
+           socket,
+           :error,
+           "AI features are not available. Please check your AI configuration (Ollama or OpenAI API key)."
+         )}
+
+      {:error, error} ->
+        {:noreply, put_flash(socket, :error, "Failed to parse: #{inspect(error)}")}
+    end
   end
 
   @impl true
@@ -399,7 +476,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
   defp parse_amount_range_filter(min_str, max_str) when is_binary(min_str) and is_binary(max_str) do
     with {min_amount, ""} <- Float.parse(min_str),
          {max_amount, ""} <- Float.parse(max_str) do
-      {Decimal.from_float(min_amount), Decimal.from_float(max_amount)}
+      {D.from_float(min_amount), D.from_float(max_amount)}
     else
       _ -> nil
     end
@@ -439,8 +516,8 @@ defmodule AshfolioWeb.TransactionLive.Index do
     end)
     |> Enum.map(fn {category_name, txns} ->
       total_amount =
-        Enum.reduce(txns, Decimal.new(0), fn tx, acc ->
-          Decimal.add(acc, tx.total_amount)
+        Enum.reduce(txns, D.new(0), fn tx, acc ->
+          D.add(acc, tx.total_amount)
         end)
 
       %{
@@ -496,8 +573,8 @@ defmodule AshfolioWeb.TransactionLive.Index do
 
       {:amount_range, {min_amount, max_amount}}, acc ->
         acc
-        |> Map.put(:amount_min, Decimal.to_string(min_amount))
-        |> Map.put(:amount_max, Decimal.to_string(max_amount))
+        |> Map.put(:amount_min, D.to_string(min_amount))
+        |> Map.put(:amount_max, D.to_string(max_amount))
 
       _, acc ->
         acc
@@ -548,7 +625,7 @@ defmodule AshfolioWeb.TransactionLive.Index do
   end
 
   defp format_amount_range_filter(min_amount, max_amount) do
-    "amount:#{Decimal.to_string(min_amount)}_#{Decimal.to_string(max_amount)}"
+    "amount:#{D.to_string(min_amount)}_#{D.to_string(max_amount)}"
   end
 
   defp format_active_filters_string([]), do: "filters:none"
@@ -568,6 +645,36 @@ defmodule AshfolioWeb.TransactionLive.Index do
           <.icon name="hero-plus" class="w-4 h-4 mr-2" /> New Transaction
         </.button>
       </div>
+      
+    <!-- Natural Language Entry Section -->
+      <.card class="mb-6 bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-100">
+        <:header>
+          <div class="flex items-center gap-2 text-indigo-900">
+            <.icon name="hero-chat-bubble-bottom-center-text" class="w-5 h-5 text-indigo-600" />
+            <h2 class="text-lg font-medium">Natural Language Entry</h2>
+          </div>
+        </:header>
+
+        <div class="mt-2">
+          <form phx-submit="parse_transaction_text" class="flex gap-2">
+            <div class="flex-grow">
+              <input
+                type="text"
+                name="text"
+                placeholder="e.g., 'Bought 10 AAPL at 150 yesterday on Fidelity'"
+                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                required
+              />
+            </div>
+            <.button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white">
+              Parse
+            </.button>
+          </form>
+          <p class="mt-2 text-xs text-indigo-600">
+            Describe your transaction naturally to auto-fill the form.
+          </p>
+        </div>
+      </.card>
       
     <!-- Advanced Transaction Filter Component -->
       <.transaction_filter

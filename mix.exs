@@ -87,7 +87,11 @@ defmodule Ashfolio.MixProject do
       {:mox, "~> 1.0", only: :test},
 
       # Development tools
-      {:igniter, "~> 0.6", only: [:dev, :test]}
+      {:igniter, "~> 0.6", only: [:dev, :test]},
+
+      # AI Integration
+      {:ash_ai, "~> 0.3.0"},
+      {:langchain, "~> 0.4.0"}
     ]
   end
 

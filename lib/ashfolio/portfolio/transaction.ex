@@ -8,7 +8,8 @@ defmodule Ashfolio.Portfolio.Transaction do
 
   use Ash.Resource,
     domain: Ashfolio.Portfolio,
-    data_layer: AshSqlite.DataLayer
+    data_layer: AshSqlite.DataLayer,
+    extensions: [AshAi]
 
   require Ash.Query
 
@@ -362,6 +363,37 @@ defmodule Ashfolio.Portfolio.Transaction do
         |> Ash.Query.offset(offset)
       end)
     end
+
+    action :parse_from_text, :struct do
+      description("""
+      Parses a natural language string into a structured Transaction.
+      Example: "Bought 10 AAPL at 150 yesterday" -> %Transaction{type: :buy, symbol: "AAPL", ...}
+      """)
+
+      argument :text, :string do
+        allow_nil?(false)
+        description("The natural language text to parse")
+      end
+
+      run(
+        prompt(
+          Ashfolio.AI.Model.default(),
+          prompt: """
+          Parse the following financial transaction text into a structured format.
+
+          Text: <%= @arguments.text %>
+
+          Rules:
+          - Type must be one of: :buy, :sell, :dividend, :fee, :interest, :deposit, :withdrawal
+          - Quantity must be a positive number (even for sells/withdrawals, the system handles the sign)
+          - Price is per share/unit. If total amount is given, calculate price.
+          - Date should be in ISO8601 format (YYYY-MM-DD). "Yesterday" or "Today" should be relative to <%= Date.to_iso8601(Date.utc_today()) %>.
+          - Account name should be extracted if present.
+          - Symbol should be the ticker (e.g., AAPL).
+          """
+        )
+      )
+    end
   end
 
   code_interface do
@@ -401,6 +433,8 @@ defmodule Ashfolio.Portfolio.Transaction do
       action: :paginated,
       args: [:page, :page_size]
     )
+
+    define(:parse_from_text, action: :parse_from_text, args: [:text])
   end
 
   # Custom validation function for quantity based on transaction type
