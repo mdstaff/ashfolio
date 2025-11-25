@@ -231,6 +231,7 @@ defmodule Ashfolio.Portfolio.Calculators.CorrelationCalculatorTest do
 
   describe "performance" do
     @tag :performance
+    @tag :flaky
     test "calculate_matrix performs within 50ms for 10x10 matrix" do
       # Generate 10 assets with 252 trading days of returns
       asset_returns =

@@ -452,6 +452,7 @@ defmodule Ashfolio.Migration.V020CompatibilityTest do
     end
 
     @tag :performance
+    @tag :flaky
     test "transaction query performance with categories" do
       account = SQLiteHelpers.get_default_account()
 

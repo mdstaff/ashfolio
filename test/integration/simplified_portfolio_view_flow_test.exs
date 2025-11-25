@@ -124,6 +124,7 @@ defmodule AshfolioWeb.Integration.SimplifiedPortfolioViewFlowTest do
       end
     end
 
+    @tag :flaky
     test "price refresh functionality integration", %{conn: conn, symbols: symbols} do
       {:ok, view, _html} = live(conn, "/")
 

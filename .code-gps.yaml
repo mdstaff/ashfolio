@@ -139,14 +139,14 @@ Index:
   missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
 Index:
   file: lib/ashfolio_web/live/transaction_live/index.ex
-  mount: 19 | render: 558
-  events: ["new_transaction", "edit_transaction", "filter_transactions", "filter_by_category", "apply_composite_filters", "clear_filters", "delete_transaction"]
+  mount: 20 | render: 635
+  events: ["new_transaction", "parse_transaction_text", "edit_transaction", "filter_transactions", "filter_by_category", "apply_composite_filters", "clear_filters", "delete_transaction"]
   subscriptions: []
   missing: ["accounts", "transactions", "net_worth", "expenses"]|...3
 
 # === KEY COMPONENTS ===
-flash: lib/ashfolio_web/components/core_components.ex:111 (114x)
-icon: lib/ashfolio_web/components/core_components.ex:599 (109x)
+flash: lib/ashfolio_web/components/core_components.ex:111 (118x)
+icon: lib/ashfolio_web/components/core_components.ex:599 (110x)
 list: lib/ashfolio_web/components/core_components.ex:541 (107x)
 input: lib/ashfolio_web/components/core_components.ex:295 (96x)
 input: lib/ashfolio_web/components/core_components.ex:306 (96x)
@@ -177,15 +177,15 @@ telemetry_metrics: ❌ (0)
 telemetry_poller: ❌ (0)
 
 # === FRESHNESS ===
-recent: ["lib/ashfolio/application.ex", "lib/ashfolio/portfolio/calculators/beta_calculator.ex", "lib/ashfolio/portfolio/calculators/correlation_calculator.ex", "lib/ashfolio/portfolio/calculators/covariance_calculator.ex", "lib/ashfolio/portfolio/calculators/drawdown_calculator.ex"]
-uncommitted: 1 files
-commits_ahead: 0
+recent: ["lib/ashfolio/portfolio/optimization/portfolio_optimizer.ex", "lib/ashfolio_web/live/advanced_analytics_live/index.ex", "lib/ashfolio/ai/dispatcher.ex", "lib/ashfolio/ai/handler.ex", "lib/ashfolio/ai/handlers/transaction_parser.ex"]
+uncommitted: 4 files
+commits_ahead: 2
 
 # === TEST ANALYSIS ===
 summary:
-  total_test_modules: 142
-  total_tests: 1924
-  average_tests_per_module: 13.5
+  total_test_modules: 144
+  total_tests: 1929
+  average_tests_per_module: 13.4
 
 top_10_test_modules:
   Unknown: 48 tests, 86 assertions (15 describes) | test/ashfolio_web/form_helpers_test.exs
@@ -213,19 +213,19 @@ test/ashfolio/financial_management/forecast_calculator_aer_test.exs ⚠️
 
 # === MODULE ANALYSIS ===
 summary:
-  total_modules: 149 (141 lib, 8 test)
-  total_functions: 2177 (2100 lib, 77 test)
-  public/private: 848 public, 1329 private
-  average_functions_per_module: 14.6
+  total_modules: 153 (145 lib, 8 test)
+  total_functions: 2186 (2109 lib, 77 test)
+  public/private: 852 public, 1334 private
+  average_functions_per_module: 14.3
   complex_modules: 17 (>30 functions)
-      empty_modules: 18 (potential parsing issues)
+      empty_modules: 19 (potential parsing issues)
 
 top_20_modules:
   Unknown: 64 functions (1 public, 63 private) | lib/ashfolio_web/components/forecast_chart.ex
   Unknown: 59 functions (32 public, 27 private) | lib/ashfolio/data_helpers.ex
   Unknown: 57 functions (13 public, 44 private) | lib/ashfolio_web/live/financial_goal_live/index.ex
   Unknown: 55 functions (13 public, 42 private) | lib/ashfolio_web/live/dashboard_live.ex
-  Unknown: 53 functions (19 public, 34 private) | lib/ashfolio_web/live/transaction_live/index.ex
+  Unknown: 54 functions (20 public, 34 private) | lib/ashfolio_web/live/transaction_live/index.ex
   Unknown: 51 functions (33 public, 18 private) | lib/ashfolio_web/components/core_components.ex
   Unknown: 49 functions (41 public, 8 private) | lib/ashfolio/financial/formatters.ex
   Unknown: 46 functions (44 public, 2 private) | lib/ashfolio_web/form_helpers.ex

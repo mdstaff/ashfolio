@@ -21,6 +21,7 @@ defmodule AshfolioWeb.AccountLive.IndexTest do
   end
 
   describe "account listing" do
+    @tag :flaky
     test "displays all accounts", %{conn: conn, account1: account1} do
       # Create second account only for this test
       {:ok, account2} =

@@ -11,10 +11,7 @@ defmodule Ashfolio.Portfolio.PerformanceCacheTest do
   alias Ashfolio.Portfolio.PerformanceCache
 
   setup do
-    # Start cache for testing
-    {:ok, _pid} = PerformanceCache.start_link([])
-
-    # Clear any existing cache entries
+    # Clear any existing cache entries (cache already started by application supervisor)
     PerformanceCache.clear_all()
 
     :ok
