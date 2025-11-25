@@ -5,6 +5,48 @@ All notable changes to the Ashfolio project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2025-11-25
+
+### AI Natural Language Transaction Entry - Intelligent Data Input
+
+#### Major Features Added
+
+- **Natural Language Transaction Parsing**: Enter transactions conversationally
+  - Parse phrases like "Bought 10 AAPL at 150 yesterday"
+  - Support for buy/sell, quantity, symbol, price, and date extraction
+  - User review required before saving (human-in-the-loop)
+  - Graceful fallback to manual entry on parse failure
+
+- **Multi-Provider AI Architecture**: Flexible AI backend support
+  - **Ollama (Recommended)**: Local-first, privacy-preserving AI processing
+  - **OpenAI**: Cloud-based alternative for users without local GPU
+  - Dispatcher pattern for seamless provider switching
+  - Configurable model selection per provider
+
+- **Privacy-First Design**: Financial data stays local
+  - Ollama runs entirely on your machine
+  - No transaction data sent to cloud unless explicitly using OpenAI
+  - Consistent with Ashfolio's local-first philosophy
+
+#### Technical Implementation
+
+- **AI Module Structure**: Clean separation of concerns
+  - `Ashfolio.AI.Dispatcher`: Routes requests to appropriate handlers
+  - `Ashfolio.AI.Handler`: Behaviour definition for AI handlers
+  - `Ashfolio.AI.Handlers.TransactionParser`: Natural language parsing
+  - `Ashfolio.AI.Model`: Provider configuration and model management
+
+- **Configuration**: Simple setup via config.exs
+  - `ai_provider`: `:ollama` (default) or `:openai`
+  - `ollama_model`: Model name (default: "llama3")
+  - `openai_model`: Model name (default: "gpt-4o-mini")
+
+#### Documentation
+
+- Comprehensive feature documentation in `docs/features/ai-natural-language-entry.md`
+- Setup guides for both Ollama and OpenAI configurations
+- Usage examples and troubleshooting guide
+
 ## [0.7.0] - 2025-09-21
 
 ### Advanced Portfolio Analytics - Professional Investment Analysis
