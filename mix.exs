@@ -4,7 +4,7 @@ defmodule Ashfolio.MixProject do
   def project do
     [
       app: :ashfolio,
-      version: "0.7.0",
+      version: "0.8.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -87,7 +87,11 @@ defmodule Ashfolio.MixProject do
       {:mox, "~> 1.0", only: :test},
 
       # Development tools
-      {:igniter, "~> 0.6", only: [:dev, :test]}
+      {:igniter, "~> 0.6", only: [:dev, :test]},
+
+      # AI Integration
+      {:ash_ai, "~> 0.3.0"},
+      {:langchain, "~> 0.4.0"}
     ]
   end
 

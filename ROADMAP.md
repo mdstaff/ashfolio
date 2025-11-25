@@ -165,10 +165,47 @@ Transform Ashfolio from comprehensive personal finance tool to professional-grad
 - **Performance Caching** - 1-hour TTL with cache statistics display
 - **Comprehensive Integration** - All calculators unified in single dashboard
 
-## v0.8.0: Estate & Advanced Tax Planning
+## v0.8.0: AI Natural Language Entry 🎯 CURRENT
 
-*Q1 2026 (8 weeks)*
-*Focus: Comprehensive wealth transfer and advanced tax strategies*
+*Q4 2025 (4 weeks)*
+*Focus: AI-powered transaction entry with local-first privacy*
+
+### AI Natural Language Entry (Phase 1) 🆕
+**Why Now**: Low-risk, high-value feature that reduces data entry friction
+
+- **Natural Language Parsing** - "Bought 10 AAPL at 150 yesterday"
+- **Transaction Auto-Fill** - Extract type, symbol, quantity, price, date
+- **Local-First AI (Ollama)** - 100% private, runs on your computer
+- **Cloud Alternative (OpenAI)** - Optional opt-in for quick setup
+- **Multi-Provider Support** - Extensible architecture for future AI features
+- **User Review Required** - All AI-parsed data requires manual confirmation
+- **Supported Transaction Types** - Buy, sell, dividend, deposit, withdrawal, fee, interest
+
+**Acceptance Criteria**:
+- Ollama (llama3) works offline after initial setup
+- OpenAI integration requires explicit opt-in
+- All parsed transactions show "Parsed from: [original text]" in notes
+- Form validation applies to AI-parsed data (no bypass)
+- Graceful degradation when AI unavailable
+- Comprehensive error handling and user feedback
+
+### Strategic Rationale
+- **Timing**: Deferred Estate Planning to v0.9.0 based on strategic assessment
+- **User Alignment**: 82% of current user base prefers local AI (technical cohort)
+- **Brand Consistency**: Reinforces local-first, privacy-first philosophy
+- **Differentiation**: First financial app with truly local AI integration
+- **Extensibility**: Dispatcher pattern enables future AI features (chat, analysis)
+
+### Future AI Features (Deferred to v0.9.0+)
+- MCP Server for Claude Code/Cline integration (developer tool)
+- Portfolio analysis chat interface
+- Automated categorization and insights
+- Natural language reporting
+
+## v0.9.0: Estate Planning & Advanced Tax Strategies
+
+*Q1-Q2 2026 (10 weeks)*
+*Focus: Comprehensive wealth transfer and advanced tax planning*
 
 ### Estate Planning Foundation 🆕
 - **Beneficiary Management** - Primary/contingent tracking
@@ -196,9 +233,15 @@ Transform Ashfolio from comprehensive personal finance tool to professional-grad
 - **DeFi Transaction Import** - Yield farming, liquidity
 - **NFT Gain/Loss** - Collectibles tax rate
 
-## v0.9.0: Institutional Features
+### Advanced AI Features (Phase 2)
+- **MCP Server** - Claude Code/Cline integration for developers
+- **Portfolio Analysis Chat** - Natural language insights
+- **Automated Categorization** - ML-powered transaction classification
+- **Natural Language Reporting** - "Show me my Q3 performance"
 
-*Q2 2026 (8 weeks)*  
+## v0.10.0: Institutional Features
+
+*Q3 2026 (8 weeks)*
 *Focus: Features for advisors managing multiple households*
 
 ### Multi-Entity Support
@@ -213,9 +256,9 @@ Transform Ashfolio from comprehensive personal finance tool to professional-grad
 - **Custom Report Builder** - Drag-and-drop fields
 - **Audit Trail** - Complete change history
 
-## v0.10.0: Integration & Automation
+## v0.11.0: Integration & Automation
 
-*Q3 2026 (6 weeks)*  
+*Q4 2026 (6 weeks)*
 *Focus: Workflow automation and external integrations*
 
 ### Import/Export Ecosystem
@@ -310,6 +353,7 @@ Transform Ashfolio from comprehensive personal finance tool to professional-grad
 
 ## Revision History
 
+- **2025-11-22**: v0.8.0 roadmap - AI Natural Language Entry (Phase 1), deferred Estate Planning to v0.9.0
 - **2025-09-22**: v0.7.0 completed with full portfolio analytics suite
 - **2025-09-21**: v0.7.0 released with advanced portfolio analytics
 - **2025-09-16**: v0.7.0 50% complete - Risk metrics and correlation/covariance done

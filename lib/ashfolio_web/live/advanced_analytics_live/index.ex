@@ -134,6 +134,7 @@ defmodule AshfolioWeb.AdvancedAnalyticsLive.Index do
       socket
       |> assign(:cache_stats, get_cache_stats())
       |> put_flash(:info, "Cache statistics updated")
+
     {:noreply, socket}
   end
 
