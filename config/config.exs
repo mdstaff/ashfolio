@@ -88,6 +88,13 @@ config :ashfolio,
 # Configure Ash Framework
 config :ashfolio, ash_domains: [Ashfolio.Portfolio, Ashfolio.FinancialManagement]
 
+# Configure MCP (Model Context Protocol) integration
+# Privacy modes: :strict, :anonymized (default), :standard, :full
+# See: docs/features/proposed/mcp-integration/decisions/ADR-MCP-001-privacy-modes.md
+config :ashfolio, :mcp,
+  enabled: true,
+  privacy_mode: :anonymized
+
 config :ashfolio,
   ecto_repos: [Ashfolio.Repo],
   generators: [timestamp_type: :utc_datetime]
