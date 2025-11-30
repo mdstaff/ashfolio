@@ -1,6 +1,8 @@
 defmodule AshfolioWeb.Mcp.CoreToolsTest do
   use AshfolioWeb.ConnCase, async: false
 
+  @moduletag :mcp
+
   alias Ashfolio.Portfolio.Account
   alias Ashfolio.Portfolio.Symbol
 

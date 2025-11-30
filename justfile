@@ -58,6 +58,9 @@ test filter="":
     elif [ "{{filter}}" = "smoke" ]; then
         echo "🧪 Running smoke tests..."
         mix test --only smoke --no-color
+    elif [ "{{filter}}" = "mcp" ]; then
+        echo "🧪 Running MCP tests..."
+        mix test --only mcp --no-color
     elif [ -f "{{filter}}" ]; then
         echo "🧪 Testing {{filter}}..."
         mix test --no-color {{filter}}
@@ -348,6 +351,7 @@ help topic="":
         echo "  just test integration → Integration tests"
         echo "  just test live    → LiveView tests"
         echo "  just test perf    → Performance tests"
+        echo "  just test mcp     → MCP integration tests"
         echo "  just test all     → All tests"
         echo "  just test failed  → Re-run failures"
         echo "  just test <file>  → Specific file"

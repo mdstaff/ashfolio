@@ -3,26 +3,7 @@
 **Phase**: 1 - Core MCP Tools
 **Priority**: P1
 **Estimate**: 6-8 hours
-**Status**: Complete
-
-## Implementation Status (2025-11-27)
-
-**Completed:**
-- [x] Basic tools exposed (`list_accounts`, `list_transactions`, `list_symbols`)
-- [x] `get_portfolio_summary` tool
-- [x] Privacy Filter integration via custom generic actions
-- [x] All tests passing (8 core tools tests + 65 total MCP tests)
-
-### ⚠️ Technical Gap Identified
-The original spec proposed a `ToolWrapper` but did not specify how to inject it into `AshAi`'s tool execution pipeline. Since `AshAi` generates tool implementations directly from Resource Actions, we cannot easily wrap them externally without `AshAi` support.
-
-**Revised Strategy for Privacy:**
-Instead of exposing raw `:read` actions, we should define **Generic Actions** (e.g., `:list_accounts_safe`) on the resources. These actions will:
-1. Call the underlying read action.
-2. Apply the `PrivacyFilter` to the result.
-3. Return the sanitized map/struct.
-
-This ensures privacy is enforced at the Resource layer before `AshAi` sees the data.
+**Status**: In Progress
 
 ## Objective
 
@@ -30,9 +11,9 @@ Expose core Ash actions as MCP tools with proper privacy filtering, enabling Cla
 
 ## Prerequisites
 
-- [x] Task 01 (Router Setup) complete
-- [x] Task 02 (Privacy Filter) complete
-- [x] Task 03 (Anonymizer) complete
+- [ ] Task 01 (Router Setup) complete
+- [ ] Task 02 (Privacy Filter) complete
+- [ ] Task 03 (Anonymizer) complete
 
 ## Acceptance Criteria
 

@@ -60,5 +60,39 @@ defmodule Ashfolio.Portfolio do
       Use for retirement planning, risk assessment, and allocation analysis.
       """)
     end
+
+    tool :add_expense, Tools, :add_expense do
+      description("""
+      Add an expense record with two-phase input support.
+
+      Phase 1: Pass {"text": "description"} to receive expected schema and example.
+      Phase 2: Pass {"expense": {amount, category, date, description}} to create.
+
+      Amounts support flexible formats: "$100", "85.50", "1.5k", "EUR 500".
+      Dates can be ISO format or relative ("today", "yesterday").
+      """)
+    end
+
+    tool :add_transaction, Tools, :add_transaction do
+      description("""
+      Add a portfolio transaction with two-phase input support.
+
+      Phase 1: Pass {"text": "description"} to receive expected schema and example.
+      Phase 2: Pass {"transaction": {type, symbol, quantity, price, date}} to create.
+
+      Types: buy, sell, dividend, fee, interest, liability, deposit, withdrawal.
+      Symbol must exist in the database. Amounts support flexible formats.
+      """)
+    end
+
+    tool :search_tools, Tools, :search_tools do
+      description("""
+      Search for available tools by keyword or description.
+
+      Use this to find the right tool before calling it directly. Returns matching
+      tool names and descriptions. Follows Anthropic's tool search pattern for
+      ~85% token reduction in systems with many tools.
+      """)
+    end
   end
 end

@@ -25,6 +25,8 @@ defmodule Ashfolio.Application do
       Ashfolio.MarketData.PriceManager,
       # Start the PerformanceCache for analytics caching
       Ashfolio.Portfolio.PerformanceCache,
+      # Start the MCP Module Registry for tool discovery
+      AshfolioWeb.Mcp.ModuleRegistry,
       # Start to serve requests, typically the last entry
       AshfolioWeb.Endpoint
     ]

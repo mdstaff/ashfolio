@@ -1,6 +1,8 @@
 defmodule AshfolioWeb.Mcp.RouterTest do
   use AshfolioWeb.ConnCase, async: true
 
+  @moduletag :mcp
+
   describe "MCP protocol" do
     test "POST /mcp with initialize returns server info", %{conn: conn} do
       request = %{

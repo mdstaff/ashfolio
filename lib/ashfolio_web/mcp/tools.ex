@@ -8,14 +8,17 @@ defmodule AshfolioWeb.Mcp.Tools do
 
   use Ash.Resource, domain: Ashfolio.Portfolio
 
+  alias Ashfolio.Portfolio.Account
+  alias AshfolioWeb.Mcp.ParserToolExecutor
   alias AshfolioWeb.Mcp.PrivacyFilter
+  alias AshfolioWeb.Mcp.ToolSearch
 
   actions do
     action :list_accounts_filtered, {:array, :map} do
       description("List all investment and cash accounts with privacy filtering applied")
 
       run(fn _input, _context ->
-        accounts = Ash.read!(Ashfolio.Portfolio.Account)
+        accounts = Ash.read!(Account)
 
         filtered =
           accounts
@@ -74,7 +77,7 @@ defmodule AshfolioWeb.Mcp.Tools do
       description("Get aggregate portfolio metrics including total value tier, allocation, and risk assessment")
 
       run(fn _input, _context ->
-        accounts = Ash.read!(Ashfolio.Portfolio.Account)
+        accounts = Ash.read!(Account)
 
         total_value =
           accounts
@@ -119,6 +122,116 @@ defmodule AshfolioWeb.Mcp.Tools do
         {:ok, filtered}
       end)
     end
+
+    # ==========================================================================
+    # Parseable Tools (two-phase: guidance -> execution)
+    # ==========================================================================
+
+    action :add_expense, :map do
+      description("""
+      Add an expense record. Supports two-phase input:
+
+      Phase 1 (guidance): Pass {"text": "description"} to get the expected schema.
+      Phase 2 (execute): Pass {"expense": {amount, category, date, description}} to create.
+
+      Amounts can be in various formats: "$100", "85.50", "1.5k", "EUR 500".
+      Dates can be ISO format (YYYY-MM-DD) or relative ("today", "yesterday").
+      """)
+
+      argument :text, :string do
+        description("Natural language expense description (triggers schema guidance)")
+      end
+
+      argument :expense, :map do
+        description("Structured expense data with amount, category, date, description")
+      end
+
+      run(fn input, _context ->
+        args =
+          %{
+            "text" => input.arguments[:text],
+            "expense" => input.arguments[:expense]
+          }
+          |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+          |> Map.new()
+
+        case ParserToolExecutor.execute(:add_expense, args) do
+          {:guidance, guidance} -> {:ok, guidance}
+          {:ok, expense} -> {:ok, expense_to_map(expense)}
+          {:error, errors} -> {:error, format_errors(errors)}
+        end
+      end)
+    end
+
+    action :add_transaction, :map do
+      description("""
+      Add a portfolio transaction. Supports two-phase input:
+
+      Phase 1 (guidance): Pass {"text": "description"} to get the expected schema.
+      Phase 2 (execute): Pass {"transaction": {type, symbol, quantity, price, date}} to create.
+
+      Types: buy, sell, dividend, fee, interest, liability, deposit, withdrawal.
+      Amounts can be in various formats: "$150", "1.5k".
+      Dates must be ISO format (YYYY-MM-DD).
+      """)
+
+      argument :text, :string do
+        description("Natural language transaction description (triggers schema guidance)")
+      end
+
+      argument :transaction, :map do
+        description("Structured transaction data with type, symbol, quantity, price, date")
+      end
+
+      run(fn input, _context ->
+        args =
+          %{
+            "text" => input.arguments[:text],
+            "transaction" => input.arguments[:transaction]
+          }
+          |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+          |> Map.new()
+
+        case ParserToolExecutor.execute(:add_transaction, args) do
+          {:guidance, guidance} -> {:ok, guidance}
+          {:ok, txn} -> {:ok, transaction_to_map(txn)}
+          {:error, errors} -> {:error, format_errors(errors)}
+        end
+      end)
+    end
+
+    # ==========================================================================
+    # Tool Search (reduces token usage by ~85%)
+    # ==========================================================================
+
+    action :search_tools, :map do
+      description("""
+      Search for available tools by keyword, category, or description.
+      Use this to find the right tool before calling it directly.
+      Returns matching tool definitions with names and descriptions.
+
+      This follows Anthropic's "tool search" pattern for reducing token usage.
+      """)
+
+      argument :query, :string do
+        allow_nil?(false)
+        description("Search query (keywords, tool name, or description)")
+      end
+
+      argument :limit, :integer do
+        default(5)
+        description("Maximum number of results (default: 5)")
+      end
+
+      run(fn input, _context ->
+        args = %{
+          "query" => input.arguments[:query],
+          "limit" => input.arguments[:limit] || 5
+        }
+
+        ToolSearch.execute(args)
+      end)
+    end
   end
 
   # Private helpers
@@ -137,7 +250,7 @@ defmodule AshfolioWeb.Mcp.Tools do
     %{
       id: txn.id,
       type: txn.type,
-      symbol: txn.symbol && txn.symbol.symbol,
+      symbol: (txn.symbol && txn.symbol.symbol) || txn.symbol_id,
       quantity: txn.quantity,
       price: txn.price,
       total_amount: txn.total_amount,
@@ -145,6 +258,21 @@ defmodule AshfolioWeb.Mcp.Tools do
       account_name: txn.account && txn.account.name
     }
   end
+
+  defp expense_to_map(expense) do
+    %{
+      id: expense.id,
+      amount: expense.amount,
+      description: expense.description,
+      date: expense.date,
+      merchant: expense.merchant,
+      category_id: expense.category_id
+    }
+  end
+
+  defp format_errors(errors) when is_list(errors), do: Enum.join(errors, "; ")
+  defp format_errors(errors) when is_binary(errors), do: errors
+  defp format_errors(errors), do: inspect(errors)
 
   defp calculate_diversification(accounts, total_value) do
     if Decimal.compare(total_value, 0) == :gt do

@@ -43,6 +43,7 @@ defmodule AshfolioWeb.Router do
     live "/corporate-actions", CorporateActionLive.Index, :index
     live "/corporate-actions/new", CorporateActionLive.Index, :new
     live "/corporate-actions/:id/edit", CorporateActionLive.Index, :edit
+    live "/settings/ai", Settings.AiSettingsLive, :index
   end
 
   # Health check endpoints - accessible without authentication

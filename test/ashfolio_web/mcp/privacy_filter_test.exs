@@ -1,6 +1,8 @@
 defmodule AshfolioWeb.Mcp.PrivacyFilterTest do
   use Ashfolio.DataCase, async: true
 
+  @moduletag :mcp
+
   alias AshfolioWeb.Mcp.PrivacyFilter
 
   # Test data fixtures

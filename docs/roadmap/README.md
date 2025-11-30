@@ -10,6 +10,13 @@ This directory contains Ashfolio's strategic planning and architectural decision
 - **[UI/UX Improvements](ui-ux-improvements.md)** - Ongoing user interface enhancements
 - **[QA Automation Roadmap](qa-automation-roadmap.md)** - Testing and quality assurance improvements
 
+### Proposed Features
+
+See **[docs/features/proposed/](../features/proposed/)** for features under consideration:
+
+- **Smart Parsing Module System** - Rule-based parsing without AI dependencies
+- **Demo Mode** - Synthetic portfolios for exploration (unarchived)
+
 ### [Architectural Decision Record](../architecture/adr-001-local-first-architecture.md)
 
 Professional ADR documenting our commitment to local-first, single-user SQLite architecture with complete rationale, alternatives considered, and consequences.
@@ -74,23 +81,22 @@ Each roadmap feature requires:
 - Dependencies and prerequisites
 - Success criteria
 
-## Current Status: v0.5.0 Complete ✅
+## Current Status: v0.8.0 Complete ✅
 
-**v0.5.0 has been successfully completed**, delivering a comprehensive financial management platform with:
-- 1,680+ comprehensive tests passing
-- Money Ratios assessment system (Charles Farrell methodology)
-- Advanced tax planning with FIFO calculations
-- Complete retirement planning features
-- Production-ready performance (<100ms portfolio calculations)
+**v0.8.0 has been successfully completed**, delivering AI Natural Language Transaction Entry:
+- 1,900+ comprehensive tests passing
+- AI-powered transaction parsing (Ollama local / OpenAI cloud)
+- Multi-provider architecture with dispatcher pattern
+- Privacy-first design with local-first AI recommended
 
-## Next Phase: v0.6.0 Planning
+**Previous milestones:**
+- v0.7.0: Advanced Portfolio Analytics (Efficient Frontier, TWR/MWR, Risk Metrics)
+- v0.6.0: Corporate Actions Engine (splits, dividends, mergers, spinoffs)
+- v0.5.0: Money Ratios, Tax Planning, Retirement Planning
 
-The next development phase will focus on advanced portfolio management and optimization features. See the [Financial Expansion Roadmap](financial-expansion-roadmap.md) for detailed planning of:
+## Next Phase: v0.9.0 Planning
 
-1. Advanced portfolio optimization
-2. Risk analysis and management
-3. Alternative investment tracking
-4. Enhanced reporting capabilities
+v0.9.0 priorities are still being determined. See [proposed features](../features/proposed/) for candidates.
 
 ## Contributing to Roadmap
 
