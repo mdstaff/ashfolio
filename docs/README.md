@@ -16,7 +16,7 @@ Welcome to the Ashfolio documentation! This is your guide to understanding, usin
 - **[Architecture Decisions](architecture/)** - Key architectural choices
 
 ### Planning & Progress
-- **[Implementation Plan](planning/IMPLEMENTATION_PLAN.md)** - Current v0.7.0 development status
+- **[Implementation Plan](planning/V0.10.0_IMPLEMENTATION_PLAN.md)** - MCP Phase 2 development (complete)
 - **[Professional Assessment](planning/CFP_CPA_ASSESSMENT.md)** - CFP/CPA feature evaluation
 - **[Future Ideas](future-ideas/)** - Concept exploration and possibilities
 
@@ -36,17 +36,19 @@ Welcome to the Ashfolio documentation! This is your guide to understanding, usin
 
 ## 📊 Current Status
 
-### Version: v0.7.0 (In Progress)
-- **Stage 1**: Advanced Risk Metrics ✅ Complete
-- **Stage 2**: Correlation & Covariance ✅ Complete
-- **Stage 3**: Portfolio Optimization 🚧 Next
-- **Stage 4**: Advanced Analytics LiveView 📋 Planned
+### Version: v0.10.0 (Current)
+
+**Recent Releases:**
+- **v0.10.0**: MCP Phase 2 - AI consent, parsing & tool discovery
+- **v0.9.0**: MCP Integration - AI assistant portfolio access
+- **v0.8.0**: AI Natural Language Transaction Entry
+- **v0.7.0**: Advanced Portfolio Analytics (Efficient Frontier, TWR/MWR)
 
 ### Statistics
-- **Tests**: 1,880+ passing tests
+- **Tests**: 2,200+ passing tests
 - **Coverage**: 95%+ for financial calculations
 - **Performance**: All calculations < 100ms
-- **Architecture**: Phoenix LiveView + Ash 3.4 + SQLite
+- **Architecture**: Phoenix LiveView + Ash 3.9 + SQLite
 
 ## 🗂️ Documentation Structure
 
@@ -114,17 +116,18 @@ If you can't find what you're looking for:
 
 ## 🔄 Recent Updates
 
-### September 2025
-- ✅ Completed v0.7.0 Stage 1: Beta, Drawdown, and Risk Metrics Calculators
-- ✅ Completed v0.7.0 Stage 2: Correlation & Covariance Analysis
-- 📚 Documentation reorganization and cleanup
-- 🎯 Enhanced portfolio analytics capabilities
+### November 2025
+- ✅ Released v0.10.0: MCP Phase 2 - AI consent, parsing & tool discovery
+- ✅ Released v0.9.0: MCP Integration - AI assistant portfolio access
+- ✅ Released v0.8.0: AI Natural Language Transaction Entry
+- 📚 Added AI Settings page for consent management
+- 🎯 GDPR-compliant consent and audit infrastructure
 
-### August 2025
-- ✅ Released v0.6.0: Corporate Actions Engine
-- ✅ Added comprehensive tax document generation
-- ✅ Implemented stock splits, dividends, and mergers
+### September 2025
+- ✅ Released v0.7.0: Advanced Portfolio Analytics
+- ✅ Efficient Frontier, TWR/MWR, Risk Metrics
+- 📚 Documentation reorganization and cleanup
 
 ---
 
-*Last Updated: September 2025 | Version: v0.7.0-dev*
+*Last Updated: November 2025 | Version: v0.10.0*

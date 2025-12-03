@@ -81,22 +81,30 @@ Each roadmap feature requires:
 - Dependencies and prerequisites
 - Success criteria
 
-## Current Status: v0.8.0 Complete ✅
+## Current Status: v0.10.0 Complete ✅
 
-**v0.8.0 has been successfully completed**, delivering AI Natural Language Transaction Entry:
-- 1,900+ comprehensive tests passing
-- AI-powered transaction parsing (Ollama local / OpenAI cloud)
-- Multi-provider architecture with dispatcher pattern
-- Privacy-first design with local-first AI recommended
+**v0.10.0 has been successfully completed**, delivering MCP Phase 2:
+- 2,200+ comprehensive tests passing
+- AI Settings page for consent and privacy management
+- Natural language parsing for amounts and dates
+- Tool discovery and search for optimized AI context
+- GDPR-compliant consent and audit infrastructure
 
 **Previous milestones:**
+- v0.9.0: MCP Integration (AI assistant portfolio access with privacy filtering)
+- v0.8.0: AI Natural Language Transaction Entry (Ollama/OpenAI)
 - v0.7.0: Advanced Portfolio Analytics (Efficient Frontier, TWR/MWR, Risk Metrics)
 - v0.6.0: Corporate Actions Engine (splits, dividends, mergers, spinoffs)
 - v0.5.0: Money Ratios, Tax Planning, Retirement Planning
 
-## Next Phase: v0.9.0 Planning
+## Next Phase: v0.11.0 Planning
 
-v0.9.0 priorities are still being determined. See [proposed features](../features/proposed/) for candidates.
+v0.11.0 priorities (deferred from v0.10.0):
+- P3-03 Audit Logging: Tool invocation tracking
+- Audit Log UI in AI Settings page
+- Extended parsers for expenses/income/accounts
+
+See [proposed features](../features/proposed/) for additional candidates.
 
 ## Contributing to Roadmap
 

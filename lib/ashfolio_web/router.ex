@@ -66,7 +66,7 @@ defmodule AshfolioWeb.Router do
   forward "/mcp", AshAi.Mcp.Router,
     otp_app: :ashfolio,
     mcp_name: "Ashfolio Portfolio Manager",
-    mcp_server_version: "0.9.0"
+    mcp_server_version: "0.10.0"
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:ashfolio, :dev_routes) do

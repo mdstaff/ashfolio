@@ -5,6 +5,113 @@ All notable changes to the Ashfolio project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2025-11-30
+
+### MCP Phase 2 - AI Consent, Parsing & Tool Discovery
+
+#### Major Features Added
+
+- **AI Settings Page**: Complete consent and privacy management interface
+  - Privacy mode selection (strict, anonymized, standard, full)
+  - Feature toggle for MCP tools, AI analysis, cloud AI
+  - GDPR-compliant data export and consent revocation
+  - Consent status display with visual indicators
+
+- **Natural Language Parsing**: Flexible amount and data parsing
+  - Amount parser supporting $100, 85k, EUR 500, ranges ($50-100)
+  - Date parsing with relative terms (today, yesterday)
+  - Two-phase MCP tools: guidance → structured execution
+  - Schema-driven validation for expenses and transactions
+
+- **Tool Discovery & Search**: Optimized AI context management
+  - Module Registry for centralized tool discovery
+  - Tool search following Anthropic's advanced pattern (~85% token reduction)
+  - Privacy-aware tool filtering by consent mode
+  - Runtime tool registration for extensibility
+
+- **Legal & Consent Infrastructure**: GDPR-compliant consent management
+  - AiConsent resource with versioned terms acceptance
+  - ConsentAudit append-only audit trail
+  - Consent modal with feature selection and terms display
+  - ConsentCheck hook for LiveView consent enforcement
+
+#### Technical Implementation
+
+- **Parsing Module** (`lib/ashfolio/parsing/`)
+  - `Parseable` behaviour for standardized parsing interface
+  - `AmountParser` with Decimal precision and currency support
+  - `Schema` helpers for LLM-assisted structuring
+
+- **MCP Infrastructure** (`lib/ashfolio_web/mcp/`)
+  - `ModuleRegistry` GenServer for tool discovery
+  - `ToolSearch` with keyword scoring algorithm
+  - `ParserToolExecutor` for two-phase tool execution
+
+- **Legal Domain** (`lib/ashfolio/legal/`)
+  - `AiConsent` Ash resource with grant/withdraw actions
+  - `ConsentAudit` for compliance tracking
+
+#### Test Coverage
+
+- 123 new tests across all modules
+- Full LiveView testing for AI Settings page
+- Integration tests for MCP tool flow
+
+## [0.9.0] - 2025-11-28
+
+### MCP Integration - AI Assistant Portfolio Access
+
+#### Major Features Added
+
+- **Model Context Protocol (MCP) Server**: Enable AI assistants to access portfolio data
+  - Complete MCP 2024-11-05 specification implementation
+  - Privacy-filtered data access with configurable modes
+  - Four core tools: list_accounts, get_portfolio_summary, list_transactions, list_symbols
+  - JSON-RPC 2.0 over stdio transport
+
+- **Privacy Filtering System**: Granular control over data exposure
+  - Four privacy modes: strict, anonymized, standard, full
+  - Account anonymization (names → letters A, B, C)
+  - Amount tier masking ($1K-$10K, $10K-$100K, etc.)
+  - Configurable via application environment
+
+- **AshAi Integration**: Native Ash framework MCP support
+  - Domain-level tool definitions
+  - Automatic schema generation from Ash resources
+  - Type-safe tool execution
+
+#### Technical Implementation
+
+- **MCP Router** (`lib/ashfolio_web/mcp/router.ex`)
+  - Handles initialize, tools/list, tools/call methods
+  - Server capabilities negotiation
+  - Proper error responses per MCP spec
+
+- **Privacy Filter** (`lib/ashfolio_web/mcp/privacy_filter.ex`)
+  - Mode-aware data transformation
+  - Consistent anonymization across requests
+  - Preserves data relationships while hiding sensitive values
+
+- **Anonymizer** (`lib/ashfolio_web/mcp/anonymizer.ex`)
+  - Deterministic letter assignment for accounts
+  - Amount tier classification
+  - Account type generalization
+
+#### Configuration
+
+```elixir
+config :ashfolio, :mcp,
+  privacy_mode: :anonymized,  # :strict | :anonymized | :standard | :full
+  enabled: true
+```
+
+#### Test Coverage
+
+- MCP router and protocol tests
+- Privacy filter with all four modes
+- Anonymizer determinism verification
+- Integration tests with real portfolio data
+
 ## [0.8.0] - 2025-11-25
 
 ### AI Natural Language Transaction Entry - Intelligent Data Input
