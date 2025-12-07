@@ -80,5 +80,4 @@ defmodule AshfolioWeb.Components.ConsentModalTest do
       assert html =~ "Not Now"
     end
   end
-
 end

@@ -28,10 +28,16 @@ defmodule AshfolioWeb.TransactionLive.Index do
 
     # Initialize enhanced filter state from URL parameters
     initial_filters = parse_url_filters(params)
-    all_transactions = list_transactions()
+    page_number = String.to_integer(params["page"] || "1")
+    page_size = 50
 
-    # Apply initial filters
-    {:ok, filtered_transactions} = TransactionFiltering.apply_filters(initial_filters)
+    {transactions, pagination} = list_transactions(initial_filters, page: page_number, limit: page_size)
+
+    # Get total count of all transactions for stats
+    total_count = count_all_transactions()
+
+    # Calculate stats based on pagination data and current page breakdown
+    filter_stats = calculate_filtered_stats(pagination.count, total_count, transactions)
 
     socket =
       socket
@@ -42,9 +48,11 @@ defmodule AshfolioWeb.TransactionLive.Index do
       # Enhanced filter state management
       |> assign(:filters, initial_filters)
       |> assign(:category_filter, initial_filters.category || :all)
-      |> assign(:transactions, all_transactions)
-      |> assign(:filtered_transactions, filtered_transactions)
-      |> assign(:filter_stats, calculate_filter_stats(filtered_transactions, all_transactions))
+      |> assign(:transactions, transactions)
+      |> assign(:pagination, pagination)
+      |> assign(:filtered_transactions, transactions)
+      |> assign(:filter_stats, filter_stats)
+      |> assign(:total_transaction_count, total_count)
       # Form state
       |> assign(:show_form, false)
       |> assign(:form_action, :new)
@@ -65,25 +73,31 @@ defmodule AshfolioWeb.TransactionLive.Index do
   def handle_params(params, _url, socket) do
     # Handle URL parameter changes for filter state restoration
     new_filters = parse_url_filters(params)
+    page = String.to_integer(params["page"] || "1")
 
-    if Map.equal?(new_filters, socket.assigns.filters) do
+    # Only reload if filters strictly change or page changes significantly
+    # Logic simplified: if params match current state, do nothing
+    current_page =
+      if socket.assigns[:pagination],
+        do: div(socket.assigns.pagination.offset, socket.assigns.pagination.limit) + 1,
+        else: 1
+
+    if Map.equal?(new_filters, socket.assigns.filters) && page == current_page do
       {:noreply, socket}
     else
-      case TransactionFiltering.apply_filters(new_filters) do
-        {:ok, filtered_transactions} ->
-          filter_stats =
-            calculate_filter_stats(filtered_transactions, socket.assigns.transactions)
+      {transactions, pagination} = list_transactions(new_filters, page: page, limit: 50)
 
-          {:noreply,
-           socket
-           |> assign(:filters, new_filters)
-           |> assign(:category_filter, new_filters[:category] || :all)
-           |> assign(:filtered_transactions, filtered_transactions)
-           |> assign(:filter_stats, filter_stats)}
+      filter_stats =
+        calculate_filtered_stats(pagination.count, socket.assigns[:total_transaction_count] || 0, transactions)
 
-        {:error, _reason} ->
-          {:noreply, socket}
-      end
+      {:noreply,
+       socket
+       |> assign(:filters, new_filters)
+       |> assign(:category_filter, new_filters[:category] || :all)
+       |> assign(:transactions, transactions)
+       |> assign(:pagination, pagination)
+       |> assign(:filtered_transactions, transactions)
+       |> assign(:filter_stats, filter_stats)}
     end
   end
 
@@ -196,37 +210,46 @@ defmodule AshfolioWeb.TransactionLive.Index do
   end
 
   @impl true
+  def handle_event("change_page", %{"page" => page}, socket) do
+    page = String.to_integer(page)
+    filters = socket.assigns.filters
+
+    {transactions, pagination} = list_transactions(filters, page: page, limit: 50)
+
+    # Update URL with new page
+    filter_params = build_filter_params(filters)
+    params_with_page = if page > 1, do: "#{filter_params}&page=#{page}", else: filter_params
+
+    {:noreply,
+     socket
+     |> assign(:transactions, transactions)
+     |> assign(:pagination, pagination)
+     |> assign(:filtered_transactions, transactions)
+     |> push_patch(to: ~p"/transactions?#{params_with_page}")}
+  end
+
+  @impl true
   def handle_event("filter_by_category", %{"category_id" => category_id}, socket) do
     category_filter = if category_id == "", do: :all, else: category_id
 
     # Enhanced filter handling with new TransactionFiltering module
     new_filters = Map.put(socket.assigns.filters, :category, category_filter)
 
-    case TransactionFiltering.apply_filters(new_filters) do
-      {:ok, filtered_transactions} ->
-        filter_stats = calculate_filter_stats(filtered_transactions, socket.assigns.transactions)
+    # Update URL parameters
+    filter_params = build_filter_params(new_filters)
 
-        # Update URL parameters
-        filter_params = build_filter_params(new_filters)
+    {transactions, pagination} = list_transactions(new_filters, page: 1, limit: 50)
+    filter_stats = calculate_filtered_stats(pagination.count, socket.assigns[:total_transaction_count] || 0, transactions)
 
-        {:noreply,
-         socket
-         |> assign(:filters, new_filters)
-         |> assign(:category_filter, category_filter)
-         |> assign(:filtered_transactions, filtered_transactions)
-         |> assign(:filter_stats, filter_stats)
-         |> push_patch(to: ~p"/transactions?#{filter_params}")}
-
-      {:error, _reason} ->
-        # Fall back to existing behavior on error
-        filtered_transactions =
-          get_filtered_transactions(socket.assigns.transactions, category_filter)
-
-        {:noreply,
-         socket
-         |> assign(:category_filter, category_filter)
-         |> assign(:filtered_transactions, filtered_transactions)}
-    end
+    {:noreply,
+     socket
+     |> assign(:filters, new_filters)
+     |> assign(:category_filter, category_filter)
+     |> assign(:transactions, transactions)
+     |> assign(:pagination, pagination)
+     |> assign(:filtered_transactions, transactions)
+     |> assign(:filter_stats, filter_stats)
+     |> push_patch(to: ~p"/transactions?#{filter_params}")}
   end
 
   # Enhanced event handlers for composite filtering
@@ -248,21 +271,18 @@ defmodule AshfolioWeb.TransactionLive.Index do
   def handle_event("clear_filters", _params, socket) do
     default_filters = %{category: :all}
 
-    case TransactionFiltering.apply_filters(default_filters) do
-      {:ok, filtered_transactions} ->
-        filter_stats = calculate_filter_stats(filtered_transactions, socket.assigns.transactions)
+    {transactions, pagination} = list_transactions(default_filters, page: 1, limit: 50)
+    filter_stats = calculate_filtered_stats(pagination.count, socket.assigns[:total_transaction_count] || 0, transactions)
 
-        {:noreply,
-         socket
-         |> assign(:filters, default_filters)
-         |> assign(:category_filter, :all)
-         |> assign(:filtered_transactions, filtered_transactions)
-         |> assign(:filter_stats, filter_stats)
-         |> push_patch(to: ~p"/transactions")}
-
-      {:error, _reason} ->
-        {:noreply, assign(socket, :category_filter, :all)}
-    end
+    {:noreply,
+     socket
+     |> assign(:filters, default_filters)
+     |> assign(:category_filter, :all)
+     |> assign(:transactions, transactions)
+     |> assign(:pagination, pagination)
+     |> assign(:filtered_transactions, transactions)
+     |> assign(:filter_stats, filter_stats)
+     |> push_patch(to: ~p"/transactions")}
   end
 
   @impl true
@@ -274,15 +294,16 @@ defmodule AshfolioWeb.TransactionLive.Index do
         # Broadcast transaction deleted event
         PubSub.broadcast!("transactions", {:transaction_deleted, id})
 
-        transactions = list_transactions()
+        {transactions, pagination} = list_transactions(socket.assigns.filters, page: 1, limit: 50)
 
-        filtered_transactions =
-          get_filtered_transactions(transactions, socket.assigns.category_filter)
+        # Filters are applied in list_transactions now
+        filtered_transactions = transactions
 
         {:noreply,
          socket
          |> ErrorHelpers.put_success_flash("Transaction deleted successfully")
          |> assign(:transactions, transactions)
+         |> assign(:pagination, pagination)
          |> assign(:filtered_transactions, filtered_transactions)
          |> assign(:deleting_transaction_id, nil)}
 
@@ -299,16 +320,16 @@ defmodule AshfolioWeb.TransactionLive.Index do
     # Broadcast transaction saved event
     PubSub.broadcast!("transactions", {:transaction_saved, transaction})
 
-    transactions = list_transactions()
+    {transactions, pagination} = list_transactions(socket.assigns.filters, page: 1, limit: 50)
 
-    filtered_transactions =
-      get_filtered_transactions(transactions, socket.assigns.category_filter)
+    filtered_transactions = transactions
 
     {:noreply,
      socket
      |> ErrorHelpers.put_success_flash(message)
      |> assign(:show_form, false)
      |> assign(:transactions, transactions)
+     |> assign(:pagination, pagination)
      |> assign(:filtered_transactions, filtered_transactions)
      |> assign(:editing_transaction_id, nil)}
   end
@@ -322,30 +343,51 @@ defmodule AshfolioWeb.TransactionLive.Index do
   end
 
   # Handle real-time updates from PubSub
+  # Handle real-time updates from PubSub
   @impl true
   def handle_info({:transaction_saved, _transaction}, socket) do
-    transactions = list_transactions()
+    # Simply reload current view
+    page =
+      if socket.assigns[:pagination],
+        do: div(socket.assigns.pagination.offset, socket.assigns.pagination.limit) + 1,
+        else: 1
 
-    filtered_transactions =
-      get_filtered_transactions(transactions, socket.assigns.category_filter)
+    {transactions, pagination} = list_transactions(socket.assigns.filters, page: page, limit: 50)
+
+    # Update total count
+    total_count = count_all_transactions()
+    filter_stats = calculate_filtered_stats(pagination.count, total_count, transactions)
 
     {:noreply,
      socket
      |> assign(:transactions, transactions)
-     |> assign(:filtered_transactions, filtered_transactions)}
+     |> assign(:pagination, pagination)
+     |> assign(:filtered_transactions, transactions)
+     |> assign(:filter_stats, filter_stats)
+     |> assign(:total_transaction_count, total_count)}
   end
 
   @impl true
   def handle_info({:transaction_deleted, _transaction_id}, socket) do
-    transactions = list_transactions()
+    # Reload current view
+    page =
+      if socket.assigns[:pagination],
+        do: div(socket.assigns.pagination.offset, socket.assigns.pagination.limit) + 1,
+        else: 1
 
-    filtered_transactions =
-      get_filtered_transactions(transactions, socket.assigns.category_filter)
+    {transactions, pagination} = list_transactions(socket.assigns.filters, page: page, limit: 50)
+
+    # Update total count
+    total_count = count_all_transactions()
+    filter_stats = calculate_filtered_stats(pagination.count, total_count, transactions)
 
     {:noreply,
      socket
      |> assign(:transactions, transactions)
-     |> assign(:filtered_transactions, filtered_transactions)}
+     |> assign(:pagination, pagination)
+     |> assign(:filtered_transactions, transactions)
+     |> assign(:filter_stats, filter_stats)
+     |> assign(:total_transaction_count, total_count)}
   end
 
   @impl true
@@ -373,33 +415,33 @@ defmodule AshfolioWeb.TransactionLive.Index do
   # Handle debounced filter application
   @impl true
   def handle_info({:apply_filters, new_filters}, socket) do
-    case TransactionFiltering.apply_filters(new_filters) do
-      {:ok, filtered_transactions} ->
-        filter_stats = calculate_filter_stats(filtered_transactions, socket.assigns.transactions)
-        filter_params = build_filter_params(new_filters)
+    # This was previously calling apply_filters directly
+    filter_params = build_filter_params(new_filters)
 
-        {:noreply,
-         socket
-         |> assign(:filters, new_filters)
-         |> assign(:category_filter, new_filters[:category] || :all)
-         |> assign(:filtered_transactions, filtered_transactions)
-         |> assign(:filter_stats, filter_stats)
-         |> assign(:filter_timer, nil)
-         |> push_patch(to: ~p"/transactions?#{filter_params}")}
+    {transactions, pagination} = list_transactions(new_filters, page: 1, limit: 50)
+    filter_stats = calculate_filtered_stats(pagination.count, socket.assigns[:total_transaction_count] || 0, transactions)
 
-      {:error, _reason} ->
-        {:noreply, assign(socket, :filter_timer, nil)}
-    end
+    {:noreply,
+     socket
+     |> assign(:filters, new_filters)
+     |> assign(:category_filter, new_filters[:category] || :all)
+     |> assign(:filtered_transactions, transactions)
+     |> assign(:transactions, transactions)
+     |> assign(:pagination, pagination)
+     |> assign(:filter_stats, filter_stats)
+     |> assign(:filter_timer, nil)
+     |> push_patch(to: ~p"/transactions?#{filter_params}")}
   end
 
-  defp list_transactions do
-    case Transaction.list() do
-      {:ok, transactions} ->
-        Ash.load!(transactions, [:account, :symbol, :category])
+  defp list_transactions(filters, opts) do
+    page = opts[:page] || 1
+    limit = opts[:limit] || 50
 
-      {:error, _error} ->
-        []
-    end
+    {:ok, query} = TransactionFiltering.apply_filters(filters)
+
+    query
+    |> Ash.read!(page: [limit: limit, offset: (page - 1) * limit, count: true])
+    |> then(fn page -> {page.results, page} end)
   end
 
   defp get_filtered_transactions(transactions, :all), do: transactions
@@ -484,16 +526,22 @@ defmodule AshfolioWeb.TransactionLive.Index do
 
   defp parse_amount_range_filter(_, _), do: nil
 
-  defp calculate_filter_stats(filtered_transactions, all_transactions) do
+  defp count_all_transactions do
+    Transaction
+    |> Ash.Query.for_read(:read)
+    |> Ash.count!()
+  end
+
+  defp calculate_filtered_stats(filtered_count, total_count, visible_transactions) do
     %{
-      total_count: length(all_transactions),
-      filtered_count: length(filtered_transactions),
+      total_count: total_count,
+      filtered_count: filtered_count,
       filter_percentage:
-        if(length(all_transactions) > 0,
-          do: Float.round(length(filtered_transactions) / length(all_transactions) * 100, 1),
+        if(total_count > 0,
+          do: Float.round(filtered_count / total_count * 100, 1),
           else: 0
         ),
-      category_breakdown: calculate_category_breakdown(filtered_transactions)
+      category_breakdown: calculate_category_breakdown(visible_transactions)
     }
   end
 
@@ -892,6 +940,72 @@ defmodule AshfolioWeb.TransactionLive.Index do
                 </tr>
               </tbody>
             </table>
+          </div>
+          
+    <!-- Pagination Controls -->
+          <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+            <div class="flex flex-1 justify-between sm:hidden">
+              <button
+                :if={@pagination.offset > 0}
+                phx-click="change_page"
+                phx-value-page={div(@pagination.offset, @pagination.limit)}
+                class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Previous
+              </button>
+              <button
+                :if={@pagination.more?}
+                phx-click="change_page"
+                phx-value-page={div(@pagination.offset, @pagination.limit) + 2}
+                class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Next
+              </button>
+            </div>
+            <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+              <div>
+                <p class="text-sm text-gray-700">
+                  Showing <span class="font-medium">{(@pagination.offset || 0) + 1}</span>
+                  to
+                  <span class="font-medium">
+                    {min((@pagination.offset || 0) + @pagination.limit, @pagination.count)}
+                  </span>
+                  of <span class="font-medium">{@pagination.count}</span>
+                  results
+                </p>
+              </div>
+              <div>
+                <nav
+                  class="isolate inline-flex -space-x-px rounded-md shadow-sm"
+                  aria-label="Pagination"
+                >
+                  <button
+                    :if={@pagination.offset > 0}
+                    phx-click="change_page"
+                    phx-value-page={div(@pagination.offset, @pagination.limit)}
+                    class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                  >
+                    <span class="sr-only">Previous</span>
+                    <.icon name="hero-chevron-left" class="h-5 w-5" />
+                  </button>
+                  
+    <!-- Current Page Indicator -->
+                  <span class="relative z-10 inline-flex items-center bg-indigo-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                    {div(@pagination.offset, @pagination.limit) + 1}
+                  </span>
+
+                  <button
+                    :if={@pagination.more?}
+                    phx-click="change_page"
+                    phx-value-page={div(@pagination.offset, @pagination.limit) + 2}
+                    class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                  >
+                    <span class="sr-only">Next</span>
+                    <.icon name="hero-chevron-right" class="h-5 w-5" />
+                  </button>
+                </nav>
+              </div>
+            </div>
           </div>
         <% end %>
       </.card>

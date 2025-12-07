@@ -1,9 +1,9 @@
 defmodule AshfolioWeb.Mcp.AnonymizerTest do
   use Ashfolio.DataCase, async: true
 
-  @moduletag :mcp
-
   alias AshfolioWeb.Mcp.Anonymizer
+
+  @moduletag :mcp
 
   # Fixtures
   @accounts [

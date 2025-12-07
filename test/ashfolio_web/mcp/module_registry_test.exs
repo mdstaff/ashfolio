@@ -7,9 +7,9 @@ defmodule AshfolioWeb.Mcp.ModuleRegistryTest do
   """
   use Ashfolio.DataCase, async: false
 
-  @moduletag :mcp
-
   alias AshfolioWeb.Mcp.ModuleRegistry
+
+  @moduletag :mcp
 
   # Note: The registry is started by the application supervisor,
   # so we don't need to start it in tests.

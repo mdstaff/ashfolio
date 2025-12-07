@@ -17,7 +17,7 @@ defmodule Ashfolio.Legal.AiConsentTest do
       assert consent.features == [:mcp_tools, :ai_analysis]
       assert consent.privacy_mode == :anonymized
       assert consent.terms_version == "1.0.0"
-      assert consent.granted_at != nil
+      assert consent.granted_at
       assert consent.withdrawn_at == nil
     end
 
@@ -34,10 +34,12 @@ defmodule Ashfolio.Legal.AiConsentTest do
     end
 
     test "stores IP address and user agent" do
-      attrs = Map.merge(@valid_attrs, %{
-        ip_address: "192.168.1.1",
-        user_agent: "Mozilla/5.0"
-      })
+      attrs =
+        Map.merge(@valid_attrs, %{
+          ip_address: "192.168.1.1",
+          user_agent: "Mozilla/5.0"
+        })
+
       assert {:ok, consent} = AiConsent.grant(attrs)
       assert consent.ip_address == "192.168.1.1"
       assert consent.user_agent == "Mozilla/5.0"
@@ -81,7 +83,7 @@ defmodule Ashfolio.Legal.AiConsentTest do
 
       assert {:ok, withdrawn} = AiConsent.withdraw(consent)
 
-      assert withdrawn.withdrawn_at != nil
+      assert withdrawn.withdrawn_at
       assert withdrawn.features == []
     end
 
@@ -108,9 +110,10 @@ defmodule Ashfolio.Legal.AiConsentTest do
     test "adds new features" do
       {:ok, consent} = AiConsent.grant(%{@valid_attrs | features: [:mcp_tools]})
 
-      assert {:ok, updated} = AiConsent.update_features(consent, %{
-        features: [:mcp_tools, :ai_analysis, :cloud_llm]
-      })
+      assert {:ok, updated} =
+               AiConsent.update_features(consent, %{
+                 features: [:mcp_tools, :ai_analysis, :cloud_llm]
+               })
 
       assert :cloud_llm in updated.features
     end

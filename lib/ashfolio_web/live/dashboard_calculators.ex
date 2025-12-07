@@ -6,7 +6,12 @@ defmodule AshfolioWeb.Live.DashboardCalculators do
   financial metrics displayed on the dashboard.
   """
 
+  import Ecto.Query
+
+  alias Ashfolio.FinancialManagement.Expense
   alias Ashfolio.Portfolio.Account
+
+  require Ash.Query
 
   @doc """
   Calculates current net worth from portfolio accounts.
@@ -57,26 +62,28 @@ defmodule AshfolioWeb.Live.DashboardCalculators do
   end
 
   @doc """
-  Calculates expenses for the current month.
+  Calculates expenses for the current month using database aggregates.
   """
-  def calculate_current_month_expenses(expenses) do
+  def calculate_current_month_expenses do
     now = Date.utc_today()
     start_of_month = Date.beginning_of_month(now)
 
-    expenses
-    |> Enum.filter(fn expense ->
-      Date.compare(expense.date, start_of_month) in [:gt, :eq]
-    end)
-    |> calculate_total_expenses()
+    query =
+      from e in Expense,
+        where: e.date >= ^start_of_month
+
+    query
+    |> Ashfolio.Repo.aggregate(:sum, :amount)
+    |> Kernel.||(Decimal.new("0"))
   end
 
   @doc """
-  Calculates total expenses from a list of expenses.
+  Calculates total expenses using database aggregates.
   """
-  def calculate_total_expenses(expenses) do
-    Enum.reduce(expenses, Decimal.new("0"), fn expense, acc ->
-      Decimal.add(acc, expense.amount || Decimal.new("0"))
-    end)
+  def calculate_total_expenses do
+    Expense
+    |> Ashfolio.Repo.aggregate(:sum, :amount)
+    |> Kernel.||(Decimal.new("0"))
   end
 
   @doc """

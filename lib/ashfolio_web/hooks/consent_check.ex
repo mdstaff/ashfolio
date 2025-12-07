@@ -25,8 +25,8 @@ defmodule AshfolioWeb.Hooks.ConsentCheck do
   - `:show_consent_modal` - boolean, whether to show consent modal
   """
 
-  import Phoenix.LiveView
   import Phoenix.Component
+  import Phoenix.LiveView
 
   alias Ashfolio.Legal.AiConsent
   alias Ashfolio.Legal.ConsentAudit
@@ -128,8 +128,7 @@ defmodule AshfolioWeb.Hooks.ConsentCheck do
         |> put_flash(:info, "AI features enabled successfully")
 
       {:error, _reason} ->
-        socket
-        |> put_flash(:error, "Failed to save consent. Please try again.")
+        put_flash(socket, :error, "Failed to save consent. Please try again.")
     end
   end
 

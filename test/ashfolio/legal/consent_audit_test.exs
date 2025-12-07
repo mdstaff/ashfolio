@@ -13,14 +13,15 @@ defmodule Ashfolio.Legal.ConsentAuditTest do
 
   describe "record/1" do
     test "creates audit entry with valid attributes" do
-      assert {:ok, audit} = ConsentAudit.record(%{
-        action: :granted,
-        consent_id: Ash.UUID.generate(),
-        new_state: %{features: [:mcp_tools]}
-      })
+      assert {:ok, audit} =
+               ConsentAudit.record(%{
+                 action: :granted,
+                 consent_id: Ash.UUID.generate(),
+                 new_state: %{features: [:mcp_tools]}
+               })
 
       assert audit.action == :granted
-      assert audit.recorded_at != nil
+      assert audit.recorded_at
     end
 
     test "accepts all action types" do
@@ -31,11 +32,12 @@ defmodule Ashfolio.Legal.ConsentAuditTest do
     end
 
     test "stores previous and new state" do
-      assert {:ok, audit} = ConsentAudit.record(%{
-        action: :privacy_mode_changed,
-        previous_state: %{privacy_mode: :strict},
-        new_state: %{privacy_mode: :full}
-      })
+      assert {:ok, audit} =
+               ConsentAudit.record(%{
+                 action: :privacy_mode_changed,
+                 previous_state: %{privacy_mode: :strict},
+                 new_state: %{privacy_mode: :full}
+               })
 
       # Maps serialize atoms to strings
       assert audit.previous_state["privacy_mode"] == "strict"
@@ -43,21 +45,23 @@ defmodule Ashfolio.Legal.ConsentAuditTest do
     end
 
     test "stores IP and user agent" do
-      assert {:ok, audit} = ConsentAudit.record(%{
-        action: :granted,
-        ip_address: "10.0.0.1",
-        user_agent: "Test Agent"
-      })
+      assert {:ok, audit} =
+               ConsentAudit.record(%{
+                 action: :granted,
+                 ip_address: "10.0.0.1",
+                 user_agent: "Test Agent"
+               })
 
       assert audit.ip_address == "10.0.0.1"
       assert audit.user_agent == "Test Agent"
     end
 
     test "stores metadata" do
-      assert {:ok, audit} = ConsentAudit.record(%{
-        action: :gdpr_export,
-        metadata: %{format: "json", requested_by: "user"}
-      })
+      assert {:ok, audit} =
+               ConsentAudit.record(%{
+                 action: :gdpr_export,
+                 metadata: %{format: "json", requested_by: "user"}
+               })
 
       assert audit.metadata["format"] == "json"
     end
@@ -116,10 +120,11 @@ defmodule Ashfolio.Legal.ConsentAuditTest do
     test "includes IP and user agent" do
       {:ok, consent} = AiConsent.grant(@consent_attrs)
 
-      assert {:ok, audit} = ConsentAudit.record_grant(consent,
-        ip_address: "1.2.3.4",
-        user_agent: "Mozilla"
-      )
+      assert {:ok, audit} =
+               ConsentAudit.record_grant(consent,
+                 ip_address: "1.2.3.4",
+                 user_agent: "Mozilla"
+               )
 
       assert audit.ip_address == "1.2.3.4"
       assert audit.user_agent == "Mozilla"
@@ -143,11 +148,12 @@ defmodule Ashfolio.Legal.ConsentAuditTest do
     test "records mode change with before/after" do
       {:ok, consent} = AiConsent.grant(@consent_attrs)
 
-      assert {:ok, audit} = ConsentAudit.record_privacy_mode_change(
-        consent,
-        :anonymized,
-        :full
-      )
+      assert {:ok, audit} =
+               ConsentAudit.record_privacy_mode_change(
+                 consent,
+                 :anonymized,
+                 :full
+               )
 
       assert audit.action == :privacy_mode_changed
       # Maps serialize atoms to strings
@@ -160,11 +166,12 @@ defmodule Ashfolio.Legal.ConsentAuditTest do
     test "records features change with before/after" do
       {:ok, consent} = AiConsent.grant(@consent_attrs)
 
-      assert {:ok, audit} = ConsentAudit.record_features_change(
-        consent,
-        [:mcp_tools],
-        [:mcp_tools, :ai_analysis]
-      )
+      assert {:ok, audit} =
+               ConsentAudit.record_features_change(
+                 consent,
+                 [:mcp_tools],
+                 [:mcp_tools, :ai_analysis]
+               )
 
       assert audit.action == :features_changed
       # Maps serialize atoms to strings
@@ -178,15 +185,13 @@ defmodule Ashfolio.Legal.ConsentAuditTest do
       assert {:ok, audit} = ConsentAudit.record_gdpr_export()
 
       assert audit.action == :gdpr_export
-      assert audit.metadata["requested_at"] != nil
+      assert audit.metadata["requested_at"]
     end
   end
 
   describe "record_gdpr_deletion/1" do
     test "records GDPR deletion request" do
-      assert {:ok, audit} = ConsentAudit.record_gdpr_deletion(
-        ip_address: "8.8.8.8"
-      )
+      assert {:ok, audit} = ConsentAudit.record_gdpr_deletion(ip_address: "8.8.8.8")
 
       assert audit.action == :gdpr_deletion
       assert audit.ip_address == "8.8.8.8"

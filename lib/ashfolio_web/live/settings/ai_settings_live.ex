@@ -191,8 +191,8 @@ defmodule AshfolioWeb.Settings.AiSettingsLive do
           <h1 class="text-2xl font-bold text-gray-900">{@page_title}</h1>
           <p class="mt-1 text-sm text-gray-600">{@page_subtitle}</p>
         </div>
-
-        <!-- Consent Status Card -->
+        
+    <!-- Consent Status Card -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
           <div class="px-6 py-5">
             <div class="flex items-center justify-between">
@@ -227,8 +227,8 @@ defmodule AshfolioWeb.Settings.AiSettingsLive do
             </div>
           </div>
         </div>
-
-        <!-- Active Consent Details -->
+        
+    <!-- Active Consent Details -->
         <div :if={@has_ai_consent} class="space-y-6">
           <!-- Privacy Mode Section -->
           <div class="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -250,8 +250,8 @@ defmodule AshfolioWeb.Settings.AiSettingsLive do
               </div>
             </div>
           </div>
-
-          <!-- Enabled Features Section -->
+          
+    <!-- Enabled Features Section -->
           <div class="bg-white rounded-lg shadow-sm border border-gray-200">
             <div class="px-6 py-5 border-b border-gray-200">
               <h3 class="text-lg font-medium text-gray-900">Enabled Features</h3>
@@ -270,8 +270,8 @@ defmodule AshfolioWeb.Settings.AiSettingsLive do
               </div>
             </div>
           </div>
-
-          <!-- GDPR Section -->
+          
+    <!-- GDPR Section -->
           <div class="bg-white rounded-lg shadow-sm border border-gray-200">
             <div class="px-6 py-5 border-b border-gray-200">
               <h3 class="text-lg font-medium text-gray-900">Data & Privacy</h3>
@@ -312,8 +312,7 @@ defmodule AshfolioWeb.Settings.AiSettingsLive do
                     </svg>
                     Exporting...
                   <% else %>
-                    <.icon name="hero-arrow-down-tray" class="h-4 w-4 mr-2" />
-                    Export My Data
+                    <.icon name="hero-arrow-down-tray" class="h-4 w-4 mr-2" /> Export My Data
                   <% end %>
                 </button>
 
@@ -332,9 +331,12 @@ defmodule AshfolioWeb.Settings.AiSettingsLive do
             </div>
           </div>
         </div>
-
-        <!-- No Consent State -->
-        <div :if={!@has_ai_consent} class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
+        
+    <!-- No Consent State -->
+        <div
+          :if={!@has_ai_consent}
+          class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-8 text-center"
+        >
           <.icon name="hero-cpu-chip" class="mx-auto h-12 w-12 text-gray-400" />
           <h3 class="mt-4 text-lg font-medium text-gray-900">AI Features Not Enabled</h3>
           <p class="mt-2 text-sm text-gray-500 max-w-md mx-auto">

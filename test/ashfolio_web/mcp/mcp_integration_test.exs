@@ -9,11 +9,11 @@ defmodule AshfolioWeb.Mcp.McpIntegrationTest do
   """
   use Ashfolio.DataCase, async: false
 
-  @moduletag :mcp
-
   alias AshfolioWeb.Mcp.ModuleRegistry
   alias AshfolioWeb.Mcp.ParserToolExecutor
   alias AshfolioWeb.Mcp.PrivacyFilter
+
+  @moduletag :mcp
 
   test "module registry discovers all expected tools" do
     tools = ModuleRegistry.all_tools()

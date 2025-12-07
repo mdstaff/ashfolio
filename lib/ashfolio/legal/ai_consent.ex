@@ -142,6 +142,7 @@ defmodule Ashfolio.Legal.AiConsent do
   calculations do
     calculate :active?, :boolean do
       description("Whether consent is currently active")
+
       calculation(fn record, _context ->
         {:ok, is_nil(record.withdrawn_at)}
       end)
@@ -175,7 +176,8 @@ defmodule Ashfolio.Legal.AiConsent do
   Generates a terms hash from the terms text.
   """
   def hash_terms(terms_text) when is_binary(terms_text) do
-    :crypto.hash(:sha256, terms_text)
+    :sha256
+    |> :crypto.hash(terms_text)
     |> Base.encode16(case: :lower)
   end
 end

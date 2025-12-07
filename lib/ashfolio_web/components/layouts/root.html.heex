@@ -13,18 +13,7 @@
   </head>
   <body class="h-full bg-gray-50 flex flex-col">
     <div class="flex-1">
-      <.top_bar
-        id="main-topbar"
-        current_page={@current_page}
-        page_title={@page_title}
-        page_subtitle={assigns[:page_subtitle]}
-      />
-      <main class="flex-1 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <.flash_group flash={@flash} />
-          {@inner_content}
-        </div>
-      </main>
+      {@inner_content}
     </div>
   </body>
 </html>

@@ -8,10 +8,10 @@ defmodule AshfolioWeb.Mcp.ParserToolExecutorTest do
   """
   use Ashfolio.DataCase, async: true
 
-  @moduletag :mcp
-
   alias Ashfolio.Parsing.Schema
   alias AshfolioWeb.Mcp.ParserToolExecutor
+
+  @moduletag :mcp
 
   describe "execute/3 with unstructured input" do
     test "returns schema guidance when input has 'text' field" do

@@ -187,7 +187,7 @@ defmodule AshfolioWeb.Settings.AiSettingsLiveTest do
 
       # Original consent should be withdrawn
       {:ok, withdrawn} = Ash.get(AiConsent, consent.id)
-      refute is_nil(withdrawn.withdrawn_at)
+      assert withdrawn.withdrawn_at
     end
 
     test "cancels revoke confirmation", %{conn: conn, consent: consent} do

@@ -4,9 +4,9 @@ defmodule AshfolioWeb.Mcp.ToolSearchTest do
   """
   use Ashfolio.DataCase, async: false
 
-  @moduletag :mcp
-
   alias AshfolioWeb.Mcp.ToolSearch
+
+  @moduletag :mcp
 
   describe "search/2 keyword matching" do
     test "finds tools by exact name" do

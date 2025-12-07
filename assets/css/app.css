@@ -13,19 +13,20 @@
 
 /* Component styles */
 @layer components {
+
   /* Portfolio value styling */
   .portfolio-value {
     @apply text-3xl font-bold text-gray-900;
   }
- 
+
   .portfolio-change-positive {
     @apply text-green-700 font-medium;
   }
- 
+
   .portfolio-change-negative {
     @apply text-red-700 font-medium;
   }
- 
+
   .portfolio-change-neutral {
     @apply text-gray-600 font-medium;
   }
@@ -34,50 +35,50 @@
   .holdings-table {
     @apply min-w-full divide-y divide-gray-200;
   }
- 
+
   .holdings-table th {
     @apply px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50;
   }
- 
+
   .holdings-table td {
     @apply px-6 py-5 whitespace-nowrap text-sm text-gray-900;
   }
- 
+
   .holdings-table tbody tr {
     @apply border-b border-gray-100 transition-all duration-150;
   }
- 
+
   .holdings-table tbody tr:hover {
     @apply bg-gray-50 shadow-sm;
   }
- 
+
   .holdings-table tbody tr:nth-child(even) {
     @apply bg-gray-50;
   }
- 
+
   .holdings-table tbody tr:nth-child(even):hover {
     @apply bg-gray-100;
   }
- 
+
   /* General table improvements */
   .table-row {
     @apply py-3 px-4 border-b border-gray-100 transition-all duration-150;
   }
- 
+
   .table-row:hover {
     @apply bg-gray-50;
   }
- 
+
   /* Mobile responsive table improvements */
   @media (max-width: 768px) {
     .table-row {
       @apply py-4 px-3;
     }
-   
+
     .holdings-table td {
       @apply px-4 py-4;
     }
-   
+
     .holdings-table th {
       @apply px-4 py-3;
     }
@@ -87,11 +88,11 @@
   .currency {
     @apply font-mono;
   }
- 
+
   .currency-positive {
     @apply text-green-700 font-medium;
   }
- 
+
   .currency-negative {
     @apply text-red-700 font-medium;
   }
@@ -100,7 +101,7 @@
   .loading-overlay {
     @apply absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center;
   }
- 
+
   .loading-text {
     @apply text-gray-600 text-sm ml-2;
   }
@@ -109,7 +110,7 @@
   .form-section {
     @apply bg-white shadow rounded-lg p-6 mb-6;
   }
- 
+
   .form-section h3 {
     @apply text-lg font-medium text-gray-900 mb-4;
   }
@@ -118,22 +119,22 @@
   .btn-primary {
     @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200;
   }
- 
+
   /* View buttons - outlined blue (primary actions) */
   .btn-view {
     @apply bg-transparent border border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white font-medium py-2 px-4 rounded-md transition-all duration-200;
   }
- 
+
   /* Edit/Secondary buttons - outlined gray */
   .btn-secondary {
     @apply bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 font-medium py-2 px-4 rounded-md transition-all duration-200;
   }
- 
+
   /* Delete buttons - outlined red (destructive actions) */
   .btn-danger {
     @apply bg-transparent border border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 font-medium py-2 px-4 rounded-md transition-all duration-200;
   }
- 
+
   /* Success buttons - outlined green */
   .btn-success {
     @apply bg-transparent border border-green-300 text-green-600 hover:bg-green-50 hover:border-green-400 font-medium py-2 px-4 rounded-md transition-all duration-200;
@@ -143,19 +144,19 @@
   .status-badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
- 
+
   .status-badge-success {
     @apply bg-green-100 text-green-800;
   }
- 
+
   .status-badge-warning {
     @apply bg-yellow-100 text-yellow-800;
   }
- 
+
   .status-badge-error {
     @apply bg-red-100 text-red-800;
   }
- 
+
   .status-badge-info {
     @apply bg-blue-100 text-blue-800;
   }
@@ -169,7 +170,7 @@
   .nav-active {
     @apply text-blue-700 bg-blue-50 border-b-2 border-blue-700;
   }
- 
+
   .nav-inactive {
     @apply text-gray-600 hover:text-gray-900 hover:bg-gray-50;
   }
@@ -177,47 +178,71 @@
 
 /* Utility classes */
 @layer utilities {
+
   /* Text utilities for financial data */
   .text-currency {
     font-variant-numeric: tabular-nums;
   }
- 
+
   /* Animation utilities */
   .fade-in {
     animation: fadeIn 0.3s ease-in-out;
   }
- 
+
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
- 
+
+  .animate-fade-in-down {
+    animation: fadeInDown 0.2s ease-out forwards;
+  }
+
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   /* Focus utilities */
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
   }
- 
+
   /* High contrast utilities for accessibility */
   .text-success {
     @apply text-green-800;
   }
- 
+
   .text-error {
     @apply text-red-800;
   }
- 
+
   .text-warning {
     @apply text-yellow-800;
   }
- 
+
   .bg-success-subtle {
     @apply bg-green-50 border-green-200;
   }
- 
+
   .bg-error-subtle {
     @apply bg-red-50 border-red-200;
   }
- 
+
   .bg-warning-subtle {
     @apply bg-yellow-50 border-yellow-200;
   }
@@ -228,19 +253,19 @@
   }
 
   .net-worth-breakdown {
-    @apply flex items-center gap-3 text-sm text-gray-600;
+    @apply flex items-center gap-3 text-sm text-gray-600 flex-wrap;
   }
 
   .breakdown-item {
-    @apply flex gap-1;
+    @apply flex gap-1 min-w-0;
   }
 
   .breakdown-label {
-    @apply font-medium;
+    @apply font-medium whitespace-nowrap;
   }
 
   .breakdown-value {
-    @apply font-mono;
+    @apply font-mono truncate;
   }
 
   .cash-zero {
@@ -251,12 +276,45 @@
     @apply text-gray-300;
   }
 
+  /* Expense Widget Styles */
+  .expense-widget {
+    @apply flex flex-col gap-2;
+  }
+
+  .expense-header {
+    @apply flex flex-col;
+  }
+
+  .expense-stats {
+    @apply flex items-center gap-3 text-sm text-gray-600 flex-wrap;
+  }
+
+  .stat-item {
+    @apply flex gap-1 min-w-0;
+  }
+
+  .stat-label {
+    @apply font-medium whitespace-nowrap;
+  }
+
+  .stat-value {
+    @apply font-mono truncate;
+  }
+
+  .expense-actions {
+    @apply pt-2;
+  }
+
   /* Responsive adjustments */
   @media (max-width: 640px) {
     .net-worth-breakdown {
       @apply flex-col items-start gap-1;
     }
-   
+
+    .expense-stats {
+      @apply flex-col items-start gap-1;
+    }
+
     .separator {
       @apply hidden;
     }
@@ -268,22 +326,22 @@
     transition: opacity 150ms ease-in-out, transform 150ms ease-in-out;
     transform-origin: top;
   }
- 
+
   .symbol-autocomplete-dropdown.entering {
     opacity: 0;
     transform: translateY(-8px) scale(0.95);
   }
- 
+
   .symbol-autocomplete-dropdown.entered {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
- 
+
   .symbol-autocomplete-dropdown.exiting {
     opacity: 0;
     transform: translateY(-8px) scale(0.95);
   }
- 
+
   /* Mobile-specific styles */
   @media (max-width: 640px) {
     .symbol-autocomplete-dropdown {
@@ -294,54 +352,54 @@
       margin-left: 0;
       margin-right: 0;
     }
-   
+
     .symbol-autocomplete-option {
       /* Larger touch targets on mobile */
       padding: 12px 16px;
       min-height: 48px;
     }
   }
- 
+
   /* Option hover and selection states */
   .symbol-autocomplete-option {
     @apply transition-all duration-150 ease-in-out;
   }
- 
+
   .symbol-autocomplete-option:hover {
     @apply bg-blue-50;
   }
- 
+
   .symbol-autocomplete-option:active {
     @apply bg-blue-100;
   }
- 
+
   .symbol-autocomplete-option[aria-selected="true"] {
     @apply bg-blue-50 ring-2 ring-blue-200 ring-inset;
   }
- 
+
   /* Loading indicator animation */
   .symbol-autocomplete-loading {
     @apply transition-opacity duration-150 ease-in-out;
   }
- 
+
   /* Accessibility improvements */
   .symbol-autocomplete-input:focus {
     @apply ring-2 ring-blue-500 ring-offset-2 border-blue-500;
   }
- 
+
   /* High contrast mode support */
   @media (prefers-contrast: high) {
     .symbol-autocomplete-option[aria-selected="true"] {
       @apply bg-blue-200 ring-4 ring-blue-600;
     }
   }
- 
+
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
     .symbol-autocomplete-dropdown {
       transition: none;
     }
-   
+
     .symbol-autocomplete-option {
       transition: none;
     }
@@ -364,8 +422,14 @@
     .account-actions {
       @apply flex-col items-stretch space-y-2 space-x-0;
     }
+
     .account-actions .btn {
       @apply w-full;
     }
   }
+}
+
+/* Explicit Dropdown Visibility Rule */
+details[open]>[role="menu"] {
+  display: block;
 }

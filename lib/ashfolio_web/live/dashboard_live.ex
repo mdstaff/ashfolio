@@ -5,7 +5,6 @@ defmodule AshfolioWeb.DashboardLive do
   alias Ashfolio.Context
   alias Ashfolio.Financial.Formatters
   alias Ashfolio.Financial.MoneyRatios
-  alias Ashfolio.FinancialManagement.Expense
   alias Ashfolio.FinancialManagement.FinancialGoal
   alias Ashfolio.FinancialManagement.FinancialProfile
   alias Ashfolio.FinancialManagement.NetWorthSnapshot
@@ -213,8 +212,7 @@ defmodule AshfolioWeb.DashboardLive do
         />
         <.stat_card
           title="Holdings"
-          value={@holdings_count}
-          change={"#{@holdings_count} positions"}
+          value={"#{@holdings_count} positions"}
           data_testid="holdings-count"
         />
         <.net_worth_card
@@ -762,16 +760,18 @@ defmodule AshfolioWeb.DashboardLive do
   end
 
   defp load_expense_data(socket) do
-    # Load all expenses
-    expenses =
-      Expense
-      |> Ash.Query.for_read(:read)
-      |> Ash.read!()
+    # Calculate totals using database aggregates
+    total_expenses = DashboardCalculators.calculate_total_expenses()
 
-    # Calculate totals
-    total_expenses = DashboardCalculators.calculate_total_expenses(expenses)
-    expense_count = length(expenses)
-    current_month_total = DashboardCalculators.calculate_current_month_expenses(expenses)
+    # Get count using aggregate
+    expense_count =
+      Expense
+      |> Ash.Query.aggregate(:count, :count, [])
+      |> Ash.read!()
+      |> List.first()
+      |> Map.get(:count)
+
+    current_month_total = DashboardCalculators.calculate_current_month_expenses()
 
     socket
     |> assign(:total_expenses, Formatters.format_currency_with_cents(total_expenses))

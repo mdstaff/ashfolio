@@ -1,1 +1,12 @@
-{@inner_content}
+<.top_bar
+  id="main-topbar"
+  current_page={@current_page}
+  page_title={@page_title}
+  page_subtitle={assigns[:page_subtitle]}
+/>
+<main class="flex-1 bg-gray-50">
+  <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 2xl:px-24 py-8">
+    <.flash_group flash={@flash} />
+    {@inner_content}
+  </div>
+</main>

@@ -821,18 +821,19 @@ defmodule AshfolioWeb.CoreComponents do
   def stat_card(assigns) do
     ~H"""
     <div class={["bg-white rounded-lg shadow p-6", @class]} data-testid={@data_testid}>
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-600">{@title}</p>
+      <div>
+        <p class="text-sm font-medium text-gray-600">{@title}</p>
+        <div class="flex items-baseline gap-2">
           <p class="text-2xl font-semibold text-gray-900">{@value}</p>
-        </div>
-        <div :if={@change} class="text-right">
-          <p class={[
-            "text-sm font-medium",
-            @positive == true && "text-green-600",
-            @positive == false && "text-red-600",
-            @positive == nil && "text-gray-600"
-          ]}>
+          <p
+            :if={@change}
+            class={[
+              "text-sm font-medium",
+              @positive == true && "text-green-600",
+              @positive == false && "text-red-600",
+              @positive == nil && "text-gray-600"
+            ]}
+          >
             {@change}
           </p>
         </div>
@@ -863,36 +864,15 @@ defmodule AshfolioWeb.CoreComponents do
   def net_worth_card(assigns) do
     ~H"""
     <div class={["bg-white rounded-lg shadow p-6", @class]} data-testid={@data_testid}>
-      <div class="net-worth-display">
-        <div class="net-worth-total">
-          <p class="text-sm font-medium text-gray-600">{@title}</p>
-          <p class="text-2xl font-semibold text-gray-900">{@value}</p>
-        </div>
-        <div class="net-worth-breakdown">
-          <div class="breakdown-item">
-            <span class="breakdown-label">Investment</span>
-            <span class="breakdown-value">{@investment_value}</span>
-          </div>
-          <span class="separator">•</span>
-          <div class="breakdown-item">
-            <span class="breakdown-label">Cash</span>
-            <span class={[
-              "breakdown-value",
-              @cash_balance == "$0.00" && "cash-zero"
-            ]}>
-              {@cash_balance}
-            </span>
-          </div>
-        </div>
-        
-    <!-- Snapshot Button -->
-        <button
-          phx-click="create_snapshot"
-          class="mt-4 w-full btn-secondary text-sm"
-          type="button"
+      <div>
+        <p class="text-sm font-medium text-gray-600">{@title}</p>
+        <p class="text-2xl font-semibold text-gray-900">{@value}</p>
+        <.link
+          navigate="/net_worth"
+          class="text-sm text-blue-600 hover:text-blue-800 mt-2 inline-block"
         >
-          Snapshot Now
-        </button>
+          View History
+        </.link>
       </div>
     </div>
     """

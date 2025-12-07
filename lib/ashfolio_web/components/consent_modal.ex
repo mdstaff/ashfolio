@@ -250,7 +250,10 @@ defmodule AshfolioWeb.Components.ConsentModal do
             />
           </div>
           <div class="ml-3">
-            <label for={"feature-#{feature}"} class="flex items-center gap-2 text-sm font-medium text-gray-900">
+            <label
+              for={"feature-#{feature}"}
+              class="flex items-center gap-2 text-sm font-medium text-gray-900"
+            >
               <.icon name={info.icon} class="h-4 w-4 text-gray-500" />
               {info.title}
             </label>
