@@ -50,3 +50,5 @@ phoenix.log
 
 # Code GPS usage tracking (operational data)
 .code-gps-usage.log
+
+internal/

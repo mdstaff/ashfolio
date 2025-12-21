@@ -2,13 +2,13 @@
 
 > Local-first, single-user, SQLite-based comprehensive financial management platform
 >
-> Updated: September 2025 | Based on CFP/CPA Professional Assessment
+> Updated: November 2025 (Current: v0.10.0) | Based on CFP/CPA Professional Assessment
 
 Transform Ashfolio from comprehensive personal finance tool to professional-grade platform meeting fiduciary and regulatory standards.
 
-## Current State: v0.5.0 ✅ COMPLETED
+## Current State: v0.10.0 ✅ COMPLETED
 
-### Delivered Features
+### Delivered Features (Through v0.10.0)
 - **Portfolio Management**: FIFO cost basis tracking with multi-account support
 - **Tax Planning**: Capital gains analysis, tax-loss harvesting opportunities
 - **Money Ratios**: Charles Farrell's 8-ratio financial health assessment
@@ -16,13 +16,17 @@ Transform Ashfolio from comprehensive personal finance tool to professional-grad
 - **Expense Analytics**: Complete tracking with categorization and trends
 - **Financial Goals**: Emergency fund, retirement, custom savings goals
 - **Performance Analytics**: TWR/MWR calculations with benchmarking
-- **Architecture**: 1,669 tests, Decimal precision, ETS caching, PubSub updates
+- **Advanced Analytics**: Efficient frontier, portfolio optimization, risk metrics
+- **AI Natural Language Entry**: Ollama/OpenAI support for transaction parsing
+- **MCP Integration**: Privacy-filtered AI assistant portfolio access
+- **AI Consent Management**: GDPR-compliant consent and privacy controls
+- **Architecture**: 2,200+ tests, Decimal precision, ETS caching, PubSub updates
 
-### Professional Assessment Score: A- (Exceptional for v0.5)
+### Professional Assessment Score: A- (Exceptional for v0.10)
 
 ## v0.6.0: Professional Standards & Tax Accuracy 🎯
 
-*Q4 2025 - Q1 2026 (12 weeks)*  
+*Q4 2025 - Q1 2026 (12 weeks)*
 *Priority: Features required for professional financial advisory use*
 
 ### Phase 1: Tax Accuracy & Compliance (Weeks 1-4) 🏆 HIGHEST PRIORITY
@@ -165,44 +169,113 @@ Transform Ashfolio from comprehensive personal finance tool to professional-grad
 - **Performance Caching** - 1-hour TTL with cache statistics display
 - **Comprehensive Integration** - All calculators unified in single dashboard
 
-## v0.8.0: AI Natural Language Entry 🎯 CURRENT
+## v0.8.0: AI Natural Language Entry ✅ COMPLETE
 
-*Q4 2025 (4 weeks)*
+*Released: November 25, 2025*
 *Focus: AI-powered transaction entry with local-first privacy*
 
-### AI Natural Language Entry (Phase 1) 🆕
-**Why Now**: Low-risk, high-value feature that reduces data entry friction
+### Status: 100% Complete
 
+### Completed Features ✅
+
+#### AI Natural Language Transaction Parsing ✅
 - **Natural Language Parsing** - "Bought 10 AAPL at 150 yesterday"
 - **Transaction Auto-Fill** - Extract type, symbol, quantity, price, date
 - **Local-First AI (Ollama)** - 100% private, runs on your computer
 - **Cloud Alternative (OpenAI)** - Optional opt-in for quick setup
-- **Multi-Provider Support** - Extensible architecture for future AI features
+- **Multi-Provider Support** - Extensible dispatcher architecture
 - **User Review Required** - All AI-parsed data requires manual confirmation
 - **Supported Transaction Types** - Buy, sell, dividend, deposit, withdrawal, fee, interest
 
-**Acceptance Criteria**:
-- Ollama (llama3) works offline after initial setup
-- OpenAI integration requires explicit opt-in
-- All parsed transactions show "Parsed from: [original text]" in notes
-- Form validation applies to AI-parsed data (no bypass)
-- Graceful degradation when AI unavailable
-- Comprehensive error handling and user feedback
+#### AI Module Architecture ✅
+- **Dispatcher Pattern** - Routes requests to appropriate AI handlers
+- **Handler Behaviour** - Standardized interface for AI handlers
+- **Transaction Parser** - Natural language to structured data
+- **Model Configuration** - Provider and model selection management
+- **Graceful Degradation** - Fallback to manual entry when AI unavailable
 
 ### Strategic Rationale
-- **Timing**: Deferred Estate Planning to v0.9.0 based on strategic assessment
 - **User Alignment**: 82% of current user base prefers local AI (technical cohort)
 - **Brand Consistency**: Reinforces local-first, privacy-first philosophy
 - **Differentiation**: First financial app with truly local AI integration
-- **Extensibility**: Dispatcher pattern enables future AI features (chat, analysis)
+- **Extensibility**: Dispatcher pattern enables future AI features
 
-### Future AI Features (Deferred to v0.9.0+)
-- MCP Server for Claude Code/Cline integration (developer tool)
-- Portfolio analysis chat interface
-- Automated categorization and insights
-- Natural language reporting
+## v0.9.0: MCP Integration ✅ COMPLETE
 
-## v0.9.0: Estate Planning & Advanced Tax Strategies
+*Released: November 28, 2025*
+*Focus: AI assistant portfolio access with privacy controls*
+
+### Status: 100% Complete
+
+### Completed Features ✅
+
+#### Model Context Protocol (MCP) Server ✅
+- **MCP 2024-11-05 Specification** - Complete implementation
+- **Privacy-Filtered Data Access** - Configurable privacy modes
+- **Four Core Tools** - list_accounts, get_portfolio_summary, list_transactions, list_symbols
+- **JSON-RPC 2.0 Transport** - Over stdio for AI assistant integration
+
+#### Privacy Filtering System ✅
+- **Four Privacy Modes** - Strict, anonymized, standard, full
+- **Account Anonymization** - Names → letters (A, B, C)
+- **Amount Tier Masking** - $1K-$10K, $10K-$100K ranges
+- **Configurable Environment** - Application-level privacy settings
+- **Deterministic Anonymization** - Consistent across requests
+
+#### AshAi Integration ✅
+- **Domain-Level Tools** - Ash framework native MCP support
+- **Automatic Schema Generation** - From Ash resources
+- **Type-Safe Execution** - Validated tool inputs/outputs
+
+### Technical Implementation
+- **MCP Router** - Initialize, tools/list, tools/call methods
+- **Privacy Filter** - Mode-aware data transformation
+- **Anonymizer** - Deterministic letter assignment and tier classification
+
+## v0.10.0: MCP Phase 2 - AI Consent & Tool Discovery ✅ COMPLETE
+
+*Released: November 30, 2025*
+*Focus: GDPR-compliant consent management and optimized AI context*
+
+### Status: 100% Complete (123 new tests)
+
+### Completed Features ✅
+
+#### AI Settings Page ✅
+- **Consent Management Interface** - Complete privacy control dashboard
+- **Privacy Mode Selection** - Strict, anonymized, standard, full with descriptions
+- **Feature Toggles** - MCP tools, AI analysis, cloud AI
+- **GDPR Data Export** - JSON export of consent and audit records
+- **Consent Revocation** - Immediate withdrawal with audit trail
+- **Visual Status Indicators** - Clear consent state display
+
+#### Natural Language Parsing ✅
+- **Amount Parser** - $100, 85k, EUR 500, ranges ($50-100)
+- **Date Parsing** - Relative terms (today, yesterday)
+- **Two-Phase MCP Tools** - Guidance → structured execution
+- **Schema-Driven Validation** - For expenses and transactions
+- **Decimal Precision** - Currency-aware parsing
+
+#### Tool Discovery & Search ✅
+- **Module Registry** - GenServer for centralized tool discovery
+- **Tool Search** - Anthropic advanced pattern (~85% token reduction)
+- **Privacy-Aware Filtering** - Tools filtered by consent mode
+- **Runtime Registration** - Extensible tool system
+- **Keyword Scoring** - Intelligent tool matching algorithm
+
+#### Legal & Consent Infrastructure ✅
+- **AiConsent Resource** - Versioned terms acceptance
+- **ConsentAudit** - Append-only audit trail
+- **Consent Modal** - Feature selection and terms display
+- **ConsentCheck Hook** - LiveView consent enforcement
+- **Terms Versioning** - SHA256 hash for detecting changes
+
+### Technical Implementation
+- **Parsing Module** - `Parseable` behaviour, `AmountParser`, `Schema` helpers
+- **MCP Infrastructure** - `ModuleRegistry`, `ToolSearch`, `ParserToolExecutor`
+- **Legal Domain** - `AiConsent` and `ConsentAudit` resources
+
+## v0.11.0: Estate Planning & Advanced Tax Strategies
 
 *Q1-Q2 2026 (10 weeks)*
 *Focus: Comprehensive wealth transfer and advanced tax planning*
@@ -233,13 +306,7 @@ Transform Ashfolio from comprehensive personal finance tool to professional-grad
 - **DeFi Transaction Import** - Yield farming, liquidity
 - **NFT Gain/Loss** - Collectibles tax rate
 
-### Advanced AI Features (Phase 2)
-- **MCP Server** - Claude Code/Cline integration for developers
-- **Portfolio Analysis Chat** - Natural language insights
-- **Automated Categorization** - ML-powered transaction classification
-- **Natural Language Reporting** - "Show me my Q3 performance"
-
-## v0.10.0: Institutional Features
+## v0.12.0: Institutional Features
 
 *Q3 2026 (8 weeks)*
 *Focus: Features for advisors managing multiple households*
@@ -256,7 +323,7 @@ Transform Ashfolio from comprehensive personal finance tool to professional-grad
 - **Custom Report Builder** - Drag-and-drop fields
 - **Audit Trail** - Complete change history
 
-## v0.11.0: Integration & Automation
+## v0.13.0: Integration & Automation
 
 *Q4 2026 (6 weeks)*
 *Focus: Workflow automation and external integrations*
@@ -275,11 +342,11 @@ Transform Ashfolio from comprehensive personal finance tool to professional-grad
 
 ## v1.0.0: Production Release
 
-*Q1 2027 (4 weeks)*  
+*Q1 2027 (4 weeks)*
 *Focus: Polish, performance, and production readiness*
 
 ### Release Criteria
-- ✅ 2,000+ tests passing
+- ✅ 2,200+ tests passing (currently met)
 - ✅ 100% critical path coverage
 - ✅ Professional documentation
 - ✅ Performance benchmarks met
@@ -297,7 +364,7 @@ Transform Ashfolio from comprehensive personal finance tool to professional-grad
 - **Security Standards**: Encrypted local storage
 
 ### Technical Excellence Metrics
-- **Test Coverage**: >95% for financial calculations
+- **Test Coverage**: >95% for financial calculations (currently 2,200+ tests)
 - **Code Quality**: Zero Credo/Dialyzer warnings
 - **Performance**: <500ms dashboard refresh
 - **Reliability**: <0.1% error rate in production
@@ -353,7 +420,10 @@ Transform Ashfolio from comprehensive personal finance tool to professional-grad
 
 ## Revision History
 
-- **2025-11-22**: v0.8.0 roadmap - AI Natural Language Entry (Phase 1), deferred Estate Planning to v0.9.0
+- **2025-11-30**: v0.10.0 completed - MCP Phase 2 (AI consent, parsing, tool discovery)
+- **2025-11-28**: v0.9.0 completed - MCP Integration (privacy filtering, 4 MCP tools)
+- **2025-11-25**: v0.8.0 completed - AI Natural Language Entry (Ollama/OpenAI support)
+- **2025-11-22**: v0.8.0 roadmap - AI Natural Language Entry (Phase 1), deferred Estate Planning to v0.11.0
 - **2025-09-22**: v0.7.0 completed with full portfolio analytics suite
 - **2025-09-21**: v0.7.0 released with advanced portfolio analytics
 - **2025-09-16**: v0.7.0 50% complete - Risk metrics and correlation/covariance done

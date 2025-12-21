@@ -54,6 +54,8 @@ Welcome to the Ashfolio user guide collection. These guides will help you maximi
 
 ### Advanced Configuration
 
+- [AI Settings & Privacy Controls](ai-settings-guide.md) - Configure AI features, privacy modes, and consent management
+- [MCP Setup Guide](mcp-setup-guide.md) - Connect AI assistants (Claude Desktop) to your portfolio data
 - [Privacy & Security Settings](privacy-security-guide.md) - Protecting your financial data
 - [Backup & Recovery](backup-recovery-guide.md) - Data protection and recovery procedures
 - [Performance Optimization](performance-optimization-guide.md) - Optimizing Ashfolio for large datasets

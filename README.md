@@ -6,6 +6,20 @@ Ashfolio manages financial data locally on your computer. Track investments, cas
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+## Why Ashfolio?
+
+**Privacy-First Financial Management** with professional-grade analytics and AI enhancements:
+
+- **100% Local Data**: Your financial information never leaves your computer
+- **AI-Enhanced Entry**: Parse transactions naturally while maintaining privacy
+- **Professional Analytics**: Markowitz optimization, tax planning, risk metrics
+- **Production Ready**: 2,200+ tests ensuring financial accuracy
+- **Open Source**: Transparent calculations you can verify and customize
+
+Built with Elixir/Phoenix for reliability and performance.
+
+---
+
 ## Quick Start
 
 ### Prerequisites
@@ -50,6 +64,9 @@ Ashfolio manages financial data locally on your computer. Track investments, cas
 - Performance Analytics: Time-weighted returns, rolling performance, and benchmarking
 - Real-time Pricing: Automatic price updates from Yahoo Finance
 - Interactive Visualizations: Professional SVG charts with responsive design
+- AI-Powered Entry: Natural language transaction parsing with privacy-first local AI
+- MCP Integration: AI assistant portfolio access with granular consent controls
+- Privacy Management: Four privacy modes with GDPR-compliant consent infrastructure
 
 ### Setup
 
@@ -61,7 +78,25 @@ Ashfolio manages financial data locally on your computer. Track investments, cas
 
 ## Project Status
 
-Current Version: v0.7.0 (Released September 21, 2025)
+Current Version: v0.10.0 (Released November 30, 2025)
+
+### Latest Features
+
+#### v0.10.0 - MCP Phase 2 (November 2025)
+- AI Settings page with privacy controls and consent management
+- GDPR-compliant consent infrastructure with audit trails
+- Natural language parsing for amounts and dates
+- Tool discovery optimization (~85% token reduction)
+
+#### v0.9.0 - MCP Integration (November 2025)
+- Model Context Protocol server for AI assistants
+- Privacy filtering system with four modes (strict/anonymized/standard/full)
+- Secure portfolio data access for AI tools
+
+#### v0.8.0 - AI Natural Language Entry (November 2025)
+- Parse conversational transactions: "Bought 10 AAPL at $150 yesterday"
+- Local AI with Ollama or cloud with OpenAI
+- Human-in-the-loop validation before saving
 
 ### Currently Available
 
@@ -107,14 +142,22 @@ Current Version: v0.7.0 (Released September 21, 2025)
 
 - **Previous Foundations**: Money Ratios Assessment, Tax Planning & Optimization, Enhanced Financial Infrastructure
 
+#### AI-Enhanced Features
+
+- Natural Language Transaction Entry with conversational parsing
+- Multi-Provider AI Support (Ollama local-first, OpenAI cloud option)
+- Model Context Protocol Server for AI assistant integration
+- Privacy-Aware Data Filtering with four configurable modes
+- GDPR-Compliant Consent Management with audit trails
+- AI Settings Interface for granular privacy control
+
 ### Development Roadmap
 
-- ✅ v0.3.x, v0.4.x, v0.5.0, v0.6.0, v0.7.0: Complete
-- 🚧 v0.8.0: Estate Planning & Advanced Tax Strategies (In Planning)
-- 📋 v0.9.0: Institutional Features & Multi-Entity Support
-- 📋 v1.0.0: Production Release
+- ✅ v0.1.0 - v0.10.0: Complete (AI integration, MCP, consent management)
+- 🚧 v0.11.0: Additional AI enhancements and analytics
+- 📋 v1.0.0: Production hardening and performance optimization
 
-See [roadmap](docs/roadmap/v0.2-v0.5-roadmap.md) for detailed feature timelines.
+See [ROADMAP.md](ROADMAP.md) and [CHANGELOG.md](CHANGELOG.md) for complete version history.
 
 ---
 
@@ -135,6 +178,9 @@ See [Architecture Overview](docs/development/architecture.md) for detailed infor
 - Frontend: Phoenix LiveView
 - Caching: In-memory caching with ETS
 - HTTP Client: `HTTPoison` for external API communication
+- AI Integration: Multi-provider support (Ollama for local, OpenAI for cloud)
+- MCP Server: Model Context Protocol for AI assistant integration
+- Privacy & Consent: GDPR-compliant consent management infrastructure
 - Testing: ExUnit, Mox, and Meck
 - Code Quality: Credo for static analysis
 - Task Runner: `just` command runner
@@ -146,7 +192,7 @@ Ashfolio uses the `just` command runner for development tasks.
 #### Essential Development Commands
 
 - `just dev`: Sets up environment and starts the server
-- `just test`: Runs the test suite
+- `just test`: Runs the test suite (2,200+ tests, 95%+ financial calculation coverage)
 - `just test-file <path>`: Runs tests for a specific file
 - `just reset`: Resets the database with sample data
 - `just`: Lists all available commands
@@ -173,6 +219,12 @@ See [Contributing Guide](CONTRIBUTING.md) and [First Contribution Guide](docs/ge
 - [Architecture Overview](docs/development/architecture.md)
 - [Database Management](docs/development/database-management.md)
 - [AI Agent Guide](docs/development/ai-agent-guide.md)
+
+### AI Features
+
+- [AI Natural Language Entry](docs/features/implemented/ai-natural-language-entry.md)
+- [MCP Integration](docs/features/implemented/mcp-integration.md)
+- [AI Agent Development Guide](docs/development/ai-agent-guide.md)
 
 ### Testing
 
