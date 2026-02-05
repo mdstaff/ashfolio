@@ -126,31 +126,6 @@ Current Version: v0.10.0 (Released November 30, 2025)
 - Professional financial notation and formatting
 - Performance caching for complex calculations
 
-### Completed in v0.7.0 ✅
-
-- **Advanced Portfolio Analytics**: Complete Markowitz portfolio optimization
-  - Efficient Frontier Visualization with minimum variance, tangency, and maximum return portfolios
-  - N-asset portfolio optimization with approximation algorithms (99% accuracy)
-  - Risk Metrics Suite: Sharpe, Sortino, Drawdown, VaR, Beta analysis
-  - Correlation & Covariance Analysis with interactive matrices
-  - Real-time TWR/MWR calculations with performance caching
-
-- **Corporate Actions Engine**: Comprehensive investment event management
-  - Stock splits, dividends, mergers, spinoffs with automatic FIFO cost basis adjustments
-  - Transaction adjustment system with complete audit trail
-  - Professional LiveView interface with conditional form fields
-
-- **Previous Foundations**: Money Ratios Assessment, Tax Planning & Optimization, Enhanced Financial Infrastructure
-
-#### AI-Enhanced Features
-
-- Natural Language Transaction Entry with conversational parsing
-- Multi-Provider AI Support (Ollama local-first, OpenAI cloud option)
-- Model Context Protocol Server for AI assistant integration
-- Privacy-Aware Data Filtering with four configurable modes
-- GDPR-Compliant Consent Management with audit trails
-- AI Settings Interface for granular privacy control
-
 ### Development Roadmap
 
 - ✅ v0.1.0 - v0.10.0: Complete (AI integration, MCP, consent management)
@@ -193,11 +168,11 @@ Ashfolio uses the `just` command runner for development tasks.
 
 - `just dev`: Sets up environment and starts the server
 - `just test`: Runs the test suite (2,200+ tests, 95%+ financial calculation coverage)
-- `just test-file <path>`: Runs tests for a specific file
-- `just reset`: Resets the database with sample data
+- `just test <path>`: Runs tests for a specific file
+- `just db reset`: Resets the database with sample data
 - `just`: Lists all available commands
 
-For complete development setup and testing details, see [Getting Started Guide](docs/getting-started/) and [Testing Strategy](docs/TESTING_STRATEGY.md).
+For complete development setup and testing details, see [Getting Started Guide](docs/getting-started/) and [Testing Documentation](docs/testing/README.md).
 
 ### Contributing
 
@@ -228,7 +203,7 @@ See [Contributing Guide](CONTRIBUTING.md) and [First Contribution Guide](docs/ge
 
 ### Testing
 
-- [Testing Strategy](docs/TESTING_STRATEGY.md)
+- [Testing Documentation](docs/testing/README.md)
 - [Troubleshooting Guide](docs/development/test-failure-troubleshooting-guide.md)
 - [Framework Guide](docs/testing/framework.md)
 - [SQLite Patterns](docs/testing/patterns.md)

@@ -25,8 +25,8 @@ Welcome to the Ashfolio documentation! This is your guide to understanding, usin
 ### Essential Documents
 - [Installation Guide](getting-started/installation.md) - Get Ashfolio running
 - [Monthly Workflow](user-guides/monthly-workflow-guide.md) - Regular maintenance tasks
-- [Portfolio Management](user-guides/portfolio-management-guide.md) - Core functionality
-- [Tax Planning](user-guides/tax-planning-optimization-guide.md) - Tax optimization features
+- [Portfolio Management](user-guides/portfolio-analytics-guide.md) - Core functionality
+- [Tax Planning](user-guides/tax-planning-optimization.md) - Tax optimization features
 
 ### Development
 - [CLAUDE.md](../CLAUDE.md) - AI agent development guidelines
@@ -74,7 +74,7 @@ docs/
 #### I'm a New User
 1. Start with [Installation Guide](getting-started/installation.md)
 2. Follow the [Quick Start](getting-started/quick-start.md)
-3. Review [Portfolio Management](user-guides/portfolio-management-guide.md)
+3. Review [Portfolio Management](user-guides/portfolio-analytics-guide.md)
 
 #### I'm a Developer
 1. Read [CLAUDE.md](../CLAUDE.md) for development guidelines
